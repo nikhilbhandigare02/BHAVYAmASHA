@@ -17,7 +17,14 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/bloc/add_family_head_bloc.dart';
 
-import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/SpousDetails.dart' show spousFormKey, clearSpousFormError, spousLastFormError, scrollToFirstError, Spousdetails, validateAllSpousFields;
+import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/SpousDetails.dart'
+    show
+        spousFormKey,
+        clearSpousFormError,
+        spousLastFormError,
+        scrollToFirstError,
+        Spousdetails,
+        validateAllSpousFields;
 
 import '../../../../data/Database/User_Info.dart';
 import '../../../../data/SecureStorage/SecureStorage.dart';
@@ -55,9 +62,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   final _formKey = GlobalKey<FormState>();
   final now = DateTime.now();
 
-
   bool _syncingNames = false;
-
 
   static String? _lastFormError;
 
@@ -66,7 +71,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   }
 
   static String? _captureError(String? message) {
-    debugPrint('_captureError called with: $message (${DateTime.now().toIso8601String()})');
+    debugPrint(
+      '_captureError called with: $message (${DateTime.now().toIso8601String()})',
+    );
     if (message != null && message.isNotEmpty) {
       debugPrint('❌ Validation Error: $message');
       // Only update if we don't have an error yet
@@ -74,7 +81,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
         _lastFormError = message;
         debugPrint('📌 Setting first validation error: $message');
       } else {
-        debugPrint('ℹ️ Not updating error message, already have: $_lastFormError');
+        debugPrint(
+          'ℹ️ Not updating error message, already have: $_lastFormError',
+        );
       }
       return message;
     }
@@ -91,13 +100,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
         Scrollable.ensureVisible(
           errorField.context,
           alignment: 0.1,
-          duration:  Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 300),
         );
       }
     });
   }
 
-  void _handleAbhaProfileResult(Map<String, dynamic> profile, BuildContext context) {
+  void _handleAbhaProfileResult(
+    Map<String, dynamic> profile,
+    BuildContext context,
+  ) {
     debugPrint("Filling ABHA data into form...");
 
     final bloc = context.read<AddFamilyHeadBloc>();
@@ -149,7 +161,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
     showAppSnackBar(context, "ABHA details filled successfully!");
   }
-
 
   // Helper method to find the first field with an error in head form
   FormFieldState<dynamic>? _findFirstErrorField() {
@@ -204,14 +215,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     return child;
   }
 
-
-
   final RegisterNewHouseHold repository = RegisterNewHouseHold();
 
   Future<Map<String, dynamic>?> fetchRCHDataForScreen(
-      int rchId, {
-        required int requestFor,
-      }) async {
+    int rchId, {
+    required int requestFor,
+  }) async {
     try {
       print('Calling API: getRCHData(rchId: $rchId, requestFor: $requestFor)');
 
@@ -230,9 +239,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   }
 
   List<String> _getMobileOwnerList(String gender) {
-    const common = [
-
-    ];
+    const common = [];
 
     gender = gender.toLowerCase();
 
@@ -249,7 +256,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
         'Neighbour',
         'Relative',
         'Other',
-
       ];
     }
 
@@ -266,7 +272,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
         'Neighbour',
         'Relative',
         'Other',
-
       ];
     }
 
@@ -284,7 +289,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
         'Neighbour',
         'Relative',
         'Other',
-
       ];
     }
 
@@ -306,7 +310,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     ];
   }
 
-  Widget _buildFamilyHeadForm(BuildContext context, AddFamilyHeadState state, AppLocalizations l) {
+  Widget _buildFamilyHeadForm(
+    BuildContext context,
+    AddFamilyHeadState state,
+    AppLocalizations l,
+  ) {
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -320,8 +328,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               labelText: '${l.houseNoLabel} *',
               hintText: l.houseNoHint,
               initialValue: state.houseNo,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateHouseNo(v.trim())),
-              validator: (value) => _captureError(Validations.validateHouseNo(l, value)),
+              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                AfhUpdateHouseNo(v.trim()),
+              ),
+              validator: (value) =>
+                  _captureError(Validations.validateHouseNo(l, value)),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -331,8 +342,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               labelText: '${l.nameOfFamilyHeadLabel} *',
               hintText: l.nameOfFamilyHeadHint,
               initialValue: state.headName,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateHeadName(v.trim())),
-              validator: (value) => _captureError(Validations.validateFamilyHead(l, value)),
+              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                AfhUpdateHeadName(v.trim()),
+              ),
+              validator: (value) =>
+                  _captureError(Validations.validateFamilyHead(l, value)),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -342,7 +356,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               labelText: l.fatherNameLabel,
               hintText: l.fatherNameLabel,
               initialValue: state.fatherName,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateFatherName(v.trim())),
+              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                AfhUpdateFatherName(v.trim()),
+              ),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -354,37 +370,44 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 Radio<bool>(
                   value: true,
                   groupValue: state.useDob,
-                  onChanged: widget.isEdit ? null : (_) => context.read<AddFamilyHeadBloc>().add(AfhToggleUseDob()),
+                  onChanged: widget.isEdit
+                      ? null
+                      : (_) => context.read<AddFamilyHeadBloc>().add(
+                          AfhToggleUseDob(),
+                        ),
                 ),
-                Text(l.dobShort, style: TextStyle(fontSize: 14.sp),),
+                Text(l.dobShort, style: TextStyle(fontSize: 14.sp)),
                 SizedBox(width: 2.w),
                 Radio<bool>(
                   value: false,
                   groupValue: state.useDob,
-                  onChanged: widget.isEdit ? null : (_) => context.read<AddFamilyHeadBloc>().add(AfhToggleUseDob()),
+                  onChanged: widget.isEdit
+                      ? null
+                      : (_) => context.read<AddFamilyHeadBloc>().add(
+                          AfhToggleUseDob(),
+                        ),
                 ),
-                Text(l.ageApproximate, style: TextStyle(fontSize:14.sp),),
+                Text(l.ageApproximate, style: TextStyle(fontSize: 14.sp)),
               ],
             ),
           ),
           if (state.useDob)
             _Section(
-                child:
-                CustomDatePicker(
-                  labelText: '${l.dobLabel} *',
-                  hintText: l.dateHint,
-                  initialDate: state.dob,
-                  firstDate: DateTime(now.year - 110, now.month, now.day),
-                  lastDate: DateTime(now.year - 15, now.month, now.day),
-                  onDateChanged: (date) {
-                    if (date != null) {
-                      context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(date));
-                    }
-                  },
-                  validator: (date) =>
-                      _captureError(Validations.validateDOB(l, date)),
-                  readOnly: widget.isEdit,
-                )
+              child: CustomDatePicker(
+                labelText: '${l.dobLabel} *',
+                hintText: l.dateHint,
+                initialDate: state.dob,
+                firstDate: DateTime(now.year - 110, now.month, now.day),
+                lastDate: DateTime(now.year - 15, now.month, now.day),
+                onDateChanged: (date) {
+                  if (date != null) {
+                    context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(date));
+                  }
+                },
+                validator: (date) =>
+                    _captureError(Validations.validateDOB(l, date)),
+                readOnly: widget.isEdit,
+              ),
             )
           else
             _Section(
@@ -392,10 +415,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(
-                      bottom: 1.h,
-                      left: 1.3.h,
-                    ),
+                    padding: EdgeInsets.only(bottom: 1.h, left: 1.3.h),
                     child: RichText(
                       text: TextSpan(
                         text: "${l.ageApproximate}",
@@ -408,7 +428,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           TextSpan(
                             text: '*',
                             style: TextStyle(
-                              color: Colors.red,   // Make asterisk red
+                              color: Colors.red, // Make asterisk red
                             ),
                           ),
                         ],
@@ -426,7 +446,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           initialValue: state.years ?? '',
                           keyboardType: TextInputType.number,
                           readOnly: widget.isEdit,
-                          onChanged: widget.isEdit ? null : (v) => context.read<AddFamilyHeadBloc>().add(UpdateYears(v.trim())),
+                          onChanged: widget.isEdit
+                              ? null
+                              : (v) => context.read<AddFamilyHeadBloc>().add(
+                                  UpdateYears(v.trim()),
+                                ),
                           validator: (value) => _captureError(
                             Validations.validateApproxAge(
                               l,
@@ -455,7 +479,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           initialValue: state.months ?? '',
                           keyboardType: TextInputType.number,
                           readOnly: widget.isEdit,
-                          onChanged: widget.isEdit ? null : (v) => context.read<AddFamilyHeadBloc>().add(UpdateMonths(v.trim())),
+                          onChanged: widget.isEdit
+                              ? null
+                              : (v) => context.read<AddFamilyHeadBloc>().add(
+                                  UpdateMonths(v.trim()),
+                                ),
                           validator: (value) => _captureError(
                             Validations.validateApproxAge(
                               l,
@@ -484,7 +512,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           keyboardType: TextInputType.number,
                           maxLength: 2,
                           readOnly: widget.isEdit,
-                          onChanged: widget.isEdit ? null : (v) => context.read<AddFamilyHeadBloc>().add(UpdateDays(v.trim())),
+                          onChanged: widget.isEdit
+                              ? null
+                              : (v) => context.read<AddFamilyHeadBloc>().add(
+                                  UpdateDays(v.trim()),
+                                ),
                           validator: (value) => _captureError(
                             Validations.validateApproxAge(
                               l,
@@ -499,8 +531,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                         ),
                       ),
                     ],
-                  )
-
+                  ),
                 ],
               ),
             ),
@@ -523,9 +554,15 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     default:
                       return s;
                   }
-                },                value: state.gender,
-                onChanged: widget.isEdit ? null : (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateGender(v)),
-                validator: (v) => _captureError(v == null ? 'Gender is required' : null),
+                },
+                value: state.gender,
+                onChanged: widget.isEdit
+                    ? null
+                    : (v) => context.read<AddFamilyHeadBloc>().add(
+                        AfhUpdateGender(v),
+                      ),
+                validator: (v) =>
+                    _captureError(v == null ? 'Gender is required' : null),
               ),
             ),
           ),
@@ -536,33 +573,44 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             child: IgnorePointer(
               ignoring: widget.isEdit,
               child: ApiDropdown<String>(
-              labelText: l.occupationLabel,
-              items: const ['Unemployed', 'Housewife', 'Daily Wage Labor', 'Agriculture', 'Salaried', 'Business', 'Retired', 'Other'],
-              getLabel: (s) {
-                switch (s) {
-                  case 'Unemployed':
-                    return l.occupationUnemployed;
-                  case 'Housewife':
-                    return l.occupationHousewife;
-                  case 'Daily Wage Labor':
-                    return l.occupationDailyWageLabor;
-                  case 'Agriculture':
-                    return l.occupationAgriculture;
-                  case 'Salaried':
-                    return l.occupationSalaried;
-                  case 'Business':
-                    return l.occupationBusiness;
-                  case 'Retired':
-                    return l.occupationRetired;
-                  case 'Other':
-                    return l.occupationOther;
-                  default:
-                    return s;
-                }
-              },
-              value: state.occupation,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateOccupation(v)),
-            ),
+                labelText: l.occupationLabel,
+                items: const [
+                  'Unemployed',
+                  'Housewife',
+                  'Daily Wage Labor',
+                  'Agriculture',
+                  'Salaried',
+                  'Business',
+                  'Retired',
+                  'Other',
+                ],
+                getLabel: (s) {
+                  switch (s) {
+                    case 'Unemployed':
+                      return l.occupationUnemployed;
+                    case 'Housewife':
+                      return l.occupationHousewife;
+                    case 'Daily Wage Labor':
+                      return l.occupationDailyWageLabor;
+                    case 'Agriculture':
+                      return l.occupationAgriculture;
+                    case 'Salaried':
+                      return l.occupationSalaried;
+                    case 'Business':
+                      return l.occupationBusiness;
+                    case 'Retired':
+                      return l.occupationRetired;
+                    case 'Other':
+                      return l.occupationOther;
+                    default:
+                      return s;
+                  }
+                },
+                value: state.occupation,
+                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                  AfhUpdateOccupation(v),
+                ),
+              ),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -570,12 +618,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           if (state.occupation == 'Other')
             _Section(
               child: CustomTextField(
-                labelText: 'Enter occupation',
-                hintText: 'Enter occupation',
+                labelText: l.enterOccupationOther,
+                hintText: l.enterOccupationOther,
                 initialValue: state.otherOccupation,
-                onChanged: (v) => context
-                    .read<AddFamilyHeadBloc>()
-                    .add(AfhUpdateOtherOccupation(v.trim())),
+                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                  AfhUpdateOtherOccupation(v.trim()),
+                ),
               ),
             ),
           if (state.occupation == 'Other')
@@ -584,7 +632,15 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           _Section(
             child: ApiDropdown<String>(
               labelText: l.educationLabel,
-              items: const ['No Schooling', 'Primary', 'Secondary', 'High School', 'Intermediate', 'Diploma', 'Graduate and above'],
+              items: const [
+                'No Schooling',
+                'Primary',
+                'Secondary',
+                'High School',
+                'Intermediate',
+                'Diploma',
+                'Graduate and above',
+              ],
               getLabel: (s) {
                 switch (s) {
                   case 'No Schooling':
@@ -606,7 +662,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 }
               },
               value: state.education,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateEducation(v)),
+              onChanged: (v) =>
+                  context.read<AddFamilyHeadBloc>().add(AfhUpdateEducation(v)),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -614,7 +671,17 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           _Section(
             child: ApiDropdown<String>(
               labelText: l.religionLabel,
-              items: const ['Do not want to disclose', 'Hindu', 'Muslim', 'Christian', 'Sikh', 'Buddhism', 'Jainism', 'Parsi', 'Other'],
+              items: const [
+                'Do not want to disclose',
+                'Hindu',
+                'Muslim',
+                'Christian',
+                'Sikh',
+                'Buddhism',
+                'Jainism',
+                'Parsi',
+                'Other',
+              ],
               getLabel: (s) {
                 switch (s) {
                   case 'Do not want to disclose':
@@ -640,7 +707,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 }
               },
               value: state.religion,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateReligion(v)),
+              onChanged: (v) =>
+                  context.read<AddFamilyHeadBloc>().add(AfhUpdateReligion(v)),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -648,12 +716,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           if (state.religion == 'Other')
             _Section(
               child: CustomTextField(
-                labelText: 'Enter Religion',
-                hintText: 'Enter Religion',
+                labelText: l.enter_religion,
+                hintText: l.enter_religion,
                 initialValue: state.otherReligion,
-                onChanged: (v) => context
-                    .read<AddFamilyHeadBloc>()
-                    .add(AfhUpdateOtherReligion(v.trim())),
+                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                  AfhUpdateOtherReligion(v.trim()),
+                ),
               ),
             ),
           if (state.religion == 'Other')
@@ -662,7 +730,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           _Section(
             child: ApiDropdown<String>(
               labelText: l.categoryLabel,
-              items: const ['NotDisclosed', 'General', 'OBC', 'SC', 'ST', 'PichdaVarg1', 'PichdaVarg2', 'AtyantPichdaVarg', 'DontKnow', 'Other'],
+              items: const [
+                'NotDisclosed',
+                'General',
+                'OBC',
+                'SC',
+                'ST',
+                'PichdaVarg1',
+                'PichdaVarg2',
+                'AtyantPichdaVarg',
+                'DontKnow',
+                'Other',
+              ],
               getLabel: (s) {
                 switch (s) {
                   case 'NotDisclosed':
@@ -690,7 +769,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 }
               },
               value: state.category,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateCategory(v)),
+              onChanged: (v) =>
+                  context.read<AddFamilyHeadBloc>().add(AfhUpdateCategory(v)),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -701,9 +781,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 labelText: 'Enter Category',
                 hintText: 'Enter Category',
                 initialValue: state.otherCategory,
-                onChanged: (v) => context
-                    .read<AddFamilyHeadBloc>()
-                    .add(AfhUpdateOtherCategory(v.trim())),
+                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                  AfhUpdateOtherCategory(v.trim()),
+                ),
               ),
             ),
           if (state.category == 'Other')
@@ -719,8 +799,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       labelText: l.abhaAddressLabel,
                       hintText: l.abhaAddressLabel,
                       initialValue: state.AfhABHAChange,
-                      onChanged: (v) =>
-                          context.read<AddFamilyHeadBloc>().add(AfhABHAChange(v.trim())),
+                      onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                        AfhABHAChange(v.trim()),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -733,14 +814,20 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       borderRadius: 8,
                       fontSize: 14.sp,
                       onPress: () async {
-                        final result = await Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
+                        final result = await Navigator.pushNamed(
+                          context,
+                          Route_Names.Abhalinkscreen,
+                        );
 
                         debugPrint("BACK FROM ABHA SCREEN");
                         debugPrint("ABHA RESULT: $result");
 
                         if (result is Map<String, dynamic>) {
                           if (!mounted) return;
-                          _handleAbhaProfileResult(result, context); // pass context safely
+                          _handleAbhaProfileResult(
+                            result,
+                            context,
+                          ); // pass context safely
                         }
                       },
                     ),
@@ -759,38 +846,43 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   children: [
                     Expanded(
                       child: CustomTextField(
-                          labelText: 'RCH ID',
-                          hintText: 'Enter 12 digit RCH ID',
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(12),
-                          ],
-                          onChanged: (v) {
-                            // Clear previous snackbar
-                            ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                        labelText: 'RCH ID',
+                        hintText: 'Enter 12 digit RCH ID',
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(12),
+                        ],
+                        onChanged: (v) {
+                          // Clear previous snackbar
+                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
-                            final value = v.trim();
-                            context.read<AddFamilyHeadBloc>().add(AfhRichIdChange(value));
+                          final value = v.trim();
+                          context.read<AddFamilyHeadBloc>().add(
+                            AfhRichIdChange(value),
+                          );
 
-                            // Show error if not empty and not exactly 12 digits
-                            if (value.isNotEmpty && value.length != 12) {
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (mounted) {
-                                  showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
-                                }
-                              });
-                            }
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return null; // Field is optional
-                            }
-                            if (value.length != 12) {
-                              return 'Must be 12 digits';
-                            }
-                            return null;
+                          // Show error if not empty and not exactly 12 digits
+                          if (value.isNotEmpty && value.length != 12) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) {
+                                showAppSnackBar(
+                                  context,
+                                  'RCH ID must be exactly 12 digits',
+                                );
+                              }
+                            });
                           }
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return null; // Field is optional
+                          }
+                          if (value.length != 12) {
+                            return 'Must be 12 digits';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -815,7 +907,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           }
 
                           if (rchId.length != 12) {
-                            showAppSnackBar(context, "RCH ID must be exactly 12 digits");
+                            showAppSnackBar(
+                              context,
+                              "RCH ID must be exactly 12 digits",
+                            );
                             return;
                           }
 
@@ -831,11 +926,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           print("API Response → $response");
 
                           if (response == null) {
-                            showAppSnackBar(context, "Failed to fetch RCH data");
+                            showAppSnackBar(
+                              context,
+                              "Failed to fetch RCH data",
+                            );
                           } else {
-                            showAppSnackBar(context, "RCH Verified Successfully!");
+                            showAppSnackBar(
+                              context,
+                              "RCH Verified Successfully!",
+                            );
                           }
-
                         },
                       ),
                     ),
@@ -849,13 +949,56 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           _Section(
             child: _Section(
               child: ApiDropdown<String>(
-                labelText: 'Whose Mobile No.? *',
+                labelText: '${l.whoseMobileLabel} *',
                 items: _getMobileOwnerList(state.gender ?? ''),
-                getLabel: (s) => s,
+                getLabel: (s) {
+                  switch (s) {
+                    case 'Self':
+                      return "${l.self}";
+
+                    case 'Husband':
+                      return '${l.husbandLabel} ';
+
+                    case 'Mother':
+                      return '${l.mother} ';
+
+                    case 'Father':
+                      return '${l.father}';
+
+                    case 'Wife':
+                      return '${l.wife} ';
+
+                    case 'Son':
+                      return '${l.son}';
+
+                    case 'Daughter':
+                      return '${l.daughter} ';
+
+                    case 'Mother In Law':
+                      return '${l.motherInLaw} ';
+
+                    case 'Father In Law':
+                      return '${l.fatherInLaw}';
+
+                    case 'Neighbour':
+                      return '${l.neighbour} ';
+
+                    case 'Relative':
+                      return "${l.relative} ";
+
+                    case 'Other':
+                      return '${l.other} ';
+
+                    default:
+                      return s;
+                  }
+                },
+
+
                 value: state.mobileOwner,
-                onChanged: (v) => context
-                    .read<AddFamilyHeadBloc>()
-                    .add(AfhUpdateMobileOwner(v)),
+                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                  AfhUpdateMobileOwner(v),
+                ),
                 validator: (value) =>
                     _captureError(Validations.validateWhoMobileNo(l, value)),
               ),
@@ -867,18 +1010,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           if (state.mobileOwner == 'Other')
             _Section(
               child: CustomTextField(
-                labelText: 'Enter Relation with mobile no. holder *' ,
-                hintText: 'Enter Relation with mobile no. holder',
+                labelText: '${l.relationWithMobileHolder} *',
+                hintText: l.relationWithMobileHolder,
                 initialValue: state.mobileOwnerOtherRelation,
-                onChanged: (v) => context
-                    .read<AddFamilyHeadBloc>()
-                    .add(AfhUpdateMobileOwnerOtherRelation(v.trim())),
+                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                  AfhUpdateMobileOwnerOtherRelation(v.trim()),
+                ),
                 validator: (value) => state.mobileOwner == 'Other'
                     ? _captureError(
-                  (value == null || value.trim().isEmpty)
-                      ? 'Relation with mobile no. holder is required'
-                      : null,
-                )
+                        (value == null || value.trim().isEmpty)
+                            ? 'Relation with mobile no. holder is required'
+                            : null,
+                      )
                     : null,
               ),
             ),
@@ -888,15 +1031,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           _Section(
             child: CustomTextField(
               labelText: '${l.mobileLabel} *',
-              hintText: '${l.mobileLabel} *',
+              hintText: '${l.mobileLabel}',
               keyboardType: TextInputType.number,
               maxLength: 10,
               initialValue: state.mobileNo,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMobileNo(v.trim())),
-              validator: (value) => _captureError(Validations.validateMobileNo(l, value)),
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
+              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                AfhUpdateMobileNo(v.trim()),
+              ),
+              validator: (value) =>
+                  _captureError(Validations.validateMobileNo(l, value)),
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -907,7 +1051,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               hintText: l.villageNameLabel,
               initialValue: state.village,
               readOnly: !widget.isEdit,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateVillage(v.trim())),
+              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                AfhUpdateVillage(v.trim()),
+              ),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -916,8 +1062,21 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             child: CustomTextField(
               labelText: l.wardNoLabel,
               hintText: l.wardNoLabel,
+              initialValue: state.wardNo,
+              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                AfhUpdateWard(v.trim()),
+              ),
+            ),
+          ),
+          Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+          _Section(
+            child: CustomTextField(
+              labelText: l.wardName,
+              hintText: l.wardName,
               initialValue: state.ward,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateWard(v.trim())),
+              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                AfhUpdateWardName(v.trim()),
+              ),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -927,16 +1086,21 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               labelText: l.mohallaTolaNameLabel,
               hintText: l.mohallaTolaNameLabel,
               initialValue: state.mohalla,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMohalla(v.trim())),
+              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                AfhUpdateMohalla(v.trim()),
+              ),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
           BlocBuilder<AddFamilyHeadBloc, AddFamilyHeadState>(
-            buildWhen: (previous, current) => previous.bankAcc != current.bankAcc,
+            buildWhen: (previous, current) =>
+                previous.bankAcc != current.bankAcc,
             builder: (contxt, state) {
               final bankAcc = state.bankAcc ?? '';
-              final isValid = bankAcc.isEmpty || bankAcc.replaceAll(RegExp(r'[^0-9]'), '').length >= 10;
+              final isValid =
+                  bankAcc.isEmpty ||
+                  bankAcc.replaceAll(RegExp(r'[^0-9]'), '').length >= 10;
 
               return Column(
                 children: [
@@ -948,7 +1112,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       initialValue: state.bankAcc,
                       onChanged: (v) {
                         final value = v.trim();
-                        context.read<AddFamilyHeadBloc>().add(AfhUpdateBankAcc(value));
+                        context.read<AddFamilyHeadBloc>().add(
+                          AfhUpdateBankAcc(value),
+                        );
                         ScaffoldMessenger.of(context).removeCurrentSnackBar();
                       },
                       validator: (value) {
@@ -956,14 +1122,17 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           return null; // Field is optional
                         }
 
-                        final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
+                        final digitsOnly = value.replaceAll(
+                          RegExp(r'[^0-9]'),
+                          '',
+                        );
 
                         if (digitsOnly.length < 11 || digitsOnly.length > 18) {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             if (mounted) {
                               showAppSnackBar(
-                                  context,
-                                  'Bank account number must be between 11 to 18 digits'
+                                context,
+                                'Bank account number must be between 11 to 18 digits',
                               );
                             }
                           });
@@ -991,7 +1160,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           _Section(
             child: CustomTextField(
               labelText: l.ifscLabel,
-              hintText:l.ifscLabel,
+              hintText: l.ifscLabel,
               initialValue: state.ifsc,
               onChanged: (v) {
                 final value = v.trim().toUpperCase();
@@ -1006,9 +1175,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
                 String? error;
                 if (value.length != 11) {
-                  error = 'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                  error =
+                      'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
                 } else if (!RegExp(r'^[A-Z]{4}0\d{6}$').hasMatch(value)) {
-                  error = 'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                  error =
+                      'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
                 }
 
                 if (error != null) {
@@ -1030,7 +1201,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               labelText: l.voterIdLabel,
               hintText: l.voterIdLabel,
               initialValue: state.voterId,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateVoterId(v.trim())),
+              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                AfhUpdateVoterId(v.trim()),
+              ),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -1040,7 +1213,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               labelText: l.rationCardIdLabel,
               hintText: l.rationCardIdLabel,
               initialValue: state.rationId,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateRationId(v.trim())),
+              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                AfhUpdateRationId(v.trim()),
+              ),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -1048,9 +1223,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           _Section(
             child: CustomTextField(
               labelText: l.personalHealthIdLabel,
-              hintText:  l.personalHealthIdLabel,
+              hintText: l.personalHealthIdLabel,
               initialValue: state.phId,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdatePhId(v.trim())),
+              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                AfhUpdatePhId(v.trim()),
+              ),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -1070,7 +1247,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 }
               },
               value: state.beneficiaryType,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateBeneficiaryType(v)),
+              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                AfhUpdateBeneficiaryType(v),
+              ),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -1079,12 +1258,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             child: ApiDropdown<String>(
               labelText: '${l.maritalStatusLabel} *',
               items: const [
-                'Married',
                 'Unmarried',
+                'Married',
+                'Divorced',
+                'Separated',
                 'Widow',
                 'Widower',
-                'Separated',
-                'Divorced',
+
+
               ],
               getLabel: (s) {
                 switch (s) {
@@ -1097,7 +1278,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   case 'Widower':
                     return l.maritalStatusWidower;
                   case 'Separated':
-                    return l.maritalStatusSeparated;
+                    return l.separatedMarried;
                   case 'Divorced':
                     return l.maritalStatusDivorced;
                   default:
@@ -1105,13 +1286,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 }
               },
               value: state.maritalStatus,
-              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(AfhUpdateMaritalStatus(v)),
-              validator: (value) => _captureError(Validations.validateMaritalStatus(l, value)),
+              onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                AfhUpdateMaritalStatus(v),
+              ),
+              validator: (value) =>
+                  _captureError(Validations.validateMaritalStatus(l, value)),
             ),
           ),
           Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
-          if(widget.isEdit == false) ...[
+          if (widget.isEdit == false) ...[
             if (state.maritalStatus == 'Married') ...[
               _Section(
                 child: CustomTextField(
@@ -1119,9 +1303,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   hintText: l.ageAtMarriageHint,
                   keyboardType: TextInputType.number,
                   initialValue: state.ageAtMarriage,
-                  onChanged: (v) => context
-                      .read<AddFamilyHeadBloc>()
-                      .add(AfhUpdateAgeAtMarriage(v.trim())),
+                  onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                    AfhUpdateAgeAtMarriage(v.trim()),
+                  ),
                 ),
               ),
               Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -1131,10 +1315,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   labelText: '${l.spouseNameLabel} *',
                   hintText: l.spouseNameHint,
                   initialValue: state.spouseName,
-                  onChanged: (v) => context
-                      .read<AddFamilyHeadBloc>()
-                      .add(AfhUpdateSpouseName(v.trim())),
-                  validator: (value) => _captureError(Validations.validateSpousName(l, value)),
+                  onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                    AfhUpdateSpouseName(v.trim()),
+                  ),
+                  validator: (value) =>
+                      _captureError(Validations.validateSpousName(l, value)),
                 ),
               ),
               Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -1155,15 +1340,22 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       }
                     },
                     validator: (value) {
-                      if (state.gender == 'Female' && state.maritalStatus == 'Married') {
-                        return _captureError(Validations.validateIsPregnant(l, value));
+                      if (state.gender == 'Female' &&
+                          state.maritalStatus == 'Married') {
+                        return _captureError(
+                          Validations.validateIsPregnant(l, value),
+                        );
                       }
                       return null;
                     },
                   ),
                 ),
                 Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+
+
+                Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
                 if (state.isPregnant == 'Yes') ...[
+
                   _Section(
                     child: CustomDatePicker(
                       labelText: '${l.lmpDateLabel} *',
@@ -1179,170 +1371,394 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           bloc.add(EDDChange(null));
                         }
                       },
-                      validator: (date) => _captureError(Validations.validateLMP(l, date)),
-                      firstDate: DateTime.now().subtract( Duration(days: 365)),
+                      validator: (date) =>
+                          _captureError(Validations.validateLMP(l, date)),
+                      firstDate: DateTime.now().subtract(Duration(days: 365)),
                       lastDate: DateTime.now(),
                     ),
                   ),
-                  Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                  Divider(
+                    color: AppColors.divider,
+                    thickness: 0.1.h,
+                    height: 0,
+                  ),
 
                   _Section(
                     child: CustomDatePicker(
                       labelText: '${l.eddDateLabel} *',
                       hintText: l.dateHint,
                       initialDate: state.edd,
-                      onDateChanged: (d) => context.read<AddFamilyHeadBloc>().add(EDDChange(d)),
-                      validator: (date) => _captureError(Validations.validateEDD(l, date)),
+                      onDateChanged: (d) =>
+                          context.read<AddFamilyHeadBloc>().add(EDDChange(d)),
+                      validator: (date) =>
+                          _captureError(Validations.validateEDD(l, date)),
                       readOnly: true,
                     ),
                   ),
-                  Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-                ] else
-                  if (state.isPregnant == 'No') ...[
-                    _Section(
-                      child: ApiDropdown<String>(
-                        labelText: 'Are you/your partner adopting family planning? *',
-                        items: const ['Yes', 'No'],
-                        getLabel: (s) => s == 'Yes' ? l.yes : l.no,
-                        value: state.hpfamilyPlanningCounseling,
-                        onChanged: (v) {
-                          context.read<AddFamilyHeadBloc>().add(HeadFamilyPlanningCounselingChanged(v!));
-                        },
-                        validator: (value) => _captureError(Validations.validateAdoptingPlan(l, value,)),
+                  Divider(
+                    color: AppColors.divider,
+                    thickness: 0.1.h,
+                    height: 0,
+                  ),
+                ] else if (state.isPregnant == 'No') ...[
+                  _Section(
+                    child: ApiDropdown<String>(
+                      labelText:
+                          '${l.fpAdoptingLabel} *',
+                      items: const ['Yes', 'No'],
+                      getLabel: (s) => s == 'Yes' ? l.yes : l.no,
+                      value: state.hpfamilyPlanningCounseling,
+                      onChanged: (v) {
+                        context.read<AddFamilyHeadBloc>().add(
+                          HeadFamilyPlanningCounselingChanged(v!),
+                        );
+                      },
+                      validator: (value) => _captureError(
+                        Validations.validateAdoptingPlan(l, value),
                       ),
                     ),
-                    Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                  ),
+                  Divider(
+                    color: AppColors.divider,
+                    thickness: 0.1.h,
+                    height: 0,
+                  ),
 
-                    if (state.hpfamilyPlanningCounseling == 'Yes') ...[
+                  if (state.hpfamilyPlanningCounseling == 'Yes') ...[
+                    _Section(
+                      child: ApiDropdown<String>(
+                        labelText: '${l.methodOfContra} *',
+                        items: const [
+                          'Condom',
+                          'Mala -N (Daily Contraceptive pill)',
+                          'Antra injection',
+                          'Copper -T (IUCD)',
+                          'Chhaya (Weekly Contraceptive pill)',
+                          'ECP (Emergency Contraceptive pill)',
+                          'Male Sterilization',
+                          'Female Sterilization',
+                          'Any Other Specify',
+                        ],
+                        getLabel: (s) {
+                          switch (s) {
+                            case 'Condom':
+                              return l.condom;
+
+                            case 'Mala -N (Daily Contraceptive pill)':
+                              return l.malaN;
+
+                            case 'Antra injection':
+                              return l.atraInjection;
+
+                            case 'Copper -T (IUCD)':
+                              return l.copperT;
+
+                            case 'Chhaya (Weekly Contraceptive pill)':
+                              return l.chhaya;
+
+                            case 'ECP (Emergency Contraceptive pill)':
+                              return l.ecp;
+
+                            case 'Male Sterilization':
+                              return l.maleSterilization;
+
+                            case 'Female Sterilization':
+                              return l.femaleSterilization;
+
+                            case 'Any Other Specify':
+                              return l.anyOtherSpecifyy;
+                            default:
+                              return s;
+                          }
+                        },
+                        value: state.hpMethod,
+                        onChanged: (v) {
+                          if (v != null) {
+                            context.read<AddFamilyHeadBloc>().add(
+                              hpMethodChanged(v),
+                            );
+                          }
+                        },
+                        validator: (value) =>
+                            _captureError(Validations.validateAntra(l, value)),
+                      ),
+                    ),
+                    Divider(
+                      color: AppColors.divider,
+                      thickness: 0.1.h,
+                      height: 0,
+                    ),
+
+                    if (state.hpMethod == 'Antra injection') ...[
                       _Section(
-                        child: ApiDropdown<String>(
-                          labelText: '${l.methodOfContra} *',
-                          items: const [
-                            'Condom',
-                            'Mala -N (Daily Contraceptive pill)',
-                            'Antra injection',
-                            'Copper -T (IUCD)',
-                            'Chhaya (Weekly Contraceptive pill)',
-                            'ECP (Emergency Contraceptive pill)',
-                            'Male Sterilization',
-                            'Female Sterilization',
-                            'Any Other Specify'
-                          ],
-                          getLabel: (s) => s,
-                          value: state.hpMethod,
-                          onChanged: (v) {
-                            if (v != null) {
-                              context.read<AddFamilyHeadBloc>().add(hpMethodChanged(v));
+                        child: CustomDatePicker(
+                          labelText: l.dateOfAntra,
+                          initialDate: state.hpantraDate,
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime(2100),
+                          onDateChanged: (date) {
+                            if (date != null) {
+                              context.read<AddFamilyHeadBloc>().add(
+                                hpDateofAntraChanged(date),
+                              );
                             }
                           },
-                          validator: (value) => _captureError(Validations.validateAntra(l, value, )),
                         ),
                       ),
-                      Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                      Divider(
+                        color: AppColors.divider,
+                        thickness: 0.1.h,
+                        height: 0,
+                      ),
+                    ],
 
-                      if (state.hpMethod == 'Antra injection') ...[
-                        _Section(
-                          child: CustomDatePicker(
-                            labelText: 'Date of Antra',
-                            initialDate: state.hpantraDate,
-                            firstDate: DateTime(1900),
-                            lastDate: DateTime(2100),
-                            onDateChanged: (date) {
-                              if (date != null) {
-                                context.read<AddFamilyHeadBloc>().add(hpDateofAntraChanged(date));
-                              }
-                            },
-                          ),
+                    if (state.hpMethod == 'Copper -T (IUCD)') ...[
+                      _Section(
+                        child: CustomDatePicker(
+                          labelText: l.removalDate,
+                          initialDate: state.hpremovalDate,
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime(2100),
+                          onDateChanged: (date) {
+                            if (date != null) {
+                              context.read<AddFamilyHeadBloc>().add(
+                                hpRemovalDateChanged(date),
+                              );
+                            }
+                          },
                         ),
-                        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-                      ],
+                      ),
+                      Divider(
+                        color: AppColors.divider,
+                        thickness: 0.1.h,
+                        height: 0,
+                      ),
 
-                      if (state.hpMethod == 'Copper -T (IUCD)') ...[
-                        _Section(
-                          child: CustomDatePicker(
-                            labelText: 'Removal Date',
-                            initialDate: state.hpremovalDate,
-                            firstDate: DateTime(1900),
-                            lastDate: DateTime(2100),
-                            onDateChanged: (date) {
-                              if (date != null) {
-                                context.read<AddFamilyHeadBloc>().add(hpRemovalDateChanged(date));
-                              }
-                            },
-                          ),
+                      _Section(
+                        child: CustomTextField(
+                          labelText: l.reasonForRemoval,
+                          hintText: l.reasonForRemoval,
+                          initialValue: state.hpremovalReason,
+                          onChanged: (value) {
+                            context.read<AddFamilyHeadBloc>().add(
+                              hpRemovalReasonChanged(value ?? ''),
+                            );
+                          },
                         ),
-                        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+                      ),
+                      Divider(
+                        color: AppColors.divider,
+                        thickness: 0.1.h,
+                        height: 0,
+                      ),
+                    ],
 
-                        _Section(
-                          child: CustomTextField(
-                            labelText: 'Reason for Removal',
-                            hintText: 'Enter reason for removal',
-                            initialValue: state.hpremovalReason,
-                            onChanged: (value) {
-                              context.read<AddFamilyHeadBloc>().add(hpRemovalReasonChanged(value ?? ''));
-                            },
-                          ),
+                    if (state.hpMethod == 'Condom') ...[
+                      _Section(
+                        child: CustomTextField(
+                          labelText: l.quantityOfCondoms,
+                          hintText: l.quantityOfCondoms,
+                          keyboardType: TextInputType.number,
+                          initialValue: state.hpcondomQuantity,
+                          onChanged: (value) {
+                            context.read<AddFamilyHeadBloc>().add(
+                              hpCondomQuantityChanged(value ?? ''),
+                            );
+                          },
                         ),
-                        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-                      ],
-
-                      if (state.hpMethod == 'Condom') ...[
-                        _Section(
-                          child: CustomTextField(
-                            labelText: 'Quantity of Condoms',
-                            hintText: 'Enter quantity',
-                            keyboardType: TextInputType.number,
-                            initialValue: state.hpcondomQuantity,
-                            onChanged: (value) {
-                              context.read<AddFamilyHeadBloc>().add(hpCondomQuantityChanged(value ?? ''));
-                            },
-                          ),
-                        ),
-                        Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-                      ],
+                      ),
+                      Divider(
+                        color: AppColors.divider,
+                        thickness: 0.1.h,
+                        height: 0,
+                      ),
                     ],
                   ],
+                ],
               ],
             ],
-
-
-            if (state.maritalStatus != null && state.maritalStatus != 'Unmarried') ...[
+            if (state.maritalStatus != null &&
+                state.maritalStatus != 'Unmarried') ...[
               _Section(
                 child: ApiDropdown<String>(
                   labelText: l.haveChildrenQuestion,
                   items: const ['Yes', 'No'],
                   getLabel: (s) => s == 'Yes' ? l.yes : l.no,
                   value: state.hasChildren,
-                  onChanged: (v) => context
-                      .read<AddFamilyHeadBloc>()
-                      .add(AfhUpdateHasChildren(v)),
+                  onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                    AfhUpdateHasChildren(v),
+                  ),
                 ),
               ),
               Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
             ],
-          ]
-        ],
 
+          ],
+        ],
       ),
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AddFamilyHeadBloc>(create: (_) {
-          final b = AddFamilyHeadBloc();
-          final m = widget.initial;
-          if (m != null && m.isNotEmpty) {
+        BlocProvider<AddFamilyHeadBloc>(
+          create: (_) {
+            final b = AddFamilyHeadBloc();
+            final m = widget.initial;
+            if (m != null && m.isNotEmpty) {
+              DateTime? _parseDate(String? iso) =>
+                  (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
+
+              // Extract years, months, days from stored approximate age string, e.g.
+              // "35 years 2 months 10 days" -> ("35","2","10")
+              String? _approxPart(String? approx, int index) {
+                if (approx == null) return null;
+                final s = approx.trim();
+                if (s.isEmpty) return null;
+                final matches = RegExp(r'\d+').allMatches(s).toList();
+                if (matches.length <= index) return null;
+                return matches[index].group(0);
+              }
+
+              final approx = m['approxAge'] as String?;
+              final years = _approxPart(approx, 0);
+              final months = _approxPart(approx, 1);
+              final days = _approxPart(approx, 2);
+
+              b.add(
+                AfhHydrate(
+                  AddFamilyHeadState(
+                    houseNo: m['houseNo'],
+                    headName: m['headName'],
+                    fatherName: m['fatherName'],
+                    AfhABHAChange: m['AfhABHAChange'],
+                    children: m['children'],
+                    useDob: m['useDob'] == 'true' || m['useDob'] == true,
+                    dob: _parseDate(m['dob'] as String?),
+                    edd: _parseDate(m['edd'] as String?),
+                    lmp: _parseDate(m['lmp'] as String?),
+                    approxAge: approx,
+                    years: years,
+                    months: months,
+                    days: days,
+                    gender: m['gender'],
+                    occupation: m['occupation'] == 'Other'
+                        ? 'Other'
+                        : m['occupation'],
+                    otherOccupation: m['occupation'] == 'Other'
+                        ? m['other_occupation']
+                        : null,
+                    education: m['education'],
+                    religion: m['religion'] == 'Other'
+                        ? 'Other'
+                        : m['religion'],
+                    otherReligion: m['religion'] == 'Other'
+                        ? m['other_religion']
+                        : null,
+                    category: m['category'] == 'Other'
+                        ? 'Other'
+                        : m['category'],
+                    otherCategory: m['category'] == 'Other'
+                        ? m['other_category']
+                        : null,
+                    mobileOwner: m['mobileOwner'],
+                    mobileOwnerOtherRelation:
+                        m['mobile_owner_relation'] == 'Other'
+                        ? m['mobile_owner_relation']
+                        : m['mobile_owner_relation'],
+                    mobileNo: m['mobileNo'],
+                    village: m['village'],
+                    ward: m['ward'],
+                    mohalla: m['mohalla'],
+                    bankAcc: m['bankAcc'],
+                    ifsc: m['ifsc'],
+                    voterId: m['voterId'],
+                    rationId: m['rationId'],
+                    phId: m['phId'],
+                    beneficiaryType: m['beneficiaryType'],
+                    maritalStatus: m['maritalStatus'],
+                    ageAtMarriage: m['ageAtMarriage'],
+                    spouseName: m['spouseName'],
+                    AfhRichIdChange: m['AfhRichIdChange'],
+                    hasChildren: m['hasChildren'],
+                    isPregnant: m['isPregnant'],
+                    householdRefKey: m['hh_unique_key'],
+                    headUniqueKey: m['head_unique_key'],
+                    spouseUniqueKey: m['spouse_unique_key'],
+                    hpfamilyPlanningCounseling: m['hpfamilyPlanningCounseling'],
+                    hpMethod: m['hpMethod'],
+                    hpantraDate: _parseDate(m['hpantraDate'] as String?),
+                    hpremovalDate: _parseDate(m['hpremovalDate'] as String?),
+                    hpremovalReason: m['hpremovalReason'],
+                    hpcondomQuantity: m['hpcondomQuantity'],
+                  ),
+                ),
+              );
+            } else {
+              // New insert: prefill village from the same source as AppDrawer
+              // using secure storage user data. Fallback to legacy format if needed.
+              SecureStorageService.getCurrentUserData().then((data) async {
+                Map<String, dynamic>? user = data;
+                if (user == null || user.isEmpty) {
+                  try {
+                    final legacyRaw = await SecureStorageService.getUserData();
+                    if (legacyRaw != null && legacyRaw.isNotEmpty) {
+                      final parsed = jsonDecode(legacyRaw);
+                      if (parsed is Map<String, dynamic>) {
+                        user = parsed;
+                      }
+                    }
+                  } catch (_) {}
+                }
+
+                try {
+                  final working = user?['working_location'];
+                  if (working is Map) {
+                    final village = (working['village'] ?? '').toString();
+                    if (village.isNotEmpty) {
+                      b.add(AfhUpdateVillage(village));
+                      return;
+                    }
+                  }
+                } catch (_) {}
+
+                // Fallback to DB user details when secure storage lacks data
+                try {
+                  final dbUser = await UserInfo.getCurrentUser();
+                  final details = dbUser?['details'];
+                  if (details is Map<String, dynamic>) {
+                    final data = details['data'];
+                    if (data is Map<String, dynamic>) {
+                      final working2 = data['working_location'];
+                      if (working2 is Map<String, dynamic>) {
+                        final village2 = (working2['village'] ?? '').toString();
+                        if (village2.isNotEmpty) {
+                          b.add(AfhUpdateVillage(village2));
+                        }
+                      }
+                    }
+                  }
+                } catch (_) {}
+              });
+            }
+            return b;
+          },
+        ),
+        BlocProvider<SpousBloc>(
+          create: (_) {
+            final m = widget.initial;
+            if (m == null || m.isEmpty) return SpousBloc();
+
+            // Helper function to get value with fallback to non-prefixed key
+            dynamic getValue(String key) => m['sp_$key'] ?? m[key];
+
             DateTime? _parseDate(String? iso) =>
                 (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
 
-            // Extract years, months, days from stored approximate age string, e.g.
-            // "35 years 2 months 10 days" -> ("35","2","10")
+            // Extract years, months, days from stored approximate age string
             String? _approxPart(String? approx, int index) {
               if (approx == null) return null;
               final s = approx.trim();
@@ -1352,250 +1768,137 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               return matches[index].group(0);
             }
 
-            final approx = m['approxAge'] as String?;
-            final years = _approxPart(approx, 0);
-            final months = _approxPart(approx, 1);
-            final days = _approxPart(approx, 2);
+            final approx = getValue('approxAge');
+            final updateYears = _approxPart(approx, 0);
+            final updateMonths = _approxPart(approx, 1);
+            final updateDays = _approxPart(approx, 2);
 
-            b.add(
-              AfhHydrate(
-                AddFamilyHeadState(
-                  houseNo: m['houseNo'],
-                  headName: m['headName'],
-                  fatherName: m['fatherName'],
-                  AfhABHAChange: m['AfhABHAChange'],
-                  children: m['children'],
-                  useDob: m['useDob'] == 'true' || m['useDob'] == true,
-                  dob: _parseDate(m['dob'] as String?),
-                  edd: _parseDate(m['edd'] as String?),
-                  lmp: _parseDate(m['lmp'] as String?),
-                  approxAge: approx,
-                  years: years,
-                  months: months,
-                  days: days,
-                  gender: m['gender'],
-                  occupation: m['occupation'] == 'Other' ? 'Other' : m['occupation'],
-                  otherOccupation: m['occupation'] == 'Other' ? m['other_occupation'] : null,
-                  education: m['education'],
-                  religion: m['religion'] == 'Other' ? 'Other' : m['religion'],
-                  otherReligion: m['religion'] == 'Other' ? m['other_religion'] : null,
-                  category: m['category'] == 'Other' ? 'Other' : m['category'],
-                  otherCategory: m['category'] == 'Other' ? m['other_category'] : null,
-                  mobileOwner: m['mobileOwner'],
-                  mobileOwnerOtherRelation: m['mobile_owner_relation'] == 'Other'
-                      ? m['mobile_owner_relation']
-                      : m['mobile_owner_relation'],
-                  mobileNo: m['mobileNo'],
-                  village: m['village'],
-                  ward: m['ward'],
-                  mohalla: m['mohalla'],
-                  bankAcc: m['bankAcc'],
-                  ifsc: m['ifsc'],
-                  voterId: m['voterId'],
-                  rationId: m['rationId'],
-                  phId: m['phId'],
-                  beneficiaryType: m['beneficiaryType'],
-                  maritalStatus: m['maritalStatus'],
-                  ageAtMarriage: m['ageAtMarriage'],
-                  spouseName: m['spouseName'],
-                  AfhRichIdChange: m['AfhRichIdChange'],
-                  hasChildren: m['hasChildren'],
-                  isPregnant: m['isPregnant'],
-                  householdRefKey: m['hh_unique_key'],
-                  headUniqueKey: m['head_unique_key'],
-                  spouseUniqueKey: m['spouse_unique_key'],
-                  hpfamilyPlanningCounseling: m['hpfamilyPlanningCounseling'],
-                  hpMethod: m['hpMethod'],
-                  hpantraDate: _parseDate(m['hpantraDate'] as String?),
-                  hpremovalDate: _parseDate(m['hpremovalDate'] as String?),
-                  hpremovalReason: m['hpremovalReason'],
-                  hpcondomQuantity: m['hpcondomQuantity'],
-                ),
+            // Get values for fields with "Other" options
+            final occupation = getValue('occupation');
+            final otherOccupation = getValue('other_occupation');
+            final religion = getValue('religion');
+            final otherReligion = getValue('other_religion');
+            final category = getValue('category');
+            final otherCategory = getValue('other_category');
+            final mobileOwner = getValue('mobileOwner');
+            final mobileOwnerOtherRelation = getValue('mobile_owner_relation');
+
+            // Additional fields
+            final familyPlanningCounseling = getValue(
+              'familyPlanningCounseling',
+            );
+            final isFamilyPlanning =
+                (familyPlanningCounseling?.toString().toLowerCase() == 'yes')
+                ? 1
+                : 0;
+            final fpMethod = getValue('fpMethod');
+            final removalDate = getValue('removalDate');
+            final removalReason = getValue('removalReason');
+            final condomQuantity = getValue('condomQuantity');
+            final malaQuantity = getValue('malaQuantity');
+            final chhayaQuantity = getValue('chhayaQuantity');
+            final ecpQuantity = getValue('ecpQuantity');
+            final antraDate = getValue('antraDate');
+
+            final spState = SpousState(
+              relation: getValue('relation') ?? 'spouse',
+              memberName: getValue('memberName') ?? getValue('spouseName'),
+              ageAtMarriage: getValue('ageAtMarriage'),
+              RichIDChanged: getValue('RichIDChanged'),
+              spouseName: getValue('spouseName') ?? getValue('headName'),
+              fatherName: getValue('fatherName'),
+              useDob:
+                  (getValue('useDob') == true || getValue('useDob') == 'true'),
+              dob: _parseDate(getValue('dob')?.toString()),
+              edd: _parseDate(getValue('edd')?.toString()),
+              lmp: _parseDate(getValue('lmp')?.toString()),
+              approxAge: approx,
+              UpdateYears: updateYears,
+              UpdateMonths: updateMonths,
+              UpdateDays: updateDays,
+              gender:
+                  getValue('gender') ??
+                  ((getValue('gender') == 'Male')
+                      ? 'Female'
+                      : (getValue('gender') == 'Female')
+                      ? 'Male'
+                      : null),
+
+              // Occupation fields
+              occupation: occupation,
+              otherOccupation: otherOccupation,
+
+              education: getValue('education'),
+
+              // Religion fields
+              religion: religion,
+              otherReligion: otherReligion,
+
+              // Category fields
+              category: category,
+              otherCategory: otherCategory,
+
+              abhaAddress: getValue('abhaAddress'),
+
+              // Mobile owner fields
+              mobileOwner: mobileOwner,
+              mobileOwnerOtherRelation: mobileOwnerOtherRelation,
+
+              mobileNo: getValue('mobileNo'),
+              bankAcc: getValue('bankAcc'),
+              ifsc: getValue('ifsc'),
+              voterId: getValue('voterId'),
+              rationId: getValue('rationId'),
+              phId: getValue('phId'),
+              beneficiaryType: getValue('beneficiaryType'),
+              isPregnant: getValue('isPregnant'),
+
+              // Family planning fields
+              familyPlanningCounseling: familyPlanningCounseling,
+              // familyPlanningCounseling: isFamilyPlanning,
+              fpMethod: fpMethod,
+
+              // Removal related fields
+              removalDate: _parseDate(
+                removalDate is String ? removalDate : removalDate?.toString(),
+              ),
+              removalReason: removalReason,
+
+              // Quantity fields
+              condomQuantity: condomQuantity,
+              malaQuantity: malaQuantity,
+              chhayaQuantity: chhayaQuantity,
+              ecpQuantity: ecpQuantity,
+
+              // Antra date field
+              antraDate: _parseDate(
+                antraDate is String ? antraDate : antraDate?.toString(),
               ),
             );
-          } else {
-            // New insert: prefill village from the same source as AppDrawer
-            // using secure storage user data. Fallback to legacy format if needed.
-            SecureStorageService.getCurrentUserData().then((data) async {
-              Map<String, dynamic>? user = data;
-              if (user == null || user.isEmpty) {
-                try {
-                  final legacyRaw = await SecureStorageService.getUserData();
-                  if (legacyRaw != null && legacyRaw.isNotEmpty) {
-                    final parsed = jsonDecode(legacyRaw);
-                    if (parsed is Map<String, dynamic>) {
-                      user = parsed;
-                    }
-                  }
-                } catch (_) {}
-              }
 
-              try {
-                final working = user?['working_location'];
-                if (working is Map) {
-                  final village = (working['village'] ?? '').toString();
-                  if (village.isNotEmpty) {
-                    b.add(AfhUpdateVillage(village));
-                    return;
-                  }
-                }
-              } catch (_) {}
+            return SpousBloc(initial: spState);
+          },
+        ),
+        BlocProvider<ChildrenBloc>(
+          create: (_) {
+            final m = widget.initial;
+            if (m == null || m.isEmpty) return ChildrenBloc();
 
-              // Fallback to DB user details when secure storage lacks data
-              try {
-                final dbUser = await UserInfo.getCurrentUser();
-                final details = dbUser?['details'];
-                if (details is Map<String, dynamic>) {
-                  final data = details['data'];
-                  if (data is Map<String, dynamic>) {
-                    final working2 = data['working_location'];
-                    if (working2 is Map<String, dynamic>) {
-                      final village2 = (working2['village'] ?? '').toString();
-                      if (village2.isNotEmpty) {
-                        b.add(AfhUpdateVillage(village2));
-                      }
-                    }
-                  }
-                }
-              } catch (_) {}
-            });
-          }
-          return b;
-        }),
-        BlocProvider<SpousBloc>(create: (_) {
-          final m = widget.initial;
-          if (m == null || m.isEmpty) return SpousBloc();
+            int _parseInt(String? v) => int.tryParse(v ?? '') ?? 0;
 
-          // Helper function to get value with fallback to non-prefixed key
-          dynamic getValue(String key) => m['sp_$key'] ?? m[key];
+            final chState = ChildrenState(
+              totalBorn: _parseInt(m['totalBorn']),
+              totalLive: _parseInt(m['totalLive']),
+              totalMale: _parseInt(m['totalMale']),
+              totalFemale: _parseInt(m['totalFemale']),
+              youngestAge: m['youngestAge'],
+              ageUnit: m['ageUnit'],
+              youngestGender: m['youngestGender'],
+            );
 
-          DateTime? _parseDate(String? iso) =>
-              (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
-
-          // Extract years, months, days from stored approximate age string
-          String? _approxPart(String? approx, int index) {
-            if (approx == null) return null;
-            final s = approx.trim();
-            if (s.isEmpty) return null;
-            final matches = RegExp(r'\d+').allMatches(s).toList();
-            if (matches.length <= index) return null;
-            return matches[index].group(0);
-          }
-
-          final approx = getValue('approxAge');
-          final updateYears = _approxPart(approx, 0);
-          final updateMonths = _approxPart(approx, 1);
-          final updateDays = _approxPart(approx, 2);
-
-          // Get values for fields with "Other" options
-          final occupation = getValue('occupation');
-          final otherOccupation = getValue('other_occupation');
-          final religion = getValue('religion');
-          final otherReligion = getValue('other_religion');
-          final category = getValue('category');
-          final otherCategory = getValue('other_category');
-          final mobileOwner = getValue('mobileOwner');
-          final mobileOwnerOtherRelation = getValue('mobile_owner_relation');
-
-          // Additional fields
-          final familyPlanningCounseling = getValue('familyPlanningCounseling');
-          final isFamilyPlanning = (familyPlanningCounseling?.toString().toLowerCase() == 'yes') ? 1 : 0;
-          final fpMethod = getValue('fpMethod');
-          final removalDate = getValue('removalDate');
-          final removalReason = getValue('removalReason');
-          final condomQuantity = getValue('condomQuantity');
-          final malaQuantity = getValue('malaQuantity');
-          final chhayaQuantity = getValue('chhayaQuantity');
-          final ecpQuantity = getValue('ecpQuantity');
-          final antraDate = getValue('antraDate');
-
-          final spState = SpousState(
-            relation: getValue('relation') ?? 'spouse',
-            memberName: getValue('memberName') ?? getValue('spouseName'),
-            ageAtMarriage: getValue('ageAtMarriage'),
-            RichIDChanged: getValue('RichIDChanged'),
-            spouseName: getValue('spouseName') ?? getValue('headName'),
-            fatherName: getValue('fatherName'),
-            useDob: (getValue('useDob') == true || getValue('useDob') == 'true'),
-            dob: _parseDate(getValue('dob')?.toString()),
-            edd: _parseDate(getValue('edd')?.toString()),
-            lmp: _parseDate(getValue('lmp')?.toString()),
-            approxAge: approx,
-            UpdateYears: updateYears,
-            UpdateMonths: updateMonths,
-            UpdateDays: updateDays,
-            gender: getValue('gender') ??
-                ((getValue('gender') == 'Male') ? 'Female' :
-                (getValue('gender') == 'Female') ? 'Male' : null),
-
-            // Occupation fields
-            occupation: occupation,
-            otherOccupation: otherOccupation,
-
-            education: getValue('education'),
-
-            // Religion fields
-            religion: religion,
-            otherReligion: otherReligion,
-
-            // Category fields
-            category: category,
-            otherCategory: otherCategory,
-
-            abhaAddress: getValue('abhaAddress'),
-
-            // Mobile owner fields
-            mobileOwner: mobileOwner,
-            mobileOwnerOtherRelation: mobileOwnerOtherRelation,
-
-            mobileNo: getValue('mobileNo'),
-            bankAcc: getValue('bankAcc'),
-            ifsc: getValue('ifsc'),
-            voterId: getValue('voterId'),
-            rationId: getValue('rationId'),
-            phId: getValue('phId'),
-            beneficiaryType: getValue('beneficiaryType'),
-            isPregnant: getValue('isPregnant'),
-
-            // Family planning fields
-            familyPlanningCounseling: familyPlanningCounseling,
-            // familyPlanningCounseling: isFamilyPlanning,
-            fpMethod: fpMethod,
-
-            // Removal related fields
-            removalDate: _parseDate(removalDate is String ? removalDate : removalDate?.toString()),
-            removalReason: removalReason,
-
-            // Quantity fields
-            condomQuantity: condomQuantity,
-            malaQuantity: malaQuantity,
-            chhayaQuantity: chhayaQuantity,
-            ecpQuantity: ecpQuantity,
-
-            // Antra date field
-            antraDate: _parseDate(antraDate is String ? antraDate : antraDate?.toString()),
-          );
-
-          return SpousBloc(initial: spState);
-        }),
-        BlocProvider<ChildrenBloc>(create: (_) {
-          final m = widget.initial;
-          if (m == null || m.isEmpty) return ChildrenBloc();
-
-          int _parseInt(String? v) => int.tryParse(v ?? '') ?? 0;
-
-          final chState = ChildrenState(
-            totalBorn: _parseInt(m['totalBorn']),
-            totalLive: _parseInt(m['totalLive']),
-            totalMale: _parseInt(m['totalMale']),
-            totalFemale: _parseInt(m['totalFemale']),
-            youngestAge: m['youngestAge'],
-            ageUnit: m['ageUnit'],
-            youngestGender: m['youngestGender'],
-          );
-
-          return ChildrenBloc()..emit(chState);
-        }),
+            return ChildrenBloc()..emit(chState);
+          },
+        ),
       ],
       child: WillPopScope(
         onWillPop: () async {
@@ -1611,10 +1914,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
         child: BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
           listenWhen: (p, c) => p.postApiStatus != c.postApiStatus,
           listener: (context, state) {
-            if (state.postApiStatus == PostApiStatus.error && state.errorMessage != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.errorMessage!)),
-              );
+            if (state.postApiStatus == PostApiStatus.error &&
+                state.errorMessage != null) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
             }
             if (state.postApiStatus == PostApiStatus.success) {
               final Map<String, dynamic> result = state.toJson();
@@ -1628,7 +1932,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   'head_id_pk',
                   'spouse_id_pk',
                 ]) {
-                  if (widget.initial![key] != null && !result.containsKey(key)) {
+                  if (widget.initial![key] != null &&
+                      !result.containsKey(key)) {
                     result[key] = widget.initial![key];
                   }
                 }
@@ -1661,17 +1966,24 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       '#': '1',
                       'Type': 'Adult',
                       'Name': (state.headName ?? '').toString(),
-                      'Age': ((state.useDob && state.dob != null) ? _ageFromDob(state.dob!) : (state.approxAge ?? '')).toString(),
+                      'Age':
+                          ((state.useDob && state.dob != null)
+                                  ? _ageFromDob(state.dob!)
+                                  : (state.approxAge ?? ''))
+                              .toString(),
                       'Gender': (state.gender ?? '').toString(),
                       'Relation': 'Self',
                       'Father': (state.fatherName ?? '').toString(),
                       'Spouse': (state.spouseName ?? '').toString(),
-                      'Total Children': (state.children != null && state.children!.isNotEmpty)
+                      'Total Children':
+                          (state.children != null && state.children!.isNotEmpty)
                           ? state.children!
                           : (state.hasChildren == 'Yes' ? '1+' : '0'),
-                    }
+                    },
                   ];
-                  if ((state.maritalStatus == 'Married') && (state.spouseName != null) && state.spouseName!.isNotEmpty) {
+                  if ((state.maritalStatus == 'Married') &&
+                      (state.spouseName != null) &&
+                      state.spouseName!.isNotEmpty) {
                     final spouseGender = (state.gender == 'Male')
                         ? 'Female'
                         : (state.gender == 'Female')
@@ -1686,7 +1998,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       'Relation': 'Wife',
                       'Father': '',
                       'Spouse': (state.headName ?? '').toString(),
-                      'Total Children': (state.children != null && state.children!.isNotEmpty)
+                      'Total Children':
+                          (state.children != null && state.children!.isNotEmpty)
                           ? state.children!
                           : (state.hasChildren == 'Yes' ? '1+' : '0'),
                     });
@@ -1726,7 +2039,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   message: l.confirmCloseFormMsg,
                   yesText: l.confirmYesExit,
                   noText: l.confirmNo,
-
                 );
                 if (shouldExit ?? false) {
                   Navigator.of(context).pop();
@@ -1752,9 +2064,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   Expanded(
                     child: BlocBuilder<AddFamilyHeadBloc, AddFamilyHeadState>(
                       builder: (context, state) {
-                        final tabs = [ Tab(text: l.familyHeadDetailsTitle)];
+                        final tabs = [Tab(text: l.familyHeadDetailsTitle)];
                         final views = <Widget>[
-                          Form(key: _formKey, child: _buildFamilyHeadForm(context, state, l)),
+                          Form(
+                            key: _formKey,
+                            child: _buildFamilyHeadForm(context, state, l),
+                          ),
                         ];
 
                         final showSpouse = state.maritalStatus == 'Married';
@@ -1765,13 +2080,19 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           final current = spBloc.state;
 
                           final bool isSpouseStateEmpty =
-                              (current.relation == null || current.relation!.trim().isEmpty) &&
-                                  (current.memberName == null || current.memberName!.trim().isEmpty) &&
-                                  (current.spouseName == null || current.spouseName!.trim().isEmpty) &&
-                                  current.dob == null &&
-                                  (current.UpdateYears == null || current.UpdateYears!.trim().isEmpty) &&
-                                  (current.UpdateMonths == null || current.UpdateMonths!.trim().isEmpty) &&
-                                  (current.UpdateDays == null || current.UpdateDays!.trim().isEmpty);
+                              (current.relation == null ||
+                                  current.relation!.trim().isEmpty) &&
+                              (current.memberName == null ||
+                                  current.memberName!.trim().isEmpty) &&
+                              (current.spouseName == null ||
+                                  current.spouseName!.trim().isEmpty) &&
+                              current.dob == null &&
+                              (current.UpdateYears == null ||
+                                  current.UpdateYears!.trim().isEmpty) &&
+                              (current.UpdateMonths == null ||
+                                  current.UpdateMonths!.trim().isEmpty) &&
+                              (current.UpdateDays == null ||
+                                  current.UpdateDays!.trim().isEmpty);
 
                           if (isSpouseStateEmpty) {
                             final g = (state.gender == 'Male')
@@ -1782,42 +2103,59 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                             // Hydrate only minimal shared fields so spouse
                             // record stays independent from head record, and
                             // only when there is no existing DB state.
-                            spBloc.add(SpHydrate(SpousState(
-                              relation: 'Spouse',
-                              memberName: state.spouseName,
-                              ageAtMarriage: state.ageAtMarriage,
-                              spouseName: state.headName,
-                              gender: g,
-                            )));
+                            spBloc.add(
+                              SpHydrate(
+                                SpousState(
+                                  relation: 'Spouse',
+                                  memberName: state.spouseName,
+                                  ageAtMarriage: state.ageAtMarriage,
+                                  spouseName: state.headName,
+                                  gender: g,
+                                ),
+                              ),
+                            );
                           } else {
                             final headName = state.headName?.trim();
                             final spouseName = state.spouseName?.trim();
-                            if ((current.memberName == null || current.memberName!.isEmpty) && (spouseName != null && spouseName.isNotEmpty)) {
+                            if ((current.memberName == null ||
+                                    current.memberName!.isEmpty) &&
+                                (spouseName != null && spouseName.isNotEmpty)) {
                               spBloc.add(SpUpdateMemberName(spouseName));
                             }
-                            if ((current.spouseName == null || current.spouseName!.isEmpty) && (headName != null && headName!.isNotEmpty)) {
+                            if ((current.spouseName == null ||
+                                    current.spouseName!.isEmpty) &&
+                                (headName != null && headName!.isNotEmpty)) {
                               spBloc.add(SpUpdateSpouseName(headName));
                             }
                           }
-                          tabs.add( Tab(text: l.spousDetails));
+                          tabs.add(Tab(text: l.spousDetails));
                           views.add(
                             MultiBlocListener(
                               listeners: [
                                 // Head -> Spouse: keep spouse tab prefilled
-                                BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
+                                BlocListener<
+                                  AddFamilyHeadBloc,
+                                  AddFamilyHeadState
+                                >(
                                   listenWhen: (prev, curr) =>
-                                  prev.headName != curr.headName ||
+                                      prev.headName != curr.headName ||
                                       prev.spouseName != curr.spouseName,
                                   listener: (ctx, st) {
                                     if (_syncingNames) return;
                                     final spBloc = ctx.read<SpousBloc>();
                                     final memberName = st.spouseName?.trim();
                                     final spouseName = st.headName?.trim();
-                                    if (memberName != null && memberName.isNotEmpty) {
-                                      spBloc.add(SpUpdateMemberName(memberName));
+                                    if (memberName != null &&
+                                        memberName.isNotEmpty) {
+                                      spBloc.add(
+                                        SpUpdateMemberName(memberName),
+                                      );
                                     }
-                                    if (spouseName != null && spouseName.isNotEmpty) {
-                                      spBloc.add(SpUpdateSpouseName(spouseName));
+                                    if (spouseName != null &&
+                                        spouseName.isNotEmpty) {
+                                      spBloc.add(
+                                        SpUpdateSpouseName(spouseName),
+                                      );
                                     }
                                   },
                                 ),
@@ -1825,63 +2163,88 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                 // spouse tab, push them back to head form.
                                 BlocListener<SpousBloc, SpousState>(
                                   listenWhen: (p, c) =>
-                                  p.memberName != c.memberName ||
+                                      p.memberName != c.memberName ||
                                       p.spouseName != c.spouseName,
                                   listener: (ctx, sp) {
                                     if (_syncingNames) return;
                                     _syncingNames = true;
                                     try {
-                                      final headBloc = ctx.read<AddFamilyHeadBloc>();
-                                      final newSpouseName = (sp.memberName ?? '').trim();
-                                      final newHeadName = (sp.spouseName ?? '').trim();
+                                      final headBloc = ctx
+                                          .read<AddFamilyHeadBloc>();
+                                      final newSpouseName =
+                                          (sp.memberName ?? '').trim();
+                                      final newHeadName = (sp.spouseName ?? '')
+                                          .trim();
 
                                       if (newSpouseName.isNotEmpty &&
-                                          (headBloc.state.spouseName ?? '').trim() != newSpouseName) {
-                                        headBloc.add(AfhUpdateSpouseName(newSpouseName));
+                                          (headBloc.state.spouseName ?? '')
+                                                  .trim() !=
+                                              newSpouseName) {
+                                        headBloc.add(
+                                          AfhUpdateSpouseName(newSpouseName),
+                                        );
                                       }
                                       if (newHeadName.isNotEmpty &&
-                                          (headBloc.state.headName ?? '').trim() != newHeadName) {
-                                        headBloc.add(AfhUpdateHeadName(newHeadName));
+                                          (headBloc.state.headName ?? '')
+                                                  .trim() !=
+                                              newHeadName) {
+                                        headBloc.add(
+                                          AfhUpdateHeadName(newHeadName),
+                                        );
                                       }
                                     } finally {
-                                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                                        _syncingNames = false;
-                                      });
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                            _syncingNames = false;
+                                          });
                                     }
                                   },
                                 ),
                               ],
-                              child: Spousdetails(syncFromHead: true, isEdit: widget.isEdit),
+                              child: Spousdetails(
+                                syncFromHead: true,
+                                isEdit: widget.isEdit,
+                              ),
                             ),
                           );
                         }
                         if (showChildren) {
-                          tabs.add( Tab(text: l.childrenDetailsTitle));
+                          tabs.add(Tab(text: l.childrenDetailsTitle));
                           views.add(const Childrendetaills());
                         }
 
-                        final int safeInitialIndex = widget.initialTab.clamp(0, tabs.length - 1);
+                        final int safeInitialIndex = widget.initialTab.clamp(
+                          0,
+                          tabs.length - 1,
+                        );
 
                         return DefaultTabController(
                           key: ValueKey<int>(tabs.length),
                           length: tabs.length,
-                          initialIndex: widget.initialTab.clamp(0, tabs.length - 1),
+                          initialIndex: widget.initialTab.clamp(
+                            0,
+                            tabs.length - 1,
+                          ),
                           child: Column(
                             children: [
                               Container(
                                 color: Theme.of(context).colorScheme.primary,
                                 child: TabBar(
                                   isScrollable: true,
-                                  labelColor: Theme.of(context).colorScheme.onPrimary,
-                                  unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                  indicatorColor: Theme.of(context).colorScheme.onPrimary,
+                                  labelColor: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
+                                  unselectedLabelColor: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary.withOpacity(0.7),
+                                  indicatorColor: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
                                   indicatorWeight: 3.0,
                                   tabs: tabs,
                                 ),
                               ),
-                              Expanded(
-                                child: TabBarView(children: views),
-                              ),
+                              Expanded(child: TabBarView(children: views)),
                               Container(
                                 decoration: BoxDecoration(
                                   color: Colors.white,
@@ -1895,43 +2258,75 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                   ],
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h).copyWith(bottom: 2.h),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 4.w,
+                                    vertical: 1.h,
+                                  ).copyWith(bottom: 2.h),
                                   child: Builder(
                                     builder: (ctx) {
-                                      final controller = DefaultTabController.of(ctx)!;
+                                      final controller =
+                                          DefaultTabController.of(ctx)!;
                                       return AnimatedBuilder(
                                         animation: controller.animation!,
                                         builder: (context, _) {
                                           final showNav = tabs.length > 1;
-                                          return BlocBuilder<AddFamilyHeadBloc, AddFamilyHeadState>(
+                                          return BlocBuilder<
+                                            AddFamilyHeadBloc,
+                                            AddFamilyHeadState
+                                          >(
                                             builder: (context, state) {
-                                              final isLoading = state.postApiStatus == PostApiStatus.loading;
+                                              final isLoading =
+                                                  state.postApiStatus ==
+                                                  PostApiStatus.loading;
                                               if (!showNav) {
                                                 return Align(
-                                                  alignment: Alignment.centerRight,
+                                                  alignment:
+                                                      Alignment.centerRight,
                                                   child: SizedBox(
                                                     width: 25.5.w,
                                                     height: 4.5.h,
                                                     child: RoundButton(
                                                       title: isLoading
-                                                          ? (widget.isEdit ? 'UPDATING...' : l.addingButton)
-                                                          : (widget.isEdit ? 'UPDATE' : l.addButton),
+                                                          ? (widget.isEdit
+                                                                ? 'UPDATING...'
+                                                                : l.addingButton)
+                                                          : (widget.isEdit
+                                                                ? 'UPDATE'
+                                                                : l.addButton),
                                                       color: AppColors.primary,
                                                       borderRadius: 4,
                                                       height: 4.5.h,
                                                       isLoading: isLoading,
                                                       onPress: () {
                                                         _clearFormError();
-                                                        final formState = _formKey.currentState;
-                                                        if (formState == null) return;
-                                                        final isValid = formState.validate();
+                                                        final formState =
+                                                            _formKey
+                                                                .currentState;
+                                                        if (formState == null)
+                                                          return;
+                                                        final isValid =
+                                                            formState
+                                                                .validate();
                                                         if (!isValid) {
-                                                          if (_lastFormError != null) {
-                                                            showAppSnackBar(context, _lastFormError!);
+                                                          if (_lastFormError !=
+                                                              null) {
+                                                            showAppSnackBar(
+                                                              context,
+                                                              _lastFormError!,
+                                                            );
                                                           }
                                                           return;
                                                         }
-                                                        context.read<AddFamilyHeadBloc>().add(AfhSubmit(context: context));
+                                                        context
+                                                            .read<
+                                                              AddFamilyHeadBloc
+                                                            >()
+                                                            .add(
+                                                              AfhSubmit(
+                                                                context:
+                                                                    context,
+                                                              ),
+                                                            );
                                                       },
                                                     ),
                                                   ),
@@ -1941,35 +2336,60 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                               final i = controller.index;
                                               final last = tabs.length - 1;
                                               return Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
                                                 children: [
                                                   if (i > 0)
                                                     SizedBox(
-                                                        height: 4.5.h,
-                                                        width: 25.5.w,
-                                                        child: OutlinedButton(
-                                                          style: OutlinedButton.styleFrom(
-                                                            minimumSize: Size(25.w, 4.5.h),
-                                                            backgroundColor: AppColors.primary,
-                                                            foregroundColor: Colors.white,
-                                                            side: BorderSide(color: AppColors.primary, width: 0.2.w), // 👈 matching border
-                                                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                                                            shape: RoundedRectangleBorder(
-                                                              borderRadius: BorderRadius.circular(4), // rounded edges
-                                                            ),
-                                                            elevation: 0.5, // subtle elevation for depth
-                                                            shadowColor: AppColors.primary.withOpacity(0.4),
+                                                      height: 4.5.h,
+                                                      width: 25.5.w,
+                                                      child: OutlinedButton(
+                                                        style: OutlinedButton.styleFrom(
+                                                          minimumSize: Size(
+                                                            25.w,
+                                                            4.5.h,
                                                           ),
-                                                          onPressed: () => controller.animateTo(i - 1),
-                                                          child: Text(
-                                                            l.previousButton,
-                                                            style:  TextStyle(
-                                                                fontWeight: FontWeight.w600,
-                                                                letterSpacing: 0.5,
-                                                                fontSize: 14.sp
-                                                            ),
+                                                          backgroundColor:
+                                                              AppColors.primary,
+                                                          foregroundColor:
+                                                              Colors.white,
+                                                          side: BorderSide(
+                                                            color: AppColors
+                                                                .primary,
+                                                            width: 0.2.w,
+                                                          ), // 👈 matching border
+                                                          padding:
+                                                              const EdgeInsets.symmetric(
+                                                                horizontal: 16,
+                                                              ),
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  4,
+                                                                ), // rounded edges
                                                           ),
-                                                        )
+                                                          elevation:
+                                                              0.5, // subtle elevation for depth
+                                                          shadowColor: AppColors
+                                                              .primary
+                                                              .withOpacity(0.4),
+                                                        ),
+                                                        onPressed: () =>
+                                                            controller
+                                                                .animateTo(
+                                                                  i - 1,
+                                                                ),
+                                                        child: Text(
+                                                          l.previousButton,
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            letterSpacing: 0.5,
+                                                            fontSize: 14.sp,
+                                                          ),
+                                                        ),
+                                                      ),
                                                     )
                                                   else
                                                     const SizedBox.shrink(),
@@ -1980,73 +2400,149 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                       title: i < last
                                                           ? l.nextButton
                                                           : (isLoading
-                                                          ? l.addingButton
-                                                          : l.addButton),
+                                                                ? l.addingButton
+                                                                : l.addButton),
                                                       onPress: () {
                                                         if (i < last) {
-                                                          bool canProceed = true;
+                                                          bool canProceed =
+                                                              true;
                                                           if (i == 0) {
                                                             _clearFormError();
-                                                            final headForm = _formKey.currentState;
-                                                            if (headForm == null || !headForm.validate()) {
-                                                              canProceed = false;
-                                                              final msg = _lastFormError ?? 'Please correct the highlighted errors before continuing.';
-                                                              showAppSnackBar(context, msg);
+                                                            final headForm =
+                                                                _formKey
+                                                                    .currentState;
+                                                            if (headForm ==
+                                                                    null ||
+                                                                !headForm
+                                                                    .validate()) {
+                                                              canProceed =
+                                                                  false;
+                                                              final msg =
+                                                                  _lastFormError ??
+                                                                  'Please correct the highlighted errors before continuing.';
+                                                              showAppSnackBar(
+                                                                context,
+                                                                msg,
+                                                              );
                                                             }
                                                           } else if (i == 1) {
                                                             clearSpousFormError();
-                                                            final spouseForm = spousFormKey.currentState;
-                                                            final spousState = context.read<SpousBloc>().state;
+                                                            final spouseForm =
+                                                                spousFormKey
+                                                                    .currentState;
+                                                            final spousState =
+                                                                context
+                                                                    .read<
+                                                                      SpousBloc
+                                                                    >()
+                                                                    .state;
 
-                                                            final isFormValid = spouseForm?.validate() ?? false;
+                                                            final isFormValid =
+                                                                spouseForm
+                                                                    ?.validate() ??
+                                                                false;
 
-                                                            final areAllFieldsValid = validateAllSpousFields(spousState);
+                                                            final areAllFieldsValid =
+                                                                validateAllSpousFields(
+                                                                  spousState,
+                                                                );
 
-                                                            if (!isFormValid || !areAllFieldsValid) {
-                                                              canProceed = false;
-                                                              final msg = spousLastFormError ?? 'Please correct the highlighted errors before continuing.';
-                                                              showAppSnackBar(context, msg);
+                                                            if (!isFormValid ||
+                                                                !areAllFieldsValid) {
+                                                              canProceed =
+                                                                  false;
+                                                              final msg =
+                                                                  spousLastFormError ??
+                                                                  'Please correct the highlighted errors before continuing.';
+                                                              showAppSnackBar(
+                                                                context,
+                                                                msg,
+                                                              );
 
-                                                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                                                final form = spousFormKey.currentContext?.findRenderObject() as RenderBox?;
-                                                                if (form != null) {
+                                                              WidgetsBinding.instance.addPostFrameCallback((
+                                                                _,
+                                                              ) {
+                                                                final form =
+                                                                    spousFormKey
+                                                                            .currentContext
+                                                                            ?.findRenderObject()
+                                                                        as RenderBox?;
+                                                                if (form !=
+                                                                    null) {
                                                                   Scrollable.ensureVisible(
-                                                                    spousFormKey.currentContext!,
-                                                                    duration: const Duration(milliseconds: 300),
-                                                                    curve: Curves.easeInOut,
+                                                                    spousFormKey
+                                                                        .currentContext!,
+                                                                    duration: const Duration(
+                                                                      milliseconds:
+                                                                          300,
+                                                                    ),
+                                                                    curve: Curves
+                                                                        .easeInOut,
                                                                   );
                                                                 }
                                                               });
                                                             }
                                                           }
-                                                          if (!canProceed) return;
-                                                          controller.animateTo(i + 1);
+                                                          if (!canProceed)
+                                                            return;
+                                                          controller.animateTo(
+                                                            i + 1,
+                                                          );
                                                         } else {
-
                                                           if (last == 1) {
                                                             clearSpousFormError();
-                                                            final spouseForm = spousFormKey.currentState;
-                                                            final spousState = context.read<SpousBloc>().state;
+                                                            final spouseForm =
+                                                                spousFormKey
+                                                                    .currentState;
+                                                            final spousState =
+                                                                context
+                                                                    .read<
+                                                                      SpousBloc
+                                                                    >()
+                                                                    .state;
 
                                                             // First validate the form fields
-                                                            final isFormValid = spouseForm?.validate() ?? false;
+                                                            final isFormValid =
+                                                                spouseForm
+                                                                    ?.validate() ??
+                                                                false;
 
                                                             // Then validate all fields including custom validations
-                                                            final areAllFieldsValid = validateAllSpousFields(spousState);
+                                                            final areAllFieldsValid =
+                                                                validateAllSpousFields(
+                                                                  spousState,
+                                                                );
 
-                                                            if (!isFormValid || !areAllFieldsValid) {
-                                                              final msg = spousLastFormError ??
+                                                            if (!isFormValid ||
+                                                                !areAllFieldsValid) {
+                                                              final msg =
+                                                                  spousLastFormError ??
                                                                   'Please correct the highlighted errors before continuing.';
-                                                              showAppSnackBar(context, msg);
+                                                              showAppSnackBar(
+                                                                context,
+                                                                msg,
+                                                              );
 
                                                               // Scroll to the first error in the form
-                                                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                                                final form = spousFormKey.currentContext?.findRenderObject() as RenderBox?;
-                                                                if (form != null) {
+                                                              WidgetsBinding.instance.addPostFrameCallback((
+                                                                _,
+                                                              ) {
+                                                                final form =
+                                                                    spousFormKey
+                                                                            .currentContext
+                                                                            ?.findRenderObject()
+                                                                        as RenderBox?;
+                                                                if (form !=
+                                                                    null) {
                                                                   Scrollable.ensureVisible(
-                                                                    spousFormKey.currentContext!,
-                                                                    duration: const Duration(milliseconds: 300),
-                                                                    curve: Curves.easeInOut,
+                                                                    spousFormKey
+                                                                        .currentContext!,
+                                                                    duration: const Duration(
+                                                                      milliseconds:
+                                                                          300,
+                                                                    ),
+                                                                    curve: Curves
+                                                                        .easeInOut,
                                                                   );
                                                                 }
                                                               });
@@ -2058,32 +2554,54 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                           if (last == 2) {
                                                             // Children tab present, validate children details
                                                             try {
-                                                              final ch = context.read<ChildrenBloc>().state;
+                                                              final ch = context
+                                                                  .read<
+                                                                    ChildrenBloc
+                                                                  >()
+                                                                  .state;
 
-                                                              if (ch.totalLive > 0 &&
-                                                                  (ch.totalMale + ch.totalFemale) !=
+                                                              if (ch.totalLive >
+                                                                      0 &&
+                                                                  (ch.totalMale +
+                                                                          ch.totalFemale) !=
                                                                       ch.totalLive) {
                                                                 showAppSnackBar(
-                                                                    context, l.malePlusFemaleError);
+                                                                  context,
+                                                                  l.malePlusFemaleError,
+                                                                );
                                                                 return;
                                                               }
 
                                                               final youngestErr =
-                                                              _validateYoungestChild(ch, l);
-                                                              if (youngestErr != null) {
-                                                                showAppSnackBar(context, youngestErr);
+                                                                  _validateYoungestChild(
+                                                                    ch,
+                                                                    l,
+                                                                  );
+                                                              if (youngestErr !=
+                                                                  null) {
+                                                                showAppSnackBar(
+                                                                  context,
+                                                                  youngestErr,
+                                                                );
                                                                 return;
                                                               }
                                                             } catch (_) {}
                                                           }
 
                                                           context
-                                                              .read<AddFamilyHeadBloc>()
-                                                              .add(AfhSubmit(context: context));
+                                                              .read<
+                                                                AddFamilyHeadBloc
+                                                              >()
+                                                              .add(
+                                                                AfhSubmit(
+                                                                  context:
+                                                                      context,
+                                                                ),
+                                                              );
                                                         }
                                                       },
                                                       color: AppColors.primary,
-                                                      borderRadius:4,
+                                                      borderRadius: 4,
                                                       isLoading: isLoading,
                                                       fontSize: 14.sp,
                                                     ),
