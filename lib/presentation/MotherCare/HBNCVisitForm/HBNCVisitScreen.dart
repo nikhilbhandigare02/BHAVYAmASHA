@@ -81,14 +81,14 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                     if (visitDay == 42) {
                       CustomDialog.show(
                         context,
-                        title: 'Form has been saved successfully',
-                        message: 'The post natal care of beneficiary has been completed',
+                        title:t?.formSavedSuccessfully ??  'Form has been saved successfully',
+                        message:t?.postNatalMssg ?? 'The post natal care of beneficiary has been completed',
                         onOkPressed: () {
                           Navigator.of(context, rootNavigator: true).pop();
                           Navigator.pushNamedAndRemoveUntil(
                             context,
                             Route_Names.HBNCScreen,
-                            (route) => false,
+                                (route) => false,
                           );
                         },
                       );

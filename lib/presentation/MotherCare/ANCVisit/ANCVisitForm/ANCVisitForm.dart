@@ -105,7 +105,7 @@ class _AncvisitformState extends State<Ancvisitform> {
   void _updateFormWithData(Map<String, dynamic> formData) {
     // Basic information
     // _bloc.add(VisitTypeChanged(formData['visit_type'] ?? '')); // Don't auto-fill visit type
-    // _bloc.add(PlaceOfAncChanged(formData['place_of_anc'] ?? '')); // Don't auto-fill place of ANC
+    _bloc.add(PlaceOfAncChanged(formData['place_of_anc'] ?? '')); // Don't auto-fill place of ANC
     _bloc.add(DateOfInspectionChanged(_parseDate(formData['date_of_inspection'])));
     _bloc.add(HouseNumberChanged(formData['house_number'] ?? ''));
     _bloc.add(WomanNameChanged(formData['woman_name'] ?? ''));
@@ -151,19 +151,17 @@ class _AncvisitformState extends State<Ancvisitform> {
 
     // Other fields
     _bloc.add(FolicAcidTabletsChanged(formData['folic_acid_tablets'] ?? ''));
+    _bloc.add(CalciumVitaminD3TabletsChanged(formData['calcium_vitamin_tablets'] ?? ''));
 
-    // Handle pre-existing diseases from form data
     if (formData['pre_existing_diseases'] != null) {
       final diseases = List<String>.from(formData['pre_existing_diseases']);
       _bloc.add(PreExistingDiseasesChanged(diseases));
 
-      // If there's an 'Other' disease, set it
       if (formData['other_disease'] != null) {
         _bloc.add(OtherDiseaseChanged(formData['other_disease']));
       }
     }
 
-    // Intentionally not auto-filling delivery/baby-related fields from previous forms
   }
 
 
@@ -857,14 +855,13 @@ class _AncvisitformState extends State<Ancvisitform> {
                   final count = _childrenCount(state.numberOfChildren);
                   CustomDialog.show(
                     context,
-                    title: 'Form has been saved successfully.',
-                    message: 'Delivery outcome : $count',
+                    title:l10n?.formSavedSuccessfully ?? 'Form has been saved successfully.',
+                    message: '${l10n?.deliveryOutcome ?? "Delivery outcome"} : $count',
                     onOkPressed: () {
                       Navigator.of(context, rootNavigator: true).pop();
                       Navigator.pop(context, true);
                     },
                   );
-                  
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(l10n?.saveSuccess ?? 'Form Submitted successfully')),
@@ -1303,7 +1300,6 @@ class _AncvisitformState extends State<Ancvisitform> {
                               getLabel: (s) => s,
                               onChanged: (v) => bloc.add(HighRiskChanged(v ?? '')),
                               hintText: l10n?.select ?? 'Select',
-
                             ),
                             if (state.highRisk == 'Yes') ...[
                               Divider(color: AppColors.divider, thickness: 0.5, height: 0),

@@ -678,7 +678,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
               _section(
                 CustomTextField(
                   key: const ValueKey('member_name'),
-                  labelText: '${l.nameOfMember} *',
+                  labelText: '${l.nameOfMemberLabel} *',
                   hintText: l.nameOfMemberHint,
                   initialValue: state.memberName,
                   readOnly: false,
@@ -714,7 +714,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
               _section(
                 CustomTextField(
                   key: const ValueKey('spouse_name'),
-                  labelText: '${l.spouseName} *',
+                  labelText: '${l.spouseNameLabel} *',
                   hintText: l.spouseNameHint,
                   initialValue: state.spouseName,
                   readOnly: widget.isEdit,
@@ -984,8 +984,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 if (state.occupation == 'Other')
                   _section(
                     CustomTextField(
-                      labelText: 'Enter Occupation',
-                      hintText: 'Enter Occupation',
+                      labelText: l.enterOccupationOther,
+                      hintText: l.enterOccupationOther,
                       initialValue: state.otherOccupation,
                       onChanged: (v) => context
                           .read<SpousBloc>()
@@ -1069,8 +1069,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 if (state.religion == 'Other')
                   _section(
                     CustomTextField(
-                      labelText: 'Enter Religion',
-                      hintText: 'Enter Religion',
+                      labelText: l.enter_religion,
+                      hintText: l.enter_religion,
                       initialValue: state.otherReligion,
                       onChanged: (v) => context
                           .read<SpousBloc>()
@@ -1078,11 +1078,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     ),
                   ),
               if (state.religion == 'Other')
-
                 if (state.religion == 'Other')
                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-
               _section(
                 ApiDropdown<String>(
                   labelText: l.categoryLabel,
@@ -1124,8 +1121,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 if (state.category == 'Other')
                   _section(
                     CustomTextField(
-                      labelText: 'Enter Category',
-                      hintText: 'Enter Category',
+                      labelText: l.enterCategory,
+                      hintText: l.enterCategory,
                       initialValue: state.otherCategory,
                       onChanged: (v) => context
                           .read<SpousBloc>()
@@ -1273,7 +1270,48 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 ApiDropdown<String>(
                   labelText: '${l.whoseMobileLabel} *',
                   items: _getMobileOwnerList(state.gender ?? ''),
-                  getLabel: (s) => s,
+                  getLabel: (s) {
+                    switch (s) {
+                      case 'Self':
+                        return "${l.self}";
+
+                      case 'Husband':
+                        return '${l.husbandLabel} ';
+
+                      case 'Mother':
+                        return '${l.mother} ';
+
+                      case 'Father':
+                        return '${l.father}';
+
+                      case 'Wife':
+                        return '${l.wife} ';
+
+                      case 'Son':
+                        return '${l.son}';
+
+                      case 'Daughter':
+                        return '${l.daughter} ';
+
+                      case 'Mother In Law':
+                        return '${l.motherInLaw} ';
+
+                      case 'Father In Law':
+                        return '${l.fatherInLaw}';
+
+                      case 'Neighbour':
+                        return '${l.neighbour} ';
+
+                      case 'Relative':
+                        return "${l.relative} ";
+
+                      case 'Other':
+                        return '${l.other} ';
+
+                      default:
+                        return s;
+                    }
+                  },
                   value: state.mobileOwner,
                   onChanged: (v) async {
                     if (v == null) return;
@@ -1364,8 +1402,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 if (state.mobileOwner == 'Other')
                   _section(
                     CustomTextField(
-                      labelText: 'Relation with mobile no. holder *',
-                      hintText: 'Relation with mobile no. holder',
+                      labelText: '${l.relationWithMobileHolder} *',
+                      hintText: l.relationWithMobileHolder,
                       initialValue: state.mobileOwnerOtherRelation,
                       onChanged: (v) => context
                           .read<SpousBloc>()
@@ -1661,7 +1699,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                 if (state.isPregnant == 'No') ...[
                   ApiDropdown<String>(
-                    labelText: 'Are you/your partner adopting family planning? *',
+                    labelText: '${l.fpAdoptingLabel} *',
                     items: const ['Yes', 'No'],
                     getLabel: (s) {
                       switch (s) {
@@ -1673,7 +1711,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           return s;
                       }
                     },
-                    value: state.familyPlanningCounseling ?? 'Select',
+                    value: state.familyPlanningCounseling ?? '${l.select}',
                     onChanged: (v) {
                       if (v == null) return;
                       spBloc.add(FamilyPlanningCounselingChanged(v));
@@ -1689,19 +1727,51 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     ApiDropdown<String>(
                       labelText: '${l.methodOfContra} *',
                       items: const [
-
-                        'Condom',
-                        'Mala -N (Daily Contraceptive pill)',
                         'Antra injection',
                         'Copper -T (IUCD)',
+                        'Condom',
+                        'Mala -N (Daily Contraceptive pill)',
+
+
                         'Chhaya (Weekly Contraceptive pill)',
                         'ECP (Emergency Contraceptive pill)',
                         'Male Sterilization',
                         'Female Sterilization',
                         'Any Other Specify'
                       ],
-                      getLabel: (value) => value,
-                      value: state.fpMethod ?? 'Select',
+                      getLabel: (s) {
+                        switch (s) {
+                          case 'Condom':
+                            return l.condom;
+
+                          case 'Mala -N (Daily Contraceptive pill)':
+                            return l.malaN;
+
+                          case 'Antra injection':
+                            return l.atraInjection;
+
+                          case 'Copper -T (IUCD)':
+                            return l.copperT;
+
+                          case 'Chhaya (Weekly Contraceptive pill)':
+                            return l.chhaya;
+
+                          case 'ECP (Emergency Contraceptive pill)':
+                            return l.ecp;
+
+                          case 'Male Sterilization':
+                            return l.maleSterilization;
+
+                          case 'Female Sterilization':
+                            return l.femaleSterilization;
+
+                          case 'Any Other Specify':
+                            return l.anyOtherSpecifyy;
+                          default:
+                            return s;
+                        }
+                      },
+                      value: state.fpMethod ?? '${l.select}',
                       onChanged: (value) {
                         if (value != null) {
                           spBloc.add(FpMethodChanged(value));
@@ -1717,7 +1787,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                   if(state.fpMethod == 'Antra injection') ...[
                     CustomDatePicker(
-                      labelText: 'Date of Antra',
+                      labelText: l.dateOfAntra,
                       initialDate: state.antraDate ?? DateTime.now(),
                       firstDate: DateTime(1900),
                       lastDate: DateTime(2100),
@@ -1732,7 +1802,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   ],
                   if (state.fpMethod == 'Copper -T (IUCD)') ...[
                     CustomDatePicker(
-                      labelText: 'Removal Date',
+                      labelText: l.removalDate,
                       initialDate: state.removalDate ?? DateTime.now(),
                       firstDate: DateTime(1900),
                       lastDate: DateTime(2100),
@@ -1745,8 +1815,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                     CustomTextField(
-                      labelText: 'Reason',
-                      hintText: 'reason ',
+                      labelText: l.reasonForRemoval,
+                      hintText: l.reasonForRemoval,
                       initialValue: state.removalReason,
                       onChanged: (value) {
                         spBloc.add(RemovalReasonChanged(value ?? ''));
@@ -1758,8 +1828,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                   if (state.fpMethod == 'Condom') ...[
                     CustomTextField(
-                      labelText: 'Quantity of Condoms',
-                      hintText: 'Quantity of Condoms',
+                      labelText: l.quantityOfCondoms,
+                      hintText: l.quantityOfCondoms,
                       keyboardType: TextInputType.number,
                       initialValue: state.condomQuantity,
                       onChanged: (value) {

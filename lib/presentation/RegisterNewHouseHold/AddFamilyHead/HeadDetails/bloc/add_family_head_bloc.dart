@@ -196,7 +196,8 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
     on<AfhUpdateVillage>(
           (event, emit) => emit(state.copyWith(village: event.value)),
     );
-    on<AfhUpdateWard>((event, emit) => emit(state.copyWith(ward: event.value)));
+    on<AfhUpdateWard>((event, emit) => emit(state.copyWith(wardNo: event.value)));
+    on<AfhUpdateWardName>((event, emit) => emit(state.copyWith(ward: event.value)));
     on<AfhUpdateMohalla>(
           (event, emit) => emit(state.copyWith(mohalla: event.value)),
     );
