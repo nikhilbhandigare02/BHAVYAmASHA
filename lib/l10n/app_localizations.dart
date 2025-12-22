@@ -2915,18 +2915,6 @@ abstract class AppLocalizations {
   /// **'Household Beneficiary'**
   String get householdBeneficiaryTitle;
 
-  /// No description provided for @hscNameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'HSC Name'**
-  String get hscNameHint;
-
-  /// No description provided for @hscNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'HSC Name'**
-  String get hscNameLabel;
-
   /// No description provided for @husbandFatherNameLabel.
   ///
   /// In en, this message translates to:
@@ -2944,18 +2932,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Husband\'s name'**
   String get husbandNameLabel;
-
-  /// No description provided for @hwcNameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'HWC Name'**
-  String get hwcNameHint;
-
-  /// No description provided for @hwcNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'HWC Name'**
-  String get hwcNameLabel;
 
   /// No description provided for @idTypeAadhaar.
   ///
@@ -4214,7 +4190,7 @@ abstract class AppLocalizations {
   /// No description provided for @saveSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Saved successfully'**
+  /// **'Form Submitted successfully'**
   String get saveSuccess;
 
   /// No description provided for @savingButton.
@@ -10340,7 +10316,7 @@ abstract class AppLocalizations {
   /// No description provided for @isBirthCertificateIssued.
   ///
   /// In en, this message translates to:
-  /// **'Is birth certificate issued?'**
+  /// **'Is birth certificate issued? *'**
   String get isBirthCertificateIssued;
 
   /// No description provided for @isSchoolGoingChild.
@@ -13504,6 +13480,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Present?'**
   String get present;
+
+  /// No description provided for @hscNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'HSC'**
+  String get hscNameHint;
+
+  /// No description provided for @hscNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'HSC'**
+  String get hscNameLabel;
+
+  /// No description provided for @hwcNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'HWC'**
+  String get hwcNameHint;
+
+  /// No description provided for @hwcNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'HWC'**
+  String get hwcNameLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

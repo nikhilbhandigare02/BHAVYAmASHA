@@ -9,6 +9,7 @@ import '../../../core/utils/app_info_utils.dart';
 import '../../../core/utils/device_info_utils.dart';
 import '../../../core/widgets/AppHeader/AppHeader.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
+import '../../../core/widgets/SnackBar/app_snackbar.dart';
 import '../../../core/widgets/TextField/TextField.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
 import '../../../data/Database/User_Info.dart';
@@ -384,13 +385,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         }
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Form saved successfully!'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
+          showAppSnackBar(context, 'Form saved successfully!');
 
           // Pop with result to refresh the list
           Navigator.pop(context, {

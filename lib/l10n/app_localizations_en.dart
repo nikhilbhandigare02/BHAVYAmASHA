@@ -1429,12 +1429,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get householdBeneficiaryTitle => 'Household Beneficiary';
 
   @override
-  String get hscNameHint => 'HSC Name';
-
-  @override
-  String get hscNameLabel => 'HSC Name';
-
-  @override
   String get husbandFatherNameLabel => 'Husband / Father Name';
 
   @override
@@ -1442,12 +1436,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get husbandNameLabel => 'Husband\'s name';
-
-  @override
-  String get hwcNameHint => 'HWC Name';
-
-  @override
-  String get hwcNameLabel => 'HWC Name';
 
   @override
   String get idTypeAadhaar => 'Aadhaar card';
@@ -2079,7 +2067,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get saveSuccess => 'Saved successfully';
+  String get saveSuccess => 'Form Submitted successfully';
 
   @override
   String get savingButton => 'SAVING...';
@@ -5146,7 +5134,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightRange => 'Weight (1.2-90)Kg';
 
   @override
-  String get isBirthCertificateIssued => 'Is birth certificate issued?';
+  String get isBirthCertificateIssued => 'Is birth certificate issued? *';
 
   @override
   String get isSchoolGoingChild => 'Is He/She school going child?';
@@ -6728,4 +6716,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get present => 'Present?';
+
+  @override
+  String get hscNameHint => 'HSC';
+
+  @override
+  String get hscNameLabel => 'HSC';
+
+  @override
+  String get hwcNameHint => 'HWC';
+
+  @override
+  String get hwcNameLabel => 'HWC';
 }

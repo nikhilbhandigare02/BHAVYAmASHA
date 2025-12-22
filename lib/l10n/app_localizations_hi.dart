@@ -1429,12 +1429,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get householdBeneficiaryTitle => 'घरेलू लाभार्थी';
 
   @override
-  String get hscNameHint => 'एच.एस.सी. का नाम';
-
-  @override
-  String get hscNameLabel => 'एच.एस.सी. का नाम';
-
-  @override
   String get husbandFatherNameLabel => 'पति / पिता का नाम';
 
   @override
@@ -1442,12 +1436,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get husbandNameLabel => 'पति का नाम';
-
-  @override
-  String get hwcNameHint => 'एच.डब्ल्यू.सी. का नाम';
-
-  @override
-  String get hwcNameLabel => 'एच.डब्ल्यू.सी. का नाम';
 
   @override
   String get idTypeAadhaar => 'आधार';
@@ -2079,7 +2067,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get saveButton => 'संरक्षित करें';
 
   @override
-  String get saveSuccess => 'Saved successfully';
+  String get saveSuccess => 'Form Submitted successfully';
 
   @override
   String get savingButton => 'SAVING...';
@@ -6728,4 +6716,16 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get present => 'उपस्थित है?';
+
+  @override
+  String get hscNameHint => 'एच.एस.सी. का नाम';
+
+  @override
+  String get hscNameLabel => 'एच.एस.सी. का नाम';
+
+  @override
+  String get hwcNameHint => 'एच.डब्ल्यू.सी. का नाम';
+
+  @override
+  String get hwcNameLabel => 'एच.डब्ल्यू.सी. का नाम';
 }
