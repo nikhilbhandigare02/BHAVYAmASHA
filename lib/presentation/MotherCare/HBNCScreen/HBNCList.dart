@@ -6,6 +6,7 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/HBNCVisitScreen.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/widgets/AppDrawer/Drawer.dart';
 import '../../../data/Database/database_provider.dart';
@@ -495,16 +496,29 @@ class _HBNCListScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppHeader(
-        screenTitle: 'HBNC List',
-        showBack: true,
+    return WillPopScope(
+      onWillPop: () async {
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          Navigator.pushReplacementNamed(context, Route_Names.Mothercarehomescreen);
+        }
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppHeader(
+          screenTitle: 'HBNC List',
+          showBack: true,
+          onBackTap: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              Navigator.pushReplacementNamed(context, Route_Names.Mothercarehomescreen);
+            }
+          },
+        ),
 
-
-
-      ),
-
-      body: Column(
+        body: Column(
         children: [
           // Search Field
           Padding(
@@ -546,6 +560,7 @@ class _HBNCListScreenState
           ),
 
         ],
+        ),
       ),
     );
   }

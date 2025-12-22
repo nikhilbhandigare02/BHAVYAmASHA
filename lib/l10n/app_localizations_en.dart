@@ -5134,7 +5134,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightRange => 'Weight (1.2-90)Kg';
 
   @override
-  String get isBirthCertificateIssued => 'Is birth certificate issued?';
+  String get isBirthCertificateIssued => 'Is birth certificate issued? *';
 
   @override
   String get isSchoolGoingChild => 'Is He/She school going child?';

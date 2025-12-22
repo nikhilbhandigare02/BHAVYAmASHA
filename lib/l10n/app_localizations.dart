@@ -10316,7 +10316,7 @@ abstract class AppLocalizations {
   /// No description provided for @isBirthCertificateIssued.
   ///
   /// In en, this message translates to:
-  /// **'Is birth certificate issued?'**
+  /// **'Is birth certificate issued? *'**
   String get isBirthCertificateIssued;
 
   /// No description provided for @isSchoolGoingChild.

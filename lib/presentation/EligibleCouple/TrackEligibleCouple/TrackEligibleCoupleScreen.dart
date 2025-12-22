@@ -10,6 +10,7 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
+import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import '../../../core/utils/enums.dart';
 import '../../../core/widgets/SnackBar/app_snackbar.dart';
 import 'PreviousVisits.dart';
@@ -86,6 +87,12 @@ class _TrackEligibleCoupleView extends StatelessWidget {
   const _TrackEligibleCoupleView({required this.beneficiaryId});
 
 
+  Future<bool> _hasActiveMotherCare(String beneficiaryKey) async {
+    if (beneficiaryKey.isEmpty) return false;
+    final rec = await LocalStorageDao.instance.getMotherCareActivityByBeneficiary(beneficiaryKey);
+    return rec != null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
@@ -144,8 +151,9 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                   labelText: t?.isPregnantLabel ?? 'क्या महिला गर्भवती है?',
                   items: [true, false],
                   getLabel: (value) =>
-                  value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
+                      value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
                   value: state.isPregnant,
+                  readOnly: false,
                   onChanged: (value) {
                     if (value != null) {
                       context
@@ -179,31 +187,26 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                         hintText: t?.dateHint,
                         initialDate: lmp,
                         onDateChanged: (date) {
-                          if (date != null) {
-                            final edd = date.add(const Duration(days: 277));
-                            context.read<TrackEligibleCoupleBloc>()
-                              ..add(LmpDateChanged(date))
-                              ..add(EddDateChanged(edd));
-                          } else {
-                            context.read<TrackEligibleCoupleBloc>()
-                              ..add(const LmpDateChanged(null))
-                              ..add(const EddDateChanged(null));
-                          }
+                          context.read<TrackEligibleCoupleBloc>()
+                              .add(LmpDateChanged(date));
                         },
                         isEditable: true,
-                        firstDate: DateTime.now().subtract(const Duration(days: 280)), // ~9 months ago
-                        lastDate: DateTime.now().add(const Duration(days: 30)), // 1 month from now
+                        firstDate: DateTime.now().subtract(const Duration(days: 280)),
+                        lastDate: DateTime.now().add(const Duration(days: 30)),
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                       const SizedBox(height: 8),
-                      CustomTextField(
-                        labelText:
-                        '${t?.eddDateLabel ?? 'प्रसव की संभावित तिथि'} *',
-                        hintText:'dd-mm-yyyy',
-                        readOnly: true,
-                        controller: TextEditingController(
-                          text: formatDate(edd),
-                        ),
+                      CustomDatePicker(
+                        labelText: '${t?.eddDateLabel ?? 'प्रसव की संभावित तिथि'} *',
+                        hintText: t?.dateHint,
+                        initialDate: edd,
+                        onDateChanged: (date) {
+                          context.read<TrackEligibleCoupleBloc>()
+                              .add(EddDateChanged(date));
+                        },
+                        isEditable: true,
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime(2100),
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                     ],

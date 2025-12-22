@@ -1755,7 +1755,7 @@
   "updateMemberDetails": "Update Member Details",
   "verifyLabel": "VERIFY",
   "weightRange": "Weight (1.2-90)Kg",
-  "isBirthCertificateIssued": "Is birth certificate issued?",
+  "isBirthCertificateIssued": "Is birth certificate issued? *",
   "isSchoolGoingChild": "Is He/She school going child?",
   "saving": "Saving...",
   "correctHighlightedErrors": "Please correct the highlighted errors before continuing.",

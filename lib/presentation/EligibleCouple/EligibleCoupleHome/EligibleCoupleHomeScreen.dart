@@ -38,7 +38,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // === Count for EligibleCoupleIdentifiedScreen ===
+      // === Count for Eligibl eCoupleIdentifiedScreen ===
       final identifiedRows = await LocalStorageDao.instance.getAllBeneficiaries();
       final identifiedHouseholds = <String, List<Map<String, dynamic>>>{};
       for (final row in identifiedRows) {
@@ -163,7 +163,6 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
       // === Count for UpdatedEligibleCoupleListScreen (All tab) ===
       final trackingFormKey =
           FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
-      final Set<String> pregnantBeneficiaries = <String>{};
       final Set<String> sterilizedBeneficiaries = <String>{};
       if (trackingFormKey.isNotEmpty) {
         final trackingRows = await db.query(
@@ -183,13 +182,6 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
             Map<String, dynamic> formData = decoded;
             if (decoded['form_data'] is Map) {
               formData = Map<String, dynamic>.from(decoded['form_data']);
-            }
-            final isPregnant = formData['is_pregnant'];
-            if (isPregnant == true) {
-              final key = row['beneficiary_ref_key']?.toString() ?? '';
-              if (key.isNotEmpty) {
-                pregnantBeneficiaries.add(key);
-              }
             }
             final fp = formData['fp_method']?.toString().toLowerCase().trim();
             final key = row['beneficiary_ref_key']?.toString() ?? '';
@@ -218,15 +210,9 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         Map<String, dynamic>? head;
         Map<String, dynamic>? spouse;
 
-        // First pass: find head and spouse
+        // First pass: find head and spouse (do not pre-filter by tracking pregnancy/sterilization)
         for (final member in household) {
           try {
-            final memberUniqueKey = member['unique_key']?.toString() ?? '';
-            if (memberUniqueKey.isNotEmpty &&
-                (pregnantBeneficiaries.contains(memberUniqueKey) || sterilizedBeneficiaries.contains(memberUniqueKey))) {
-              continue;
-            }
-
             final dynamic infoRaw = member['beneficiary_info'];
             final Map<String, dynamic> info = infoRaw is String
                 ? jsonDecode(infoRaw)
@@ -262,12 +248,6 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         for (final member in household) {
           try {
             final memberUniqueKey = member['unique_key']?.toString() ?? '';
-            if (memberUniqueKey.isNotEmpty &&
-                pregnantBeneficiaries.contains(memberUniqueKey)) {
-              // Skip ECs already marked pregnant in tracking form,
-              // same as UpdatedEligibleCoupleListScreen
-              continue;
-            }
 
             final dynamic infoRaw = member['beneficiary_info'];
             final Map<String, dynamic> info = infoRaw is String

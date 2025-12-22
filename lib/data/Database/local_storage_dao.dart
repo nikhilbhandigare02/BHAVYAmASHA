@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:medixcel_new/data/Database/tables/beneficiaries_table.dart';
 import 'package:medixcel_new/data/Database/tables/cluster_meeting_table.dart';
 import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
+import 'package:medixcel_new/data/Database/tables/mother_care_activities_table.dart';
 import 'package:medixcel_new/data/Database/tables/notification_table.dart';
 import 'package:medixcel_new/data/Database/tables/training_data_table.dart';
 import 'package:sqflite/sqflite.dart';
@@ -418,23 +419,60 @@ class LocalStorageDao {
     try {
       final db = await _db;
       bool isHighRisk = false;
+      String? cutoff;
+
+      final cutoffRows = await db.rawQuery('''
+      SELECT created_date_time
+      FROM ${MotherCareActivitiesTable.table}
+      WHERE beneficiary_ref_key = ?
+        AND mother_care_state = ?
+        AND is_deleted = 0
+      ORDER BY created_date_time DESC
+      LIMIT 1
+    ''', [beneficiaryId, 'anc_due_state']);
+
+      if (cutoffRows.isNotEmpty) {
+        final v = cutoffRows.first['created_date_time']?.toString();
+        if (v != null && v.isNotEmpty) {
+          cutoff = v;
+        }
+      }
 
       // Get visit count
-      final countResult = await db.rawQuery('''
+      String countSql = '''
       SELECT COUNT(*) as count 
       FROM ${FollowupFormDataTable.table} 
       WHERE beneficiary_ref_key = ? 
       AND forms_ref_key = ?
-    ''', [beneficiaryId, FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration]]);
+      AND (is_deleted IS NULL OR is_deleted = 0)
+    ''';
+      final countArgs = <Object?>[
+        beneficiaryId,
+        FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration],
+      ];
+      if (cutoff != null && cutoff.isNotEmpty) {
+        countSql += ' AND datetime(created_date_time) >= datetime(?)';
+        countArgs.add(cutoff);
+      }
+      final countResult = await db.rawQuery(countSql, countArgs);
 
-      final riskResult = await db.rawQuery('''
+      String riskSql = '''
       SELECT form_json
       FROM ${FollowupFormDataTable.table} 
       WHERE beneficiary_ref_key = ? 
       AND forms_ref_key = ?
-      ORDER BY created_date_time DESC
-      LIMIT 1
-    ''', [beneficiaryId, FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration]]);
+      AND (is_deleted IS NULL OR is_deleted = 0)
+    ''';
+      final riskArgs = <Object?>[
+        beneficiaryId,
+        FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration],
+      ];
+      if (cutoff != null && cutoff.isNotEmpty) {
+        riskSql += ' AND datetime(created_date_time) >= datetime(?)';
+        riskArgs.add(cutoff);
+      }
+      riskSql += ' ORDER BY created_date_time DESC LIMIT 1';
+      final riskResult = await db.rawQuery(riskSql, riskArgs);
 
       print('🔍 Risk query for $beneficiaryId returned ${riskResult.length} rows');
       if (riskResult.isNotEmpty) {
@@ -446,11 +484,11 @@ class LocalStorageDao {
             print('🔍 Parsed form data: $formData');
 
             // Check if form_data exists and has high_risk field
-            if (formData['form_data'] != null &&
-                formData['form_data'] is Map &&
-                formData['form_data']['high_risk'] != null) {
+            if (formData['anc_form'] != null &&
+                formData['anc_form'] is Map &&
+                formData['anc_form']['high_risk'] != null) {
 
-              final highRiskValue = formData['form_data']['high_risk'].toString().toLowerCase();
+              final highRiskValue = formData['anc_form']['high_risk'].toString().toLowerCase();
               print('🔍 Found high_risk in form_data: $highRiskValue');
 
               isHighRisk = highRiskValue == 'yes' ||
@@ -491,13 +529,38 @@ class LocalStorageDao {
   Future<List<Map<String, dynamic>>> getAncFormsByBeneficiaryId(String beneficiaryId) async {
     try {
       final db = await _db;
+      String? cutoff;
+      final cutoffRows = await db.rawQuery('''
+      SELECT created_date_time
+      FROM ${MotherCareActivitiesTable.table}
+      WHERE beneficiary_ref_key = ?
+        AND mother_care_state = ?
+        AND is_deleted = 0
+      ORDER BY created_date_time DESC
+      LIMIT 1
+    ''', [beneficiaryId, 'anc_due_state']);
+
+      if (cutoffRows.isNotEmpty) {
+        final v = cutoffRows.first['created_date_time']?.toString();
+        if (v != null && v.isNotEmpty) {
+          cutoff = v;
+        }
+      }
+
+      String where = 'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)';
+      final args = <Object?>[
+        FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration],
+        beneficiaryId,
+      ];
+      if (cutoff != null && cutoff.isNotEmpty) {
+        where += ' AND datetime(created_date_time) >= datetime(?)';
+        args.add(cutoff);
+      }
+
       final result = await db.query(
         FollowupFormDataTable.table,
-        where: 'forms_ref_key = ? AND beneficiary_ref_key = ?',
-        whereArgs: [
-          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration],
-          beneficiaryId,
-        ],
+        where: where,
+        whereArgs: args,
         orderBy: 'created_date_time DESC',
       );
 
@@ -506,10 +569,10 @@ class LocalStorageDao {
         try {
           if (row['form_json'] != null) {
             final decoded = jsonDecode(row['form_json']);
-            if (decoded is Map && decoded['form_data'] is Map) {
-              row['form_data'] = Map<String, dynamic>.from(decoded['form_data']);
+            if (decoded is Map && decoded['anc_form'] is Map) {
+              row['anc_form'] = Map<String, dynamic>.from(decoded['anc_form']);
             } else {
-              row['form_data'] = decoded;
+              row['anc_form'] = decoded;
             }
           }
         } catch (_) {}
