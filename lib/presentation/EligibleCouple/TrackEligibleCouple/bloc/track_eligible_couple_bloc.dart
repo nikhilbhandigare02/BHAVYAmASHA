@@ -62,8 +62,20 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
     });
 
     on<LmpDateChanged>((event, emit) {
+      final lmp = event.date;
+      if (lmp == null) {
+        emit(state.copyWith(
+          lmpDate: null,
+          eddDate: null,
+          status: state.isValid ? FormStatus.valid : FormStatus.initial,
+          clearError: true,
+        ));
+        return;
+      }
+      final edd = _calculateEddFromLmp(lmp);
       emit(state.copyWith(
-        lmpDate: event.date,
+        lmpDate: lmp,
+        eddDate: edd,
         status: state.isValid ? FormStatus.valid : FormStatus.initial,
         clearError: true,
       ));
@@ -493,15 +505,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
   }
 
   DateTime _calculateEddFromLmp(DateTime lmp) {
-    // Add 8 months and 10 days to LMP
-    int year = lmp.year;
-    int month = lmp.month + 8;
-    if (month > 12) {
-      year += (month - 1) ~/ 12;
-      month = ((month - 1) % 12) + 1;
-    }
-    final base = DateTime(year, month, lmp.day);
-    return base.add(const Duration(days: 10));
+    return lmp.add(const Duration(days: 277));
   }
 
   Future<void> _loadPreviousFormData() async {

@@ -132,7 +132,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
               builder: (context, state) {
                 return CustomTextField(
                   labelText: t?.financialYearLabel ?? 'वित्तीय वर्ष',
-                  // readOnly: true,
+                  readOnly: true,
                   controller: TextEditingController(
                     text: state.financialYear.isEmpty
                         ? 'YYYY'
@@ -191,8 +191,8 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                               .add(LmpDateChanged(date));
                         },
                         isEditable: true,
-                        firstDate: DateTime.now().subtract(const Duration(days: 280)),
-                        lastDate: DateTime.now().add(const Duration(days: 30)),
+                        firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                        lastDate: DateTime.now(),
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                       const SizedBox(height: 8),
@@ -204,9 +204,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                           context.read<TrackEligibleCoupleBloc>()
                               .add(EddDateChanged(date));
                         },
-                        isEditable: true,
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime(2100),
+                        readOnly: true,
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
