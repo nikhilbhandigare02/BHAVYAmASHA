@@ -5096,7 +5096,7 @@ abstract class AppLocalizations {
   /// No description provided for @birthCertificateIssuedLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is birth certificate issued?'**
+  /// **'Is birth certificate issued? *'**
   String get birthCertificateIssuedLabel;
 
   /// No description provided for @birthCertificateNumberLabel.
@@ -12236,7 +12236,7 @@ abstract class AppLocalizations {
   /// No description provided for @is_birth_certificate_issued.
   ///
   /// In en, this message translates to:
-  /// **'Is birth certificate issued?'**
+  /// **'Is birth certificate issued? *'**
   String get is_birth_certificate_issued;
 
   /// No description provided for @enter_religion.

@@ -2520,7 +2520,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mothersRchIdLabel => 'Mother\'s RCH ID number';
 
   @override
-  String get birthCertificateIssuedLabel => 'Is birth certificate issued?';
+  String get birthCertificateIssuedLabel => 'Is birth certificate issued? *';
 
   @override
   String get birthCertificateNumberLabel => 'birth certificate number';
@@ -6094,7 +6094,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get is_school_going_child => 'Is he/she a school-going child?';
 
   @override
-  String get is_birth_certificate_issued => 'Is birth certificate issued?';
+  String get is_birth_certificate_issued => 'Is birth certificate issued? *';
 
   @override
   String get enter_religion => 'Enter Religion';
