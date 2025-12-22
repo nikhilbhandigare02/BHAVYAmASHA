@@ -709,81 +709,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           if (state.category == 'Other')
             Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
           _Section(
-            child: Row(
-              children: [
-                Expanded(
-                  child: CustomTextField(
-                    labelText: l.abhaAddressLabel,
-                    hintText: l.abhaAddressLabel,
-                    initialValue: state.AfhABHAChange,
-                    onChanged: (v) =>
-                        context.read<AddFamilyHeadBloc>().add(AfhABHAChange(v.trim())),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                SizedBox(
-                  height: 3.h,
-                  width: 15.h,
-                  child: RoundButton(
-                    title: l.linkAbha,
-                    width: 40.w,
-                    borderRadius: 8,
-                    fontSize: 14.sp,
-                    onPress: () async {
-                      final result = await Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
+            child: IgnorePointer(
+              ignoring: widget.isEdit,
 
-                      debugPrint("BACK FROM ABHA SCREEN");
-                      debugPrint("ABHA RESULT: $result");
-
-                      if (result is Map<String, dynamic>) {
-                        if (!mounted) return;
-                        _handleAbhaProfileResult(result, context); // pass context safely
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
-          if (state.gender == 'Female') ...[
-            _Section(
               child: Row(
                 children: [
                   Expanded(
                     child: CustomTextField(
-                        labelText: 'RCH ID',
-                        hintText: 'Enter 12 digit RCH ID',
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(12),
-                        ],
-                        onChanged: (v) {
-                          // Clear previous snackbar
-                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
-
-                          final value = v.trim();
-                          context.read<AddFamilyHeadBloc>().add(AfhRichIdChange(value));
-
-                          // Show error if not empty and not exactly 12 digits
-                          if (value.isNotEmpty && value.length != 12) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (mounted) {
-                                showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
-                              }
-                            });
-                          }
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return null; // Field is optional
-                          }
-                          if (value.length != 12) {
-                            return 'Must be 12 digits';
-                          }
-                          return null;
-                        }
+                      labelText: l.abhaAddressLabel,
+                      hintText: l.abhaAddressLabel,
+                      initialValue: state.AfhABHAChange,
+                      onChanged: (v) =>
+                          context.read<AddFamilyHeadBloc>().add(AfhABHAChange(v.trim())),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -791,48 +728,119 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     height: 3.h,
                     width: 15.h,
                     child: RoundButton(
-                      title: 'VERIFY',
+                      title: l.linkAbha,
                       width: 40.w,
-                      borderRadius: 1.h,
+                      borderRadius: 8,
                       fontSize: 14.sp,
                       onPress: () async {
-                        // Remove previous
-                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                        final result = await Navigator.pushNamed(context, Route_Names.Abhalinkscreen);
 
-                        final rchId = state?.AfhRichIdChange?.trim() ?? "";
+                        debugPrint("BACK FROM ABHA SCREEN");
+                        debugPrint("ABHA RESULT: $result");
 
-                        // Validate
-                        if (rchId.isEmpty) {
-                          showAppSnackBar(context, "Please enter RCH ID");
-                          return;
+                        if (result is Map<String, dynamic>) {
+                          if (!mounted) return;
+                          _handleAbhaProfileResult(result, context); // pass context safely
                         }
-
-                        if (rchId.length != 12) {
-                          showAppSnackBar(context, "RCH ID must be exactly 12 digits");
-                          return;
-                        }
-
-                        print("VERIFY PRESSED → Calling API…");
-                        print("RCH ID: $rchId");
-                        print("requestFor: 1");
-
-                        final response = await fetchRCHDataForScreen(
-                          int.parse(rchId),
-                          requestFor: 1, // FEMALE
-                        );
-
-                        print("API Response → $response");
-
-                        if (response == null) {
-                          showAppSnackBar(context, "Failed to fetch RCH data");
-                        } else {
-                          showAppSnackBar(context, "RCH Verified Successfully!");
-                        }
-
                       },
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+          Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+          if (state.gender == 'Female') ...[
+            _Section(
+              child: IgnorePointer(
+                ignoring: widget.isEdit,
+
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                          labelText: 'RCH ID',
+                          hintText: 'Enter 12 digit RCH ID',
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(12),
+                          ],
+                          onChanged: (v) {
+                            // Clear previous snackbar
+                            ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+                            final value = v.trim();
+                            context.read<AddFamilyHeadBloc>().add(AfhRichIdChange(value));
+
+                            // Show error if not empty and not exactly 12 digits
+                            if (value.isNotEmpty && value.length != 12) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) {
+                                  showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
+                                }
+                              });
+                            }
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return null; // Field is optional
+                            }
+                            if (value.length != 12) {
+                              return 'Must be 12 digits';
+                            }
+                            return null;
+                          }
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      height: 3.h,
+                      width: 15.h,
+                      child: RoundButton(
+                        title: 'VERIFY',
+                        width: 40.w,
+                        borderRadius: 1.h,
+                        fontSize: 14.sp,
+                        onPress: () async {
+                          // Remove previous
+                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+                          final rchId = state?.AfhRichIdChange?.trim() ?? "";
+
+                          // Validate
+                          if (rchId.isEmpty) {
+                            showAppSnackBar(context, "Please enter RCH ID");
+                            return;
+                          }
+
+                          if (rchId.length != 12) {
+                            showAppSnackBar(context, "RCH ID must be exactly 12 digits");
+                            return;
+                          }
+
+                          print("VERIFY PRESSED → Calling API…");
+                          print("RCH ID: $rchId");
+                          print("requestFor: 1");
+
+                          final response = await fetchRCHDataForScreen(
+                            int.parse(rchId),
+                            requestFor: 1, // FEMALE
+                          );
+
+                          print("API Response → $response");
+
+                          if (response == null) {
+                            showAppSnackBar(context, "Failed to fetch RCH data");
+                          } else {
+                            showAppSnackBar(context, "RCH Verified Successfully!");
+                          }
+
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
