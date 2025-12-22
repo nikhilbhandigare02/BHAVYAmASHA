@@ -642,6 +642,8 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             CustomDatePicker(
                               labelText: l10n?.dateOfRegistrationLabel ?? 'Date of Registration *',
                               initialDate: state.dateOfRegistration,
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime(DateTime.now().year, DateTime.now().month + 1, 0), // End of current month
                               onDateChanged: (d) => bloc.add(DateOfRegistrationChanged(d)),
                               validator: (date) {
                                 if (date == null) {

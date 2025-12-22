@@ -1391,7 +1391,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 CustomTextField(
                   key: const ValueKey('spouse_mobile'),
                   labelText: '${l.mobileLabel} *',
-                  hintText: '${l.mobileLabel} *',
+                  hintText: '${l.mobileLabel}',
                   keyboardType: TextInputType.number,
                   maxLength: 10,
                   initialValue: state.mobileNo,
@@ -1605,11 +1605,11 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   _section(
                     CustomDatePicker(
                       key: const ValueKey('lmp_date'),
-                      labelText: '${l.lmpDateLabel} *',
+                      labelText: '${l.lmpDateLabel}',
                       hintText: l.dateHint,
-                      initialDate: state.lmp,
-                      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                      lastDate: DateTime.now(),
+                      // initialDate: state.lmp ?? DateTime.now().subtract(const Duration(days: 1)),
+                      firstDate: DateTime.now().subtract(const Duration(days: 276)),
+                      lastDate: DateTime.now().subtract(const Duration(days: 1)),
                       onDateChanged: (d) {
                         final bloc = context.read<SpousBloc>();
                         bloc.add(SpLMPChange(d));
