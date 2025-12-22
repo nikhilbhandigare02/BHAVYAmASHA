@@ -125,7 +125,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
               builder: (context, state) {
                 return CustomTextField(
                   labelText: t?.financialYearLabel ?? 'वित्तीय वर्ष',
-                  readOnly: true,
+                  // readOnly: true,
                   controller: TextEditingController(
                     text: state.financialYear.isEmpty
                         ? 'YYYY'
