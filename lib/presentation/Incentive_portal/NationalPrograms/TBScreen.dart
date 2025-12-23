@@ -164,7 +164,8 @@ class TbProgramScreen extends StatelessWidget {
                             Align(
                               alignment: Alignment.centerRight,
                               child: RoundButton(
-                                width: 14.h,
+                                width: 9.h,
+                                height: 4.h,
                                 title: l10n.saveButton,
                                 onPress: () {
                                   bloc.add(SaveTbData());

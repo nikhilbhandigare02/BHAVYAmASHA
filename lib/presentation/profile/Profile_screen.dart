@@ -874,21 +874,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5),
-                    //district
-                    BlocBuilder<ProfileBloc, ProfileState>(
-                      buildWhen: (previous, current) =>
-                      previous.district != current.district,
-                      builder: (context, state) {
-                        return CustomTextField(
-                          key: ValueKey('district_field_${state.district}'),
-                          labelText: l10n.districtLabel,
-                          hintText: l10n.districtHint,
-                          initialValue: state.district,
-                          readOnly: true,
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5),
                     BlocBuilder<ProfileBloc, ProfileState>(
                       buildWhen: (previous, current) =>
                       previous.stateName != current.stateName,
@@ -902,6 +887,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
+
                     Divider(color: AppColors.divider, thickness: 0.5),
                     BlocBuilder<ProfileBloc, ProfileState>(
                       buildWhen: (previous, current) =>
@@ -917,6 +903,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5),
+                    //district
+                    BlocBuilder<ProfileBloc, ProfileState>(
+                      buildWhen: (previous, current) =>
+                      previous.district != current.district,
+                      builder: (context, state) {
+                        return CustomTextField(
+                          key: ValueKey('district_field_${state.district}'),
+                          labelText: l10n.districtLabel,
+                          hintText: l10n.districtHint,
+                          initialValue: state.district,
+                          readOnly: true,
+                        );
+                      },
+                    ),
+
+                    Divider(color: AppColors.divider, thickness: 0.5),
+
+
+
                     BlocBuilder<ProfileBloc, ProfileState>(
                       buildWhen: (previous, current) =>
                       previous.block != current.block,
@@ -1109,6 +1114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           onChanged: (v) => context.read<ProfileBloc>().add(
                             PopulationCoveredChanged(v),
                           ),
+                          readOnly: isFacilitator,
                         );
                       },
                     ),

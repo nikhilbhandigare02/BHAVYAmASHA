@@ -408,7 +408,7 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
                       'server_id': null,
                       'household_ref_key': householdRefKey,
                       'beneficiary_ref_key': beneficiaryId,
-                      'mother_care_state': 'hbnc_visit',
+                      'mother_care_state': 'pnc_mother',
                       'device_details': jsonEncode({
                         'id': deviceInfo.deviceId,
                         'platform': deviceInfo.platform,

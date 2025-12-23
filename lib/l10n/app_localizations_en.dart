@@ -2628,16 +2628,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get colorRed => 'Red';
 
   @override
-  String get motherReportsTempOrChestIndrawingLabel => 'The mother reports that the child feels hot or cold when touching and the temperature of the child is more than 37.5°C  or less than 35.5°C, and the chest is pulled inward while breathing. *';
+  String get motherReportsTempOrChestIndrawingLabel => 'The mother reports that the child feels hot or cold when touching and the temperature of the child is more than 37.5°C  or less than 35.5°C, and the chest is pulled inward while breathing.';
 
   @override
   String get bleedingUmbilicalCordLabel => 'Is Umbilical cord bleeding';
 
   @override
-  String get newbornSeizuresLabel => 'Is the child having seizures? *';
+  String get newbornSeizuresLabel => 'Is the child having seizures?';
 
   @override
-  String get stoppedCryingLabel => 'Has the child stopped crying? *';
+  String get stoppedCryingLabel => 'Has the child stopped crying?';
 
   @override
   String get homeVisitDayLabel => 'Home Visit Day *';
@@ -2682,7 +2682,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get padsPerDayLabel => 'How many pads have been changed in a day for bleeding? *';
 
   @override
-  String get mothersTemperatureLabel => 'Temperature of mother *';
+  String get mothersTemperatureLabel => 'Temperature of mother';
 
   @override
   String get foulDischargeHighFeverLabel => 'Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C) *';
@@ -2691,7 +2691,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get abnormalSpeechOrSeizureLabel => 'Is the mother speaking abnormally or having fits?';
 
   @override
-  String get counselingAdviceLabel => 'Counseling / Advise';
+  String get counselingAdviceLabel => 'Counseling / Advise *';
 
   @override
   String get outcomeFormTitle => 'Delivery Outcome';
@@ -2859,16 +2859,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get firstFeedGivenAfterBirthLabel => 'What was given as the baby first feed to baby after birth? *';
 
   @override
-  String get adequatelyFedSevenToEightTimesLabel => 'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)? *';
+  String get adequatelyFedSevenToEightTimesLabel => 'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)?';
 
   @override
-  String get babyDrinkingLessMilkLabel => 'Is the child feeding less? *';
+  String get babyDrinkingLessMilkLabel => 'Is the child feeding less?';
 
   @override
-  String get breastfeedingStoppedLabel => 'Has the child stopped feeding? *';
+  String get breastfeedingStoppedLabel => 'Has the child stopped feeding?';
 
   @override
-  String get bloatedStomachOrFrequentVomitingLabel => 'Bloated stomach or mother tells that the child vomits again and again *';
+  String get bloatedStomachOrFrequentVomitingLabel => 'Bloated stomach or mother tells that the child vomits again and again';
 
   @override
   String get err_visit_day_required => 'Home Visit Day is required.';
@@ -5128,10 +5128,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yearRangeValidation => 'Year: only 1 to 90 allowed';
 
   @override
-  String get postDeliveryProblemsLabel => 'Does the mother have any of the following problems post delivery?';
+  String get postDeliveryProblemsLabel => 'Does the mother have any of the following problems post delivery? *';
 
   @override
-  String get breastfeedingProblemsLabel => 'Does the mother have breast feeding problem?';
+  String get breastfeedingProblemsLabel => 'Does the mother have breast feeding problem? *';
 
   @override
   String get milkNotProducingOrLessLabel => 'Mother\'s milk is not being produced after delivery or she thinks less milk is being produced';
@@ -5170,7 +5170,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get congenitalAbnormalitiesLabel => 'Is the baby having any congenital physical abnormality';
 
   @override
-  String get eyesNormalLabel => 'Eyes: Normal *';
+  String get eyesNormalLabel => 'Eyes: Normal';
 
   @override
   String get eyesSwollenOrPusLabel => 'Are the eyes swollen? Is there pus coming out of the eyes?';
@@ -5185,7 +5185,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pusBumpsOrBoilLabel => 'More than ten pus- filled pustules or large boil';
 
   @override
-  String get pusInNavelLabel => 'Is pus in the navel? *';
+  String get pusInNavelLabel => 'Is pus in the navel?';
 
   @override
   String get routineCareDoneLabel => 'Whether the Routine Newborn care tasks was performed?';
@@ -5194,13 +5194,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cryingConstantlyOrLessUrineLabel => 'Is the baby crying continuously or passing usrine less than 6 times a day?';
 
   @override
-  String get cryingSoftlyLabel => 'Is the child crying weak? *';
+  String get cryingSoftlyLabel => 'Is the child crying weak?';
 
   @override
   String get newbornReferredByAshaLabel => 'In the above symptoms, weather the child is referred by ASHA?';
 
   @override
-  String get birthRegisteredLabel => 'Is birth registration completed? *';
+  String get birthRegisteredLabel => 'Is birth registration completed?';
 
   @override
   String get birthDoseVaccinationLabel => 'Is the Birthdose vaccination given to baby?';
@@ -5731,16 +5731,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get is_navel_tied_with_thread => 'Is navel tied with a clean thread by ASHA or ANM?';
 
   @override
-  String get babyWipedWithCleanCloth => 'Has the baby wiped with clean dry cloth? *';
+  String get babyWipedWithCleanCloth => 'Has the baby wiped with clean dry cloth?';
 
   @override
-  String get is_child_kept_warm => 'Has the baby kept warm? *';
+  String get is_child_kept_warm => 'Has the baby kept warm?';
 
   @override
-  String get babyGivenBath => 'Has the baby given bath? *';
+  String get babyGivenBath => 'Has the baby given bath?';
 
   @override
-  String get babyWrappedAndPlacedNearMother => 'Whether the baby was wrapped in a cloth and placed near the mother? *';
+  String get babyWrappedAndPlacedNearMother => 'Whether the baby was wrapped in a cloth and placed near the mother?';
 
   @override
   String get selectEyeProblemTypeLabel => 'Select type of eye problem';

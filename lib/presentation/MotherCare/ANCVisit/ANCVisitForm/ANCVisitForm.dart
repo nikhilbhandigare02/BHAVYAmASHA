@@ -1709,17 +1709,16 @@ Widget _qtyButton({required IconData icon, required VoidCallback? onTap, require
     onTap: onTap,
     borderRadius: BorderRadius.circular(4),
     child: Container(
-      width: 32,
-      height: 32,
+      width: 30,
+      height: 30,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: enabled ? Colors.white : AppColors.outlineVariant.withOpacity(0.5),
-        border: Border.all(
-          color: enabled ? AppColors.outlineVariant : Colors.grey.withOpacity(0.5),
-        ),
+        //color: enabled ? Colors.white : AppColors.outlineVariant.withOpacity(0.5),
+        color: AppColors.primary,
+
         borderRadius: BorderRadius.circular(4),
       ),
-      child: Icon(icon, size: 18, color: enabled ? Colors.black87 : Colors.grey),
+      child: Icon(icon, size: 18, color: enabled ? Colors.white : Colors.white),
     ),
   );
 }

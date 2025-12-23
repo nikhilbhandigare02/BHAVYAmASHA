@@ -151,8 +151,8 @@ class AESJEScreen extends StatelessWidget {
                                   SizedBox(
                                     width: 12.w,
                                     child: CustomTextField(
-                                      initialValue:
-                                      state.values[i] == '0' ? '' : state.values[i],
+                                      initialValue:'0',
+
                                       keyboardType: TextInputType.number,
                                       onChanged: (val) =>
                                           bloc.add(UpdateAesJeField(i, val)),
@@ -169,7 +169,8 @@ class AESJEScreen extends StatelessWidget {
                             Align(
                               alignment: Alignment.centerRight,
                               child: RoundButton(
-                                width: 14.h,
+                                width: 9.h,
+                                height: 4.h,
                                 title: AppLocalizations.of(context)!.saveButton,
                                 onPress: () {
                                   bloc.add(SaveAesJeData());
