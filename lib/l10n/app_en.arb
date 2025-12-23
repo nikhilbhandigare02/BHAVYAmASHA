@@ -890,7 +890,7 @@
   "postDeliveryProblemConvulsions": "Convulsions",
   "mealsPerDayLabel": "No. of times does a mother take a full meal in 24 hours?",
   "padsPerDayLabel": "How many pads have been changed in a day for bleeding? *",
-  "mothersTemperatureLabel": "Temperature of mother *",
+  "mothersTemperatureLabel": "Temperature of mother",
   "foulDischargeHighFeverLabel": "Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C) *",  "abnormalSpeechOrSeizureLabel": "Is the mother speaking abnormally or having fits?",
   "counselingAdviceLabel": "Counseling / Advise",
 
