@@ -1177,7 +1177,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get finalizeClaimedAmount => 'दावा की गई राशि';
 
   @override
-  String get finalizeSave => 'संरक्षित करें';
+  String get finalizeSave => 'संरक्षित करे';
 
   @override
   String get finalizeStateAmount => 'राज्य राशि';
@@ -1477,7 +1477,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get incentiveDailyTabPlaceholder => 'दैनिक कार्यों की सामग्री यहाँ';
 
   @override
-  String get incentiveFormTitle => 'इंसेंटिव फॉर्म';
+  String get incentiveFormTitle => 'प्रोत्साहन फॉर्म';
 
   @override
   String get incentiveFormWorkCodeLabel => 'कार्य कोड :';
@@ -1504,16 +1504,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get incentiveFormBeneficiaryCountHint => 'लाभार्थियों की संख्या';
 
   @override
-  String get incentiveFormWorkAmountLabel => 'कार्य की राशि : [*]';
+  String get incentiveFormWorkAmountLabel => 'कार्य की राशी : [*]';
 
   @override
-  String get incentiveFormWorkAmountHint => 'कार्य की राशि';
+  String get incentiveFormWorkAmountHint => 'कार्य की राशी';
 
   @override
-  String get incentiveFormClaimedAmountLabel => 'दावा की गई राशि : [*]';
+  String get incentiveFormClaimedAmountLabel => 'दावा की गई राशी : [*]';
 
   @override
-  String get incentiveFormClaimedAmountHint => 'दावा की गई राशि';
+  String get incentiveFormClaimedAmountHint => 'दावा की गई राशी';
 
   @override
   String get incentiveFormCompletionDateLabel => 'कार्य पूर्ण की तिथि : [*]';
@@ -1546,19 +1546,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get incentiveHeaderDistrict => 'जिला';
 
   @override
-  String get incentiveHeaderHsc => 'स्वास्थ्य उप केंद्र';
+  String get incentiveHeaderHsc => 'स्वस्थ उप केंद्र';
 
   @override
   String get incentiveHeaderPanchayat => 'पंचायत';
 
   @override
-  String get incentiveNote => 'प्रत्येक महीने की दावा राशि के भुगतान फाइल अगले महीने की 28 से 30 तारीख के बीच जमा करें।';
+  String get incentiveNote => 'प्रत्येक महीने की दावा राशि के भुगतान फाइल अगले महीने की 28 से 30 तारीख के बीच तैयार की जाती है और उसके अगले दस दिनों के अंदर आशा/आशा फैसिलिटी एक्टर के खाते में भी F M एस के माध्यम से भुगतान हो जाती है ';
 
   @override
   String get incentiveTabDaily => 'दैनिक कार्य';
 
   @override
-  String get incentiveTabFinalize => 'अंतिम रूप से';
+  String get incentiveTabFinalize => 'अंतिम रूप दे';
 
   @override
   String get incentiveTabMonthly => 'मासिक कार्य';
@@ -1716,7 +1716,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get monthlyTaskPC21 => 'PC2.1 - प्रतिरक्षण-Due List अद्यतन कर 90% लक्षित बच्चों का Full immunization करने पर';
 
   @override
-  String get monthlyTaskPC23 => 'PC2.3 - मातृ स्वास्थ्य: सभी गर्भावस्था माताओं का Line Listing एव 60% गर्भवती माताओं का चार प्रसूतिपूर्ण करने जांच (ANC) पर ';
+  String get monthlyTaskPC23 => 'PC2.3 - मातृ स्वस्थ- सभी गर्भावस्था माताओं का Line Listing एव 60% गर्भवती माताओं का चार प्रसूतिपूर्ण करने जांच (ANC) पर ';
 
   @override
   String get mother => 'माता';
@@ -3033,7 +3033,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get confirmBackLoseDetailsMsg => 'If you go back, details will be lost. Do you want to go back?';
 
   @override
-  String get confirmCloseFormMsg => 'क्या आप वाकई इस फॉर्म को बंद करना चाहते हैं? कोई भी न सहेजे गए परिवर्तन हटा दिए जाएंगे।';
+  String get confirmCloseFormMsg => 'यदि आप वापस जाते हैं, तो विवरण खो जाएगा| तो क्या आप वापस जाना चाहते हैं ?';
 
   @override
   String get confirmYes => 'Yes';
@@ -3042,64 +3042,31 @@ class AppLocalizationsHi extends AppLocalizations {
   String get nationalProgramsTitle => 'राष्ट्रीय कार्यक्रम';
 
   @override
-  String get tbEradicationProgram => 'क्षय रोग उन्मूलन कार्यक्रम';
-
-  @override
-  String get tbLabel1 => 'पहली संकेतक गतिविधि/संपर्क अनुरेखण अभियान (नए टीबी रोगियों को लेन के लिए सूचित करने के लिए)';
-
-  @override
-  String get tbLabel2 => 'उपचार प्रदाता गतिविधि';
-
-  @override
-  String get tbLabel3 => 'प्रत्येक दवा संवेदनशील टीबी रोगी या प्रत्येक छोटी अवधि के दवा प्रतिरोधी टीबी रोगी के लिए दवा प्रशासन के लिए';
-
-  @override
-  String get tbLabel4 => 'एक पारंपरिक एमडीआर उपचार दवा प्रतिरोधी टीबी रोगी को दवा प्रशासन के लिए (₹2000 - तीव्र चरण के दौरान)';
-
-  @override
   String get leprosyEradicationProgram => 'कुष्ठ उन्मूलन कार्यक्रम';
 
   @override
-  String get leprosyQuestion1 => '1. क्या आपके शरीर के किसी हिस्से पर सफेद या लाल धब्बे हैं?';
-
-  @override
-  String get leprosyQuestion2 => '2. क्या आपको शरीर के किसी भाग में सुन्नता या झनझनाहट महसूस होती है?';
-
-  @override
-  String get leprosyQuestion3 => '3. क्या आपने किसी अंग में कमजोरी या लकवा जैसा अनुभव किया है?';
-
-  @override
-  String get leprosyQuestion4 => '4. क्या आपके परिवार में किसी को कभी कुष्ठ रोग हुआ है?';
-
-  @override
-  String get kalaAzarEradicationProgram => 'काला-अजार उन्मूलन कार्यक्रम';
+  String get kalaAzarEradicationProgram => 'कालाजार उन्मूलन कार्यक्रम';
 
   @override
   String get malariaEradicationProgram => 'मलेरिया उन्मूलन कार्यक्रम';
 
   @override
-  String get malariaQuestion1 => '1. बुखार के मामलों के लिए रक्त स्मीयर संग्रह और परीक्षण (प्रति मामला)';
-
-  @override
-  String get malariaQuestion2 => '2. पॉजिटिव मामलों के पूर्ण उपचार के लिए (प्रति मामला)';
-
-  @override
   String get migrationStayingInHouse => 'घर में रहने वाले';
 
   @override
-  String get aesJeEradicationProgram => 'एईएस/जेई उन्मूलन कार्यक्रम';
+  String get aesJeEradicationProgram => 'AES/JE उन्मूलन कार्यक्रम';
 
   @override
-  String get ambEradicationProgram => 'एएमबी उन्मूलन कार्यक्रम';
+  String get ambEradicationProgram => 'AMB उन्मूलन कार्यक्रम';
 
   @override
-  String get abPmjayProgram => 'आयुष्मान भारत-पीएमजेएवाई कार्यक्रम';
+  String get abPmjayProgram => 'AB-PMJAY कार्यक्रम';
 
   @override
-  String get abpmjayScreenTitle => 'आयुष्मान भारत-पीएमजेएवाई कार्यक्रम';
+  String get abpmjayScreenTitle => 'AB-PMJAY कार्यक्रम';
 
   @override
-  String get abpmjayQuestion1 => 'आयुष्मान भारत-पीएमजेएवाई के तहत, आशा द्वारा सरकारी अस्पतालों में इलाज के लिए लाए गए रोगियों के लिए (जिन्हें अस्पताल में भर्ती होने के बाद चिकित्सा लाभ मिलेगा)';
+  String get abpmjayQuestion1 => 'AB-PMJAY अंतर्गत आशा द्वारा सरकारी अस्पतालों में इलाज हेतु लाये गये मरीजो (जो अस्पताल में भर्ती होकर चिकित्सा लाभ लेंगे) के लिए';
 
   @override
   String get abpmjayDataSaved => 'आयुष्मान भारत-पीएमजेएवाई डेटा सफलतापूर्वक सहेजा गया!';
@@ -3357,13 +3324,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get aesJeProgram => 'एईएस/जेई उन्मूलन कार्यक्रम';
 
   @override
-  String get aesJeScreenTitle => 'एईएस/जेई उन्मूलन कार्यक्रम';
+  String get aesJeScreenTitle => 'AES/JE उन्मूलन कार्यक्रम';
 
   @override
-  String get aesJeQuestion1 => 'आईआरएस छिड़काव के दौरान 1000 जनसंख्या में समुदाय उत्प्रेरक के रूप में आशा को देय राशि';
-
-  @override
-  String get aesJeQuestion2 => 'आशा द्वारा निकटतम पीएचसी, सीएचसी, रेफरल, डीएच या मेडिकल कॉलेज अस्पताल में भेजे गए रोगी, जिनका अज्ञात एईएस या जापानी इंसेफेलाइटिस (जेई) चिकित्सा अधिकारी द्वारा पुष्टि की गई है';
+  String get aesJeQuestion1 => 'IRS छिड़काव के दौरान 1000 जनसंख्या में सामुदायिक उत्प्रेरक के रूप में आशा को देय राशि';
 
   @override
   String get aesJeDataSaved => 'एईएस/जेई डेटा सफलतापूर्वक सहेजा गया!';
@@ -3372,49 +3336,40 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ambProgram => 'एएमबी उन्मूलन कार्यक्रम';
 
   @override
-  String get ambScreenTitle => 'एएमबी उन्मूलन कार्यक्रम';
+  String get ambScreenTitle => 'AMB उन्मूलन कार्यक्रम';
 
   @override
-  String get ambQuestion1 => 'आशा द्वारा अपने क्षेत्र की प्रजनन आयु (20 से 49 वर्ष) की गर्भवती या यात्रा करने वाली महिलाओं का लाइन लिस्टिंग रजिस्टर में रखरखाव और उन महिलाओं को प्रति माह 4 आईएफए लाल गोलियों के वितरण के लिए देय राशि।';
+  String get ambQuestion1 => 'आशा अपने क्षेत्र के प्रजनन उम्र (20 से 49 वर्ष) की वैसी महिलाए जो गर्भवती या यात्री न हो उनका Line Listing रजिस्टर में संधारण करना एवं उन महिला को प्रति माह 4 IFA लाल गोली वितरण करने हेतु देय राशि';
 
   @override
-  String get ambQuestion2 => 'आशा क्षेत्र के 6 महीने से 59 महीने तक के बच्चों के लाइन लिस्टिंग रजिस्टर को नियमित करने और उन बच्चों के अभिभावकों/माता-पिता को आईएफए सिरप वितरित करने के लिए देय राशि।';
+  String get ambQuestion2 => 'आशा अपने क्षेत्र के 6 माह से 59 माह तक के बच्चों का Line Listing रजिस्टर में साधारण करने एवं बच्चों के उन अभिभावक / माता पिता को IFA का सिरप वितरण करने हेतु देय राशि';
 
   @override
   String get ambDataSaved => 'एएमबी डेटा सफलतापूर्वक सहेजा गया!';
 
   @override
-  String get filariasisProgram => 'फाइलेरिया उन्मूलन कार्यक्रम';
-
-  @override
-  String get filariasisScreenTitle => 'फाइलेरिया उन्मूलन कार्यक्रम';
-
-  @override
-  String get filariasisQuestion1 => 'फाइलेरिया चक्र के दौरान आशा द्वारा प्रति 50 घरों के लिए एमडीए कार्यक्रम के तहत दवा का सामने से वितरण (एक हजार जनसंख्या को कवर करने के लिए)';
-
-  @override
   String get kalaAzarProgram => 'काला-अजार उन्मूलन कार्यक्रम';
 
   @override
-  String get kalaAzarScreenTitle => 'काला-अजार उन्मूलन कार्यक्रम';
+  String get kalaAzarScreenTitle => 'कालाजार उन्मूलन कार्यक्रम';
 
   @override
-  String get kalaAzarQuestion1 => 'आशा को काला-अजार रोगी की खोज, पीएचसी, जांच, पूर्ण उपचार, 6 महीने तक निगरानी के लिए देय राशि।';
+  String get kalaAzarQuestion1 => 'कालाजार मरीज के खोज, PHC रेफर करना, जाँच कराना, पूर्ण इलाज कराना, 6 माह तक अनुश्रवण करने हेतु आशा को देय राशि';
 
   @override
-  String get kalaAzarQuestion2 => 'मुख्यमंत्री काला-अजार राहत योजना के तहत सरकारी अस्पताल में काला-अजार रोगियों के उपचार पूरा होने पर आशा को देय राशि';
+  String get kalaAzarQuestion2 => 'आशा को मुख्यमंत्री कालाजार राहत योजना से कालाजार मरीजो को सरकारी अस्पताल में ईलाज पूर्ण कराने पर';
 
   @override
   String get kalaAzarDataSaved => 'काला-अजार स्क्रीनिंग डेटा सफलतापूर्वक सहेजा गया!';
 
   @override
-  String get niddcpProgram => 'एनआईडीडीसीपी कार्यक्रम';
+  String get niddcpProgram => 'NIDDCP कार्यक्रम';
 
   @override
   String get niddcpScreenTitle => 'NIDDCP Program';
 
   @override
-  String get niddcpQuestion1 => 'एनआईडीडीसीपी के तहत आशा को प्रोत्साहन राशि';
+  String get niddcpQuestion1 => 'NIDDCP के तहत आशा प्रोत्साहन';
 
   @override
   String get niddcpDataSaved => 'एनआईडीडीसीपी डेटा सफलतापूर्वक सहेजा गया!';
@@ -5278,7 +5233,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get formSavedSuccessfully => 'फ़ॉर्म सफलतापूर्वक सहेजा गया है';
 
   @override
-  String get pregnantAddedToAnc => 'गर्भवती लाभार्थी को प्रसवपूर्व देखभाल (ANC) सूची में जोड़ दिया गया है।';
+  String get pregnantAddedToAnc => 'गर्भवती लाभार्थी को प्रसवपूर्व देखभाल (ए.एन.सी) की सूची में जोड़ा दिया गया है।';
 
   @override
   String get okay => 'ठीक है';
@@ -6760,8 +6715,59 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hospitalReferMsg => 'कृपया बच्चे को पास के अस्पताल में ले जाएं।';
 
   @override
-  String get attention => 'ध्यान!';
+  String get attention => 'ध्यान दें !';
 
   @override
   String get deliveryOutcome => 'प्रसव का परिणाम ';
+
+  @override
+  String get formSavedSuccessfullyLabel => 'प्रपत्र सफलतापूर्वक संरक्षित कर दिया गया है |';
+
+  @override
+  String get incentiveHeaderHscLabel => 'स्वास्थ्य उप केंद्र';
+
+  @override
+  String get tbEradicationProgram => 'यक्ष्मा(टी.बी.) उन्मूलन कार्यक्रम';
+
+  @override
+  String get tbLabel1 => 'प्रथम सूचक कार्य/सघन खोज अभियान (नये यक्ष्मा मरीज को नोटीफाइड करने हेतु लेन पर)';
+
+  @override
+  String get tbLabel2 => 'ट्रीटमेंट प्रोभाइडर कार्य';
+
+  @override
+  String get tbLabel3 => 'प्रति Drug Sensitive यक्ष्मा मरीज अथवा प्रति Shorter regimen के Drug Resistant यक्ष्मा मरीज को दवा खिलाने पर';
+
+  @override
+  String get tbLabel4 => 'Conventional MDR इलाजरत Drug Resistant यक्ष्मा मरीज को दवा खिलाने (रू० 2000-Intensive Phase पर।';
+
+  @override
+  String get leprosyQuestion1 => 'विकलांगता मुक्त नये कुष्ठ रोगी खोजने हेतु आशा को देय राशि';
+
+  @override
+  String get leprosyQuestion2 => 'विकलांगता युक्त नये कुष्ठ रोगी खोजने हेतु आशा को देय राशि';
+
+  @override
+  String get leprosyQuestion3 => 'कुष्ठ रोग के पाउसी-बेसीलरी (पी० बी०) मामलों में पूर्ण उपचार करने के पश्चात देय राशि';
+
+  @override
+  String get leprosyQuestion4 => 'कुष्ठ रोग के बहु-बैसीलरी (MB)) मामलों में पूर्ण उपचार करने के पश्चात राशि';
+
+  @override
+  String get malariaQuestion1 => 'मलेरिया बुखार पीडितों का सक्रिय (Active) मलेरिया संक्रमण जाँच';
+
+  @override
+  String get malariaQuestion2 => 'मलेरिया पॉजिटिव पी० वी० अथवा पी० एफ० मरीजों को अद्यतन दावा प्रणाली के अनुसार पूर्ण रेडिकल उपचार प्रदान कराने';
+
+  @override
+  String get filariasisScreenTitle => 'फाइलेरिया उन्मूलन कार्यक्रम';
+
+  @override
+  String get filariasisQuestion1 => 'फाइलेरिया चक्र के दौरान आशा द्वारा प्रति 50 घर के लिए MDA Program के अंतर्गत दवा सामने खिलाने हेतु (एक हजार आबादी को कवर करने के लिए)';
+
+  @override
+  String get aesJeQuestion2 => 'आशा द्वारा नजदीकी PHC, CHC, Referral, DH अथवा चिकित्सा महाविद्यालय अस्पताल में रेफर किए गए वैसे मरीज, जिनका अज्ञात AES ( Unknown AES) अथवा जापानी इन्केलाइटिस (Japanese Encephalitis JE) संपुष्ट, चिकित्सा पदाधिकारी द्वारा किया गया हो, उन्हें प्रोत्साहन राशि दिए जाने का प्रावधान है';
+
+  @override
+  String get filariasisProgram => 'फाइलेरिया उन्मूलन कार्यक्रम';
 }

@@ -6137,65 +6137,11 @@ abstract class AppLocalizations {
   /// **'National Programs'**
   String get nationalProgramsTitle;
 
-  /// No description provided for @tbEradicationProgram.
-  ///
-  /// In en, this message translates to:
-  /// **'Tuberculosis Eradication Program'**
-  String get tbEradicationProgram;
-
-  /// No description provided for @tbLabel1.
-  ///
-  /// In en, this message translates to:
-  /// **'First indicator activity/contact tracing campaign (for notifying new TB patients on lane)'**
-  String get tbLabel1;
-
-  /// No description provided for @tbLabel2.
-  ///
-  /// In en, this message translates to:
-  /// **'Treatment provider activity'**
-  String get tbLabel2;
-
-  /// No description provided for @tbLabel3.
-  ///
-  /// In en, this message translates to:
-  /// **'For each Drug Sensitive TB patient or each Shorter regimen Drug Resistant TB patient for administering medicine'**
-  String get tbLabel3;
-
-  /// No description provided for @tbLabel4.
-  ///
-  /// In en, this message translates to:
-  /// **'For administering medicine to a Conventional MDR treatment Drug Resistant TB patient (₹2000 - during Intensive Phase).'**
-  String get tbLabel4;
-
   /// No description provided for @leprosyEradicationProgram.
   ///
   /// In en, this message translates to:
   /// **'Leprosy Eradication Program'**
   String get leprosyEradicationProgram;
-
-  /// No description provided for @leprosyQuestion1.
-  ///
-  /// In en, this message translates to:
-  /// **'1. Do you have any white or red patches on any part of your body?'**
-  String get leprosyQuestion1;
-
-  /// No description provided for @leprosyQuestion2.
-  ///
-  /// In en, this message translates to:
-  /// **'2. Do you feel numbness or tingling in any part of your body?'**
-  String get leprosyQuestion2;
-
-  /// No description provided for @leprosyQuestion3.
-  ///
-  /// In en, this message translates to:
-  /// **'3. Have you experienced weakness or paralysis in any limb?'**
-  String get leprosyQuestion3;
-
-  /// No description provided for @leprosyQuestion4.
-  ///
-  /// In en, this message translates to:
-  /// **'4. Has anyone in your family ever had leprosy?'**
-  String get leprosyQuestion4;
 
   /// No description provided for @kalaAzarEradicationProgram.
   ///
@@ -6208,18 +6154,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Malaria Eradication Program'**
   String get malariaEradicationProgram;
-
-  /// No description provided for @malariaQuestion1.
-  ///
-  /// In en, this message translates to:
-  /// **'1. For blood smear collection and testing of fever cases (per case)'**
-  String get malariaQuestion1;
-
-  /// No description provided for @malariaQuestion2.
-  ///
-  /// In en, this message translates to:
-  /// **'2. For complete treatment of positive cases (per case)'**
-  String get malariaQuestion2;
 
   /// No description provided for @migrationStayingInHouse.
   ///
@@ -6779,12 +6713,6 @@ abstract class AppLocalizations {
   /// **'Amount payable to ASHA as community catalyst in 1000 population during IRS spraying'**
   String get aesJeQuestion1;
 
-  /// No description provided for @aesJeQuestion2.
-  ///
-  /// In en, this message translates to:
-  /// **'Patients referred by ASHA to the nearest PHC, CHC, Referral, DH or Medical College Hospital, whose Unknown AES or Japanese Encephalitis (JE) has been confirmed by the Medical Officer'**
-  String get aesJeQuestion2;
-
   /// No description provided for @aesJeDataSaved.
   ///
   /// In en, this message translates to:
@@ -6820,24 +6748,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AMB data saved successfully!'**
   String get ambDataSaved;
-
-  /// No description provided for @filariasisProgram.
-  ///
-  /// In en, this message translates to:
-  /// **'Filariasis Eradication Program'**
-  String get filariasisProgram;
-
-  /// No description provided for @filariasisScreenTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Filariasis Eradication Program'**
-  String get filariasisScreenTitle;
-
-  /// No description provided for @filariasisQuestion1.
-  ///
-  /// In en, this message translates to:
-  /// **'Front feeding of medicine under MDA program for every 50 households by ASHA during filariasis cycle (to cover one thousand population)'**
-  String get filariasisQuestion1;
 
   /// No description provided for @kalaAzarProgram.
   ///
@@ -13576,6 +13486,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delivery outcome'**
   String get deliveryOutcome;
+
+  /// No description provided for @formSavedSuccessfullyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Form has been saved successfully'**
+  String get formSavedSuccessfullyLabel;
+
+  /// No description provided for @incentiveHeaderHscLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'HSC'**
+  String get incentiveHeaderHscLabel;
+
+  /// No description provided for @tbEradicationProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuberculosis(TB) Eradication Program'**
+  String get tbEradicationProgram;
+
+  /// No description provided for @tbLabel1.
+  ///
+  /// In en, this message translates to:
+  /// **'First Indicative Work/Intensive Search Campaign (on the lane for notifying new Tuberculosis patients)'**
+  String get tbLabel1;
+
+  /// No description provided for @tbLabel2.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment provider work'**
+  String get tbLabel2;
+
+  /// No description provided for @tbLabel3.
+  ///
+  /// In en, this message translates to:
+  /// **'On feeding medicine to Drug Sensitive Tuberculosis patient or Drug Resistant Tuberculosis patient per Shorter regimen'**
+  String get tbLabel3;
+
+  /// No description provided for @tbLabel4.
+  ///
+  /// In en, this message translates to:
+  /// **'Conventional MDR treated Drug Resistant Tuberculosis patient (Rs. 2000) for feeding medicine (on Intensive Phase).'**
+  String get tbLabel4;
+
+  /// No description provided for @leprosyQuestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount payable to ASHA for finding new leprosy free patients'**
+  String get leprosyQuestion1;
+
+  /// No description provided for @leprosyQuestion2.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount payable to ASHA for finding new leprosy patients with disabilities'**
+  String get leprosyQuestion2;
+
+  /// No description provided for @leprosyQuestion3.
+  ///
+  /// In en, this message translates to:
+  /// **'Pauci-Bacillary (PB) of Leprosy Payable after complete treatment of leprosy'**
+  String get leprosyQuestion3;
+
+  /// No description provided for @leprosyQuestion4.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount after complete cure in multi-bacillary(MB) cases of leprosy'**
+  String get leprosyQuestion4;
+
+  /// No description provided for @malariaQuestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'Active malaria infection test of malaria fever victims'**
+  String get malariaQuestion1;
+
+  /// No description provided for @malariaQuestion2.
+  ///
+  /// In en, this message translates to:
+  /// **'Providing full radical treatment to malaria positive P.V. or P.F. patients as per the latest claim system'**
+  String get malariaQuestion2;
+
+  /// No description provided for @filariasisScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filaria Eradication Program'**
+  String get filariasisScreenTitle;
+
+  /// No description provided for @filariasisQuestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'Front feeding of medicine under MDA program for every 50 households by ASHA during filariasis cycle (to cover one thousand population)'**
+  String get filariasisQuestion1;
+
+  /// No description provided for @aesJeQuestion2.
+  ///
+  /// In en, this message translates to:
+  /// **'Those patients referred by ASHA to the nearest PHC, CHC, Referral, DH or Medical College Hospital, whose Unknown AES or Japanese Encephalitis (JE) has been confirmed by the Medical Officer,will be given incentive amount'**
+  String get aesJeQuestion2;
+
+  /// No description provided for @filariasisProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Filaria Eradication Program'**
+  String get filariasisProgram;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

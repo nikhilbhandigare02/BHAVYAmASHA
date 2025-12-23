@@ -1645,9 +1645,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       key: const ValueKey('lmp_date'),
                       labelText: '${l.lmpDateLabel}',
                       hintText: l.dateHint,
-                      // initialDate: state.lmp ?? DateTime.now().subtract(const Duration(days: 1)),
-                      firstDate: DateTime.now().subtract(const Duration(days: 276)),
-                      lastDate: DateTime.now().subtract(const Duration(days: 1)),
+                       firstDate: DateTime.now().subtract(const Duration(days: 276)),
+                      lastDate: DateTime.now().subtract(const Duration(days: 31)),
                       onDateChanged: (d) {
                         final bloc = context.read<SpousBloc>();
                         bloc.add(SpLMPChange(d));
