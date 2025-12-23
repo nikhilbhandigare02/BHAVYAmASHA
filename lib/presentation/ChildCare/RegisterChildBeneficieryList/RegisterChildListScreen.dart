@@ -243,8 +243,8 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       final List<Map<String, dynamic>> rows = await db.query(
         'beneficiaries_new',
         columns: ['*', 'is_death'],
-        where: 'is_deleted = ? AND is_adult = ?',
-        whereArgs: [0, 0],
+        where: 'is_deleted = ? AND is_adult = ? AND  is_migrated = ?',
+        whereArgs: [0, 0, 0],
         orderBy: 'created_date_time DESC',
       );
 
