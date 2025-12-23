@@ -13588,6 +13588,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Filaria Eradication Program'**
   String get filariasisProgram;
+
+  /// No description provided for @validateEmptyUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the username'**
+  String get validateEmptyUsername;
+
+  /// No description provided for @validateEmptyCP.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the current password'**
+  String get validateEmptyCP;
+
+  /// No description provided for @validateEmptyNP.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the new password'**
+  String get validateEmptyNP;
+
+  /// No description provided for @validateEmptyRRP.
+  ///
+  /// In en, this message translates to:
+  /// **'Please re-enter the new password'**
+  String get validateEmptyRRP;
+
+  /// No description provided for @cpAndNPNotSame.
+  ///
+  /// In en, this message translates to:
+  /// **'The Current password and the new password can not be same.'**
+  String get cpAndNPNotSame;
+
+  /// No description provided for @npAndRRPValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'The new password and the re-entered password must be the same.'**
+  String get npAndRRPValidation;
+
+  /// No description provided for @errorMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred. Please try again.'**
+  String get errorMsg;
+
+  /// No description provided for @failUpdatePassMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update password'**
+  String get failUpdatePassMsg;
+
+  /// No description provided for @successUpdatePassMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password has been changed successfully'**
+  String get successUpdatePassMsg;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

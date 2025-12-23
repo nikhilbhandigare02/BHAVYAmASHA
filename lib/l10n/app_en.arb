@@ -2319,5 +2319,14 @@
   "filariasisScreenTitle": "Filaria Eradication Program",
   "filariasisQuestion1": "Front feeding of medicine under MDA program for every 50 households by ASHA during filariasis cycle (to cover one thousand population)",
   "aesJeQuestion2": "Those patients referred by ASHA to the nearest PHC, CHC, Referral, DH or Medical College Hospital, whose Unknown AES or Japanese Encephalitis (JE) has been confirmed by the Medical Officer,will be given incentive amount",
-  "filariasisProgram": "Filaria Eradication Program"
+  "filariasisProgram": "Filaria Eradication Program",
+  "validateEmptyUsername": "Please enter the username",
+  "validateEmptyCP": "Please enter the current password",
+  "validateEmptyNP": "Please enter the new password",
+  "validateEmptyRRP": "Please re-enter the new password",
+  "cpAndNPNotSame": "The Current password and the new password can not be same.",
+  "npAndRRPValidation": "The new password and the re-entered password must be the same.",
+  "errorMsg": "An error occurred. Please try again.",
+  "failUpdatePassMsg": "Failed to update password",
+  "successUpdatePassMsg": "Your password has been changed successfully"
 }

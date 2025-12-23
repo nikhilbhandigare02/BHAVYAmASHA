@@ -276,74 +276,65 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       _buildMenuItem(context, 'assets/images/rupee.png', l10n.drawerIncentivePortal, onTap: () {
                         Navigator.pushNamed(context, Route_Names.incentivePortal);
                       }),
-                      _buildMenuItem(context, 'assets/images/fetch.png', l10n.drawerFetchData, onTap: () async {
+                      _buildMenuItem(context, 'assets/images/fetch.png', l10n.drawerFetchData, onTap: () {
                         final onCompleted = widget.onSyncCompleted;
-                        if (isSyncing) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Sync already in progress')),
-                          );
-                          return;
-                        }
-                        setState(() {
-                          isSyncing = true;
-                        });
-
                         final scaffoldMessenger = ScaffoldMessenger.of(context);
-                        scaffoldMessenger.hideCurrentSnackBar();
-                        final controller = scaffoldMessenger.showSnackBar(
-                          const SnackBar(
-                            content: Text('Data is being fetched...'),
-                            duration: Duration(seconds: 5), // Show for 20 seconds
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
+                        final scaffoldState = Scaffold.maybeOf(context);
 
-                        try { 
-                          // Start the sync operation
-                          // await SyncService.instance.runFullSyncOnce();
-                          await SyncApiCall.allGetApicall();
+                        if (scaffoldState != null && scaffoldState.isDrawerOpen) {
+                          Navigator.pop(context);
+                        }
 
-                          // If still mounted and sync completed successfully
+                        Future.microtask(() async {
+                          if (isSyncing) {
+                            scaffoldMessenger.showSnackBar(
+                              const SnackBar(content: Text('Sync already in progress')),
+                            );
+                            return;
+                          }
+
                           if (mounted) {
-                            // Remove the loading snackbar if still showing
-                            scaffoldMessenger.hideCurrentSnackBar();
+                            setState(() {
+                              isSyncing = true;
+                            });
+                          }
 
-                            // Show success message
+                          scaffoldMessenger.hideCurrentSnackBar();
+                          scaffoldMessenger.showSnackBar(
+                            const SnackBar(
+                              content: Text('Data is being fetched...'),
+                              duration: Duration(seconds: 5),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+
+                          try {
+                            await SyncApiCall.allGetApicall();
+                            scaffoldMessenger.hideCurrentSnackBar();
                             scaffoldMessenger.showSnackBar(
                               const SnackBar(
                                 content: Text('Data sync completed'),
                                 duration: Duration(seconds: 3),
                               ),
                             );
-
-                            // Close drawer if it's open
-                            final scaffoldState = Scaffold.maybeOf(context);
-                            if (scaffoldState != null && scaffoldState.isDrawerOpen) {
-                              Navigator.pop(context);
+                            onCompleted?.call();
+                          } catch (e) {
+                            scaffoldMessenger
+                              ..hideCurrentSnackBar()
+                              ..showSnackBar(
+                                SnackBar(
+                                  content: Text('Sync failed: ${e.toString()}'),
+                                  duration: const Duration(seconds: 4),
+                                ),
+                              );
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                isSyncing = false;
+                              });
                             }
                           }
-
-                          // Notify parent (HomeScreen)
-                          onCompleted?.call();
-                        } catch (e) {
-                          if (!mounted) return;
-
-                          // Remove loading snackbar and show error
-                          scaffoldMessenger
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(
-                              SnackBar(
-                                content: Text('Sync failed: ${e.toString()}'),
-                                duration: const Duration(seconds: 4),
-                              ),
-                            );
-                        } finally {
-                          if (mounted) {
-                            setState(() {
-                              isSyncing = false;
-                            });
-                          }
-                        }
+                        });
                       }),
                       _buildMenuItem(context, 'assets/images/refresh-button.png', l10n.drawerSyncedData, onTap: () {
                         Navigator.pushNamed(context, Route_Names.SyncStatusScreen);

@@ -12,6 +12,7 @@ import '../../core/widgets/RoundButton/RoundButton.dart';
 import '../../core/widgets/TextField/TextField.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:medixcel_new/data/repositories/Auth_Repository/auth_repository.dart';
+import '../../core/widgets/SnackBar/app_snackbar.dart';
 
 class Resetpassword extends StatefulWidget {
   const Resetpassword({super.key});
@@ -28,7 +29,7 @@ class _ResetpasswordState extends State<Resetpassword> {
     final l10n = AppLocalizations.of(context)!;
 
     return BlocProvider(
-      create: (_) => ResetPasswordBloc(authRepository: AuthRepository()),
+      create: (_) => ResetPasswordBloc(authRepository: AuthRepository(),l10n: l10n),
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppHeader(screenTitle: l10n.resetCreateNewPasswordTitle, showBack: true),
@@ -50,7 +51,8 @@ class _ResetpasswordState extends State<Resetpassword> {
                                 labelText: l10n.usernameLabel,
                                 hintText: l10n.usernameHint,
                                 keyboardType: TextInputType.text,
-                                validator: (value) => Validations.validateUsername(l10n, value),
+                                autovalidateMode: AutovalidateMode.disabled,
+                               // validator: (value) => Validations.validateUsername(l10n, value),
                                 onChanged: (value) {
                                   context
                                       .read<ResetPasswordBloc>()
@@ -70,8 +72,9 @@ class _ResetpasswordState extends State<Resetpassword> {
                                 labelText: l10n.currentPasswordLabel,
                                 hintText: l10n.currentPasswordHint,
                                 keyboardType: TextInputType.text,
-                                validator: (value) => Validations.validateCurrentPassword(l10n, value),
+                                //validator: (value) => Validations.validateCurrentPassword(l10n, value),
                                 obscureText: false,
+                                autovalidateMode: AutovalidateMode.disabled,
                                 onChanged: (value) {
                                   context
                                       .read<ResetPasswordBloc>()
@@ -92,8 +95,9 @@ class _ResetpasswordState extends State<Resetpassword> {
                                 labelText: l10n.newPasswordLabel,
                                 hintText: l10n.newPasswordHint,
                                 keyboardType: TextInputType.text,
-                                validator: (value) => Validations.validateNewPassword(l10n, value),
+                                //validator: (value) => Validations.validateNewPassword(l10n, value),
                                 obscureText: false,
+                                autovalidateMode: AutovalidateMode.disabled,
                                 onChanged: (value) {
                                   context
                                       .read<ResetPasswordBloc>()
@@ -113,10 +117,11 @@ class _ResetpasswordState extends State<Resetpassword> {
                                 labelText: l10n.reenterPasswordLabel,
                                 hintText: l10n.reenterPasswordHint,
                                 keyboardType: TextInputType.text,
-                                validator: (value) =>
+                                /*validator: (value) =>
                                     Validations.validateReEnterPassword(
-                                        l10n, value, state.newPasswordPassword),
+                                        l10n, value, state.newPasswordPassword),*/
                                 obscureText: false,
+                                autovalidateMode: AutovalidateMode.disabled,
                                 onChanged: (value) {
                                   context
                                       .read<ResetPasswordBloc>()
@@ -139,19 +144,7 @@ class _ResetpasswordState extends State<Resetpassword> {
                 BlocListener<ResetPasswordBloc, ResetPasswordState>(
                   listener: (context, state) {
                     if (state.postApiStatus == PostApiStatus.success) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            state.successMessage,
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          backgroundColor: Colors.green,
-                          behavior: SnackBarBehavior.floating,
-                          margin: const EdgeInsets.all(10),
-                          duration: const Duration(seconds: 3),
-                        ),
-                      );
-                      // Navigate after showing the success message
+                      showAppSnackBar(context, state.successMessage);
                       Future.delayed(const Duration(seconds: 2), () {
                         if (mounted) {
                           Navigator.pushNamedAndRemoveUntil(
@@ -162,18 +155,7 @@ class _ResetpasswordState extends State<Resetpassword> {
                         }
                       });
                     } else if (state.postApiStatus == PostApiStatus.error) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            state.error,
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          backgroundColor: Colors.red,
-                          behavior: SnackBarBehavior.floating,
-                          margin: const EdgeInsets.all(10),
-                          duration: const Duration(seconds: 3),
-                        ),
-                      );
+                      showAppSnackBar(context, state.error);
                     }
                   },
                   child: BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
