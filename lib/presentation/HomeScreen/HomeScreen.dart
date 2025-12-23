@@ -723,13 +723,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   Future<void> _loadAncVisitCount() async {
     try {
-      final count = await ANCUtils.getMotherCareTotalCount();
-      final countSync = await ANCUtils.getMotherCareSyncedTotalCount();
+     /* final count = await ANCUtils.getMotherCareTotalCount();
+      final countSync = await ANCUtils.getMotherCareSyncedTotalCount();*/
+      await ANCUtils.loadPregnantWomen();
       if (mounted) {
         setState(() {
-          ancVisitCount = count;
-          Constant.motherCareTotal = count;
-          Constant.motherCareSynced = countSync;
+          ancVisitCount = Constant.motherCareTotal;
+          /*Constant.motherCareTotal = count;
+          Constant.motherCareSynced = countSync;*/
         });
       }
     } catch (e) {

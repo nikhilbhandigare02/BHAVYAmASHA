@@ -169,7 +169,6 @@ class _AncvisitformState extends State<Ancvisitform> {
     if (lmpDate == null) return 0;
     final today = DateTime.now();
     final difference = today.difference(lmpDate).inDays;
-    // Add 1 to account for the first week of pregnancy
     return (difference / 7).floor() + 1;
   }
 

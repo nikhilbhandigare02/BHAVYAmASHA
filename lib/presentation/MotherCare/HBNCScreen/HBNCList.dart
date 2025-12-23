@@ -66,8 +66,7 @@ class _HBNCListScreenState
       return 0;
     }
   }
-// Add this new method to check sync status from both tables
-// Add this new method to check sync status from both tables
+
   Future<bool> _isSynced(String beneficiaryId) async {
     try {
       final db = await DatabaseProvider.instance.database;
@@ -142,11 +141,10 @@ class _HBNCListScreenState
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      // 1. Get the list of valid beneficiaries
       final validBeneficiaries = await db.rawQuery('''
       SELECT DISTINCT mca.beneficiary_ref_key 
       FROM mother_care_activities mca
-      WHERE mca.mother_care_state ='hbnc_visit'
+      WHERE mca.mother_care_state ='pnc_mother'
       AND mca.is_deleted = 0
       AND mca.current_user_key = ?
     ''', [ashaUniqueKey]);
