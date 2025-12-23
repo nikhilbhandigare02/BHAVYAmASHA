@@ -429,7 +429,7 @@ class LocalStorageDao {
         AND is_deleted = 0
       ORDER BY created_date_time DESC
       LIMIT 1
-    ''', [beneficiaryId, 'anc_due_state']);
+    ''', [beneficiaryId, 'anc_due']);
 
       if (cutoffRows.isNotEmpty) {
         final v = cutoffRows.first['created_date_time']?.toString();
@@ -538,7 +538,7 @@ class LocalStorageDao {
         AND is_deleted = 0
       ORDER BY created_date_time DESC
       LIMIT 1
-    ''', [beneficiaryId, 'anc_due_state']);
+    ''', [beneficiaryId, 'anc_due']);
 
       if (cutoffRows.isNotEmpty) {
         final v = cutoffRows.first['created_date_time']?.toString();

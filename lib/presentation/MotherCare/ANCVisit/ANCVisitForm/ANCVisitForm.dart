@@ -167,8 +167,8 @@ class _AncvisitformState extends State<Ancvisitform> {
 
   int _calculateWeeksOfPregnancy(DateTime? lmpDate) {
     if (lmpDate == null) return 0;
-    final today = DateTime.now();
-    final difference = today.difference(lmpDate).inDays;
+    final base = _bloc.state.dateOfInspection ?? DateTime.now();
+    final difference = base.difference(lmpDate).inDays;
     // Add 1 to account for the first week of pregnancy
     return (difference / 7).floor() + 1;
   }
@@ -185,13 +185,13 @@ class _AncvisitformState extends State<Ancvisitform> {
   Future<void> _initializeForm() async {
     final data = widget.beneficiaryData;
     if (data == null) return;
-    
+
     String? houseNo;
-    
+
     // 1. First try to get names directly from the passed data
     final womanName = data['Name']?.toString();
     final husbandName = data['Husband']?.toString() ?? data['husbandName']?.toString();
-    
+
     if (womanName != null && womanName.isNotEmpty) {
       _bloc.add(WomanNameChanged(womanName));
     }
@@ -201,9 +201,9 @@ class _AncvisitformState extends State<Ancvisitform> {
 
     // 2. Fetch and set house number from beneficiary data
     try {
-      final householdRefKey = data['hhId']?.toString() ?? 
+      final householdRefKey = data['hhId']?.toString() ??
                             (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['household_ref_key']?.toString() : null);
-      
+
       if (householdRefKey != null && householdRefKey.isNotEmpty) {
         final db = await DatabaseProvider.instance.database;
         final result = await db.query(
@@ -323,17 +323,17 @@ class _AncvisitformState extends State<Ancvisitform> {
 
       // If we still don't have the woman's name, try to get it from other fields
       if (_bloc.state.womanName == null || _bloc.state.womanName!.isEmpty) {
-        final nameFromData = data['memberName']?.toString() ?? 
+        final nameFromData = data['memberName']?.toString() ??
                            data['headName']?.toString() ??
                            data['name']?.toString();
         if (nameFromData != null && nameFromData.isNotEmpty) {
           _bloc.add(WomanNameChanged(nameFromData));
         }
       }
-      
+
       // If we still don't have the husband's name, try to get it from other fields
       if (_bloc.state.husbandName == null || _bloc.state.husbandName!.isEmpty) {
-        final spouseName = data['spouseName']?.toString() ?? 
+        final spouseName = data['spouseName']?.toString() ??
                           data['headName']?.toString() ??
                           data['husbandName']?.toString();
         if (spouseName != null && spouseName.isNotEmpty) {
@@ -477,8 +477,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                 final lmpDate = DateTime.parse(info['lmp'].toString());
                 _bloc.add(LmpDateChanged(lmpDate));
                 print('📅 Set LMP date from beneficiary info: $lmpDate');
-                final today = DateTime.now();
-                final difference = today.difference(lmpDate).inDays;
+                final base = _bloc.state.dateOfInspection ?? DateTime.now();
+                final difference = base.difference(lmpDate).inDays;
                 final weeksOfPregnancy = (difference / 7).floor() + 1;
                 _bloc.add(WeeksOfPregnancyChanged(weeksOfPregnancy.toString()));
               } catch (e) {
@@ -950,7 +950,15 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.dateOfInspectionLabel ?? 'Date of inspection *',
                               hintText: l10n?.dateOfInspectionLabel ?? 'Date of inspection *',
                               initialDate: state.dateOfInspection ?? DateTime.now(),
-                              onDateChanged: (d) => bloc.add(DateOfInspectionChanged(d)),
+                              onDateChanged: (d) {
+                                bloc.add(DateOfInspectionChanged(d));
+                                final lmp = bloc.state.lmpDate;
+                                if (lmp != null && d != null) {
+                                  final difference = d.difference(lmp).inDays;
+                                  final weeks = (difference / 7).floor() + 1;
+                                  bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
+                                }
+                              },
                               validator: (date) => validateDateRequired(date),
                             ),
 
@@ -1005,15 +1013,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 onDateChanged: (d) {
                                   if (d != null) {
                                     bloc.add(LmpDateChanged(d));
-
-                                    final today = DateTime.now();
-                                    final difference = today.difference(d).inDays;
-                                    final weeksOfPregnancy = (difference / 7).floor();
-
-                                    // Add 1 to account for the first week of pregnancy
-                                    final calculatedWeeks = weeksOfPregnancy + 1;
-
-                                    bloc.add(WeeksOfPregnancyChanged(calculatedWeeks.toString()));
+                                    final base = bloc.state.dateOfInspection ?? DateTime.now();
+                                    final difference = base.difference(d).inDays;
+                                    final weeks = (difference / 7).floor() + 1;
+                                    bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
                                   }
                                 },
                                 validator: (date) => validateDateRequired(date),
@@ -1034,7 +1037,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
-                             readOnly: true,
+                            // readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
                             ),
@@ -1085,7 +1088,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               hintText: l10n?.select ?? 'Select',
                             ),
 
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(color: const Color.fromRGBO(202, 196, 208, 1), thickness: 0.5, height: 0),
                             CustomDatePicker(
                               labelText: l10n?.td1DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 1',
                               hintText: l10n?.td1DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 1',
@@ -1107,19 +1110,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                               hintText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
                               initialDate: state.td2Date,
                               readOnly: (() {
-                                final prev = _prevLmpFromEc;
-                                final curr = state.lmpDate;
-                                if (prev != null && curr != null) {
-                                  final years = _fullYearsBetween(prev, curr);
-                                  if (years < 3) return true;
-                                }
-                                else {
-                                  return true;
-                                }
-
-                                final inspect = state.dateOfInspection;
-                                final td1 = _lastTd1DateFromDb;
-                                if (inspect == null || td1 == null) {
+                                final inspect = state.dateOfInspection ?? DateTime.now();
+                                final td1 = state.td1Date ?? _lastTd1DateFromDb;
+                                if (td1 == null) {
                                   return true;
                                 }
                                 final days = inspect.difference(td1).inDays;
@@ -1133,11 +1126,21 @@ class _AncvisitformState extends State<Ancvisitform> {
                               hintText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
                               initialDate: state.tdBoosterDate,
                               readOnly: (() {
-                                final prev = _prevLmpFromEc;
-                                final curr = state.lmpDate;
-                                if (prev != null && curr != null) {
-                                  final years = _fullYearsBetween(prev, curr);
-                                  return years > 3; // disable if gap > 3 years
+                                bool td2Eligible = false;
+                                final inspect = state.dateOfInspection ?? DateTime.now();
+                                final td1 = state.td1Date ?? _lastTd1DateFromDb;
+                                if (inspect != null && td1 != null) {
+                                  final days = inspect.difference(td1).inDays;
+                                  td2Eligible = days >= 28;
+                                }
+                                if (td2Eligible) {
+                                  return true;
+                                }
+                                final p = _prevLmpFromEc;
+                                final c = state.lmpDate;
+                                if (p != null && c != null) {
+                                  final years = _fullYearsBetween(p, c);
+                                  return years > 3;
                                 }
                                 return state.gravida < 2;
                               })(),

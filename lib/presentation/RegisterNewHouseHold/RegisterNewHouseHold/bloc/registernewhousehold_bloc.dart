@@ -352,7 +352,7 @@ class RegisterNewHouseholdBloc
                       'server_id': null,
                       'household_ref_key': uniqueKey,
                       'beneficiary_ref_key': headId,
-                      'mother_care_state': 'anc_due_state',
+                      'mother_care_state': 'anc_due',
                       'device_details': jsonEncode({
                         'id': deviceInfo.deviceId,
                         'platform': deviceInfo.platform,
@@ -631,7 +631,7 @@ class RegisterNewHouseholdBloc
                           'server_id': null,
                           'household_ref_key': uniqueKey,
                           'beneficiary_ref_key': spouseKey!,
-                          'mother_care_state': 'anc_due_state',
+                          'mother_care_state': 'anc_due',
                           'device_details': jsonEncode({
                             'id': deviceInfo.deviceId,
                             'platform': deviceInfo.platform,
@@ -1257,7 +1257,7 @@ class RegisterNewHouseholdBloc
                       'server_id': null,
                       'household_ref_key': uniqueKey,
                       'beneficiary_ref_key': memberId,
-                      'mother_care_state': 'anc_due_state',
+                      'mother_care_state': 'anc_due',
                       'device_details': jsonEncode({
                         'id': deviceInfo.deviceId,
                         'platform': deviceInfo.platform,

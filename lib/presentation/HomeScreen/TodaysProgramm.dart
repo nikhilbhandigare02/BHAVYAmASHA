@@ -726,7 +726,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   INNER JOIN beneficiaries_new bn 
       ON mca.beneficiary_ref_key = bn.unique_key
   WHERE (mca.mother_care_state = 'anc_due' 
-         OR mca.mother_care_state = 'anc_due_state')
+         OR mca.mother_care_state = 'anc_due')
     AND bn.is_deleted = 0
     ${excludedBeneficiaryIds.isNotEmpty ? 'AND mca.beneficiary_ref_key NOT IN (${excludedBeneficiaryIds.map((_) => '?').join(',')})' : ''}
   ORDER BY mca.created_date_time DESC
