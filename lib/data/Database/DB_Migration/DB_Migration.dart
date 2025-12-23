@@ -218,7 +218,6 @@ class DbMigration {
       for (final row in oldRows) {
         final form = row["form_json"] != null ? jsonDecode(row["form_json"]) : {};
 
-        // ---------------- BENEFICIARY INFO ----------------
         final Map<String, dynamic> finalJson = {};
         for (final key in beneficiaryKeys) {
           if (form[key] != null &&
@@ -238,42 +237,36 @@ class DbMigration {
           }
         }
 
-        // ---------------- SINGLE SOURCE OF TRUTH ----------------
-        final String reasonOfCloser =
-        (row["reason_of_closer"] ?? form["reason_of_closer"] ?? "")
-            .toString()
-            .trim()
-            .toLowerCase();
-
-        // ---------------- DEATH & MIGRATION DETAILS ----------------
+        // First, get the direct column values from the old database
+        int isDeath = (row["is_death"] == 1) ? 1 : 0;
+        int isMigrated = (row["is_migrated"] == 1) ? 1 : 0;
         Map<String, dynamic>? deathDetailsMap;
-        if (reasonOfCloser == "death" ||
-            reasonOfCloser == "migrate_out" ||
-            reasonOfCloser == "migration") {
-          deathDetailsMap = {
-            "reason_of_closer": reasonOfCloser,
-            "date_of_death": row["date_of_death"] ?? form["date_of_death"],
-            "cause_of_death": row["cause_of_death"] ?? form["cause_of_death"],
-            "death_place": row["death_place"] ?? form["death_place"],
-            "remark": form["remark"],
-          };
+
+        if (isDeath == 0 && isMigrated == 0) {
+          final String reasonOfCloser =
+          (row["reason_of_closer"] ?? form["reason_of_closer"] ?? "")
+              .toString()
+              .trim()
+              .toLowerCase();
+
+          if (reasonOfCloser.isNotEmpty) {
+            deathDetailsMap = {
+              "reason_of_closer": reasonOfCloser,
+              "date_of_death": row["date_of_death"] ?? form["date_of_death"],
+              "cause_of_death": row["cause_of_death"] ?? form["cause_of_death"],
+              "death_place": row["death_place"] ?? form["death_place"],
+              "remark": form["remark"],
+            };
+
+            if (reasonOfCloser == "death") {
+              isDeath = 1;
+            } else if (reasonOfCloser == "migrate_out" || reasonOfCloser == "migration") {
+              isMigrated = 1;
+            }
+          }
         }
 
-        // ✅ FINAL FLAGS (STRICT)
-        final int isDeath = (deathDetailsMap != null &&
-            deathDetailsMap["reason_of_closer"] == "death")
-            ? 1
-            : 0;
-        final int isMigrated = (deathDetailsMap != null &&
-            (deathDetailsMap["reason_of_closer"] == "migrate_out" ||
-                deathDetailsMap["reason_of_closer"] == "migration"))
-            ? 1
-            : 0;
 
-        final String? deathDetails =
-        deathDetailsMap != null ? jsonEncode(deathDetailsMap) : null;
-
-        // ---------------- INSERT ----------------
         final existing = await db.query(
           "beneficiaries_new",
           where: "unique_key = ?",
@@ -281,7 +274,7 @@ class DbMigration {
         );
 
         if (existing.isEmpty) {
-          await db.insert("beneficiaries_new", {
+          final Map<String, dynamic> insertData = {
             "server_id": row["_id"],
             "household_ref_key": row["household_registrations_ref_key"],
             "unique_key": row["unique_key"],
@@ -292,19 +285,37 @@ class DbMigration {
             "is_family_planning": row["is_family_planning"],
             "is_adult": row["is_adult"],
             "is_guest": row["is_guest"],
-
-            // ✅ FINAL FLAGS
             "is_death": isDeath,
-            "death_details": deathDetails,
+            "death_details": deathDetailsMap != null ? jsonEncode(deathDetailsMap) : null,
             "is_migrated": isMigrated,
-
             "current_user_key": row["added_by"],
             "created_date_time": row["created_date_time"],
             "modified_date_time": row["modified_date_time"],
             "is_synced": row["is_synced"],
             "is_deleted": row["is_deleted"],
             "is_separated": row["is_separated"],
-          });
+          };
+
+          // Print the data being inserted
+          print('\n📌 Inserting beneficiary:');
+          print('----------------------------------------');
+          print('🔑 Unique Key: ${insertData['unique_key']}');
+          print('🏠 Household Ref: ${insertData['household_ref_key']}');
+          print('👤 Name: ${finalJson['name'] ?? finalJson['member_name']}');
+          print('👨‍👩‍👧‍👦 Relation: ${finalJson['relation'] ?? finalJson['relaton_with_family_head']}');
+          print('🎂 DOB: ${finalJson['dob']}');
+          print('📱 Mobile: ${finalJson['mobileNo']}');
+          print('💀 Is Death: ${insertData['is_death']}');
+          print('✈️ Is Migrated: ${insertData['is_migrated']}');
+          if (deathDetailsMap != null) {
+            print('⚰️ Death Details:');
+            deathDetailsMap.forEach((key, value) {
+              if (value != null) print('   • $key: $value');
+            });
+          }
+          print('----------------------------------------\n');
+
+          await db.insert("beneficiaries_new", insertData);
         }
       }
 
@@ -314,8 +325,6 @@ class DbMigration {
       print(st);
     }
   }
-
-
 
 
   static Future<void> runHouseholdTableMigration(Database db) async {
@@ -343,7 +352,6 @@ class DbMigration {
 
         if (members.isEmpty) continue;
 
-        // ---------- Detect Head(s) ----------
         List<Map<String, dynamic>> heads = [];
 
         for (var member in members) {
@@ -352,7 +360,6 @@ class DbMigration {
 
           final Map<String, dynamic> data = jsonDecode(infoJson);
 
-          // isFamilyhead check
           final bool isFamilyHead =
               data["isFamilyhead"] == true ||
                   data["isFamilyhead"] == "true" ||

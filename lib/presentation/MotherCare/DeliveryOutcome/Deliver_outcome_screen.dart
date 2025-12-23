@@ -107,7 +107,6 @@ LatestANC AS (
   WHERE
     f.forms_ref_key = ?
     AND f.is_deleted = 0
-    AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
     AND f.current_user_key = ?
 )
 SELECT
