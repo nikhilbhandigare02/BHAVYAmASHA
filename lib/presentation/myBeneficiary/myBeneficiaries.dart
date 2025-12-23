@@ -242,19 +242,7 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
           .cast<String>()
           .toSet();
 
-      String ancSql = """
-        SELECT mca.*, bn.*, mca.id as mca_id, bn.id as beneficiary_id
-        FROM mother_care_activities mca
-        INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
-        WHERE mca.mother_care_state = 'anc_due' 
-          AND bn.is_deleted = 0
-      """;
-      final ancArgs = <Object?>[];
-      if (excludedBeneficiaryIds.isNotEmpty) {
-        ancSql += ' AND mca.beneficiary_ref_key NOT IN (${List.filled(excludedBeneficiaryIds.length, '?').join(',')})';
-        ancArgs.addAll(excludedBeneficiaryIds);
-      }
-      final ancDueRecords = await db.rawQuery(ancSql, ancArgs);
+      final ancDueRecords = await _getAncDueRecords();
       final ancDueBeneficiaryIds = ancDueRecords
           .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
           .where((id) => id.isNotEmpty)
@@ -321,6 +309,46 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
     }
   }
 
+  Future<List<Map<String, dynamic>>> _getAncDueRecords() async {
+    final db = await DatabaseProvider.instance.database;
+
+    final currentUserData = await SecureStorageService.getCurrentUserData();
+    final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+    if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+      return [];
+    }
+
+    final rows = await db.rawQuery(
+      '''
+    WITH RankedMCA AS (
+      SELECT
+        mca.*,
+        ROW_NUMBER() OVER (
+          PARTITION BY mca.beneficiary_ref_key
+          ORDER BY mca.created_date_time DESC, mca.id DESC
+        ) AS rn
+      FROM mother_care_activities mca
+      WHERE
+        mca.is_deleted = 0
+        AND mca.current_user_key = ?
+    )
+    SELECT r.*
+    FROM RankedMCA r
+    INNER JOIN beneficiaries_new bn
+      ON r.beneficiary_ref_key = bn.unique_key
+    WHERE
+      r.rn = 1
+      AND r.mother_care_state = 'anc_due_state'
+      AND bn.is_deleted = 0
+    ORDER BY r.created_date_time DESC; 
+    ''',
+      [ashaUniqueKey],
+    );
+
+    return rows;
+  }
+
   bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
     if (person.isEmpty) return false;
     final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
@@ -360,17 +388,60 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
   Future<int> _getPregnancyOutcomeCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
-      final ancRefKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
-      if (ancRefKey.isEmpty) return 0;
-      final result = await db.rawQuery(
-        'SELECT COUNT(DISTINCT beneficiary_ref_key) as c FROM ${FollowupFormDataTable.table} WHERE forms_ref_key = ? AND form_json LIKE ? AND is_deleted = 0',
-        [ancRefKey, '%"gives_birth_to_baby":"Yes"%'],
+
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+        return 0;
+      }
+
+      const ancRefKey = 'bt7gs9rl1a5d26mz';
+
+      final results = await db.rawQuery(
+        '''
+WITH LatestMCA AS (
+  SELECT
+    mca.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY mca.beneficiary_ref_key
+      ORDER BY mca.created_date_time DESC, mca.id DESC
+    ) AS rn
+  FROM mother_care_activities mca
+  WHERE mca.is_deleted = 0
+),
+DeliveryOutcomeOnly AS (
+  SELECT *
+  FROM LatestMCA
+  WHERE rn = 1
+    AND mother_care_state = 'delivery_outcome'
+),
+LatestANC AS (
+  SELECT
+    f.beneficiary_ref_key,
+    f.form_json,
+    ROW_NUMBER() OVER (
+      PARTITION BY f.beneficiary_ref_key
+      ORDER BY f.created_date_time DESC, f.id DESC
+    ) AS rn
+  FROM ${FollowupFormDataTable.table} f
+  WHERE
+    f.forms_ref_key = ?
+    AND f.is_deleted = 0
+    AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
+    AND f.current_user_key = ?
+)
+SELECT
+  d.beneficiary_ref_key
+FROM DeliveryOutcomeOnly d
+LEFT JOIN LatestANC a
+  ON a.beneficiary_ref_key = d.beneficiary_ref_key
+ AND a.rn = 1
+''',
+        [ancRefKey, ashaUniqueKey],
       );
-      final row = result.isNotEmpty ? result.first : null;
-      final v = row?['c'];
-      if (v is int) return v;
-      if (v is num) return v.toInt();
-      return 0;
+
+      return results.length;
     } catch (_) {
       return 0;
     }
@@ -427,24 +498,53 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
         BeneficiariesTable.table,
         where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL)',
       );
-      int c = 0;
-      for (final r in rows) {
+
+      int count = 0;
+
+      for (final row in rows) {
         try {
-          final infoStr = r['beneficiary_info']?.toString();
+          final hhId = row['household_ref_key']?.toString() ?? '';
+          if (hhId.isEmpty) continue;
+
+          final infoStr = row['beneficiary_info']?.toString();
           if (infoStr == null || infoStr.isEmpty) continue;
-          final decoded = jsonDecode(infoStr);
-          if (decoded is! Map) continue;
-          final info = Map<String, dynamic>.from(decoded);
+
+          Map<String, dynamic>? info;
+          try {
+            final decoded = jsonDecode(infoStr);
+            if (decoded is Map) info = Map<String, dynamic>.from(decoded);
+          } catch (_) {}
+
+          if (info == null || info.isEmpty) continue;
+
           var weight = _parseNumFlexible(info['weight'])?.toDouble();
           var birthWeight = _parseNumFlexible(info['birthWeight'])?.toDouble();
-          if (weight != null && weight > 20) weight = weight / 1000.0; // grams -> kg
-          if (birthWeight != null && birthWeight <= 20) birthWeight = birthWeight * 1000.0; // kg -> grams
-          final isLbw = (weight != null && birthWeight != null && weight <= 1.2 && birthWeight <= 1200);
-          if (isLbw) c++;
-        } catch (_) {}
+
+          // Flexible LBW condition logic - matches _loadLbwChildren()
+          bool isLbw = false;
+
+          if (weight != null && birthWeight != null) {
+            // Both present: BOTH must satisfy their conditions
+            isLbw = (weight <= 1.6 && birthWeight <= 1600);
+          } else if (weight != null && birthWeight == null) {
+            // Only weight present: check weight condition only
+            isLbw = (weight <= 1.6);
+          } else if (weight == null && birthWeight != null) {
+            // Only birthWeight present: check birthWeight condition only
+            isLbw = (birthWeight <= 1600);
+          }
+          // If both are null, isLbw remains false
+
+          if (isLbw) count++;
+
+        } catch (e) {
+          print('Error processing beneficiary LBW row in count: $e');
+        }
       }
-      return c;
-    } catch (_) {
+
+      return count;
+    } catch (e) {
+      print('Error loading LBW count: $e');
       return 0;
     }
   }

@@ -39,10 +39,15 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   String? _expandedKey;
   List<Map<String, dynamic>> _familySurveyItems = [];
   List<Map<String, dynamic>> _eligibleCoupleItems = [];
+  List<Map<String, dynamic>> _eligibleCompletedCoupleItems = [];
   List<Map<String, dynamic>> _ancItems = [];
+  List<Map<String, dynamic>> _ancCompletedItems = [];
   List<Map<String, dynamic>> _hbncItems = [];
+  List<Map<String, dynamic>> _hbncCompletedItems = [];
   List<Map<String, dynamic>> _riItems = [];
+  List<Map<String, dynamic>> _riCompletedItems = [];
   int _completedVisitsCount = 0;
+  bool todayVisitClick = true;
 
   @override
   void initState() {
@@ -56,27 +61,27 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
   Future<void> _loadData() async {
     if (!mounted) return;
-    
+
     try {
       // Load all the data from the database
       await _loadFamilySurveyItems();
       if (!mounted) return;
-      
+
       await _loadEligibleCoupleItems();
       if (!mounted) return;
-      
+
       await _loadAncItems();
       if (!mounted) return;
-      
+
       await _loadHbncItems();
       if (!mounted) return;
-      
+
       await _loadRoutineImmunizationItems();
       if (!mounted) return;
-      
+
       // Finally, load the completed visits count
       await _loadCompletedVisitsCount();
-      
+
       // Save the counts to storage
       if (mounted) {
         await _saveTodayWorkCountsToStorage();
@@ -92,21 +97,21 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     if (input == null || input.isEmpty) return '-';
     return input.length <= 11 ? input : input.substring(input.length - 11);
   }
-  var _isLoading = true;
 
+  var _isLoading = true;
 
   int _calculateAge(String? dob) {
     if (dob == null || dob.isEmpty) return 0;
     try {
       DateTime? birthDate;
-      
+
       // Try parsing the date string
       if (dob.contains('T')) {
         birthDate = DateTime.tryParse(dob.split('T')[0]);
       } else {
         birthDate = DateTime.tryParse(dob);
       }
-      
+
       if (birthDate == null) {
         // If parsing fails, try to extract date parts manually
         final parts = dob.split(RegExp(r'[^0-9]'));
@@ -119,21 +124,86 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           return 0;
         }
       }
-      
+
       final now = DateTime.now();
       int age = now.year - birthDate.year;
-      
+
       // Adjust age if birthday hasn't occurred yet this year
-      if (now.month < birthDate.month || 
+      if (now.month < birthDate.month ||
           (now.month == birthDate.month && now.day < birthDate.day)) {
         age--;
       }
-      
+
       return age > 0 ? age : 0;
     } catch (e) {
       print('Error calculating age: $e');
       return 0;
     }
+  }
+
+  String _formatDateOnly(String? dateTime) {
+    if (dateTime == null || dateTime.isEmpty) return '-';
+    try {
+      final dt = DateTime.parse(dateTime);
+      return DateFormat('dd-MM-yyyy').format(dt);
+    } catch (_) {
+      return '-';
+    }
+  }
+
+  Future<Map<String, String>> _getBeneficiaryFields(String uniqueKey) async {
+    final rec = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(uniqueKey);
+    if (rec == null) {
+      return {
+        'name': '',
+        'age': '',
+        'gender': '',
+        'mobile': '-',
+      };
+    }
+
+    dynamic info = rec['beneficiary_info'];
+    Map<String, dynamic> m = {};
+    if (info is Map) {
+      m = Map<String, dynamic>.from(info);
+    } else if (info is String && info.isNotEmpty) {
+      try {
+        m = Map<String, dynamic>.from(jsonDecode(info));
+      } catch (_) {}
+    }
+
+    final name = (m['name']?.toString()?.trim().isNotEmpty == true
+            ? m['name']?.toString()
+            : null) ??
+        m['memberName']?.toString() ??
+        m['headName']?.toString() ??
+        '';
+
+    final dob = m['dob']?.toString() ?? m['date_of_birth']?.toString();
+    var ageYears = _calculateAge(dob);
+    if (ageYears == 0) {
+      final updateYearStr = m['updateYear']?.toString() ?? '';
+      final approxAgeStr = m['approxAge']?.toString() ?? '';
+      final parsedUpdateYear = int.tryParse(updateYearStr);
+      if (parsedUpdateYear != null && parsedUpdateYear > 0) {
+        ageYears = parsedUpdateYear;
+      } else if (approxAgeStr.isNotEmpty) {
+        final matches = RegExp(r"\d+").allMatches(approxAgeStr).toList();
+        if (matches.isNotEmpty) {
+          ageYears = int.tryParse(matches.first.group(0) ?? '') ?? 0;
+        }
+      }
+    }
+
+    final gender = m['gender']?.toString() ?? '';
+    final mobile = (m['mobileNo'] ?? m['mobile'] ?? m['phone'])?.toString() ?? '-';
+
+    return {
+      'name': name,
+      'age': ageYears > 0 ? ageYears.toString() : '',
+      'gender': gender,
+      'mobile': mobile.isNotEmpty ? mobile : '-',
+    };
   }
 
   void _launchPhoneDialer(String? phoneNumber) async {
@@ -142,26 +212,31 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No phone number available')),
         );
-
       }
       return;
     }
 
     // Clean the phone number - remove all spaces and any non-digit characters
-    final raw = phoneNumber.replaceAll(' ', '').replaceAll(RegExp(r'[^0-9+]'), '');
+    final raw = phoneNumber
+        .replaceAll(' ', '')
+        .replaceAll(RegExp(r'[^0-9+]'), '');
     final uri = Uri(scheme: 'tel', path: raw);
 
     try {
       final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
       if (!ok && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unable to open dialer on this device.')),
+          const SnackBar(
+            content: Text('Unable to open dialer on this device.'),
+          ),
         );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unable to open dialer on this device.')),
+          const SnackBar(
+            content: Text('Unable to open dialer on this device.'),
+          ),
         );
       }
     }
@@ -174,7 +249,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   Future<void> _saveTodayWorkCountsToStorage() async {
     try {
       if (!mounted) return;
-      
+
       final familyCount = _familySurveyItems.length;
       final eligibleCoupleCount = _eligibleCoupleItems.length;
       final ancCount = _ancItems.length;
@@ -187,14 +262,16 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
       // Ensure we don't have negative counts
       final toDoCount = totalToDoCount >= 0 ? totalToDoCount : 0;
-      final completedCount = _completedVisitsCount >= 0 ? _completedVisitsCount : 0;
+      final completedCount = _completedVisitsCount >= 0
+          ? _completedVisitsCount
+          : 0;
 
       // Save to secure storage
       await SecureStorageService.saveTodayWorkCounts(
         toDo: toDoCount,
         completed: completedCount,
       );
-      
+
       if (mounted) {
         // Update the UI with the latest counts
         setState(() {
@@ -218,14 +295,307 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         });
       }
 
+      _eligibleCompletedCoupleItems = [];
+      _ancCompletedItems = [];
+      _hbncCompletedItems = [];
+      _riCompletedItems = [];
+
+       try {
+        final db = await DatabaseProvider.instance.database;
+
+
+        final ancFormKey =
+            FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+                .ancDueRegistration] ??
+                '';
+
+        final formKeys = <String>[];
+        //if (ecFormKey.isNotEmpty) formKeys.add(ecFormKey);
+        if (ancFormKey.isNotEmpty) formKeys.add(ancFormKey);
+
+        if (formKeys.isEmpty) return;
+
+        final placeholders = List.filled(formKeys.length, '?').join(',');
+        final now = DateTime.now();
+        final todayStr =
+            '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+
+        try{
+          final rows = await db.rawQuery(
+            'SELECT * FROM ${FollowupFormDataTable.table} '
+                'WHERE forms_ref_key IN ($placeholders) '
+                'AND (is_deleted IS NULL OR is_deleted = 0) '
+                'AND DATE(created_date_time) = DATE(?)',
+            [...formKeys, todayStr],
+          );
+
+          // final count = rows.first['cnt'] as int? ?? 0;
+
+
+          for (final row in rows) {
+            final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
+
+            // Decode form_json
+            final Map<String, dynamic> formJson =
+            row['form_json'] != null ?jsonDecode(row['form_json'] as String): {};
+
+            // Get anc_form
+            final Map<String, dynamic> ancForm =
+                formJson['anc_form'] ?? {};
+
+            final fields = beneficiaryId.isNotEmpty
+                ? await _getBeneficiaryFields(beneficiaryId)
+                : {
+                    'name': ancForm['woman_name']?.toString() ?? '',
+                    'age': ancForm['age']?.toString() ?? '',
+                    'gender': 'Female',
+                    'mobile': ancForm['mobile']?.toString() ?? '-',
+                  };
+
+            _ancCompletedItems.add({
+              'id': row['id'] ?? '',
+              'household_ref_key': row['household_ref_key'] ?? '',
+              'hhId': row['household_ref_key'] ?? '',
+              'unique_key': row['beneficiary_ref_key'] ?? '',
+              'BeneficiaryID': row['beneficiary_ref_key'] ?? '',
+
+              'name': fields['name'],
+              'age': fields['age'],
+              'gender': fields['gender']?.isNotEmpty == true ? fields['gender'] : 'Female',
+              'last Visit date': _formatDateOnly(row['created_date_time']?.toString()),
+              'Current ANC last due date': 'currentAncLastDueDateText',
+              'mobile': fields['mobile'],
+              'badge': 'ANC',
+
+              '_rawRow': row,
+            });
+          }
+        }
+        catch(e){}
+
+        try{
+
+          final ecFormKey =
+              FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+                  .eligibleCoupleTrackingDue] ??
+                  '';
+          final formKeysEC = <String>[];
+          if (ecFormKey.isNotEmpty) formKeysEC.add(ecFormKey);
+
+          if (formKeysEC.isEmpty) return;
+
+          final placeholdersEC = List.filled(formKeysEC.length, '?').join(',');
+
+          final rowsEC = await db.rawQuery(
+            'SELECT * FROM ${FollowupFormDataTable.table} '
+                'WHERE forms_ref_key IN ($placeholdersEC) '
+                'AND (is_deleted IS NULL OR is_deleted = 0) '
+                'AND DATE(created_date_time) = DATE(?)',
+            [...formKeysEC, todayStr],
+          );
+
+          // final count = rows.first['cnt'] as int? ?? 0;
+
+
+          _eligibleCompletedCoupleItems = [];
+          for (final row in rowsEC) {
+            final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
+
+            final fields = beneficiaryId.isNotEmpty
+                ? await _getBeneficiaryFields(beneficiaryId)
+                : {
+                    'name': '',
+                    'age': '',
+                    'gender': 'Female',
+                    'mobile': '-',
+                  };
+
+            _eligibleCompletedCoupleItems.add({
+              'id': row['id'] ?? '',
+              // trimmed for display
+              'household_ref_key': row['household_ref_key'] ?? '',
+              // full household key
+              'hhId': row['household_ref_key'] ?? '',
+              // explicit for ANCVisitForm
+              'unique_key': row['beneficiary_ref_key'] ?? '',
+              // full beneficiary key
+              'BeneficiaryID': row['beneficiary_ref_key'] ?? '',
+              'name': fields['name'],
+              'age': fields['age'],
+              'gender': fields['gender']?.isNotEmpty == true ? fields['gender'] : 'Female',
+              'last Visit date': _formatDateOnly(row['created_date_time']?.toString()),
+              'Current ANC last due date': 'currentAncLastDueDateText',
+              'mobile': fields['mobile'],
+              'badge': 'EligibleCouple',
+              // Keep raw data for forms that expect it
+              // 'beneficiary_info': jsonEncode(info),
+              '_rawRow': row,
+            });
+          }
+
+
+        }
+        catch(e){}
+
+        try{
+
+
+          final hbncFormKey =
+              FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+                  .pncMother] ??
+                  '';
+
+          final formKeysHBNC = <String>[];
+          if (hbncFormKey.isNotEmpty) formKeysHBNC.add(hbncFormKey);
+
+          if (formKeysHBNC.isEmpty) return;
+
+          final placeholdersHBNC = List.filled(formKeysHBNC.length, '?').join(',');
+
+
+          final rowsHBNC = await db.rawQuery(
+            'SELECT * FROM ${FollowupFormDataTable.table} '
+                'WHERE forms_ref_key IN ($placeholdersHBNC) '
+                'AND (is_deleted IS NULL OR is_deleted = 0) '
+                'AND DATE(created_date_time) = DATE(?)',
+            [...formKeysHBNC, todayStr],
+          );
+          _hbncCompletedItems = [];
+          for (final row in rowsHBNC) {
+            final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
+
+            final fields = beneficiaryId.isNotEmpty
+                ? await _getBeneficiaryFields(beneficiaryId)
+                : {
+                    'name': row['woman_name']?.toString() ?? '',
+                    'age': '',
+                    'gender': 'Female',
+                    'mobile': '-',
+                  };
+
+            _hbncCompletedItems.add({
+              'id': row['id']??'', // trimmed for display
+              'household_ref_key':row['household_ref_key']??'', // full household key
+              'hhId': row['household_ref_key']??'', // explicit for ANCVisitForm
+              'unique_key': row['beneficiary_ref_key']??'', // full beneficiary key
+              'BeneficiaryID': row['beneficiary_ref_key']??'',
+              'name': fields['name'],
+              'age': fields['age'],
+              'gender': fields['gender']?.isNotEmpty == true ? fields['gender'] : 'Female',
+              'last Visit date': _formatDateOnly(row['created_date_time']?.toString()),
+              'Current ANC last due date': 'currentAncLastDueDateText',
+              'mobile': fields['mobile'],
+              'badge': 'HBNC',
+              // Keep raw data for forms that expect it
+              // 'beneficiary_info': jsonEncode(info),
+              '_rawRow': row,
+            });
+          }
+
+        }
+        catch(e){}
+
+        try{
+
+          final resulrowsRI = await db.query(
+            FollowupFormDataTable.table,
+            // Add brackets around the OR conditions
+            where: '(form_json LIKE ? OR forms_ref_key = ?) AND DATE(created_date_time) = DATE(?)',
+            whereArgs: ['%child_registration_due%', '30bycxe4gv7fqnt6', todayStr],
+            orderBy: 'id DESC',
+          );
+
+
+          _riCompletedItems = [];
+          for (final row in resulrowsRI) {
+            final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
+
+            final fields = beneficiaryId.isNotEmpty
+                ? await _getBeneficiaryFields(beneficiaryId)
+                : {
+                    'name': row['woman_name']?.toString() ?? '',
+                    'age': '',
+                    'gender': 'Female',
+                    'mobile': '-',
+                  };
+
+            _riCompletedItems.add({
+              'id': row['id']??'', // trimmed for display
+              'household_ref_key':row['household_ref_key']??'', // full household key
+              'hhId': row['household_ref_key']??'', // explicit for ANCVisitForm
+              'unique_key': row['beneficiary_ref_key']??'', // full beneficiary key
+              'BeneficiaryID': row['beneficiary_ref_key']??'',
+              'name': fields['name'],
+              'age': fields['age'],
+              'gender': fields['gender']?.isNotEmpty == true ? fields['gender'] : 'Female',
+              'last Visit date': _formatDateOnly(row['created_date_time']?.toString()),
+              'Current ANC last due date': 'currentAncLastDueDateText',
+              'mobile': fields['mobile'],
+              'badge': 'RI',
+              // Keep raw data for forms that expect it
+              // 'beneficiary_info': jsonEncode(info),
+              '_rawRow': row,
+            });
+          }
+
+
+
+        }
+        catch(e){}
+
+       /* final rows = await db.rawQuery(
+          'SELECT COUNT(*) AS cnt FROM ${FollowupFormDataTable.table} '
+              'WHERE forms_ref_key IN ($placeholders) '
+              'AND (is_deleted IS NULL OR is_deleted = 0) '
+              'AND DATE(created_date_time) = DATE(?)',
+          [...formKeys, todayStr],
+        );*/
+
+
+
+
+        final count = (_ancCompletedItems.length ?? 0) +(_eligibleCompletedCoupleItems.length??0)+(_hbncCompletedItems.length??0)+(_riCompletedItems.length??0);
+        if (mounted && count > _completedVisitsCount) {
+          setState(() {
+            _completedVisitsCount = count;
+          });
+          await _saveTodayWorkCountsToStorage();
+        }
+
+
+      } catch (e) {
+        print(e);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _completedVisitsCount = 0;
+        });
+      }
+    }
+  }
+
+  /*Future<void> _loadCompletedVisitsCount() async {
+    try {
+      // First try to load from SecureStorage
+      final counts = await SecureStorageService.getTodayWorkCounts();
+      if (mounted) {
+        setState(() {
+          _completedVisitsCount = counts['completed'] ?? 0;
+        });
+      }
+
       // Then update from database in the background
       try {
         final db = await DatabaseProvider.instance.database;
-        final ecFormKey = FollowupFormDataTable
-                .formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ??
+        final ecFormKey =
+            FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+                .eligibleCoupleTrackingDue] ??
             '';
-        final ancFormKey = FollowupFormDataTable
-                .formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ??
+        final ancFormKey =
+            FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+                .ancDueRegistration] ??
             '';
 
         final formKeys = <String>[];
@@ -248,15 +618,14 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         );
 
         final count = rows.first['cnt'] as int? ?? 0;
-        
+
         if (mounted && count > _completedVisitsCount) {
           setState(() {
             _completedVisitsCount = count;
           });
           await _saveTodayWorkCountsToStorage();
         }
-      } catch (e) {
-      }
+      } catch (e) {}
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -264,35 +633,80 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         });
       }
     }
-  }
+  }*/
 
   Future<void> _loadEligibleCoupleItems() async {
     try {
-      if (mounted) {
-        setState(() {
-          _eligibleCoupleItems = [];
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      final ecFormKey =
+          FollowupFormDataTable.formUniqueKeys[
+          FollowupFormDataTable.eligibleCoupleTrackingDue] ??
+              '';
+
+      if (ecFormKey.isEmpty) return;
+
+      final rowsEC = await db.rawQuery(
+        '''
+      SELECT *
+      FROM ${FollowupFormDataTable.table}
+      WHERE forms_ref_key = ? AND current_user_key = ?
+      AND (is_deleted IS NULL OR is_deleted = 0)
+      AND DATE(created_date_time) < DATE('now','-1 month')
+      AND (
+        modified_date_time IS NULL
+        OR DATE(modified_date_time) < DATE('now','-1 month')
+      )
+      ''',
+        [ecFormKey,ashaUniqueKey],
+      );
+
+      _eligibleCoupleItems.clear();
+
+      for (final row in rowsEC) {
+        _eligibleCoupleItems.add({
+          'id': row['id'] ?? '',
+          'household_ref_key': row['household_ref_key'] ?? '',
+          'hhId': row['household_ref_key'] ?? '',
+          'unique_key': row['beneficiary_ref_key'] ?? '',
+          'BeneficiaryID': row['beneficiary_ref_key'] ?? '',
+          'name': row['woman_name'] ?? '',
+          'gender': 'Female',
+          '_rawRow': row,
         });
+      }
+
+      if (mounted) {
+        setState(() {});
         _saveTodayWorkCountsToStorage();
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('EC load error: $e');
+    }
   }
+
 
   Future<void> _loadAncItems() async {
     try {
       final db = await DatabaseProvider.instance.database;
       final ancFormKey =
-          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+              .ancDueRegistration] ??
+          '';
 
       final List<Map<String, dynamic>> items = [];
       final Set<String> processedBeneficiaries = {};
 
       final excludedStates = await db.query(
         'mother_care_activities',
-        where: "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother')",
+        where:
+            "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother')",
         columns: ['beneficiary_ref_key'],
-        distinct: true
+        distinct: true,
       );
-      
+
       final excludedBeneficiaryIds = excludedStates
           .map((e) => e['beneficiary_ref_key']?.toString())
           .where((id) => id != null && id.isNotEmpty)
@@ -301,7 +715,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       debugPrint('Excluded beneficiary IDs: $excludedBeneficiaryIds');
 
       // Get all beneficiaries with anc_due state that are not in excluded states
-      final query = '''
+      final query =
+          '''
   SELECT 
     mca.*, 
     bn.*, 
@@ -313,26 +728,29 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   WHERE (mca.mother_care_state = 'anc_due' 
          OR mca.mother_care_state = 'anc_due_state')
     AND bn.is_deleted = 0
-    ${excludedBeneficiaryIds.isNotEmpty
-          ? 'AND mca.beneficiary_ref_key NOT IN (${excludedBeneficiaryIds.map((_) => '?').join(',')})'
-          : ''}
+    ${excludedBeneficiaryIds.isNotEmpty ? 'AND mca.beneficiary_ref_key NOT IN (${excludedBeneficiaryIds.map((_) => '?').join(',')})' : ''}
   ORDER BY mca.created_date_time DESC
 ''';
 
       debugPrint('Executing query: $query');
       debugPrint('With parameters: ${excludedBeneficiaryIds.toList()}');
-      
+
       final ancDueRecords = await db.rawQuery(
         query,
-        excludedBeneficiaryIds.isNotEmpty ? excludedBeneficiaryIds.toList() : [],
+        excludedBeneficiaryIds.isNotEmpty
+            ? excludedBeneficiaryIds.toList()
+            : [],
       );
-      
-      debugPrint('Found ${ancDueRecords.length} ANC due records after filtering');
+
+      debugPrint(
+        'Found ${ancDueRecords.length} ANC due records after filtering',
+      );
 
       // Process the filtered rows
       for (final row in ancDueRecords) {
         final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
-        if (beneficiaryId.isEmpty || processedBeneficiaries.contains(beneficiaryId)) {
+        if (beneficiaryId.isEmpty ||
+            processedBeneficiaries.contains(beneficiaryId)) {
           continue; // Skip if already processed or no beneficiary ID
         }
         try {
@@ -345,25 +763,31 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           // Parse beneficiary_info
           final infoRaw = row['beneficiary_info'];
           if (infoRaw == null) continue;
-          
+
           Map<String, dynamic> info = {};
           try {
-            info = infoRaw is String 
+            info = infoRaw is String
                 ? jsonDecode(infoRaw) as Map<String, dynamic>
                 : Map<String, dynamic>.from(infoRaw as Map);
           } catch (e) {
             debugPrint('Error parsing beneficiary_info: $e');
             continue;
           }
-          final isPregnant = info['isPregnant']?.toString().toLowerCase() == 'yes';
+          final isPregnant =
+              info['isPregnant']?.toString().toLowerCase() == 'yes';
           final genderRaw = info['gender']?.toString().toLowerCase() ?? '';
-          
-          // For ANC due records, we still want to show them even if not marked as pregnant
-          if (!isPregnant && genderRaw != 'f' && genderRaw != 'female') continue;
 
-          final name = (info['memberName'] ?? info['headName'] ?? info['name'] ?? 'Unknown')
-              .toString()
-              .trim();
+          // For ANC due records, we still want to show them even if not marked as pregnant
+          if (!isPregnant && genderRaw != 'f' && genderRaw != 'female')
+            continue;
+
+          final name =
+              (info['memberName'] ??
+                      info['headName'] ??
+                      info['name'] ??
+                      'Unknown')
+                  .toString()
+                  .trim();
 
           String ageText = '-';
           final dobRaw =
@@ -379,8 +803,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 final now = DateTime.now();
                 int ageYears = now.year - birthDate.year;
                 if (now.month < birthDate.month ||
-                    (now.month == birthDate.month &&
-                        now.day < birthDate.day)) {
+                    (now.month == birthDate.month && now.day < birthDate.day)) {
                   ageYears--;
                 }
                 if (ageYears >= 0) {
@@ -396,8 +819,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             ageText = (years != null && years.isNotEmpty)
                 ? '${years}Y'
                 : (approxAge != null && approxAge.isNotEmpty)
-                    ? '${approxAge}y'
-                    : '-';
+                ? '${approxAge}y'
+                : '-';
           }
 
           final mobile = (info['mobileNo'] ?? info['phone'])?.toString();
@@ -446,17 +869,23 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
           final ancRanges = _calculateAncDateRangesForToday(lmpDate);
 
-           final today = DateTime.now();
+          final today = DateTime.now();
           final todayDate = DateTime(today.year, today.month, today.day);
 
           bool _isTodayInWindow(DateTime start, DateTime end) {
             final startDate = DateTime(start.year, start.month, start.day);
             final endDate = DateTime(end.year, end.month, end.day);
-            return (todayDate.isAtSameMomentAs(startDate) || todayDate.isAfter(startDate)) &&
-                (todayDate.isAtSameMomentAs(endDate) || todayDate.isBefore(endDate));
+            return (todayDate.isAtSameMomentAs(startDate) ||
+                    todayDate.isAfter(startDate)) &&
+                (todayDate.isAtSameMomentAs(endDate) ||
+                    todayDate.isBefore(endDate));
           }
 
-          bool _hasFormInWindow(List<Map<String, dynamic>> forms, DateTime start, DateTime end) {
+          bool _hasFormInWindow(
+            List<Map<String, dynamic>> forms,
+            DateTime start,
+            DateTime end,
+          ) {
             for (final formRow in forms) {
               try {
                 final formJsonRaw = formRow['form_json']?.toString();
@@ -465,7 +894,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 if (formJsonRaw != null && formJsonRaw.isNotEmpty) {
                   final decoded = jsonDecode(formJsonRaw);
                   if (decoded is Map && decoded['form_data'] is Map) {
-                    final formData = Map<String, dynamic>.from(decoded['form_data'] as Map);
+                    final formData = Map<String, dynamic>.from(
+                      decoded['form_data'] as Map,
+                    );
                     dateRaw = formData['date_of_inspection']?.toString();
                   }
                 }
@@ -487,7 +918,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 final d = DateTime(dt.year, dt.month, dt.day);
                 final startDate = DateTime(start.year, start.month, start.day);
                 final endDate = DateTime(end.year, end.month, end.day);
-                final within = (d.isAtSameMomentAs(startDate) || d.isAfter(startDate)) &&
+                final within =
+                    (d.isAtSameMomentAs(startDate) || d.isAfter(startDate)) &&
                     (d.isAtSameMomentAs(endDate) || d.isBefore(endDate));
                 if (within) return true;
               } catch (_) {}
@@ -519,28 +951,40 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
           bool hasDueVisit = false;
 
-          if (!hasDueVisit && firstStart != null && firstEnd != null && _isTodayInWindow(firstStart, firstEnd)) {
+          if (!hasDueVisit &&
+              firstStart != null &&
+              firstEnd != null &&
+              _isTodayInWindow(firstStart, firstEnd)) {
             if (!_hasFormInWindow(existingForms, firstStart, firstEnd)) {
               hasDueVisit = true;
               dueVisitEndDate = firstEnd;
             }
           }
 
-          if (!hasDueVisit && secondStart != null && secondEnd != null && _isTodayInWindow(secondStart, secondEnd)) {
+          if (!hasDueVisit &&
+              secondStart != null &&
+              secondEnd != null &&
+              _isTodayInWindow(secondStart, secondEnd)) {
             if (!_hasFormInWindow(existingForms, secondStart, secondEnd)) {
               hasDueVisit = true;
               dueVisitEndDate = secondEnd;
             }
           }
 
-          if (!hasDueVisit && thirdStart != null && thirdEnd != null && _isTodayInWindow(thirdStart, thirdEnd)) {
+          if (!hasDueVisit &&
+              thirdStart != null &&
+              thirdEnd != null &&
+              _isTodayInWindow(thirdStart, thirdEnd)) {
             if (!_hasFormInWindow(existingForms, thirdStart, thirdEnd)) {
               hasDueVisit = true;
               dueVisitEndDate = thirdEnd;
             }
           }
 
-          if (!hasDueVisit && fourthStart != null && fourthEnd != null && _isTodayInWindow(fourthStart, fourthEnd)) {
+          if (!hasDueVisit &&
+              fourthStart != null &&
+              fourthEnd != null &&
+              _isTodayInWindow(fourthStart, fourthEnd)) {
             if (!_hasFormInWindow(existingForms, fourthStart, fourthEnd)) {
               hasDueVisit = true;
               dueVisitEndDate = fourthEnd;
@@ -623,7 +1067,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
       // Get delivery outcome data (similar to HBNCList)
       final db = await DatabaseProvider.instance.database;
-      final deliveryOutcomeKey = '4r7twnycml3ej1vg'; // Delivery outcome form key
+      final deliveryOutcomeKey =
+          '4r7twnycml3ej1vg'; // Delivery outcome form key
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
@@ -642,13 +1087,17 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
 
           if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
-            debugPrint('⚠️ Missing beneficiary_ref_key in outcome: ${outcome['id']}');
+            debugPrint(
+              '⚠️ Missing beneficiary_ref_key in outcome: ${outcome['id']}',
+            );
             continue;
           }
 
           // Skip if already processed
           if (processedBeneficiaries.contains(beneficiaryRefKey)) {
-            debugPrint('ℹ️ Skipping duplicate outcome for beneficiary: $beneficiaryRefKey');
+            debugPrint(
+              'ℹ️ Skipping duplicate outcome for beneficiary: $beneficiaryRefKey',
+            );
             continue;
           }
           processedBeneficiaries.add(beneficiaryRefKey);
@@ -666,7 +1115,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           }
 
           final beneficiary = beneficiaryResults.first;
-          final beneficiaryInfoRaw = beneficiary['beneficiary_info'] as String? ?? '{}';
+          final beneficiaryInfoRaw =
+              beneficiary['beneficiary_info'] as String? ?? '{}';
 
           Map<String, dynamic> beneficiaryInfo;
           try {
@@ -677,21 +1127,30 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           }
 
           // Extract data
-          final name = beneficiaryInfo['memberName']?.toString() ??
-              beneficiaryInfo['headName']?.toString() ?? 'N/A';
+          final name =
+              beneficiaryInfo['memberName']?.toString() ??
+              beneficiaryInfo['headName']?.toString() ??
+              'N/A';
           final dob = beneficiaryInfo['dob']?.toString();
           final age = _calculateAge(dob);
-          final gender = (beneficiaryInfo['gender']?.toString() ?? 'female').toLowerCase() == 'female'
-              ? 'Female' : 'Male';
+          final gender =
+              (beneficiaryInfo['gender']?.toString() ?? 'female')
+                      .toLowerCase() ==
+                  'female'
+              ? 'Female'
+              : 'Male';
           final mobile = beneficiaryInfo['mobileNo']?.toString() ?? '-';
           final spouseName = beneficiaryInfo['spouseName']?.toString() ?? '-';
-          final householdRefKey = beneficiary['household_ref_key']?.toString() ?? '';
+          final householdRefKey =
+              beneficiary['household_ref_key']?.toString() ?? '';
 
           // Get visit count
           final visitCount = await _getHbncVisitCount(beneficiaryRefKey);
 
           // Get last and next visit dates
-          final lastVisitDate = await _getHbncLastVisitDateForDisplay(beneficiaryRefKey);
+          final lastVisitDate = await _getHbncLastVisitDateForDisplay(
+            beneficiaryRefKey,
+          );
           final nextVisitDate = await _getHbncNextVisitDateForDisplay(
             beneficiaryRefKey,
             formData['delivery_date']?.toString(),
@@ -716,8 +1175,12 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             'beneficiary_info': jsonEncode(beneficiaryInfo),
             'form_data': formData,
             'badge': 'HBNC', // Add this line to ensure the badge shows "HBNC"
-            'last Visit date': lastVisitDate ?? '-', // Ensure this matches the card's expected field name
-            'Current HBNC last due date': nextVisitDate ?? '-', // Ensure this matches the card's expected field name
+            'last Visit date':
+                lastVisitDate ??
+                '-', // Ensure this matches the card's expected field name
+            'Current HBNC last due date':
+                nextVisitDate ??
+                '-', // Ensure this matches the card's expected field name
             'fullBeneficiaryId': beneficiaryRefKey, // Add this for navigation
             'fullHhId': householdRefKey, // Add this for navigation
           };
@@ -725,7 +1188,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           setState(() {
             _hbncItems.add(formattedData);
           });
-
         } catch (e) {
           debugPrint('❌ Error processing outcome ${outcome['id']}: $e');
         }
@@ -736,8 +1198,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       setState(() => _isLoading = false);
     }
   }
-
-
 
   /// Decide whether a beneficiary should appear in HBNC list for a given
   /// last HBNC due date. We show only if there is **no** HBNC visit record
@@ -783,8 +1243,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         if (dt == null) continue;
 
         final d = DateTime(dt.year, dt.month, dt.day);
-        final start =
-            DateTime(windowStart.year, windowStart.month, windowStart.day);
+        final start = DateTime(
+          windowStart.year,
+          windowStart.month,
+          windowStart.day,
+        );
         final end = DateTime(dueDate.year, dueDate.month, dueDate.day);
 
         final inWindow =
@@ -836,15 +1299,14 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       if (results.isNotEmpty) {
         final result = results.first;
         try {
-          final formJson =
-              jsonDecode(result['form_json'] as String? ?? '{}');
-          final formData =
-              formJson['form_data'] as Map<String, dynamic>? ?? {};
+          final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
+          final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
 
           if (formData.containsKey('visitDetails')) {
             final visitDetails = formData['visitDetails'];
             if (visitDetails is Map) {
-              final visitDate = visitDetails['visitDate'] ??
+              final visitDate =
+                  visitDetails['visitDate'] ??
                   visitDetails['visit_date'] ??
                   visitDetails['dateOfVisit'] ??
                   visitDetails['date_of_visit'];
@@ -855,7 +1317,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             }
           }
 
-          final visitDate = formData['visit_date'] ??
+          final visitDate =
+              formData['visit_date'] ??
               formData['visitDate'] ??
               formData['dateOfVisit'] ??
               formData['date_of_visit'] ??
@@ -888,14 +1351,16 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       }
 
       final db = await DatabaseProvider.instance.database;
-      final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+      final hbncVisitKey =
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
       if (hbncVisitKey == null || hbncVisitKey.isEmpty) {
         return 0;
       }
 
       final List<Map<String, dynamic>> results = await db.query(
         FollowupFormDataTable.table,
-        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        where:
+            'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
         whereArgs: [beneficiaryId, hbncVisitKey],
         orderBy: 'created_date_time DESC',
       );
@@ -906,11 +1371,14 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
       try {
         final latestRecord = results.first;
-        final formJson = jsonDecode(latestRecord['form_json'] as String? ?? '{}');
+        final formJson = jsonDecode(
+          latestRecord['form_json'] as String? ?? '{}',
+        );
         final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
 
         if (formData.containsKey('visitDetails')) {
-          final visitDetails = formData['visitDetails'] as Map<String, dynamic>? ?? {};
+          final visitDetails =
+              formData['visitDetails'] as Map<String, dynamic>? ?? {};
           final visitNumber = visitDetails['visitNumber'] as int? ?? 0;
           return visitNumber;
         }
@@ -922,7 +1390,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     }
   }
 
-  Future<String?> _getNextHbncVisitDate(Database db, String beneficiaryId, String? deliveryDate) async {
+  Future<String?> _getNextHbncVisitDate(
+    Database db,
+    String beneficiaryId,
+    String? deliveryDate,
+  ) async {
     if (deliveryDate == null || deliveryDate.isEmpty) return null;
     try {
       final d = DateTime.tryParse(deliveryDate);
@@ -966,7 +1438,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       // delivery) to determine the next visit date, then format it for
       // display.
       final db = await DatabaseProvider.instance.database;
-      final nextRaw = await _getNextHbncVisitDate(db, beneficiaryId, deliveryDate);
+      final nextRaw = await _getNextHbncVisitDate(
+        db,
+        beneficiaryId,
+        deliveryDate,
+      );
       if (nextRaw == null || nextRaw.isEmpty) {
         return null;
       }
@@ -1029,7 +1505,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               formType == FollowupFormDataTable.childRegistrationDue;
           final isChildTracking =
               formsRefKey == '30bycxe4gv7fqnt6' ||
-                  formType == FollowupFormDataTable.childTrackingDue;
+              formType == FollowupFormDataTable.childTrackingDue;
 
           if (!isChildRegistration && !isChildTracking) {
             continue;
@@ -1071,7 +1547,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                     final ccFormDataMap =
                         ccDecoded['form_data'] as Map<String, dynamic>? ?? {};
                     final caseClosure =
-                        ccFormDataMap['case_closure'] as Map<String, dynamic>? ?? {};
+                        ccFormDataMap['case_closure']
+                            as Map<String, dynamic>? ??
+                        {};
                     if (caseClosure['is_case_closure'] == true) {
                       hasCaseClosure = true;
                       break;
@@ -1106,8 +1584,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             continue;
           }
 
-          final recordDateOnly =
-              DateTime(recordDate.year, recordDate.month, recordDate.day);
+          final recordDateOnly = DateTime(
+            recordDate.year,
+            recordDate.month,
+            recordDate.day,
+          );
           // Show records whose date is **up to** today (past or today),
           // and skip only those with future dates.
           if (recordDateOnly.isAfter(todayDateOnly)) {
@@ -1233,10 +1714,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               ? infoRaw
               : Map<String, dynamic>.from(infoRaw as Map);
 
-          final name =
-              (info['headName'] ?? info['memberName'] ?? info['name'])
-                  ?.toString()
-                  .trim();
+          final name = (info['headName'] ?? info['memberName'] ?? info['name'])
+              ?.toString()
+              .trim();
           if (name == null || name.isEmpty) continue;
 
           final gender = info['gender']?.toString();
@@ -1274,8 +1754,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             ageText = (years != null && years.isNotEmpty)
                 ? '${years}Y'
                 : (approxAge != null && approxAge.isNotEmpty)
-                    ? '${approxAge}y'
-                    : '-';
+                ? '${approxAge}y'
+                : '-';
           }
 
           final mobile = (info['mobileNo'] ?? info['phone'])?.toString();
@@ -1356,8 +1836,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     } catch (_) {}
   }
 
-
-  Future<String?> _getHbncDeliveryDateForBeneficiary(String beneficiaryId) async {
+  Future<String?> _getHbncDeliveryDateForBeneficiary(
+    String beneficiaryId,
+  ) async {
     try {
       if (beneficiaryId.isEmpty) return null;
 
@@ -1390,10 +1871,34 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   List<Widget> _getAncListItems() {
     final List<Map<String, dynamic>> ancItems = _ancItems;
 
-    return ancItems.map((item) => _routineCard(item)).toList();
+    return ancItems.map((item) => _routineCard(item, context)).toList();
   }
 
-  Widget _routineCard(Map<String, dynamic> item) {
+  List<Widget> _getAncListCompletedItems() {
+    final List<Map<String, dynamic>> ancItems = _ancCompletedItems;
+
+    return ancItems.map((item) => _routineCard(item, context)).toList();
+  }
+
+  List<Widget> _getHBNCListCompletedItems() {
+    final List<Map<String, dynamic>> ancItems = _hbncCompletedItems;
+
+    return ancItems.map((item) => _routineCard(item, context)).toList();
+  }
+
+  List<Widget> _getECListCompletedItems() {
+    final List<Map<String, dynamic>> ancItems = _eligibleCompletedCoupleItems;
+
+    return ancItems.map((item) => _routineCard(item, context)).toList();
+  }
+
+  List<Widget> _getRIListCompletedItems() {
+    final List<Map<String, dynamic>> ancItems = _riCompletedItems;
+
+    return ancItems.map((item) => _routineCard(item, context)).toList();
+  }
+  Widget _routineCard(Map<String, dynamic> item, BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final primary = Theme.of(context).primaryColor;
     final badge = item['badge']?.toString() ?? '';
 
@@ -1401,9 +1906,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       onTap: () async {
         final confirmed = await showConfirmationDialog(
           context: context,
-          message: 'Move forward?',
-          yesText: 'Yes',
-          noText: 'No',
+          message: l10n?.moveForward ?? 'Move forward?',
+          yesText: l10n?.yes ?? 'Yes',
+          noText: l10n?.no ?? 'No',
         );
 
         if (confirmed != true) {
@@ -1416,7 +1921,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
           Map<String, String> initial = {};
           try {
-            final households = await LocalStorageDao.instance.getAllHouseholds();
+            final households = await LocalStorageDao.instance
+                .getAllHouseholds();
             String? headId;
             for (final hh in households) {
               final key = (hh['unique_key'] ?? '').toString();
@@ -1426,7 +1932,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               }
             }
 
-            final members = await LocalStorageDao.instance.getBeneficiariesByHousehold(hhKey);
+            final members = await LocalStorageDao.instance
+                .getBeneficiariesByHousehold(hhKey);
 
             Map<String, dynamic>? headRow;
             if (headId != null && headId.isNotEmpty) {
@@ -1504,7 +2011,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                   }
 
                   // Technical identifiers for spouse row
-                  map['spouse_unique_key'] = spouseRow['unique_key']?.toString() ?? '';
+                  map['spouse_unique_key'] =
+                      spouseRow['unique_key']?.toString() ?? '';
                   if (spouseRow['id'] != null) {
                     map['spouse_id_pk'] = spouseRow['id'].toString();
                   }
@@ -1533,10 +2041,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddNewFamilyHeadScreen(
-                isEdit: true,
-                initial: initial,
-              ),
+              builder: (context) =>
+                  AddNewFamilyHeadScreen(isEdit: true, initial: initial),
             ),
           );
         } else if (badge == 'EligibleCouple') {
@@ -1557,25 +2063,31 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             setState(() {
               _completedVisitsCount++;
               // Remove the item from the eligible couple items list
-              _eligibleCoupleItems.removeWhere((element) => 
-                element['id'] == item['id'] && 
-                element['beneficiaryId'] == item['beneficiaryId']
+              _eligibleCoupleItems.removeWhere(
+                (element) =>
+                    element['id'] == item['id'] &&
+                    element['beneficiaryId'] == item['beneficiaryId'],
               );
             });
             _saveTodayWorkCountsToStorage();
           }
         } else if (badge == 'ANC') {
           // Navigate to ANC Visit Form with full beneficiary data
-          final hhId = item['hhId']?.toString() ??
-              item['household_ref_key']?.toString() ?? '';
-          final beneficiaryId = item['BeneficiaryID']?.toString() ??
-              item['unique_key']?.toString() ?? '';
+          final hhId =
+              item['hhId']?.toString() ??
+              item['household_ref_key']?.toString() ??
+              '';
+          final beneficiaryId =
+              item['BeneficiaryID']?.toString() ??
+              item['unique_key']?.toString() ??
+              '';
           if (hhId.isEmpty || beneficiaryId.isEmpty) return;
 
           final formData = Map<String, dynamic>.from(item);
           formData['hhId'] = hhId;
           formData['BeneficiaryID'] = beneficiaryId;
-          formData['unique_key'] = item['unique_key']?.toString() ?? beneficiaryId;
+          formData['unique_key'] =
+              item['unique_key']?.toString() ?? beneficiaryId;
 
           final result = await Navigator.push(
             context,
@@ -1588,17 +2100,17 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             setState(() {
               _completedVisitsCount++;
               // Remove the item from the ANC items list
-              _ancItems.removeWhere((element) => 
-                element['unique_key'] == item['unique_key'] && 
-                element['BeneficiaryID'] == item['BeneficiaryID']
+              _ancItems.removeWhere(
+                (element) =>
+                    element['unique_key'] == item['unique_key'] &&
+                    element['BeneficiaryID'] == item['BeneficiaryID'],
               );
             });
             _saveTodayWorkCountsToStorage();
           }
         } else if (badge == 'HBNC') {
           // Navigate to HBNC Visit Form with full beneficiary IDs
-          final fullBeneficiaryId =
-              item['fullBeneficiaryId']?.toString() ?? '';
+          final fullBeneficiaryId = item['fullBeneficiaryId']?.toString() ?? '';
           final fullHhId = item['fullHhId']?.toString() ?? '';
           if (fullBeneficiaryId.isEmpty || fullHhId.isEmpty) return;
 
@@ -1611,9 +2123,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => HbncVisitScreen(
-                beneficiaryData: beneficiaryData,
-              ),
+              builder: (context) =>
+                  HbncVisitScreen(beneficiaryData: beneficiaryData),
             ),
           );
 
@@ -1621,18 +2132,21 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             setState(() {
               _completedVisitsCount++;
               // Remove the item from the HBNC items list
-              _hbncItems.removeWhere((element) => 
-                element['fullBeneficiaryId'] == item['fullBeneficiaryId']
+              _hbncItems.removeWhere(
+                (element) =>
+                    element['fullBeneficiaryId'] == item['fullBeneficiaryId'],
               );
             });
             _saveTodayWorkCountsToStorage();
           }
         } else if (badge == 'RI') {
           // Navigate to Child Tracking Due List form for Routine Immunization
-          final hhKey = item['household_ref_key']?.toString() ??
-              item['hhId']?.toString() ?? '';
-          final beneficiaryRefKey = item['BeneficiaryID']?.toString() ??
-              item['id']?.toString() ?? '';
+          final hhKey =
+              item['household_ref_key']?.toString() ??
+              item['hhId']?.toString() ??
+              '';
+          final beneficiaryRefKey =
+              item['BeneficiaryID']?.toString() ?? item['id']?.toString() ?? '';
           if (beneficiaryRefKey.isEmpty) return;
 
           final formData = <String, dynamic>{
@@ -1652,9 +2166,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             context,
             MaterialPageRoute(
               builder: (context) => const ChildTrackingDueListForm(),
-              settings: RouteSettings(arguments: {
-                'formData': formData,
-              }),
+              settings: RouteSettings(arguments: {'formData': formData}),
             ),
           );
 
@@ -1662,9 +2174,10 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             setState(() {
               _completedVisitsCount++;
               // Remove the item from the RI items list
-              _riItems.removeWhere((element) => 
-                element['id'] == item['id'] && 
-                element['BeneficiaryID'] == item['BeneficiaryID']
+              _riItems.removeWhere(
+                (element) =>
+                    element['id'] == item['id'] &&
+                    element['BeneficiaryID'] == item['BeneficiaryID'],
               );
             });
             _saveTodayWorkCountsToStorage();
@@ -1760,7 +2273,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${item['name'] ?? 'N/A'}',
+                          '${item['name'] ?? (l10n?.na ??'N/A')}',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16.sp,
@@ -1780,7 +2293,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         ],
                         if (item['mobile'] != null) ...[
                           Text(
-                            'Mobile: ${item['mobile']}',
+                            '${l10n?.mobile ?? "Mobile"}: ${item['mobile']}',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14.sp,
@@ -1790,7 +2303,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         ],
                         if (item['last Visit date'] != null) ...[
                           Text(
-                            'Last Visit: ${item['last Visit date']}',
+                            '${l10n?.lastVisit ?? "Last Visit"}: ${item['last Visit date']}',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14.sp,
@@ -1803,7 +2316,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: () => _launchPhoneDialer(item['mobile']?.toString()),
+                        onTap: () =>
+                            _launchPhoneDialer(item['mobile']?.toString()),
                         child: CircleAvatar(
                           radius: 22,
                           backgroundColor: Colors.white,
@@ -1839,7 +2353,10 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 ],
               ),
             ),
-    ])));
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -1855,6 +2372,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     final totalToDoCount =
         familyCount + eligibleCoupleCount + ancCount + hbncCount + riCount;
 
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1866,13 +2384,17 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             children: [
               Expanded(
                 flex: 1,
-                child: InkWell(
-                  onTap: () => widget.onGridTap(0),
+                child:  InkWell(
+                  onTap: () {
+                    setState(() {
+                      todayVisitClick = true;
+                    });
+                  },
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   child: Card(
                     elevation: 3,
-                    color: widget.selectedGridIndex == 0
+                    color: todayVisitClick
                         ? AppColors.primary
                         : AppColors.surface,
                     child: Padding(
@@ -1903,7 +2425,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                 "$totalToDoCount",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: widget.selectedGridIndex == 0
+                                  color: todayVisitClick
                                       ? AppColors.onPrimary
                                       : AppColors.onSurface,
                                   fontSize: 15.sp,
@@ -1917,7 +2439,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             style: TextStyle(
                               fontWeight: FontWeight.w500,
                               fontSize: 15.sp,
-                              color: widget.selectedGridIndex == 0
+                              color: todayVisitClick
                                   ? AppColors.onPrimary
                                   : AppColors.outline,
                             ),
@@ -1932,12 +2454,18 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               Expanded(
                 flex: 1,
                 child: InkWell(
-                  onTap: () => widget.onGridTap(1),
-                  splashColor: Colors.transparent,
+                  onTap: () {
+                    setState(() {
+                      todayVisitClick = false;
+                    });
+                  },
+
+
+                splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   child: Card(
                     elevation: 3,
-                    color: widget.selectedGridIndex == 1
+                    color: (!todayVisitClick)
                         ? AppColors.primary
                         : AppColors.surface,
                     child: Padding(
@@ -1969,7 +2497,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                 "$_completedVisitsCount",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: widget.selectedGridIndex == 1
+                                  color: (!todayVisitClick)
                                       ? AppColors.onPrimary
                                       : AppColors.onSurface,
                                   fontSize: 15.sp,
@@ -1983,7 +2511,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             style: TextStyle(
                               fontWeight: FontWeight.w500,
                               fontSize: 15.sp,
-                              color: widget.selectedGridIndex == 1
+                              color: (!todayVisitClick)
                                   ? AppColors.onPrimary
                                   : AppColors.outline,
                             ),
@@ -2000,6 +2528,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         const SizedBox(height: 20),
 
         // ExpansionTile list
+        if(todayVisitClick)
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Theme(
@@ -2039,14 +2568,14 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             entry.key == l10n.listFamilySurvey
                                 ? "${_familySurveyItems.length}"
                                 : entry.key == l10n.listEligibleCoupleDue
-                                    ? "${_eligibleCoupleItems.length}"
-                                    : entry.key == l10n.listANC
-                                        ? "${_ancItems.length}"
-                                        : entry.key == l10n.listHBNC
-                                            ? "${_hbncItems.length}"
-                                            : entry.key == l10n.listRoutineImmunization
-                                                ? "${_riItems.length}"
-                                                : "${entry.value.length}",
+                                ? "${_eligibleCoupleItems.length}"
+                                : entry.key == l10n.listANC
+                                ? "${_ancItems.length}"
+                                : entry.key == l10n.listHBNC
+                                ? "${_hbncItems.length}"
+                                : entry.key == l10n.listRoutineImmunization
+                                ? "${_riItems.length}"
+                                : "${entry.value.length}",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: _expandedKey == entry.key
@@ -2071,75 +2600,250 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                       ),
                       children: entry.key == l10n.listANC
                           ? (_ancItems.isEmpty
-                              ? [
-                                  const Padding(
-                                    padding: EdgeInsets.all(12.0),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text('No data found'),
-                                    ),
-                                  ),
-                                ]
-                              : _getAncListItems())
-                          : entry.key == l10n.listFamilySurvey
-                          ? (_familySurveyItems.isEmpty
                                 ? [
-                                    const Padding(
+                                    Padding(
                                       padding: EdgeInsets.all(12.0),
                                       child: Align(
                                         alignment: Alignment.centerLeft,
-                                        child: Text('No data found'),
+                                        child: Text(
+                                          l10n?.noDataFound ?? 'No data found',
+                                        ),
+                                      ),
+                                    ),
+                                  ]
+                                : _getAncListItems())
+                          : entry.key == l10n.listFamilySurvey
+                          ? (_familySurveyItems.isEmpty
+                                ? [
+                                    Padding(
+                                      padding: EdgeInsets.all(12.0),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          l10n?.noDataFound ?? 'No data found',
+                                        ),
                                       ),
                                     ),
                                   ]
                                 : _familySurveyItems
-                                      .map((item) => _routineCard(item))
+                                      .map(
+                                        (item) => _routineCard(item, context),
+                                      )
                                       .toList())
                           : entry.key == l10n.listEligibleCoupleDue
                           ? (_eligibleCoupleItems.isEmpty
                                 ? [
-                                    const Padding(
+                                    Padding(
                                       padding: EdgeInsets.all(12.0),
                                       child: Align(
                                         alignment: Alignment.centerLeft,
-                                        child: Text('No data found'),
+                                        child: Text(
+                                          l10n?.noDataFound ?? 'No data found',
+                                        ),
                                       ),
                                     ),
                                   ]
                                 : _eligibleCoupleItems
-                                      .map((item) => _routineCard(item))
+                                      .map(
+                                        (item) => _routineCard(item, context),
+                                      )
                                       .toList())
                           : entry.key == l10n.listHBNC
                           ? (_hbncItems.isEmpty
                                 ? [
-                                    const Padding(
+                                    Padding(
                                       padding: EdgeInsets.all(12.0),
                                       child: Align(
                                         alignment: Alignment.centerLeft,
-                                        child: Text('No data found'),
+                                        child: Text(
+                                          l10n?.noDataFound ?? 'No data found',
+                                        ),
                                       ),
                                     ),
                                   ]
                                 : _hbncItems
-                                    .map((item) => _routineCard(item))
-                                    .toList())
+                                      .map(
+                                        (item) => _routineCard(item, context),
+                                      )
+                                      .toList())
                           : entry.key == l10n.listRoutineImmunization
                           ? _riItems.isEmpty
-                              ? [
-                                  const Padding(
-                                    padding: EdgeInsets.all(12.0),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text('No data found'),
+                                ? [
+                                    Padding(
+                                      padding: EdgeInsets.all(12.0),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          l10n?.noDataFound ?? 'No data found',
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ]
-                              : _riItems
-                                  .map((item) => _routineCard(item))
-                                  .toList()
+                                  ]
+                                : _riItems
+                                      .map(
+                                        (item) => _routineCard(item, context),
+                                      )
+                                      .toList()
                           : entry.value
                                 .map((item) => ListTile(title: Text(item)))
                                 .toList(),
+                    ),
+                  ),
+                  Divider(color: AppColors.divider, thickness: 1, height: 1),
+                ],
+              ],
+            ),
+          ),
+        ),
+
+        // ExpansionTile list Competed
+        if(!todayVisitClick)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              dividerColor: Colors.transparent,
+              // Control ExpansionTile animation speed globally
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+            ),
+            child: Column(
+              children: [
+                for (var entry in widget.apiData.entries) ...[
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
+                    child: ExpansionTile(
+                      key: ValueKey('${entry.key}_$_expandedKey'),
+                      onExpansionChanged: (expanded) {
+                        setState(() {
+                          _expandedKey = expanded ? entry.key : null;
+                        });
+                      },
+                      initiallyExpanded: _expandedKey == entry.key,
+                      title: Text(
+                        entry.key,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15.sp,
+                          color: _expandedKey == entry.key
+                              ? Colors.blueAccent
+                              : null,
+                        ),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            entry.key == l10n.listFamilySurvey
+                                ? "${_familySurveyItems.length}"
+                                : entry.key == l10n.listEligibleCoupleDue
+                                ? "${_eligibleCompletedCoupleItems.length}"
+                                : entry.key == l10n.listANC
+                                ? "${_ancCompletedItems.length}"
+                                : entry.key == l10n.listHBNC
+                                ? "${_hbncCompletedItems.length}"
+                                : entry.key == l10n.listRoutineImmunization
+                                ? "${_riCompletedItems.length}"
+                                : "${entry.value.length}",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: _expandedKey == entry.key
+                                  ? Colors.blueAccent
+                                  : AppColors.onSurface,
+                              fontSize: 15.sp,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          AnimatedRotation(
+                            turns: _expandedKey == entry.key ? 0.5 : 0,
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut,
+                            child: Icon(
+                              Icons.keyboard_arrow_down_outlined,
+                              color: _expandedKey == entry.key
+                                  ? Colors.blueAccent
+                                  : AppColors.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                      children: entry.key == l10n.listANC
+                          ? (_ancCompletedItems.isEmpty
+                          ? [
+                        Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              l10n?.noDataFound ?? 'No data found',
+                            ),
+                          ),
+                        ),
+                      ]
+                          : _getAncListCompletedItems())
+                          : entry.key == l10n.listFamilySurvey
+                          ? (_familySurveyItems.isEmpty
+                          ? [
+                        Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              l10n?.noDataFound ?? 'No data found',
+                            ),
+                          ),
+                        ),
+                      ]
+                          : _familySurveyItems
+                          .map(
+                            (item) => _routineCard(item, context),
+                      )
+                          .toList())
+                          : entry.key == l10n.listEligibleCoupleDue
+                          ? (_eligibleCompletedCoupleItems.isEmpty
+                          ? [
+                        Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              l10n?.noDataFound ?? 'No data found',
+                            ),
+                          ),
+                        ),
+                      ]
+                          : _getECListCompletedItems())
+                          : entry.key == l10n.listHBNC
+                          ? (_hbncCompletedItems.isEmpty
+                          ? [
+                        Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              l10n?.noDataFound ?? 'No data found',
+                            ),
+                          ),
+                        ),
+                      ]
+                          : _getHBNCListCompletedItems())
+                          : entry.key == l10n.listRoutineImmunization
+                          ? _riCompletedItems.isEmpty
+                          ? [
+                        Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              l10n?.noDataFound ?? 'No data found',
+                            ),
+                          ),
+                        ),
+                      ]
+                          : _getRIListCompletedItems()
+                          : entry.value
+                          .map((item) => ListTile(title: Text(item)))
+                          .toList(),
                     ),
                   ),
                   Divider(color: AppColors.divider, thickness: 1, height: 1),

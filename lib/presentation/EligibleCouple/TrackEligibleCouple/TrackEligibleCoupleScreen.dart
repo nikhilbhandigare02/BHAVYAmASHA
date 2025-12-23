@@ -32,13 +32,14 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
     required String beneficiaryId,
     bool isProtected = false,
     String? beneficiaryRefKey,
-  }) => MaterialPageRoute(
-    builder: (context) => TrackEligibleCoupleScreen(
-      beneficiaryId: beneficiaryId,
-      isProtected: isProtected,
-      beneficiaryRefKey: beneficiaryRefKey,
-    ),
-  );
+  }) =>
+      MaterialPageRoute(
+        builder: (context) => TrackEligibleCoupleScreen(
+          beneficiaryId: beneficiaryId,
+          isProtected: isProtected,
+          beneficiaryRefKey: beneficiaryRefKey,
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -56,13 +57,10 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
             if (state.isPregnant == true) {
               showConfirmationDialog(
                 context: context,
-                title:
-                    l10n?.formSavedSuccessfullyLabel ??
-                    'Form has been saved successfully',
+                title:l10n?.formSavedSuccessfully ?? 'Form has been saved successfully',
                 message:
-                    l10n?.pregnantAddedToAnc ??
-                    'Pregnant beneficiary has been added to antenatal care (ANC) list.',
-                yesText: l10n?.okay ?? 'Okay',
+               l10n?.pregnantAddedToAnc ?? 'Pregnant beneficiary has been added to antenatal care (ANC) list.',
+                yesText:l10n?.okay ??  'Okay',
                 onYes: () => Navigator.pop(context),
                 titleBackgroundColor: AppColors.background,
                 titleTextColor: AppColors.primary,
@@ -71,10 +69,7 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
                 dialogBackgroundColor: Colors.white,
               );
             } else {
-              showAppSnackBar(
-                context,
-                l10n?.formSavedSuccess ?? 'Form saved successfully',
-              );
+              showAppSnackBar(context,l10n?.formSavedSuccess ??  'Form saved successfully');
               Navigator.of(context).pop(true);
             }
           }
@@ -88,12 +83,13 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
 class _TrackEligibleCoupleView extends StatelessWidget {
   final String beneficiaryId;
 
+
   const _TrackEligibleCoupleView({required this.beneficiaryId});
+
 
   Future<bool> _hasActiveMotherCare(String beneficiaryKey) async {
     if (beneficiaryKey.isEmpty) return false;
-    final rec = await LocalStorageDao.instance
-        .getMotherCareActivityByBeneficiary(beneficiaryKey);
+    final rec = await LocalStorageDao.instance.getMotherCareActivityByBeneficiary(beneficiaryKey);
     return rec != null;
   }
 
@@ -104,8 +100,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppHeader(
-        screenTitle:
-            t?.eligibleCoupleTrackingDue ?? 'Eligible Couple Tracking Due',
+        screenTitle: t?.eligibleCoupleTrackingDue ?? 'Eligible Couple Tracking Due',
         showBack: true,
       ),
       body: SingleChildScrollView(
@@ -121,9 +116,9 @@ class _TrackEligibleCoupleView extends StatelessWidget {
               lastDate: DateTime(2100),
               onDateChanged: (date) {
                 if (date != null) {
-                  context.read<TrackEligibleCoupleBloc>().add(
-                    VisitDateChanged(date),
-                  );
+                  context
+                      .read<TrackEligibleCoupleBloc>()
+                      .add(VisitDateChanged(date));
                 }
               },
             ),
@@ -133,15 +128,113 @@ class _TrackEligibleCoupleView extends StatelessWidget {
             // Financial Year
             BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
               buildWhen: (previous, current) =>
-                  previous.financialYear != current.financialYear,
+              previous.financialYear != current.financialYear,
               builder: (context, state) {
-                return CustomTextField(
-                  labelText: t?.financialYearLabel ?? 'वित्तीय वर्ष',
-                  // readOnly: true,
-                  controller: TextEditingController(
-                    text: state.financialYear.isEmpty
-                        ? 'YYYY'
-                        : state.financialYear,
+                // Helper function to parse financial year string to DateTime
+                DateTime? parseFinancialYear(String? yearStr) {
+                  if (yearStr == null || yearStr.isEmpty) return null;
+                  try {
+                    // Handle both YYYY and YYYY-YY formats
+                    final year = yearStr.split('-').first;
+                    return DateTime(int.parse(year));
+                  } catch (e) {
+                    return null;
+                  }
+                }
+
+                // Helper function to format year for display
+                String formatFinancialYear(DateTime date) {
+                  final year = date.year;
+                  return '$year-${(year + 1).toString().substring(2)}';
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t?.financialYearLabel ?? 'वित्तीय वर्ष',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      InkWell(
+                        onTap: () async {
+                          final currentDate = parseFinancialYear(state.financialYear) ?? DateTime.now();
+
+                          final DateTime? picked = await showDialog<DateTime>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                  child: Container(
+                                    width: 300,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(16),
+                                          child: Text(
+                                            t?.financialYearLabel ?? 'Select Year',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        const Divider(height: 1),
+                                        Container(
+                                          height: 300,
+                                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                                          child: YearPicker(
+                                            firstDate: DateTime(DateTime.now().year - 100),
+                                            lastDate: DateTime.now(),
+                                            initialDate: currentDate,
+                                            selectedDate: currentDate,
+                                            onChanged: (DateTime dateTime) {
+                                              Navigator.pop(context, dateTime);
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ));
+                            },
+                          );
+
+                          if (picked != null) {
+                            // Format the year as YYYY-YY (e.g., 2025-26)
+                            final formattedYear = '${picked.year}';
+                            if (!context.mounted) return;
+                            context.read<TrackEligibleCoupleBloc>()
+                                .add(FinancialYearChanged(formattedYear));
+                          }
+                        },
+                        child: Container(
+                          // padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                state.financialYear.isNotEmpty
+                                    ? state.financialYear
+                                    : t?.financialYearLabel ?? 'Select Year',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: state.financialYear.isEmpty
+                                      ? Colors.grey.shade600
+                                      : Colors.black87,
+                                ),
+                              ),
+                              const Icon(Icons.calendar_today, size: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -161,9 +254,9 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                   readOnly: false,
                   onChanged: (value) {
                     if (value != null) {
-                      context.read<TrackEligibleCoupleBloc>().add(
-                        IsPregnantChanged(value),
-                      );
+                      context
+                          .read<TrackEligibleCoupleBloc>()
+                          .add(IsPregnantChanged(value));
                     }
                   },
                 );
@@ -188,36 +281,28 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       CustomDatePicker(
-                        labelText:
-                            '${t?.lmpDateLabelText ?? 'एलएमपी की तिथि'} *',
+                        labelText: '${t?.lmpDateLabelText ?? 'एलएमपी की तिथि'} *',
                         hintText: t?.dateHint,
                         initialDate: lmp,
                         onDateChanged: (date) {
-                          context.read<TrackEligibleCoupleBloc>().add(
-                            LmpDateChanged(date),
-                          );
+                          context.read<TrackEligibleCoupleBloc>()
+                              .add(LmpDateChanged(date));
                         },
                         isEditable: true,
-                        firstDate: DateTime.now().subtract(
-                          const Duration(days: 280),
-                        ),
-                        lastDate: DateTime.now().add(const Duration(days: 30)),
+                        firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                        lastDate: DateTime.now(),
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                       const SizedBox(height: 8),
                       CustomDatePicker(
-                        labelText:
-                            '${t?.eddDateLabel ?? 'प्रसव की संभावित तिथि'} *',
+                        labelText: '${t?.eddDateLabel ?? 'प्रसव की संभावित तिथि'} *',
                         hintText: t?.dateHint,
                         initialDate: edd,
                         onDateChanged: (date) {
-                          context.read<TrackEligibleCoupleBloc>().add(
-                            EddDateChanged(date),
-                          );
+                          context.read<TrackEligibleCoupleBloc>()
+                              .add(EddDateChanged(date));
                         },
-                        isEditable: true,
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime(2100),
+                        readOnly: true,
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
@@ -237,19 +322,18 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ApiDropdown<bool>(
-                      labelText:
-                          t?.fpAdoptingLabel ??
+                      labelText: t?.fpAdoptingLabel ??
                           'क्या आप/आपका साथी परिवार नियोजन अपना रहे हैं?',
                       items: [true, false],
                       getLabel: (value) =>
-                          value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
+                      value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
                       value: state.fpAdopting,
                       hintText: t?.select ?? 'Select',
                       onChanged: (value) {
                         if (value != null) {
-                          context.read<TrackEligibleCoupleBloc>().add(
-                            FpAdoptingChanged(value),
-                          );
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(FpAdoptingChanged(value));
                         }
                       },
                     ),
@@ -259,9 +343,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     // Dependent questions for family planning
                     if (state.fpAdopting == true) ...[
                       ApiDropdown<String>(
-                        labelText:
-                            t?.methodOfContraception ??
-                            'Method of contraception',
+                        labelText: t?.methodOfContraception ?? 'Method of contraception',
                         items: const [
                           'Condom',
                           'Mala -N (Daily contraceptive pill)',
@@ -271,7 +353,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                           'ECP (Emergency contraceptive pill)',
                           'Male Sterilization',
                           'Female Sterilization',
-                          'Any Other Specify',
+                          'Any Other Specify'
                         ],
                         getLabel: (value) {
                           switch (value) {
@@ -300,9 +382,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                         value: state.fpMethod,
                         onChanged: (value) {
                           if (value != null) {
-                            context.read<TrackEligibleCoupleBloc>().add(
-                              FpMethodChanged(value),
-                            );
+                            context.read<TrackEligibleCoupleBloc>().add(FpMethodChanged(value));
                           }
                         },
                       ),
@@ -333,133 +413,110 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
 
-                    if (state.fpMethod == 'Atra Injection' &&
-                        state.fpAdopting == true) ...[
+                    if (state.fpMethod == 'Atra Injection' && state.fpAdopting == true) ...[
                       CustomDatePicker(
-                        labelText:
-                            t?.dateOfAntraInjection ??
-                            'Date of Antra Injection',
+                        labelText: t?.dateOfAntraInjection ?? 'Date of Antra Injection',
                         hintText: 'dd-mm-yyyy',
                         initialDate: state.antraInjectionDateChanged,
                         firstDate: DateTime(1900),
                         lastDate: DateTime(2100),
                         onDateChanged: (date) {
                           if (date != null) {
-                            context.read<TrackEligibleCoupleBloc>().add(
-                              FpAntraInjectionDateChanged(date),
-                            );
+                            context
+                                .read<TrackEligibleCoupleBloc>()
+                                .add(FpAntraInjectionDateChanged(date));
                           }
                         },
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
 
-                    if (state.fpMethod == 'Copper -T (IUCD)' &&
-                        state.fpAdopting == true) ...[
+
+                    if (state.fpMethod == 'Copper -T (IUCD)' && state.fpAdopting == true) ...[
                       CustomDatePicker(
-                        labelText: t?.dateOfRemoval ?? 'Date of removal',
+                        labelText:t?.dateOfRemoval ?? 'Date of removal',
                         initialDate: state.removalDate ?? DateTime.now(),
                         firstDate: DateTime(1900),
                         lastDate: DateTime(2100),
                         onDateChanged: (date) {
                           if (date != null) {
-                            context.read<TrackEligibleCoupleBloc>().add(
-                              RemovalDAteChange(date),
-                            );
+                            context
+                                .read<TrackEligibleCoupleBloc>()
+                                .add(RemovalDAteChange(date));
                           }
                         },
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                       CustomTextField(
                         labelText: t?.reasonForRemoval ?? 'Reason for Removal',
-                        hintText:
-                            t?.enterReasonForRemoval ??
-                            'Enter reason for removal',
+                        hintText:t?.enterReasonForRemoval ??  'Enter reason for removal',
                         initialValue: state.removalReasonChanged,
                         onChanged: (value) {
-                          context.read<TrackEligibleCoupleBloc>().add(
-                            RemovalReasonChanged(value),
-                          );
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(RemovalReasonChanged(value));
                         },
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
 
-                    if (state.fpMethod == 'Condom' &&
-                        state.fpAdopting == true) ...[
+                    if (state.fpMethod == 'Condom' && state.fpAdopting == true) ...[
                       CustomTextField(
-                        labelText:
-                            t?.quantityOfCondoms ?? 'Quantity of Condoms',
+                        labelText:t?.quantityOfCondoms ?? 'Quantity of Condoms',
                         hintText: t?.quantityOfCondoms ?? 'Quantity of condoms',
                         keyboardType: TextInputType.number,
                         onChanged: (value) {
-                          context.read<TrackEligibleCoupleBloc>().add(
-                            CondomQuantity(value),
-                          );
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(CondomQuantity(value));
                         },
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
-                    if (state.fpMethod ==
-                            'Chhaya (Weekly contraceptive pill)' &&
-                        state.fpAdopting == true) ...[
+                    if (state.fpMethod == 'Chhaya (Weekly contraceptive pill)' && state.fpAdopting == true) ...[
                       CustomTextField(
-                        labelText:
-                            t?.quantityOfChhaya ??
-                            'Quantity of Chhaya (Weekly contraceptive pill)',
-                        hintText:
-                            t?.quantityOfChhaya ??
-                            'Quantity of Chhaya (Weekly contraceptive pill)',
+                        labelText:t?.quantityOfChhaya ??  'Quantity of Chhaya (Weekly contraceptive pill)',
+                        hintText:t?.quantityOfChhaya ?? 'Quantity of Chhaya (Weekly contraceptive pill)',
                         keyboardType: TextInputType.number,
                         initialValue: state.chhaya,
                         onChanged: (value) {
-                          context.read<TrackEligibleCoupleBloc>().add(
-                            ChayaQuantity(value),
-                          );
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(ChayaQuantity(value));
                         },
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
-                    if (state.fpMethod ==
-                            'ECP (Emergency contraceptive pill)' &&
-                        state.fpAdopting == true) ...[
+                    if (state.fpMethod == 'ECP (Emergency contraceptive pill)' && state.fpAdopting == true) ...[
                       CustomTextField(
-                        labelText:
-                            t?.quantityOfECP ??
-                            'Quantity of ECP (Emergency contraceptive pill)',
-                        hintText:
-                            t?.quantityOfECP ??
-                            'Quantity of ECP (Emergency contraceptive pill)',
+                        labelText: t?.quantityOfECP ?? 'Quantity of ECP (Emergency contraceptive pill)',
+                        hintText: t?.quantityOfECP ?? 'Quantity of ECP (Emergency contraceptive pill)',
                         keyboardType: TextInputType.number,
                         initialValue: state.ecp,
                         onChanged: (value) {
-                          context.read<TrackEligibleCoupleBloc>().add(
-                            ECPQuantity(value),
-                          );
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(ECPQuantity(value));
                         },
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
-                    if (state.fpMethod ==
-                            'Mala -N (Daily contraceptive pill)' &&
-                        state.fpAdopting == true) ...[
+                    if (state.fpMethod == 'Mala -N (Daily contraceptive pill)' && state.fpAdopting == true) ...[
                       CustomTextField(
-                        labelText:
-                            t?.quantityOfMalaN ??
-                            'Quantity of Mala -N (Daily contraceptive pill)',
-                        hintText:
-                            t?.quantityOfMalaN ??
-                            'Quantity of Mala -N (Daily contraceptive pill)',
+                        labelText: t?.quantityOfMalaN ?? 'Quantity of Mala -N (Daily contraceptive pill)',
+                        hintText: t?.quantityOfMalaN ??'Quantity of Mala -N (Daily contraceptive pill)',
                         keyboardType: TextInputType.number,
                         initialValue: state.mala,
                         onChanged: (value) {
-                          context.read<TrackEligibleCoupleBloc>().add(
-                            MalaQuantity(value),
-                          );
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(MalaQuantity(value));
                         },
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
+
+
                   ],
                 );
               },
@@ -472,17 +529,16 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                   children: [
                     const SizedBox(height: 8),
                     ApiDropdown<bool>(
-                      labelText:
-                          t?.isBeneficiaryAbsent ?? 'Is Beneficiary Absent',
+                      labelText: t?.isBeneficiaryAbsent ?? 'Is Beneficiary Absent',
                       items: [true, false],
                       getLabel: (value) =>
-                          value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
+                      value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
                       value: state.beneficiaryAbsentCHanged,
                       onChanged: (value) {
                         if (value != null) {
-                          context.read<TrackEligibleCoupleBloc>().add(
-                            BeneficiaryAbsentCHanged(value),
-                          );
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(BeneficiaryAbsentCHanged(value));
                         }
                       },
                     ),
@@ -494,13 +550,14 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                         labelText: t?.reasonForAbsent ?? 'Reason for absent',
                         hintText: t?.enterReason ?? 'Enter reason',
                         onChanged: (val) {
-                          context.read<TrackEligibleCoupleBloc>().add(
-                            BeneficiaryAbsentReasonChanged(val),
-                          );
+                          context
+                              .read<TrackEligibleCoupleBloc>()
+                              .add(BeneficiaryAbsentReasonChanged(val));
                         },
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
+
                   ],
                 );
               },
@@ -536,9 +593,8 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PreviousVisitsScreen(
-                              beneficiaryId: beneficiaryId,
-                            ),
+                            builder: (context) =>
+                                PreviousVisitsScreen(beneficiaryId: beneficiaryId),
                           ),
                         );
                       },
@@ -547,7 +603,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        minimumSize: Size.fromHeight(4.5.h),
+                        minimumSize:  Size.fromHeight(4.5.h),
                       ),
                       child: Text(
                         t?.previousButton ?? 'पिछला पेज',
@@ -563,34 +619,34 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: enabled
                           ? () {
-                              context.read<TrackEligibleCoupleBloc>().add(
-                                const SubmitTrackForm(),
-                              );
-                            }
+                        context
+                            .read<TrackEligibleCoupleBloc>()
+                            .add(const SubmitTrackForm());
+                      }
                           : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        minimumSize: Size.fromHeight(4.5.h),
+                        minimumSize:  Size.fromHeight(4.5.h),
                       ),
                       child: state.status == FormStatus.submitting
                           ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
                           : Text(
-                              t?.saveButton ?? 'संरक्षित करें',
-                              style: TextStyle(
-                                color: AppColors.background,
-                                fontSize: 15.sp,
-                              ),
-                            ),
+                        t?.saveButton ?? 'संरक्षित करें',
+                        style: TextStyle(
+                          color: AppColors.background,
+                          fontSize: 15.sp,
+                        ),
+                      ),
                     ),
                   ),
                 ],
