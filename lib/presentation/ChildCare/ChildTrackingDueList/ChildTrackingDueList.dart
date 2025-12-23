@@ -10,6 +10,7 @@ import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/routes/Routes.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import '../../../core/widgets/SnackBar/app_snackbar.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/tables/followup_form_data_table.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
@@ -56,6 +57,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         where: 'child_care_state = ? AND is_deleted = 0',
         whereArgs: ['tracking_due'],
         columns: ['beneficiary_ref_key'],
+        orderBy: 'created_date_time DESC',
       );
 
       if (childCareActivities.isEmpty) {
@@ -683,14 +685,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
               });
               _filtered = List<Map<String, dynamic>>.from(_childTrackingList);
             });
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Case closure recorded. Child removed from tracking list.'),
-                backgroundColor: Colors.green,
-                duration: Duration(seconds: 2),
-              ),
-            );
+            showAppSnackBar(context, 'Case closure recorded. Child removed from tracking list.');
           } else {
             _loadChildTrackingData();
           }
@@ -746,7 +741,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                         'assets/images/sync.png',
                         width: 25,
                         color: isSynced 
-                            ? Colors.green
+                            ? null
                             : Colors.grey[500],
                       );
                     },

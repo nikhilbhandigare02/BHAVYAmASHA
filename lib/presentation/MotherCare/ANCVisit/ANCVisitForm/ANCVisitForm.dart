@@ -105,7 +105,7 @@ class _AncvisitformState extends State<Ancvisitform> {
   void _updateFormWithData(Map<String, dynamic> formData) {
     // Basic information
     // _bloc.add(VisitTypeChanged(formData['visit_type'] ?? '')); // Don't auto-fill visit type
-    // _bloc.add(PlaceOfAncChanged(formData['place_of_anc'] ?? '')); // Don't auto-fill place of ANC
+    _bloc.add(PlaceOfAncChanged(formData['place_of_anc'] ?? '')); // Don't auto-fill place of ANC
     _bloc.add(DateOfInspectionChanged(_parseDate(formData['date_of_inspection'])));
     _bloc.add(HouseNumberChanged(formData['house_number'] ?? ''));
     _bloc.add(WomanNameChanged(formData['woman_name'] ?? ''));
@@ -113,9 +113,7 @@ class _AncvisitformState extends State<Ancvisitform> {
     _bloc.add(RchNumberChanged(formData['rch_number'] ?? ''));
 
     // Pregnancy information
-    _bloc.add(LmpDateChanged(_parseDate(formData['lmp_date'])));
-    _bloc.add(EddDateChanged(_parseDate(formData['edd_date'])));
-    _bloc.add(WeeksOfPregnancyChanged(formData['weeks_of_pregnancy']?.toString() ?? ''));
+    // Intentionally not auto-filling LMP/EDD/weeks from previous forms
 
     // Medical information
     _bloc.add(WeightChanged(formData['weight']?.toString() ?? ''));
@@ -153,59 +151,17 @@ class _AncvisitformState extends State<Ancvisitform> {
 
     // Other fields
     _bloc.add(FolicAcidTabletsChanged(formData['folic_acid_tablets'] ?? ''));
+    _bloc.add(CalciumVitaminD3TabletsChanged(formData['calcium_vitamin_tablets'] ?? ''));
 
-    // Handle pre-existing diseases from form data
     if (formData['pre_existing_diseases'] != null) {
       final diseases = List<String>.from(formData['pre_existing_diseases']);
       _bloc.add(PreExistingDiseasesChanged(diseases));
 
-      // If there's an 'Other' disease, set it
       if (formData['other_disease'] != null) {
         _bloc.add(OtherDiseaseChanged(formData['other_disease']));
       }
     }
 
-    if (formData['gives_birth_to_baby'] != null) {
-      _bloc.add(GivesBirthToBaby(formData['gives_birth_to_baby'].toString()));
-    }
-
-    if (formData['delivery_outcome'] != null) {
-      _bloc.add(DeliveryOutcomeChanged(formData['delivery_outcome'].toString()));
-    }
-
-    if (formData['number_of_children'] != null) {
-      _bloc.add(NumberOfChildrenChanged(formData['number_of_children'].toString()));
-    }
-
-    if (formData['baby1_name'] != null) {
-      _bloc.add(Baby1NameChanged(formData['baby1_name'].toString()));
-    }
-    if (formData['baby1_gender'] != null) {
-      _bloc.add(Baby1GenderChanged(formData['baby1_gender'].toString()));
-    }
-    if (formData['baby1_weight'] != null) {
-      _bloc.add(Baby1WeightChanged(formData['baby1_weight'].toString()));
-    }
-
-    if (formData['baby2_name'] != null) {
-      _bloc.add(Baby2NameChanged(formData['baby2_name'].toString()));
-    }
-    if (formData['baby2_gender'] != null) {
-      _bloc.add(Baby2GenderChanged(formData['baby2_gender'].toString()));
-    }
-    if (formData['baby2_weight'] != null) {
-      _bloc.add(Baby2WeightChanged(formData['baby2_weight'].toString()));
-    }
-
-    if (formData['baby3_name'] != null) {
-      _bloc.add(Baby3NameChanged(formData['baby3_name'].toString()));
-    }
-    if (formData['baby3_gender'] != null) {
-      _bloc.add(Baby3GenderChanged(formData['baby3_gender'].toString()));
-    }
-    if (formData['baby3_weight'] != null) {
-      _bloc.add(Baby3WeightChanged(formData['baby3_weight'].toString()));
-    }
   }
 
 
@@ -385,7 +341,7 @@ class _AncvisitformState extends State<Ancvisitform> {
         }
       }
 
-      // Extract and ensure full IDs are used - preserve original values without modification
+
       final dataId = data['id']?.toString() ?? '';
       final dataBeneficiaryId = data['BeneficiaryID']?.toString() ?? '';
       final uniqueKey = data['unique_key']?.toString() ?? '';
@@ -411,8 +367,8 @@ class _AncvisitformState extends State<Ancvisitform> {
           if (formData['form_json'] != null) {
             try {
               final formJson = jsonDecode(formData['form_json'] as String);
-              if (formJson is Map && formJson['form_data'] is Map) {
-                final formDataMap = formJson['form_data'] as Map<String, dynamic>;
+              if (formJson is Map && formJson['anc_form'] is Map) {
+                final formDataMap = formJson['anc_form'] as Map<String, dynamic>;
                 print('📝 Loaded form data: $formDataMap');
 
                 // Update the form with the loaded data
@@ -424,7 +380,7 @@ class _AncvisitformState extends State<Ancvisitform> {
           }
 
           for (var form in existingForms) {
-            // Try to extract and display name from form_json
+
             if (form['form_json'] != null) {
               try {
                 final formDataJson = jsonDecode(form['form_json'] as String);
@@ -433,7 +389,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                 // If this is the current beneficiary, log more details
                 if (form['beneficiary_ref_key'] == (dataBeneficiaryId.isNotEmpty ? dataBeneficiaryId : uniqueKey)) {
-                  print('  👆 Current beneficiary match!');
+                  print('  Current beneficiary match!');
                   final formJsonString = jsonEncode(formDataJson);
                   print('  📝 Full form data: ${formJsonString.length > 200 ? formJsonString.substring(0, 200) + '...' : formJsonString}');
                 }
@@ -466,10 +422,10 @@ class _AncvisitformState extends State<Ancvisitform> {
               final latest = byBeneficiary.first;
 
               // Fixed: Proper conditional expression with type casting
-              final fd = latest['form_data'] is Map
-                  ? Map<String, dynamic>.from(latest['form_data'] as Map)
+              final fd = latest['anc_form'] is Map
+                  ? Map<String, dynamic>.from(latest['anc_form'] as Map)
                   : (latest['form_json'] != null
-                  ? ((jsonDecode(latest['form_json'] as String) as Map<String, dynamic>?)?['form_data'] as Map<String, dynamic>?) ?? {}
+                  ? ((jsonDecode(latest['form_json'] as String) as Map<String, dynamic>?)?['anc_form'] as Map<String, dynamic>?) ?? {}
                   : <String, dynamic>{});
 
               print('📝 Loaded fallback ANC form data: $fd');
@@ -493,8 +449,8 @@ class _AncvisitformState extends State<Ancvisitform> {
           ? dataBeneficiaryId
           : (dataId.isNotEmpty ? dataId : uniqueKey);
 
-      print('📌 Selected Beneficiary ID: $beneficiaryIdToUse (${beneficiaryIdToUse?.length ?? 0} chars)');
-      print('📌 Household ID: $hhId (${hhId.length} chars)');
+      print('  Selected Beneficiary ID: $beneficiaryIdToUse (${beneficiaryIdToUse?.length ?? 0} chars)');
+      print('  Household ID: $hhId (${hhId.length} chars)');
 
       if (beneficiaryIdToUse != null && beneficiaryIdToUse.isNotEmpty) {
         _bloc.add(BeneficiaryIdSet(beneficiaryIdToUse));
@@ -740,7 +696,7 @@ class _AncvisitformState extends State<Ancvisitform> {
         } catch (_) {
           continue;
         }
-        final data = root['form_data'];
+        final data = root['anc_form'];
         if (data is Map) {
           final lmpStr = data['lmp_date']?.toString();
           if (lmpStr != null && lmpStr.isNotEmpty) {
@@ -808,7 +764,7 @@ class _AncvisitformState extends State<Ancvisitform> {
         } catch (_) {
           continue;
         }
-        final data = root['form_data'];
+        final data = root['anc_form'];
         if (data is Map) {
           final td1Str = data['td1_date']?.toString();
           if (td1Str != null && td1Str.isNotEmpty) {
@@ -899,14 +855,13 @@ class _AncvisitformState extends State<Ancvisitform> {
                   final count = _childrenCount(state.numberOfChildren);
                   CustomDialog.show(
                     context,
-                    title: 'Form has been saved successfully.',
-                    message: 'Delivery outcome : $count',
+                    title:l10n?.formSavedSuccessfully ?? 'Form has been saved successfully.',
+                    message: '${l10n?.deliveryOutcome ?? "Delivery outcome"} : $count',
                     onOkPressed: () {
                       Navigator.of(context, rootNavigator: true).pop();
                       Navigator.pop(context, true);
                     },
                   );
-                  
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(l10n?.saveSuccess ?? 'Form Submitted successfully')),
@@ -962,6 +917,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     return s;
                                 }
                               },
+
                               value: state.visitType.isEmpty ? null : state.visitType,
 
                               onChanged: (v) => bloc.add(VisitTypeChanged(v ?? '')),
@@ -1078,7 +1034,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               labelText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
-                             // readOnly: true,
+                             readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
                             ),

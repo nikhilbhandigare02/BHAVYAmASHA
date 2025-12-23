@@ -11,6 +11,7 @@ import '../../../../core/config/themes/CustomColors.dart';
 
 import '../../../../data/Database/database_provider.dart';
 import '../../../../data/Database/local_storage_dao.dart';
+import '../../../../data/SecureStorage/SecureStorage.dart';
 import '../ANCVisitForm/ANCVisitForm.dart';
 
 class Ancvisitlistscreen extends StatefulWidget {
@@ -30,53 +31,41 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
   Future<List<Map<String, dynamic>>> _getAncDueRecords() async {
     final db = await DatabaseProvider.instance.database;
 
-    final rows = await db.rawQuery('''
-  SELECT mca.*
-FROM mother_care_activities mca
-INNER JOIN (
-    SELECT beneficiary_ref_key,
-           MAX(created_date_time) AS max_date
-    FROM mother_care_activities
-    WHERE mother_care_state = 'anc_due'
-    GROUP BY beneficiary_ref_key
-) latest
-  ON mca.beneficiary_ref_key = latest.beneficiary_ref_key
- AND mca.created_date_time = latest.max_date
-INNER JOIN beneficiaries_new bn
-  ON mca.beneficiary_ref_key = bn.unique_key
-WHERE bn.is_deleted = 0;
+    final currentUserData = await SecureStorageService.getCurrentUserData();
+    final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
+    if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+      return [];
+    }
 
-  ''');
-
-    return rows;
-  }
-
-  Future<Set<String>> _getDeliveredBeneficiaryIds() async {
-    final db = await DatabaseProvider.instance.database;
-
-    final rows = await db.query(
-      'followup_form_data',
-      where: '''
-      forms_ref_key = ?
-      AND (
-        LOWER(form_json) LIKE '%gives_birth_to_baby%'
-      )
-      AND (
-        LOWER(form_json) LIKE '%yes%'
-        OR LOWER(form_json) LIKE '%live_birth%'
-      )
+    final rows = await db.rawQuery(
+      '''
+    WITH RankedMCA AS (
+      SELECT
+        mca.*,
+        ROW_NUMBER() OVER (
+          PARTITION BY mca.beneficiary_ref_key
+          ORDER BY mca.created_date_time DESC, mca.id DESC
+        ) AS rn
+      FROM mother_care_activities mca
+      WHERE
+        mca.is_deleted = 0
+        AND mca.current_user_key = ?
+    )
+    SELECT r.*
+    FROM RankedMCA r
+    INNER JOIN beneficiaries_new bn
+      ON r.beneficiary_ref_key = bn.unique_key
+    WHERE
+      r.rn = 1
+      AND r.mother_care_state = 'anc_due'
+      AND bn.is_deleted = 0
+    ORDER BY r.created_date_time DESC; 
     ''',
-      whereArgs: ['bt7gs9rl1a5d26mz'],
-      columns: ['beneficiary_ref_key'],
-      distinct: true,
+      [ashaUniqueKey],
     );
 
-    return rows
-        .map((e) => e['beneficiary_ref_key']?.toString())
-        .where((id) => id != null && id!.isNotEmpty)
-        .cast<String>()
-        .toSet();
+    return rows;
   }
 
   Future<void> _loadPregnantWomen() async {
@@ -94,8 +83,8 @@ WHERE bn.is_deleted = 0;
           .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
           .toSet();
 
-      final deliveredBeneficiaryIds = await _getDeliveredBeneficiaryIds();
-      print('ℹ️ Delivered: ${deliveredBeneficiaryIds.length}');
+    //  final deliveredBeneficiaryIds = await _getDeliveredBeneficiaryIds();
+     // print('ℹ️ Delivered: ${deliveredBeneficiaryIds.length}');
 
       for (final row in rows) {
         try {
@@ -109,9 +98,9 @@ WHERE bn.is_deleted = 0;
           final beneficiaryId = row['unique_key']?.toString() ?? '';
           if (beneficiaryId.isEmpty) continue;
 
-          if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
-            continue;
-          }
+          // if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
+          //   continue;
+          // }
 
           final isPregnant =
               info['isPregnant']?.toString().toLowerCase() == 'yes';
@@ -142,10 +131,10 @@ WHERE bn.is_deleted = 0;
           continue;
         }
 
-        // ❌ EXCLUDE DELIVERED (IMPORTANT)
-        if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
-          continue;
-        }
+        // // ❌ EXCLUDE DELIVERED (IMPORTANT)
+        // if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
+        //   continue;
+        // }
 
         pregnantWomen.add({
           'BeneficiaryID': beneficiaryId,
@@ -226,6 +215,7 @@ WHERE bn.is_deleted = 0;
 
   DateTime _calculateEdd(DateTime lmp) {
     return _dateAfterWeeks(lmp, 40);
+
   }
 
   Map<String, DateTime> _calculateAncDateRanges(DateTime lmp) {
@@ -495,13 +485,13 @@ WHERE bn.is_deleted = 0;
             if (ancForms.isNotEmpty) {
               final latest = ancForms.first;
               Map<String, dynamic> fd = {};
-              if (latest['form_data'] is Map) {
-                fd = Map<String, dynamic>.from(latest['form_data'] as Map);
+              if (latest['anc_form'] is Map) {
+                fd = Map<String, dynamic>.from(latest['anc_form'] as Map);
               } else if (latest['form_json'] is String && (latest['form_json'] as String).isNotEmpty) {
                 try {
                   final decoded = jsonDecode(latest['form_json'] as String);
-                  if (decoded is Map && decoded['form_data'] is Map) {
-                    fd = Map<String, dynamic>.from(decoded['form_data'] as Map);
+                  if (decoded is Map && decoded['anc_form'] is Map) {
+                    fd = Map<String, dynamic>.from(decoded['anc_form'] as Map);
                   }
                 } catch (_) {}
               }
@@ -598,21 +588,13 @@ WHERE bn.is_deleted = 0;
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            '${isAncDue ? 'DUE - ' : ''}${l10n?.visitsLabel ?? 'Visits :'} $count',
-                            style: TextStyle(
-                              color: primary,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14.sp,
-                            ),
-                          ),
                           if (isHighRisk) ...[
                             const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
                                 color: Colors.red[50],
-                                border: Border.all(color: Colors.red[700]!),
+                               // border: Border.all(color: Colors.red[700]!),
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
@@ -633,6 +615,16 @@ WHERE bn.is_deleted = 0;
                               ),
                             ),
                           ],
+                          SizedBox(width: 2,),
+                          Text(
+                            '${isAncDue ? ' ' : ''}${l10n?.visitsLabel ?? 'Visits :'} $count',
+                            style: TextStyle(
+                              color: primary,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+
                         ],
                       );
                     },

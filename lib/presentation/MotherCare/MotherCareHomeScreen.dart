@@ -120,12 +120,42 @@ WHERE bn.is_deleted = 0;
   Future<void> _loadAncVisitCount() async {
     try {
       setState(() => _isLoading = true);
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      final deliveredIds = await _getDeliveredBeneficiaryIds();
-      final ancDueIds = await _getAncDueBeneficiaryIds();
+      final ancDueRows = ashaUniqueKey == null || ashaUniqueKey.isEmpty
+          ? <Map<String, dynamic>>[]
+          : await db.rawQuery('''
+    WITH RankedMCA AS (
+      SELECT
+        mca.*,
+        ROW_NUMBER() OVER (
+          PARTITION BY mca.beneficiary_ref_key
+          ORDER BY mca.created_date_time DESC, mca.id DESC
+        ) AS rn
+      FROM mother_care_activities mca
+      WHERE
+        mca.is_deleted = 0
+        AND mca.current_user_key = ?
+    )
+    SELECT r.*
+    FROM RankedMCA r
+    INNER JOIN beneficiaries_new bn
+      ON r.beneficiary_ref_key = bn.unique_key
+    WHERE
+      r.rn = 1
+      AND r.mother_care_state = 'anc_due_state'
+      AND bn.is_deleted = 0
+    ORDER BY r.created_date_time DESC;
+      ''', [ashaUniqueKey]);
+
+      final ancDueBeneficiaryIds = ancDueRows
+          .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
+          .where((id) => id.isNotEmpty)
+          .toSet();
 
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-
       final Set<String> countedIds = {};
 
       for (final row in rows) {
@@ -139,17 +169,13 @@ WHERE bn.is_deleted = 0;
         final beneficiaryId = row['unique_key']?.toString() ?? '';
         if (beneficiaryId.isEmpty) continue;
 
-        // ❌ Exclude delivered
-        if (deliveredIds.contains(beneficiaryId)) continue;
-
         final gender = info['gender']?.toString().toLowerCase() ?? '';
         if (gender != 'f' && gender != 'female') continue;
 
         final isPregnant =
             info['isPregnant']?.toString().toLowerCase() == 'yes';
-        final isAncDue = ancDueIds.contains(beneficiaryId);
+        final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
 
-        // ✅ Same condition as UI
         if (isPregnant || isAncDue) {
           countedIds.add(beneficiaryId);
         }
@@ -175,54 +201,63 @@ WHERE bn.is_deleted = 0;
     try {
       final db = await DatabaseProvider.instance.database;
       const ancRefKey = 'bt7gs9rl1a5d26mz';
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      print('🔍 Loading Delivery Outcome count (same logic as list)...');
+      print('🔍 Loading Delivery Outcome count (aligned with screen)...');
 
-      final rows = await db.rawQuery('''
-      WITH LatestForms AS (
-        SELECT
-          f.beneficiary_ref_key,
-          ROW_NUMBER() OVER (
-            PARTITION BY f.beneficiary_ref_key
-            ORDER BY f.created_date_time DESC, f.id DESC
-          ) AS rn
-        FROM ${FollowupFormDataTable.table} f
-        WHERE
-          f.forms_ref_key = '$ancRefKey'
-          AND f.is_deleted = 0
-          AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
-      )
+      final results = await db.rawQuery(
+        '''
+WITH LatestMCA AS (
+  SELECT
+    mca.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY mca.beneficiary_ref_key
+      ORDER BY mca.created_date_time DESC, mca.id DESC
+    ) AS rn
+  FROM ${MotherCareActivitiesTable.table} mca
+  WHERE mca.is_deleted = 0
+),
+DeliveryOutcomeOnly AS (
+  SELECT *
+  FROM LatestMCA
+  WHERE rn = 1
+    AND mother_care_state = 'delivery_outcome'
+),
+LatestANC AS (
+  SELECT
+    f.beneficiary_ref_key,
+    f.form_json,
+    ROW_NUMBER() OVER (
+      PARTITION BY f.beneficiary_ref_key
+      ORDER BY f.created_date_time DESC, f.id DESC
+    ) AS rn
+  FROM ${FollowupFormDataTable.table} f
+  WHERE
+    f.forms_ref_key = ?
+    AND f.is_deleted = 0
+    AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
+    AND f.current_user_key = ?
+)
+SELECT
+  d.beneficiary_ref_key
+FROM DeliveryOutcomeOnly d
+LEFT JOIN LatestANC a
+  ON a.beneficiary_ref_key = d.beneficiary_ref_key
+ AND a.rn = 1
+ORDER BY d.created_date_time DESC
+''',
+        [
+          ancRefKey,
+          ashaUniqueKey,
+        ],
+      );
 
-      SELECT DISTINCT beneficiary_ref_key
-      FROM (
-        -- From ANC forms
-        SELECT beneficiary_ref_key
-        FROM LatestForms
-        WHERE rn = 1
-
-        UNION
-
-        -- From mother care activities
-        SELECT mca.beneficiary_ref_key
-        FROM ${MotherCareActivitiesTable.table} mca
-        WHERE
-          mca.mother_care_state = 'delivery_outcome'
-          AND mca.is_deleted = 0
-      )
-      WHERE beneficiary_ref_key NOT IN (
-        SELECT beneficiary_ref_key
-        FROM ${FollowupFormDataTable.table}
-        WHERE
-          forms_ref_key = '${FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.deliveryOutcome]}'
-          AND is_deleted = 0
-      )
-    ''');
-
-      print('✅ Delivery Outcome Count = ${rows.length}');
+      print('✅ Delivery Outcome Count = ${results.length}');
 
       if (mounted) {
         setState(() {
-          _deliveryOutcomeCount = rows.length;
+          _deliveryOutcomeCount = results.length;
         });
       }
     } catch (e, stackTrace) {

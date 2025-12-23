@@ -85,13 +85,13 @@ class _UpdatedEligibleCoupleListScreenState
           if (decoded['form_data'] is Map) {
             formData = Map<String, dynamic>.from(decoded['form_data']);
           }
-          final isPregnant = formData['is_pregnant'];
-          if (isPregnant == true) {
-            final key = row['beneficiary_ref_key']?.toString() ?? '';
-            if (key.isNotEmpty) {
-              pregnantBeneficiaries.add(key);
-            }
-          }
+          // final isPregnant = formData['is_pregnant'];
+          // if (isPregnant == true) {
+          //   final key = row['beneficiary_ref_key']?.toString() ?? '';
+          //   if (key.isNotEmpty) {
+          //     pregnantBeneficiaries.add(key);
+          //   }
+          // }
           final fpMethod = formData['fp_method']?.toString().toLowerCase().trim();
           if (fpMethod == 'male sterilization' || fpMethod == 'female sterilization') {
             final key = row['beneficiary_ref_key']?.toString() ?? '';

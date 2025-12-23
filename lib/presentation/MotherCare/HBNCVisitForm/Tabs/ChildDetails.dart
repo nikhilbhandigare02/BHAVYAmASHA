@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
@@ -38,6 +39,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
     required String? unit,
   }) {
     if (tempValue == null || tempValue.isEmpty || unit == null) return;
+    final l10n = AppLocalizations.of(context);
 
     final temp = double.tryParse(tempValue);
     if (temp == null) return;
@@ -54,15 +56,15 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text(
-            'Attention!',
+          title:  Text(
+            l10n?.attention ?? 'Attention!',
             style: TextStyle(
               color: Colors.red,
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: const Text(
-            'Please refer the child to nearby hospital.',
+          content:  Text(
+            l10n?.hospitalReferMsg ?? 'Please refer the child to nearby hospital.',
             style: TextStyle(
               color: Colors.red,
             ),
@@ -70,8 +72,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'OKAY',
+              child:  Text(
+                l10n?.okayLabel ?? 'OKAY',
                 style: TextStyle(color: Colors.red),
               ),
             ),
@@ -98,8 +100,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
           print('HBNC ChildDetails last ANC record for ${widget.beneficiaryId}: $s');
           try {
             final decoded = jsonDecode(s);
-            if (decoded is Map && decoded['form_data'] is Map) {
-              final fd = Map<String, dynamic>.from(decoded['form_data'] as Map);
+            if (decoded is Map && decoded['anc_form'] is Map) {
+              final fd = Map<String, dynamic>.from(decoded['anc_form'] as Map);
               final outcome = fd['delivery_outcome']?.toString();
               final number_of_children = fd['number_of_children']?.toString();
               final idx = widget.childIndex <= 1 ? 1 : (widget.childIndex >= 3 ? 3 : widget.childIndex);
@@ -162,7 +164,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   ApiDropdown<String>(
-                    labelText: t.babyConditionLabel,
+                    labelText: "${t.babyConditionLabel} *",
                     items:  ['alive', 'death'],
                     getLabel: (e) => e == 'alive' ? t.alive : t.dead,
                     value: s(c['babyCondition']),
@@ -173,7 +175,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   CustomTextField(
-                    labelText: t.babyNameLabel,
+                    labelText: "${t.babyNameLabel} *",
                     hintText: t.babyNameLabel,
                     initialValue: s(c['babyName']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
@@ -183,10 +185,21 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   ApiDropdown<String>(
-                    labelText: t.babyGenderLabel,
+                    labelText: "${t.babyGenderLabel} *",
                     hintText: t.babyGenderLabel,
-                    items: const ['Male', 'Female'],
-                    getLabel: (e) => e == 'Male' ? t.male : t.female,
+                    items: const ['Male', 'Female', 'Transgender'],
+                    getLabel: (s) {
+                      switch (s) {
+                        case 'Male':
+                          return t.genderMale;
+                        case 'Female':
+                          return t.genderFemale;
+                        case 'Transgender':
+                          return t.transgender;
+                        default:
+                          return s;
+                      }
+                    },
                     value: s(c['gender']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(
@@ -200,7 +213,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   CustomTextField(
-                    labelText: t.newbornWeightGramLabel,
+                    labelText: "${t.newbornWeightGramLabel} *",
                     hintText: t.newbornWeightGramLabel,
                     keyboardType: TextInputType.number,
                     initialValue: s(c['weightAtBirth']),
@@ -211,7 +224,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   CustomTextField(
-                    labelText: t.newbornTemperatureLabel,
+                    labelText: "${t.newbornTemperatureLabel} *",
                     hintText: t.hintTemp,
                     keyboardType: TextInputType.number,
                     initialValue: s(c['temperature']),
@@ -238,9 +251,30 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        t.infantTemperatureUnitLabel,
-                        style: Theme.of(context).textTheme.bodyMedium,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: t.infantTemperatureUnitLabel,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black, // label color
+                                ),
+                              ),
+                              const TextSpan(
+                                text: ' *',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.red, // 🔴 red asterisk
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                       Row(
                         children: [
@@ -295,9 +329,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
                   const Divider(height: 0,),
                   ApiDropdown<String>(
-                    labelText: t.weightColorMatchLabel,
+                    labelText: "${t.weightColorMatchLabel} *",
                     items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? 'Yes' : 'No',
+                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['weightColorMatch']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'weightColorMatch', value: val, childIndex: widget.childIndex),
@@ -307,7 +341,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.weighingScaleColorLabel,
+                    labelText: "${t.weighingScaleColorLabel} *",
                     items: const ['Green', 'Yellow', 'Red'],
                     getLabel: (e) => e == 'Green' ? t.colorGreen : (e == 'Yellow' ? t.colorYellow : t.colorRed),
                     value: s(c['weighingScaleColor']),
@@ -319,7 +353,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.motherReportsTempOrChestIndrawingLabel,
+                    labelText: "${t.motherReportsTempOrChestIndrawingLabel} *",
                     labelMaxLines: 4,
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
@@ -333,7 +367,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
                   // Breastfeeding-related fields
                   ApiDropdown<String>(
-                    labelText: t.exclusiveBreastfeedingStartedLabel,
+                    labelText: "${t.exclusiveBreastfeedingStartedLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['exclusiveBreastfeedingStarted']),
@@ -344,7 +378,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   ApiDropdown<String>(
-                    labelText: t.firstBreastfeedTimingLabel,
+                    labelText: "${t.firstBreastfeedTimingLabel} *",
                     items: const [
                       'Within 30 minutes of birth',
                       'Within 1 hour of birth',
@@ -353,7 +387,24 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       'Other',
                       'Not breastfed'
                     ],
-                    getLabel: (e) => e,
+                    getLabel: (s) {
+                      switch (s) {
+                        case 'Within 30 minutes of birth':
+                          return t.within30Minutes;
+                        case 'Within 1 hour of birth':
+                          return t.within1Hour;
+                        case 'Within 6 hours of birth':
+                          return t.within6Hours;
+                        case 'Within 24 hours of birth':
+                          return t.within24Hours;
+                        case 'Other':
+                          return t.other;
+                        case 'Not breastfed':
+                          return t.notBreastfed;
+                        default:
+                          return s;
+                      }
+                    },
                     value: c['firstBreastfeedTiming'] ?? '',
                     onChanged: (val) {
                       context.read<HbncVisitBloc>().add(
@@ -379,7 +430,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   if (c['firstBreastfeedTiming'] == 'Other')
 
                     CustomTextField(
-                      labelText: 'Please enter breastfeeding time (hh:mm)',
+                      labelText: t.breastfeedingTime,
                       hintText: 'hh:mm',
                       keyboardType: TextInputType.number,
                         initialValue: c['firstBreastfeedCustomTime'] ?? '',
@@ -389,7 +440,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
                   if (c['firstBreastfeedTiming'] != 'Not breastfed')
                     ApiDropdown<String>(
-                      labelText: t.howWasBreastfedLabel,
+                      labelText: "${t.howWasBreastfedLabel} *",
                       items: const [
                         'Normal',
                         'Forcefully',
@@ -397,7 +448,22 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                         'Could not breast feed but had to be fed with spoon',
                         'Could neither breast feed nor take given by spoon'
                       ],
-                      getLabel: (e) => e,
+                      getLabel: (s) {
+                        switch (s) {
+                          case 'Normal':
+                            return t.normal;
+                          case 'Forcefully':
+                            return t.forcefully;
+                          case 'With weakness':
+                            return t.withWeakness;
+                          case 'Could not breast feed but had to be fed with spoon':
+                            return t.couldNotBreastfeedButSpoon;
+                          case 'Could neither breast feed nor take given by spoon':
+                            return t.couldNeitherBreastfeedNorSpoon;
+                          default:
+                            return s;
+                        }
+                      },
                       value: c['howWasBreastfed'] ?? '',
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
                         NewbornDetailsChanged(
@@ -410,9 +476,28 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   ApiDropdown<String>(
-                    labelText: t.firstFeedGivenAfterBirthLabel,
+                    labelText: "${t.firstFeedGivenAfterBirthLabel} *",
                     items: const ['First Breastfeeding','Water','Honey','Mishri Water / Sugar Syrup', 'Goat Milk','Cow Milk', 'Other' ],
-                    getLabel: (e) => e,
+                    getLabel: (s) {
+                      switch (s) {
+                        case 'First Breastfeeding':
+                          return t.firstBreastfeeding;
+                        case 'Water':
+                          return t.water;
+                        case 'Honey':
+                          return t.honey;
+                        case 'Mishri Water / Sugar Syrup':
+                          return t.mishriWater;
+                        case 'Goat Milk':
+                          return t.goatMilk;
+                        case 'Cow Milk':
+                          return t.cowMilk;
+                        case 'Other':
+                          return t.other;
+                        default:
+                          return s;
+                      }
+                    },
                     value: s(c['firstFeedGivenAfterBirth']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'firstFeedGivenAfterBirth', value: val, childIndex: widget.childIndex),
@@ -422,7 +507,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: CustomTextField(
-                        labelText: t.enter_other_feeding_option,
+                        labelText: "${t.enter_other_feeding_option} *",
                         initialValue: c['firstFeedOther'] ?? '',
                         onChanged: (val) => context.read<HbncVisitBloc>().add(
                           NewbornDetailsChanged(field: 'firstFeedOther', value: val, childIndex: widget.childIndex),
@@ -432,7 +517,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   ApiDropdown<String>(
-                    labelText: t.adequatelyFedSevenToEightTimesLabel,
+                    labelText: "${t.adequatelyFedSevenToEightTimesLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['adequatelyFedSevenToEightTimes']),
@@ -444,7 +529,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: ApiDropdown<String>(
-                        labelText: t.counsellingAdviceNeeded,
+                        labelText: "${t.counsellingAdviceNeeded} *",
                         items: const ['Yes', 'No'],
                         getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                         value: yn(c['adequatelyFedCounseling']),
@@ -456,7 +541,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   ApiDropdown<String>(
-                    labelText: t.babyDrinkingLessMilkLabel,
+                    labelText: "${t.babyDrinkingLessMilkLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['babyDrinkingLessMilk']),
@@ -467,7 +552,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   ApiDropdown<String>(
-                    labelText: t.breastfeedingStoppedLabel,
+                    labelText: "${t.breastfeedingStoppedLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['breastfeedingStopped']),
@@ -477,7 +562,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   ApiDropdown<String>(
-                    labelText: t.bloatedStomachOrFrequentVomitingLabel,
+                    labelText: "${t.bloatedStomachOrFrequentVomitingLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['bloatedStomachOrFrequentVomiting']),
@@ -487,7 +572,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   ),
                   const Divider(height: 0,),
                    ApiDropdown<String>(
-                    labelText: t.bleedingUmbilicalCordLabel,
+                    labelText: "${t.bleedingUmbilicalCordLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['bleedingUmbilicalCord']),
@@ -499,7 +584,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
                   if (c['bleedingUmbilicalCord'] == 'Yes')
                     ApiDropdown<String>(
-                      labelText: t.is_navel_tied_with_thread,
+                      labelText: "${t.is_navel_tied_with_thread} *",
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: yn(c['navelTiedByAshaAnm']),
@@ -511,7 +596,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     const Divider(height: 0,),
 
                   ApiDropdown<String>(
-                    labelText: t.pusInNavelLabel,
+                    labelText: "${t.pusInNavelLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['pusInNavel']),
@@ -523,7 +608,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.routineCareDoneLabel,
+                    labelText: "${t.routineCareDoneLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['routineCareDone']),
@@ -534,7 +619,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   ApiDropdown<String>(
-                    labelText:t.babyWipedWithCleanCloth,
+                    labelText:"${t.babyWipedWithCleanCloth} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['wipedWithCleanCloth']),
@@ -545,7 +630,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   ApiDropdown<String>(
-                    labelText: t.is_child_kept_warm,
+                    labelText: "${t.is_child_kept_warm} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['keptWarm']),
@@ -557,7 +642,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
                   // New Question 3: Given bath
                   ApiDropdown<String>(
-                    labelText: t.babyGivenBath,
+                    labelText: "${t.babyGivenBath} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['givenBath']),
@@ -569,7 +654,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
                   // New Question 4: Wrapped and placed near mother
                   ApiDropdown<String>(
-                    labelText: t.babyWrappedAndPlacedNearMother,
+                    labelText: "${t.babyWrappedAndPlacedNearMother} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['wrappedAndPlacedNearMother']),
@@ -580,7 +665,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   ApiDropdown<String>(
-                    labelText: t.breathingRapidLabel,
+                    labelText: "${t.breathingRapidLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['breathingRapid']),
@@ -592,7 +677,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.lethargicLabel,
+                    labelText: "${t.lethargicLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['lethargic']),
@@ -604,7 +689,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.congenitalAbnormalitiesLabel,
+                    labelText: "${t.congenitalAbnormalitiesLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['congenitalAbnormalities']),
@@ -616,7 +701,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.eyesNormalLabel,
+                    labelText: "${t.eyesNormalLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['eyesNormal']),
@@ -630,7 +715,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: ApiDropdown<String>(
-                      labelText:t.selectEyeProblemTypeLabel,
+                      labelText:"${t.selectEyeProblemTypeLabel} *",
                       items: const ['Swelling', 'Oozing pus'],
                       getLabel: (e) => e,
                       value: c['eyesProblemType'],
@@ -643,7 +728,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.eyesSwollenOrPusLabel,
+                    labelText: "${t.eyesSwollenOrPusLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['eyesSwollenOrPus']),
@@ -655,7 +740,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.skinFoldRednessLabel,
+                    labelText:"${ t.skinFoldRednessLabel} *",
                     labelMaxLines: 3,
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
@@ -668,7 +753,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.newbornJaundiceLabel,
+                    labelText: "${t.newbornJaundiceLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['jaundice']),
@@ -680,7 +765,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.pusBumpsOrBoilLabel,
+                    labelText: "${t.pusBumpsOrBoilLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['pusBumpsOrBoil']),
@@ -692,7 +777,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.newbornSeizuresLabel,
+                    labelText: "${t.newbornSeizuresLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['seizures']),
@@ -704,7 +789,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.cryingConstantlyOrLessUrineLabel,
+                    labelText: "${t.cryingConstantlyOrLessUrineLabel} *",
                     labelMaxLines: 3,
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
@@ -717,7 +802,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: ApiDropdown<String>(
-                        labelText: t.counsellingBreastfeeding,
+                        labelText: "${t.counsellingBreastfeeding} *",
                         items: const ['Yes', 'No'],
                         getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                         value: yn(c['cryingCounseling']),
@@ -730,7 +815,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.cryingSoftlyLabel,
+                    labelText: "${t.cryingSoftlyLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['cryingSoftly']),
@@ -742,7 +827,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.stoppedCryingLabel,
+                    labelText: "${t.stoppedCryingLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['stoppedCrying']),
@@ -754,7 +839,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.newbornReferredByAshaLabel,
+                    labelText: "${t.newbornReferredByAshaLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['referredByASHA']),
@@ -766,7 +851,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   if (c['referredByASHA'] == 'Yes') ...[
 
                     ApiDropdown<String>(
-                      labelText:t.referredByASHA,
+                      labelText:"${t.referredByASHA} *",
                       items:  [t.hsc,t.aphc,t.phc,t.chc,t.rhLabel,t.sdh,t.dhLabel],
                       getLabel: (e) => e,
                       value: s(c['referredByASHAFacility']),
@@ -779,7 +864,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.birthRegisteredLabel,
+                    labelText: "${t.birthRegisteredLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['birthRegistered']),
@@ -791,7 +876,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.birthCertificateIssuedLabel,
+                    labelText: "${t.birthCertificateIssuedLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['birthCertificateIssued']),
@@ -803,7 +888,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
 
                   ApiDropdown<String>(
-                    labelText: t.birthDoseVaccinationLabel,
+                    labelText: "${t.birthDoseVaccinationLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['birthDoseVaccination']),
@@ -819,7 +904,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     SizedBox(height: 5,)
                   ],
                   ApiDropdown<String>(
-                    labelText: t.mcpCardAvailableLabel,
+                    labelText:"${ t.mcpCardAvailableLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['mcpCardAvailable']),
@@ -832,7 +917,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
                   if (c['mcpCardAvailable'] == 'Yes')
                     ApiDropdown<String>(
-                      labelText: t.babyWeightRecordedInMPC,
+                      labelText: "${t.babyWeightRecordedInMPC} *",
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: yn(c['weightRecordedInMcpCard']),
@@ -845,7 +930,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
                   // Refer to hospital field
                   ApiDropdown<String>(
-                    labelText: t.refer_to_hospital,
+                    labelText: "${t.refer_to_hospital} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['referToHospital']),
@@ -856,7 +941,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   if (c['referToHospital'] == 'Yes') ...[
                     const Divider(height: 0,),
                     ApiDropdown<String>(
-                      labelText: t.referToLabel,
+                      labelText: "${t.referToLabel} *",
                       items:  [
                         t.visitTypePhc,
                         t.chc,

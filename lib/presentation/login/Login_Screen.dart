@@ -15,6 +15,7 @@ import '../../core/widgets/TextField/TextField.dart';
 import '../../l10n/app_localizations.dart';
 import 'bloc/login_bloc.dart';
 import 'package:medixcel_new/data/sync/sync_service.dart';
+import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -33,16 +34,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   final FocusNode _passwordFocusNode = FocusNode();
   String _appVersion = '';
   void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          "User does not exists.Please enter valid credentials",
-          style: const TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.black,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    showAppSnackBar(context, message);
   }
 
   @override

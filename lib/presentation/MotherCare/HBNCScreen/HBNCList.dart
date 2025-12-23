@@ -6,6 +6,7 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/HBNCVisitScreen.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/widgets/AppDrawer/Drawer.dart';
 import '../../../data/Database/database_provider.dart';
@@ -120,7 +121,7 @@ class _HBNCListScreenState
       final s = rows.first['form_json']?.toString() ?? '';
       if (s.isEmpty) return 1;
       final decoded = jsonDecode(s);
-      final fd = (decoded is Map) ? Map<String, dynamic>.from(decoded['form_data'] as Map? ?? {}) : <String, dynamic>{};
+      final fd = (decoded is Map) ? Map<String, dynamic>.from(decoded['anc_form'] as Map? ?? {}) : <String, dynamic>{};
       final raw = fd['number_of_children']?.toString().trim().toLowerCase() ?? '';
       if (raw.isEmpty) return 1;
       if (raw == 'one' || raw == 'single' || raw == '1') return 1;
@@ -141,14 +142,14 @@ class _HBNCListScreenState
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      // First, get all beneficiary_ref_keys that have either pnc_mother or hbnc_visit state in mother_care_activities
+      // 1. Get the list of valid beneficiaries
       final validBeneficiaries = await db.rawQuery('''
-        SELECT DISTINCT mca.beneficiary_ref_key 
-        FROM mother_care_activities mca
-        WHERE mca.mother_care_state ='hbnc_visit'
-        AND mca.is_deleted = 0
-        AND mca.current_user_key = ?
-      ''', [ashaUniqueKey]);
+      SELECT DISTINCT mca.beneficiary_ref_key 
+      FROM mother_care_activities mca
+      WHERE mca.mother_care_state ='hbnc_visit'
+      AND mca.is_deleted = 0
+      AND mca.current_user_key = ?
+    ''', [ashaUniqueKey]);
 
       if (validBeneficiaries.isEmpty) {
         print('No beneficiaries found with pnc_mother or hbnc_visit state');
@@ -157,14 +158,16 @@ class _HBNCListScreenState
 
       final beneficiaryKeys = validBeneficiaries.map((e) => e['beneficiary_ref_key']).toList();
 
-      // Then get the delivery outcome data only for those beneficiaries
       final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
+
+      // 2. Add ORDER BY DESC here
       final query = '''
-        SELECT * FROM followup_form_data 
-        WHERE forms_ref_key = ? 
-        AND current_user_key = ?
-        AND beneficiary_ref_key IN ($placeholders)
-      ''';
+      SELECT * FROM followup_form_data 
+      WHERE forms_ref_key = ? 
+      AND current_user_key = ?
+      AND beneficiary_ref_key IN ($placeholders)
+      ORDER BY created_date_time DESC
+    ''';
 
       final results = await db.rawQuery(
         query,
@@ -493,16 +496,29 @@ class _HBNCListScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppHeader(
-        screenTitle: 'HBNC List',
-        showBack: true,
+    return WillPopScope(
+      onWillPop: () async {
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          Navigator.pushReplacementNamed(context, Route_Names.Mothercarehomescreen);
+        }
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppHeader(
+          screenTitle: 'HBNC List',
+          showBack: true,
+          onBackTap: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              Navigator.pushReplacementNamed(context, Route_Names.Mothercarehomescreen);
+            }
+          },
+        ),
 
-
-
-      ),
-
-      body: Column(
+        body: Column(
         children: [
           // Search Field
           Padding(
@@ -544,6 +560,7 @@ class _HBNCListScreenState
           ),
 
         ],
+        ),
       ),
     );
   }

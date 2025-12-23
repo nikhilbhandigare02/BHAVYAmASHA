@@ -10,6 +10,7 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
+import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import '../../../core/utils/enums.dart';
 import '../../../core/widgets/SnackBar/app_snackbar.dart';
 import 'PreviousVisits.dart';
@@ -86,6 +87,12 @@ class _TrackEligibleCoupleView extends StatelessWidget {
   const _TrackEligibleCoupleView({required this.beneficiaryId});
 
 
+  Future<bool> _hasActiveMotherCare(String beneficiaryKey) async {
+    if (beneficiaryKey.isEmpty) return false;
+    final rec = await LocalStorageDao.instance.getMotherCareActivityByBeneficiary(beneficiaryKey);
+    return rec != null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
@@ -123,13 +130,111 @@ class _TrackEligibleCoupleView extends StatelessWidget {
               buildWhen: (previous, current) =>
               previous.financialYear != current.financialYear,
               builder: (context, state) {
-                return CustomTextField(
-                  labelText: t?.financialYearLabel ?? 'वित्तीय वर्ष',
-                  readOnly: true,
-                  controller: TextEditingController(
-                    text: state.financialYear.isEmpty
-                        ? 'YYYY'
-                        : state.financialYear,
+                // Helper function to parse financial year string to DateTime
+                DateTime? parseFinancialYear(String? yearStr) {
+                  if (yearStr == null || yearStr.isEmpty) return null;
+                  try {
+                    // Handle both YYYY and YYYY-YY formats
+                    final year = yearStr.split('-').first;
+                    return DateTime(int.parse(year));
+                  } catch (e) {
+                    return null;
+                  }
+                }
+
+                // Helper function to format year for display
+                String formatFinancialYear(DateTime date) {
+                  final year = date.year;
+                  return '$year-${(year + 1).toString().substring(2)}';
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t?.financialYearLabel ?? 'वित्तीय वर्ष',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      InkWell(
+                        onTap: () async {
+                          final currentDate = parseFinancialYear(state.financialYear) ?? DateTime.now();
+
+                          final DateTime? picked = await showDialog<DateTime>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                  child: Container(
+                                    width: 300,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(16),
+                                          child: Text(
+                                            t?.financialYearLabel ?? 'Select Year',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        const Divider(height: 1),
+                                        Container(
+                                          height: 300,
+                                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                                          child: YearPicker(
+                                            firstDate: DateTime(DateTime.now().year - 100),
+                                            lastDate: DateTime.now(),
+                                            initialDate: currentDate,
+                                            selectedDate: currentDate,
+                                            onChanged: (DateTime dateTime) {
+                                              Navigator.pop(context, dateTime);
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ));
+                            },
+                          );
+
+                          if (picked != null) {
+                            // Format the year as YYYY-YY (e.g., 2025-26)
+                            final formattedYear = '${picked.year}';
+                            if (!context.mounted) return;
+                            context.read<TrackEligibleCoupleBloc>()
+                                .add(FinancialYearChanged(formattedYear));
+                          }
+                        },
+                        child: Container(
+                          // padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                state.financialYear.isNotEmpty
+                                    ? state.financialYear
+                                    : t?.financialYearLabel ?? 'Select Year',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: state.financialYear.isEmpty
+                                      ? Colors.grey.shade600
+                                      : Colors.black87,
+                                ),
+                              ),
+                              const Icon(Icons.calendar_today, size: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -144,8 +249,9 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                   labelText: t?.isPregnantLabel ?? 'क्या महिला गर्भवती है?',
                   items: [true, false],
                   getLabel: (value) =>
-                  value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
+                      value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
                   value: state.isPregnant,
+                  readOnly: false,
                   onChanged: (value) {
                     if (value != null) {
                       context
@@ -179,31 +285,24 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                         hintText: t?.dateHint,
                         initialDate: lmp,
                         onDateChanged: (date) {
-                          if (date != null) {
-                            final edd = date.add(const Duration(days: 277));
-                            context.read<TrackEligibleCoupleBloc>()
-                              ..add(LmpDateChanged(date))
-                              ..add(EddDateChanged(edd));
-                          } else {
-                            context.read<TrackEligibleCoupleBloc>()
-                              ..add(const LmpDateChanged(null))
-                              ..add(const EddDateChanged(null));
-                          }
+                          context.read<TrackEligibleCoupleBloc>()
+                              .add(LmpDateChanged(date));
                         },
                         isEditable: true,
-                        firstDate: DateTime.now().subtract(const Duration(days: 280)), // ~9 months ago
-                        lastDate: DateTime.now().add(const Duration(days: 30)), // 1 month from now
+                        firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                        lastDate: DateTime.now(),
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                       const SizedBox(height: 8),
-                      CustomTextField(
-                        labelText:
-                        '${t?.eddDateLabel ?? 'प्रसव की संभावित तिथि'} *',
-                        hintText:'dd-mm-yyyy',
+                      CustomDatePicker(
+                        labelText: '${t?.eddDateLabel ?? 'प्रसव की संभावित तिथि'} *',
+                        hintText: t?.dateHint,
+                        initialDate: edd,
+                        onDateChanged: (date) {
+                          context.read<TrackEligibleCoupleBloc>()
+                              .add(EddDateChanged(date));
+                        },
                         readOnly: true,
-                        controller: TextEditingController(
-                          text: formatDate(edd),
-                        ),
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                     ],

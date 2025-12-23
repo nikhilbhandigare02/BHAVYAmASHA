@@ -187,7 +187,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         'form_type': formType,
         'form_name': formName,
         'unique_key': formsRefKey,
-        'form_data': {
+        'anc_form': {
           'anc_visit_no': state.ancVisitNo,
           'visit_type': state.visitType,
           'beneficiaryId': beneficiaryId,
@@ -211,6 +211,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           'td2_date': state.td2Date?.toIso8601String(),
           'td_booster_date': state.tdBoosterDate?.toIso8601String(),
           'folic_acid_tablets': state.folicAcidTablets,
+          'calcium_vitamin_tablets': state.calciumVitaminD3Tablets,
           'pre_existing_diseases': state.selectedDiseases,
           'other_disease': state.otherDisease,
           'weight': state.weight,
@@ -232,8 +233,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           'baby3_name': state.baby3Name,
           'baby3_gender': state.baby3Gender,
           'baby3_weight': state.baby3Weight,
-          'created_at': now,
-          'updated_at': now,
+          "anc_visit_interval":"0",
         },
         'created_at': now,
         'updated_at': now,
@@ -374,6 +374,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             'td2_date': state.td2Date?.toIso8601String(),
             'td_booster_date': state.tdBoosterDate?.toIso8601String(),
             'folic_acid_tablets': state.folicAcidTablets,
+            'calcium_vitamin_tablets': state.calciumVitaminD3Tablets,
             'selected_risks': state.selectedRisks,
             'has_abortion_complication': state.hasAbortionComplication,
             'abortion_date': state.abortionDate?.toIso8601String(),
@@ -386,6 +387,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             'high_risk': state.highRisk,
             'gives_birth_to_baby': state.givesBirthToBaby,
             'beneficiary_absent': state.beneficiaryAbsent,
+            'anc_visit_interval':'0',
             'form_data': formDataForDb,
           };
 
@@ -430,8 +432,8 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
                 final fj = jsonDecode(saved['form_json']);
                 if (fj is Map) {
                   formRoot = Map<String, dynamic>.from(fj);
-                  if (fj['form_data'] is Map) {
-                    formDataJson = Map<String, dynamic>.from(fj['form_data']);
+                  if (fj['anc_form'] is Map) {
+                    formDataJson = Map<String, dynamic>.from(fj['anc_form']);
                   }
                   if (fj['geolocation_details'] is Map) {
                     geoJson = Map<String, dynamic>.from(fj['geolocation_details']);
@@ -452,7 +454,6 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             final dbHouseholdRefKey = (saved['household_ref_key'] ?? householdRefKey).toString();
             final dbBeneficiaryRefKey = (saved['beneficiary_ref_key'] ?? beneficiaryId).toString();
 
-            // Mother care API call removed from here; it will be handled by sync/scheduler.
           }
         } catch (e) {
           print('Error reading saved followup_form_data to build mother care payload: $e');

@@ -29,8 +29,8 @@ class _PreviousvisitState extends State<Previousvisit> {
     final list = <Map<String, String>>[];
 
     for (final r in rows.reversed) { // 👈 reverse here
-      final fd = r['form_data'] is Map<String, dynamic>
-          ? (r['form_data'] as Map<String, dynamic>)
+      final fd = r['anc_form'] is Map<String, dynamic>
+          ? (r['anc_form'] as Map<String, dynamic>)
           : {};
 
       String dateRaw = fd['date_of_inspection']?.toString() ?? '';

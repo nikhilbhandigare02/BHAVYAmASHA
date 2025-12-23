@@ -707,6 +707,34 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         spouse = Map<String, String>.from(spouseMember);
       } catch (_) {}
 
+      String? spouseMobileNumber;
+      try {
+        final spRaw = _headForm?['spousedetails'];
+        Map<String, dynamic>? spMap;
+
+        if (spRaw is Map) {
+          spMap = Map<String, dynamic>.from(spRaw);
+        } else if (spRaw is String && spRaw.isNotEmpty) {
+          spMap = Map<String, dynamic>.from(jsonDecode(spRaw));
+        }
+
+        if (spMap != null) {
+          // Try to get mobile number from different possible keys
+          spouseMobileNumber = spMap['mobileNo']?.toString() ??
+              spMap['mobile']?.toString() ??
+              spMap['phoneNumber']?.toString();
+
+          // Also update _headForm with all spouse details
+          spMap.forEach((key, value) {
+            if (value != null) {
+              _headForm!['sp_$key'] = value.toString();
+            }
+          });
+        }
+      } catch (e) {
+        print('Error parsing spouse details: $e');
+      }
+
       final result = await Navigator.of(context).push<Map<String, dynamic>>(
         MaterialPageRoute(
           builder: (_) => AddNewFamilyMemberScreen(
@@ -715,6 +743,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             headGender: head['Gender'] ?? '',
             isAddMember: true,
             headMobileNumber: _headForm?['mobileNo']?.toString(), // Add this line
+            headSpouseMobile: spouseMobileNumber, // Add this line
             spouseName: spouse['Name'] ?? '',
             spouseGender: spouse['Gender'] ?? '',
           ),

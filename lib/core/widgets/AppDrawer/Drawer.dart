@@ -157,6 +157,20 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   String _appVersion = ''; // Default version
 
+  // Helper method to get responsive icon size
+  double _getIconSize(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = screenSize.width > screenSize.height;
+    
+    // Use a combination of screen width and height to get a consistent size
+    final baseSize = isLandscape 
+        ? screenSize.height * 0.04  // Slightly smaller in landscape
+        : screenSize.width * 0.05;  // Normal size in portrait
+    
+    // Ensure the icon size has reasonable bounds
+    return baseSize.clamp(20.0, 32.0);
+  }
+
 
   Widget _buildLoadingState() {
     return Center(
@@ -189,7 +203,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
     final bool isTablet = width >= 600;
     print("DRAWER → Current appRoleId: $_appRoleId");
 // Set responsive drawer width
-    final double drawerWidth = isTablet ? width * 0.55 : width * 0.75;
+    final double drawerWidth = isTablet ? width * 0.55 : width * 0.69;
     return SizedBox(
         width: drawerWidth,
         child: Drawer(
@@ -199,18 +213,25 @@ class _CustomDrawerState extends State<CustomDrawer> {
             child: Column(
               children: [
                 // 🔹 Top Logo
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 2.w),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
                   child: Column(
                     children: [
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(vertical: 0.5.h),
-                        child: Image.asset(
-                          'assets/images/bhabya-logo.png',
-                          width: 30.w,
-                          height: 13.h,
-                          fit: BoxFit.contain,
+                      AspectRatio(
+                        aspectRatio: 3,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            // Calculate size based on drawer width (subtract horizontal padding)
+                            final maxLogoWidth = constraints.maxWidth * 0.8; // 80% of available width
+                            return Center(
+                              child: Image.asset(
+                                'assets/images/bhabya-logo.png',
+                                width: maxLogoWidth,
+                                fit: BoxFit.contain,
+                              ),
+                            );
+                          },
                         ),
                       ),
                       Divider(
@@ -389,71 +410,95 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     ],
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.only(top: 0), // Remove any top margin
-                  width: double.infinity,
-                  height: 4.5.h,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      elevation: 0,
-                      padding: EdgeInsets.zero,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(0),
-                          topRight: Radius.circular(0),
+                // Logout Button
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Calculate responsive dimensions
+                    final screenSize = MediaQuery.of(context).size;
+                    final isLandscape = screenSize.width > screenSize.height;
+                    final buttonHeight = isLandscape 
+                        ? screenSize.height * 0.07  // Slightly taller in landscape
+                        : screenSize.height * 0.065; // Standard height in portrait
+                    
+                    return Container(
+                      width: double.infinity,
+                      height: buttonHeight.clamp(44.0, 60.0), // Reasonable min/max
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          elevation: 0,
+                          padding: EdgeInsets.symmetric(vertical: buttonHeight * 0.2), // Responsive padding
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(0),
+                              topRight: Radius.circular(0),
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          showConfirmationDialog(
+                            context: context,
+                            title: l10n.logoutTitle,
+                            message: l10n.logoutMessage,
+                            yesText: l10n.yes,
+                            noText: l10n.no,
+                            onYes: () async {
+                              // Clear all secure storage data
+                              await SecureStorageService.clearAll();
+                              // Set login flag to 0
+                              await SecureStorageService.setLoginFlag(0);
+
+                              if (mounted) {
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  Route_Names.loginScreen,
+                                  (Route<dynamic> route) => false,
+                                );
+                              }
+                            },
+                          );
+                        },
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(
+                              l10n.drawerLogout,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    onPressed: () {
-                      showConfirmationDialog(
-                        context: context,
-                        title: l10n.logoutTitle,
-                        message: l10n.logoutMessage,
-                        yesText: l10n.yes,
-                        noText: l10n.no,
-                        onYes: () async {
-                          // Clear all secure storage data
-                          await SecureStorageService.clearAll();
-                          // Set login flag to 0
-                          await SecureStorageService.setLoginFlag(0);
-
-                          if (mounted) {
-                            Navigator.pushNamedAndRemoveUntil(
-                              context,
-                              Route_Names.loginScreen,
-                                  (Route<dynamic> route) => false,
-                            );
-                          }
-                        },
-                      );
-                    },
-                    child: Text(
-                      l10n.drawerLogout,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                )],
-            ),
+                    );
+                  },
+                ),
+            ]),
           ),
         ));
   }
 
   Widget _buildMenuItem(BuildContext context, String imagePath, String title, {VoidCallback? onTap}) {
+    final iconSize = _getIconSize(context);
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.5.h),
       dense: true,
       visualDensity: VisualDensity(vertical: -2),
-      minLeadingWidth: 6.w,
-      leading: Image.asset(
-        imagePath,
-        width: 5.w,
-        height: 5.w,
-        fit: BoxFit.contain,
+      minLeadingWidth: iconSize + 8, // Add some padding
+      leading: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: iconSize,
+          maxHeight: iconSize,
+        ),
+        child: Image.asset(
+          imagePath,
+          width: iconSize,
+          height: iconSize,
+          fit: BoxFit.contain,
+        ),
       ),
       title: Text(
         title,

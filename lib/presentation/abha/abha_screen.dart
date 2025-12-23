@@ -66,7 +66,8 @@ import '../../data/models/abha/create/Exisiting/profile_existing.dart';
 import '../../data/models/abha/create/mobile/abha_suggestion_model.dart';
 import '../../data/models/abha/create/mobile/mobile_create_address_response.dart';
 import '../../data/models/abha/create/mobile/mobile_link_abha_address.dart';
-import '../../data/models/abha/create/search_availability_response.dart' hide AvailableAbhaNumbers;
+import '../../data/models/abha/create/search_availability_response.dart'
+    hide AvailableAbhaNumbers;
 import '../../data/models/abha_model/create/abha_suggestion_mobile.dart';
 import '../../data/models/abha_model/create/create_abha_aadhaar.dart';
 import '../../data/models/abha_model/create/get_districts.dart';
@@ -79,11 +80,9 @@ import '../../data/models/abha_model/existing/verify_otp_existing.dart';
 import '../../data/repositories/AbhaController.dart';
 import '../../l10n/app_localizations.dart';
 
-
-
-
 class ABHAScreen extends StatefulWidget {
   const ABHAScreen({super.key});
+
   @override
   State<ABHAScreen> createState() => _ABHAScreenState();
 }
@@ -101,11 +100,13 @@ class _ABHAScreenState extends State<ABHAScreen> {
   double? latitude;
   double? longitude;
   bool isEnableSearch = true;
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return PopScope(
-        canPop: true, // whether the route can be popped
+        canPop: true,
+        // whether the route can be popped
         onPopInvoked: (didPop) {
           /*   if (!didPop) {
             Utils.willPopCallback(context);
@@ -113,10 +114,15 @@ class _ABHAScreenState extends State<ABHAScreen> {
           }*/
           // your custom logic before pop
           // Example: show a dialog instead of closing
-        },child: Container(child: Container(child: createVerifyAbha(context),)));
+        },
+        child: Container(
+            child: Container(
+          child: createVerifyAbha(context),
+        )));
   }
 
   var abhaIdEnd = '@sbx';
+
   //var abhaIdEnd = '@abdm';
 
   var _base64HealthcardID = '';
@@ -124,10 +130,9 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
   String clinicToken = '';
   var box = GetStorage();
+
   @override
   void initState() {
-
-
     abhaIdController.addListener(_filterAbhaId);
 
     listABHAID.add(ABHAID('rohit@inde', true));
@@ -138,18 +143,27 @@ class _ABHAScreenState extends State<ABHAScreen> {
     Constant.abhaToken = Utils.generateAbhaTokenUAT();
 
     _getStates();
+  }
 
+  void allcheckbosRefresh() {
+    var value = otpVisible();
+    setState(() {
+      checkedValue = value;
+      if (checkedValue) {
+        sendOtpAbha = true;
+        checkedValue = true;
+      } else {
+        sendOtpAbha = false;
+        checkedValue = false;
+      }
+    });
   }
 
 
-
-
   void _filterAbhaId() {
-
-    if(abhaIdController.text.isNotEmpty){
+    if (abhaIdController.text.isNotEmpty) {
       verifyAbhaFlag = true;
-    }
-    else {
+    } else {
       verifyAbhaFlag = false;
     }
     setState(() {
@@ -164,92 +178,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
       color: Colors.white,
       context: context,
       position:
-      RelativeRect.fromLTRB(100, 140, 0, 0), // Adjust position as needed
-      items: [
-        PopupMenuItem(
-          child: StatefulBuilder(
-            builder: (context, setState) {
-              return Container(
-                width: 300,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TextField(
-                      style: TextStyle(fontSize: 11.sp),
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        labelStyle: TextStyle(fontSize: 11.sp),
-                        labelText: 'Search State',
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (value) {
-                        setState(() {}); // Trigger rebuild on search
-                      },
-                    ),
-                    SizedBox(height: 10),
-                    Container(
-                        height: 200, // Set a height for the list
-                        child: getStates?.states!=null
-                            ?ListView(
-                          children: getStates.states!
-                              .where((val) => val.stateName!
-                              .toLowerCase()
-                              .contains(_searchController.text.toLowerCase()))
-                              .map((val) {
-                            return ListTile(
-                              title: Text(
-                                '${val.stateName}',
-                                style: TextStyle(fontSize: 11.sp),
-                              ),
-                              onTap: () {
-                                setStatea(() {
-                                  selectedState = val;
-                                  patientStateController.text = selectedState.stateName??'';
-                                  _getDistricts();// Update selected doctor
-                                });
-                                Navigator.pop(context); // Close the popup
-                                // Call setState in the parent widget to update UI
-                                this.setState(() {});
-                              },
-                            );
-                          }).toList(),
-                        )
-                            :Center(
-                            child: Text('No record found')
-
-                        )
-                    ),
-                    SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pop(context); // Close the popup
-                        },
-                        child: Text(
-                          'Close',
-                          style: TextStyle(color: AppColors.blueApp, fontSize: 11.sp),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showDistrictSelectionPopup(StateSetter setStatea) {
-    final TextEditingController _searchController = TextEditingController();
-
-    showMenu(
-      color: Colors.white,
-      context: context,
-      position:
-      RelativeRect.fromLTRB(100, 140, 0, 0),
+          RelativeRect.fromLTRB(100, 140, 0, 0), // Adjust position as needed
       items: [
         PopupMenuItem(
           child: StatefulBuilder(
@@ -274,35 +203,116 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     SizedBox(height: 10),
                     Container(
                         height: 200, // Set a height for the list
-                        child: getDistricts?.districts!=null
-                            ?ListView(
-                          children: getDistricts.districts!
-                              .where((val) => val.name!
-                              .toLowerCase()
-                              .contains(_searchController.text.toLowerCase()))
-                              .map((val) {
-                            return ListTile(
-                              title: Text(
-                                '${val.name}',
-                                style: TextStyle(fontSize: 11.sp),
-                              ),
-                              onTap: () {
-                                setStatea(() {
-                                  selectedDistrict = val;
-                                  patientDistrictController.text = selectedDistrict.name??'';
-                                });
-                                Navigator.pop(context); // Close the popup
-                                // Call setState in the parent widget to update UI
-                                this.setState(() {});
-                              },
-                            );
-                          }).toList(),
-                        )
-                            :Center(
-                            child: Text('No record found')
-
-                        )
+                        child: getStates?.states != null
+                            ? ListView(
+                                children: getStates.states!
+                                    .where((val) => val.stateName!
+                                        .toLowerCase()
+                                        .contains(_searchController.text
+                                            .toLowerCase()))
+                                    .map((val) {
+                                  return ListTile(
+                                    title: Text(
+                                      '${val.stateName}',
+                                      style: TextStyle(fontSize: 11.sp),
+                                    ),
+                                    onTap: () {
+                                      setStatea(() {
+                                        selectedState = val;
+                                        patientStateController.text =
+                                            selectedState.stateName ?? '';
+                                        _getDistricts(); // Update selected doctor
+                                      });
+                                      Navigator.pop(context); // Close the popup
+                                      // Call setState in the parent widget to update UI
+                                      this.setState(() {});
+                                    },
+                                  );
+                                }).toList(),
+                              )
+                            : Center(child: Text('No record found'))),
+                    SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context); // Close the popup
+                        },
+                        child: Text(
+                          'Close',
+                          style: TextStyle(
+                              color: AppColors.blueApp, fontSize: 11.sp),
+                        ),
+                      ),
                     ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showDistrictSelectionPopup(StateSetter setStatea) {
+    final TextEditingController _searchController = TextEditingController();
+
+    showMenu(
+      color: Colors.white,
+      context: context,
+      position: RelativeRect.fromLTRB(100, 140, 0, 0),
+      items: [
+        PopupMenuItem(
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Container(
+                width: 300, // Set width for the popup
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextField(
+                      style: TextStyle(fontSize: 11.sp),
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        labelStyle: TextStyle(fontSize: 11.sp),
+                        labelText: 'Search State',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        setState(() {}); // Trigger rebuild on search
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    Container(
+                        height: 200, // Set a height for the list
+                        child: getDistricts?.districts != null
+                            ? ListView(
+                                children: getDistricts.districts!
+                                    .where((val) => val.name!
+                                        .toLowerCase()
+                                        .contains(_searchController.text
+                                            .toLowerCase()))
+                                    .map((val) {
+                                  return ListTile(
+                                    title: Text(
+                                      '${val.name}',
+                                      style: TextStyle(fontSize: 11.sp),
+                                    ),
+                                    onTap: () {
+                                      setStatea(() {
+                                        selectedDistrict = val;
+                                        patientDistrictController.text =
+                                            selectedDistrict.name ?? '';
+                                      });
+                                      Navigator.pop(context); // Close the popup
+                                      // Call setState in the parent widget to update UI
+                                      this.setState(() {});
+                                    },
+                                  );
+                                }).toList(),
+                              )
+                            : Center(child: Text('No record found'))),
                     SizedBox(height: 10),
                     Align(
                       alignment: Alignment.centerRight,
@@ -312,7 +322,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
                         },
                         child: Text(
                           'Close',
-                          style: TextStyle(color: AppColors.blueApp, fontSize: 11.sp),
+                          style: TextStyle(
+                              color: AppColors.blueApp, fontSize: 11.sp),
                         ),
                       ),
                     ),
@@ -363,26 +374,26 @@ class _ABHAScreenState extends State<ABHAScreen> {
     return "$minutes:$secs";
   }
 
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget createVerifyAbha(BuildContext context) {
     //final localText = AppLocalizations.of(context)!;
-    return
-      ScreenUtilInit(
-          designSize: const Size(360, 690),
-          minTextAdapt: true,
-          splitScreenMode: true,
-          builder: (_, __) => Scaffold(
-            appBar: AppHeader(
-              screenTitle: 'ABHA Generation',
-              showBack: false,
-
-            ),
-            drawer: CustomDrawer(),
-            body: SafeArea(
-              bottom: true,
-              child: Stack(children: [
-                /*Container(
+    return ScreenUtilInit(
+        designSize: const Size(360, 690),
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (_, __) => Scaffold(
+              appBar: AppHeader(
+                screenTitle: 'ABHA Generation',
+                showBack: false,
+              ),
+              drawer: CustomDrawer(),
+              body: SafeArea(
+                bottom: true,
+                child: Stack(
+                  children: [
+                    /*Container(
                         decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/img/background_abdm.png'),
@@ -395,36 +406,35 @@ class _ABHAScreenState extends State<ABHAScreen> {
                         ),
                       ),*/
 
-                Padding(
-                  padding: EdgeInsets.all(10),
-                  child: SingleChildScrollView(
-                    child: Column(children: [
-
-                      SizedBox(height: 15,),
-                      Padding(
-                        padding: EdgeInsets.all(0),
+                    Padding(
+                      padding: EdgeInsets.all(10),
+                      child: SingleChildScrollView(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            createAbhaAddress(context),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  createAbhaAddress(context),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                    ],),
-                  ),
+                    ),
+                  ],
                 ),
-              ],),
-            ),
-
-
-
-          )
-      );
-
+              ),
+            ));
   }
 
-
   String dropdownvalue = '';
+
   // List of items in our dropdown menu
   /*var items = [
     'Mobile',
@@ -457,7 +467,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
   bool enableAbhaClick = false;
 
   var _selectedAbhaIDValue;
-  String defaultDropdownValue="";
+  String defaultDropdownValue = "";
+
 
   void refresh() {
     isResendEnabled = false;
@@ -485,39 +496,36 @@ class _ABHAScreenState extends State<ABHAScreen> {
     checkedIAgreeValue_4 = false;
     checkedIAgreeValue_5 = false;
     checkedIAgreeValue_6 = false;
-    otpController.text='';
+    otpController.text = '';
 
-    firstNameController.text='';
-    firstMiddleController.text='';
-    lastNameController.text='';
-    mobileCreateController.text='';
-    patientEmailController.text='';
-    dobController.text='';
-    patientStateController.text='';
-    patientDistrictController.text='';
-    patientPinCodeController.text='';
-    patientAddressController.text='';
-    txtABHAIDMobileController.text='';
+    firstNameController.text = '';
+    firstMiddleController.text = '';
+    lastNameController.text = '';
+    mobileCreateController.text = '';
+    patientEmailController.text = '';
+    dobController.text = '';
+    patientStateController.text = '';
+    patientDistrictController.text = '';
+    patientPinCodeController.text = '';
+    patientAddressController.text = '';
+    txtABHAIDMobileController.text = '';
     createMobileAadhharView = true;
 
     availableAbhaNumbers = [];
     availableAbhaNumbersSelectedIndex = -1;
-    listMobileAbhaSuggestion=[];
+    listMobileAbhaSuggestion = [];
     _valueSelectedSuggestId = '';
-    aadhaarController.text="";
+    aadhaarController.text = "";
     availableAbhaNumbersSelectedIndex = -1;
     listABHAID = [];
-
   }
-
-
 
   @override
   Widget createAbhaAddress(BuildContext context) {
     final localText = AppLocalizations.of(context)!;
     String? selectedOption = box.read('selectedABHASettings');
     print("sselected option $selectedOption");
-    defaultDropdownValue="Aadhaar";
+    defaultDropdownValue = "Aadhaar";
     /*if (selectedOption == null) {
       items = ['Mobile', 'Aadhaar'];
       defaultDropdownValue='Mobile';
@@ -535,125 +543,136 @@ class _ABHAScreenState extends State<ABHAScreen> {
     }*/
     return Padding(
       padding: EdgeInsets.all(15),
-      child: Column(children: [
-
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            "Mobile No.",
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              "Mobile No.",
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
-        ),
-        SizedBox(height: 5,),
-        Row(
-          children: [
-            // Mobile number text field
-            Expanded(
-              child: Container(
-                alignment: Alignment.center,
-                //width: 200.w,
-                height: 35.h,
-                child: TextFormField(
-                  controller: mobileController,
-                  style: TextStyle(fontSize: 11),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly, // only digits
-                    LengthLimitingTextInputFormatter(10),   // max 10 digits
-                  ],
-                  enabled: isEnableSearch,
-                  decoration: InputDecoration(
-                    fillColor: isEnableSearch ? Colors.white : Colors.grey.shade200,
+          SizedBox(
+            height: 5,
+          ),
+          Row(
+            children: [
+              // Mobile number text field
+              Expanded(
+                child: Container(
+                  alignment: Alignment.center,
+                  //width: 200.w,
+                  height: 35.h,
+                  child: TextFormField(
+                    controller: mobileController,
+                    style: TextStyle(fontSize: 11),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly, // only digits
+                      LengthLimitingTextInputFormatter(10), // max 10 digits
+                    ],
+                    enabled: isEnableSearch,
+                    decoration: InputDecoration(
+                      fillColor:
+                          isEnableSearch ? Colors.white : Colors.grey.shade200,
 
-                    hintText: "Enter mobile no to search ABHA",
-                    // border: OutlineInputBorder(
-                    //   borderRadius: BorderRadius.only(
-                    //     topLeft: Radius.circular(5),
-                    //     bottomLeft: Radius.circular(5),
-                    //   ),
-                    //   borderSide: BorderSide(color: Colors.grey),
-                    // ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(5),
-                        bottomLeft: Radius.circular(5),
+                      hintText: "Enter mobile no to search ABHA",
+                      // border: OutlineInputBorder(
+                      //   borderRadius: BorderRadius.only(
+                      //     topLeft: Radius.circular(5),
+                      //     bottomLeft: Radius.circular(5),
+                      //   ),
+                      //   borderSide: BorderSide(color: Colors.grey),
+                      // ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(5),
+                          bottomLeft: Radius.circular(5),
+                        ),
+                        borderSide: BorderSide(color: Colors.grey),
                       ),
-                      borderSide: BorderSide(color: Colors.grey),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(5),
-                        bottomLeft: Radius.circular(5),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(5),
+                          bottomLeft: Radius.circular(5),
+                        ),
+                        borderSide: BorderSide(color: Colors.grey),
                       ),
-                      borderSide: BorderSide(color: Colors.grey),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16.sp),
                     ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16.sp),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter mobile number';
-                    }
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter mobile number';
+                      }
 
-                    // Must be exactly 10 digits
-                    if (value.length != 10) {
-                      return 'Mobile number must be 10 digits';
-                    }
+                      // Must be exactly 10 digits
+                      if (value.length != 10) {
+                        return 'Mobile number must be 10 digits';
+                      }
 
-                    // Must start with 6, 7, 8 or 9
-                    if (!RegExp(r'^[6-9]').hasMatch(value)) {
-                      return 'Enter valid Indian mobile number';
-                    }
+                      // Must start with 6, 7, 8 or 9
+                      if (!RegExp(r'^[6-9]').hasMatch(value)) {
+                        return 'Enter valid Indian mobile number';
+                      }
 
-                    // Reject if all digits are the same (1111111111, 9999999999)
-                    if (RegExp(r'^(\d)\1{9}$').hasMatch(value)) {
-                      return 'Invalid mobile number';
-                    }
+                      // Reject if all digits are the same (1111111111, 9999999999)
+                      if (RegExp(r'^(\d)\1{9}$').hasMatch(value)) {
+                        return 'Invalid mobile number';
+                      }
 
-                    return null;
-                  },
-                ),
-              ),
-            ),
-
-            // Search icon
-            // if(checkavailableAbha)
-            InkWell(
-              onTap: (){
-                if(isEnableSearch){
-                  if (mobileController.text.isEmpty) {
-                    Utils.showToastMessage('Please enter mobile number');
-                  }
-                  else if (mobileController.text.length!=10){
-                    Utils.showToastMessage('Enter valid 10-digit mobile number');
-                  }
-                  else {
-                    setState(() {
-                      refresh();
-                      refreshLinkABha();
-                    });
-                    _searchAvailability(mobileController.text);
-                  }
-                }
-
-              },
-              child: Container(
-                width: 60.w,
-                height: 35.h,
-                decoration: BoxDecoration(
-                  color: isEnableSearch ? AppColors.primary : Colors.grey.shade300,
-                  border: Border.all(color: isEnableSearch ? AppColors.primary : Colors.grey.shade300,),
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(5),
-                    bottomRight: Radius.circular(5),
+                      return null;
+                    },
                   ),
                 ),
-                child: Icon(Icons.search, size: 18, color: AppColors.background,),
               ),
-            ),
-            /* if(!checkavailableAbha)
+
+              // Search icon
+              // if(checkavailableAbha)
+              InkWell(
+                onTap: () {
+                  if (isEnableSearch) {
+                    if (mobileController.text.isEmpty) {
+                      Utils.showToastMessage('Please enter mobile number');
+                    } else if (mobileController.text.length != 10) {
+                      Utils.showToastMessage(
+                          'Enter valid 10-digit mobile number');
+                    } else {
+                      setState(() {
+                        refresh();
+                        refreshLinkABha();
+                      });
+                      _searchAvailability(mobileController.text);
+                    }
+                  }
+                },
+                child: Container(
+                  width: 60.w,
+                  height: 35.h,
+                  decoration: BoxDecoration(
+                    color: isEnableSearch
+                        ? AppColors.primary
+                        : Colors.grey.shade300,
+                    border: Border.all(
+                      color: isEnableSearch
+                          ? AppColors.primary
+                          : Colors.grey.shade300,
+                    ),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(5),
+                      bottomRight: Radius.circular(5),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.search,
+                    size: 18,
+                    color: AppColors.background,
+                  ),
+                ),
+              ),
+              /* if(!checkavailableAbha)
             InkWell(
               onTap: (){
                 setState(() {
@@ -679,11 +698,11 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     fontSize: 11.sp,
                     //fontWeight: FontWeight.bold,
                   ),),
-                )*//*Icon(Icons.refresh, size: 18, color: AppColors.white,)*//*,
+                )*/ /*Icon(Icons.refresh, size: 18, color: AppColors.white,)*/ /*,
               ),
             ),*/
-          ],
-        ),
+            ],
+          ),
 
 /*
 
@@ -842,252 +861,244 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
 */
 
+          Container(
+            child: Column(
+              children: [
+                // if(availableAbha)
+                SizedBox(
+                  height: 20,
+                ),
+                if (availableAbhaNumbers != null &&
+                    availableAbhaNumbers.length != 0 &&
+                    enableAbhaClick)
+                  Text(
+                    "Select to Proceed",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
 
+                Container(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: 200, // your max height
+                      ), // set your max height here
+                      child: Scrollbar(
+                        thumbVisibility: true, // always show scrollbar
+                        thickness: 6,
+                        radius: Radius.circular(10),
 
-
-
-        Container(
-          child: Column(children: [
-            // if(availableAbha)
-            SizedBox(height: 20,),
-            if(availableAbhaNumbers!=null&&availableAbhaNumbers.length!=0&&enableAbhaClick)
-              Text("Select to Proceed",  style: TextStyle(
-                fontSize: 12,
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
-              ),),
-            Container(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: 200, // your max height
-                  ), // set your max height here
-                  child: Scrollbar(
-
-                    thumbVisibility: true,   // always show scrollbar
-                    thickness: 6,
-                    radius: Radius.circular(10),
-
-                    child: ListView(
-                      shrinkWrap: true,
-                      children: List.generate(
-                        availableAbhaNumbers.length,
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: List.generate(
+                            availableAbhaNumbers.length,
                             (index) => Padding(
-                          padding: EdgeInsets.only(bottom: 10),
-                          child: InkWell(
-                            onTap: (){
-                              if(enableAbhaClick){
-                                setState(() {
-                                  availableAbhaNumbersSelectedIndex = index;
-                                });
-                              }
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(15),
-                              //width: 240.w,
-                              //height: 50.h,
-                              //padding: EdgeInsets.all(6.w),
-                              decoration: BoxDecoration(
-                                color:  (availableAbhaNumbersSelectedIndex == index)?AppColors.bgColorScreen:Colors.white,
-                                borderRadius: BorderRadius.circular(10.0),
-                                border: Border.all(color: (availableAbhaNumbersSelectedIndex == index)?AppColors.blueApp:Colors.grey, width: (availableAbhaNumbersSelectedIndex == index)?1.5.w:1.w),
-                              ),
-                              child: Column(children: [
-                                Row(children: [
-                                  Expanded(flex:1,
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        localText.abhaNumber,
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 11.sp,
-                                          //fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),),
-                                  Text(
-                                    ':  ',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 11.sp,
-                                      //fontWeight: FontWeight.bold,
-                                    ),
+                              padding: EdgeInsets.only(bottom: 10),
+                              child: InkWell(
+                                onTap: () {
+                                  if (enableAbhaClick) {
+                                    setState(() {
+                                      availableAbhaNumbersSelectedIndex = index;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(15),
+                                  //width: 240.w,
+                                  //height: 50.h,
+                                  //padding: EdgeInsets.all(6.w),
+                                  decoration: BoxDecoration(
+                                    color: (availableAbhaNumbersSelectedIndex ==
+                                            index)
+                                        ? AppColors.bgColorScreen
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    border: Border.all(
+                                        color:
+                                            (availableAbhaNumbersSelectedIndex ==
+                                                    index)
+                                                ? AppColors.blueApp
+                                                : Colors.grey,
+                                        width:
+                                            (availableAbhaNumbersSelectedIndex ==
+                                                    index)
+                                                ? 1.5.w
+                                                : 1.w),
                                   ),
-                                  Expanded(flex:2,
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        availableAbhaNumbers[index].abhaNumber??'',
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 11.sp,
-                                          //fontWeight: FontWeight.bold,
+                                  child:Container(
+                                   /* margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(14),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.08),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
                                         ),
-                                      ),
-                                    ),)
-                                ],),
-                                /*Row(children: [
-                                    Expanded(flex:1,
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          localText.name,
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 11.sp,
-                                            //fontWeight: FontWeight.bold,
+                                      ],
+                                    ),*/
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // 🔵 Avatar
+                                        CircleAvatar(
+                                          radius: 22,
+                                          backgroundColor: AppColors.primary,
+                                          child: Text(
+                                            availableAbhaNumbers[index].name
+                                                ?.substring(0, 1)
+                                                .toUpperCase() ??
+                                                '',
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ),
-                                      ),),
-                                    Text(
-                                      ':  ',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 11.sp,
-                                        //fontWeight: FontWeight.bold,
-                                      ),
+
+                                        const SizedBox(width: 12),
+
+                                        // 📄 Details
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              // 👤 Name + Gender
+                                              Text(
+                                                '${availableAbhaNumbers[index].name ?? ''}'
+                                                    '${availableAbhaNumbers[index].gender != null ? ' (${availableAbhaNumbers[index].gender})' : ''}',
+                                                style: TextStyle(
+                                                  fontSize: 13.sp,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.black,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+
+                                              const SizedBox(height: 6),
+
+                                              // 🆔 ABHA Number
+                                              Text(
+                                                '${localText.abhaNumber}: '
+                                                    '${availableAbhaNumbers[index].abhaNumber ?? ''}',
+                                                style: TextStyle(
+                                                  fontSize: 11.sp,
+                                                  color: Colors.grey.shade700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    Expanded(flex:2,
-                                      child:
+                                  ),
+                                  /*Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 1,
+                                            child: Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: Text(
+                                                localText.abhaNumber,
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 11.sp,
+                                                  //fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            ':  ',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 11.sp,
+                                              //fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 2,
+                                            child: Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: Text(
+                                                availableAbhaNumbers[index]
+                                                        .abhaNumber ??
+                                                    '',
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 11.sp,
+                                                  //fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+
                                       Row(
                                         children: [
                                           Expanded(
                                             flex: 1,
                                             child: Text(
-                                              localText.abhaNumber,
+                                              localText.name,
                                               style: TextStyle(fontSize: 11.sp),
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
-
                                           Text(':  '),
-
                                           Expanded(
                                             flex: 2,
-                                            child: Text(
-                                              availableAbhaNumbers[index].abhaNumber ?? '',
-                                              style: TextStyle(fontSize: 11.sp),
-                                              overflow: TextOverflow.ellipsis,
-                                              softWrap: true,
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    availableAbhaNumbers[index]
+                                                            .name ??
+                                                        '',
+                                                    style: TextStyle(
+                                                        fontSize: 11.sp),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    softWrap: true,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  availableAbhaNumbers[index]
+                                                              .gender !=
+                                                          null
+                                                      ? ' (${availableAbhaNumbers[index].gender})'
+                                                      : '',
+                                                  style: TextStyle(
+                                                      fontSize: 11.sp),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ],
-                                      ),
-                                     *//* Row(children: [
-                                        Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            availableAbhaNumbers[index].name??'',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 11.sp,
-                                              //fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            availableAbhaNumbers[index].gender!=null?
-                                            ' (${availableAbhaNumbers[index].gender??''})':'',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 11.sp,
-                                              //fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ],)*//*
-
                                       )
-                                  ],),*/
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 1,
-                                      child: Text(
-                                        localText.name,
-                                        style: TextStyle(fontSize: 11.sp),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
 
-                                    Text(':  '),
-
-                                    Expanded(
-                                      flex: 2,
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              availableAbhaNumbers[index].name ?? '',
-                                              style: TextStyle(fontSize: 11.sp),
-                                              overflow: TextOverflow.ellipsis,
-                                              softWrap: true,
-                                            ),
-                                          ),
-                                          Text(
-                                            availableAbhaNumbers[index].gender != null
-                                                ? ' (${availableAbhaNumbers[index].gender})'
-                                                : '',
-                                            style: TextStyle(fontSize: 11.sp),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                )
-
-                                /* Row(children: [
-                                    Expanded(flex:1,
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          '',
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 11.sp,
-                                            //fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),),
-                                    Text(
-                                      '   ',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 11.sp,
-                                        //fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Expanded(flex:2,
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          availableAbhaNumbers[index].gender!=null?
-                                          '(${availableAbhaNumbers[index].gender??''})':'',
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 11.sp,
-                                            //fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),)
-                                  ],),*/
-                              ],),
+                                    ],
+                                  )*/
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                )
+                    )
 
-
-
-
-              /*ListView.builder(
+                    /*ListView.builder(
                   // primary: false,
                     shrinkWrap: true,
                     itemCount: availableAbhaNumbers.length ?? 0,
@@ -1149,7 +1160,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                     ),
                                   ),)
                               ],),
-                              *//*Row(children: [
+                              */ /*Row(children: [
                                 Expanded(flex:1,
                                   child: Align(
                                     alignment: Alignment.centerLeft,
@@ -1196,7 +1207,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                       ),
                                     ],
                                   ),
-                                 *//**//* Row(children: [
+                                 */ /**/ /* Row(children: [
                                     Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
@@ -1220,10 +1231,10 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                         ),
                                       ),
                                     ),
-                                  ],)*//**//*
+                                  ],)*/ /**/ /*
 
                                   )
-                              ],),*//*
+                              ],),*/ /*
                               Row(
                                 children: [
                                   Expanded(
@@ -1262,7 +1273,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                 ],
                               )
 
-                              *//* Row(children: [
+                              */ /* Row(children: [
                                 Expanded(flex:1,
                                   child: Align(
                                     alignment: Alignment.centerLeft,
@@ -1296,86 +1307,779 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                       ),
                                     ),
                                   ),)
-                              ],),*//*
+                              ],),*/ /*
                             ],),
                           ),
                         ),
                       );
                     }),*/
+                    ),
+                Padding(
+                  padding: EdgeInsets.only(top: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (availableAbha)
+                        Align(
+                          alignment: Alignment.center,
+                          child: InkWell(
+                            onTap: () {
+                              dropdownvalue = '';
+                              if (availableAbhaNumbersSelectedIndex != -1 &&
+                                  availableAbhaNumbers != null) {
+                                _sendOTPLinkExisting();
+                              } else {
+                                Utils.showToastMessage('Select ABHA number');
+                              }
+                            },
+                            child: Container(
+                              width: 150.w,
+                              height: 30.h,
+                              decoration: BoxDecoration(
+                                color: Colors.amberAccent,
+                                borderRadius: BorderRadius.circular(5.0),
+                                border: Border.all(
+                                    color: Colors.amberAccent, width: 1.w),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    // Prefix icon for "Create New"
+                                    color: Colors.white,
+                                    size: 16.sp,
+                                  ),
+                                  SizedBox(width: 6.w),
+                                  // Small space between icon and text
+                                  Text(
+                                    localText.proceedwithkyc,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (availableAbha) Spacer(),
+                      // SizedBox(width: 10,),
+                      //if(availableAbha)
+                      if (availableAbha)
+                        Align(
+                          alignment: Alignment.center,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                dropdownvalue = defaultDropdownValue;
+                                isEnableSearch = false;
+                                linkExistAbha = false;
+                                availableAbha = false;
+                                createViaAbha = true;
+                                termCondFlag = true;
+                                createnewFlag = false;
+                                enableAbhaClick = false;
+                              });
+                            },
+                            child: Container(
+                              width: 130.w,
+                              height: 30.h,
+                              decoration: BoxDecoration(
+                                color: AppColors.greenHighlight,
+                                borderRadius: BorderRadius.circular(5.0),
+                                border: Border.all(
+                                    color: AppColors.greenHighlight,
+                                    width: 1.w),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add, // Prefix icon for "Create New"
+                                    color: Colors.white,
+                                    size: 16.sp,
+                                  ),
+                                  SizedBox(width: 6.w),
+                                  // Small space between icon and text
+                                  Text(
+                                    localText.createNew,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Padding(
-              padding: EdgeInsets.only(top: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  if(availableAbha)
-                    Align(
-                      alignment: Alignment.center,
-                      child: InkWell(
-                        onTap: () {
-                          dropdownvalue='';
-                          if(availableAbhaNumbersSelectedIndex != -1 && availableAbhaNumbers!=null){
-                            _sendOTPLinkExisting();
-                          }
-                          else {
-                            Utils.showToastMessage('Select ABHA number');
-                          }
+          ),
 
+          //if(createViaAbha)
+          if (false)
+            Column(
+              children: [
+                SizedBox(
+                  height: 0,
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    localText.createVia,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: DropdownButtonFormField<String>(
+                    value: dropdownvalue,
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.zero,
+                      border: UnderlineInputBorder(
+                        borderSide:
+                            BorderSide(color: AppColors.blueApp, width: 1),
+                      ),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide:
+                            BorderSide(color: AppColors.blueApp, width: 1),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide:
+                            BorderSide(color: AppColors.blueApp, width: 2),
+                      ),
+                    ),
+                    icon: Icon(Icons.keyboard_arrow_down,
+                        color: AppColors.blueApp),
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11.sp,
+                    ),
+                    items: items.map((String item) {
+                      return DropdownMenuItem(
+                        value: item,
+                        child: Text(item),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        dropdownvalue = newValue!;
+                      });
+                    },
+                  ),
+                ),
+                SizedBox(
+                  height: 25,
+                )
+              ],
+            ),
+
+          if (createViaAbha && dropdownvalue == 'Aadhaar')
+            Column(
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    localText.aadhaarNumber,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Form(
+                  key: _formKey,
+                  child: TextFormField(
+                    controller: aadhaarController,
+                    style: const TextStyle(fontSize: 11),
+                    keyboardType: TextInputType.number,
+                    maxLength: 12,
+                    decoration: InputDecoration(
+                      hintText: localText.aadhaarNumber,
+
+                      border: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.green, width: 2),
+                      ),
+                      errorBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red),
+                      ),
+                      focusedErrorBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red, width: 2),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16.sp,
+                        vertical: 12,
+                      ),
+                      counterText: "", // hides character counter
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter Aadhaar number';
+                      }
+
+                      if (!RegExp(r'^[2-9][0-9]{11}$').hasMatch(value)) {
+                        return 'Enter a valid 12-digit Aadhaar number';
+                      }
+
+                      return null;
+                    },
+                  ),
+
+                  /*TextFormField(
+                //readOnly: verifyAbhaFlag==true?true:false,
+                controller: aadhaarController,
+                style: TextStyle(
+                  fontSize: 11,
+                ),
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: localText.aadhaarNumber,
+
+                  // Completely remove the box — use underline only
+                  border: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.green, width: 2), // Green when focused
+                  ),
+                  errorBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.red),
+                  ),
+                  focusedErrorBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.red, width: 2),
+                  ),
+
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16.sp,
+                    vertical: 12, // keeps good height & alignment
+                  ),
+                ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter Aadhaar number';
+                    }
+
+                    if (!RegExp(r'^[2-9][0-9]{11}$').hasMatch(value)) {
+                      return 'Enter a valid 12-digit Aadhaar number';
+                    }
+
+                    return null;
+                  },
+              ),*/
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+              ],
+            ),
+
+          Visibility(
+            visible: termCondFlag,
+            child: Column(
+              children: [
+                Container(
+                  //width: 240.w,
+                  height: 50.h,
+                  //padding: EdgeInsets.all(6.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10.0),
+                    border: Border.all(color: AppColors.blueApp, width: 1.w),
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '    ${localText.iHerebyDeclareThat}:',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      //const SizedBox(width: 10),
+                      Checkbox(
+                        // tristate: true, // Example with tristate
+                        value: checkedValue,
+                        onChanged: (bool? newValue) {
+                          setState(() {
+                            checkedValue = newValue!;
+                            checkedIAgreeValue_1 = newValue;
+                            checkedIAgreeValue_2 = newValue;
+                            checkedIAgreeValue_3 = newValue;
+                            checkedIAgreeValue_4 = newValue;
+                            checkedIAgreeValue_5 = newValue;
+                            checkedIAgreeValue_6 = newValue;
+                            sendOtpAbha = true;
+                          });
                         },
+                      ),
+                      // const SizedBox(width: 10),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            checkedValue = !checkedValue;
+
+                            checkedIAgreeValue_1 = checkedValue;
+                            checkedIAgreeValue_2 = checkedValue;
+                            checkedIAgreeValue_3 = checkedValue;
+                            checkedIAgreeValue_4 = checkedValue;
+                            checkedIAgreeValue_5 = checkedValue;
+                            checkedIAgreeValue_6 = checkedValue;
+                            sendOtpAbha = true;
+                          });
+                        },
+                        child: Text(
+                          localText.agreeAll,
+                          style: TextStyle(
+                              fontSize: 11.0, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  //width: 240.w,
+                  //height: 50.h,
+                  //padding: EdgeInsets.all(6.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10.0),
+                    border: Border.all(color: AppColors.blueApp, width: 1.w),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              checkedIAgreeValue_1 = !checkedIAgreeValue_1;
+                            });
+
+                            allcheckbosRefresh();
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              //  const SizedBox(width: 10),
+                              Checkbox(
+                                // tristate: true, // Example with tristate
+                                value: checkedIAgreeValue_1,
+                                onChanged: (bool? newValue) {
+                                  setState(() {
+                                    checkedIAgreeValue_1 = newValue!;
+                                  });
+                                  allcheckbosRefresh();
+                                },
+                              ),
+                              // const SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
+                                  localText.igree1,
+                                  style: TextStyle(fontSize: 11.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              checkedIAgreeValue_2 = !checkedIAgreeValue_2;
+                            });
+                            allcheckbosRefresh();
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              //  const SizedBox(width: 10),
+                              Checkbox(
+                                // tristate: true, // Example with tristate
+                                value: checkedIAgreeValue_2,
+                                onChanged: (bool? newValue) {
+                                  setState(() {
+                                    checkedIAgreeValue_2 = newValue!;
+                                  });
+                                  allcheckbosRefresh();
+                                },
+                              ),
+                              // const SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
+                                  localText.igree2,
+                                  style: TextStyle(fontSize: 11.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              checkedIAgreeValue_3 = !checkedIAgreeValue_3;
+                            });
+                            allcheckbosRefresh();
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              //  const SizedBox(width: 10),
+                              Checkbox(
+                                // tristate: true, // Example with tristate
+                                value: checkedIAgreeValue_3,
+                                onChanged: (bool? newValue) {
+                                  setState(() {
+                                    checkedIAgreeValue_3 = newValue!;
+                                  });
+
+                                  allcheckbosRefresh();
+                                },
+                              ),
+                              // const SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
+                                  localText.igree3,
+                                  style: TextStyle(fontSize: 11.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              checkedIAgreeValue_4 = !checkedIAgreeValue_4;
+                            });
+                            allcheckbosRefresh();
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              //  const SizedBox(width: 10),
+                              Checkbox(
+                                // tristate: true, // Example with tristate
+                                value: checkedIAgreeValue_4,
+                                onChanged: (bool? newValue) {
+                                  setState(() {
+                                    checkedIAgreeValue_4 = newValue!;
+                                  });
+                                  allcheckbosRefresh();
+                                },
+                              ),
+                              // const SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
+                                  localText.igree4,
+                                  style: TextStyle(fontSize: 11.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              checkedIAgreeValue_5 = !checkedIAgreeValue_5;
+                            });
+                            allcheckbosRefresh();
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              //  const SizedBox(width: 10),
+                              Checkbox(
+                                // tristate: true, // Example with tristate
+                                value: checkedIAgreeValue_5,
+                                onChanged: (bool? newValue) {
+                                  setState(() {
+                                    checkedIAgreeValue_5 = newValue!;
+                                  });
+                                  allcheckbosRefresh();
+                                },
+                              ),
+                              // const SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
+                                  localText.igree5,
+                                  style: TextStyle(fontSize: 11.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              checkedIAgreeValue_6 = !checkedIAgreeValue_6;
+                            });
+                            allcheckbosRefresh();
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              //  const SizedBox(width: 10),
+                              Checkbox(
+                                // tristate: true, // Example with tristate
+                                value: checkedIAgreeValue_6,
+                                onChanged: (bool? newValue) {
+                                  setState(() {
+                                    checkedIAgreeValue_6 = newValue!;
+                                  });
+                                  allcheckbosRefresh();
+                                },
+                              ),
+                              // const SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
+                                  localText.igree6,
+                                  style: TextStyle(fontSize: 11.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          if (sendOtpAbha)
+            Visibility(
+              visible: otpVisible(),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: InkWell(
+                  onTap: () {
+                    if (dropdownvalue == 'Aadhaar') {
+                      if (_formKey.currentState!.validate()) {
+                        // ✅ Aadhaar is valid (non-empty + 12 digits)
+                        _aadhaarOTPABHA(sendOTP);
+                      } else {
+                        Utils.showToastMessage('Please enter aadhaar number');
+                      }
+                    } /*else {
+                      _aadhaarOTPABHA(sendOTP);
+                    }*/
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 20),
+                    child: Container(
+                      width: 100.w,
+                      height: 30.h,
+                      decoration: BoxDecoration(
+                        color: Colors.amberAccent,
+                        borderRadius: BorderRadius.circular(5.0),
+                        border:
+                            Border.all(color: Colors.amberAccent, width: 1.w),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.send_rounded,
+                            // Perfect prefix icon for "Send OTP"
+                            color: Colors.white,
+                            size: 15.sp,
+                          ),
+                          SizedBox(width: 6.w),
+                          // Small space between icon and text
+                          Text(
+                            localText.sendOtp,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          if (linkExistAbha)
+            Column(
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    getOtpLabel(localText.enterOtp),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                CustomTextField(
+                  controller: otpController,
+                  hintText: "Please enter OTP",
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "OTP is required";
+                    }
+                    return null;
+                  },
+                ),
+                Divider(color: AppColors.divider, thickness: 1, height: 0),
+                Padding(
+                  padding: EdgeInsets.only(top: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      InkWell(
+                        onTap: isResendEnabled
+                            ? () {
+                                if (dropdownvalue == 'Aadhaar') {
+                                  if (aadhaarController.text.isNotEmpty) {
+                                    _aadhaarOTPABHA(sendOTP);
+                                  } else {
+                                    Utils.showToastMessage(
+                                        'Please enter Aadhaar number');
+                                  }
+                                } else {
+                                  _aadhaarOTPABHA(sendOTP);
+                                }
+                              }
+                            : null,
+                        borderRadius: BorderRadius.circular(5.0),
                         child: Container(
-                          width: 150.w,
+                          width: 100.w,
                           height: 30.h,
                           decoration: BoxDecoration(
-                            color: Colors.amberAccent,
+                            color: isResendEnabled
+                                ? Colors.yellow
+                                : Colors.yellow.withOpacity(0.4),
                             borderRadius: BorderRadius.circular(5.0),
-                            border: Border.all(
-                                color: Colors.amberAccent, width: 1.w),
+                            border:
+                                Border.all(color: Colors.yellow, width: 1.w),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.arrow_forward_ios_rounded,                  // Prefix icon for "Create New"
-                                color: Colors.white,
-                                size: 16.sp,
-                              ),
-                              SizedBox(width: 6.w),           // Small space between icon and text
+                              Icon(Icons.refresh,
+                                  color: Colors.white, size: 16.sp),
+                              // Prefix icon
+                              SizedBox(width: 6.w),
                               Text(
-                                localText.proceedwithkyc,
+                                localText.resendOtp,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 11.sp,
                                   fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.3,
                                 ),
                               ),
                             ],
                           ),
                         ),
                       ),
-                    ),
-                  if(availableAbha)
-                    Spacer(),
-                  // SizedBox(width: 10,),
-                  //if(availableAbha)
-                  if(availableAbha)
-                    Align(
-                      alignment: Alignment.center,
-                      child: InkWell(
+                      Spacer(),
+                      InkWell(
                         onTap: () {
-                          setState(() {
-                            dropdownvalue = defaultDropdownValue;
-                            isEnableSearch = false;
-                            linkExistAbha = false;
-                            availableAbha = false;
-                            createViaAbha = true;
-                            termCondFlag = true;
-                            createnewFlag = false;
-                            enableAbhaClick = false;
-                          });
+                          if (dropdownvalue == 'Aadhaar') {
+                            if (otpController.text.isNotEmpty) {
+                              _aadhaarOTPABHA(verifyOTP);
+                            } else {
+                              Utils.showToastMessage('Please enter OTP');
+                            }
+                          } else if (dropdownvalue == 'Mobile') {
+                            if (otpController.text.isNotEmpty) {
+                              _aadhaarOTPABHA(verifyOTP);
+                            } else {
+                              Utils.showToastMessage('Please enter OTP');
+                            }
+                          } else {
+                            if (otpController.text.isNotEmpty) {
+                              _verifyOTPLinkExisting(otpController.text);
+                            } else {
+                              Utils.showToastMessage('Please enter OTP');
+                            }
+                          }
                         },
                         child: Container(
-                          width: 130.w,
+                          width: 100.w,
                           height: 30.h,
                           decoration: BoxDecoration(
                             color: AppColors.greenHighlight,
@@ -1386,14 +2090,12 @@ class _ABHAScreenState extends State<ABHAScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.add,                    // Prefix icon for "Create New"
-                                color: Colors.white,
-                                size: 16.sp,
-                              ),
-                              SizedBox(width: 6.w),           // Small space between icon and text
+                              Icon(Icons.check_box_outlined,
+                                  color: Colors.white,
+                                  size: 16.sp), // Prefix icon
+                              SizedBox(width: 6.w),
                               Text(
-                                localText.createNew,
+                                localText.verifyOtp,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 11.sp,
@@ -1404,610 +2106,105 @@ class _ABHAScreenState extends State<ABHAScreen> {
                           ),
                         ),
                       ),
-                    ),
-                ],),
-            ),
-          ],),
-        ),
-
-        //if(createViaAbha)
-        if(false)
-          Column(children: [
-            SizedBox(height: 0,),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                localText.createVia,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            SizedBox(height: 10,),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: DropdownButtonFormField<String>(
-                value: dropdownvalue,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.zero,
-                  border: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.blueApp, width: 1),
-                  ),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.blueApp, width: 1),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.blueApp, width: 2),
-                  ),
-                ),
-                icon: Icon(Icons.keyboard_arrow_down, color: AppColors.blueApp),
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 11.sp,
-                ),
-                items: items.map((String item) {
-                  return DropdownMenuItem(
-                    value: item,
-                    child: Text(item),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    dropdownvalue = newValue!;
-                  });
-                },
-              ),
-            ),
-            SizedBox(height: 25,)
-          ],),
-
-        if(createViaAbha&& dropdownvalue == 'Aadhaar')
-          Column(children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                localText.aadhaarNumber,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            SizedBox(height: 10,),
-            TextFormField(
-              //readOnly: verifyAbhaFlag==true?true:false,
-              controller: aadhaarController,
-              style: TextStyle(
-                fontSize: 11,
-              ),
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: localText.aadhaarNumber,
-
-                // Completely remove the box — use underline only
-                border: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.green, width: 2), // Green when focused
-                ),
-                errorBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red),
-                ),
-                focusedErrorBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red, width: 2),
-                ),
-
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16.sp,
-                  vertical: 12, // keeps good height & alignment
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter aadhaar number';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 15,),
-          ],),
-
-        Visibility(
-          visible: termCondFlag,
-          child: Column(
-            children: [
-              Container(
-                //width: 240.w,
-                height: 50.h,
-                //padding: EdgeInsets.all(6.w),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: AppColors.blueApp, width: 1.w),
-                ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    '    ${localText.iHerebyDeclareThat}:',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    //const SizedBox(width: 10),
-                    Checkbox(
-                      // tristate: true, // Example with tristate
-                      value: checkedValue,
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          checkedValue = newValue!;
-                          checkedIAgreeValue_1 = newValue;
-                          checkedIAgreeValue_2 = newValue;
-                          checkedIAgreeValue_3 = newValue;
-                          checkedIAgreeValue_4 = newValue;
-                          checkedIAgreeValue_5 = newValue;
-                          checkedIAgreeValue_6 = newValue;
-                          sendOtpAbha = true;
-                        });
-                      },
-                    ),
-                    // const SizedBox(width: 10),
-                    Text(
-                      localText.agreeAll,
-                      style: TextStyle(
-                          fontSize: 11.0, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                //width: 240.w,
-                //height: 50.h,
-                //padding: EdgeInsets.all(6.w),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: AppColors.blueApp, width: 1.w),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          //  const SizedBox(width: 10),
-                          Checkbox(
-                            // tristate: true, // Example with tristate
-                            value: checkedIAgreeValue_1,
-                            onChanged: (bool? newValue) {
-                              setState(() {
-                                checkedIAgreeValue_1 = newValue!;
-                              });
-                            },
-                          ),
-                          // const SizedBox(width: 10),
-                          Flexible(
-                            child: Text(
-                              localText.igree1,
-                              style: TextStyle(fontSize: 11.0),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          //  const SizedBox(width: 10),
-                          Checkbox(
-                            // tristate: true, // Example with tristate
-                            value: checkedIAgreeValue_2,
-                            onChanged: (bool? newValue) {
-                              setState(() {
-                                checkedIAgreeValue_2 = newValue!;
-                              });
-                            },
-                          ),
-                          // const SizedBox(width: 10),
-                          Flexible(
-                            child: Text(
-                              localText.igree2,
-                              style: TextStyle(fontSize: 11.0),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          //  const SizedBox(width: 10),
-                          Checkbox(
-                            // tristate: true, // Example with tristate
-                            value: checkedIAgreeValue_3,
-                            onChanged: (bool? newValue) {
-                              setState(() {
-                                checkedIAgreeValue_3 = newValue!;
-                              });
-                            },
-                          ),
-                          // const SizedBox(width: 10),
-                          Flexible(
-                            child: Text(
-                              localText.igree3,
-                              style: TextStyle(fontSize: 11.0),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          //  const SizedBox(width: 10),
-                          Checkbox(
-                            // tristate: true, // Example with tristate
-                            value: checkedIAgreeValue_4,
-                            onChanged: (bool? newValue) {
-                              setState(() {
-                                checkedIAgreeValue_4 = newValue!;
-                              });
-                            },
-                          ),
-                          // const SizedBox(width: 10),
-                          Flexible(
-                            child: Text(
-                              localText.igree4,
-                              style: TextStyle(fontSize: 11.0),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          //  const SizedBox(width: 10),
-                          Checkbox(
-                            // tristate: true, // Example with tristate
-                            value: checkedIAgreeValue_5,
-                            onChanged: (bool? newValue) {
-                              setState(() {
-                                checkedIAgreeValue_5 = newValue!;
-                              });
-                            },
-                          ),
-                          // const SizedBox(width: 10),
-                          Flexible(
-                            child: Text(
-                              localText.igree5,
-                              style: TextStyle(fontSize: 11.0),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          //  const SizedBox(width: 10),
-                          Checkbox(
-                            // tristate: true, // Example with tristate
-                            value: checkedIAgreeValue_6,
-                            onChanged: (bool? newValue) {
-                              setState(() {
-                                checkedIAgreeValue_6 = newValue!;
-                              });
-                            },
-                          ),
-                          // const SizedBox(width: 10),
-                          Flexible(
-                            child: Text(
-                              localText.igree6,
-                              style: TextStyle(fontSize: 11.0),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
+                const SizedBox(height: 10),
+                AnimatedOpacity(
+                  opacity: isResendEnabled ? 0.0 : 1.0,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeInOut,
+                  child: isResendEnabled
+                      ? const SizedBox.shrink()
+                      : Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: Colors.blueAccent.withOpacity(0.2)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.timer_outlined,
+                                  size: 18, color: Colors.blueAccent),
+                              const SizedBox(width: 6),
+                              Text(
+                                formatTime(countdown),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Colors.blueAccent.shade700,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.5,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                )
+              ],
+            ),
 
-
-
-        if(sendOtpAbha)
           Visibility(
-            visible: otpVisible(),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: InkWell(
-                onTap: () {
-                  if(dropdownvalue == 'Aadhaar'){
-                    if(aadhaarController.text.isNotEmpty)
-                    {
-                      _aadhaarOTPABHA(sendOTP);
-                    }
-                    else {
-                      Utils.showToastMessage('Please enter aadhaar number');
-                    }
-
-                  }
-                  else {
-                    _aadhaarOTPABHA(sendOTP);
-                  }
-
-
-
-                },
-                child: Padding(
-                  padding: EdgeInsets.only(top: 20),
-                  child: Container(
-                    width: 100.w,
-                    height: 30.h,
-                    decoration: BoxDecoration(
-                      color: Colors.amberAccent,
-                      borderRadius: BorderRadius.circular(5.0),
-                      border: Border.all(
-                          color: Colors.amberAccent, width: 1.w),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.send_rounded,           // Perfect prefix icon for "Send OTP"
-                          color: Colors.white,
-                          size: 15.sp,
-                        ),
-                        SizedBox(width: 6.w),           // Small space between icon and text
-                        Text(
-                          localText.sendOtp,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        if(linkExistAbha)
-          Column(children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                getOtpLabel(localText.enterOtp),
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            SizedBox(height: 5,),
-            CustomTextField(
-              controller: otpController,
-              hintText: "Please enter OTP",
-              keyboardType: TextInputType.number,
-              maxLength: 6,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "OTP is required";
-                }
-                return null;
-              },
-            ),
-            Divider(color: AppColors.divider, thickness: 1, height: 0),
-
-            Padding(
-              padding: EdgeInsets.only(top: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+              visible: (showLinkAbhaIdList),
+              child: Column(
                 children: [
-                  InkWell(
-                    onTap: isResendEnabled
-                        ? () {
-                      if (dropdownvalue == 'Aadhaar') {
-                        if (aadhaarController.text.isNotEmpty) {
-                          _aadhaarOTPABHA(sendOTP);
-                        } else {
-                          Utils.showToastMessage('Please enter Aadhaar number');
-                        }
-                      } else {
-                        _aadhaarOTPABHA(sendOTP);
-                      }
-                    }
-                        : null,
-                    borderRadius: BorderRadius.circular(5.0),
-                    child: Container(
-                      width: 100.w,
-                      height: 30.h,
-                      decoration: BoxDecoration(
-                        color: isResendEnabled
-                            ? Colors.yellow
-                            : Colors.yellow.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(5.0),
-                        border: Border.all(color: Colors.yellow, width: 1.w),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.refresh, color: Colors.white, size: 16.sp), // Prefix icon
-                          SizedBox(width: 6.w),
-                          Text(
-                            localText.resendOtp,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.3,
+                  //For aadhar
+                  if (listMobileAbhaSuggestion != null &&
+                      listMobileAbhaSuggestion.length != 0)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            width: 100.w,
+                            height: 50.h,
+                            child: TextFormField(
+                              onTap: () {
+                                //suggestion(setState);
+                                //createAbhaMobileSuggestion();
+                              },
+                              controller: txtABHAIDMobileController,
+                              style: TextStyle(fontSize: 11),
+                              // keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                hintText: localText.abhaId,
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    borderSide: BorderSide(color: Colors.blue)),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.blue)),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.blue),
+                                ),
+                                contentPadding: EdgeInsets.symmetric(
+                                  vertical: 14.sp,
+                                  horizontal: 16.sp,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter ABHA ID';
+                                }
+                                return null;
+                              },
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Spacer(),
-                  InkWell(
-                    onTap: () {
-                      if (dropdownvalue == 'Aadhaar') {
-                        if (otpController.text.isNotEmpty) {
-                          _aadhaarOTPABHA(verifyOTP);
-                        } else {
-                          Utils.showToastMessage('Please enter OTP');
-                        }
-                      } else if (dropdownvalue == 'Mobile') {
-                        if (otpController.text.isNotEmpty) {
-                          _aadhaarOTPABHA(verifyOTP);
-                        } else {
-                          Utils.showToastMessage('Please enter OTP');
-                        }
-                      } else {
-                        if (otpController.text.isNotEmpty) {
-                          _verifyOTPLinkExisting(otpController.text);
-                        } else {
-                          Utils.showToastMessage('Please enter OTP');
-                        }
-                      }
-                    },
-                    child: Container(
-                      width: 100.w,
-                      height: 30.h,
-                      decoration: BoxDecoration(
-                        color: AppColors.greenHighlight,
-                        borderRadius: BorderRadius.circular(5.0),
-                        border: Border.all(color: AppColors.greenHighlight, width: 1.w),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.check_box_outlined, color: Colors.white, size: 16.sp), // Prefix icon
-                          SizedBox(width: 6.w),
-                          Text(
-                            localText.verifyOtp,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            AnimatedOpacity(
-              opacity: isResendEnabled ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeInOut,
-              child: isResendEnabled
-                  ? const SizedBox.shrink()
-                  : Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blueAccent.withOpacity(0.2)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.timer_outlined, size: 18, color: Colors.blueAccent),
-                    const SizedBox(width: 6),
-                    Text(
-                      formatTime(countdown),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.blueAccent.shade700,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          ],),
-
-
-        Visibility(
-            visible: (showLinkAbhaIdList),
-            child: Column(
-              children: [
-
-
-                //For aadhar
-                if (listMobileAbhaSuggestion != null &&
-                    listMobileAbhaSuggestion.length != 0)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          width: 100.w,
+                        ),
+                        Container(
+                          width: 80.w,
                           height: 50.h,
                           child: TextFormField(
-                            onTap: () {
-                              //suggestion(setState);
-                              //createAbhaMobileSuggestion();
-                            },
-                            controller: txtABHAIDMobileController,
+                            readOnly: true,
+                            // controller: usernameController,
                             style: TextStyle(fontSize: 11),
-                            // keyboardType: TextInputType.number,
+                            keyboardType: TextInputType.number,
+                            initialValue: abhaIdEnd,
                             decoration: InputDecoration(
-                              hintText: localText.abhaId,
+                              hintText: abhaIdEnd,
                               border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10.0),
                                   borderSide: BorderSide(color: Colors.blue)),
@@ -2023,46 +2220,13 @@ class _ABHAScreenState extends State<ABHAScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter ABHA ID';
+                                return 'Please enter OTP';
                               }
                               return null;
                             },
                           ),
                         ),
-                      ),
-                      Container(
-                        width: 80.w,
-                        height: 50.h,
-                        child: TextFormField(
-                          readOnly: true,
-                          // controller: usernameController,
-                          style: TextStyle(fontSize: 11),
-                          keyboardType: TextInputType.number,
-                          initialValue: abhaIdEnd,
-                          decoration: InputDecoration(
-                            hintText: abhaIdEnd,
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                                borderSide: BorderSide(color: Colors.blue)),
-                            focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.blue)),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blue),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 14.sp,
-                              horizontal: 16.sp,
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter OTP';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      /*ElevatedButton(
+                        /*ElevatedButton(
                   onPressed: () {
                     */ /*if (dropdownvalue == 'Aadhaar') {
                       createAbhaAadhaarSuggestion(setState);
@@ -2071,144 +2235,205 @@ class _ABHAScreenState extends State<ABHAScreen> {
                    // }
                   },
                   child: Text('suggestion'))*/
-                    ],
-                  ),
-                if (listMobileAbhaSuggestion != null &&
-                    listMobileAbhaSuggestion.length != 0)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 5, top: 10),
-                      child: Text(
-                        '${localText.suggestedAbhaAddress} :',
-                        style: TextStyle(
-                          color: Colors.blueGrey,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.bold,
+                      ],
+                    ),
+                  if (listMobileAbhaSuggestion != null &&
+                      listMobileAbhaSuggestion.length != 0)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: 5, top: 10),
+                        child: Text(
+                          '${localText.suggestedAbhaAddress} :',
+                          style: TextStyle(
+                            color: Colors.blueGrey,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                if (listMobileAbhaSuggestion != null &&
-                    listMobileAbhaSuggestion.length != 0)
-                  Wrap(
-                    children: List<Widget>.generate(
-                      listMobileAbhaSuggestion.length,
-                          (int idx) {
-                        return Padding(
-                          padding: EdgeInsets.only(right: 3, left: 2),
-                          child: ChoiceChip(
-                              disabledColor: Colors.grey,
-                              selectedColor: Colors.blue[100],
-                              backgroundColor: Colors.white,
-                              shadowColor: Colors.grey,
-                              pressElevation: 5.0,
-                              elevation: 1.0,
-                              label: Text(
-                                listMobileAbhaSuggestion[idx],
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 9.sp,
-                                  fontWeight: FontWeight.bold,
+                  if (listMobileAbhaSuggestion != null &&
+                      listMobileAbhaSuggestion.length != 0)
+                    Wrap(
+                      children: List<Widget>.generate(
+                        listMobileAbhaSuggestion.length,
+                        (int idx) {
+                          return Padding(
+                            padding: EdgeInsets.only(right: 3, left: 2),
+                            child: ChoiceChip(
+                                disabledColor: Colors.grey,
+                                selectedColor: Colors.blue[100],
+                                backgroundColor: Colors.white,
+                                shadowColor: Colors.grey,
+                                pressElevation: 5.0,
+                                elevation: 1.0,
+                                label: Text(
+                                  listMobileAbhaSuggestion[idx],
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 9.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                selected: _valueSelectedSuggestId == idx,
+                                onSelected: (bool selected) {
+                                  setState(() {
+                                    _valueSelectedSuggestId =
+                                        (selected ? idx : null)!;
+                                    txtABHAIDMobileController.text =
+                                        listMobileAbhaSuggestion[idx];
+                                  });
+                                }),
+                          );
+                        },
+                      ).toList(),
+                    ),
+
+                  if (listABHAID.length > 0)
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: 200, // your max height
+                      ), // set your max height here
+
+                      child: Scrollbar(
+                        //controller: _scrollController,
+                        thumbVisibility: true, // always show scrollbar
+                        thickness: 6,
+                        radius: Radius.circular(10),
+
+                        child: ListView.builder(
+                            primary: false,
+                            shrinkWrap: true,
+                            itemCount: listABHAID.length ?? 0,
+                            itemBuilder: (BuildContext context, int index) {
+                              return RadioListTile(
+                                dense: true,
+                                title: Text(listABHAID[index].abhaId ?? '',
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13)),
+                                // Display the title for option 1
+                                // subtitle: Text('Subtitle for Option 1'), // Display a subtitle for option 1
+                                value: listABHAID[index].abhaId ?? '',
+                                // Assign a value of 1 to this option
+                                groupValue: _selectedAbhaIDValue,
+                                // Use _selectedValue to track the selected option
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedAbhaIDValue =
+                                        value!; // Update _selectedValue when option 1 is selected
+                                  });
+                                },
+                              );
+                            }),
+                      ),
+                    ),
+                  if (listABHAID.length > 0)
+                    SizedBox(
+                      height: 10,
+                    ),
+                  Container(
+                    child: Row(
+                      children: [
+                        if (listABHAID.length > 0)
+                          Align(
+                            alignment: Alignment.center,
+                            child: InkWell(
+                              onTap: () {
+                                if (dropdownvalue == 'Aadhaar') {
+                                  _healthCardLinkExisting(
+                                      verifyOtpAadhaar?.tokens?.token ?? '');
+                                  // _profileLinkExisting(verifyOtpAadhaar?.tokens?.token??'');
+                                } else {
+                                  if (_selectedAbhaIDValue != null &&
+                                      _selectedAbhaIDValue != "") {
+                                    _continueExisitingABHAMobileUser(
+                                        _selectedAbhaIDValue);
+                                  } else {
+                                    Utils.showToastMessage("Select Abha Id");
+                                  }
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.only(
+                                    left: 10.0, right: 10),
+                                height: 30.h,
+                                decoration: BoxDecoration(
+                                  color: Colors.yellow,
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  border: Border.all(
+                                      color: Colors.yellow, width: 1.w),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.person, // prefix icon
+                                      size: 14.sp,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      localText.useExisting,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11.sp,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              selected: _valueSelectedSuggestId == idx,
-                              onSelected: (bool selected) {
-                                setState(() {
-                                  _valueSelectedSuggestId = (selected ? idx : null)!;
-                                  txtABHAIDMobileController.text = listMobileAbhaSuggestion[idx];
-                                });
-                              }),
-                        );
-                      },
-                    ).toList(),
-                  ),
-
-                if(listABHAID.length > 0)
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: 200, // your max height
-                    ), // set your max height here
-
-                    child: Scrollbar(
-                      //controller: _scrollController,
-                      thumbVisibility: true,   // always show scrollbar
-                      thickness: 6,
-                      radius: Radius.circular(10),
-
-                      child: ListView.builder(
-                          primary: false,
-                          shrinkWrap: true,
-                          itemCount: listABHAID.length ?? 0,
-                          itemBuilder: (BuildContext context, int index) {
-                            return RadioListTile(
-                              dense: true,
-                              title: Text(listABHAID[index].abhaId ?? '',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13)),
-                              // Display the title for option 1
-                              // subtitle: Text('Subtitle for Option 1'), // Display a subtitle for option 1
-                              value: listABHAID[index].abhaId ?? '',
-                              // Assign a value of 1 to this option
-                              groupValue: _selectedAbhaIDValue,
-                              // Use _selectedValue to track the selected option
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedAbhaIDValue = value!; // Update _selectedValue when option 1 is selected
-                                });
-                              },
-                            );
-                          }),
-                    ),
-                  ),
-                if(listABHAID.length > 0)
-                  SizedBox(
-                    height: 10,
-                  ),
-                Container(
-                  child: Row(
-                    children: [
-                      if(listABHAID.length > 0)
+                            ),
+                          ),
+                        if (listABHAID.length > 0)
+                          SizedBox(
+                            width: 10,
+                          ),
                         Align(
                           alignment: Alignment.center,
                           child: InkWell(
                             onTap: () {
+                              mobileCreateController.text =
+                                  mobileController.text;
+                              //crateNewABHADialog();
                               if (dropdownvalue == 'Aadhaar') {
-                                _healthCardLinkExisting(verifyOtpAadhaar?.tokens?.token??'');
-                                // _profileLinkExisting(verifyOtpAadhaar?.tokens?.token??'');
-                              }
-                              else {
-                                if(_selectedAbhaIDValue!=null&&_selectedAbhaIDValue!=""){
-                                  _continueExisitingABHAMobileUser(_selectedAbhaIDValue);
+                                if (callAbhaSuggestion) {
+                                  _aadhaarabhasuggestions();
+                                } else if (txtABHAIDMobileController
+                                    .text.isNotEmpty) {
+                                  _aadhaarCreateABHA();
+                                } else {
+                                  Utils.showToastMessage(
+                                      'Please enter ABHA ID');
                                 }
-                                else {
-                                  Utils.showToastMessage("Select Abha Id");
-                                }
-
+                              } else {
+                                crateNewABHADialog();
                               }
-
                             },
-                            child:Container(
-                              padding: const EdgeInsets.only(left: 10.0, right: 10),
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.only(left: 10.0, right: 10),
                               height: 30.h,
                               decoration: BoxDecoration(
                                 color: Colors.yellow,
                                 borderRadius: BorderRadius.circular(5.0),
-                                border: Border.all(color: Colors.yellow, width: 1.w),
+                                border: Border.all(
+                                    color: Colors.yellow, width: 1.w),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
-                                    Icons.person,     // prefix icon
+                                    Icons.add_circle, // prefix icon
                                     size: 14.sp,
                                     color: Colors.white,
                                   ),
                                   SizedBox(width: 6),
                                   Text(
-                                    localText.useExisting,
+                                    localText.createNew,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.sp,
@@ -2220,72 +2445,15 @@ class _ABHAScreenState extends State<ABHAScreen> {
                             ),
                           ),
                         ),
-                      if(listABHAID.length > 0)
-                        SizedBox(width: 10,),
-                      Align(
-                        alignment: Alignment.center,
-                        child: InkWell(
-                          onTap: () {
-                            mobileCreateController.text= mobileController.text;
-                            //crateNewABHADialog();
-                            if (dropdownvalue == 'Aadhaar') {
-                              if(callAbhaSuggestion){
-                                _aadhaarabhasuggestions();
-                              }
-                              else if(txtABHAIDMobileController.text.isNotEmpty){
-                                _aadhaarCreateABHA();
-                              }
-                              else {
-                                Utils.showToastMessage('Please enter ABHA ID');
-                              }
-                            }
-                            else {
-                              crateNewABHADialog();
-                            }
-
-                          },
-                          child:Container(
-                            padding: const EdgeInsets.only(left: 10.0, right: 10),
-                            height: 30.h,
-                            decoration: BoxDecoration(
-                              color: Colors.yellow,
-                              borderRadius: BorderRadius.circular(5.0),
-                              border: Border.all(color: Colors.yellow, width: 1.w),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.add_circle,      // prefix icon
-                                  size: 14.sp,
-                                  color: Colors.white,
-                                ),
-                                SizedBox(width: 6),
-                                Text(
-                                  localText.createNew,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                ],
+              )),
 
-              ],
-            )),
+          if (healthCardShow) _showHealthCard(),
 
-        if(healthCardShow)
-          _showHealthCard(),
-
-
-        /*SizedBox(
+          /*SizedBox(
           height: 20,
         ),
         Text(
@@ -2296,7 +2464,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
               fontSize: 11.sp),
           textAlign: TextAlign.center,
         ),*/
-      ],),
+        ],
+      ),
     );
   }
 
@@ -2317,44 +2486,44 @@ class _ABHAScreenState extends State<ABHAScreen> {
           },
           child: StatefulBuilder(// You need this, notice the parameters below:
               builder: (BuildContext context, StateSetter setStateDialog) {
-                final localText = AppLocalizations.of(context)!;
-                return Scaffold(
-                  backgroundColor: Colors.white,
-                  body: Container(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 50,),
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Row(
-                              children: [
-                                Text(localText.createAbhaAddress,
-                                    style:
-                                    TextStyle(color: Colors.black, fontSize: 18)),
-                                Spacer(),
-                                InkWell(
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      Navigator.pop(context);
-                                      refresh();
-                                    },
-                                    child: Icon(Icons.close))
-                              ],
-                            ),
-                          ),
-                          createAbhaAddress(context),
-                        ],
-                      )
-
-                      ,
-                    ),
+            final localText = AppLocalizations.of(context)!;
+            return Scaffold(
+              backgroundColor: Colors.white,
+              body: Container(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 50,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            Text(localText.createAbhaAddress,
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 18)),
+                            Spacer(),
+                            InkWell(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.pop(context);
+                                  refresh();
+                                },
+                                child: Icon(Icons.close))
+                          ],
+                        ),
+                      ),
+                      createAbhaAddress(context),
+                    ],
                   ),
-                );
-              }),
+                ),
+              ),
+            );
+          }),
         );
       },
     );
@@ -2362,23 +2531,23 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
   Future<bool> _confirmExit(BuildContext context) async {
     return await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Exit'),
-        content: const Text('Are you sure you want to close this screen?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('No'),
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: const Text('Exit'),
+            content: const Text('Are you sure you want to close this screen?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('No'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Yes'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Yes'),
-          ),
-        ],
-      ),
-    ) ??
+        ) ??
         false;
   }
 
@@ -2387,9 +2556,9 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
     final result = await showConfirmationDialog(
       context: context,
-      message:l10n?.doYouWantToContinue ?? 'Do you want to close this screen?',
-      yesText:l10n?.yes ?? 'Yes',
-      noText:l10n?.no ?? 'No',
+      message: l10n?.doYouWantToContinue ?? 'Do you want to close this screen?',
+      yesText: l10n?.yes ?? 'Yes',
+      noText: l10n?.no ?? 'No',
     );
     return result ?? false;
   }
@@ -2405,67 +2574,70 @@ class _ABHAScreenState extends State<ABHAScreen> {
       pageBuilder: (context, se, ___) {
         return StatefulBuilder(// You need this, notice the parameters below:
             builder: (BuildContext context, StateSetter setDialogState) {
-              final localText = AppLocalizations.of(context)!;
-              return PopScope(
-                canPop: false, // prevent default back close
-                onPopInvoked: (didPop) async {
-                  if (didPop) return;
+          final localText = AppLocalizations.of(context)!;
+          return PopScope(
+            canPop: false, // prevent default back close
+            onPopInvoked: (didPop) async {
+              if (didPop) return;
 
-                  final confirm = await _showConfirmDialog(context);
-                  if (confirm) {
-                    refresh();
-                    Navigator.pop(context);
-                  }
+              final confirm = await _showConfirmDialog(context);
+              if (confirm) {
+                refresh();
+                Navigator.pop(context);
+              }
 
-                 /* final shouldExit = await _confirmExit(context);
+              /* final shouldExit = await _confirmExit(context);
                   if (shouldExit) {
                     refresh();
                     Navigator.pop(context);
                   }*/
-                },
-                child: Scaffold(
-                  backgroundColor: Colors.white,
-                  body: Container(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 30,),
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Row(
-                              children: [
-                                Text(localText.createAbha,
-                                    style:
-                                    TextStyle(color: Colors.black, fontSize: 18)),
-                                Spacer(),
-                                InkWell(
-                                    onTap: () async {
-                                      final confirm = await _showConfirmDialog(context);
-                                      if (confirm) {
-                                        setState(() {
-                                          refresh();
-                                        });
+            },
+            child: Scaffold(
+              backgroundColor: Colors.white,
+              body: Container(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            Text(localText.createAbha,
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 18)),
+                            Spacer(),
+                            InkWell(
+                                onTap: () async {
+                                  final confirm =
+                                      await _showConfirmDialog(context);
+                                  if (confirm) {
+                                    setState(() {
+                                      refresh();
+                                    });
 
-                                        Navigator.pop(context);
-                                      }
-                                    },
-                                    child: Icon(Icons.close))
-                              ],
-                            ),
-                          ),
-                          _buildTableOne(setDialogState),
-                          Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: SizedBox(
-                              width: 150.w,
-                              height: 40.h,
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: InkWell(
-                                  onTap: () {
-                                    /* if (dropdownvalue == 'Aadhaar') {
+                                    Navigator.pop(context);
+                                  }
+                                },
+                                child: Icon(Icons.close))
+                          ],
+                        ),
+                      ),
+                      _buildTableOne(setDialogState),
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: SizedBox(
+                          width: 150.w,
+                          height: 40.h,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: InkWell(
+                              onTap: () {
+                                /* if (dropdownvalue == 'Aadhaar') {
                                       if(txtABHAIDMobileController.text.isNotEmpty){
                                         _aadhaarCreateABHA();
                                       }
@@ -2480,56 +2652,54 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
                                       }
                                       else {*/
-                                   // if(txtABHAIDMobileController.text.isNotEmpty){
-                                      _mobileCreateABHA();
-                                   /* }
+                                // if(txtABHAIDMobileController.text.isNotEmpty){
+                                _mobileCreateABHA();
+                                /* }
                                     else {
                                       Utils.showToastMessage('Please enter ABHA ID');
                                     }*/
 
-                                    // }
-                                    // }
-
-                                  },
-                                  child: Container(
-                                    width: 150.w,
-                                    height: 30.h,
-                                    //padding: EdgeInsets.all(6.w),
-                                    decoration: BoxDecoration(
-                                      color: Colors.amberAccent,
-                                      borderRadius: BorderRadius.circular(5.0),
-                                      border: Border.all(
-                                          color: Colors.amberAccent, width: 1.w),
-                                    ),
-                                    child: Align(
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        (createMobileAadhharView)?
-                                        localText.submit:localText.createAbhaAddress,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 11.sp,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                // }
+                                // }
+                              },
+                              child: Container(
+                                width: 150.w,
+                                height: 30.h,
+                                //padding: EdgeInsets.all(6.w),
+                                decoration: BoxDecoration(
+                                  color: Colors.amberAccent,
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  border: Border.all(
+                                      color: Colors.amberAccent, width: 1.w),
+                                ),
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    (createMobileAadhharView)
+                                        ? localText.submit
+                                        : localText.createAbhaAddress,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.sp,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
-              );
-            });
+              ),
+            ),
+          );
+        });
       },
     );
   }
-
-
 
   TextEditingController firstNameController = TextEditingController();
   TextEditingController firstMiddleController = TextEditingController();
@@ -2559,8 +2729,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
     }
   }
 
-
   bool createMobileAadhharView = true;
+
   //Create new abha address view
   Widget _buildTableOne(StateSetter setDialogState) {
     final localText = AppLocalizations.of(context)!;
@@ -2569,7 +2739,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
       child: Column(
         children: [
           //For mobile
-          if (dropdownvalue == 'Mobile'&& createMobileAadhharView)
+          if (dropdownvalue == 'Mobile' && createMobileAadhharView)
             Table(
               border: TableBorder.all(color: Colors.grey, width: 1),
               children: [
@@ -2746,7 +2916,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     ),
                     TextFormField(
                       readOnly: true,
-                      onTap:(){
+                      onTap: () {
                         _showStateSelectionPopup(setDialogState);
                       },
                       controller: patientStateController,
@@ -2758,7 +2928,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
                         fillColor: Colors.transparent,
                       ),
                     ),
-
                   ],
                 ),
                 TableRow(
@@ -2771,13 +2940,12 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     ),
                     TextFormField(
                       readOnly: true,
-                      onTap:(){
-                        if(selectedState!=null){
+                      onTap: () {
+                        if (selectedState != null) {
                           _showDistrictSelectionPopup(setDialogState);
-                        }else{
+                        } else {
                           Utils.showToastMessage('Select State');
                         }
-
                       },
                       controller: patientDistrictController,
                       style: TextStyle(fontSize: 11),
@@ -2788,7 +2956,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
                         fillColor: Colors.transparent,
                       ),
                     ),
-
                   ],
                 ),
                 TableRow(
@@ -2855,7 +3022,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
                         return null;
                       },
-
                     ),
                   ],
                 ),
@@ -2907,12 +3073,11 @@ class _ABHAScreenState extends State<ABHAScreen> {
               ],
             ),
 
-
           //For aadhar
           //   if(!createMobileAadhharView)
 
           Padding(
-            padding: EdgeInsets.only(top:10),
+            padding: EdgeInsets.only(top: 10),
             child: Row(
               children: [
                 Expanded(
@@ -3016,7 +3181,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
             Wrap(
               children: List<Widget>.generate(
                 listMobileAbhaSuggestion.length,
-                    (int idx) {
+                (int idx) {
                   return Padding(
                     padding: EdgeInsets.only(right: 3, left: 2),
                     child: ChoiceChip(
@@ -3038,7 +3203,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
                         onSelected: (bool selected) {
                           setDialogState(() {
                             _valueSelectedSuggestId = (selected ? idx : null)!;
-                            txtABHAIDMobileController.text = listMobileAbhaSuggestion[idx];
+                            txtABHAIDMobileController.text =
+                                listMobileAbhaSuggestion[idx];
                           });
                         }),
                   );
@@ -3058,83 +3224,75 @@ class _ABHAScreenState extends State<ABHAScreen> {
       bool _isLoading = true;
       Utils.onLoading(context);
 
-      String response_sync ="";
-      Map<String, dynamic> data = {
-        "mobile" : mobileNo??''
-      };
+      String response_sync = "";
+      Map<String, dynamic> data = {"mobile": mobileNo ?? ''};
 
       String dataString = jsonEncode(data);
 
       AbhaController controller = AbhaController();
       try {
-
         final response = await controller.searchExistingAbha(data, clinicToken);
 
-        if (response != null&& response.statusCode==200) {
-          searchAvailabilityResponse = SearchAbhaResponse.fromJson(response.data);
+        if (response != null && response.statusCode == 200) {
+          searchAvailabilityResponse =
+              SearchAbhaResponse.fromJson(response.data);
 
-          _isLoading=false;
+          _isLoading = false;
           Navigator.pop(context);
-          availableAbhaNumbers = searchAvailabilityResponse?.abha??[];
+          availableAbhaNumbers = searchAvailabilityResponse?.abha ?? [];
 
-          if(availableAbhaNumbers.length>0){
-            enableAbhaClick=true;
+          if (availableAbhaNumbers.length > 0) {
+            enableAbhaClick = true;
           }
-
 
           setState(() {
             availableAbhaNumbers;
             //available_abha_numbers
-            availableAbha=true;
-            checkavailableAbha=false;
+            availableAbha = true;
+            checkavailableAbha = false;
             enableAbhaClick;
           });
           // Utils.showToastMessage('${searchAvailabilityResponse?.sMessage}');
-
-        }
-        else {
-          if (response != null&& response.statusCode==404) {
-
+        } else {
+          if (response != null && response.statusCode == 404) {
             Error400 error400 = Error400.fromJson(response?.data);
             Utils.showToastMessage(
                 (error400.error?.message?.contains("User not found.") ?? false)
                     ? "ABHA account not found."
-                    : error400.error?.message ?? 'Something went wrong! ${response?.statusCode}'
-            );
+                    : error400.error?.message ??
+                        'Something went wrong! ${response?.statusCode}');
             setState(() {
-              checkavailableAbha= false;
+              checkavailableAbha = false;
               dropdownvalue = defaultDropdownValue;
-              linkExistAbha =false;
-              availableAbha =false;
+              linkExistAbha = false;
+              availableAbha = false;
 
-              createViaAbha =true;
-              termCondFlag =true;
+              createViaAbha = true;
+              termCondFlag = true;
               /*createViaAbha =false;
               termCondFlag =false;*/
             });
             print(response);
-          }
-          else {
-
+          } else {
             Error400 error400 = Error400.fromJson(response?.data);
-            Utils.showToastMessage(error400.errorDetails?.message??'Something went wrong! ${response?.statusCode}');
+            Utils.showToastMessage(error400.errorDetails?.message ??
+                'Something went wrong! ${response?.statusCode}');
             setState(() {
-              checkavailableAbha= false;
+              checkavailableAbha = false;
               dropdownvalue = defaultDropdownValue;
-              linkExistAbha =false;
-              availableAbha =false;
-              createViaAbha =true;
+              linkExistAbha = false;
+              availableAbha = false;
+              createViaAbha = true;
 
-              termCondFlag =true;
+              termCondFlag = true;
             });
             print(response);
           }
         }
 
         response_sync = jsonEncode(response?.data ?? {});
-
       } catch (e) {
-        response_sync = e.toString()??'';
+        response_sync = e.toString() ?? '';
         Utils.showToastMessage('Something went wrong!');
         print(e);
       } finally {
@@ -3151,6 +3309,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
   }
 
   SendOtpExisting? sendOtpExisting;
+
   Future<void> _sendOTPLinkExisting() async {
     if (await Utils.isConnected()) {
       bool _isLoading = true;
@@ -3161,34 +3320,34 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
       num? loginId = 1;
 
-      if(availableAbhaNumbersSelectedIndex != -1 && availableAbhaNumbers!=null)
-      {
-        loginId = availableAbhaNumbers[availableAbhaNumbersSelectedIndex]!.index;
+      if (availableAbhaNumbersSelectedIndex != -1 &&
+          availableAbhaNumbers != null) {
+        loginId =
+            availableAbhaNumbers[availableAbhaNumbersSelectedIndex]!.index;
       }
 
-
       Map<String, dynamic> data = {
-        "loginId" : loginId,
-        "txnId" : searchAvailabilityResponse?.txnId??'',
-        "loginHint" : "index"
+        "loginId": loginId,
+        "txnId": searchAvailabilityResponse?.txnId ?? '',
+        "loginHint": "index"
       };
 
       dataRequestSync = jsonEncode(data);
 
       AbhaController controller = AbhaController();
       try {
+        final response =
+            await controller.sendOTPLinkExisting(data, clinicToken);
 
-        final response = await controller.sendOTPLinkExisting(data, clinicToken);
-
-        if (response != null&&response.statusCode==200) {
+        if (response != null && response.statusCode == 200) {
           sendOtpExisting = SendOtpExisting.fromJson(response.data);
 
           if (sendOtpExisting?.statusCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
             setState(() {
-              enableAbhaClick=false;
-              linkExistAbha=true;
+              enableAbhaClick = false;
+              linkExistAbha = true;
               availableAbha = false;
               createnewFlag = false;
               startTimer();
@@ -3215,6 +3374,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
   }
 
   VerifyOtpExisting? verifyOtpExisting;
+
   Future<void> _verifyOTPLinkExisting(var otpCode) async {
     if (await Utils.isConnected()) {
       bool _isLoading = true;
@@ -3226,27 +3386,28 @@ class _ABHAScreenState extends State<ABHAScreen> {
       String dataResponseSync = "";
 
       Map<String, dynamic> data = {
-        "otp" : otpCode,
-        "txnId" : sendOtpExisting?.txnId??""
+        "otp": otpCode,
+        "txnId": sendOtpExisting?.txnId ?? ""
       };
       dataRequestSync = jsonEncode(data);
 
       AbhaController controller = AbhaController();
       try {
+        final response =
+            await controller.verifyOTPLinkExisting(data, clinicToken);
 
-        final response = await controller.verifyOTPLinkExisting(data, clinicToken);
-
-        if (response != null&&response.statusCode==200) {
+        if (response != null && response.statusCode == 200) {
           verifyOtpExisting = VerifyOtpExisting.fromJson(response.data);
 
-          if (verifyOtpExisting?.statusCode == 200&&verifyOtpExisting?.authResult=="success") {
-            _isLoading=false;
+          if (verifyOtpExisting?.statusCode == 200 &&
+              verifyOtpExisting?.authResult == "success") {
+            _isLoading = false;
             Navigator.pop(context);
             setState(() {
               linkExistAbha = false;
             });
             methodNameLog = Constant.log_type_existing;
-            _healthCardLinkExisting(verifyOtpExisting?.token??'');
+            _healthCardLinkExisting(verifyOtpExisting?.token ?? '');
             // _profileLinkExisting(setStateDialog, verifyOtpExisting?.token??'');
           }
 
@@ -3257,7 +3418,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
         }
         dataResponseSync = jsonEncode(response?.data ?? {});
       } catch (e) {
-        dataResponseSync = e.toString()??'';
+        dataResponseSync = e.toString() ?? '';
         Utils.showToastMessage('Something went wrong!');
         print(e);
       } finally {
@@ -3271,6 +3432,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
   }
 
   HealthCardResposne? healthCardResposne;
+
   Future<void> _healthCardLinkExisting(var token) async {
     if (await Utils.isConnected()) {
       bool _isLoading = true;
@@ -3279,46 +3441,43 @@ class _ABHAScreenState extends State<ABHAScreen> {
       String dataRequestSync = "";
       String dataResponseSync = "";
 
-      Map<String, dynamic> data = {
-        "X-Token" : "Bearer ${token}"
-      };
+      Map<String, dynamic> data = {"X-Token": "Bearer ${token}"};
 
       dataRequestSync = jsonEncode(data);
 
       AbhaController controller = AbhaController();
       try {
+        final response =
+            await controller.healthCardLinkExisting(data, clinicToken);
 
-        final response = await controller.healthCardLinkExisting(data, clinicToken);
-
-        if (response != null&&response.statusCode==200) {
-          HealthCardResposne healthCardResposne = HealthCardResposne.fromJson(response.data);
+        if (response != null && response.statusCode == 200) {
+          HealthCardResposne healthCardResposne =
+              HealthCardResposne.fromJson(response.data);
 
           if (healthCardResposne.statusCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
             setState(() {
               healthCardShow = true;
               showLinkAbhaIdList = false;
-              _base64HealthcardID = healthCardResposne?.content??'';
+              _base64HealthcardID = healthCardResposne?.content ?? '';
               // Decode once here
               if (_base64HealthcardID!.isNotEmpty) {
                 _healthCardImageBytes = base64Decode(_base64HealthcardID!);
               }
-              createViaAbha =false;
+              createViaAbha = false;
             });
             // _viewImage(healthCardResposne.sData?.content??'', verifyOtpExisting?.sData?.token??'');
-          }
-          else {
+          } else {
             Utils.showToastMessage(Constant.tryagain);
           }
-
         } else {
           Utils.showToastMessage('Something went wrong!');
           print(response);
         }
         dataResponseSync = jsonEncode(response?.data ?? {});
       } catch (e) {
-        dataResponseSync = e.toString()??'';
+        dataResponseSync = e.toString() ?? '';
         Utils.showToastMessage('Something went wrong!');
         print(e);
       } finally {
@@ -3331,44 +3490,39 @@ class _ABHAScreenState extends State<ABHAScreen> {
     }
   }
 
-
-
   Future<void> _healthCardLinkExistingMobile(var token) async {
     if (await Utils.isConnected()) {
       bool _isLoading = true;
       Utils.onLoading(context);
 
-      Map<String, dynamic> data = {
-        "X-Token" : "Bearer ${token}"
-      };
+      Map<String, dynamic> data = {"X-Token": "Bearer ${token}"};
 
       AbhaController controller = AbhaController();
       try {
+        final response =
+            await controller.healthCardLinkExistingMobile(data, clinicToken);
 
-        final response = await controller.healthCardLinkExistingMobile(data, clinicToken);
-
-        if (response != null&&response.statusCode==200) {
-          HealthCardResposne healthCardResposne = HealthCardResposne.fromJson(response.data);
+        if (response != null && response.statusCode == 200) {
+          HealthCardResposne healthCardResposne =
+              HealthCardResposne.fromJson(response.data);
 
           if (healthCardResposne.statusCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
             setState(() {
               healthCardShow = true;
               showLinkAbhaIdList = false;
-              _base64HealthcardID = healthCardResposne?.content??'';
+              _base64HealthcardID = healthCardResposne?.content ?? '';
               // Decode once here
               if (_base64HealthcardID!.isNotEmpty) {
                 _healthCardImageBytes = base64Decode(_base64HealthcardID!);
               }
-              createViaAbha =false;
+              createViaAbha = false;
             });
             // _viewImage(healthCardResposne.sData?.content??'', verifyOtpExisting?.sData?.token??'');
-          }
-          else {
+          } else {
             Utils.showToastMessage(Constant.tryagain);
           }
-
         } else {
           Utils.showToastMessage('Something went wrong!');
           print(response);
@@ -3391,20 +3545,19 @@ class _ABHAScreenState extends State<ABHAScreen> {
       bool _isLoading = true;
       Utils.onLoading(context);
 
-      Map<String, dynamic> data = {
-        "x-token" : token
-      };
+      Map<String, dynamic> data = {"x-token": token};
 
       AbhaController controller = AbhaController();
       try {
-
-        final response = await controller.profileLinkExisting(data, clinicToken);
+        final response =
+            await controller.profileLinkExisting(data, clinicToken);
 
         if (response != null) {
-          ProfileExisting profileExisting = ProfileExisting.fromJson(response.data);
+          ProfileExisting profileExisting =
+              ProfileExisting.fromJson(response.data);
 
           if (profileExisting.sCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
           }
 
@@ -3425,7 +3578,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
       Utils.showToastMessage(Constant.internetConMsg);
     }
   }
-
 
   Widget _showHealthCard() {
     final localText = AppLocalizations.of(context)!;
@@ -3459,7 +3611,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
           SizedBox(
             height: 20,
           ),
-
           Center(
             child: Align(
               alignment: Alignment.center,
@@ -3467,7 +3618,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
                 onTap: () async {
                   try {
                     await Utils.requestMediaPermissions();
-                    String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+                    String timestamp =
+                        DateTime.now().millisecondsSinceEpoch.toString();
                     String filePath = await Utils.saveImageToDownloads(
                       _base64HealthcardID,
                       'ABHACard_$timestamp.png',
@@ -3485,18 +3637,18 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   decoration: BoxDecoration(
                     color: AppColors.greenHighlight,
                     borderRadius: BorderRadius.circular(5.0),
-                    border: Border.all(
-                        color: AppColors.greenHighlight, width: 1.w),
+                    border:
+                        Border.all(color: AppColors.greenHighlight, width: 1.w),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.download,                    // Prefix icon for "Create New"
+                        Icons.download, // Prefix icon for "Create New"
                         color: Colors.white,
                         size: 16.sp,
                       ),
-                      SizedBox(width: 6.w),           // Small space between icon and text
+                      SizedBox(width: 6.w), // Small space between icon and text
                       Text(
                         localText.download,
                         style: TextStyle(
@@ -3552,10 +3704,10 @@ class _ABHAScreenState extends State<ABHAScreen> {
                 ),
 
               ),
-              *//*SizedBox(
+              */ /*SizedBox(
                 width: 10,
-              ),*//*
-              *//*Expanded(
+              ),*/ /*
+              */ /*Expanded(
                       flex: 1,
                       child: SizedBox(
                         // width: 125.w,
@@ -3578,7 +3730,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                 color: Colors.white,
                               ),
                             )),
-                      ))*//*
+                      ))*/ /*
             ],
           )*/
         ],
@@ -3591,8 +3743,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
       barrierDismissible: false,
       context: context,
       builder: (context) => Dialog(
-        child:
-        Padding(
+        child: Padding(
           padding: EdgeInsets.all(15),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -3714,25 +3865,26 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
   String? authMethodSelectedvalue;
   var txnIdLinkAbha = '';
+
   // List of items in our dropdown menu
   var itemsAuthMethod = [''];
 
-  void refreshLinkABha(){
-    otpLinkController.text='';
-    authMethodSelectedvalue='';
-    itemsAuthMethod =[];
+  void refreshLinkABha() {
+    otpLinkController.text = '';
+    authMethodSelectedvalue = '';
+    itemsAuthMethod = [];
     txnIdLinkAbha = '';
-    abhaIdController.text='';
+    abhaIdController.text = '';
   }
 
   GetStates getStates = new GetStates();
   SDataState selectedState = new SDataState();
+
   //GetState and districts
   Future<void> _getStates() async {
     if (await Utils.isConnected()) {
       bool _isLoading = true;
       //Utils.onLoading(context);
-
 
       AbhaController controller = AbhaController();
       try {
@@ -3742,7 +3894,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
           getStates = GetStates.fromJson(response.data);
 
           if (getStates?.sCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             // Navigator.pop(context);
           }
 
@@ -3772,9 +3924,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
       bool _isLoading = true;
       Utils.onLoading(context);
 
-      Map<String, dynamic> data = {
-        "stateId" : selectedState.stateCode
-      };
+      Map<String, dynamic> data = {"stateId": selectedState.stateCode};
 
       AbhaController controller = AbhaController();
       try {
@@ -3784,7 +3934,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
           getDistricts = GetDistricts.fromJson(response.data);
 
           if (getDistricts.sCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
           }
 
@@ -3818,13 +3968,14 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
 // Create abha Addhaar
 
-  var callAbhaSuggestion =false;
-  var updateMobile =false;
+  var callAbhaSuggestion = false;
+  var updateMobile = false;
   var sendOTP = 'SendOtp';
   var verifyOTP = 'VierfyOtp';
   SendOtpExisting? aadhaarSendOtp;
   VerifyOtpAadhaar? verifyOtpAadhaar;
   VerifyOtpMobile? verifyOtpMobile;
+
   Future<void> _aadhaarOTPABHA(var clickVal) async {
     listABHAID = [];
     if (await Utils.isConnected()) {
@@ -3837,7 +3988,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
       var methodName = '';
 
       //Aadhaar
-      if(dropdownvalue == 'Aadhaar'){
+      if (dropdownvalue == 'Aadhaar') {
         if (clickVal == sendOTP) {
           jsonData = {
             "aadhaar": aadhaarController.text,
@@ -3845,29 +3996,23 @@ class _ABHAScreenState extends State<ABHAScreen> {
             "entity_id": "0" //patient id for existing patient
           };
           methodName = AbhaController.aadharSendOTP;
-        }
-        else if (clickVal == verifyOTP) {
-
-          if(updateMobile){
+        } else if (clickVal == verifyOTP) {
+          if (updateMobile) {
             jsonData = {
-              "txnId" : verifyOtpAadhaar?.txnId??'',
-              "otp" : otpController.text??''
+              "txnId": verifyOtpAadhaar?.txnId ?? '',
+              "otp": otpController.text ?? ''
             };
             methodName = AbhaController.aadhaarMobileVerify;
-          }
-          else {
+          } else {
             jsonData = {
-              "txnId" : aadhaarSendOtp?.txnId??'',
-              "otp" : otpController.text??'',
-              "mobile" : mobileController.text
+              "txnId": aadhaarSendOtp?.txnId ?? '',
+              "otp": otpController.text ?? '',
+              "mobile": mobileController.text
             };
             methodName = AbhaController.aadharVerifyOTP;
           }
-
-
         }
-      }
-      else {
+      } else {
         //Mobile
         if (clickVal == sendOTP) {
           jsonData = {
@@ -3877,11 +4022,10 @@ class _ABHAScreenState extends State<ABHAScreen> {
           };
 
           methodName = AbhaController.mobileSendotp;
-        }
-        else if (clickVal == verifyOTP) {
+        } else if (clickVal == verifyOTP) {
           jsonData = {
-            "otp" : otpController.text??'',
-            "txnId" : aadhaarSendOtp?.txnId??''
+            "otp": otpController.text ?? '',
+            "txnId": aadhaarSendOtp?.txnId ?? ''
           };
           methodName = AbhaController.mobileVerifyotp;
         }
@@ -3891,14 +4035,15 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
       AbhaController controller = AbhaController();
       try {
-        final response = await controller.aadhaarCreateABHA(methodName, jsonData, clinicToken);
+        final response = await controller.aadhaarCreateABHA(
+            methodName, jsonData, clinicToken);
 
-        if (response != null&&response.statusCode==200) {
+        if (response != null && response.statusCode == 200) {
           var sMessage;
           if (clickVal == sendOTP) {
             aadhaarSendOtp = SendOtpExisting.fromJson(response.data);
             if (aadhaarSendOtp?.statusCode == 200) {
-              _isLoading=false;
+              _isLoading = false;
               Navigator.pop(context);
               setState(() {
                 linkExistAbha = true;
@@ -3908,23 +4053,21 @@ class _ABHAScreenState extends State<ABHAScreen> {
               startTimer();
             }
             sMessage = aadhaarSendOtp?.message;
-          }
-          else if (clickVal == verifyOTP) {
-            if(dropdownvalue == 'Aadhaar'){
-              if(response!=null&&response.statusCode==200){
+          } else if (clickVal == verifyOTP) {
+            if (dropdownvalue == 'Aadhaar') {
+              if (response != null && response.statusCode == 200) {
                 //VerifyOtpAadhaar verifyres = VerifyOtpAadhaar.fromJson(response.data);
-                if (updateMobile){
+                if (updateMobile) {
                   final txnId = response.data["txnId"];
                   if (verifyOtpAadhaar != null) {
                     verifyOtpAadhaar!.txnId = txnId;
                   }
-                }
-                else {
+                } else {
                   verifyOtpAadhaar = VerifyOtpAadhaar.fromJson(response.data);
                 }
                 if (verifyOtpAadhaar?.statusCode == 200) {
                   createMobileAadhharView = false;
-                  _isLoading=false;
+                  _isLoading = false;
                   Navigator.pop(context);
                   /* setState(() {
                     linkExistAbha = false;
@@ -3932,87 +4075,88 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   //  listABHAID.add(ABHAID(verifyOtpAadhaar?.aBHAProfile?.phrAddress?.first??'', true));
                   });*/
 
-                  var abhaMobileNo = verifyOtpAadhaar?.aBHAProfile?.mobile??'';
+                  var abhaMobileNo =
+                      verifyOtpAadhaar?.aBHAProfile?.mobile ?? '';
 
-                  if(abhaMobileNo!=mobileController.text&&updateMobile==false){
-
+                  if (abhaMobileNo != mobileController.text &&
+                      updateMobile == false) {
                     final result = await showAadharAlert(context);
                     if (result == true) {
                       // User selected Yes → update the number
                       _updateCommunication();
                     } else {
                       // User selected No
-                      updateMobile=false;
+                      updateMobile = false;
                       setState(() {
                         linkExistAbha = false;
                         showLinkAbhaIdList = true;
-                        listABHAID.add(ABHAID(verifyOtpAadhaar?.aBHAProfile?.phrAddress?.first??'', true));
+                        listABHAID.add(ABHAID(
+                            verifyOtpAadhaar?.aBHAProfile?.phrAddress?.first ??
+                                '',
+                            true));
                       });
 
-                      if(listABHAID.length==0){
+                      if (listABHAID.length == 0) {
                         setState(() {
                           callAbhaSuggestion = false;
                         });
                         _aadhaarabhasuggestions();
-                      }
-                      else {
+                      } else {
                         callAbhaSuggestion = true;
                       }
                     }
-                  }
-                  else {
-                    updateMobile=false;
+                  } else {
+                    updateMobile = false;
                     setState(() {
                       linkExistAbha = false;
                       showLinkAbhaIdList = true;
-                      listABHAID.add(ABHAID(verifyOtpAadhaar?.aBHAProfile?.phrAddress?.first??'', true));
+                      listABHAID.add(ABHAID(
+                          verifyOtpAadhaar?.aBHAProfile?.phrAddress?.first ??
+                              '',
+                          true));
                     });
 
-                    if(listABHAID.length==0){
+                    if (listABHAID.length == 0) {
                       setState(() {
                         callAbhaSuggestion = false;
                       });
                       _aadhaarabhasuggestions();
-                    }
-                    else {
+                    } else {
                       callAbhaSuggestion = true;
                     }
-
-
                   }
                 }
 
                 // _profileMobile(verifyOtpAadhaar?.tokens?.token??'');
                 sMessage = verifyOtpAadhaar?.message;
-              }
-              else {
-
+              } else {
                 Error400 error400 = Error400.fromJson(response?.data);
-                Utils.showToastMessage(error400.errorDetails?.message??'Something went wrong! ${response?.statusCode}');
+                Utils.showToastMessage(error400.errorDetails?.message ??
+                    'Something went wrong! ${response?.statusCode}');
                 setState(() {
-                  checkavailableAbha= false;
+                  checkavailableAbha = false;
                   dropdownvalue = defaultDropdownValue;
-                  linkExistAbha =false;
-                  availableAbha =false;
-                  createViaAbha =true;
+                  linkExistAbha = false;
+                  availableAbha = false;
+                  createViaAbha = true;
 
-                  termCondFlag =true;
+                  termCondFlag = true;
                 });
                 print(response);
               }
-            }
-            else {
+            } else {
               verifyOtpMobile = VerifyOtpMobile.fromJson(response.data);
               if (verifyOtpMobile?.statusCode == 200) {
-                _isLoading=false;
+                _isLoading = false;
                 Navigator.pop(context);
                 setState(() {
                   linkExistAbha = false;
                   showLinkAbhaIdList = true;
-                  if(verifyOtpMobile?.users!=null){
+                  if (verifyOtpMobile?.users != null) {
                     for (var imageAsset in verifyOtpMobile!.users!) {
                       if (imageAsset.kycStatus == "VERIFIED") {
-                        listABHAID.add(ABHAID(imageAsset.abhaAddress??'', true));
+                        listABHAID
+                            .add(ABHAID(imageAsset.abhaAddress ?? '', true));
                       }
                     }
                   }
@@ -4024,17 +4168,17 @@ class _ABHAScreenState extends State<ABHAScreen> {
             }
           }
           Utils.showToastMessage(sMessage);
-        }
-        else if (response != null&&response.statusCode==400) {
+        } else if (response != null && response.statusCode == 400) {
           Error400 error400 = Error400.fromJson(response.data);
-          Utils.showToastMessage(error400.errorDetails?.message??'Something went wrong! ${response?.statusCode}');
+          Utils.showToastMessage(error400.errorDetails?.message ??
+              'Something went wrong! ${response?.statusCode}');
           print(response);
-        }
-        else {
-          if(response != null){
+        } else {
+          if (response != null) {
             Error400 error400 = Error400.fromJson(response.data);
             // Get the message safely
-            String fullMessage = error400.error?.message ?? 'Something went wrong! ${response?.statusCode}';
+            String fullMessage = error400.error?.message ??
+                'Something went wrong! ${response?.statusCode}';
 
             // Check if it contains "OTP validation failed"
             String displayMessage;
@@ -4046,16 +4190,16 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
 // Show toast
             Utils.showToastMessage(displayMessage);
-          }
-          else {
-            Utils.showToastMessage('Something went wrong! ${response?.statusCode}');
+          } else {
+            Utils.showToastMessage(
+                'Something went wrong! ${response?.statusCode}');
           }
 
           print(response);
         }
         dataResponseSync = jsonEncode(response?.data ?? {});
       } catch (e) {
-        dataResponseSync = e.toString()??'';
+        dataResponseSync = e.toString() ?? '';
         Utils.showToastMessage('Something went wrong!');
         print(e);
       } finally {
@@ -4063,7 +4207,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
           Navigator.pop(context);
         }
         var logName = Constant.log_type_create_new_via_mobile;
-        if(dropdownvalue == 'Aadhaar'){
+        if (dropdownvalue == 'Aadhaar') {
           logName = Constant.log_type_create_new_via_aadhaar;
         }
       }
@@ -4081,18 +4225,16 @@ class _ABHAScreenState extends State<ABHAScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title:  Text(
+          title: Text(
             'Mobile Number Mismatch',
             style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 12.sp),
           ),
-          content:  Text(
+          content: Text(
             'The Aadhaar-linked mobile number is different from the number you searched for.\n\nDo you want to update the mobile number?',
-            style: TextStyle(
-                color: Colors.black,
-                fontSize: 12.sp),
+            style: TextStyle(color: Colors.black, fontSize: 12.sp),
           ),
           actionsAlignment: MainAxisAlignment.end,
           actions: [
@@ -4101,9 +4243,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
                 foregroundColor: Colors.grey[700],
               ),
               onPressed: () => Navigator.of(context).pop(false),
-              child:  Text('No',style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 12.sp)),
+              child: Text('No',
+                  style: TextStyle(color: Colors.black, fontSize: 12.sp)),
             ),
             FilledButton(
               style: FilledButton.styleFrom(
@@ -4114,17 +4255,14 @@ class _ABHAScreenState extends State<ABHAScreen> {
                 ),
               ),
               onPressed: () => Navigator.of(context).pop(true),
-              child:  Text('Yes', style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12.sp)),
+              child: Text('Yes',
+                  style: TextStyle(color: Colors.white, fontSize: 12.sp)),
             ),
           ],
         );
       },
     );
   }
-
-
 
   Future<void> _updateCommunication() async {
     //listABHAID = [];
@@ -4134,8 +4272,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
       String dataRequestSync = "";
       String dataResponseSync = "";
 
-      Map<String, dynamic>? jsonData  =
-      {
+      Map<String, dynamic>? jsonData = {
         "txnId": verifyOtpAadhaar?.txnId,
         "mobile": mobileController.text
       };
@@ -4143,60 +4280,56 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
       AbhaController controller = AbhaController();
       try {
-        final response = await controller.aadhaarCreateABHA(AbhaController.aadhaarMobileUpdate, jsonData, clinicToken);
+        final response = await controller.aadhaarCreateABHA(
+            AbhaController.aadhaarMobileUpdate, jsonData, clinicToken);
 
-        if (response != null&& response.statusCode==200) {
+        if (response != null && response.statusCode == 200) {
           var sMessage;
-          UpdateAadhaarMobile verifyOtpAadhaar = UpdateAadhaarMobile.fromJson(response.data);
+          UpdateAadhaarMobile verifyOtpAadhaar =
+              UpdateAadhaarMobile.fromJson(response.data);
           if (verifyOtpAadhaar?.statusCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
-            sMessage = verifyOtpAadhaar?.message??'';
+            sMessage = verifyOtpAadhaar?.message ?? '';
             setState(() {
-              otpController.text="";
-              updateMobile=true;
+              otpController.text = "";
+              updateMobile = true;
               linkExistAbha = true;
               sendOtpAbha = false;
               termCondFlag = false;
             });
-
-
-
           }
           // sMessage = abhaSuggestionMobile?.statusCode;
           Utils.showToastMessage(sMessage);
-        }  else {
-
+        } else {
           Error400 error400 = Error400.fromJson(response?.data);
-          Utils.showToastMessage(error400.errorDetails?.message??'Something went wrong! ${response?.statusCode}');
+          Utils.showToastMessage(error400.errorDetails?.message ??
+              'Something went wrong! ${response?.statusCode}');
           setState(() {
-            checkavailableAbha= false;
+            checkavailableAbha = false;
             dropdownvalue = defaultDropdownValue;
-            linkExistAbha =false;
-            availableAbha =false;
-            createViaAbha =true;
+            linkExistAbha = false;
+            availableAbha = false;
+            createViaAbha = true;
 
-            termCondFlag =true;
+            termCondFlag = true;
           });
           print(response);
         }
         dataResponseSync = jsonEncode(response?.data ?? {});
       } catch (e) {
-        dataResponseSync = e.toString()??'';
+        dataResponseSync = e.toString() ?? '';
         Utils.showToastMessage('Something went wrong!');
         print(e);
       } finally {
         if (_isLoading) {
           Navigator.pop(context);
         }
-
       }
     } else {
       Utils.showToastMessage(Constant.internetConMsg);
     }
   }
-
-
 
   Future<void> _continueExisitingABHAMobileUser(var selectedAbha) async {
     if (await Utils.isConnected()) {
@@ -4205,88 +4338,88 @@ class _ABHAScreenState extends State<ABHAScreen> {
       String dataRequestSync = "";
       String dataResponseSync = "";
       Map<String, dynamic> data = {
-        "X-Token": "Bearer ${verifyOtpMobile?.tokens?.token}", //token that came in the above API.
-        "abhaAddress":selectedAbha,
-        "txnId":verifyOtpMobile?.txnId??''
+        "X-Token": "Bearer ${verifyOtpMobile?.tokens?.token}",
+        //token that came in the above API.
+        "abhaAddress": selectedAbha,
+        "txnId": verifyOtpMobile?.txnId ?? ''
       };
       dataRequestSync = jsonEncode(data);
 
-      var  methodName = AbhaController.continueExisitingABHAMobile;
+      var methodName = AbhaController.continueExisitingABHAMobile;
 
       AbhaController controller = AbhaController();
       try {
+        final response =
+            await controller.aadhaarCreateABHA(methodName, data, clinicToken);
 
-        final response = await controller.aadhaarCreateABHA(methodName, data, clinicToken);
-
-        if (response != null&& response.statusCode==200) {
-          ExistingMobileAbha existingMobileAbha = ExistingMobileAbha.fromJson(response.data);
+        if (response != null && response.statusCode == 200) {
+          ExistingMobileAbha existingMobileAbha =
+              ExistingMobileAbha.fromJson(response.data);
 
           if (existingMobileAbha.statusCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
-            _healthCardLinkExistingMobile(existingMobileAbha.token??'');
+            _healthCardLinkExistingMobile(existingMobileAbha.token ?? '');
             //_mobileabhasuggestions(profileAadhaar);
           }
 
           //Utils.showToastMessage('${profileMobile}');
-        }  else {
-
+        } else {
           Error400 error400 = Error400.fromJson(response?.data);
-          Utils.showToastMessage(error400.errorDetails?.message??'Something went wrong! ${response?.statusCode}');
+          Utils.showToastMessage(error400.errorDetails?.message ??
+              'Something went wrong! ${response?.statusCode}');
           setState(() {
-            checkavailableAbha= false;
+            checkavailableAbha = false;
             dropdownvalue = defaultDropdownValue;
-            linkExistAbha =false;
-            availableAbha =false;
-            createViaAbha =true;
+            linkExistAbha = false;
+            availableAbha = false;
+            createViaAbha = true;
 
-            termCondFlag =true;
+            termCondFlag = true;
           });
           print(response);
         }
         dataResponseSync = jsonEncode(response?.data ?? {});
       } catch (e) {
-        dataResponseSync = e.toString()??'';
+        dataResponseSync = e.toString() ?? '';
         Utils.showToastMessage('Something went wrong!');
         print(e);
       } finally {
         if (_isLoading) {
           Navigator.pop(context);
         }
-
       }
     } else {
       Utils.showToastMessage(Constant.internetConMsg);
     }
   }
 
-
 //Mobile create
   Future<void> _mobileCreateLinkExisitingABHA() async {
-
     if (await Utils.isConnected()) {
       bool _isLoading = true;
       Utils.onLoading(context);
 
-      Map<String, dynamic>? jsonData  = {
-        "txnId" : verifyOtpMobile?.txnId??'',
-        "abha_address" : _selectedAbhaIDValue,
-        "x_token" : 'Bearer ${verifyOtpMobile?.tokens?.token}'
+      Map<String, dynamic>? jsonData = {
+        "txnId": verifyOtpMobile?.txnId ?? '',
+        "abha_address": _selectedAbhaIDValue,
+        "x_token": 'Bearer ${verifyOtpMobile?.tokens?.token}'
       };
       var methodName = AbhaController.mobileLinkExisting;
 
-
       AbhaController controller = AbhaController();
       try {
-        final response = await controller.aadhaarCreateABHA(methodName, jsonData, clinicToken);
+        final response = await controller.aadhaarCreateABHA(
+            methodName, jsonData, clinicToken);
 
         if (response != null) {
           var sMessage;
-          MobileLinkAbhaAddress createAadhaarResponse = MobileLinkAbhaAddress.fromJson(response.data);
+          MobileLinkAbhaAddress createAadhaarResponse =
+              MobileLinkAbhaAddress.fromJson(response.data);
           if (createAadhaarResponse?.sCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
-            _healthCardMobile(createAadhaarResponse?.sData?.token??'');
+            _healthCardMobile(createAadhaarResponse?.sData?.token ?? '');
             //_profileLinkMobile(setStateDialog, createAadhaarResponse?.sData?.token??'');
           }
           sMessage = createAadhaarResponse?.sMessage;
@@ -4313,25 +4446,24 @@ class _ABHAScreenState extends State<ABHAScreen> {
       bool _isLoading = true;
       Utils.onLoading(context);
 
-      Map<String, dynamic> data = {
-        "token" : 'Bearer ${token}'
-      };
+      Map<String, dynamic> data = {"token": 'Bearer ${token}'};
 
       AbhaController controller = AbhaController();
       try {
-
-        final response = await controller.aadhaarCreateABHA(AbhaController.mobileHealthCard,data, clinicToken);
+        final response = await controller.aadhaarCreateABHA(
+            AbhaController.mobileHealthCard, data, clinicToken);
 
         if (response != null) {
-          HealthCardResposne healthCardResposne = HealthCardResposne.fromJson(response.data);
+          HealthCardResposne healthCardResposne =
+              HealthCardResposne.fromJson(response.data);
 
           if (healthCardResposne.statusCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
             setState(() {
               healthCardShow = true;
               showLinkAbhaIdList = false;
-              _base64HealthcardID = healthCardResposne?.content??'';
+              _base64HealthcardID = healthCardResposne?.content ?? '';
               // Decode once here
               if (_base64HealthcardID!.isNotEmpty) {
                 _healthCardImageBytes = base64Decode(_base64HealthcardID!);
@@ -4358,7 +4490,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
     }
   }
 
-
   Future<void> _healthCardAfterCreateMobile(var token) async {
     if (await Utils.isConnected()) {
       bool _isLoading = true;
@@ -4366,37 +4497,34 @@ class _ABHAScreenState extends State<ABHAScreen> {
       String dataRequestSync = "";
       String dataResponseSync = "";
 
-      Map<String, dynamic> data = {
-        "X-Token" : 'Bearer ${token}'
-      };
+      Map<String, dynamic> data = {"X-Token": 'Bearer ${token}'};
       dataRequestSync = jsonEncode(data);
 
       AbhaController controller = AbhaController();
       try {
-
-        final response = await controller.aadhaarCreateABHA(AbhaController.mobileCreateABHACard,data, clinicToken);
+        final response = await controller.aadhaarCreateABHA(
+            AbhaController.mobileCreateABHACard, data, clinicToken);
 
         if (response != null) {
-          HealthCardResposne healthCardResposne = HealthCardResposne.fromJson(response.data);
+          HealthCardResposne healthCardResposne =
+              HealthCardResposne.fromJson(response.data);
           if (healthCardResposne.statusCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
             setState(() {
               healthCardShow = true;
               showLinkAbhaIdList = false;
-              _base64HealthcardID = healthCardResposne?.content??'';
+              _base64HealthcardID = healthCardResposne?.content ?? '';
               // Decode once here
               if (_base64HealthcardID!.isNotEmpty) {
                 _healthCardImageBytes = base64Decode(_base64HealthcardID!);
               }
             });
             // _viewImage(healthCardResposne.sData?.content??'', verifyOtpExisting?.sData?.token??'');
-          }
-
-          else {
-
+          } else {
             Error400 error400 = Error400.fromJson(response?.data);
-            Utils.showToastMessage(error400.errorDetails?.message??'Something went wrong! ${response?.statusCode}');
+            Utils.showToastMessage(error400.errorDetails?.message ??
+                'Something went wrong! ${response?.statusCode}');
 
             setState(() {
               refresh();
@@ -4412,7 +4540,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
         }
         dataResponseSync = jsonEncode(response?.data ?? {});
       } catch (e) {
-        dataResponseSync = e.toString()??'';
+        dataResponseSync = e.toString() ?? '';
         Utils.showToastMessage('Something went wrong!');
         print(e);
       } finally {
@@ -4426,50 +4554,47 @@ class _ABHAScreenState extends State<ABHAScreen> {
     }
   }
 
-
   Future<void> _profileMobile(var token) async {
     if (await Utils.isConnected()) {
       bool _isLoading = true;
       Utils.onLoading(context);
 
-      Map<String, dynamic> data = {
-        "X-Token": "Bearer ${token}"
-      };
+      Map<String, dynamic> data = {"X-Token": "Bearer ${token}"};
 
       var methodName = "";
-      if(dropdownvalue == 'Aadhaar'){
+      if (dropdownvalue == 'Aadhaar') {
         methodName = AbhaController.aadhaarProfile;
-      }
-      else {
+      } else {
         methodName = AbhaController.mobileProfile;
       }
       AbhaController controller = AbhaController();
       try {
+        final response =
+            await controller.aadhaarCreateABHA(methodName, data, clinicToken);
 
-        final response = await controller.aadhaarCreateABHA(methodName, data, clinicToken);
-
-        if (response != null&& response.statusCode==200) {
-          ProfileAadhaar profileAadhaar = ProfileAadhaar.fromJson(response.data);
+        if (response != null && response.statusCode == 200) {
+          ProfileAadhaar profileAadhaar =
+              ProfileAadhaar.fromJson(response.data);
 
           if (profileAadhaar.statusCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
             //_mobileabhasuggestions(profileAadhaar);
           }
 
           //Utils.showToastMessage('${profileMobile}');
-        }  else {
-
+        } else {
           Error400 error400 = Error400.fromJson(response?.data);
-          Utils.showToastMessage(error400.errorDetails?.message??'Something went wrong! ${response?.statusCode}');
+          Utils.showToastMessage(error400.errorDetails?.message ??
+              'Something went wrong! ${response?.statusCode}');
           setState(() {
-            checkavailableAbha= false;
+            checkavailableAbha = false;
             dropdownvalue = defaultDropdownValue;
-            linkExistAbha =false;
-            availableAbha =false;
-            createViaAbha =true;
+            linkExistAbha = false;
+            availableAbha = false;
+            createViaAbha = true;
 
-            termCondFlag =true;
+            termCondFlag = true;
           });
           print(response);
         }
@@ -4486,39 +4611,36 @@ class _ABHAScreenState extends State<ABHAScreen> {
     }
   }
 
-
   Future<void> _aadhaarabhasuggestions() async {
     //listABHAID = [];
     if (await Utils.isConnected()) {
       bool _isLoading = true;
       Utils.onLoading(context);
 
-      Map<String, dynamic>? jsonData  =
-      {
-        "txnId": verifyOtpAadhaar?.txnId??'',
+      Map<String, dynamic>? jsonData = {
+        "txnId": verifyOtpAadhaar?.txnId ?? '',
       };
-
 
       AbhaController controller = AbhaController();
       try {
         final response = await controller.getABHASuggesstion(jsonData, "");
 
-        if (response != null&& response.statusCode==200) {
+        if (response != null && response.statusCode == 200) {
           var sMessage;
-          AbhaSuggestionMobile abhaSuggestionMobile = AbhaSuggestionMobile.fromJson(response.data);
+          AbhaSuggestionMobile abhaSuggestionMobile =
+              AbhaSuggestionMobile.fromJson(response.data);
           if (abhaSuggestionMobile?.statusCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
-            if(abhaSuggestionMobile?.abhaAddressList!=null)
-            {
+            if (abhaSuggestionMobile?.abhaAddressList != null) {
               listMobileAbhaSuggestion = abhaSuggestionMobile!.abhaAddressList!;
-              if(listMobileAbhaSuggestion.isNotEmpty){
+              if (listMobileAbhaSuggestion.isNotEmpty) {
                 setState(() {
-                  txtABHAIDMobileController.text = listMobileAbhaSuggestion[0]??'';
+                  txtABHAIDMobileController.text =
+                      listMobileAbhaSuggestion[0] ?? '';
                   _valueSelectedSuggestId = 0;
                 });
               }
-
             }
 
             setState(() {
@@ -4530,11 +4652,11 @@ class _ABHAScreenState extends State<ABHAScreen> {
           }
           // sMessage = abhaSuggestionMobile?.statusCode;
           // Utils.showToastMessage(sMessage);
-        }  else {
-
+        } else {
           Error400 error400 = Error400.fromJson(response?.data);
-          Utils.showToastMessage(error400.errorDetails?.message??'Something went wrong! ${response?.statusCode}');
-         /* setState(() {
+          Utils.showToastMessage(error400.errorDetails?.message ??
+              'Something went wrong! ${response?.statusCode}');
+          /* setState(() {
             checkavailableAbha= false;
             dropdownvalue = defaultDropdownValue;
             linkExistAbha =false;
@@ -4558,7 +4680,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
     }
   }
 
-
   Future<void> _mobileabhasuggestions(StateSetter setStateDialog) async {
     //listABHAID = [];
     if (await Utils.isConnected()) {
@@ -4575,9 +4696,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
         yearOfBirth = dateParts[2];
       }
 
-      Map<String, dynamic>? jsonData  =
-      {
-        "txnId": verifyOtpMobile?.txnId??'',
+      Map<String, dynamic>? jsonData = {
+        "txnId": verifyOtpMobile?.txnId ?? '',
         "firstName": firstNameController.text.trim() ?? '',
         "lastName": lastNameController.text.trim() ?? '',
         "dayOfBirth": dayOfBirth,
@@ -4586,21 +4706,21 @@ class _ABHAScreenState extends State<ABHAScreen> {
         "email": ""
       };
 
-
       AbhaController controller = AbhaController();
       try {
-        final response = await controller.getMobileABHASuggesstion(jsonData, "");
+        final response =
+            await controller.getMobileABHASuggesstion(jsonData, "");
 
-        if (response != null&& response.statusCode==200) {
+        if (response != null && response.statusCode == 200) {
           var sMessage;
-          AbhaSuggestionMobile abhaSuggestionMobile = AbhaSuggestionMobile.fromJson(response.data);
+          AbhaSuggestionMobile abhaSuggestionMobile =
+              AbhaSuggestionMobile.fromJson(response.data);
           if (abhaSuggestionMobile?.statusCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
-            if(abhaSuggestionMobile?.abhaAddressList!=null)
-            {
+            if (abhaSuggestionMobile?.abhaAddressList != null) {
               listMobileAbhaSuggestion = abhaSuggestionMobile!.abhaAddressList!;
-              if(listMobileAbhaSuggestion.isNotEmpty){
+              if (listMobileAbhaSuggestion.isNotEmpty) {
                 setState(() {
                   _valueSelectedSuggestId = 0;
                   txtABHAIDMobileController.text = listMobileAbhaSuggestion[0];
@@ -4615,18 +4735,18 @@ class _ABHAScreenState extends State<ABHAScreen> {
           }
           // sMessage = abhaSuggestionMobile?.statusCode;
           // Utils.showToastMessage(sMessage);
-        }  else {
-
+        } else {
           Error400 error400 = Error400.fromJson(response?.data);
-          Utils.showToastMessage(error400.errorDetails?.message??'Something went wrong! ${response?.statusCode}');
+          Utils.showToastMessage(error400.errorDetails?.message ??
+              'Something went wrong! ${response?.statusCode}');
           setState(() {
-            checkavailableAbha= false;
+            checkavailableAbha = false;
             dropdownvalue = defaultDropdownValue;
-            linkExistAbha =false;
-            availableAbha =false;
-            createViaAbha =true;
+            linkExistAbha = false;
+            availableAbha = false;
+            createViaAbha = true;
 
-            termCondFlag =true;
+            termCondFlag = true;
           });
           print(response);
         }
@@ -4643,8 +4763,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
     }
   }
 
-
-
   Future<void> _aadhaarCreateABHA() async {
     //listABHAID = [];
     if (await Utils.isConnected()) {
@@ -4654,32 +4772,31 @@ class _ABHAScreenState extends State<ABHAScreen> {
       String dataRequestSync = "";
       String dataResponseSync = "";
 
-      Map<String, dynamic>? jsonData  = {
-        "abhaAddress" : txtABHAIDMobileController.text,
-        "preferred" : 1,
-        "txnId": verifyOtpAadhaar?.txnId??''
+      Map<String, dynamic>? jsonData = {
+        "abhaAddress": txtABHAIDMobileController.text,
+        "preferred": 1,
+        "txnId": verifyOtpAadhaar?.txnId ?? ''
       };
 
       dataRequestSync = jsonEncode(jsonData);
 
-
-
       var methodName = AbhaController.aadhaarCreate;
-
 
       AbhaController controller = AbhaController();
       try {
-        final response = await controller.aadhaarCreateABHA(methodName, jsonData, clinicToken);
+        final response = await controller.aadhaarCreateABHA(
+            methodName, jsonData, clinicToken);
 
         if (response != null) {
           var sMessage;
-          CreateAbhaAadhaar createAadhaarResponse = CreateAbhaAadhaar.fromJson(response.data);
+          CreateAbhaAadhaar createAadhaarResponse =
+              CreateAbhaAadhaar.fromJson(response.data);
           if (createAadhaarResponse?.statusCode == 200) {
-            _isLoading=false;
+            _isLoading = false;
             Navigator.pop(context);
             Utils.showToastMessage("Abha Created Successfully!");
             methodNameLog = Constant.log_type_create_new_via_aadhaar_final;
-            _healthCardLinkExisting(verifyOtpAadhaar?.tokens?.token??'');
+            _healthCardLinkExisting(verifyOtpAadhaar?.tokens?.token ?? '');
           }
           // sMessage = createAadhaarResponse?.;
           // Utils.showToastMessage(sMessage);
@@ -4689,7 +4806,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
         }
         dataResponseSync = jsonEncode(response?.data ?? {});
       } catch (e) {
-        dataResponseSync = e.toString()??'';
+        dataResponseSync = e.toString() ?? '';
         Utils.showToastMessage('Something went wrong!');
         print(e);
       } finally {
@@ -4702,52 +4819,40 @@ class _ABHAScreenState extends State<ABHAScreen> {
     }
   }
 
-
   List<String> listMobileAbhaSuggestion = [];
   var _valueSelectedSuggestId;
+
   Future<void> _submitDetailsMobile(StateSetter setStateDialog) async {
-
-    if(firstNameController.text.isEmpty){
+    if (firstNameController.text.isEmpty) {
       Utils.showToastMessage('Enter First Name');
-    }
-    else if(lastNameController.text.isEmpty){
+    } else if (lastNameController.text.isEmpty) {
       Utils.showToastMessage('Enter Last Name');
-    }
-    else if(gender_dropdownvalue==null||gender_dropdownvalue==''){
+    } else if (gender_dropdownvalue == null || gender_dropdownvalue == '') {
       Utils.showToastMessage('Select Gender');
-    }
-    else if(dobController.text.isEmpty){
+    } else if (dobController.text.isEmpty) {
       Utils.showToastMessage('Select Date of Birth');
-    }
-    else if(patientEmailController.text.isEmpty){
+    } else if (patientEmailController.text.isEmpty) {
       Utils.showToastMessage('Enter Email ID');
-    }
-    else if(mobileCreateController.text.isEmpty){
+    } else if (mobileCreateController.text.isEmpty) {
       Utils.showToastMessage('Enter Mobile Number');
-    }
-
-    else if(patientAddressController.text.isEmpty){
+    } else if (patientAddressController.text.isEmpty) {
       Utils.showToastMessage('Enter Address');
-    }
-    else if(patientPinCodeController.text.isEmpty){
+    } else if (patientPinCodeController.text.isEmpty) {
       Utils.showToastMessage('Enter Pincode');
-    }
-    else {
-
+    } else {
       if (await Utils.isConnected()) {
         bool _isLoading = true;
         Utils.onLoading(context);
 
-        var name = '${firstNameController.text} ${firstMiddleController.text} ${lastNameController.text}';
+        var name =
+            '${firstNameController.text} ${firstMiddleController.text} ${lastNameController.text}';
 
         var gender = '';
-        if(gender_dropdownvalue=='Male'){
+        if (gender_dropdownvalue == 'Male') {
           gender = 'M';
-        }
-        else if(gender_dropdownvalue=='Female'){
+        } else if (gender_dropdownvalue == 'Female') {
           gender = 'F';
-        }
-        else if(gender_dropdownvalue=='Other'){
+        } else if (gender_dropdownvalue == 'Other') {
           gender = 'O';
         }
 
@@ -4755,7 +4860,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
         // Parse the dateString to DateTime
         DateTime birthDate = dateFormat.parse(dobController.text);
-        var selectedDate =DateFormat('yyyy-mm-dd').format(birthDate);
+        var selectedDate = DateFormat('yyyy-mm-dd').format(birthDate);
 
         /* Map<String, dynamic> data = {
           "sessionId" : aadhaarSendOtp?.sData?.sessionId??'',
@@ -4770,10 +4875,10 @@ class _ABHAScreenState extends State<ABHAScreen> {
           "address" : patientAddressController.text
         };*/
         Map<String, dynamic> data = {
-          "txnId" : verifyOtpMobile?.txnId??'',
-          "firstName" : firstNameController.text,
-          "lastName" : lastNameController.text,
-          "dateOfBirth" : selectedDate
+          "txnId": verifyOtpMobile?.txnId ?? '',
+          "firstName": firstNameController.text,
+          "lastName": lastNameController.text,
+          "dateOfBirth": selectedDate
         };
 
         listMobileAbhaSuggestion = [];
@@ -4781,25 +4886,25 @@ class _ABHAScreenState extends State<ABHAScreen> {
         AbhaController controller = AbhaController();
         var methodName = AbhaController.mobileSubmitDetails;
         try {
-
-          final response = await controller.aadhaarCreateABHA(methodName,data, clinicToken);
+          final response =
+              await controller.aadhaarCreateABHA(methodName, data, clinicToken);
 
           if (response != null) {
-            AbhaSuggestionModel abhaSuggestionModel = AbhaSuggestionModel.fromJson(response.data);
+            AbhaSuggestionModel abhaSuggestionModel =
+                AbhaSuggestionModel.fromJson(response.data);
 
             if (abhaSuggestionModel.sCode == 200) {
-              _isLoading=false;
+              _isLoading = false;
               Navigator.pop(context);
 
-              if(abhaSuggestionModel?.sData?.abhaAddressList!=null)
-              {
-                listMobileAbhaSuggestion = abhaSuggestionModel!.sData!.abhaAddressList!;
+              if (abhaSuggestionModel?.sData?.abhaAddressList != null) {
+                listMobileAbhaSuggestion =
+                    abhaSuggestionModel!.sData!.abhaAddressList!;
               }
 
               setStateDialog(() {
                 createMobileAadhharView = false;
               });
-
             }
 
             Utils.showToastMessage('${abhaSuggestionModel.sMessage}');
@@ -4821,53 +4926,38 @@ class _ABHAScreenState extends State<ABHAScreen> {
     }
   }
 
-
-
   Future<void> _mobileCreateABHA() async {
-
-    if(firstNameController.text.isEmpty){
+    if (firstNameController.text.isEmpty) {
       Utils.showToastMessage('Enter First Name');
-    }
-    else if(lastNameController.text.isEmpty){
+    } else if (lastNameController.text.isEmpty) {
       Utils.showToastMessage('Enter Last Name');
-    }
-    else if(gender_dropdownvalue==null||gender_dropdownvalue==''){
+    } else if (gender_dropdownvalue == null || gender_dropdownvalue == '') {
       Utils.showToastMessage('Select Gender');
-    }
-    else if(dobController.text.isEmpty){
+    } else if (dobController.text.isEmpty) {
       Utils.showToastMessage('Select Date of Birth');
-    }
-    else if(selectedState.stateCode==null||selectedState.stateCode.toString().isEmpty){
+    } else if (selectedState.stateCode == null ||
+        selectedState.stateCode.toString().isEmpty) {
       Utils.showToastMessage('Select State');
-    }
-    else if(selectedDistrict.code==null||selectedDistrict.code.toString().isEmpty){
+    } else if (selectedDistrict.code == null ||
+        selectedDistrict.code.toString().isEmpty) {
       Utils.showToastMessage('Select District');
-    }
-    else if(patientEmailController.text.isEmpty){
+    } else if (patientEmailController.text.isEmpty) {
       Utils.showToastMessage('Enter Email ID');
-    }
-    else if(mobileCreateController.text.isEmpty){
+    } else if (mobileCreateController.text.isEmpty) {
       Utils.showToastMessage('Enter Mobile Number');
-    }
-
-    else if(patientAddressController.text.isEmpty){
+    } else if (patientAddressController.text.isEmpty) {
       Utils.showToastMessage('Enter Address');
-    }
-    else if(patientPinCodeController.text.isEmpty){
+    } else if (patientPinCodeController.text.isEmpty) {
       Utils.showToastMessage('Enter Pincode');
-    }
-    else if(txtABHAIDMobileController.text.isEmpty){
+    } else if (txtABHAIDMobileController.text.isEmpty) {
       Utils.showToastMessage('Please enter ABHA ID');
-    }
-    else {
+    } else {
       if (await Utils.isConnected()) {
         bool _isLoading = true;
         Utils.onLoading(context);
         var gender = '';
         var dayOfBirth = '', monthOfBirth = '', yearOfBirth = '';
-        try{
-
-
+        try {
           if (dobController.text.isNotEmpty) {
             String date = dobController.text;
             List<String> dateParts = date.split("/");
@@ -4876,29 +4966,22 @@ class _ABHAScreenState extends State<ABHAScreen> {
             yearOfBirth = dateParts[2];
           }
 
-
-          if(gender_dropdownvalue=='Male'){
+          if (gender_dropdownvalue == 'Male') {
             gender = 'M';
-          }
-          else if(gender_dropdownvalue=='Female'){
+          } else if (gender_dropdownvalue == 'Female') {
             gender = 'F';
-          }
-          else if(gender_dropdownvalue=='Other'){
+          } else if (gender_dropdownvalue == 'Other') {
             gender = 'O';
           }
-        }
-        catch(e){
-        }
+        } catch (e) {}
 
         var methodNameLog = Constant.create_new;
-
 
         String dataRequestSync = "";
         String dataResponseSync = "";
 
-
         Map<String, dynamic>? jsonData = {
-          "txnId": verifyOtpMobile?.txnId??'',
+          "txnId": verifyOtpMobile?.txnId ?? '',
           "phrDetails": {
             "firstName": firstNameController.text,
             "middleName": firstMiddleController.text,
@@ -4922,52 +5005,52 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
         dataRequestSync = jsonEncode(jsonData);
 
-
         var methodName = AbhaController.mobileCreateAbhaAddress;
 
         AbhaController controller = AbhaController();
         try {
-          final response = await controller.aadhaarCreateABHA(methodName, jsonData, clinicToken);
+          final response = await controller.aadhaarCreateABHA(
+              methodName, jsonData, clinicToken);
 
-          if (response != null&& response.statusCode==200) {
+          if (response != null && response.statusCode == 200) {
             var sMessage;
-            MobileCreateAddressResponse mobileCreateAddressResponse = MobileCreateAddressResponse.fromJson(response.data);
+            MobileCreateAddressResponse mobileCreateAddressResponse =
+                MobileCreateAddressResponse.fromJson(response.data);
             if (mobileCreateAddressResponse?.statusCode == 200) {
-              _isLoading=false;
+              _isLoading = false;
               Navigator.pop(context);
               Navigator.pop(context);
               methodNameLog = Constant.log_type_create_new_via_mobile_final;
 
-              _healthCardAfterCreateMobile(mobileCreateAddressResponse?.tokens?.token??'');
+              _healthCardAfterCreateMobile(
+                  mobileCreateAddressResponse?.tokens?.token ?? '');
 
               //_healthCardAfterCreateMobile(mobileCreateAddressResponse?.tokens?.token??'');
               // _profileLinkExisting(setStateDialog, mobileCreateAddressResponse?.sData?.token??'');
-            }
-            else {
-
+            } else {
               Error400 error400 = Error400.fromJson(response?.data);
-              Utils.showToastMessage(error400.errorDetails?.message??'Something went wrong! ${response?.statusCode}');
+              Utils.showToastMessage(error400.errorDetails?.message ??
+                  'Something went wrong! ${response?.statusCode}');
               setState(() {
-                checkavailableAbha= false;
+                checkavailableAbha = false;
                 dropdownvalue = defaultDropdownValue;
-                linkExistAbha =false;
-                availableAbha =false;
-                createViaAbha =true;
+                linkExistAbha = false;
+                availableAbha = false;
+                createViaAbha = true;
 
-                termCondFlag =true;
+                termCondFlag = true;
               });
               print(response);
             }
             sMessage = mobileCreateAddressResponse?.message;
-            Utils.showToastMessage(sMessage??'');
-
+            Utils.showToastMessage(sMessage ?? '');
           } else {
             Utils.showToastMessage('Something went wrong!');
             print(response);
           }
           dataResponseSync = jsonEncode(response?.data ?? {});
         } catch (e) {
-          dataResponseSync = e.toString()??'';
+          dataResponseSync = e.toString() ?? '';
           Utils.showToastMessage('Something went wrong!');
           print(e);
         } finally {
@@ -4979,7 +5062,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
         Utils.showToastMessage(Constant.internetConMsg);
       }
     }
-
   }
 
   bool otpVisible() {
@@ -4995,7 +5077,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
     return visible;
   }
-
 }
 
 class ABHAID {
@@ -5004,4 +5085,3 @@ class ABHAID {
 
   ABHAID(this.abhaId, this.selectedAbha);
 }
-

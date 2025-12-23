@@ -46,80 +46,93 @@ class _PregnancyoutcomeState extends State<Pregnancyoutcome> {
 
     try {
       final db = await DatabaseProvider.instance.database;
+
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+        setState(() {
+          _allData = [];
+          _filtered = [];
+          _isLoading = false;
+        });
+        return;
+      }
+
       const ancRefKey = 'bt7gs9rl1a5d26mz';
 
-      // --- 1. Get Current User Key from Secure Storage ---
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
-      print('🔍 Using forms_ref_key: $ancRefKey for ANC forms');
-
-      // --- 2. Update Debug Query (Optional but good for consistency) ---
-      print('🔍 Checking all forms with ref_key: $ancRefKey');
-
-      String debugWhere = 'forms_ref_key = ? AND is_deleted = 0';
-      List<Object?> debugArgs = [ancRefKey];
-
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        debugWhere += ' AND current_user_key = ?';
-        debugArgs.add(ashaUniqueKey);
-      }
-
-      final allForms = await db.query(
-        FollowupFormDataTable.table,
-        where: debugWhere,
-        whereArgs: debugArgs,
+      final results = await db.rawQuery(
+        '''
+WITH LatestMCA AS (
+  SELECT
+    mca.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY mca.beneficiary_ref_key
+      ORDER BY mca.created_date_time DESC, mca.id DESC
+    ) AS rn
+  FROM mother_care_activities mca
+  WHERE mca.is_deleted = 0
+),
+DeliveryOutcomeOnly AS (
+  SELECT *
+  FROM LatestMCA
+  WHERE rn = 1
+    AND mother_care_state = 'delivery_outcome'
+),
+LatestANC AS (
+  SELECT
+    f.beneficiary_ref_key,
+    f.form_json,
+    ROW_NUMBER() OVER (
+      PARTITION BY f.beneficiary_ref_key
+      ORDER BY f.created_date_time DESC, f.id DESC
+    ) AS rn
+  FROM ${FollowupFormDataTable.table} f
+  WHERE
+    f.forms_ref_key = ?
+    AND f.is_deleted = 0
+    AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
+    AND f.current_user_key = ?
+)
+SELECT
+  d.beneficiary_ref_key,
+  d.household_ref_key,
+  d.created_date_time,
+  d.id AS form_id,
+  COALESCE(a.form_json, '{}') AS form_json
+FROM DeliveryOutcomeOnly d
+LEFT JOIN LatestANC a
+  ON a.beneficiary_ref_key = d.beneficiary_ref_key
+ AND a.rn = 1
+ORDER BY d.created_date_time DESC
+''',
+        [ancRefKey, ashaUniqueKey],
       );
 
-      print('🔍 Found ${allForms.length} forms with ref_key $ancRefKey');
-      if (allForms.isNotEmpty) {
-        print('🔍 First form data: ${allForms.first}');
-      }
-
-      // --- 3. Build Main Query Dynamically ---
-      // Start with the base query
-      String sql = '''
-      SELECT 
-        f.beneficiary_ref_key,
-        f.form_json,
-        f.household_ref_key,
-        f.forms_ref_key,
-        f.created_date_time,
-        f.id as form_id
-      FROM ${FollowupFormDataTable.table} f
-      WHERE 
-        f.forms_ref_key = ?
-        AND f.form_json LIKE ?
-        AND f.is_deleted = 0
-    ''';
-
-      // Base arguments
-      List<dynamic> args = [ancRefKey, '%"gives_birth_to_baby":"Yes"%'];
-
-      // Append user condition if key exists
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        sql += ' AND f.current_user_key = ?';
-        args.add(ashaUniqueKey);
-      }
-
-      // Add ordering at the end
-      sql += ' ORDER BY f.created_date_time DESC';
-
-      // Execute the raw query
-      final ancForms = await db.rawQuery(sql, args);
-
-      print('🔍 Found ${ancForms.length} pregnancy cases');
-      if (ancForms.isNotEmpty) {
-        print('🔍 First form data: ${ancForms.first}');
+      if (results.isEmpty) {
+        setState(() {
+          _allData = [];
+          _filtered = [];
+          _isLoading = false;
+        });
+        return;
       }
 
       final List<Map<String, dynamic>> processedData = [];
 
-      // --- Process Results (Existing Logic) ---
-      for (final form in ancForms) {
+      for (final row in results) {
         try {
-          final formJson = jsonDecode(form['form_json'] as String);
-          final formData = (formJson['form_data'] ?? formJson) as Map<String, dynamic>;
+          final formJsonStr = row['form_json']?.toString() ?? '{}';
+          Map<String, dynamic> formJson = {};
+          Map<String, dynamic> formData = {};
+          try {
+            final decoded = jsonDecode(formJsonStr);
+            if (decoded is Map) {
+              formJson = Map<String, dynamic>.from(decoded);
+              final fd = formJson['form_data'];
+              if (fd is Map) formData = Map<String, dynamic>.from(fd);
+            }
+          } catch (_) {}
 
           final womanName = formData['woman_name']?.toString() ?? 'Unknown';
           final husbandName = formData['husband_name']?.toString() ?? 'N/A';
@@ -129,20 +142,20 @@ class _PregnancyoutcomeState extends State<Pregnancyoutcome> {
           final mobileNo = formData['mobile_no']?.toString() ?? '';
 
           processedData.add({
-            'hhId': form['household_ref_key']?.toString() ?? '',
-            'beneficiaryId': form['beneficiary_ref_key']?.toString() ?? '',
+            'hhId': row['household_ref_key']?.toString() ?? '',
+            'beneficiaryId': row['beneficiary_ref_key']?.toString() ?? '',
             'name': womanName,
             'husbandName': husbandName,
             'mobileNo': mobileNo,
             'lmpDate': lmpDate,
             'eddDate': eddDate,
             'weeksOfPregnancy': weeksOfPregnancy,
-            'formId': form['id']?.toString() ?? '',
+            'formId': row['form_id']?.toString() ?? '',
             'formData': formData,
             'age': _calculatePregnancyWeeks(lmpDate, eddDate, weeksOfPregnancy),
           });
         } catch (e) {
-          print(' Error processing form: $e');
+          print(' Error processing delivery outcome row: $e');
         }
       }
 

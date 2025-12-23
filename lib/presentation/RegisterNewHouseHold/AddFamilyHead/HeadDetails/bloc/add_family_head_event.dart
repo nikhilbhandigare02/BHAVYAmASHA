@@ -166,6 +166,10 @@ final class AfhUpdateWard extends AddFamilyHeadEvent {
   final String value;
   AfhUpdateWard(this.value);
 }
+final class AfhUpdateWardName extends AddFamilyHeadEvent {
+  final String value;
+  AfhUpdateWardName(this.value);
+}
 
 final class AfhUpdateMohalla extends AddFamilyHeadEvent {
   final String value;

@@ -104,9 +104,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   final Map<String, String> _adultRelationByName = {};
 
 
-
-  int _ageFromDob(DateTime dob) => DateTime.now().year - dob.year;
-
   Widget _section(Widget child) =>
       Padding(padding: const EdgeInsets.only(bottom: 4), child: child);
 
@@ -1618,274 +1615,278 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       crossAxisAlignment:
                                       CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: CustomTextField(
-                                                labelText:
-                                                l?.rchIdLabel ?? "RCH ID",
-                                                hintText:
-                                                l?.enter_12_digit_rch_id ??
-                                                    'Enter 12 digit RCH ID',
-                                                keyboardType:
-                                                TextInputType.number,
-                                                initialValue:
-                                                state.RichIDChanged ?? '',
-                                                inputFormatters: [
-                                                  FilteringTextInputFormatter
-                                                      .digitsOnly,
-                                                  LengthLimitingTextInputFormatter(
-                                                    12,
-                                                  ),
-                                                ],
-                                                onChanged: (v) {
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).removeCurrentSnackBar();
-                                                  final value = v?.trim() ?? '';
-                                                  context
-                                                      .read<
-                                                      AddnewfamilymemberBloc
-                                                  >()
-                                                      .add(
-                                                    RichIDChanged(value),
-                                                  );
+                                        IgnorePointer(
+                                          ignoring: widget.isEdit,
 
-                                                  if (value.isNotEmpty &&
-                                                      value.length != 12) {
-                                                    WidgetsBinding.instance
-                                                        .addPostFrameCallback((
-                                                        _,
-                                                        ) {
-                                                      if (mounted) {
-                                                        showAppSnackBar(
-                                                          context,
-                                                          l?.rch_id_must_be_12_digits ??
-                                                              'RCH ID must be exactly 12 digits',
-                                                        );
-                                                      }
-                                                    });
-                                                  }
-                                                },
-                                                validator: (value) {
-                                                  if (value == null ||
-                                                      value.isEmpty)
-                                                    return null;
-                                                  if (value.length != 12)
-                                                    return l?.must_be_12_digits ??
-                                                        'Must be 12 digits';
-                                                  return null;
-                                                },
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            SizedBox(
-                                              height: 3.5.h,
-                                              child: RoundButton(
-                                                title:
-                                                l?.verifyLabel ?? 'VERIFY',
-                                                width: 100,
-                                                borderRadius: 8,
-                                                fontSize: 12,
-                                                isLoading: _isLoading,
-                                                onPress: () async {
-                                                  final rchIdStr =
-                                                      state
-                                                          .RichIDChanged?.trim() ??
-                                                          '';
-
-                                                  // --- Basic validation ---
-                                                  if (rchIdStr.isEmpty) {
-                                                    showAppSnackBar(
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: CustomTextField(
+                                                  labelText:
+                                                  l?.rchIdLabel ?? "RCH ID",
+                                                  hintText:
+                                                  l?.enter_12_digit_rch_id ??
+                                                      'Enter 12 digit RCH ID',
+                                                  keyboardType:
+                                                  TextInputType.number,
+                                                  initialValue:
+                                                  state.RichIDChanged ?? '',
+                                                  inputFormatters: [
+                                                    FilteringTextInputFormatter
+                                                        .digitsOnly,
+                                                    LengthLimitingTextInputFormatter(
+                                                      12,
+                                                    ),
+                                                  ],
+                                                  onChanged: (v) {
+                                                    ScaffoldMessenger.of(
                                                       context,
-                                                      l?.please_enter_rch_id_first ??
-                                                          'Please enter RCH ID first',
-                                                    );
-                                                    return;
-                                                  }
-                                                  if (rchIdStr.length != 12) {
-                                                    showAppSnackBar(
-                                                      context,
-                                                      l?.rch_id_must_be_12digits ??
-                                                          'RCH ID must be exactly 12 digits',
-                                                    );
-                                                    return;
-                                                  }
-
-                                                  final rchId = int.tryParse(
-                                                    rchIdStr,
-                                                  );
-                                                  if (rchId == null) {
-                                                    showAppSnackBar(
-                                                      context,
-                                                      l?.invalid_rch_id ??
-                                                          'Invalid RCH ID',
-                                                    );
-                                                    return;
-                                                  }
-                                                  setState(
-                                                        () => _isLoading = true,
-                                                  );
-                                                  showAppSnackBar(
-                                                    context,
-                                                    l?.verifying_rch_id ??
-                                                        'Verifying RCH ID...',
-                                                  );
-
-                                                  print(
-                                                    'API REQUEST → getRCHData(rchId: $rchId, requestFor: 2)',
-                                                  );
-                                                  try {
-                                                    final requestFor =
-                                                    state.memberType ==
-                                                        'Child'
-                                                        ? 2
-                                                        : 1;
-
-                                                    final response =
-                                                    await fetchRCHDataForScreen(
-                                                      rchId,
-                                                      requestFor:
-                                                      requestFor,
-                                                    );
-                                                    print(
-                                                      'API RESPONSE → $response',
-                                                    );
-
-                                                    if (!mounted) return;
-
-                                                    setState(
-                                                          () => _isLoading = false,
-                                                    );
-
-                                                    if (response == null) {
-                                                      showAppSnackBar(
-                                                        context,
-                                                        l?.api_returned_null_response ??
-                                                            'API returned null response',
-                                                      );
-                                                      return;
-                                                    }
-
-                                                    if (response.isEmpty) {
-                                                      showAppSnackBar(
-                                                        context,
-                                                        l?.no_data_found_rch_id ??
-                                                            'No data found for this RCH ID',
-                                                      );
-                                                      return;
-                                                    }
-
-                                                    // If API returns an "error" field
-                                                    if (response.containsKey(
-                                                      'error',
-                                                    )) {
-                                                      showAppSnackBar(
-                                                        context,
-                                                        'Error: ${response['error']}',
-                                                      );
-                                                      return;
-                                                    }
-
-                                                    // If API returns status parameter
-                                                    if (response['status'] ==
-                                                        false) {
-                                                      showAppSnackBar(
-                                                        context,
-                                                        response['message'] ??
-                                                            (l?.failed_to_fetch_rch_data ??
-                                                                'Failed to fetch RCH data'),
-                                                      );
-                                                      return;
-                                                    }
-
-                                                    // --- SAFE EXTRACTION ---
-                                                    final bloc = context
+                                                    ).removeCurrentSnackBar();
+                                                    final value = v?.trim() ?? '';
+                                                    context
                                                         .read<
                                                         AddnewfamilymemberBloc
-                                                    >();
+                                                    >()
+                                                        .add(
+                                                      RichIDChanged(value),
+                                                    );
 
-                                                    final name =
-                                                    response['name']
-                                                        ?.toString()
-                                                        .trim();
-                                                    final genderRaw =
-                                                    response['gender']
-                                                        ?.toString()
-                                                        .trim();
-                                                    final dobStr =
-                                                    response['dob']
-                                                        ?.toString()
-                                                        .trim();
+                                                    if (value.isNotEmpty &&
+                                                        value.length != 12) {
+                                                      WidgetsBinding.instance
+                                                          .addPostFrameCallback((
+                                                          _,
+                                                          ) {
+                                                        if (mounted) {
+                                                          showAppSnackBar(
+                                                            context,
+                                                            l?.rch_id_must_be_12_digits ??
+                                                                'RCH ID must be exactly 12 digits',
+                                                          );
+                                                        }
+                                                      });
+                                                    }
+                                                  },
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty)
+                                                      return null;
+                                                    if (value.length != 12)
+                                                      return l?.must_be_12_digits ??
+                                                          'Must be 12 digits';
+                                                    return null;
+                                                  },
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              SizedBox(
+                                                height: 3.5.h,
+                                                child: RoundButton(
+                                                  title:
+                                                  l?.verifyLabel ?? 'VERIFY',
+                                                  width: 100,
+                                                  borderRadius: 8,
+                                                  fontSize: 12,
+                                                  isLoading: _isLoading,
+                                                  onPress: () async {
+                                                    final rchIdStr =
+                                                        state
+                                                            .RichIDChanged?.trim() ??
+                                                            '';
 
-                                                    // NAME
-                                                    if (name != null &&
-                                                        name.isNotEmpty) {
-                                                      bloc.add(
-                                                        AnmUpdateName(name),
+                                                    // --- Basic validation ---
+                                                    if (rchIdStr.isEmpty) {
+                                                      showAppSnackBar(
+                                                        context,
+                                                        l?.please_enter_rch_id_first ??
+                                                            'Please enter RCH ID first',
                                                       );
+                                                      return;
+                                                    }
+                                                    if (rchIdStr.length != 12) {
+                                                      showAppSnackBar(
+                                                        context,
+                                                        l?.rch_id_must_be_12digits ??
+                                                            'RCH ID must be exactly 12 digits',
+                                                      );
+                                                      return;
                                                     }
 
-                                                    // GENDER
-                                                    if (genderRaw != null &&
-                                                        genderRaw.isNotEmpty) {
-                                                      final gender =
-                                                      (genderRaw.toLowerCase() ==
-                                                          'm' ||
-                                                          genderRaw == '1')
-                                                          ? 'Male'
-                                                          : (genderRaw.toLowerCase() ==
-                                                          'f' ||
-                                                          genderRaw == '2'
-                                                          ? 'Female'
-                                                          : 'Transgender');
-
-                                                      bloc.add(
-                                                        AnmUpdateGender(gender),
+                                                    final rchId = int.tryParse(
+                                                      rchIdStr,
+                                                    );
+                                                    if (rchId == null) {
+                                                      showAppSnackBar(
+                                                        context,
+                                                        l?.invalid_rch_id ??
+                                                            'Invalid RCH ID',
                                                       );
+                                                      return;
                                                     }
+                                                    setState(
+                                                          () => _isLoading = true,
+                                                    );
+                                                    showAppSnackBar(
+                                                      context,
+                                                      l?.verifying_rch_id ??
+                                                          'Verifying RCH ID...',
+                                                    );
 
-                                                    // DOB
-                                                    if (dobStr != null &&
-                                                        dobStr.isNotEmpty) {
-                                                      final dob =
-                                                      DateTime.tryParse(
-                                                        dobStr,
+                                                    print(
+                                                      'API REQUEST → getRCHData(rchId: $rchId, requestFor: 2)',
+                                                    );
+                                                    try {
+                                                      final requestFor =
+                                                      state.memberType ==
+                                                          'Child'
+                                                          ? 2
+                                                          : 1;
+
+                                                      final response =
+                                                      await fetchRCHDataForScreen(
+                                                        rchId,
+                                                        requestFor:
+                                                        requestFor,
                                                       );
-                                                      if (dob != null) {
-                                                        bloc.add(
-                                                          AnmUpdateDob(dob),
+                                                      print(
+                                                        'API RESPONSE → $response',
+                                                      );
+
+                                                      if (!mounted) return;
+
+                                                      setState(
+                                                            () => _isLoading = false,
+                                                      );
+
+                                                      if (response == null) {
+                                                        showAppSnackBar(
+                                                          context,
+                                                          l?.api_returned_null_response ??
+                                                              'API returned null response',
                                                         );
+                                                        return;
+                                                      }
+
+                                                      if (response.isEmpty) {
+                                                        showAppSnackBar(
+                                                          context,
+                                                          l?.no_data_found_rch_id ??
+                                                              'No data found for this RCH ID',
+                                                        );
+                                                        return;
+                                                      }
+
+                                                      // If API returns an "error" field
+                                                      if (response.containsKey(
+                                                        'error',
+                                                      )) {
+                                                        showAppSnackBar(
+                                                          context,
+                                                          'Error: ${response['error']}',
+                                                        );
+                                                        return;
+                                                      }
+
+                                                      // If API returns status parameter
+                                                      if (response['status'] ==
+                                                          false) {
+                                                        showAppSnackBar(
+                                                          context,
+                                                          response['message'] ??
+                                                              (l?.failed_to_fetch_rch_data ??
+                                                                  'Failed to fetch RCH data'),
+                                                        );
+                                                        return;
+                                                      }
+
+                                                      // --- SAFE EXTRACTION ---
+                                                      final bloc = context
+                                                          .read<
+                                                          AddnewfamilymemberBloc
+                                                      >();
+
+                                                      final name =
+                                                      response['name']
+                                                          ?.toString()
+                                                          .trim();
+                                                      final genderRaw =
+                                                      response['gender']
+                                                          ?.toString()
+                                                          .trim();
+                                                      final dobStr =
+                                                      response['dob']
+                                                          ?.toString()
+                                                          .trim();
+
+                                                      // NAME
+                                                      if (name != null &&
+                                                          name.isNotEmpty) {
                                                         bloc.add(
-                                                          AnmToggleUseDob(),
+                                                          AnmUpdateName(name),
+                                                        );
+                                                      }
+
+                                                      // GENDER
+                                                      if (genderRaw != null &&
+                                                          genderRaw.isNotEmpty) {
+                                                        final gender =
+                                                        (genderRaw.toLowerCase() ==
+                                                            'm' ||
+                                                            genderRaw == '1')
+                                                            ? 'Male'
+                                                            : (genderRaw.toLowerCase() ==
+                                                            'f' ||
+                                                            genderRaw == '2'
+                                                            ? 'Female'
+                                                            : 'Transgender');
+
+                                                        bloc.add(
+                                                          AnmUpdateGender(gender),
+                                                        );
+                                                      }
+
+                                                      // DOB
+                                                      if (dobStr != null &&
+                                                          dobStr.isNotEmpty) {
+                                                        final dob =
+                                                        DateTime.tryParse(
+                                                          dobStr,
+                                                        );
+                                                        if (dob != null) {
+                                                          bloc.add(
+                                                            AnmUpdateDob(dob),
+                                                          );
+                                                          bloc.add(
+                                                            AnmToggleUseDob(),
+                                                          );
+                                                        }
+                                                      }
+
+                                                      showAppSnackBar(
+                                                        context,
+                                                        l?.rch_data_loaded_successfully ??
+                                                            'RCH data loaded successfully!',
+                                                      );
+                                                    } catch (e) {
+                                                      print('API ERROR → $e');
+
+                                                      if (mounted) {
+                                                        setState(
+                                                              () =>
+                                                          _isLoading = false,
+                                                        );
+                                                        showAppSnackBar(
+                                                          context,
+                                                          '${l?.failedTo_fetch_rch_data ?? "Failed to fetch RCH data"}: $e',
                                                         );
                                                       }
                                                     }
-
-                                                    showAppSnackBar(
-                                                      context,
-                                                      l?.rch_data_loaded_successfully ??
-                                                          'RCH data loaded successfully!',
-                                                    );
-                                                  } catch (e) {
-                                                    print('API ERROR → $e');
-
-                                                    if (mounted) {
-                                                      setState(
-                                                            () =>
-                                                        _isLoading = false,
-                                                      );
-                                                      showAppSnackBar(
-                                                        context,
-                                                        '${l?.failedTo_fetch_rch_data ?? "Failed to fetch RCH data"}: $e',
-                                                      );
-                                                    }
-                                                  }
-                                                },
+                                                  },
+                                                ),
                                               ),
-                                            ),
-                                          ],
-                                        ),
+                                            ],
+                                          ),
+                                        )
                                       ],
                                     ),
                                   ),
@@ -2538,56 +2539,59 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                 if ((state.memberType ?? '').toLowerCase() ==
                                     'child') ...[
                                   _section(
-                                    ApiDropdown<String>(
-                                      labelText: '${l.genderLabel} *',
-                                      items: const [
-                                        'Male',
-                                        'Female',
-                                        'Transgender',
-                                      ],
-                                      getLabel: (s) {
-                                        switch (s) {
-                                          case 'Male':
-                                            return l.genderMale;
-                                          case 'Female':
-                                            return l.genderFemale;
-                                          case 'Transgender':
-                                            return l.transgender;
-                                          default:
-                                            return s;
-                                        }
-                                      },
-                                      value: state.gender,
-                                      onChanged: (v) {
-                                        if (v == null) return;
-                                        final memberGender = v;
-                                        context
-                                            .read<AddnewfamilymemberBloc>()
-                                            .add(AnmUpdateGender(memberGender));
-                                        try {
-                                          if (_syncingGender) return;
-                                          _syncingGender = true;
-                                          final opposite = _oppositeGender(
-                                            memberGender,
-                                          );
-                                          final spBloc = context
-                                              .read<SpousBloc>();
-                                          if (spBloc.state.gender != opposite) {
-                                            spBloc.add(
-                                              SpUpdateGender(opposite),
-                                            );
-                                          }
-                                        } finally {
-                                          WidgetsBinding.instance
-                                              .addPostFrameCallback((_) {
-                                            _syncingGender = false;
-                                          });
-                                        }
-                                      },
-                                      validator: (value) => _captureAnmError(
-                                        Validations.validateGender(l, value),
-                                      ),
-                                    ),
+                                      IgnorePointer(
+                                          ignoring: widget.isEdit,
+                                          child: ApiDropdown<String>(
+                                          labelText: '${l.genderLabel} *',
+                                          items: const [
+                                            'Male',
+                                            'Female',
+                                            'Transgender',
+                                          ],
+                                          getLabel: (s) {
+                                            switch (s) {
+                                              case 'Male':
+                                                return l.genderMale;
+                                              case 'Female':
+                                                return l.genderFemale;
+                                              case 'Transgender':
+                                                return l.transgender;
+                                              default:
+                                                return s;
+                                            }
+                                          },
+                                          value: state.gender,
+                                          onChanged: (v) {
+                                            if (v == null) return;
+                                            final memberGender = v;
+                                            context
+                                                .read<AddnewfamilymemberBloc>()
+                                                .add(AnmUpdateGender(memberGender));
+                                            try {
+                                              if (_syncingGender) return;
+                                              _syncingGender = true;
+                                              final opposite = _oppositeGender(
+                                                memberGender,
+                                              );
+                                              final spBloc = context
+                                                  .read<SpousBloc>();
+                                              if (spBloc.state.gender != opposite) {
+                                                spBloc.add(
+                                                  SpUpdateGender(opposite),
+                                                );
+                                              }
+                                            } finally {
+                                              WidgetsBinding.instance
+                                                  .addPostFrameCallback((_) {
+                                                _syncingGender = false;
+                                              });
+                                            }
+                                          },
+                                          validator: (value) => _captureAnmError(
+                                            Validations.validateGender(l, value),
+                                          ),
+                                        ),
+                                      )
                                   ),
                                   Divider(
                                     color: AppColors.divider,
@@ -2606,25 +2610,27 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         if (v == null) return;
                                         final bloc = context.read<AddnewfamilymemberBloc>();
 
-                                        // Always update the mobile owner first
                                         bloc.add(AnmUpdateMobileOwner(v));
 
-                                        // Clear the mobile number first when changing the owner
                                         bloc.add(AnmUpdateMobileNo(''));
 
-                                        // Check if we should prefill the mobile number
                                         if (v == 'Family Head' || v == "Father" || v == "Mother") {
                                           String? mobileNumber;
                                           bool shouldFetchFromDb = true;
 
-                                          if (v == 'Mother' && widget.headSpouseMobile != null &&
-                                              widget.headSpouseMobile!.isNotEmpty) {
-                                            mobileNumber = widget.headSpouseMobile;
-                                            print('📱 [AddNewMember] Using spouse mobile from props: $mobileNumber');
-                                            shouldFetchFromDb = false;
+                                          if (v == 'Mother') {
+                                            if (widget.headSpouseMobile != null && widget.headSpouseMobile!.isNotEmpty) {
+                                              mobileNumber = widget.headSpouseMobile;
+                                              print('📱 [AddNewMember] Using spouse mobile from props: $mobileNumber');
+                                              shouldFetchFromDb = false;
+                                            } 
+                                            else if (state.mobileNo != null && state.mobileNo!.isNotEmpty) {
+                                              mobileNumber = state.mobileNo;
+                                              print('📱 [AddNewMember] Using spouse mobile from state: $mobileNumber');
+                                              shouldFetchFromDb = false;
+                                            }
                                           }
                                           else if ((v == 'Family Head' || v == 'Father') &&
-                                              widget.isAddMember &&
                                               widget.headMobileNumber != null &&
                                               widget.headMobileNumber!.isNotEmpty) {
                                             mobileNumber = widget.headMobileNumber;
@@ -2632,7 +2638,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             shouldFetchFromDb = false;
                                           }
 
-                                          // 3. If not found in props, try to fetch from database
                                           if (shouldFetchFromDb && _isMemberDetails && widget.hhId != null) {
                                             try {
                                               if (v == 'Mother') {
@@ -2754,7 +2759,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       Radio<bool>(
                                         value: true,
                                         groupValue: state.useDob,
-                                        onChanged: (_) => context
+                                        onChanged: widget.isEdit ? null :(_) => context
                                             .read<AddnewfamilymemberBloc>()
                                             .add(AnmToggleUseDob()),
                                       ),
@@ -2763,7 +2768,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       Radio<bool>(
                                         value: false,
                                         groupValue: state.useDob,
-                                        onChanged: (_) => context
+                                        onChanged: widget.isEdit ? null :(_) => context
                                             .read<AddnewfamilymemberBloc>()
                                             .add(AnmToggleUseDob()),
                                       ),
@@ -2773,79 +2778,84 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                 ),
                                 if (state.useDob)
                                   _section(
-                                    CustomDatePicker(
-                                      labelText: '${l.dobLabel}  *',
-                                      initialDate: state.dob,
+                                      IgnorePointer(
+                                        ignoring: widget.isEdit,
 
-                                      firstDate:
-                                      (state.memberType.toLowerCase() ==
-                                          'child')
-                                          ? childMinDate // child minimum age = today - 15 years
-                                          : adultMinDate, // adult minimum age = today - 110 years
+                                        child: CustomDatePicker(
+                                          labelText: '${l.dobLabel}  *',
+                                          initialDate: state.dob,
 
-                                      lastDate:
-                                      (state.memberType.toLowerCase() ==
-                                          'child')
-                                          ? childMaxDate
-                                          : adultMaxDate,
+                                          firstDate:
+                                          (state.memberType.toLowerCase() ==
+                                              'child')
+                                              ? childMinDate // child minimum age = today - 15 years
+                                              : adultMinDate, // adult minimum age = today - 110 years
 
-                                      onDateChanged: (date) {
-                                        if (date != null) {
-                                          context
-                                              .read<AddnewfamilymemberBloc>()
-                                              .add(AnmUpdateDob(date));
-                                        }
-                                      },
-                                      validator: (date) {
-                                        if (date == null) {
-                                          return _captureAnmError(
-                                            l?.dob_required ?? 'Date of birth is required',
-                                          );
-                                        }
+                                          lastDate:
+                                          (state.memberType.toLowerCase() ==
+                                              'child')
+                                              ? childMaxDate
+                                              : adultMaxDate,
 
-                                        final today = DateTime.now();
-                                        final dobDate = DateTime(
-                                          date.year,
-                                          date.month,
-                                          date.day,
-                                        );
-                                        final todayDate = DateTime(
-                                          today.year,
-                                          today.month,
-                                          today.day,
-                                        );
+                                          onDateChanged: (date) {
+                                            if (date != null) {
+                                              context
+                                                  .read<AddnewfamilymemberBloc>()
+                                                  .add(AnmUpdateDob(date));
+                                            }
+                                          },
+                                          validator: (date) {
+                                            if (date == null) {
+                                              return _captureAnmError(
+                                                l?.dob_required ?? 'Date of birth is required',
 
-                                        if (dobDate.isAfter(todayDate)) {
-                                          return _captureAnmError(
-                                            l?.dob_cannot_be_future ?? 'Date of birth cannot be in the future',
-                                          );
-                                        }
+                                              );
+                                            }
 
-                                        // Apply the 1 day–15 years rule only when member type is Child
-                                        final memberType =
-                                        (state.memberType ?? '')
-                                            .trim()
-                                            .toLowerCase();
-                                        if (memberType == 'child') {
-                                          final diffDays = todayDate
-                                              .difference(dobDate)
-                                              .inDays;
-
-                                          const int minDays = 1;
-                                          const int maxDays = 15 * 365;
-
-                                          if (diffDays < minDays ||
-                                              diffDays > maxDays) {
-                                            return _captureAnmError(
-                                              l?.child_age_validation ?? 'For Child: Age should be between 1 day to 15 years.',
+                                            final today = DateTime.now();
+                                            final dobDate = DateTime(
+                                              date.year,
+                                              date.month,
+                                              date.day,
                                             );
-                                          }
-                                        }
+                                            final todayDate = DateTime(
+                                              today.year,
+                                              today.month,
+                                              today.day,
+                                            );
 
-                                        // For adults, no extra age-range restriction beyond not-future
-                                        return null;
-                                      },
-                                    ),
+                                            if (dobDate.isAfter(todayDate)) {
+                                              return _captureAnmError(
+                                                l?.dob_cannot_be_future ?? 'Date of birth cannot be in the future',
+                                              );
+                                            }
+
+                                            // Apply the 1 day–15 years rule only when member type is Child
+                                            final memberType =
+                                            (state.memberType ?? '')
+                                                .trim()
+                                                .toLowerCase();
+                                            if (memberType == 'child') {
+                                              final diffDays = todayDate
+                                                  .difference(dobDate)
+                                                  .inDays;
+
+                                              const int minDays = 1;
+                                              const int maxDays = 15 * 365;
+
+                                              if (diffDays < minDays ||
+                                                  diffDays > maxDays) {
+                                                return _captureAnmError(
+                                                  l?.child_age_validation ?? 'For Child: Age should be between 1 day to 15 years.',
+                                                );
+                                              }
+                                            }
+
+                                            // For adults, no extra age-range restriction beyond not-future
+                                            return null;
+                                          },
+                                        ),
+                                      )
                                   )
                                 else
                                   _section(
@@ -3067,56 +3077,59 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                 if ((state.memberType ?? '').toLowerCase() ==
                                     'adult') ...[
                                   _section(
-                                    ApiDropdown<String>(
-                                      labelText: '${l.genderLabel} *',
-                                      items: const [
-                                        'Male',
-                                        'Female',
-                                        'Transgender',
-                                      ],
-                                      getLabel: (s) {
-                                        switch (s) {
-                                          case 'Male':
-                                            return l.genderMale;
-                                          case 'Female':
-                                            return l.genderFemale;
-                                          case 'Transgender':
-                                            return l.transgender;
-                                          default:
-                                            return s;
-                                        }
-                                      },
-                                      value: state.gender,
-                                      onChanged: (v) {
-                                        if (v == null) return;
-                                        final memberGender = v;
-                                        context
-                                            .read<AddnewfamilymemberBloc>()
-                                            .add(AnmUpdateGender(memberGender));
-                                        try {
-                                          if (_syncingGender) return;
-                                          _syncingGender = true;
-                                          final opposite = _oppositeGender(
-                                            memberGender,
-                                          );
-                                          final spBloc = context
-                                              .read<SpousBloc>();
-                                          if (spBloc.state.gender != opposite) {
-                                            spBloc.add(
-                                              SpUpdateGender(opposite),
-                                            );
+                                    IgnorePointer(
+                                      ignoring: widget.isEdit,
+                                      child:ApiDropdown<String>(
+                                        labelText: '${l.genderLabel} *',
+                                        items: const [
+                                          'Male',
+                                          'Female',
+                                          'Transgender',
+                                        ],
+                                        getLabel: (s) {
+                                          switch (s) {
+                                            case 'Male':
+                                              return l.genderMale;
+                                            case 'Female':
+                                              return l.genderFemale;
+                                            case 'Transgender':
+                                              return l.transgender;
+                                            default:
+                                              return s;
                                           }
-                                        } finally {
-                                          WidgetsBinding.instance
-                                              .addPostFrameCallback((_) {
-                                            _syncingGender = false;
-                                          });
-                                        }
-                                      },
-                                      validator: (value) => _captureAnmError(
-                                        Validations.validateGender(l, value),
+                                        },
+                                        value: state.gender,
+                                        onChanged: (v) {
+                                          if (v == null) return;
+                                          final memberGender = v;
+                                          context
+                                              .read<AddnewfamilymemberBloc>()
+                                              .add(AnmUpdateGender(memberGender));
+                                          try {
+                                            if (_syncingGender) return;
+                                            _syncingGender = true;
+                                            final opposite = _oppositeGender(
+                                              memberGender,
+                                            );
+                                            final spBloc = context
+                                                .read<SpousBloc>();
+                                            if (spBloc.state.gender != opposite) {
+                                              spBloc.add(
+                                                SpUpdateGender(opposite),
+                                              );
+                                            }
+                                          } finally {
+                                            WidgetsBinding.instance
+                                                .addPostFrameCallback((_) {
+                                              _syncingGender = false;
+                                            });
+                                          }
+                                        },
+                                        validator: (value) => _captureAnmError(
+                                          Validations.validateGender(l, value),
+                                        ),
                                       ),
-                                    ),
+                                    )
                                   ),
                                   Divider(
                                     color: AppColors.divider,
@@ -3544,49 +3557,52 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     crossAxisAlignment:
                                     CrossAxisAlignment.start,
                                     children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: CustomTextField(
-                                              labelText: l.abhaAddressLabel,
-                                              hintText: l.abhaAddressLabel,
-                                              initialValue: state.abhaAddress,
-                                              onChanged: (v) => context
-                                                  .read<
-                                                  AddnewfamilymemberBloc
-                                              >()
-                                                  .add(
-                                                AnmUpdateAbhaAddress(
-                                                  v.trim(),
+                                      IgnorePointer(
+                                        ignoring: widget.isEdit,
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: CustomTextField(
+                                                labelText: l.abhaAddressLabel,
+                                                hintText: l.abhaAddressLabel,
+                                                initialValue: state.abhaAddress,
+                                                onChanged: (v) => context
+                                                    .read<
+                                                    AddnewfamilymemberBloc
+                                                >()
+                                                    .add(
+                                                  AnmUpdateAbhaAddress(
+                                                    v.trim(),
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          SizedBox(
-                                            height: 30,
-                                            child: RoundButton(
-                                              title: l.linkAbha,
-                                              width: 140,
-                                              borderRadius: 8,
-                                              fontSize: 12,
-                                              onPress: () async {
-                                                final result = await Navigator.pushNamed(
-                                                  context,
-                                                  Route_Names.Abhalinkscreen,
-                                                );
+                                            const SizedBox(width: 8),
+                                            SizedBox(
+                                              height: 30,
+                                              child: RoundButton(
+                                                title: l.linkAbha,
+                                                width: 140,
+                                                borderRadius: 8,
+                                                fontSize: 12,
+                                                onPress: () async {
+                                                  final result = await Navigator.pushNamed(
+                                                    context,
+                                                    Route_Names.Abhalinkscreen,
+                                                  );
 
-                                                debugPrint("BACK FROM ABHA LINK SCREEN (New Member)");
-                                                debugPrint("RESULT: $result");
+                                                  debugPrint("BACK FROM ABHA LINK SCREEN (New Member)");
+                                                  debugPrint("RESULT: $result");
 
-                                                if (result is Map<String, dynamic> && mounted) {
-                                                  _handleAbhaProfileResult(result, context);
-                                                }
-                                              },
+                                                  if (result is Map<String, dynamic> && mounted) {
+                                                    _handleAbhaProfileResult(result, context);
+                                                  }
+                                                },
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
+                                          ],
+                                        ),
+                                      )
                                     ],
                                   ),
                                 ),
@@ -3607,71 +3623,66 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       value: state.mobileOwner,
                                       onChanged: (v) async {
                                         if (v == null) return;
-                                        final bloc = context
-                                            .read<AddnewfamilymemberBloc>();
+                                        final bloc = context.read<AddnewfamilymemberBloc>();
+
                                         bloc.add(AnmUpdateMobileOwner(v));
 
-                                        if (v == 'Family Head' ||
-                                            v == "Father") {
-                                          if (widget.isAddMember &&
-                                              widget.headMobileNumber != null &&
-                                              widget
-                                                  .headMobileNumber!
-                                                  .isNotEmpty) {
-                                            print(
-                                              '📱 [AddNewMember] Using head mobile from props: ${widget.headMobileNumber}',
-                                            );
-                                            bloc.add(
-                                              AnmUpdateMobileNo(
-                                                widget.headMobileNumber!,
-                                              ),
-                                            );
-                                          } else if (_isMemberDetails &&
-                                              widget.hhId != null) {
-                                            try {
-                                              final headMobile =
-                                              await LocalStorageDao.instance
-                                                  .getHeadMobileNumber(
-                                                widget.hhId!,
-                                              );
-                                              print(
-                                                '📱 [AddNewMember] Fetched mobile from DB: $headMobile',
-                                              );
-                                              if (headMobile != null &&
-                                                  headMobile.isNotEmpty) {
-                                                bloc.add(
-                                                  AnmUpdateMobileNo(headMobile),
-                                                );
-                                              } else if (mounted) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      l?.no_mobile_found_for_head ?? 'No mobile number found for the head of family',
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            } catch (e) {
-                                              print(
-                                                '❌ [AddNewMember] Error fetching from DB: $e',
-                                              );
-                                              if (mounted) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      l?.error_loading_head_mobile ?? 'Error loading head of family mobile number',
-                                                    ),
-                                                  ),
-                                                );
-                                              }
+                                        bloc.add(AnmUpdateMobileNo(''));
+
+                                        if (v == 'Family Head' || v == "Father" || v == "Mother") {
+                                          String? mobileNumber;
+                                          bool shouldFetchFromDb = true;
+
+                                          if (v == 'Mother') {
+                                            if (widget.headSpouseMobile != null && widget.headSpouseMobile!.isNotEmpty) {
+                                              mobileNumber = widget.headSpouseMobile;
+                                              print('📱 [AddNewMember] Using spouse mobile from props: $mobileNumber');
+                                              shouldFetchFromDb = false;
+                                            }
+                                            else if (state.mobileNo != null && state.mobileNo!.isNotEmpty) {
+                                              mobileNumber = state.mobileNo;
+                                              print('📱 [AddNewMember] Using spouse mobile from state: $mobileNumber');
+                                              shouldFetchFromDb = false;
                                             }
                                           }
+                                          else if ((v == 'Family Head' || v == 'Father') &&
+                                              widget.headMobileNumber != null &&
+                                              widget.headMobileNumber!.isNotEmpty) {
+                                            mobileNumber = widget.headMobileNumber;
+                                            print('📱 [AddNewMember] Using head mobile from props: $mobileNumber');
+                                            shouldFetchFromDb = false;
+                                          }
+
+                                          if (shouldFetchFromDb && _isMemberDetails && widget.hhId != null) {
+                                            try {
+                                              if (v == 'Mother') {
+                                                mobileNumber = await LocalStorageDao.instance.getSpouseMobileNumber(widget.hhId!);
+                                                print('📱 [AddNewMember] Fetched spouse mobile from DB: $mobileNumber');
+                                              } else {
+                                                mobileNumber = await LocalStorageDao.instance.getHeadMobileNumber(widget.hhId!);
+                                                print('📱 [AddNewMember] Fetched head mobile from DB: $mobileNumber');
+                                              }
+                                            } catch (e) {
+                                              print('❌ Error fetching mobile number: $e');
+                                            }
+                                          }
+
+                                          // Update the mobile number if found
+                                          if (mobileNumber != null && mobileNumber.isNotEmpty) {
+                                            print('📱 [AddNewMember] Setting mobile number: $mobileNumber for $v');
+                                            bloc.add(AnmUpdateMobileNo(mobileNumber));
+                                          } else if (mobileNumber == null && mounted) {
+                                            // Show error if no mobile number found
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  l?.no_mobile_found_for_head ?? 'No mobile number found',
+                                                ),
+                                              ),
+                                            );
+                                          }
                                         } else {
-                                          // Clear mobile number if not Family Head
+                                          // For any other selection, clear the mobile number
                                           bloc.add(AnmUpdateMobileNo(''));
                                         }
                                       },

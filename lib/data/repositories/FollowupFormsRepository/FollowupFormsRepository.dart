@@ -53,7 +53,6 @@ class FollowupFormsRepository {
     dynamic formJsonValue;
     Map<String, dynamic> formRoot = {};
 
-    // Parse device_details
     try {
       final devStr = saved['device_details']?.toString();
       if (devStr != null && devStr.isNotEmpty) {
@@ -62,7 +61,7 @@ class FollowupFormsRepository {
       }
     } catch (_) {}
 
-    // Parse app_details
+
     try {
       final appStr = saved['app_details']?.toString();
       if (appStr != null && appStr.isNotEmpty) {
@@ -130,7 +129,7 @@ final formType = formJsonValue['form_type'];
       "household_registration_ref_key": householdRefKey,
       "beneficiaries_registration_ref_key": beneficiaryRefKey,
       "forms_ref_key": formsRefKey,
-      "form_type": '',
+      "form_type": formType,
 
       "form_json": formJsonValue,
 
@@ -326,7 +325,6 @@ final formType = formJsonValue['form_type'];
         }
       } catch (_) {}
 
-      // Prefer an existing 'form_data' if already present
       if (formRoot['form_data'] is Map) {
         formDataMap = Map<String, dynamic>.from(formRoot['form_data'] as Map);
       } else {
@@ -362,8 +360,8 @@ final formType = formJsonValue['form_type'];
           };
         } else if (formsRefKey == ancKey) {
           final Map<String, dynamic> src =
-          formRoot['form_type'] == 'anc_due_registration'
-              ? Map<String, dynamic>.from(formRoot['form_data'] ?? {})
+          formRoot['form_type'] == 'mother_care'
+              ? Map<String, dynamic>.from(formRoot['anc_form'] ?? {})
               : Map<String, dynamic>.from(formRoot['anc_form'] ?? {});
 
           String _normalizeYesNo(dynamic value) {
@@ -446,6 +444,8 @@ final formType = formJsonValue['form_type'];
             // ---------------- STATUS ----------------
             'beneficiary_absent':
             _pick(src, 'beneficiary_absent', 'is_beneficiary_absent'),
+            'anc_visit_interval':
+            _pick(src, 'anc_visit_interval', 'is_anc_visit_interval'),
           };
         }
         else if (formsRefKey == hbycKey && formRoot['hbyc_form'] is Map) {

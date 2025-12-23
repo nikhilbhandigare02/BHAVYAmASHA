@@ -171,6 +171,7 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
             CustomDatePicker(
               labelText: 'Date of Death',
               initialDate: widget.dateOfDeath,
+              lastDate: DateTime.now(),
               onDateChanged: widget.onDateOfDeathChanged,
             ),
             const Divider(thickness: 0.5, height: 1, color: AppColors.divider),
