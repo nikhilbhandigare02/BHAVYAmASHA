@@ -2315,6 +2315,8 @@
   "okayLabel": "OKAY",
   "hospitalReferMsg": "Please refer the child to nearby hospital.",
   "attention": "Attention!",
-  "deliveryOutcome": "Delivery outcome"
+  "deliveryOutcome": "Delivery outcome",
+
+  "formSavedSuccessfullyLabel": "Form has been saved successfully"
 
 }
