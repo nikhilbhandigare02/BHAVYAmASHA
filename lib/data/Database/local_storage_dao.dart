@@ -429,7 +429,7 @@ class LocalStorageDao {
         AND is_deleted = 0
       ORDER BY created_date_time DESC
       LIMIT 1
-    ''', [beneficiaryId, 'anc_due_state']);
+    ''', [beneficiaryId, 'anc_due']);
 
       if (cutoffRows.isNotEmpty) {
         final v = cutoffRows.first['created_date_time']?.toString();
@@ -538,7 +538,7 @@ class LocalStorageDao {
         AND is_deleted = 0
       ORDER BY created_date_time DESC
       LIMIT 1
-    ''', [beneficiaryId, 'anc_due_state']);
+    ''', [beneficiaryId, 'anc_due']);
 
       if (cutoffRows.isNotEmpty) {
         final v = cutoffRows.first['created_date_time']?.toString();
@@ -1315,13 +1315,22 @@ class LocalStorageDao {
         FollowupFormDataTable.ancDueRegistration
         ],
       ],
-      orderBy: 'created_date_time DESC',
+      orderBy: 'created_date_time DESC', // IMPORTANT
     );
 
     final List<Map<String, dynamic>> result = [];
+    final Set<String> processedBeneficiaries = {}; // ✅ DISTINCT TRACKER
 
     for (final form in forms) {
       try {
+        final beneficiaryRefKey = form['beneficiary_ref_key'] as String?;
+        if (beneficiaryRefKey == null) continue;
+
+        // ✅ Skip if already added
+        if (processedBeneficiaries.contains(beneficiaryRefKey)) {
+          continue;
+        }
+
         final formJson = form['form_json'] as String?;
         if (formJson == null || formJson.isEmpty) continue;
 
@@ -1330,26 +1339,25 @@ class LocalStorageDao {
 
         Map<String, dynamic>? data;
 
-        if (decoded.containsKey('form_data') && decoded['form_data'] is Map) {
+        if (decoded['form_data'] is Map) {
           data = Map<String, dynamic>.from(decoded['form_data']);
-        } else if (decoded.containsKey('anc_form') && decoded['anc_form'] is Map) {
+        } else if (decoded['anc_form'] is Map) {
           data = Map<String, dynamic>.from(decoded['anc_form']);
         }
 
         if (data == null) continue;
 
-        final dynamic hr = data['high_risk'] ?? data['is_high_risk'];
+        final hr = data['high_risk'] ?? data['is_high_risk'];
         final bool isHighRisk = hr == true ||
             hr == 1 ||
             (hr is String && ['true', 'yes', '1'].contains(hr.toLowerCase()));
 
         if (!isHighRisk) continue;
 
-        // Fetch beneficiary data
-        final beneficiaryRefKey = form['beneficiary_ref_key'] as String?;
-        if (beneficiaryRefKey == null) continue;
+        // ✅ Mark beneficiary as processed
+        processedBeneficiaries.add(beneficiaryRefKey);
 
-        // Get the beneficiary data
+        // Fetch beneficiary
         final beneficiary = await db.query(
           BeneficiariesTable.table,
           where: 'unique_key = ?',
@@ -1359,17 +1367,13 @@ class LocalStorageDao {
 
         if (beneficiary.isEmpty) continue;
 
-        // Parse beneficiary info if it's a string
         var beneficiaryData = Map<String, dynamic>.from(beneficiary.first);
         if (beneficiaryData['beneficiary_info'] is String) {
-          try {
-            beneficiaryData['beneficiary_info'] = jsonDecode(beneficiaryData['beneficiary_info']);
-          } catch (e) {
-            debugPrint('Error parsing beneficiary_info: $e');
-          }
+          beneficiaryData['beneficiary_info'] =
+              jsonDecode(beneficiaryData['beneficiary_info']);
         }
 
-        // Get spouse data if exists
+        // Fetch spouse if exists
         Map<String, dynamic>? spouseData;
         final spouseKey = beneficiaryData['spouse_key'];
         if (spouseKey != null) {
@@ -1382,12 +1386,9 @@ class LocalStorageDao {
 
           if (spouse.isNotEmpty) {
             spouseData = Map<String, dynamic>.from(spouse.first);
-            if (spouseData!['beneficiary_info'] is String) {
-              try {
-                spouseData!['beneficiary_info'] = jsonDecode(spouseData!['beneficiary_info']);
-              } catch (e) {
-                debugPrint('Error parsing spouse beneficiary_info: $e');
-              }
+            if (spouseData['beneficiary_info'] is String) {
+              spouseData['beneficiary_info'] =
+                  jsonDecode(spouseData['beneficiary_info']);
             }
           }
         }
@@ -1398,20 +1399,19 @@ class LocalStorageDao {
           'form_type': form['form_type'],
           'beneficiary_ref_key': beneficiaryRefKey,
           'beneficiary_data': beneficiaryData,
-          'spouse_data': spouseData, // Add spouse data if available
+          'spouse_data': spouseData,
           'created_date_time': form['created_date_time'],
           'modified_date_time': form['modified_date_time'],
           'form_data': data,
         });
       } catch (e) {
-        debugPrint(
-          '❌ Error processing high-risk ANC form ${form['id']}: $e',
-        );
+        debugPrint('❌ Error processing high-risk ANC form ${form['id']}: $e');
       }
     }
 
     return result;
   }
+
   Future<List<Map<String, dynamic>>> getAllHouseholds() async {
     try {
       final db = await _db;

@@ -47,7 +47,6 @@ class _EligibleCoupleListState extends State<HighRisk> {
           final formData = Map<String, dynamic>.from(entry['form_data'] as Map);
           final beneficiaryKey = entry['beneficiary_ref_key']?.toString() ?? '';
 
-          // Skip if no beneficiary key
           if (beneficiaryKey.isEmpty) continue;
 
           // Get the HHID from multiple possible locations

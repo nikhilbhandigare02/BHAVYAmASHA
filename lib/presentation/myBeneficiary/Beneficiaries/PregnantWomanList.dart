@@ -155,7 +155,7 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
       ON r.beneficiary_ref_key = bn.unique_key
     WHERE
       r.rn = 1
-      AND r.mother_care_state = 'anc_due_state'
+      AND r.mother_care_state = 'anc_due'
       AND bn.is_deleted = 0
     ORDER BY r.created_date_time DESC; 
     ''',

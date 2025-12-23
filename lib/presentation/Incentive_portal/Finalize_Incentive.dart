@@ -155,7 +155,7 @@ class _FinalizeIncentivePageState extends State<FinalizeIncentivePage> {
                       _RowThree(
                         t1: (l10n?.incentiveHeaderDistrict ?? 'District'), v1: _getWorkingField('district'),
                         t2:  (l10n?.incentiveHeaderBlock ?? 'Block'), v2: _getWorkingField('block'),
-                        t3: (l10n?.incentiveHeaderHsc ?? 'HSC'), v3: _getWorkingField('hsc_name'),
+                        t3: (l10n?.incentiveHeaderHscLabel ?? 'HSC'), v3: _getWorkingField('hsc_name'),
                         t4:  (l10n?.incentiveHeaderPanchayat ?? 'Panchayat'), v4: _getWorkingField('panchayat'),
                         t5:  (l10n?.incentiveHeaderAnganwadi ?? 'Anganwadi'), v5: _getWorkingField('anganwadi'),
                       ),

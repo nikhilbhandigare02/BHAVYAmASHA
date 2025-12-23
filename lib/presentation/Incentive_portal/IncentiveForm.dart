@@ -67,14 +67,14 @@ class _IncentiveFormState extends State<IncentiveForm> {
                 children: [
                   Expanded(
                     child: _infoBox(
-                      (l10n?.incentiveFinancialYear ?? 'वित्तीय वर्ष:'),
+                      '${l10n?.incentiveFinancialYear ?? 'वित्तीय वर्ष'}:',
                       '2024-2025',
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: _infoBox(
-                      (l10n?.incentiveFinancialMonth ?? 'वित्तीय महीना:'),
+                      '${l10n?.incentiveFinancialMonth ?? 'वित्तीय महीना'}:',
                       'June',
                     ),
                   ),
@@ -83,7 +83,7 @@ class _IncentiveFormState extends State<IncentiveForm> {
               const SizedBox(height: 16),
         
               _labelField(
-                l10n?.incentiveFormWorkCodeLabel ?? 'कार्य कोड :',
+                l10n?.incentiveFormWorkCodeLabel ?? 'कार्य कोड',
                 _textField(
                   l10n?.incentiveFormWorkCodeHint ?? 'कार्य कोड डाले',
                   workCodeController,

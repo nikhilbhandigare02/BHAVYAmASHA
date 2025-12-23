@@ -1048,7 +1048,7 @@ class AddnewfamilymemberBloc
               'server_id': null,
               'household_ref_key': householdRefKey,
               'beneficiary_ref_key': memberId,
-              'mother_care_state': 'anc_due_state',
+              'mother_care_state': 'anc_due',
               'device_details': jsonEncode({
                 'id': deviceInfo.deviceId,
                 'platform': deviceInfo.platform,
@@ -1960,7 +1960,7 @@ class AddnewfamilymemberBloc
                 'server_id': null,
                 'household_ref_key': householdRefKey,
                 'beneficiary_ref_key': _editingBeneficiaryKey!,
-                'mother_care_state': 'anc_due_state',
+                'mother_care_state': 'anc_due',
                 'device_details': jsonEncode({
                   'id': deviceInfo.deviceId,
                   'platform': deviceInfo.platform,

@@ -29,6 +29,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
   late TabController _tabController;
   final _formKey = GlobalKey<FormState>();
   late int _childCount;
+  bool _saveTapLocked = false;
 
   @override
   void initState() {
@@ -63,7 +64,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
             child: BlocListener<HbncVisitBloc, HbncVisitState>(
               listenWhen: (previous, current) =>
                   (previous.validationTick != current.validationTick) ||
-                  (previous.isSaving && !current.isSaving && current.saveSuccess),
+                  (previous.isSaving && !current.isSaving),
               listener: (context, state) {
                 final idx = _tabController.index;
                 if (state.lastValidatedIndex == idx && state.validationErrors.isNotEmpty) {
@@ -71,6 +72,11 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                   final first = state.validationErrors.first;
                   final localized = _mapErrorCodeToText(t, first);
                   showAppSnackBar(context, localized);
+                  if (_saveTapLocked) {
+                    setState(() {
+                      _saveTapLocked = false;
+                    });
+                  }
                 }
 
                 if (state.saveSuccess && !state.isSaving) {
@@ -103,6 +109,19 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                         }
                       });
                     }
+                    if (_saveTapLocked) {
+                      setState(() {
+                        _saveTapLocked = false;
+                      });
+                    }
+                  }
+                }
+
+                if (!state.isSaving && !state.saveSuccess && state.errorMessage != null) {
+                  if (_saveTapLocked) {
+                    setState(() {
+                      _saveTapLocked = false;
+                    });
                   }
                 }
 
@@ -241,8 +260,12 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                                       height: 34,
                                       title: t.saveButton,
                                       isLoading: state.isSaving,
+                                      disabled: state.isSaving || _saveTapLocked,
                                       onPress: () {
-                                        if (!state.isSaving) {
+                                        if (!state.isSaving && !_saveTapLocked) {
+                                          setState(() {
+                                            _saveTapLocked = true;
+                                          });
                                           if (_formKey.currentState?.validate() ?? true) {
                                             context.read<HbncVisitBloc>().add(
                                               ValidateSection(

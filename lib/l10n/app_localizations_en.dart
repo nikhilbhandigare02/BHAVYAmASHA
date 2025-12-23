@@ -3042,46 +3042,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nationalProgramsTitle => 'National Programs';
 
   @override
-  String get tbEradicationProgram => 'Tuberculosis Eradication Program';
-
-  @override
-  String get tbLabel1 => 'First indicator activity/contact tracing campaign (for notifying new TB patients on lane)';
-
-  @override
-  String get tbLabel2 => 'Treatment provider activity';
-
-  @override
-  String get tbLabel3 => 'For each Drug Sensitive TB patient or each Shorter regimen Drug Resistant TB patient for administering medicine';
-
-  @override
-  String get tbLabel4 => 'For administering medicine to a Conventional MDR treatment Drug Resistant TB patient (₹2000 - during Intensive Phase).';
-
-  @override
   String get leprosyEradicationProgram => 'Leprosy Eradication Program';
-
-  @override
-  String get leprosyQuestion1 => '1. Do you have any white or red patches on any part of your body?';
-
-  @override
-  String get leprosyQuestion2 => '2. Do you feel numbness or tingling in any part of your body?';
-
-  @override
-  String get leprosyQuestion3 => '3. Have you experienced weakness or paralysis in any limb?';
-
-  @override
-  String get leprosyQuestion4 => '4. Has anyone in your family ever had leprosy?';
 
   @override
   String get kalaAzarEradicationProgram => 'Kala-azar Eradication Program';
 
   @override
   String get malariaEradicationProgram => 'Malaria Eradication Program';
-
-  @override
-  String get malariaQuestion1 => '1. For blood smear collection and testing of fever cases (per case)';
-
-  @override
-  String get malariaQuestion2 => '2. For complete treatment of positive cases (per case)';
 
   @override
   String get migrationStayingInHouse => 'Staying in House';
@@ -3363,9 +3330,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aesJeQuestion1 => 'Amount payable to ASHA as community catalyst in 1000 population during IRS spraying';
 
   @override
-  String get aesJeQuestion2 => 'Patients referred by ASHA to the nearest PHC, CHC, Referral, DH or Medical College Hospital, whose Unknown AES or Japanese Encephalitis (JE) has been confirmed by the Medical Officer';
-
-  @override
   String get aesJeDataSaved => 'AES/JE data saved successfully!';
 
   @override
@@ -3382,15 +3346,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ambDataSaved => 'AMB data saved successfully!';
-
-  @override
-  String get filariasisProgram => 'Filariasis Eradication Program';
-
-  @override
-  String get filariasisScreenTitle => 'Filariasis Eradication Program';
-
-  @override
-  String get filariasisQuestion1 => 'Front feeding of medicine under MDA program for every 50 households by ASHA during filariasis cycle (to cover one thousand population)';
 
   @override
   String get kalaAzarProgram => 'Kala-azar Eradication Program';
@@ -6764,4 +6719,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deliveryOutcome => 'Delivery outcome';
+
+  @override
+  String get formSavedSuccessfullyLabel => 'Form has been saved successfully';
+
+  @override
+  String get incentiveHeaderHscLabel => 'HSC';
+
+  @override
+  String get tbEradicationProgram => 'Tuberculosis(TB) Eradication Program';
+
+  @override
+  String get tbLabel1 => 'First Indicative Work/Intensive Search Campaign (on the lane for notifying new Tuberculosis patients)';
+
+  @override
+  String get tbLabel2 => 'Treatment provider work';
+
+  @override
+  String get tbLabel3 => 'On feeding medicine to Drug Sensitive Tuberculosis patient or Drug Resistant Tuberculosis patient per Shorter regimen';
+
+  @override
+  String get tbLabel4 => 'Conventional MDR treated Drug Resistant Tuberculosis patient (Rs. 2000) for feeding medicine (on Intensive Phase).';
+
+  @override
+  String get leprosyQuestion1 => 'Amount payable to ASHA for finding new leprosy free patients';
+
+  @override
+  String get leprosyQuestion2 => 'Amount payable to ASHA for finding new leprosy patients with disabilities';
+
+  @override
+  String get leprosyQuestion3 => 'Pauci-Bacillary (PB) of Leprosy Payable after complete treatment of leprosy';
+
+  @override
+  String get leprosyQuestion4 => 'Amount after complete cure in multi-bacillary(MB) cases of leprosy';
+
+  @override
+  String get malariaQuestion1 => 'Active malaria infection test of malaria fever victims';
+
+  @override
+  String get malariaQuestion2 => 'Providing full radical treatment to malaria positive P.V. or P.F. patients as per the latest claim system';
+
+  @override
+  String get filariasisScreenTitle => 'Filaria Eradication Program';
+
+  @override
+  String get filariasisQuestion1 => 'Front feeding of medicine under MDA program for every 50 households by ASHA during filariasis cycle (to cover one thousand population)';
+
+  @override
+  String get aesJeQuestion2 => 'Those patients referred by ASHA to the nearest PHC, CHC, Referral, DH or Medical College Hospital, whose Unknown AES or Japanese Encephalitis (JE) has been confirmed by the Medical Officer,will be given incentive amount';
+
+  @override
+  String get filariasisProgram => 'Filaria Eradication Program';
 }

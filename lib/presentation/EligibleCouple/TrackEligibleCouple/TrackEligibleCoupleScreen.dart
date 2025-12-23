@@ -289,8 +289,8 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                               .add(LmpDateChanged(date));
                         },
                         isEditable: true,
-                        firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                        lastDate: DateTime.now(),
+                        firstDate: DateTime.now().subtract(const Duration(days: 276)),
+                        lastDate: DateTime.now().subtract(const Duration(days: 31)),
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                       const SizedBox(height: 8),

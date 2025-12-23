@@ -49,7 +49,7 @@ class NIDDCPScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppHeader(
-              screenTitle: AppLocalizations.of(context)!.niddcpScreenTitle,
+              screenTitle: AppLocalizations.of(context)!.niddcpProgram,
               showBack: true,
             ),
             body: Padding(

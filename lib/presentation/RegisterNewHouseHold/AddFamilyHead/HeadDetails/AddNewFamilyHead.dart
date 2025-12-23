@@ -1361,6 +1361,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       labelText: '${l.lmpDateLabel} *',
                       hintText: l.dateHint,
                       initialDate: state.lmp,
+
                       onDateChanged: (d) {
                         final bloc = context.read<AddFamilyHeadBloc>();
                         bloc.add(LMPChange(d));
@@ -1373,8 +1374,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       },
                       validator: (date) =>
                           _captureError(Validations.validateLMP(l, date)),
-                      firstDate: DateTime.now().subtract(Duration(days: 365)),
-                      lastDate: DateTime.now(),
+                      firstDate: DateTime.now().subtract(const Duration(days: 276)),
+                      lastDate: DateTime.now().subtract(const Duration(days: 31)),
                     ),
                   ),
                   Divider(

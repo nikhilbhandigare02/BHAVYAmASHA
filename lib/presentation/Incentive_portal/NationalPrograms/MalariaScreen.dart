@@ -107,11 +107,12 @@ class MalariaScreen extends StatelessWidget {
                             ),
                             SizedBox(width: 2.w),
                             Text(
-                              '${l10n.screeningDate ?? "Screening Date"}: $formattedDate',
+                             // '${l10n.screeningDate ?? "Screening Date"}: $formattedDate',
+                              formattedDate,
                               style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
                                 color: Colors.white,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
