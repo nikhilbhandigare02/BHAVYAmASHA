@@ -76,7 +76,7 @@ class _HBNCListScreenState
         'mother_care_activities',
         columns: ['is_synced'],
         where: 'beneficiary_ref_key = ? AND mother_care_state = ? AND is_deleted = 0',
-        whereArgs: [beneficiaryId, 'hbnc_visit'],
+        whereArgs: [beneficiaryId, 'pnc_mother'],
         orderBy: 'created_date_time DESC',
         limit: 1,
       );
