@@ -1225,59 +1225,93 @@ class AddnewfamilymemberBloc
               }
             }
 
-            // Check if member is female, married, and within childbearing age
-            final isFemaleMarried =
-                spousState.gender == 'female' || state.gender == 'female' &&
-                state.maritalStatus == 'Married'  &&
-                spousState.fpMethod == 'male sterilization' && state.fpMethod == 'male sterilization' &&
-                spousState.fpMethod == 'female sterilization' && state.fpMethod == 'female sterilization' &&
+
+            final bool isSterilized =
+                spousState.fpMethod== 'male sterilization' ||
+                    spousState.fpMethod == 'female sterilization' ||
+                    spousState.fpMethod == 'male sterilization' ||
+                    spousState.fpMethod == 'female sterilization';
+
+            final bool isFemale =
+                spousState.gender == 'female' ||
+                    state.gender == 'female';
+
+            final bool isMarried =
+                state.maritalStatus == 'Married';
+
+            final bool isFemaleMarried =
+                isFemale &&
+                    isMarried &&
+                    !isSterilized &&
                     age >= 15 &&
                     age <= 49;
 
 
             if (isFemaleMarried) {
-              final isPregnant = state.isPregnant == 'Yes' || state.isPregnant == 'yes';
-              final coupleState = isPregnant ? 'eligible_couple' : 'tracking_due';
+              final bool isPregnant = spousState.isPregnant == 'Yes' || state.isPregnant == 'Yes';
 
-              print('${isPregnant ? 'Pregnant' : 'Non-pregnant'} eligible couple detected. State: $coupleState');
               try {
                 final db = await DatabaseProvider.instance.database;
-                final eligibleCoupleActivityData = {
-                  'server_id': '',
-                  'household_ref_key': householdRefKey,
-                  'beneficiary_ref_key': memberId,
-                  'eligible_couple_state': 'eligible_couple',
-                  'device_details': jsonEncode({
-                    'id': deviceInfo.deviceId,
-                    'platform': deviceInfo.platform,
-                    'version': deviceInfo.osVersion,
-                  }),
-                  'app_details': jsonEncode({
-                    'app_version': deviceInfo.appVersion.split('+').first,
-                    'form_data': {
-                      'created_at': DateTime.now().toIso8601String(),
-                      'updated_at': DateTime.now().toIso8601String(),
-                    },
-                  }),
-                  'parent_user': '',
-                  'current_user_key': ashaUniqueKey,
-                  'facility_id': facilityId,
-                  'created_date_time': ts,
-                  'modified_date_time': ts,
-                  'is_synced': 0,
-                  'is_deleted': 0,
-                };
 
-                print('Inserting eligible couple activity for head: $memberId');
                 await db.insert(
                   'eligible_couple_activities',
-                  eligibleCoupleActivityData,
-                  conflictAlgorithm: ConflictAlgorithm.replace,
+                  {
+                    'server_id': '',
+                    'household_ref_key': householdRefKey,
+                    'beneficiary_ref_key': spousKey,
+                    'eligible_couple_state': 'eligible_couple',
+                    'device_details': jsonEncode({
+                      'id': deviceInfo.deviceId,
+                      'platform': deviceInfo.platform,
+                      'version': deviceInfo.osVersion,
+                    }),
+                    'app_details': jsonEncode({
+                      'app_version': deviceInfo.appVersion.split('+').first,
+                    }),
+                    'parent_user': '',
+                    'current_user_key': ashaUniqueKey,
+                    'facility_id': facilityId,
+                    'created_date_time': ts,
+                    'modified_date_time': ts,
+                    'is_synced': 0,
+                    'is_deleted': 0,
+                  },
+                  conflictAlgorithm: ConflictAlgorithm.ignore,
                 );
+
+                print('Inserted eligible_couple');
+
+                if (!isPregnant) {
+                  await db.insert(
+                    'eligible_couple_activities',
+                    {
+                      'server_id': '',
+                      'household_ref_key': householdRefKey,
+                      'beneficiary_ref_key': spousKey,
+                      'eligible_couple_state': 'tracking_due',
+                      'device_details': jsonEncode({
+                        'id': deviceInfo.deviceId,
+                        'platform': deviceInfo.platform,
+                        'version': deviceInfo.osVersion,
+                      }),
+                      'app_details': jsonEncode({
+                        'app_version': deviceInfo.appVersion.split('+').first,
+                      }),
+                      'parent_user': '',
+                      'current_user_key': ashaUniqueKey,
+                      'facility_id': facilityId,
+                      'created_date_time': ts,
+                      'modified_date_time': ts,
+                      'is_synced': 0,
+                      'is_deleted': 0,
+                    },
+                    conflictAlgorithm: ConflictAlgorithm.ignore,
+                  );
+
+                  print('Inserted tracking_due (Non-pregnant)');
+                }
               } catch (e) {
-                print(
-                  'Error inserting eligible couple activity for head: $e',
-                );
+                print('Error inserting eligible couple activity: $e');
               }
             }
 

@@ -418,11 +418,25 @@ class ChildCareCountProvider {
         whereArgs.add(ashaUniqueKey);
       }
 
-      final rows = await db.query(
-        'beneficiaries_new',
-        where: whereClause,
-        whereArgs: whereArgs,
-      );
+      final List<Map<String, dynamic>> rows = await db.rawQuery('''
+  SELECT 
+    B.*, 
+    B.is_death,
+    C.child_care_state
+  FROM beneficiaries_new B
+  INNER JOIN child_care_activities C
+    ON B.unique_key = C.beneficiary_ref_key
+  WHERE 
+    B.is_deleted = 0
+    AND B.is_adult = 0
+    AND B.is_migrated = 0
+    AND C.is_deleted = 0
+    AND C.current_user_key = ?
+    AND B.current_user_key = ?
+    AND C.child_care_state IN ('registration_due', 'tracking_due')
+  ORDER BY B.created_date_time DESC
+''', [ashaUniqueKey, ashaUniqueKey]);
+
 
       int childCount = 0;
       int childCountIsSync = 0;
@@ -497,12 +511,25 @@ class ChildCareCountProvider {
         whereArgs.add(ashaUniqueKey);
       }
 
-      // Get child beneficiaries for current user
-      final List<Map<String, dynamic>> rows = await db.query(
-        'beneficiaries_new',
-        where: whereClause,
-        whereArgs: whereArgs,
-      );
+      final List<Map<String, dynamic>> rows = await db.rawQuery('''
+  SELECT 
+    B.*, 
+    B.is_death,
+    C.child_care_state
+  FROM beneficiaries_new B
+  INNER JOIN child_care_activities C
+    ON B.unique_key = C.beneficiary_ref_key
+  WHERE 
+    B.is_deleted = 0
+    AND B.is_adult = 0
+    AND B.is_migrated = 0
+    AND C.is_deleted = 0
+    AND C.current_user_key = ?
+    AND B.current_user_key = ?
+    AND C.child_care_state IN ('registration_due', 'tracking_due')
+  ORDER BY B.created_date_time DESC
+''', [ashaUniqueKey, ashaUniqueKey]);
+
 
       int childCount = 0;
       int childCountIsSync = 0;

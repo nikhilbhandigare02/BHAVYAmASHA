@@ -76,7 +76,6 @@ class _EligibleCoupleListState extends State<HighRisk> {
             }
           }
 
-          // Get spouse info if available
           Map<String, dynamic>? spouseData;
           if (entry['spouse_data'] != null) {
             spouseData = Map<String, dynamic>.from(entry['spouse_data']);
@@ -140,7 +139,9 @@ class _EligibleCoupleListState extends State<HighRisk> {
         _isLoading = false;
       });
     }
-  }  List<ANCVisitModel> _filteredVisits = [];
+  }
+
+  List<ANCVisitModel> _filteredVisits = [];
 
   void _onSearchChanged() {
     final query = _searchCtrl.text.toLowerCase().trim();
