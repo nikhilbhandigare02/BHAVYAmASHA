@@ -38,7 +38,6 @@ class _EligibleCoupleListState extends State<HighRisk> {
         _error = '';
       });
 
-      // Get all high risk visits
       final dbForms = await LocalStorageDao.instance.getHighRiskANCVisits();
       final List<ANCVisitModel> highRiskVisits = [];
 
@@ -49,7 +48,6 @@ class _EligibleCoupleListState extends State<HighRisk> {
 
           if (beneficiaryKey.isEmpty) continue;
 
-          // Get the HHID from multiple possible locations
           final rawHhId = entry['household_ref_key']?.toString() ??
               entry['beneficiary_data']?['household_ref_key']?.toString() ??
               formData['household_ref_key']?.toString() ??
@@ -78,7 +76,6 @@ class _EligibleCoupleListState extends State<HighRisk> {
             }
           }
 
-          // Get spouse info if available
           Map<String, dynamic>? spouseData;
           if (entry['spouse_data'] != null) {
             spouseData = Map<String, dynamic>.from(entry['spouse_data']);
@@ -142,7 +139,9 @@ class _EligibleCoupleListState extends State<HighRisk> {
         _isLoading = false;
       });
     }
-  }  List<ANCVisitModel> _filteredVisits = [];
+  }
+
+  List<ANCVisitModel> _filteredVisits = [];
 
   void _onSearchChanged() {
     final query = _searchCtrl.text.toLowerCase().trim();

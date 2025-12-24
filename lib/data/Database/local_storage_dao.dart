@@ -1307,48 +1307,74 @@ class LocalStorageDao {
     return result;
   }
 
+  Future<Map<String, dynamic>?> _getCurrentUserData() async {
+    try {
+      return await SecureStorageService.getCurrentUserData();
+    } catch (e) {
+      print('Error getting current user data: $e');
+      return null;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getHighRiskANCVisits() async {
     final db = await _db;
 
-    final forms = await db.query(
-      FollowupFormDataTable.table,
-      where: 'is_deleted = 0 AND forms_ref_key = ?',
-      whereArgs: [
-        FollowupFormDataTable.formUniqueKeys[
-        FollowupFormDataTable.ancDueRegistration
-        ],
-      ],
-      orderBy: 'created_date_time DESC', // IMPORTANT
-    );
+    final currentUser = await _getCurrentUserData();
+    final ashaUniqueKey = currentUser?['unique_key']?.toString() ?? '';
+
+    if (ashaUniqueKey.isEmpty) return [];
+
+    // First, get all beneficiaries with anc_due status
+    final beneficiaries = await db.rawQuery('''
+      SELECT DISTINCT B.*
+      FROM beneficiaries_new B
+      INNER JOIN mother_care_activities M ON M.beneficiary_ref_key = B.unique_key
+      WHERE B.is_deleted = 0
+        AND B.is_migrated = 0
+        AND B.current_user_key = ?
+        AND M.is_deleted = 0
+        AND M.current_user_key = ?
+        AND M.mother_care_state = 'anc_due'
+        AND M.created_date_time = (
+          SELECT MAX(created_date_time)
+          FROM mother_care_activities
+          WHERE beneficiary_ref_key = B.unique_key
+            AND is_deleted = 0
+        )
+    ''', [ashaUniqueKey, ashaUniqueKey]);
 
     final List<Map<String, dynamic>> result = [];
-    final Set<String> processedBeneficiaries = {}; // ✅ DISTINCT TRACKER
+    final Set<String> processedBeneficiaries = {};
 
-    for (final form in forms) {
+    for (final beneficiary in beneficiaries) {
       try {
-        final beneficiaryRefKey = form['beneficiary_ref_key'] as String?;
+        final beneficiaryRefKey = beneficiary['unique_key'] as String?;
         if (beneficiaryRefKey == null) continue;
 
-        // ✅ Skip if already added
-        if (processedBeneficiaries.contains(beneficiaryRefKey)) {
-          continue;
-        }
+        final forms = await db.query(
+          FollowupFormDataTable.table,
+          where: 'is_deleted = 0 AND forms_ref_key = ? AND beneficiary_ref_key = ?',
+          whereArgs: [
+            FollowupFormDataTable.formUniqueKeys[
+              FollowupFormDataTable.ancDueRegistration
+            ],
+            beneficiaryRefKey,
+          ],
+          orderBy: 'created_date_time DESC',
+          limit: 1,
+        );
 
+        if (forms.isEmpty) continue;
+
+        final form = forms.first;
         final formJson = form['form_json'] as String?;
         if (formJson == null || formJson.isEmpty) continue;
 
         final decoded = jsonDecode(formJson);
         if (decoded is! Map<String, dynamic>) continue;
 
-        Map<String, dynamic>? data;
-
-        if (decoded['form_data'] is Map) {
-          data = Map<String, dynamic>.from(decoded['form_data']);
-        } else if (decoded['anc_form'] is Map) {
-          data = Map<String, dynamic>.from(decoded['anc_form']);
-        }
-
-        if (data == null) continue;
+        final data = decoded['form_data'] ?? decoded['anc_form'];
+        if (data is! Map<String, dynamic>) continue;
 
         final hr = data['high_risk'] ?? data['is_high_risk'];
         final bool isHighRisk = hr == true ||
@@ -1357,35 +1383,29 @@ class LocalStorageDao {
 
         if (!isHighRisk) continue;
 
-        // ✅ Mark beneficiary as processed
-        processedBeneficiaries.add(beneficiaryRefKey);
-
-        // Fetch beneficiary
-        final beneficiary = await db.query(
-          BeneficiariesTable.table,
-          where: 'unique_key = ?',
-          whereArgs: [beneficiaryRefKey],
-          limit: 1,
-        );
-
-        if (beneficiary.isEmpty) continue;
-
-        var beneficiaryData = Map<String, dynamic>.from(beneficiary.first);
+        final beneficiaryData = Map<String, dynamic>.from(beneficiary);
         if (beneficiaryData['beneficiary_info'] is String) {
           beneficiaryData['beneficiary_info'] =
               jsonDecode(beneficiaryData['beneficiary_info']);
         }
 
-        // Fetch spouse if exists
+        if (beneficiary.isEmpty) continue;
+
+        processedBeneficiaries.add(beneficiaryRefKey);
+
+        /// Fetch spouse (optional)
         Map<String, dynamic>? spouseData;
         final spouseKey = beneficiaryData['spouse_key'];
         if (spouseKey != null) {
-          final spouse = await db.query(
-            BeneficiariesTable.table,
-            where: 'unique_key = ?',
-            whereArgs: [spouseKey],
-            limit: 1,
-          );
+          final spouse = await db.rawQuery('''
+          SELECT B.*
+          FROM beneficiaries_new B
+          WHERE B.unique_key = ?
+            AND B.is_deleted = 0
+            AND B.is_migrated = 0
+            AND B.current_user_key = ?
+          LIMIT 1
+        ''', [spouseKey, ashaUniqueKey]);
 
           if (spouse.isNotEmpty) {
             spouseData = Map<String, dynamic>.from(spouse.first);
@@ -1395,6 +1415,7 @@ class LocalStorageDao {
             }
           }
         }
+
 
         result.add({
           'id': form['id'],
@@ -1408,7 +1429,7 @@ class LocalStorageDao {
           'form_data': data,
         });
       } catch (e) {
-        debugPrint('❌ Error processing high-risk ANC form ${form['id']}: $e');
+        debugPrint('❌ High-risk ANC error: $e');
       }
     }
 
@@ -1510,6 +1531,8 @@ class LocalStorageDao {
         whereArgs: [householdId, 0],
       );
 
+
+
       return rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
         mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
@@ -1523,6 +1546,51 @@ class LocalStorageDao {
     } catch (e) {
       print('Error getting beneficiaries by household: $e');
       rethrow;
+    }
+  }
+
+  // Add this method to the LocalStorageDao class
+  Future<Map<String, int>> getEligibleCoupleCounts() async {
+    final db = await _db;
+    final currentUser = await SecureStorageService.getCurrentUserData();
+    final currentUserKey = currentUser?['unique_key']?.toString() ?? '';
+
+    if (currentUserKey.isEmpty) {
+      return {'total': 0, 'tracking_due': 0};
+    }
+
+    try {
+      // Get total eligible couples
+      final totalCount = Sqflite.firstIntValue(await db.rawQuery('''
+      SELECT COUNT(DISTINCT b.unique_key)
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+      WHERE b.is_deleted = 0 
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND e.eligible_couple_state = 'eligible_couple'
+        AND e.is_deleted = 0
+        AND e.current_user_key = ?
+    ''', [currentUserKey])) ?? 0;
+
+      // Get tracking due count
+      final trackingDueCount = Sqflite.firstIntValue(await db.rawQuery('''
+      SELECT COUNT(DISTINCT b.unique_key)
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+      WHERE b.is_deleted = 0 
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND e.eligible_couple_state = 'tracking_due'
+        AND e.is_deleted = 0
+        AND e.current_user_key = ?
+    ''', [currentUserKey])) ?? 0;
+
+      return {
+        'total': totalCount,
+        'tracking_due': trackingDueCount,
+      };
+    } catch (e) {
+      print('Error getting eligible couple counts: $e');
+      return {'total': 0, 'tracking_due': 0};
     }
   }
 
@@ -1627,8 +1695,8 @@ class LocalStorageDao {
       String? where;
       List<Object?>? whereArgs;
       if (isMigrated != null && ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        where = 'is_migrated = ? AND current_user_key = ?';
-        whereArgs = [isMigrated, ashaUniqueKey];
+        where = 'is_migrated = ? AND current_user_key = ? AND is_deleted = ?' ;
+        whereArgs = [isMigrated, ashaUniqueKey, 0];
       } else if (isMigrated != null) {
         where = 'is_migrated = ?';
         whereArgs = [isMigrated];

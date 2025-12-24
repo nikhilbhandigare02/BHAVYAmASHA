@@ -467,286 +467,64 @@ sfgfdd
 
   Future<void> _loadEligibleCouplesCount() async {
     try {
-      // Mirror EligibleCoupleHomeScreen identified logic so the dashboard
-      // Eligible Couple tile matches the identified count
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final households = <String, List<Map<String, dynamic>>>{};
+      print('🔍 Starting to load eligible couples count...');
+      final db = await DatabaseProvider.instance.database;
+      final currentUser = await SecureStorageService.getCurrentUserData();
+      final currentUserKey = currentUser?['unique_key']?.toString() ?? '';
+      print('👤 Current user key: $currentUserKey');
 
-      for (final row in rows) {
-        final hhKey = row['household_ref_key']?.toString() ?? '';
-        if (hhKey.isEmpty) continue;
-        households.putIfAbsent(hhKey, () => []).add(row);
-      }
+      // Get total eligible couples count
+      final totalQuery = '''
+      SELECT COUNT(DISTINCT b.unique_key) as count
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+      WHERE b.is_deleted = 0 
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND e.eligible_couple_state = 'eligible_couple'
+        AND e.is_deleted = 0
+        ${currentUserKey.isNotEmpty ? "AND e.current_user_key = '$currentUserKey'" : ""}
+    ''';
 
-      const allowedRelations = <String>{
-        'self',
-        'spouse',
-        'husband',
-        'son',
-        'daughter',
-        'father',
-        'mother',
-        'brother',
-        'sister',
-        'wife',
-        'nephew',
-        'niece',
-        'grand father',
-        'grand mother',
-        'father in law',
-        'mother in low',
-        'grand son',
-        'grand daughter',
-        'son in law',
-        'daughter in law',
-        'other',
-      };
+      print('🔍 Total query: $totalQuery');
+      final totalResult = await db.rawQuery(totalQuery);
+      print('📊 Total result: $totalResult');
 
-      int totalIdentified = 0;
-       _eligibleCoupleSynced = 0;
-      for (final household in households.values) {
-        Map<String, dynamic>? head;
-        Map<String, dynamic>? spouse;
+      // Get synced eligible couples count
+      final syncedQuery = '''
+      SELECT COUNT(DISTINCT b.unique_key) as count
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+      WHERE b.is_deleted = 0 
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND e.eligible_couple_state = 'eligible_couple'
+        AND e.is_deleted = 0
+        AND e.is_synced = 1
+        ${currentUserKey.isNotEmpty ? "AND e.current_user_key = '$currentUserKey'" : ""}
+    ''';
 
-        // First pass: find head and spouse
-        for (final member in household) {
-          final info = _toStringMapEc(member['beneficiary_info']);
-          String rawRelation =
-              (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
-          rawRelation = rawRelation.replaceAll('_', ' ');
-          if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
-            rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
-          }
-
-          final relation = () {
-            if (rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head') {
-              return 'self';
-            }
-            if (rawRelation == 'spouse' || rawRelation == 'wife' || rawRelation == 'husband') {
-              return 'spouse';
-            }
-            return rawRelation;
-          }();
-
-          if (relation == 'self') {
-            head = info;
-          } else if (relation == 'spouse') {
-            spouse = info;
-          }
-        }
-
-        // Second pass: count all eligible females with allowed relations
-        for (final member in household) {
-          final info = _toStringMapEc(member['beneficiary_info']);
-          String rawRelation =
-              (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
-          rawRelation = rawRelation.replaceAll('_', ' ');
-          if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
-            rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
-          }
-
-          if (!allowedRelations.contains(rawRelation)) continue;
-          if (!_isIdentifiedEcFemale(info, head: head)) continue;
-
-          if(member['is_synced']==1){
-            _eligibleCoupleSynced++;
-          }
-
-          totalIdentified++;
-
-        }
-      }
+      print('🔍 Synced query: $syncedQuery');
+      final syncedResult = await db.rawQuery(syncedQuery);
+      print('📊 Synced result: $syncedResult');
 
       if (mounted) {
-        setState(() {
+        final total = totalResult.isNotEmpty ? (totalResult.first['count'] as int?) ?? 0 : 0;
+        final synced = syncedResult.isNotEmpty ? (syncedResult.first['count'] as int?) ?? 0 : 0;
 
-          _eligibleCoupleTotal = totalIdentified;
+        print('✅ Setting counts - Total: $total, Synced: $synced');
+
+        setState(() {
+          _eligibleCoupleTotal = total;
+          _eligibleCoupleSynced = synced;
         });
       }
     } catch (e) {
-      print('Error loading eligible couples count: $e');
-    }
-  }
-
-  Map<String, dynamic> _toStringMapEc(dynamic map) {
-    if (map == null) return {};
-    if (map is Map<String, dynamic>) return map;
-    if (map is Map) {
-      return Map<String, dynamic>.from(map);
-    }
-    return {};
-  }
-
-
-  bool _isIdentifiedEcFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
-    if (person.isEmpty) return false;
-
-    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
-    final isFemale = genderRaw == 'f' || genderRaw == 'female';
-    if (!isFemale) return false;
-
-    final maritalStatusRaw =
-        person['maritalStatus']?.toString().toLowerCase() ??
-            head?['maritalStatus']?.toString().toLowerCase() ?? '';
-    final isMarried = maritalStatusRaw == 'married';
-    if (!isMarried) return false;
-
-    final dob = person['dob'];
-    final age = _calculateEcAge(dob);
-    return age >= 15 && age <= 49;
-  }
-
-  int _calculateEcAge(dynamic dobRaw) {
-    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
-    try {
-      final dob = DateTime.tryParse(dobRaw.toString());
-      if (dob == null) return 0;
-      return DateTime.now().difference(dob).inDays ~/ 365;
-    } catch (_) {
-      return 0;
-    }
-  }
-
-  bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
-    if (person.isEmpty) return false;
-
-    // Check gender
-    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
-    if (genderRaw != 'f' && genderRaw != 'female') return false;
-
-    // Check marital status (use head's marital status if person is spouse)
-    final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ??
-        person['marital_status']?.toString().toLowerCase() ??
-        head?['maritalStatus']?.toString().toLowerCase() ??
-        head?['marital_status']?.toString().toLowerCase() ??
-        '';
-    if (maritalStatusRaw != 'married' && maritalStatusRaw != 'm') return false;
-
-    // Check if pregnant
-    final isPregnant = person['isPregnant']?.toString().toLowerCase() == 'true' ||
-        person['isPregnant']?.toString().toLowerCase() == 'yes' ||
-        person['pregnancyStatus']?.toString().toLowerCase() == 'pregnant';
-
-    if (!isPregnant) return false;
-
-    // Check age (15-49 years)
-    final dob = person['dob']?.toString() ?? person['dateOfBirth']?.toString();
-    if (dob != null && dob.isNotEmpty) {
-      try {
-        String dateStr = dob.toString();
-        if (dateStr.contains('T')) {
-          dateStr = dateStr.split('T')[0];
-        }
-        final birthDate = DateTime.tryParse(dateStr);
-        if (birthDate != null) {
-          final now = DateTime.now();
-          int age = now.year - birthDate.year;
-          if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
-            age--;
-          }
-          return age >= 15 && age <= 49;
-        }
-      } catch (e) {
-        print('Error parsing date of birth: $e');
-        return false;
+      print('❌ Error loading eligible couples count: $e');
+      if (mounted) {
+        setState(() {
+          _eligibleCoupleTotal = 0;
+          _eligibleCoupleSynced = 0;
+        });
       }
-    }
-
-    // If we can't determine age, assume eligible
-    return true;
-  }
-
-  Future<int> _getTotalCount(String tableName) async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-      // For child_care_activities, get all records regardless of is_deleted status
-      if (tableName == 'child_care_activities') {
-        if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-          final result = await db.rawQuery(
-            'SELECT COUNT(*) as count FROM $tableName WHERE current_user_key = ?',
-            [ashaUniqueKey],
-          );
-          return result.first['count'] as int? ?? 0;
-        }
-        final result = await db.rawQuery('SELECT COUNT(*) as count FROM $tableName');
-        return result.first['count'] as int? ?? 0;
-      } else {
-        if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-          final result = await db.rawQuery(
-            'SELECT COUNT(*) as count FROM $tableName WHERE is_deleted = 0 AND current_user_key = ?',
-            [ashaUniqueKey],
-          );
-          return result.first['count'] as int? ?? 0;
-        }
-        final result = await db.rawQuery('SELECT COUNT(*) as count FROM $tableName WHERE is_deleted = 0');
-        return result.first['count'] as int? ?? 0;
-      }
-    } catch (e) {
-      print('Error getting total count from $tableName: $e');
-      return 0;
-    }
-  }
-
-  // Helper method to get synced count for a specific table and IDs
-  Future<int> _getSyncedCount(String tableName, List<int> ids) async {
-    if (ids.isEmpty) return 0;
-
-    try {
-      final db = await DatabaseProvider.instance.database;
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-      final placeholders = List.filled(ids.length, '?').join(',');
-      // For child_care_activities, don't filter by is_deleted
-      if (tableName == 'child_care_activities') {
-        if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-          final result = await db.rawQuery(
-            'SELECT COUNT(*) as count FROM $tableName WHERE id IN ($placeholders) AND is_synced = 1 AND current_user_key = ?',
-            [...ids, ashaUniqueKey],
-          );
-          return result.first['count'] as int? ?? 0;
-        }
-        final result = await db.rawQuery(
-          'SELECT COUNT(*) as count FROM $tableName WHERE id IN ($placeholders) AND is_synced = 1',
-          ids,
-        );
-        return result.first['count'] as int? ?? 0;
-      } else {
-        if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-          final result = await db.rawQuery(
-            'SELECT COUNT(*) as count FROM $tableName WHERE id IN ($placeholders) AND is_deleted = 0 AND is_synced = 1 AND current_user_key = ?',
-            [...ids, ashaUniqueKey],
-          );
-          return result.first['count'] as int? ?? 0;
-        }
-        final result = await db.rawQuery(
-          'SELECT COUNT(*) as count FROM $tableName WHERE id IN ($placeholders) AND is_deleted = 0 AND is_synced = 1',
-          ids,
-        );
-        return result.first['count'] as int? ?? 0;
-      }
-    } catch (e) {
-      print('Error getting synced count from $tableName: $e');
-      return 0;
-    }
-  }
-
-  // Helper method to get IDs from a table
-  Future<List<int>> _getIdsFromTable(String tableName) async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-
-      if (tableName == 'child_care_activities') {
-        final result = await db.rawQuery('SELECT id FROM $tableName');
-        return result.map((e) => e['id'] as int).toList();
-      } else {
-        final result = await db.rawQuery('SELECT id FROM $tableName WHERE is_deleted = 0');
-        return result.map((e) => e['id'] as int).toList();
-      }
-    } catch (e) {
-      print('Error getting IDs from $tableName: $e');
-      return [];
     }
   }
   @override
@@ -815,7 +593,7 @@ sfgfdd
                                 SyncCard(title:l10n?.household ?? 'Household', total: Constant.householdTotal, synced: Constant.householdTotalSync),
                                 SyncCard(title:l10n?.beneficiary ?? 'Beneficiary', total: _beneficiaryTotal, synced: _beneficiarySynced),
                                 SyncCard(title:l10n?.followUpLabel ?? 'Follow Up', total: _followupTotal, synced: _followupSynced),
-                                SyncCard(title:l10n?.gridEligibleCoupleASHA ?? 'Eligible Couple', total: Constant.eligibleCouplesTotal, synced: Constant.eligibleCouplesTotalSync),
+                                SyncCard(title:l10n?.gridEligibleCoupleASHA ?? 'Eligible Couple', total: _eligibleCoupleTotal, synced: _eligibleCoupleSynced),
                                 SyncCard(title:l10n?.gridMotherCare ?? 'Mother Care', total: Constant.motherCareTotal, synced: Constant.motherCareSynced),
                                 SyncCard(title:l10n?.gridChildCare ?? 'Child Care', total: Constant.childRegisteredtotal, synced: Constant.childRegisteredtotalSync),],
                             ),

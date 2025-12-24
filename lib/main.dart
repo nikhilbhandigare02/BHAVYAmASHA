@@ -70,7 +70,7 @@ class MyApp extends StatelessWidget {
               bodyLarge: baseTextTheme.bodyLarge?.copyWith(color: Colors.white),
               bodyMedium: baseTextTheme.bodyMedium?.copyWith(color: Colors.white),
             ),
-            // Style form fields
+            // Style form
             inputDecorationTheme: InputDecorationTheme(
               labelStyle: const TextStyle(fontFamily: 'Lato'),
               hintStyle: const TextStyle(fontFamily: 'Lato'),

@@ -136,11 +136,9 @@ class EligibleCouleUpdateBloc
 
       print('✅ Found ${rows.length} potential record(s)');
 
-      // When we query by unique_key or exact household_ref_key, the first row is the match
       final row = rows.first;
       print('✅ Found beneficiary record in database');
 
-      // Store the database row ID and household_ref_key for later update
       final dbRowId = row['id'] as int?;
       final householdRefKey = row['household_ref_key'] as String?;
 
@@ -394,7 +392,7 @@ class EligibleCouleUpdateBloc
         {
           'beneficiary_info': updatedBeneficiaryInfoJson,
           'modified_date_time': DateTime.now().toIso8601String(),
-          'is_synced': 0, // Mark as not synced since we updated locally
+          'is_synced': 0,
         },
         where: 'id = ?',
         whereArgs: [state.dbRowId],

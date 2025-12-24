@@ -239,14 +239,29 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       }
 
       print('✅ Total deceased beneficiaries: ${deceasedIds.length}');
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+          String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      final List<Map<String, dynamic>> rows = await db.query(
-        'beneficiaries_new',
-        columns: ['*', 'is_death'],
-        where: 'is_deleted = ? AND is_adult = ?',
-        whereArgs: [0, 0],
-        orderBy: 'created_date_time DESC',
-      );
+
+      final List<Map<String, dynamic>> rows = await db.rawQuery('''
+  SELECT 
+    B.*, 
+    B.is_death,
+    C.child_care_state
+  FROM beneficiaries_new B
+  INNER JOIN child_care_activities C
+    ON B.unique_key = C.beneficiary_ref_key
+  WHERE 
+    B.is_deleted = 0
+    AND B.is_adult = 0
+    AND B.is_migrated = 0
+    AND C.is_deleted = 0
+    AND C.current_user_key = ?
+    AND B.current_user_key = ?
+    AND C.child_care_state IN ('registration_due', 'tracking_due')
+  ORDER BY B.created_date_time DESC
+''', [ashaUniqueKey, ashaUniqueKey]);
+
 
       print('📊 Found ${rows.length} total beneficiaries');
       final childBeneficiaries = <Map<String, dynamic>>[];
@@ -327,11 +342,11 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
           _childBeneficiaries = List<Map<String, dynamic>>.from(childBeneficiaries);
           _filtered = List<Map<String, dynamic>>.from(childBeneficiaries);
           _isLoading = false;
-          
+
 
           debugPrint('✅ Loaded ${_childBeneficiaries.length} child beneficiaries');
           debugPrint('✅ Filtered list contains ${_filtered.length} records');
-          
+
           // Log first few records for verification
           final count = _childBeneficiaries.length > 5 ? 5 : _childBeneficiaries.length;
           for (int i = 0; i < count; i++) {

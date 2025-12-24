@@ -418,11 +418,25 @@ class ChildCareCountProvider {
         whereArgs.add(ashaUniqueKey);
       }
 
-      final rows = await db.query(
-        'beneficiaries_new',
-        where: whereClause,
-        whereArgs: whereArgs,
-      );
+      final List<Map<String, dynamic>> rows = await db.rawQuery('''
+  SELECT 
+    B.*, 
+    B.is_death,
+    C.child_care_state
+  FROM beneficiaries_new B
+  INNER JOIN child_care_activities C
+    ON B.unique_key = C.beneficiary_ref_key
+  WHERE 
+    B.is_deleted = 0
+    AND B.is_adult = 0
+    AND B.is_migrated = 0
+    AND C.is_deleted = 0
+    AND C.current_user_key = ?
+    AND B.current_user_key = ?
+    AND C.child_care_state IN ('registration_due', 'tracking_due')
+  ORDER BY B.created_date_time DESC
+''', [ashaUniqueKey, ashaUniqueKey]);
+
 
       int childCount = 0;
       int childCountIsSync = 0;
@@ -497,12 +511,25 @@ class ChildCareCountProvider {
         whereArgs.add(ashaUniqueKey);
       }
 
-      // Get child beneficiaries for current user
-      final List<Map<String, dynamic>> rows = await db.query(
-        'beneficiaries_new',
-        where: whereClause,
-        whereArgs: whereArgs,
-      );
+      final List<Map<String, dynamic>> rows = await db.rawQuery('''
+  SELECT 
+    B.*, 
+    B.is_death,
+    C.child_care_state
+  FROM beneficiaries_new B
+  INNER JOIN child_care_activities C
+    ON B.unique_key = C.beneficiary_ref_key
+  WHERE 
+    B.is_deleted = 0
+    AND B.is_adult = 0
+    AND B.is_migrated = 0
+    AND C.is_deleted = 0
+    AND C.current_user_key = ?
+    AND B.current_user_key = ?
+    AND C.child_care_state IN ('registration_due', 'tracking_due')
+  ORDER BY B.created_date_time DESC
+''', [ashaUniqueKey, ashaUniqueKey]);
+
 
       int childCount = 0;
       int childCountIsSync = 0;
@@ -892,82 +919,67 @@ class ChildCareCountProvider {
       developer.log('Getting tracking due count...', name: 'ChildCareCountProvider');
 
       final db = await DatabaseProvider.instance.database;
-
-      // Check if table exists
-      final tables = await db.rawQuery(
-          "SELECT name FROM sqlite_master WHERE type='table' AND name='followup_form_data'");
-      if (tables.isEmpty) {
-        developer.log('followup_form_data table does not exist', name: 'ChildCareCountProvider');
-        return 0;
-      }
-
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      /// Match filtering logic from _loadChildTrackingData()
-      String whereClause;
-      List<Object?> whereArgs;
+      /// STEP 1️⃣ Get beneficiaries from child_care_activities (tracking_due)
+      final childCareActivities = await db.query(
+        'child_care_activities',
+        where: 'child_care_state = ? AND is_deleted = 0',
+        whereArgs: ['tracking_due'],
+        columns: ['beneficiary_ref_key'],
+        orderBy: 'created_date_time DESC',
+      );
 
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        whereClause = '(form_json LIKE ? OR forms_ref_key = ?)';
-        whereArgs = ['%child_registration_due%', '30bycxe4gv7fqnt6'];
-      } else {
-        whereClause = 'form_json LIKE ? OR forms_ref_key = ?';
-        whereArgs = ['%child_registration_due%', '30bycxe4gv7fqnt6'];
+      if (childCareActivities.isEmpty) {
+        developer.log('No tracking_due records found', name: 'ChildCareCountProvider');
+        return 0;
       }
 
+      final beneficiaryRefKeys = childCareActivities
+          .map((e) => e['beneficiary_ref_key'] as String?)
+          .where((k) => k != null && k.isNotEmpty)
+          .toSet()
+          .toList();
+
+      if (beneficiaryRefKeys.isEmpty) return 0;
+
+      /// STEP 2️⃣ Fetch followup forms for only these beneficiaries
+      final whereClause =
+          'beneficiary_ref_key IN (${List.filled(beneficiaryRefKeys.length, '?').join(',')})';
+
       final results = await db.query(
-        'followup_form_data',
+        FollowupFormDataTable.table,
         where: whereClause,
-        whereArgs: whereArgs,
+        whereArgs: beneficiaryRefKeys,
         orderBy: 'id DESC',
       );
 
-      developer.log('Found ${results.length} child registration/tracking records after filtering',
-          name: 'ChildCareCountProvider');
-
       int count = 0;
-      final Set<String> seenBeneficiaries = <String>{};
+      final Set<String> seenBeneficiaries = {};
 
       for (final row in results) {
         try {
           final formJsonStr = row['form_json'] as String?;
-          if (formJsonStr == null || formJsonStr.isEmpty) {
-            continue;
-          }
+          if (formJsonStr == null || formJsonStr.isEmpty) continue;
 
           final beneficiaryRefKey = row['beneficiary_ref_key']?.toString() ?? '';
-          if (beneficiaryRefKey.isEmpty) {
-            continue;
-          }
+          if (beneficiaryRefKey.isEmpty) continue;
 
-          // CRITICAL: Check if beneficiary is marked as deceased AND belongs to current user
-          // This matches the load function exactly
-          final beneficiaryWhere = (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
-              ? 'unique_key = ? AND (is_death IS NULL OR is_death = 0) AND current_user_key = ?'
-              : 'unique_key = ? AND (is_death IS NULL OR is_death = 0)';
-
-          final beneficiaryArgs = (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
-              ? [beneficiaryRefKey, ashaUniqueKey]
-              : [beneficiaryRefKey];
-
+          /// STEP 3️⃣ Death + current user check (same as load)
           final beneficiary = await db.query(
             'beneficiaries_new',
-            where: beneficiaryWhere,
-            whereArgs: beneficiaryArgs,
+            where:
+            'unique_key = ? AND (is_death IS NULL OR is_death = 0) AND current_user_key = ?',
+            whereArgs: [beneficiaryRefKey, ashaUniqueKey],
             limit: 1,
           );
 
-          // Skip if beneficiary not found or is marked as deceased (is_death = 1)
-          if (beneficiary.isEmpty) {
-            continue;
-          }
+          if (beneficiary.isEmpty) continue;
 
           final formJson = jsonDecode(formJsonStr);
-
-          // Determine form type
-          String formType = '';
           final formsRefKey = row['forms_ref_key']?.toString() ?? '';
+          String formType = '';
 
           if (formJson['form_type'] != null) {
             formType = formJson['form_type'].toString();
@@ -975,13 +987,12 @@ class ChildCareCountProvider {
             formType = 'child_registration_due';
           } else if (formJson is Map && formJson.isNotEmpty) {
             final firstKey = formJson.keys.first;
-            if (firstKey.toString().contains('child_registration') ||
-                firstKey.toString().contains('child_tracking')) {
-              formType = firstKey.toString();
+            if (firstKey.contains('child_registration') ||
+                firstKey.contains('child_tracking')) {
+              formType = firstKey;
             }
           }
 
-          // Apply registration/tracking filtering like load function
           final isChildRegistration =
               formType == FollowupFormDataTable.childRegistrationDue ||
                   formType == 'child_registration_due';
@@ -991,123 +1002,75 @@ class ChildCareCountProvider {
                   formType == FollowupFormDataTable.childTrackingDue ||
                   formType == 'child_tracking_due';
 
-          if (!isChildRegistration && !isChildTracking) {
-            continue;
-          }
+          if (!isChildRegistration && !isChildTracking) continue;
 
-          // Extract child name to match load function's validation
+          /// STEP 4️⃣ Extract form data (same logic)
           Map<String, dynamic> formDataMap = {};
 
           if (formJson['form_data'] is String) {
             try {
               formDataMap = jsonDecode(formJson['form_data']);
-            } catch (e) {
-              // Try parsing from nested structure
-              if (formJson is Map && formJson.isNotEmpty) {
-                if (formJson['child_registration_due_form'] is Map) {
-                  formDataMap = Map<String, dynamic>.from(formJson['child_registration_due_form']);
-                } else {
-                  final firstKey = formJson.keys.first;
-                  if (firstKey != null && formJson[firstKey] is Map) {
-                    formDataMap = Map<String, dynamic>.from(formJson[firstKey]);
-                  }
-                }
-              }
-            }
+            } catch (_) {}
           } else if (formJson['form_data'] is Map) {
-            formDataMap = Map<String, dynamic>.from(formJson['form_data'] as Map);
-          } else if (formJson.containsKey('child_name')) {
-            formDataMap = Map<String, dynamic>.from(formJson);
-          } else if (formJson['formData'] is Map) {
-            formDataMap = Map<String, dynamic>.from(formJson['formData'] as Map);
-          } else if (formJson is Map && formJson.isNotEmpty) {
-            if (formJson['child_registration_due_form'] is Map) {
-              formDataMap = Map<String, dynamic>.from(formJson['child_registration_due_form']);
-            } else {
-              final firstKey = formJson.keys.first;
-              if (firstKey != null && formJson[firstKey] is Map) {
-                formDataMap = Map<String, dynamic>.from(formJson[firstKey]);
+            formDataMap = Map<String, dynamic>.from(formJson['form_data']);
+          } else if (formJson['child_registration_due_form'] is Map) {
+            formDataMap =
+            Map<String, dynamic>.from(formJson['child_registration_due_form']);
+          } else if (formJson.isNotEmpty && formJson.values.first is Map) {
+            formDataMap = Map<String, dynamic>.from(formJson.values.first);
+          }
+
+          final childName =
+              formDataMap['name_of_child']?.toString().trim() ??
+                  formDataMap['child_name']?.toString().trim() ??
+                  '';
+
+          if (childName.isEmpty) continue;
+
+          /// STEP 5️⃣ Case-closure check (same as load)
+          final caseClosureRecords = await db.query(
+            FollowupFormDataTable.table,
+            where:
+            'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0 AND current_user_key = ?',
+            whereArgs: [beneficiaryRefKey, '%case_closure%', ashaUniqueKey],
+          );
+
+          bool hasCaseClosure = false;
+          for (final cc in caseClosureRecords) {
+            try {
+              final ccJsonStr = cc['form_json'] as String?;
+              if (ccJsonStr == null || ccJsonStr.isEmpty) continue;
+
+              final ccJson = jsonDecode(ccJsonStr);
+              final closure =
+                  ccJson['form_data']?['case_closure'] ?? {};
+              if (closure['is_case_closure'] == true) {
+                hasCaseClosure = true;
+                break;
               }
-            }
+            } catch (_) {}
           }
 
-          // Extract child name exactly like load function
-          final childName = formDataMap['name_of_child']?.toString()?.trim() ??
-              formDataMap['child_name']?.toString()?.trim() ?? '';
+          if (hasCaseClosure) continue;
 
-          // Skip if child name is empty (matches load function)
-          if (childName.isEmpty) {
-            continue;
-          }
-
-          // De-duplicate check
-          if (beneficiaryRefKey.isNotEmpty && seenBeneficiaries.contains(beneficiaryRefKey)) {
-            continue;
-          }
-
-          // Case closure check
-          if (beneficiaryRefKey.isNotEmpty) {
-            final caseClosureWhere =
-            (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
-                ? 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0 AND current_user_key = ?'
-                : 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0';
-
-            final caseClosureArgs =
-            (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
-                ? [beneficiaryRefKey, '%case_closure%', ashaUniqueKey]
-                : [beneficiaryRefKey, '%case_closure%'];
-
-            final caseClosureRecords = await db.query(
-              'followup_form_data',
-              where: caseClosureWhere,
-              whereArgs: caseClosureArgs,
-            );
-
-            bool hasCaseClosure = false;
-
-            for (final ccRecord in caseClosureRecords) {
-              try {
-                final ccJson = ccRecord['form_json'] as String?;
-                if (ccJson != null) {
-                  final ccForm = jsonDecode(ccJson);
-                  final ccData = ccForm['form_data'] as Map<String, dynamic>? ?? {};
-                  final closure = ccData['case_closure'] as Map<String, dynamic>? ?? {};
-
-                  if (closure['is_case_closure'] == true) {
-                    hasCaseClosure = true;
-                    break;
-                  }
-                }
-              } catch (_) {}
-            }
-
-            if (hasCaseClosure) {
-              continue;
-            }
-          }
-
-          // Mark beneficiary as counted and increment
-          if (beneficiaryRefKey.isNotEmpty) {
-            seenBeneficiaries.add(beneficiaryRefKey);
-          }
+          /// STEP 6️⃣ De-duplication
+          if (seenBeneficiaries.contains(beneficiaryRefKey)) continue;
+          seenBeneficiaries.add(beneficiaryRefKey);
 
           count++;
-
-        } catch (e) {
-          developer.log('Error parsing record: $e', name: 'ChildCareCountProvider');
-        }
+        } catch (_) {}
       }
 
-      developer.log('FINAL TRACKING DUE COUNT = $count', name: 'ChildCareCountProvider');
+      developer.log('FINAL TRACKING DUE COUNT = $count',
+          name: 'ChildCareCountProvider');
 
       return count;
-
-    } catch (e, stackTrace) {
+    } catch (e, st) {
       developer.log(
-        'Error in getTrackingDueCount: $e',
+        'Error in getTrackingDueCount',
         name: 'ChildCareCountProvider',
         error: e,
-        stackTrace: stackTrace,
+        stackTrace: st,
       );
       return 0;
     }
@@ -1395,17 +1358,14 @@ class ChildCareCountProvider {
   //   }
   // }
 
-  // Get count of deceased children
   Future<int> getDeceasedCount() async {
     try {
       developer.log('Getting deceased count...', name: 'ChildCareCountProvider');
       final db = await DatabaseProvider.instance.database;
       
-      // Get current user's unique key
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       
-      // Build where clause based on whether we have a user key
       String whereClause = 'is_deleted = ? AND is_adult = ? AND is_death = ?';
       List<dynamic> whereArgs = [0, 0, 1]; // is_deleted = 0, is_adult = 0, is_death = 1
       

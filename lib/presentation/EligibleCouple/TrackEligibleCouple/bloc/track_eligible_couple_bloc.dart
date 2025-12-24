@@ -414,7 +414,6 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
 
           if (formId > 0) {
-            // Eligible couple activities insertion has been moved to RegisterNewHouseholdBloc
 
             try {
               final rows = await db.query(
