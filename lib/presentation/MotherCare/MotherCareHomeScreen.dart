@@ -285,13 +285,13 @@ ORDER BY d.created_date_time DESC
       final validBeneficiaries = await db.rawQuery('''
       SELECT DISTINCT mca.beneficiary_ref_key 
       FROM mother_care_activities mca
-      WHERE mca.mother_care_state IN ('pnc_mother', 'hbnc_visit')
+      WHERE mca.mother_care_state IN ('pnc_mother', 'pnc_mother')
       AND mca.is_deleted = 0
       AND mca.current_user_key = ?
     ''', [ashaUniqueKey]);
 
       if (validBeneficiaries.isEmpty) {
-        print('ℹ️ No beneficiaries found with pnc_mother or hbnc_visit state');
+        print('ℹ️ No beneficiaries found with pnc_mother or pnc_mother state');
         if (mounted) {
           setState(() => _hbcnMotherCount = 0);
         }

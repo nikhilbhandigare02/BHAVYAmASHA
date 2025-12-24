@@ -160,13 +160,13 @@ class NIDDCPScreen extends StatelessWidget {
                               SizedBox(height: 1.5.h),
                             ],
 
-                            SizedBox(height: 2.h),
 
                             // ✅ Save Button (right aligned)
                             Align(
                               alignment: Alignment.centerRight,
                               child: RoundButton(
-                                width: 14.h,
+                                width: 9.h,
+                                height: 4.h,
                                 title: AppLocalizations.of(context)!.saveButton,
                                 onPress: () {
                                   bloc.add(SaveNiddcpData());

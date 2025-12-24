@@ -109,7 +109,6 @@ class ABPMJAYScreen extends StatelessWidget {
                         ),
                       ),
 
-                      // ✅ Content Area
                       Padding(
                         padding: EdgeInsets.symmetric(
                           horizontal: 3.w,
@@ -148,9 +147,9 @@ class ABPMJAYScreen extends StatelessWidget {
                                   SizedBox(
                                     width: 12.w,
                                     child: CustomTextField(
-                                      initialValue: state.value == '0' ? '' : state.value,
+                                      initialValue:'0',
                                       keyboardType: TextInputType.number,
-                                      onChanged: (val) => 
+                                      onChanged: (val) =>
                                           bloc.add(UpdateAbpmjayValue(val)),
                                     ),
                                   ),
@@ -161,11 +160,12 @@ class ABPMJAYScreen extends StatelessWidget {
 
                             SizedBox(height: 2.h),
 
-                            // ✅ Save Button (right aligned)
+
                             Align(
                               alignment: Alignment.centerRight,
                               child: RoundButton(
-                                width: 14.h,
+                                width: 9.h,
+                                height: 4.h,
                                 title: AppLocalizations.of(context)!.saveButton,
                                 onPress: () {
                                   bloc.add(SaveAbpmjayData());

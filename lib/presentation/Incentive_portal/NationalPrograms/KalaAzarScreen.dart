@@ -180,7 +180,8 @@ class KalaAzarScreen extends StatelessWidget {
                         child: Align(
                           alignment: Alignment.centerRight,
                           child: RoundButton(
-                            width: 15.h,
+                            width: 9.h,
+                            height: 4.h,
                             onPress: () {
                               bloc.add(const SaveKalaAzarData());
                               ScaffoldMessenger.of(context).showSnackBar(

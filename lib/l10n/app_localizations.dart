@@ -5312,7 +5312,7 @@ abstract class AppLocalizations {
   /// No description provided for @motherReportsTempOrChestIndrawingLabel.
   ///
   /// In en, this message translates to:
-  /// **'The mother reports that the child feels hot or cold when touching and the temperature of the child is more than 37.5°C  or less than 35.5°C, and the chest is pulled inward while breathing. *'**
+  /// **'The mother reports that the child feels hot or cold when touching and the temperature of the child is more than 37.5°C  or less than 35.5°C, and the chest is pulled inward while breathing.'**
   String get motherReportsTempOrChestIndrawingLabel;
 
   /// No description provided for @bleedingUmbilicalCordLabel.
@@ -5324,13 +5324,13 @@ abstract class AppLocalizations {
   /// No description provided for @newbornSeizuresLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the child having seizures? *'**
+  /// **'Is the child having seizures?'**
   String get newbornSeizuresLabel;
 
   /// No description provided for @stoppedCryingLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the child stopped crying? *'**
+  /// **'Has the child stopped crying?'**
   String get stoppedCryingLabel;
 
   /// No description provided for @homeVisitDayLabel.
@@ -5420,7 +5420,7 @@ abstract class AppLocalizations {
   /// No description provided for @mothersTemperatureLabel.
   ///
   /// In en, this message translates to:
-  /// **'Temperature of mother *'**
+  /// **'Temperature of mother'**
   String get mothersTemperatureLabel;
 
   /// No description provided for @foulDischargeHighFeverLabel.
@@ -5438,7 +5438,7 @@ abstract class AppLocalizations {
   /// No description provided for @counselingAdviceLabel.
   ///
   /// In en, this message translates to:
-  /// **'Counseling / Advise'**
+  /// **'Counseling / Advise *'**
   String get counselingAdviceLabel;
 
   /// No description provided for @outcomeFormTitle.
@@ -5774,25 +5774,25 @@ abstract class AppLocalizations {
   /// No description provided for @adequatelyFedSevenToEightTimesLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)? *'**
+  /// **'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)?'**
   String get adequatelyFedSevenToEightTimesLabel;
 
   /// No description provided for @babyDrinkingLessMilkLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the child feeding less? *'**
+  /// **'Is the child feeding less?'**
   String get babyDrinkingLessMilkLabel;
 
   /// No description provided for @breastfeedingStoppedLabel.
   ///
   /// In en, this message translates to:
-  /// **'Has the child stopped feeding? *'**
+  /// **'Has the child stopped feeding?'**
   String get breastfeedingStoppedLabel;
 
   /// No description provided for @bloatedStomachOrFrequentVomitingLabel.
   ///
   /// In en, this message translates to:
-  /// **'Bloated stomach or mother tells that the child vomits again and again *'**
+  /// **'Bloated stomach or mother tells that the child vomits again and again'**
   String get bloatedStomachOrFrequentVomitingLabel;
 
   /// No description provided for @err_visit_day_required.
@@ -10304,13 +10304,13 @@ abstract class AppLocalizations {
   /// No description provided for @postDeliveryProblemsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Does the mother have any of the following problems post delivery?'**
+  /// **'Does the mother have any of the following problems post delivery? *'**
   String get postDeliveryProblemsLabel;
 
   /// No description provided for @breastfeedingProblemsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Does the mother have breast feeding problem?'**
+  /// **'Does the mother have breast feeding problem? *'**
   String get breastfeedingProblemsLabel;
 
   /// No description provided for @milkNotProducingOrLessLabel.
@@ -10388,7 +10388,7 @@ abstract class AppLocalizations {
   /// No description provided for @eyesNormalLabel.
   ///
   /// In en, this message translates to:
-  /// **'Eyes: Normal *'**
+  /// **'Eyes: Normal'**
   String get eyesNormalLabel;
 
   /// No description provided for @eyesSwollenOrPusLabel.
@@ -10418,7 +10418,7 @@ abstract class AppLocalizations {
   /// No description provided for @pusInNavelLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is pus in the navel? *'**
+  /// **'Is pus in the navel?'**
   String get pusInNavelLabel;
 
   /// No description provided for @routineCareDoneLabel.
@@ -10436,7 +10436,7 @@ abstract class AppLocalizations {
   /// No description provided for @cryingSoftlyLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the child crying weak? *'**
+  /// **'Is the child crying weak?'**
   String get cryingSoftlyLabel;
 
   /// No description provided for @newbornReferredByAshaLabel.
@@ -10448,7 +10448,7 @@ abstract class AppLocalizations {
   /// No description provided for @birthRegisteredLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is birth registration completed? *'**
+  /// **'Is birth registration completed?'**
   String get birthRegisteredLabel;
 
   /// No description provided for @birthDoseVaccinationLabel.
@@ -11510,25 +11510,25 @@ abstract class AppLocalizations {
   /// No description provided for @babyWipedWithCleanCloth.
   ///
   /// In en, this message translates to:
-  /// **'Has the baby wiped with clean dry cloth? *'**
+  /// **'Has the baby wiped with clean dry cloth?'**
   String get babyWipedWithCleanCloth;
 
   /// No description provided for @is_child_kept_warm.
   ///
   /// In en, this message translates to:
-  /// **'Has the baby kept warm? *'**
+  /// **'Has the baby kept warm?'**
   String get is_child_kept_warm;
 
   /// No description provided for @babyGivenBath.
   ///
   /// In en, this message translates to:
-  /// **'Has the baby given bath? *'**
+  /// **'Has the baby given bath?'**
   String get babyGivenBath;
 
   /// No description provided for @babyWrappedAndPlacedNearMother.
   ///
   /// In en, this message translates to:
-  /// **'Whether the baby was wrapped in a cloth and placed near the mother? *'**
+  /// **'Whether the baby was wrapped in a cloth and placed near the mother?'**
   String get babyWrappedAndPlacedNearMother;
 
   /// No description provided for @selectEyeProblemTypeLabel.

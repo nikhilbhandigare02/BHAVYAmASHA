@@ -539,6 +539,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         text: item["population"] ?? "",
                       ),
                       decoration: InputDecoration(
+                        hintText: l10n?.population ?? "Population",
                         isDense: true,
                         fillColor: Colors.grey.shade200,
                         filled: true,
@@ -596,17 +597,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: BlocConsumer<ProfileBloc, ProfileState>(
             listener: (context, state) {
               if (state.success) {
-                SnackBar(
-                  content: Text(
-                    l10n?.formSubmittedSuccessfully ??
-                        "Form Submitted Successfully",
-                  ),
-                );
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  Route_Names.homeScreen,
-                      (Route<dynamic> route) => false,
-                );
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Form Submitted Successfully")),
+                  );
+
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    Route_Names.homeScreen,
+                        (route) => false,
+                  );
+                });
               }
               if (state.error != null) {
                 ScaffoldMessenger.of(
@@ -873,23 +874,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5),
-
-                    BlocBuilder<ProfileBloc, ProfileState>(
-                      buildWhen: (previous, current) =>
-                      previous.district != current.district,
-                      builder: (context, state) {
-                        return CustomTextField(
-                          key: ValueKey('district_field_${state.district}'),
-                          labelText: l10n.districtLabel,
-                          hintText: l10n.districtHint,
-                          initialValue: state.district,
-                          readOnly: true,
-                        );
-                      },
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5),
-
-                    // State field with value from API
                     BlocBuilder<ProfileBloc, ProfileState>(
                       buildWhen: (previous, current) =>
                       previous.stateName != current.stateName,
@@ -903,8 +887,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
-                    Divider(color: AppColors.divider, thickness: 0.5),
 
+                    Divider(color: AppColors.divider, thickness: 0.5),
                     BlocBuilder<ProfileBloc, ProfileState>(
                       buildWhen: (previous, current) =>
                       previous.division != current.division,
@@ -919,6 +903,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5),
+                    //district
+                    BlocBuilder<ProfileBloc, ProfileState>(
+                      buildWhen: (previous, current) =>
+                      previous.district != current.district,
+                      builder: (context, state) {
+                        return CustomTextField(
+                          key: ValueKey('district_field_${state.district}'),
+                          labelText: l10n.districtLabel,
+                          hintText: l10n.districtHint,
+                          initialValue: state.district,
+                          readOnly: true,
+                        );
+                      },
+                    ),
+
+                    Divider(color: AppColors.divider, thickness: 0.5),
+
+
 
                     BlocBuilder<ProfileBloc, ProfileState>(
                       buildWhen: (previous, current) =>
@@ -1112,51 +1114,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           onChanged: (v) => context.read<ProfileBloc>().add(
                             PopulationCoveredChanged(v),
                           ),
+                          readOnly: isFacilitator,
                         );
                       },
                     ),
                     Divider(color: AppColors.divider, thickness: 0.5),
-                    // if (_appRoleId != 4) ...[
-                    //   BlocBuilder<ProfileBloc, ProfileState>(
-                    //     buildWhen: (previous, current) =>
-                    //     previous.ashaFacilitatorName !=
-                    //         current.ashaFacilitatorName,
-                    //     builder: (context, state) {
-                    //       return CustomTextField(
-                    //         key: ValueKey(
-                    //           'asha_facilitator_name_field_${state.ashaFacilitatorName}',
-                    //         ),
-                    //         labelText: l10n.ashaFacilitatorNameLabel,
-                    //         hintText: l10n.ashaFacilitatorNameHint,
-                    //         initialValue: state.ashaFacilitatorName,
-                    //         onChanged: (v) =>
-                    //             bloc.add(AshaFacilitatorNameChanged(v)),
-                    //         readOnly: true,
-                    //       );
-                    //     },
-                    //   ),
-                    //   Divider(color: AppColors.divider, thickness: 0.5),
-                    //   BlocBuilder<ProfileBloc, ProfileState>(
-                    //     buildWhen: (previous, current) =>
-                    //     previous.ashaFacilitatorMobile !=
-                    //         current.ashaFacilitatorMobile,
-                    //     builder: (context, state) {
-                    //       return CustomTextField(
-                    //         key: ValueKey(
-                    //           'asha_facilitator_mobile_field_${state.ashaFacilitatorMobile}',
-                    //         ),
-                    //         labelText: l10n.ashaFacilitatorMobileLabel,
-                    //         hintText: l10n.ashaFacilitatorMobileHint,
-                    //         initialValue: state.ashaFacilitatorMobile,
-                    //         keyboardType: TextInputType.phone,
-                    //         onChanged: (v) =>
-                    //             bloc.add(AshaFacilitatorMobileChanged(v)),
-                    //         readOnly: true,
-                    //       );
-                    //     },
-                    //   ),
-                    //   Divider(color: AppColors.divider, thickness: 0.5),
-                    // ],
+                    // Replace the existing if (_appRoleId == 4) ...[] block for facilitator name/mobile
+// with this:
+
+                    BlocBuilder<ProfileBloc, ProfileState>(
+                      buildWhen: (previous, current) =>
+                      previous.appRoleId != current.appRoleId,
+                      builder: (context, state) {
+                        final bool isFacilitator = state.appRoleId == 4;
+
+                        // Only show these fields when NOT facilitator
+                        if (!isFacilitator) {
+                          return Column(
+                            children: [
+                              // ASHA Facilitator Name Field
+                              BlocBuilder<ProfileBloc, ProfileState>(
+                                buildWhen: (previous, current) =>
+                                previous.ashaFacilitatorName != current.ashaFacilitatorName,
+                                builder: (context, state) {
+                                  return CustomTextField(
+                                    key: ValueKey(
+                                      'asha_facilitator_name_field_${state.ashaFacilitatorName}',
+                                    ),
+                                    labelText: l10n.ashaFacilitatorNameLabel,
+                                    hintText: l10n.ashaFacilitatorNameHint,
+                                    initialValue: state.ashaFacilitatorName,
+                                    onChanged: (v) =>
+                                        bloc.add(AshaFacilitatorNameChanged(v)),
+                                    readOnly: true,
+                                  );
+                                },
+                              ),
+                              Divider(color: AppColors.divider, thickness: 0.5),
+                              // ASHA Facilitator Mobile Field
+                              BlocBuilder<ProfileBloc, ProfileState>(
+                                buildWhen: (previous, current) =>
+                                previous.ashaFacilitatorMobile != current.ashaFacilitatorMobile,
+                                builder: (context, state) {
+                                  return CustomTextField(
+                                    key: ValueKey(
+                                      'asha_facilitator_mobile_field_${state.ashaFacilitatorMobile}',
+                                    ),
+                                    labelText: l10n.ashaFacilitatorMobileLabel,
+                                    hintText: l10n.ashaFacilitatorMobileHint,
+                                    initialValue: state.ashaFacilitatorMobile,
+                                    keyboardType: TextInputType.phone,
+                                    onChanged: (v) =>
+                                        bloc.add(AshaFacilitatorMobileChanged(v)),
+                                    readOnly: true,
+                                  );
+                                },
+                              ),
+                              Divider(color: AppColors.divider, thickness: 0.5),
+                            ],
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
                     BlocBuilder<ProfileBloc, ProfileState>(
                       buildWhen: (previous, current) =>
                       previous.choName != current.choName,

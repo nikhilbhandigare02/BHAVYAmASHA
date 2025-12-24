@@ -778,13 +778,13 @@ ORDER BY d.created_date_time DESC
     SELECT DISTINCT mca.beneficiary_ref_key,
            MAX(CASE WHEN mca.is_synced = 1 THEN 1 ELSE 0 END) as has_synced
     FROM mother_care_activities mca
-    WHERE mca.mother_care_state IN ('pnc_mother', 'hbnc_visit')
+    WHERE mca.mother_care_state IN ('pnc_mother', 'pnc_mother')
     AND mca.is_deleted = 0
     GROUP BY mca.beneficiary_ref_key
   ''');
 
       if (validBeneficiaries.isEmpty) {
-        print('ℹ️ No beneficiaries found with pnc_mother or hbnc_visit state');
+        print('ℹ️ No beneficiaries found with pnc_mother or pnc_mother state');
         return {'total': 0, 'synced': 0};
       }
 

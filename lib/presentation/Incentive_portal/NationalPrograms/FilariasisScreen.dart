@@ -166,7 +166,8 @@ class FilariasisScreen extends StatelessWidget {
                             Align(
                               alignment: Alignment.centerRight,
                               child: RoundButton(
-                                width: 14.h,
+                                width: 9.h,
+                                height: 4.h,
                                 title: AppLocalizations.of(context)!.saveButton,
                                 onPress: () {
                                   bloc.add(SaveFilariasisData());

@@ -172,22 +172,31 @@ class LeprosyScreen extends StatelessWidget {
                       SizedBox(height: 3.h),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 3.w),
-                        child: RoundButton(
-                          onPress: () {
-                            bloc.add(const SaveLeprosyData());
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.dataSavedSuccessfully),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                          },
-                          title: l10n.saveButton,
-                          isLoading: false,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: RoundButton(
+                            width: 9.h,
+                            height: 4.h,
+                            onPress: () {
+                              bloc.add(const SaveLeprosyData());
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      AppLocalizations.of(context)!.kalaAzarDataSaved),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            },
+                            title: AppLocalizations.of(context)!.saveButton,
+                            isLoading: false,
+                          ),
                         ),
                       ),
+                      SizedBox(height: 3.h),
                     ],
+
                   ),
+
                 ),
               ),
             ),
