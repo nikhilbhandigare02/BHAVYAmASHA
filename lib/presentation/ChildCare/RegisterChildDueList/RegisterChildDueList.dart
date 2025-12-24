@@ -41,7 +41,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     super.dispose();
   }
 
-/*
+  /*
   Future<bool> _isSynced(String beneficiaryId) async {
     try {
       if (beneficiaryId.isEmpty) return false;
@@ -72,7 +72,8 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       final rows = await db.query(
         'child_care_activities',
         columns: ['is_synced', 'server_id', 'created_date_time'],
-        where: 'beneficiary_ref_key = ? AND child_care_state = ? AND is_deleted = 0',
+        where:
+            'beneficiary_ref_key = ? AND child_care_state = ? AND is_deleted = 0',
         whereArgs: [beneficiaryRefKey, 'registration_due'],
         orderBy: 'created_date_time DESC',
         limit: 1,
@@ -81,7 +82,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       if (rows.isNotEmpty) {
         return {
           'is_synced': rows.first['is_synced'] == 1,
-          'server_id': rows.first['server_id']
+          'server_id': rows.first['server_id'],
         };
       }
 
@@ -249,7 +250,6 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
   //   }
   // }
 
-
   Future<void> _loadChildBeneficiaries() async {
     if (!mounted) return;
 
@@ -270,15 +270,34 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         whereArgs.add(ashaUniqueKey);
       }
 
-      // Get child care activities with registration_due
-      final List<Map<String, dynamic>> childActivities = await db.query(
-        'child_care_activities',
-        where: whereClause,
-        whereArgs: whereArgs,
-        orderBy: 'created_date_time DESC',
+      final List<Map<String, dynamic>> childActivities = await db.rawQuery(
+        '''
+  SELECT cca.*
+  FROM child_care_activities cca
+  INNER JOIN (
+      SELECT beneficiary_ref_key,
+             MAX(created_date_time) AS max_date
+      FROM child_care_activities
+      WHERE is_deleted = 0
+      GROUP BY beneficiary_ref_key
+  ) latest
+    ON cca.beneficiary_ref_key = latest.beneficiary_ref_key
+   AND cca.created_date_time = latest.max_date
+  WHERE cca.child_care_state = ?
+    AND cca.is_deleted = ?
+    ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND cca.current_user_key = ?' : ''}
+  ORDER BY cca.created_date_time DESC
+''',
+        [
+          'registration_due',
+          0,
+          if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) ashaUniqueKey,
+        ],
       );
 
-      debugPrint('🎯 Found ${childActivities.length} child care activities with registration_due status');
+      debugPrint(
+        '🎯 Found ${childActivities.length} child care activities with registration_due status',
+      );
 
       final childBeneficiaries = <Map<String, dynamic>>[];
 
@@ -290,7 +309,9 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
           continue;
         }
 
-        debugPrint('\n🔍 Processing child care activity for beneficiary: $beneficiaryRefKey');
+        debugPrint(
+          '\n🔍 Processing child care activity for beneficiary: $beneficiaryRefKey',
+        );
 
         // Get the beneficiary record
         final List<Map<String, dynamic>> beneficiaryRows = await db.query(
@@ -323,14 +344,17 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         }
 
         final memberData = Map<String, dynamic>.from(info);
-        final memberType = (memberData['memberType']?.toString() ?? '').trim().toLowerCase();
+        final memberType = (memberData['memberType']?.toString() ?? '')
+            .trim()
+            .toLowerCase();
 
         if (memberType != 'child') {
           debugPrint('⏭️ Skipping non-child member type: $memberType');
           continue;
         }
 
-        final name = memberData['memberName']?.toString().trim() ??
+        final name =
+            memberData['memberName']?.toString().trim() ??
             memberData['name']?.toString().trim() ??
             '';
         if (name.isEmpty) {
@@ -339,7 +363,11 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         }
 
         // ✅ Check registration by beneficiary_ref_key instead of household_ref_key
-        final isAlreadyRegistered = await _isChildRegistered(db, beneficiaryRefKey, name);
+        final isAlreadyRegistered = await _isChildRegistered(
+          db,
+          beneficiaryRefKey,
+          name,
+        );
         if (isAlreadyRegistered) {
           debugPrint('⏭️ Skipping already registered child: $name');
           continue;
@@ -348,12 +376,18 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
         // Prepare child card
         final card = <String, dynamic>{
           'hhId': activity['household_ref_key']?.toString() ?? '',
-          'RegitrationDate': _formatDate(activity['created_date_time']?.toString() ?? row['created_date_time']?.toString()),
+          'RegitrationDate': _formatDate(
+            activity['created_date_time']?.toString() ??
+                row['created_date_time']?.toString(),
+          ),
           'RegitrationType': 'Child',
           'BeneficiaryID': beneficiaryRefKey,
           'RchID': memberData['RichIDChanged']?.toString() ?? '',
           'Name': name,
-          'Age|Gender': _formatAgeGender(memberData['dob'], memberData['gender']),
+          'Age|Gender': _formatAgeGender(
+            memberData['dob'],
+            memberData['gender'],
+          ),
           'Mobileno.': memberData['mobileNo']?.toString() ?? '',
           'FatherName': memberData['fatherName']?.toString() ?? '',
           'MotherName': memberData['motherName']?.toString() ?? '',
@@ -370,7 +404,9 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
 
       if (mounted) {
         setState(() {
-          _childBeneficiaries = List<Map<String, dynamic>>.from(childBeneficiaries);
+          _childBeneficiaries = List<Map<String, dynamic>>.from(
+            childBeneficiaries,
+          );
           _filtered = List<Map<String, dynamic>>.from(childBeneficiaries);
           _isLoading = false;
         });
@@ -381,24 +417,32 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     }
   }
 
-
-  Future<bool> _isChildRegistered(Database db, String beneficiaryRefKey, String childName) async {
+  Future<bool> _isChildRegistered(
+    Database db,
+    String beneficiaryRefKey,
+    String childName,
+  ) async {
     try {
       final normalizedSearchName = childName.trim().toLowerCase();
-      debugPrint('\n🔍 Checking registration for child: "$childName" with beneficiary_ref_key: "$beneficiaryRefKey"');
+      debugPrint(
+        '\n🔍 Checking registration for child: "$childName" with beneficiary_ref_key: "$beneficiaryRefKey"',
+      );
 
       // Query followup_form_data for this beneficiary_ref_key
       final results = await db.query(
         'followup_form_data',
-        where: 'beneficiary_ref_key = ? AND (form_json LIKE ? OR form_json LIKE ?)',
+        where:
+            'beneficiary_ref_key = ? AND (form_json LIKE ? OR form_json LIKE ?)',
         whereArgs: [
           beneficiaryRefKey,
           '%"form_type":"child_registration_due"%',
-          '%"child_registration_due_form"%'
+          '%"child_registration_due_form"%',
         ],
       );
 
-      debugPrint('📊 Found ${results.length} child registration forms for beneficiary: $beneficiaryRefKey');
+      debugPrint(
+        '📊 Found ${results.length} child registration forms for beneficiary: $beneficiaryRefKey',
+      );
 
       if (results.isNotEmpty) {
         // Check each form for exact child name match
@@ -408,14 +452,20 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             if (formJson == null || formJson.isEmpty) continue;
 
             final formData = jsonDecode(formJson);
-            final formType = (formData['form_type']?.toString() ?? '').toLowerCase();
-            final hasChildRegistrationForm = formData['child_registration_due_form'] is Map;
+            final formType = (formData['form_type']?.toString() ?? '')
+                .toLowerCase();
+            final hasChildRegistrationForm =
+                formData['child_registration_due_form'] is Map;
 
-            if (formType != 'child_registration_due' && !hasChildRegistrationForm) continue;
+            if (formType != 'child_registration_due' &&
+                !hasChildRegistrationForm)
+              continue;
 
             Map<String, dynamic> formDataMap;
             if (hasChildRegistrationForm) {
-              formDataMap = formData['child_registration_due_form'] as Map<String, dynamic>;
+              formDataMap =
+                  formData['child_registration_due_form']
+                      as Map<String, dynamic>;
             } else if (formData['form_data'] is Map) {
               formDataMap = formData['form_data'] as Map<String, dynamic>;
             } else {
@@ -423,8 +473,10 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             }
 
             // Check possible name fields
-            final childNameInForm = formDataMap['name_of_child']?.toString() ??
-                formDataMap['child_name']?.toString() ?? '';
+            final childNameInForm =
+                formDataMap['name_of_child']?.toString() ??
+                formDataMap['child_name']?.toString() ??
+                '';
 
             if (childNameInForm.trim().toLowerCase() == normalizedSearchName) {
               debugPrint('✅ MATCH FOUND! Child already registered');
@@ -485,7 +537,11 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
           if (days < 0) {
             final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
             final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
-            final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
+            final daysInLastMonth = DateTime(
+              lastMonthYear,
+              lastMonth + 1,
+              0,
+            ).day;
             days += daysInLastMonth;
             months--;
           }
@@ -536,7 +592,9 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
               (e['Name']?.toString().toLowerCase() ?? '').contains(q) ||
               (e['Mobileno.']?.toString().toLowerCase() ?? '').contains(q) ||
               (e['FatherName']?.toString().toLowerCase() ?? '').contains(q) ||
-              (e['BeneficiaryID']?.toString().toLowerCase() ?? '').contains(q) ||
+              (e['BeneficiaryID']?.toString().toLowerCase() ?? '').contains(
+                q,
+              ) ||
               (e['RchID']?.toString().toLowerCase() ?? '').contains(q);
         }).toList();
       }
@@ -548,7 +606,8 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.childRegisteredDueListTitle ?? 'Register Child Due List',
+        screenTitle:
+            l10n?.childRegisteredDueListTitle ?? 'Register Child Due List',
         showBack: true,
       ),
       drawer: const CustomDrawer(),
@@ -563,7 +622,10 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 12,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -583,32 +645,42 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                 ? const Center(child: CircularProgressIndicator())
                 : _filtered.isEmpty
                 ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.child_care, size: 64, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No children found for registration',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Children with "registration_due" status will appear here',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            )
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.child_care,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No children found for registration',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Children with "registration_due" status will appear here',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[500],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  )
                 : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(5, 0, 5, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
-            ),
+                    padding: const EdgeInsets.fromLTRB(5, 0, 5, 12),
+                    itemCount: _filtered.length,
+                    itemBuilder: (context, index) {
+                      final data = _filtered[index];
+                      return _householdCard(context, data);
+                    },
+                  ),
           ),
         ],
       ),
@@ -620,93 +692,96 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
     final Color primary = Theme.of(context).primaryColor;
 
     return InkWell(
-        onTap: () {
-          final name = data['Name'] ?? '';
-          final ageGender = data['Age|Gender']?.toString().split(' | ') ?? [];
-          final gender = ageGender.length > 1 ? ageGender[1] : '';
-          final mobile = data['Mobileno.'] ?? '';
-          final hhId = data['hhId']?.toString() ?? '';
+      onTap: () {
+        final name = data['Name'] ?? '';
+        final ageGender = data['Age|Gender']?.toString().split(' | ') ?? [];
+        final gender = ageGender.length > 1 ? ageGender[1] : '';
+        final mobile = data['Mobileno.'] ?? '';
+        final hhId = data['hhId']?.toString() ?? '';
 
-          final fatherName = data['FatherName'] ?? '';
-          final beneficiaryId = (data['_raw'] is Map && (data['_raw']['unique_key'] != null))
-              ? data['_raw']['unique_key'].toString()
-              : (data['BeneficiaryID']?.toString() ?? '');
+        final fatherName = data['FatherName'] ?? '';
+        final beneficiaryId =
+            (data['_raw'] is Map && (data['_raw']['unique_key'] != null))
+            ? data['_raw']['unique_key'].toString()
+            : (data['BeneficiaryID']?.toString() ?? '');
 
-          final args = <String, dynamic>{
-            'hhId': hhId,
-            'name': name,
-            'gender': gender, 
-            'mobile': mobile, 
+        final args = <String, dynamic>{
+          'hhId': hhId,
+          'name': name,
+          'gender': gender,
+          'mobile': mobile,
 
-            'fatherName': fatherName,
-            'beneficiaryId': beneficiaryId,
-            'beneficiary_ref_key': beneficiaryId,
-          };
+          'fatherName': fatherName,
+          'beneficiaryId': beneficiaryId,
+          'beneficiary_ref_key': beneficiaryId,
+        };
 
-          // Schedule the navigation for after the current build
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            if (!mounted) return;
-            String? villageName;
-            try {
-              final db = await DatabaseProvider.instance.database;
-              final rows = await db.query(
-                'beneficiaries_new',
-                columns: ['beneficiary_info'],
-                where: 'household_ref_key = ? AND is_deleted = 0',
-                whereArgs: [hhId],
-                orderBy: 'id ASC',
-                limit: 1,
-              );
-              if (rows.isNotEmpty) {
-                final infoStr = rows.first['beneficiary_info']?.toString() ?? '{}';
-                try {
-                  final info = jsonDecode(infoStr);
-                  if (info is Map) {
-                    villageName = info['village']?.toString();
-                  }
-                } catch (_) {}
-              }
-            } catch (e) {
-              debugPrint('Error fetching village by hhId $hhId: $e');
-            }
-
-            final argsWithVillage = Map<String, dynamic>.from(args);
-            if (villageName != null) {
-              argsWithVillage['village'] = villageName;
-            }
-
-            debugPrint('Navigating with args:');
-            debugPrint('hhId: ${argsWithVillage['hhId']}');
-            debugPrint('name: ${argsWithVillage['name']}');
-            debugPrint('gender: ${argsWithVillage['gender']}');
-            debugPrint('mobile: ${argsWithVillage['mobile']}');
-            debugPrint('fatherName: ${argsWithVillage['fatherName']}');
-            debugPrint('beneficiaryId: ${argsWithVillage['beneficiaryId']}');
-            debugPrint('beneficiary_ref_key: ${argsWithVillage['beneficiary_ref_key']}');
-            debugPrint('village: ${argsWithVillage['village']}');
-            
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => RegisterChildDueListFormScreen(
-                  arguments: argsWithVillage,
-                ),
-              ),
+        // Schedule the navigation for after the current build
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (!mounted) return;
+          String? villageName;
+          try {
+            final db = await DatabaseProvider.instance.database;
+            final rows = await db.query(
+              'beneficiaries_new',
+              columns: ['beneficiary_info'],
+              where: 'household_ref_key = ? AND is_deleted = 0',
+              whereArgs: [hhId],
+              orderBy: 'id ASC',
+              limit: 1,
             );
-
-            // Handle the result after navigation
-            if (mounted && result != null && result is Map<String, dynamic>) {
-              if (result['saved'] == true) {
-                // Schedule the refresh after the current frame
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) {
-                    _loadChildBeneficiaries();
-                  }
-                });
-              }
+            if (rows.isNotEmpty) {
+              final infoStr =
+                  rows.first['beneficiary_info']?.toString() ?? '{}';
+              try {
+                final info = jsonDecode(infoStr);
+                if (info is Map) {
+                  villageName = info['village']?.toString();
+                }
+              } catch (_) {}
             }
-          });
-        },
+          } catch (e) {
+            debugPrint('Error fetching village by hhId $hhId: $e');
+          }
+
+          final argsWithVillage = Map<String, dynamic>.from(args);
+          if (villageName != null) {
+            argsWithVillage['village'] = villageName;
+          }
+
+          debugPrint('Navigating with args:');
+          debugPrint('hhId: ${argsWithVillage['hhId']}');
+          debugPrint('name: ${argsWithVillage['name']}');
+          debugPrint('gender: ${argsWithVillage['gender']}');
+          debugPrint('mobile: ${argsWithVillage['mobile']}');
+          debugPrint('fatherName: ${argsWithVillage['fatherName']}');
+          debugPrint('beneficiaryId: ${argsWithVillage['beneficiaryId']}');
+          debugPrint(
+            'beneficiary_ref_key: ${argsWithVillage['beneficiary_ref_key']}',
+          );
+          debugPrint('village: ${argsWithVillage['village']}');
+
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  RegisterChildDueListFormScreen(arguments: argsWithVillage),
+            ),
+          );
+
+          // Handle the result after navigation
+          if (mounted && result != null && result is Map<String, dynamic>) {
+            if (result['saved'] == true) {
+              // Schedule the refresh after the current frame
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  _loadChildBeneficiaries();
+                }
+              });
+            }
+          }
+        });
+      },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
         // height: 180,
@@ -738,12 +813,15 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
-                   Icon(Icons.home, color: AppColors.primary, size: 15.sp),
+                  Icon(Icons.home, color: AppColors.primary, size: 15.sp),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      (data['hhId'] != null && data['hhId'].toString().length > 11)
-                          ? data['hhId'].toString().substring(data['hhId'].toString().length - 11)
+                      (data['hhId'] != null &&
+                              data['hhId'].toString().length > 11)
+                          ? data['hhId'].toString().substring(
+                              data['hhId'].toString().length - 11,
+                            )
                           : (data['hhId']?.toString() ?? ''),
                       style: TextStyle(
                         color: primary,
@@ -756,7 +834,9 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                   const SizedBox(width: 8),
 
                   FutureBuilder<Map<String, dynamic>>(
-                    future: _getSyncStatus(data['BeneficiaryID']?.toString() ?? ''),
+                    future: _getSyncStatus(
+                      data['BeneficiaryID']?.toString() ?? '',
+                    ),
                     builder: (context, snapshot) {
                       final isSynced = snapshot.data?['is_synced'] == true;
                       return Image.asset(
@@ -765,7 +845,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                         color: isSynced ? null : Colors.grey[500],
                       );
                     },
-                  )
+                  ),
                   /*FutureBuilder<bool>(
                     future: _isSynced(data['BeneficiaryID']?.toString() ?? ''),
                     builder: (context, snapshot) {
@@ -788,7 +868,9 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             Container(
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.95),
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4)),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(4),
+                ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Column(
@@ -796,27 +878,57 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate'] ?? 'N/A')),
+                      Expanded(
+                        child: _rowText(
+                          l10n?.registrationDateLabel ?? 'Registration Date',
+                          data['RegitrationDate'] ?? 'N/A',
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType'] ?? 'Child')),
+                      Expanded(
+                        child: _rowText(
+                          l10n?.registrationTypeLabel ?? 'Registration Type',
+                          data['RegitrationType'] ?? 'Child',
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
+                      Expanded(
+                        child: _rowText(
+                          l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
                           (data['BeneficiaryID']?.toString().length ?? 0) > 11
-                              ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11)
-                              : (data['BeneficiaryID']?.toString() ?? 'N/A'))),
+                              ? data['BeneficiaryID'].toString().substring(
+                                  data['BeneficiaryID'].toString().length - 11,
+                                )
+                              : (data['BeneficiaryID']?.toString() ?? 'N/A'),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.nameLabelSimple ?? 'Name', data['Name'] ?? 'N/A')),
+                      Expanded(
+                        child: _rowText(
+                          l10n?.nameLabelSimple ?? 'Name',
+                          data['Name'] ?? 'N/A',
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? 'N/A')),
+                      Expanded(
+                        child: _rowText(
+                          l10n?.ageGenderLabel ?? 'Age | Gender',
+                          data['Age|Gender'] ?? 'N/A',
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(
-                        l10n?.rchIdLabel ?? 'RCH ID',
-                        data['RchID']?.isNotEmpty == true ? data['RchID'] : 'N/A',
-                      )),
+                      Expanded(
+                        child: _rowText(
+                          l10n?.rchIdLabel ?? 'RCH ID',
+                          data['RchID']?.isNotEmpty == true
+                              ? data['RchID']
+                              : 'N/A',
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -825,14 +937,18 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                       Expanded(
                         child: _rowText(
                           l10n?.mobileLabelSimple ?? 'Mobile No.',
-                          data['Mobileno.']?.isNotEmpty == true ? data['Mobileno.'] : 'N/A',
+                          data['Mobileno.']?.isNotEmpty == true
+                              ? data['Mobileno.']
+                              : 'N/A',
                         ),
                       ),
                       const SizedBox(width: 140),
                       Expanded(
                         child: _rowText(
                           l10n?.fatherNameLabel ?? 'Father\'s Name',
-                          data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A',
+                          data['FatherName']?.isNotEmpty == true
+                              ? data['FatherName']
+                              : 'N/A',
                         ),
                       ),
                     ],

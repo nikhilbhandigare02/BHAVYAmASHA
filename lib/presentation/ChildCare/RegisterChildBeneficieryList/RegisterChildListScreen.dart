@@ -245,7 +245,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
         columns: ['*', 'is_death'],
         where: 'is_deleted = ? AND is_adult = ? AND  is_migrated = ?',
         whereArgs: [0, 0, 0],
-        orderBy: 'created_date_time DESC',
+        orderBy: 'created_date_time DESC' ,
       );
 
       print('📊 Found ${rows.length} total beneficiaries');
@@ -327,11 +327,11 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
           _childBeneficiaries = List<Map<String, dynamic>>.from(childBeneficiaries);
           _filtered = List<Map<String, dynamic>>.from(childBeneficiaries);
           _isLoading = false;
-          
+
 
           debugPrint('✅ Loaded ${_childBeneficiaries.length} child beneficiaries');
           debugPrint('✅ Filtered list contains ${_filtered.length} records');
-          
+
           // Log first few records for verification
           final count = _childBeneficiaries.length > 5 ? 5 : _childBeneficiaries.length;
           for (int i = 0; i < count; i++) {

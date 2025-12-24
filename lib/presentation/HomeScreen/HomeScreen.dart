@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     _loadHouseholdCount();
     _loadBeneficiariesCount();
     _loadEligibleCouplesCount();
-    _loadPregnantWomenCount();
+    // _loadPregnantWomenCount();
     _loadAncVisitCount();
     _loadChildRegisteredCount();
     _loadHighRiskCount();
@@ -128,14 +128,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         }
       } catch (_) {}
     });
-    SyncService.instance.start(interval: const Duration(minutes: 5));
+    SyncService.instance.start(interval: const Duration(minutes: 1));
 
     Future.delayed(const Duration(seconds: 5), () async {
       if (!mounted) return;
       await _loadHouseholdCount();
       await _loadBeneficiariesCount();
       await _loadEligibleCouplesCount();
-      await _loadPregnantWomenCount();
+      // await _loadPregnantWomenCount();
       await _loadAncVisitCount();
       await _loadChildRegisteredCount();
       await _loadHighRiskCount();
@@ -148,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       await _loadHouseholdCount();
       await _loadBeneficiariesCount();
       await _loadEligibleCouplesCount();
-      await _loadPregnantWomenCount();
+      // await _loadPregnantWomenCount();
       await _loadAncVisitCount();
       await _loadChildRegisteredCount();
       await _loadHighRiskCount();
@@ -163,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           _loadHouseholdCount();
           _loadBeneficiariesCount();
           _loadEligibleCouplesCount();
-          _loadPregnantWomenCount();
+          // _loadPregnantWomenCount();
           _loadAncVisitCount();
           _loadChildRegisteredCount();
           _loadHighRiskCount();
@@ -419,186 +419,24 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     }
   }
 
+  // Add this method to the _HomeScreenState class
   Future<void> _loadEligibleCouplesCount() async {
     try {
-      // Mirror EligibleCoupleHomeScreen identified logic so the dashboard
-      // Eligible Couple tile matches the identified count
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final households = <String, List<Map<String, dynamic>>>{};
-
-      for (final row in rows) {
-        final hhKey = row['household_ref_key']?.toString() ?? '';
-        if (hhKey.isEmpty) continue;
-        households.putIfAbsent(hhKey, () => []).add(row);
-      }
-
-      const allowedRelations = <String>{
-        'self',
-        'spouse',
-        'husband',
-        'son',
-        'daughter',
-        'father',
-        'mother',
-        'brother',
-        'sister',
-        'wife',
-        'nephew',
-        'niece',
-        'grand father',
-        'grand mother',
-        'father in law',
-        'mother in low',
-        'grand son',
-        'grand daughter',
-        'son in law',
-        'daughter in law',
-        'other',
-      };
-
-      // === ADDED: Check for sterilized beneficiaries ===
-      final db = await DatabaseProvider.instance.database;
-      final trackingFormKeyForIdentified =
-          ffd.FollowupFormDataTable.formUniqueKeys[ffd.FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
-      final Set<String> sterilizedBeneficiariesIdentified = <String>{};
-
-      if (trackingFormKeyForIdentified.isNotEmpty) {
-        final trackingRows = await db.query(
-          ffd.FollowupFormDataTable.table,
-          columns: ['beneficiary_ref_key', 'form_json', 'created_date_time', 'id'],
-          where: 'forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
-          whereArgs: [trackingFormKeyForIdentified],
-          orderBy: 'created_date_time DESC, id DESC',
-        );
-
-        final Map<String, String> latestFpMethod = {};
-        for (final row in trackingRows) {
-          final key = row['beneficiary_ref_key']?.toString() ?? '';
-          if (key.isEmpty) continue;
-          if (latestFpMethod.containsKey(key)) continue;
-
-          final s = row['form_json']?.toString() ?? '';
-          if (s.isEmpty) continue;
-
-          try {
-            final decoded = jsonDecode(s);
-            Map<String, dynamic> formData = decoded is Map<String, dynamic>
-                ? Map<String, dynamic>.from(decoded)
-                : <String, dynamic>{};
-            if (decoded is Map && decoded['form_data'] is Map) {
-              formData = Map<String, dynamic>.from(decoded['form_data'] as Map);
-            }
-            final fp = formData['fp_method']?.toString().toLowerCase().trim();
-            if (fp != null) latestFpMethod[key] = fp;
-          } catch (_) {}
-        }
-
-        sterilizedBeneficiariesIdentified.addAll(
-          latestFpMethod.entries
-              .where((e) => e.value == 'male sterilization' || e.value == 'female sterilization')
-              .map((e) => e.key),
-        );
-      }
-      // === END ADDED ===
-
-      int totalIdentified = 0;
-      int totalIdentifiedSync = 0;
-
-      for (final household in households.values) {
-        Map<String, dynamic>? head;
-        Map<String, dynamic>? spouse;
-
-        // First pass: find head and spouse
-        for (final member in household) {
-          final info = _toStringMapEc(member['beneficiary_info']);
-          String rawRelation =
-              (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
-          rawRelation = rawRelation.replaceAll('_', ' ');
-          if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
-            rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
-          }
-
-          final relation = () {
-            if (rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head') {
-              return 'self';
-            }
-            if (rawRelation == 'spouse' || rawRelation == 'wife' || rawRelation == 'husband') {
-              return 'spouse';
-            }
-            return rawRelation;
-          }();
-
-          if (relation == 'self') {
-            head = info;
-          } else if (relation == 'spouse') {
-            spouse = info;
-          }
-        }
-
-        // Second pass: count all eligible females with allowed relations
-        for (final member in household) {
-          final info = _toStringMapEc(member['beneficiary_info']);
-          String rawRelation =
-              (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
-          rawRelation = rawRelation.replaceAll('_', ' ');
-          if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
-            rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
-          }
-
-          if (!allowedRelations.contains(rawRelation)) continue;
-          if (!_isIdentifiedEcFemale(info, head: head)) continue;
-
-          // === ADDED: Skip sterilized beneficiaries ===
-          final memberUniqueKey = member['unique_key']?.toString() ?? '';
-          if (memberUniqueKey.isNotEmpty && sterilizedBeneficiariesIdentified.contains(memberUniqueKey)) {
-            continue;
-          }
-          // === END ADDED ===
-
-          if (member['is_synced'] == 1) {
-            totalIdentifiedSync++;
-          }
-          totalIdentified++;
-        }
-      }
-
+      final localStorageDao = LocalStorageDao();
+      final counts = await localStorageDao.getEligibleCoupleCounts();
       if (mounted) {
         setState(() {
-          eligibleCouplesCount = totalIdentified;
-          Constant.eligibleCouplesTotal = totalIdentified;
-          Constant.eligibleCouplesTotalSync = totalIdentifiedSync;
+          eligibleCouplesCount = counts['total'] ?? 0;
         });
       }
     } catch (e) {
       print('Error loading eligible couples count: $e');
+      if (mounted) {
+        setState(() {
+          eligibleCouplesCount = 0;
+        });
+      }
     }
-  }
-
-  Map<String, dynamic> _toStringMapEc(dynamic map) {
-    if (map == null) return {};
-    if (map is Map<String, dynamic>) return map;
-    if (map is Map) {
-      return Map<String, dynamic>.from(map);
-    }
-    return {};
-  }
-
-  bool _isIdentifiedEcFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
-    if (person.isEmpty) return false;
-
-    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
-    final isFemale = genderRaw == 'f' || genderRaw == 'female';
-    if (!isFemale) return false;
-
-    final maritalStatusRaw =
-        person['maritalStatus']?.toString().toLowerCase() ??
-            head?['maritalStatus']?.toString().toLowerCase() ?? '';
-    final isMarried = maritalStatusRaw == 'married';
-    if (!isMarried) return false;
-
-    final dob = person['dob'];
-    final age = _calculateEcAge(dob);
-    return age >= 15 && age <= 49;
   }
 
   int _calculateEcAge(dynamic dobRaw) {
@@ -612,114 +450,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     }
   }
 
-  bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
-    if (person.isEmpty) return false;
 
-    // Check gender
-    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
-    if (genderRaw != 'f' && genderRaw != 'female') return false;
-
-    // Check marital status (use head's marital status if person is spouse)
-    final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ??
-        person['marital_status']?.toString().toLowerCase() ??
-        head?['maritalStatus']?.toString().toLowerCase() ??
-        head?['marital_status']?.toString().toLowerCase() ??
-        '';
-    if (maritalStatusRaw != 'married' && maritalStatusRaw != 'm') return false;
-
-    // Check if pregnant
-    final isPregnant = person['isPregnant']?.toString().toLowerCase() == 'true' ||
-        person['isPregnant']?.toString().toLowerCase() == 'yes' ||
-        person['pregnancyStatus']?.toString().toLowerCase() == 'pregnant';
-
-    if (!isPregnant) return false;
-
-    // Check age (15-49 years)
-    final dob = person['dob']?.toString() ?? person['dateOfBirth']?.toString();
-    if (dob != null && dob.isNotEmpty) {
-      try {
-        String dateStr = dob.toString();
-        if (dateStr.contains('T')) {
-          dateStr = dateStr.split('T')[0];
-        }
-        final birthDate = DateTime.tryParse(dateStr);
-        if (birthDate != null) {
-          final now = DateTime.now();
-          int age = now.year - birthDate.year;
-          if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
-            age--;
-          }
-          return age >= 15 && age <= 49;
-        }
-      } catch (e) {
-        print('Error parsing date of birth: $e');
-        return false;
-      }
-    }
-
-    // If we can't determine age, assume eligible
-    return true;
-  }
-
-  Future<void> _loadPregnantWomenCount() async {
-    try {
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      int count = 0;
-
-      for (final row in rows) {
-        try {
-          // Check if is_family_planning is set
-          final isFamilyPlanning = row['is_family_planning'] == 1 ||
-              row['is_family_planning'] == '1' ||
-              (row['is_family_planning']?.toString().toLowerCase() == 'true');
-
-          if (!isFamilyPlanning) continue;
-
-          // Parse the beneficiary info
-          final dynamic rawInfo = row['beneficiary_info'];
-          if (rawInfo == null) continue;
-
-          Map<String, dynamic> info = {};
-          try {
-            info = rawInfo is String
-                ? Map<String, dynamic>.from(jsonDecode(rawInfo) as Map)
-                : Map<String, dynamic>.from(rawInfo as Map);
-          } catch (e) {
-            continue;
-          }
-
-          // Process head and spouse
-          final head = (info['head_details'] is Map)
-              ? Map<String, dynamic>.from(info['head_details'] as Map)
-              : <String, dynamic>{};
-
-          final spouse = (info['spouse_details'] is Map)
-              ? Map<String, dynamic>.from(info['spouse_details'] as Map)
-              : <String, dynamic>{};
-
-          // Check if head is eligible pregnant woman
-          if (_isEligibleFemale(head, head: head)) {
-            count++;
-          }
-
-          // Check if spouse is eligible pregnant woman
-          if (spouse.isNotEmpty && _isEligibleFemale(spouse, head: head)) {
-            count++;
-          }
-        } catch (e) {
-          print('Error processing beneficiary for pregnant women count: $e');
-        }
-      }
-
-      if (mounted) {
-        setState(() {
-          pregnantWomenCount = count;
-        });
-      }
-    } catch (e) {
-      print('Error loading pregnant women count: $e');
-    }
-  }
 
   Future<void> _loadAncVisitCount() async {
     try {
@@ -908,7 +639,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               await _loadHouseholdCount();
               await _loadBeneficiariesCount();
               await _loadEligibleCouplesCount();
-              await _loadPregnantWomenCount();
+              // await _loadPregnantWomenCount();
               await _loadAncVisitCount();
               await _loadChildRegisteredCount();
               await _loadHighRiskCount();
@@ -1084,7 +815,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     _loadHouseholdCount();
     _loadBeneficiariesCount();
     _loadEligibleCouplesCount();
-    _loadPregnantWomenCount();
+    // _loadPregnant/WomenCount();
     _loadAncVisitCount();
     _loadChildRegisteredCount();
     _loadHighRiskCount();

@@ -1507,6 +1507,8 @@ class LocalStorageDao {
         whereArgs: [householdId, 0],
       );
 
+
+
       return rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
         mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
@@ -1520,6 +1522,51 @@ class LocalStorageDao {
     } catch (e) {
       print('Error getting beneficiaries by household: $e');
       rethrow;
+    }
+  }
+
+  // Add this method to the LocalStorageDao class
+  Future<Map<String, int>> getEligibleCoupleCounts() async {
+    final db = await _db;
+    final currentUser = await SecureStorageService.getCurrentUserData();
+    final currentUserKey = currentUser?['unique_key']?.toString() ?? '';
+
+    if (currentUserKey.isEmpty) {
+      return {'total': 0, 'tracking_due': 0};
+    }
+
+    try {
+      // Get total eligible couples
+      final totalCount = Sqflite.firstIntValue(await db.rawQuery('''
+      SELECT COUNT(DISTINCT b.unique_key)
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+      WHERE b.is_deleted = 0 
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND e.eligible_couple_state = 'eligible_couple'
+        AND e.is_deleted = 0
+        AND e.current_user_key = ?
+    ''', [currentUserKey])) ?? 0;
+
+      // Get tracking due count
+      final trackingDueCount = Sqflite.firstIntValue(await db.rawQuery('''
+      SELECT COUNT(DISTINCT b.unique_key)
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+      WHERE b.is_deleted = 0 
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND e.eligible_couple_state = 'tracking_due'
+        AND e.is_deleted = 0
+        AND e.current_user_key = ?
+    ''', [currentUserKey])) ?? 0;
+
+      return {
+        'total': totalCount,
+        'tracking_due': trackingDueCount,
+      };
+    } catch (e) {
+      print('Error getting eligible couple counts: $e');
+      return {'total': 0, 'tracking_due': 0};
     }
   }
 
