@@ -160,7 +160,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         'gender': '',
         'mobile': '-',
       };
+
     }
+
 
     dynamic info = rec['beneficiary_info'];
     Map<String, dynamic> m = {};
@@ -300,6 +302,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       _hbncCompletedItems = [];
       _riCompletedItems = [];
 
+////////////// Completed ANC Data///////////////////////////
        try {
         final db = await DatabaseProvider.instance.database;
 
@@ -402,57 +405,66 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           for (final row in rowsEC) {
             final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
 
+            // Decode form_json
+            final Map<String, dynamic> formJson =
+            row['form_json'] != null
+                ? jsonDecode(row['form_json'] as String)
+                : {};
+
+
+            final Map<String, dynamic> ecForm =
+                formJson['ec_form'] ?? {};
+
             final fields = beneficiaryId.isNotEmpty
                 ? await _getBeneficiaryFields(beneficiaryId)
                 : {
-                    'name': '',
-                    'age': '',
-                    'gender': 'Female',
-                    'mobile': '-',
-                  };
+              'name': ecForm['woman_name']?.toString() ?? '',
+              'age': ecForm['age']?.toString() ?? '',
+              'gender': 'Female',
+              'mobile': ecForm['mobile']?.toString() ?? '-',
+            };
 
             _eligibleCompletedCoupleItems.add({
               'id': row['id'] ?? '',
-              // trimmed for display
-              'household_ref_key': row['household_ref_key'] ?? '',
-              // full household key
-              'hhId': row['household_ref_key'] ?? '',
-              // explicit for ANCVisitForm
+              'household_ref_key':
+              row['household_ref_key']?.toString() ?? '',
+              'hhId':
+              row['household_ref_key']?.toString() ?? '',
               'unique_key': row['beneficiary_ref_key'] ?? '',
-              // full beneficiary key
               'BeneficiaryID': row['beneficiary_ref_key'] ?? '',
+
               'name': fields['name'],
               'age': fields['age'],
-              'gender': fields['gender']?.isNotEmpty == true ? fields['gender'] : 'Female',
-              'last Visit date': _formatDateOnly(row['created_date_time']?.toString()),
+              'gender': fields['gender']?.isNotEmpty == true
+                  ? fields['gender']
+                  : 'Female',
+              'last Visit date':
+              _formatDateOnly(row['created_date_time']?.toString()),
               'Current ANC last due date': 'currentAncLastDueDateText',
               'mobile': fields['mobile'],
               'badge': 'EligibleCouple',
-              // Keep raw data for forms that expect it
-              // 'beneficiary_info': jsonEncode(info),
+
               '_rawRow': row,
             });
           }
 
 
+
         }
         catch(e){}
 
-        try{
-
-
+        try {
           final hbncFormKey =
-              FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
-                  .pncMother] ??
-                  '';
+              FollowupFormDataTable.formUniqueKeys[
+              FollowupFormDataTable.pncMother] ?? '';
 
           final formKeysHBNC = <String>[];
           if (hbncFormKey.isNotEmpty) formKeysHBNC.add(hbncFormKey);
 
           if (formKeysHBNC.isEmpty) return;
 
-          final placeholdersHBNC = List.filled(formKeysHBNC.length, '?').join(',');
-
+          final placeholdersHBNC =
+          List.filled(formKeysHBNC.length, '?').join(',');
 
           final rowsHBNC = await db.rawQuery(
             'SELECT * FROM ${FollowupFormDataTable.table} '
@@ -461,90 +473,138 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 'AND DATE(created_date_time) = DATE(?)',
             [...formKeysHBNC, todayStr],
           );
+
           _hbncCompletedItems = [];
+
           for (final row in rowsHBNC) {
-            final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
+            final beneficiaryId =
+                row['beneficiary_ref_key']?.toString() ?? '';
+
+            // 🔹 Decode form_json
+            final Map<String, dynamic> formJson =
+            row['form_json'] != null
+                ? jsonDecode(row['form_json'] as String)
+                : {};
+
+
+            final Map<String, dynamic> hbncForm =
+                formJson['pnc_mother_form'] ?? {};
 
             final fields = beneficiaryId.isNotEmpty
                 ? await _getBeneficiaryFields(beneficiaryId)
                 : {
-                    'name': row['woman_name']?.toString() ?? '',
-                    'age': '',
-                    'gender': 'Female',
-                    'mobile': '-',
-                  };
+              'name': hbncForm['woman_name']?.toString() ?? '',
+              'age': hbncForm['age']?.toString() ?? '',
+              'gender': 'Female',
+              'mobile': hbncForm['mobile']?.toString() ?? '-',
+            };
 
             _hbncCompletedItems.add({
-              'id': row['id']??'', // trimmed for display
-              'household_ref_key':row['household_ref_key']??'', // full household key
-              'hhId': row['household_ref_key']??'', // explicit for ANCVisitForm
-              'unique_key': row['beneficiary_ref_key']??'', // full beneficiary key
-              'BeneficiaryID': row['beneficiary_ref_key']??'',
+              'id': row['id'] ?? '',
+              'household_ref_key':
+              row['household_ref_key']?.toString() ?? '',
+              'hhId':
+              row['household_ref_key']?.toString() ?? '',
+              'unique_key':
+              row['beneficiary_ref_key']?.toString() ?? '',
+              'BeneficiaryID':
+              row['beneficiary_ref_key']?.toString() ?? '',
+
               'name': fields['name'],
               'age': fields['age'],
-              'gender': fields['gender']?.isNotEmpty == true ? fields['gender'] : 'Female',
-              'last Visit date': _formatDateOnly(row['created_date_time']?.toString()),
-              'Current ANC last due date': 'currentAncLastDueDateText',
+              'gender': fields['gender']?.isNotEmpty == true
+                  ? fields['gender']
+                  : 'Female',
+              'last Visit date':
+              _formatDateOnly(row['created_date_time']?.toString()),
+              'Current ANC last due date':
+              'currentAncLastDueDateText',
               'mobile': fields['mobile'],
               'badge': 'HBNC',
-              // Keep raw data for forms that expect it
-              // 'beneficiary_info': jsonEncode(info),
+
               '_rawRow': row,
             });
           }
-
+        } catch (e) {
+          debugPrint('HBNC error: $e');
         }
-        catch(e){}
 
-        try{
 
+        try {
           final resulrowsRI = await db.query(
             FollowupFormDataTable.table,
-            // Add brackets around the OR conditions
-            where: '(form_json LIKE ? OR forms_ref_key = ?) AND DATE(created_date_time) = DATE(?)',
-            whereArgs: ['%child_registration_due%', '30bycxe4gv7fqnt6', todayStr],
+            where:
+            '(form_json LIKE ? OR forms_ref_key = ?) '
+                'AND DATE(created_date_time) = DATE(?)',
+            whereArgs: [
+              '%child_registration_due%',
+              '30bycxe4gv7fqnt6',
+              todayStr
+            ],
             orderBy: 'id DESC',
           );
 
-
           _riCompletedItems = [];
+
           for (final row in resulrowsRI) {
-            final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
+            final beneficiaryId =
+                row['beneficiary_ref_key']?.toString() ?? '';
+
+            final Map<String, dynamic> formJson =
+            row['form_json'] != null
+                ? jsonDecode(row['form_json'] as String)
+                : {};
+
+            final Map<String, dynamic> riForm =
+                formJson['child_registration_form'] ??
+                    formJson['ri_form'] ??
+                    {};
 
             final fields = beneficiaryId.isNotEmpty
                 ? await _getBeneficiaryFields(beneficiaryId)
                 : {
-                    'name': row['woman_name']?.toString() ?? '',
-                    'age': '',
-                    'gender': 'Female',
-                    'mobile': '-',
-                  };
+              'name': riForm['mother_name']?.toString() ??
+                  riForm['woman_name']?.toString() ??
+                  '',
+              'age': riForm['mother_age']?.toString() ??
+                  riForm['age']?.toString() ??
+                  '',
+              'gender': 'Female',
+              'mobile': riForm['mobile']?.toString() ?? '-',
+            };
 
             _riCompletedItems.add({
-              'id': row['id']??'', // trimmed for display
-              'household_ref_key':row['household_ref_key']??'', // full household key
-              'hhId': row['household_ref_key']??'', // explicit for ANCVisitForm
-              'unique_key': row['beneficiary_ref_key']??'', // full beneficiary key
-              'BeneficiaryID': row['beneficiary_ref_key']??'',
+              'id': row['id'] ?? '',
+              'household_ref_key':
+              row['household_ref_key']?.toString() ?? '',
+              'hhId':
+              row['household_ref_key']?.toString() ?? '',
+              'unique_key':
+              row['beneficiary_ref_key']?.toString() ?? '',
+              'BeneficiaryID':
+              row['beneficiary_ref_key']?.toString() ?? '',
+
               'name': fields['name'],
               'age': fields['age'],
-              'gender': fields['gender']?.isNotEmpty == true ? fields['gender'] : 'Female',
-              'last Visit date': _formatDateOnly(row['created_date_time']?.toString()),
-              'Current ANC last due date': 'currentAncLastDueDateText',
+              'gender': fields['gender']?.isNotEmpty == true
+                  ? fields['gender']
+                  : 'Female',
+              'last Visit date':
+              _formatDateOnly(row['created_date_time']?.toString()),
+              'Current ANC last due date':
+              'currentAncLastDueDateText',
               'mobile': fields['mobile'],
               'badge': 'RI',
-              // Keep raw data for forms that expect it
-              // 'beneficiary_info': jsonEncode(info),
+
               '_rawRow': row,
             });
           }
-
-
-
+        } catch (e) {
+          debugPrint('RI error: $e');
         }
-        catch(e){}
 
-       /* final rows = await db.rawQuery(
+
+        /* final rows = await db.rawQuery(
           'SELECT COUNT(*) AS cnt FROM ${FollowupFormDataTable.table} '
               'WHERE forms_ref_key IN ($placeholders) '
               'AND (is_deleted IS NULL OR is_deleted = 0) '
@@ -666,17 +726,48 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       _eligibleCoupleItems.clear();
 
       for (final row in rowsEC) {
+        final beneficiaryId =
+            row['beneficiary_ref_key']?.toString() ?? '';
+
+        // 🔹 Decode form_json
+        final Map<String, dynamic> formJson =
+        row['form_json'] != null
+            ? jsonDecode(row['form_json'] as String)
+            : {};
+
+        // 🔹 EC form (verify key once)
+        final Map<String, dynamic> ecForm =
+            formJson['ec_form'] ??
+                formJson['eligible_couple_form'] ??
+                {};
+
+        final fields = beneficiaryId.isNotEmpty
+            ? await _getBeneficiaryFields(beneficiaryId)
+            : {
+          'name': ecForm['woman_name']?.toString() ?? '',
+          'gender': 'Female',
+        };
+
         _eligibleCoupleItems.add({
           'id': row['id'] ?? '',
-          'household_ref_key': row['household_ref_key'] ?? '',
-          'hhId': row['household_ref_key'] ?? '',
-          'unique_key': row['beneficiary_ref_key'] ?? '',
-          'BeneficiaryID': row['beneficiary_ref_key'] ?? '',
-          'name': row['woman_name'] ?? '',
-          'gender': 'Female',
+          'household_ref_key':
+          row['household_ref_key']?.toString() ?? '',
+          'hhId':
+          row['household_ref_key']?.toString() ?? '',
+          'unique_key':
+          row['beneficiary_ref_key']?.toString() ?? '',
+          'BeneficiaryID':
+          row['beneficiary_ref_key']?.toString() ?? '',
+
+          'name': fields['name'],
+          'gender':'Female',
+          'age': fields['age'],
+          'mobile': fields['mobile'],
+          'badge': 'EligibleCouple',
           '_rawRow': row,
         });
       }
+
 
       if (mounted) {
         setState(() {});
@@ -1908,6 +1999,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           context: context,
           message: l10n?.moveForward ?? 'Move forward?',
           yesText: l10n?.yes ?? 'Yes',
+          noButtonColor: AppColors.primary,
+          yesButtonColor: AppColors.primary,
           noText: l10n?.no ?? 'No',
         );
 
@@ -1958,8 +2051,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 info = <String, dynamic>{};
               }
 
-              // Convert all primitive fields to String for AddNewFamilyHeadScreen.initial
-              final map = <String, String>{};
+               final map = <String, String>{};
               info.forEach((key, value) {
                 if (value != null) {
                   map[key] = value.toString();
@@ -2291,6 +2383,16 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           ),
                           const SizedBox(height: 2),
                         ],
+
+                        if (item['last Visit date'] != null) ...[
+                          Text(
+                            '${l10n?.lastVisit ?? "Last Visit"}: ${item['last Visit date']}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                        ],
                         if (item['mobile'] != null) ...[
                           Text(
                             '${l10n?.mobile ?? "Mobile"}: ${item['mobile']}',
@@ -2300,15 +2402,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             ),
                           ),
                           const SizedBox(height: 2),
-                        ],
-                        if (item['last Visit date'] != null) ...[
-                          Text(
-                            '${l10n?.lastVisit ?? "Last Visit"}: ${item['last Visit date']}',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14.sp,
-                            ),
-                          ),
                         ],
                       ],
                     ),
@@ -2388,6 +2481,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                   onTap: () {
                     setState(() {
                       todayVisitClick = true;
+                      _expandedKey = null;
                     });
                   },
                   splashColor: Colors.transparent,
@@ -2457,6 +2551,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                   onTap: () {
                     setState(() {
                       todayVisitClick = false;
+                      _expandedKey = null;
                     });
                   },
 
@@ -2601,29 +2696,35 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                       children: entry.key == l10n.listANC
                           ? (_ancItems.isEmpty
                                 ? [
-                                    Padding(
-                                      padding: EdgeInsets.all(12.0),
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          l10n?.noDataFound ?? 'No data found',
-                                        ),
-                                      ),
-                                    ),
+                        Card(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                l10n?.noDataFound ?? 'No data found',
+                              ),
+                            ),
+                          ),
+                        ),
                                   ]
                                 : _getAncListItems())
                           : entry.key == l10n.listFamilySurvey
                           ? (_familySurveyItems.isEmpty
                                 ? [
-                                    Padding(
-                                      padding: EdgeInsets.all(12.0),
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          l10n?.noDataFound ?? 'No data found',
-                                        ),
-                                      ),
-                                    ),
+                        Card(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                l10n?.noDataFound ?? 'No data found',
+                              ),
+                            ),
+                          ),
+                        ),
                                   ]
                                 : _familySurveyItems
                                       .map(
@@ -2633,15 +2734,18 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           : entry.key == l10n.listEligibleCoupleDue
                           ? (_eligibleCoupleItems.isEmpty
                                 ? [
-                                    Padding(
-                                      padding: EdgeInsets.all(12.0),
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          l10n?.noDataFound ?? 'No data found',
-                                        ),
-                                      ),
-                                    ),
+                        Card(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                l10n?.noDataFound ?? 'No data found',
+                              ),
+                            ),
+                          ),
+                        ),
                                   ]
                                 : _eligibleCoupleItems
                                       .map(
@@ -2651,15 +2755,18 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           : entry.key == l10n.listHBNC
                           ? (_hbncItems.isEmpty
                                 ? [
-                                    Padding(
-                                      padding: EdgeInsets.all(12.0),
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          l10n?.noDataFound ?? 'No data found',
-                                        ),
-                                      ),
-                                    ),
+                        Card(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                l10n?.noDataFound ?? 'No data found',
+                              ),
+                            ),
+                          ),
+                        ),
                                   ]
                                 : _hbncItems
                                       .map(
@@ -2669,15 +2776,18 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           : entry.key == l10n.listRoutineImmunization
                           ? _riItems.isEmpty
                                 ? [
-                                    Padding(
-                                      padding: EdgeInsets.all(12.0),
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          l10n?.noDataFound ?? 'No data found',
-                                        ),
-                                      ),
-                                    ),
+                        Card(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                l10n?.noDataFound ?? 'No data found',
+                              ),
+                            ),
+                          ),
+                        ),
                                   ]
                                 : _riItems
                                       .map(
@@ -2770,12 +2880,15 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                       children: entry.key == l10n.listANC
                           ? (_ancCompletedItems.isEmpty
                           ? [
-                        Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              l10n?.noDataFound ?? 'No data found',
+                        Card(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                l10n?.noDataFound ?? 'No data found',
+                              ),
                             ),
                           ),
                         ),
@@ -2784,12 +2897,15 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           : entry.key == l10n.listFamilySurvey
                           ? (_familySurveyItems.isEmpty
                           ? [
-                        Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              l10n?.noDataFound ?? 'No data found',
+                        Card(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                l10n?.noDataFound ?? 'No data found',
+                              ),
                             ),
                           ),
                         ),
@@ -2802,12 +2918,15 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           : entry.key == l10n.listEligibleCoupleDue
                           ? (_eligibleCompletedCoupleItems.isEmpty
                           ? [
-                        Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              l10n?.noDataFound ?? 'No data found',
+                        Card(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                l10n?.noDataFound ?? 'No data found',
+                              ),
                             ),
                           ),
                         ),
@@ -2816,12 +2935,15 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           : entry.key == l10n.listHBNC
                           ? (_hbncCompletedItems.isEmpty
                           ? [
-                        Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              l10n?.noDataFound ?? 'No data found',
+                        Card(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                l10n?.noDataFound ?? 'No data found',
+                              ),
                             ),
                           ),
                         ),
@@ -2830,12 +2952,15 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           : entry.key == l10n.listRoutineImmunization
                           ? _riCompletedItems.isEmpty
                           ? [
-                        Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              l10n?.noDataFound ?? 'No data found',
+                        Card(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                l10n?.noDataFound ?? 'No data found',
+                              ),
                             ),
                           ),
                         ),

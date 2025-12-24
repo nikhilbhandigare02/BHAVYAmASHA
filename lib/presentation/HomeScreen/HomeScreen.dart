@@ -840,6 +840,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             context: context,
             title: l10n.exitAppTitle,
             message: l10n.exitAppMessage,
+            noButtonColor: AppColors.primary,
+            yesButtonColor:AppColors.primary,
             yesText: l10n.yes,
             noText: l10n.no,
           );///
@@ -916,8 +918,20 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               await _loadNcdCount();
             },
           ),
-          body: Column(
+          body: Stack(
             children: [
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Image.asset(
+                  'assets/images/sakhi-bg.jpg',
+                  width: 25.h,
+                  fit: BoxFit.cover,
+                  opacity: AlwaysStoppedAnimation(0.1),
+                ),
+              ),
+              Column(
+                children: [
               // Tabs
               Material(
                 color: AppColors.background,
@@ -1018,56 +1032,55 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                     ? isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : SingleChildScrollView(
-                  child: TodayProgramSection(
-                    selectedGridIndex: selectedGridIndex,
-                    onGridTap: (index) =>
-                        setState(() => selectedGridIndex = index),
-                    apiData: apiData,
-                  ),
-                )
+                      child: TodayProgramSection(
+                        selectedGridIndex: selectedGridIndex,
+                        onGridTap: (index) =>
+                            setState(() => selectedGridIndex = index),
+                        apiData: apiData,
+                      ),
+                    )
                     : SingleChildScrollView(
-                  child: AshaDashboardSection(
-                    householdCount: householdCount,
-                    beneficiariesCount: beneficiariesCount,
-                    eligibleCouplesCount: eligibleCouplesCount,
-                    pregnantWomenCount: pregnantWomenCount,
-                    ancVisitCount: ancVisitCount,
-                    childRegisteredCount: childRegisteredCount,
-                    highRiskCount: highRiskCount,
-                    selectedGridIndex: selectedGridIndex,
-                    onGridTap: (index) =>
-                        setState(() => selectedGridIndex = index),
-                    appRoleId: appRoleId ?? 0,
-                    mainGridActions: [
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                          () async {
-                        final result = await Navigator.pushNamed(
-                            context, Route_Names.Mothercarehomescreen);
-                        if (!mounted) return;
-                        if (result is int) {
-                          setState(() {
-                            ancVisitCount = result;
-                          });
-                        } else if (result == true) {
-                          await _loadAncVisitCount();
-                        } else {
-                          await _loadAncVisitCount();
-                        }
-                      },
-                    ],
-                  ),
-                ),
+                      child: AshaDashboardSection(
+                        householdCount: householdCount,
+                        beneficiariesCount: beneficiariesCount,
+                        eligibleCouplesCount: eligibleCouplesCount,
+                        pregnantWomenCount: pregnantWomenCount,
+                        ancVisitCount: ancVisitCount,
+                        childRegisteredCount: childRegisteredCount,
+                        highRiskCount: highRiskCount,
+                        selectedGridIndex: selectedGridIndex,
+                        onGridTap: (index) =>
+                            setState(() => selectedGridIndex = index),
+                        appRoleId: appRoleId ?? 0,
+                        mainGridActions: [
+                          null,
+                          null,
+                          null,
+                          null,
+                          null,
+                          null,
+                          null,
+                              () async {
+                            final result = await Navigator.pushNamed(
+                                context, Route_Names.Mothercarehomescreen);
+                            if (!mounted) return;
+                            if (result is int) {
+                              setState(() {
+                                ancVisitCount = result;
+                              });
+                            } else if (result == true) {
+                              await _loadAncVisitCount();
+                            } else {
+                              await _loadAncVisitCount();
+                            }
+                          },
+                        ],
+                      ),
+                    ),
               ),
-
             ],
           ),
-        ));
+        ])));
   }
 
   @override

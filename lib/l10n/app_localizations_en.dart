@@ -5011,7 +5011,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get synced => 'Synced';
 
   @override
-  String get noDataFound => 'No data found';
+  String get noDataFound => 'No Record found';
 
   @override
   String get newHouseholdRegistration => 'NEW HOUSEHOLD REGISTRATION';

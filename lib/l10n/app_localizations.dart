@@ -10070,7 +10070,7 @@ abstract class AppLocalizations {
   /// No description provided for @noDataFound.
   ///
   /// In en, this message translates to:
-  /// **'No data found'**
+  /// **'No Record found'**
   String get noDataFound;
 
   /// No description provided for @newHouseholdRegistration.

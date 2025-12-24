@@ -103,11 +103,70 @@ Future<List<String>?> showMultiSelectDialog({
     ),
   );
 }
+Future<void> showAlertDialog({
+  required BuildContext context,
+  String? title,
+  String? message,
+  required String buttonText,
+  VoidCallback? onPressed,
+
+  // ✅ Optional color customizations
+  Color? messageTextColor,
+  Color? buttonColor, // This will be your primary color
+  Color? dialogBackgroundColor,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        backgroundColor: dialogBackgroundColor ?? AppColors.background,
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+        ),
+        titlePadding: EdgeInsets.zero,
+        contentPadding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+
+        // 🟡 Message Section
+        content: Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: Text(
+            message ?? '',
+            style: TextStyle(
+              color: messageTextColor ?? AppColors.onSurface,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+
+        actionsAlignment: MainAxisAlignment.end,
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              if (onPressed != null) onPressed();
+            },
+            child: Text(
+              buttonText,
+              style: TextStyle(
+                // ✅ Using Primary Color here
+                color: buttonColor ?? AppColors.primary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
 
 Future<bool?> showConfirmationDialog({
   required BuildContext context,
-  String?  title,
-   String? message,
+  String? title,
+  String? message,
   required String yesText,
   String? noText,
   VoidCallback? onYes,
@@ -117,8 +176,8 @@ Future<bool?> showConfirmationDialog({
   Color? titleBackgroundColor,
   Color? titleTextColor,
   Color? messageTextColor,
-  Color? yesButtonColor,
-  Color? noButtonColor,
+  Color? yesButtonColor, // Passed to control Yes Text Color
+  Color? noButtonColor,  // Passed to control No Text Color
   Color? dialogBackgroundColor,
 }) {
   return showDialog<bool>(
@@ -143,15 +202,13 @@ Future<bool?> showConfirmationDialog({
             message ?? '',
             style: TextStyle(
               color: messageTextColor ?? AppColors.onSurface,
-              fontSize: 16.sp,
+              fontSize: 16.sp, // Assuming you are using screen_util or similar
               fontWeight: FontWeight.w500,
             ),
           ),
         ),
 
-
-        actionsAlignment:
-        hasTwoButtons ? MainAxisAlignment.end : MainAxisAlignment.end,
+        actionsAlignment: MainAxisAlignment.end,
         actions: [
           if (hasTwoButtons)
             TextButton(
@@ -162,7 +219,9 @@ Future<bool?> showConfirmationDialog({
               child: Text(
                 noText!,
                 style: TextStyle(
-                  color: AppColors.onSurface ?? AppColors.error,
+                  // ✅ LOGIC: If noButtonColor is provided, use it.
+                  // Otherwise, fall back to AppColors.error (or your preferred default).
+                  color: noButtonColor ?? AppColors.error,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -175,7 +234,9 @@ Future<bool?> showConfirmationDialog({
             child: Text(
               yesText,
               style: TextStyle(
-                color: AppColors.onSurface ?? AppColors.error,
+                // ✅ LOGIC: If yesButtonColor is provided, use it.
+                // Otherwise, fall back to AppColors.primary (or your preferred default).
+                color: yesButtonColor ?? AppColors.primary,
                 fontWeight: FontWeight.w500,
               ),
             ),

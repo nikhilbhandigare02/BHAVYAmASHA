@@ -27,6 +27,15 @@ class _CustomDrawerState extends State<CustomDrawer> {
   Map<String, dynamic>? userData;
   bool isLoading = true;
   bool isSyncing = false;
+  String _twoDigits(int n) => n.toString().padLeft(2, '0');
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour % 12 == 0 ? 12 : dateTime.hour % 12;
+    final period = dateTime.hour < 12 ? 'am' : 'pm';
+    return '${_twoDigits(hour)}:${_twoDigits(dateTime.minute)}$period';
+  }
+  String _formatDateTime(DateTime dateTime) {
+    return '${_twoDigits(dateTime.day)}-${_twoDigits(dateTime.month)}-${dateTime.year} ${_formatTime(dateTime)}';
+  }
 
   @override
   void initState() {
@@ -302,7 +311,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           scaffoldMessenger.hideCurrentSnackBar();
                           scaffoldMessenger.showSnackBar(
                             const SnackBar(
-                              content: Text('Data is being fetched...'),
+                              content: Text('Data is being fetched'),
                               duration: Duration(seconds: 5),
                               behavior: SnackBarBehavior.floating,
                             ),
@@ -311,10 +320,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           try {
                             await SyncApiCall.allGetApicall();
                             scaffoldMessenger.hideCurrentSnackBar();
+                            final now = DateTime.now();
+                            await SecureStorageService.saveLastSyncTime(now);
+                            final formatted = _formatDateTime(now);
                             scaffoldMessenger.showSnackBar(
-                              const SnackBar(
-                                content: Text('Data sync completed'),
-                                duration: Duration(seconds: 3),
+                              SnackBar(
+                                content: Text('Data fetching completed'),
+                                duration: const Duration(seconds: 3),
+                                behavior: SnackBarBehavior.floating,
                               ),
                             );
                             onCompleted?.call();

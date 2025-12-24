@@ -30,6 +30,9 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
   final _formKey = GlobalKey<FormState>();
   late int _childCount;
   bool _saveTapLocked = false;
+  bool _saveRequested = false;
+  bool _saveInProgress = false;
+  bool _navigationTriggered = false;
 
   @override
   void initState() {
@@ -75,6 +78,8 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                   if (_saveTapLocked) {
                     setState(() {
                       _saveTapLocked = false;
+                      _saveRequested = false;
+                      _saveInProgress = false;
                     });
                   }
                 }
@@ -85,7 +90,9 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                     final dynamic dayRaw = state.visitDetails['visitNumber'];
                     final int visitDay = dayRaw is int ? dayRaw : int.tryParse(dayRaw?.toString() ?? '') ?? 0;
                     if (visitDay == 42) {
-                      CustomDialog.show(
+                      if (!_navigationTriggered) {
+                        _navigationTriggered = true;
+                        CustomDialog.show(
                         context,
                         title:t?.formSavedSuccessfully ??  'Form has been saved successfully',
                         message:t?.postNatalMssg ?? 'The post natal care of beneficiary has been completed',
@@ -97,21 +104,27 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                                 (route) => false,
                           );
                         },
-                      );
+                        );
+                      }
                     } else {
-                      Future.delayed(const Duration(milliseconds: 2000), () {
-                        if (mounted) {
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            Route_Names.HBNCScreen,
-                            (route) => false,
-                          );
-                        }
-                      });
+                      if (!_navigationTriggered) {
+                        _navigationTriggered = true;
+                        Future.delayed(const Duration(milliseconds: 2000), () {
+                          if (mounted) {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              Route_Names.HBNCScreen,
+                              (route) => false,
+                            );
+                          }
+                        });
+                      }
                     }
                     if (_saveTapLocked) {
                       setState(() {
                         _saveTapLocked = false;
+                        _saveRequested = false;
+                        _saveInProgress = false;
                       });
                     }
                   }
@@ -121,6 +134,8 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                   if (_saveTapLocked) {
                     setState(() {
                       _saveTapLocked = false;
+                      _saveRequested = false;
+                      _saveInProgress = false;
                     });
                   }
                 }
@@ -139,10 +154,13 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                 if (state.lastValidatedIndex == idx &&
                     state.lastValidationWasSave &&
                     state.validationErrors.isEmpty) {
-                  final beneficiaryData = (widget as dynamic).beneficiaryData;
-                  context.read<HbncVisitBloc>().add(
-                    SaveHbncVisit(beneficiaryData: beneficiaryData),
-                  );
+                  if (_saveRequested && !_saveInProgress) {
+                    final beneficiaryData = (widget as dynamic).beneficiaryData;
+                    _saveInProgress = true;
+                    context.read<HbncVisitBloc>().add(
+                      SaveHbncVisit(beneficiaryData: beneficiaryData),
+                    );
+                  }
                 }
               },
               child: Column(
@@ -265,6 +283,8 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                                         if (!state.isSaving && !_saveTapLocked) {
                                           setState(() {
                                             _saveTapLocked = true;
+                                            _saveRequested = true;
+                                            _navigationTriggered = false;
                                           });
                                           if (_formKey.currentState?.validate() ?? true) {
                                             context.read<HbncVisitBloc>().add(
