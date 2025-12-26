@@ -28,10 +28,12 @@ class OutcomeFormPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => OutcomeFormBloc()
-        ..add(OutcomeFormInitialized(
-          householdId: beneficiaryData['householdId']?.toString(),
-          beneficiaryId: beneficiaryData['beneficiaryId']?.toString(),
-        )),
+        ..add(
+          OutcomeFormInitialized(
+            householdId: beneficiaryData['householdId']?.toString(),
+            beneficiaryId: beneficiaryData['beneficiaryId']?.toString(),
+          ),
+        ),
       child: _OutcomeFormView(beneficiaryData: beneficiaryData),
     );
   }
@@ -45,7 +47,9 @@ class _OutcomeFormView extends StatelessWidget {
   }
 
   void _logState(OutcomeFormState state) {
-    print('Current state - householdId: ${state.householdId}, beneficiaryId: ${state.beneficiaryId}');
+    print(
+      'Current state - householdId: ${state.householdId}, beneficiaryId: ${state.beneficiaryId}',
+    );
   }
 
   @override
@@ -82,22 +86,31 @@ class _OutcomeFormView extends StatelessWidget {
           builder: (context, state) {
             return Column(
               children: [
-
                 _SectionHeader(title: l10n.deliveryOutcomeDetails),
- 
+
                 FutureBuilder<int>(
                   future: () async {
                     try {
-                      final beneficiaryId = beneficiaryData['BeneficiaryID']?.toString();
-                      print('🔍 Checking submFion count for BeneficiaryID: $beneficiaryId');
+                      final beneficiaryId = beneficiaryData['BeneficiaryID']
+                          ?.toString();
+                      print(
+                        '🔍 Checking submFion count for BeneficiaryID: $beneficiaryId',
+                      );
 
                       if (beneficiaryId == null || beneficiaryId.isEmpty) {
-                        print('⚠️ No valid BeneficiaryID found in beneficiaryData: $beneficiaryData');
+                        print(
+                          '⚠️ No valid BeneficiaryID found in beneficiaryData: $beneficiaryData',
+                        );
                         return 0;
                       }
 
-                      final count = await SecureStorageService.getSubmissionCount(beneficiaryId);
-                      print('✅ Found $count submissions for BeneficiaryID: $beneficiaryId');
+                      final count =
+                          await SecureStorageService.getSubmissionCount(
+                            beneficiaryId,
+                          );
+                      print(
+                        '✅ Found $count submissions for BeneficiaryID: $beneficiaryId',
+                      );
                       return count;
                     } catch (e) {
                       print('❌ Error getting submission count: $e');
@@ -107,13 +120,12 @@ class _OutcomeFormView extends StatelessWidget {
                   builder: (context, snapshot) {
                     final count = snapshot.data ?? 0;
                     return Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                      color: Colors.white,
-                      child: Row(
-                        children: [
-                          
-                        ],
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 16,
                       ),
+                      color: Colors.white,
+                      child: Row(children: []),
                     );
                   },
                 ),
@@ -122,8 +134,16 @@ class _OutcomeFormView extends StatelessWidget {
                   future: () async {
                     try {
                       final db = await DatabaseProvider.instance.database;
-                      final beneficiaryId = beneficiaryData['BeneficiaryID']?.toString() ?? beneficiaryData['beneficiaryId']?.toString() ?? beneficiaryData['unique_key']?.toString() ?? '';
-                      final ancKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+                      final beneficiaryId =
+                          beneficiaryData['BeneficiaryID']?.toString() ??
+                          beneficiaryData['beneficiaryId']?.toString() ??
+                          beneficiaryData['unique_key']?.toString() ??
+                          '';
+                      final ancKey =
+                          FollowupFormDataTable
+                              .formUniqueKeys[FollowupFormDataTable
+                              .ancDueRegistration] ??
+                          '';
                       if (beneficiaryId.isEmpty || ancKey.isEmpty) return;
                       final results = await db.query(
                         FollowupFormDataTable.table,
@@ -133,28 +153,42 @@ class _OutcomeFormView extends StatelessWidget {
                         limit: 1,
                       );
                       if (results.isEmpty) return;
-                      final formJsonRaw = results.first['form_json']?.toString() ?? '';
-                      final createdAt = results.first['created_date_time']?.toString() ?? '';
+                      final formJsonRaw =
+                          results.first['form_json']?.toString() ?? '';
+                      final createdAt =
+                          results.first['created_date_time']?.toString() ?? '';
                       DateTime? createdDate;
                       try {
                         createdDate = DateTime.tryParse(createdAt);
                       } catch (_) {}
                       if (createdDate != null) {
-                        context.read<OutcomeFormBloc>().add(DeliveryDateChanged(createdDate));
+                        context.read<OutcomeFormBloc>().add(
+                          DeliveryDateChanged(createdDate),
+                        );
                       }
                       if (formJsonRaw.isEmpty) return;
                       final decoded = jsonDecode(formJsonRaw);
                       if (decoded is Map && decoded['anc_form'] is Map) {
-                        final fd = Map<String, dynamic>.from(decoded['anc_form'] as Map);
-                        final flag = (fd['gives_birth_to_baby']?.toString() ?? '').toLowerCase();
+                        final fd = Map<String, dynamic>.from(
+                          decoded['anc_form'] as Map,
+                        );
+                        final flag =
+                            (fd['gives_birth_to_baby']?.toString() ?? '')
+                                .toLowerCase();
                         if (flag == 'yes') {
-                          print('ANC record with gives_birth_to_baby YES: ${results.first}');
+                          print(
+                            'ANC record with gives_birth_to_baby YES: ${results.first}',
+                          );
                         }
-                        final weeks = fd['weeks_of_pregnancy']?.toString() ?? '';
+                        final weeks =
+                            fd['weeks_of_pregnancy']?.toString() ?? '';
                         if (weeks.isNotEmpty) {
-                          context.read<OutcomeFormBloc>().add(GestationWeeksChanged(weeks));
+                          context.read<OutcomeFormBloc>().add(
+                            GestationWeeksChanged(weeks),
+                          );
                         }
-                        final children = fd['number_of_children']?.toString() ?? '';
+                        final children =
+                            fd['number_of_children']?.toString() ?? '';
                         if (children.isNotEmpty) {
                           final t = children.trim().toLowerCase();
                           String numeric;
@@ -162,13 +196,17 @@ class _OutcomeFormView extends StatelessWidget {
                             numeric = '1';
                           } else if (t == 'twins' || t == 'two' || t == '2') {
                             numeric = '2';
-                          } else if (t == 'triplets' || t == 'three' || t == '3') {
+                          } else if (t == 'triplets' ||
+                              t == 'three' ||
+                              t == '3') {
                             numeric = '3';
                           } else {
                             final n = int.tryParse(children);
                             numeric = n?.toString() ?? children;
                           }
-                          context.read<OutcomeFormBloc>().add(OutcomeCountChanged(numeric));
+                          context.read<OutcomeFormBloc>().add(
+                            OutcomeCountChanged(numeric),
+                          );
                         }
                       }
                     } catch (e) {
@@ -186,9 +224,8 @@ class _OutcomeFormView extends StatelessWidget {
                   ),
                 ),
               ],
-            )
-           ;
-          }
+            );
+          },
         ),
       ),
     );
@@ -197,7 +234,7 @@ class _OutcomeFormView extends StatelessWidget {
 
 class _OutcomeFormFields extends StatelessWidget {
   final Map<String, dynamic> beneficiaryData;
-  
+
   const _OutcomeFormFields({required this.beneficiaryData});
 
   @override
@@ -214,7 +251,7 @@ class _OutcomeFormFields extends StatelessWidget {
           isEditable: true,
           labelText: l10n.deliveryDate,
           onDateChanged: (d) => bloc.add(DeliveryDateChanged(d)),
-         // readOnly: true,
+          // readOnly: true,
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         const SizedBox(height: 8),
@@ -223,7 +260,7 @@ class _OutcomeFormFields extends StatelessWidget {
           padding: const EdgeInsets.only(left: 4.0),
           child: Row(
             children: [
-              Expanded( 
+              Expanded(
                 child: Text(
                   l10n.gestationWeeks,
                   style: TextStyle(
@@ -282,20 +319,14 @@ class _OutcomeFormFields extends StatelessWidget {
               initialValue: state.deliveryTime ?? '',
               keyboardType: TextInputType.datetime,
               onChanged: (v) => bloc.add(DeliveryTimeChanged(v)),
-             // suffixIcon: Icon(Icons.access_time),
+              // suffixIcon: Icon(Icons.access_time),
             ),
           ),
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-
         ApiDropdown<String>(
-          items: [
-
-            'Institutional',
-            'Non-Institutional',
-            'Other',
-          ],
+          items: ['Institutional', 'Non-Institutional', 'Other'],
           getLabel: (s) {
             switch (s) {
               case 'institutional':
@@ -307,7 +338,8 @@ class _OutcomeFormFields extends StatelessWidget {
               default:
                 return s;
             }
-          },          value:
+          },
+          value:
               state.placeOfDelivery.isEmpty ||
                   ![
                     l10n.select,
@@ -324,7 +356,7 @@ class _OutcomeFormFields extends StatelessWidget {
         if (state.placeOfDelivery == 'Other') ...[
           const SizedBox(height: 8),
           CustomTextField(
-            labelText:  l10n.enterOtherPlaceOfDelivery,
+            labelText: l10n.enterOtherPlaceOfDelivery,
             hintText: l10n.enterPlace,
             initialValue: state.otherPlaceOfDeliveryName ?? '',
             onChanged: (v) => bloc.add(OtherPlaceOfDeliveryNameChanged(v)),
@@ -332,16 +364,11 @@ class _OutcomeFormFields extends StatelessWidget {
           const SizedBox(height: 8),
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         ],
+
         // Replace the institutional dropdowns section with this fixed code:
-
         if (state.placeOfDelivery == 'Institutional') ...[
-
           ApiDropdown<String>(
-            items: const [
-
-              'Public',
-              'Private',
-            ],
+            items: const ['Public', 'Private'],
             getLabel: (s) {
               switch (s) {
                 case 'Public':
@@ -352,17 +379,18 @@ class _OutcomeFormFields extends StatelessWidget {
                   return s;
               }
             },
-            value: (state.institutionalPlaceType == null ||
-                state.institutionalPlaceType!.isEmpty ||
-                !['Public',
-                  'Private',]
-                    .contains(state.institutionalPlaceType))
+            value:
+                (state.institutionalPlaceType == null ||
+                    state.institutionalPlaceType!.isEmpty ||
+                    ![
+                      'Public',
+                      'Private',
+                    ].contains(state.institutionalPlaceType))
                 ? null
                 : state.institutionalPlaceType,
-            onChanged: (v) =>
-                bloc.add(InstitutionalPlaceTypeChanged(v ?? '')),
+            onChanged: (v) => bloc.add(InstitutionalPlaceTypeChanged(v ?? '')),
             labelText:
-            l10n?.institutionPlaceOfDelivery ??
+                l10n?.institutionPlaceOfDelivery ??
                 'Institution place of delivery',
             hintText: l10n?.select ?? 'Select',
           ),
@@ -371,15 +399,7 @@ class _OutcomeFormFields extends StatelessWidget {
 
           if (state.institutionalPlaceType == 'Public') ...[
             ApiDropdown<String>(
-              items: const [
-
-                'Sub-Center',
-                'PHC',
-                'CHC',
-                'RH',
-                'DH',
-                'MCH',
-              ],
+              items: const ['Sub-Center', 'PHC', 'CHC', 'RH', 'DH', 'MCH'],
               getLabel: (s) {
                 switch (s) {
                   case 'subCenter':
@@ -398,37 +418,32 @@ class _OutcomeFormFields extends StatelessWidget {
                     return s;
                 }
               },
-              value: (state.institutionalPlaceOfDelivery == null ||
-                  state.institutionalPlaceOfDelivery!.isEmpty ||
-                  ![
-
-                    'Sub-Center',
-                    'PHC',
-                    'CHC',
-                    'RH',
-                    'DH',
-                    'MCH',
-                  ].contains(state.institutionalPlaceOfDelivery))
+              value:
+                  (state.institutionalPlaceOfDelivery == null ||
+                      state.institutionalPlaceOfDelivery!.isEmpty ||
+                      ![
+                        'Sub-Center',
+                        'PHC',
+                        'CHC',
+                        'RH',
+                        'DH',
+                        'MCH',
+                      ].contains(state.institutionalPlaceOfDelivery))
                   ? null
                   : state.institutionalPlaceOfDelivery,
               onChanged: (v) =>
                   bloc.add(InstitutionalPlaceOfDeliveryChanged(v ?? '')),
               labelText:
-              l10n?.institutionPlaceOfDelivery ??
+                  l10n?.institutionPlaceOfDelivery ??
                   'Institutional place of delivery',
               hintText: l10n?.select ?? 'Select',
             ),
 
             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
             const SizedBox(height: 8),
-
           ] else if (state.institutionalPlaceType == 'Private') ...[
             ApiDropdown<String>(
-              items: const [
-
-                'Nursing Home',
-                'Hospital',
-              ],
+              items: const ['Nursing Home', 'Hospital'],
               getLabel: (s) {
                 switch (s) {
                   case 'nursingHome':
@@ -439,37 +454,30 @@ class _OutcomeFormFields extends StatelessWidget {
                     return s;
                 }
               },
-              value: (state.institutionalPlaceOfDelivery == null ||
-                  state.institutionalPlaceOfDelivery!.isEmpty ||
-                  ![ 'Nursing Home',
-                    'Hospital',]
-                      .contains(state.institutionalPlaceOfDelivery))
+              value:
+                  (state.institutionalPlaceOfDelivery == null ||
+                      state.institutionalPlaceOfDelivery!.isEmpty ||
+                      ![
+                        'Nursing Home',
+                        'Hospital',
+                      ].contains(state.institutionalPlaceOfDelivery))
                   ? null
                   : state.institutionalPlaceOfDelivery,
               onChanged: (v) =>
                   bloc.add(InstitutionalPlaceOfDeliveryChanged(v ?? '')),
               labelText:
-              l10n?.institutionPlaceOfDelivery ??
+                  l10n?.institutionPlaceOfDelivery ??
                   'Institutional place of delivery',
               hintText: l10n?.select ?? 'Select',
             ),
             const SizedBox(height: 8),
             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
             const SizedBox(height: 8),
-
           ],
-
-
         ],
         if (state.placeOfDelivery == 'Non-Institutional') ...[
-
           ApiDropdown<String>(
-            items: [
-
-              'Home Based Delivery',
-              'In Transit',
-              'Other',
-            ],
+            items: ['Home Based Delivery', 'In Transit', 'Other'],
             getLabel: (s) {
               switch (s) {
                 case 'Home Based Delivery':
@@ -482,14 +490,20 @@ class _OutcomeFormFields extends StatelessWidget {
                   return s;
               }
             },
-            value: (state.nonInstitutionalPlaceType == null ||
-                state.nonInstitutionalPlaceType!.isEmpty ||
-                ![  'Home Based delivery', 'In Transit', 'Other']
-                    .contains(state.nonInstitutionalPlaceType))
+            value:
+                (state.nonInstitutionalPlaceType == null ||
+                    state.nonInstitutionalPlaceType!.isEmpty ||
+                    ![
+                      'Home Based delivery',
+                      'In Transit',
+                      'Other',
+                    ].contains(state.nonInstitutionalPlaceType))
                 ? l10n.select
                 : state.nonInstitutionalPlaceType!,
-            onChanged: (v) => bloc.add(NonInstitutionalPlaceTypeChanged(v ?? '')),
-            labelText:   l10n?.institutionPlaceOfDelivery ??
+            onChanged: (v) =>
+                bloc.add(NonInstitutionalPlaceTypeChanged(v ?? '')),
+            labelText:
+                l10n?.institutionPlaceOfDelivery ??
                 'Institutional place of delivery',
           ),
 
@@ -497,35 +511,42 @@ class _OutcomeFormFields extends StatelessWidget {
           if (state.nonInstitutionalPlaceType == 'Other') ...[
             CustomTextField(
               labelText: l10n?.enterOtherNonInstitutionalDelivery,
-              hintText: 'Enter name',
+              hintText: l10n.enterName,
               initialValue: state.otherNonInstitutionalPlaceName ?? '',
-              onChanged: (v) => bloc.add(OtherNonInstitutionalPlaceNameChanged(v)),
+              onChanged: (v) =>
+                  bloc.add(OtherNonInstitutionalPlaceNameChanged(v)),
             ),
             const SizedBox(height: 8),
             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
           ] else if (state.nonInstitutionalPlaceType == 'In Transit') ...[
             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
             ApiDropdown<String>(
-              items: [
-                'Ambulance',
-                'Other',
-              ],
-              getLabel: (s) => s,
-              value: (state.transitPlace == null ||
-                  state.transitPlace!.isEmpty ||
-                  ![  'Ambulance', 'Other']
-                      .contains(state.transitPlace))
+              items: ['Ambulance', 'Other'],
+              getLabel: (s) {
+                switch (s) {
+                  case 'Ambulance':
+                    return l10n?.ambulance ?? '';
+                  case 'Other':
+                    return l10n?.other ?? '';
+                  default:
+                    return s;
+                }
+              },
+              value:
+                  (state.transitPlace == null ||
+                      state.transitPlace!.isEmpty ||
+                      !['Ambulance', 'Other'].contains(state.transitPlace))
                   ? l10n.select
                   : state.transitPlace!,
               onChanged: (v) => bloc.add(TransitPlaceChanged(v ?? '')),
-              labelText: 'Transit place',
+              labelText: l10n.transitPlace,
             ),
             const SizedBox(height: 8),
             if (state.transitPlace == 'Other') ...[
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
               CustomTextField(
-                labelText: 'Please Enter name of other transit place',
-                hintText: 'Please Enter name of other transit place',
+                labelText: l10n.enterOtherTransitPlace,
+                hintText: l10n.enterOtherTransitPlace,
                 initialValue: state.otherTransitPlaceName ?? '',
                 onChanged: (v) => bloc.add(OtherTransitPlaceNameChanged(v)),
               ),
@@ -537,29 +558,56 @@ class _OutcomeFormFields extends StatelessWidget {
 
         ApiDropdown<String>(
           items: [
-
             'ANM',
             'LHV',
             'Doctor',
             'Staff Nurse',
             'Relative',
             'TBA (Non-Skilled birth attendant)',
-            'Other'
+            'Other',
           ],
-          getLabel: (s) => s,
-          value: (state.conductedBy == null ||
-              state.conductedBy!.isEmpty ||
-              !['ANM', 'LHV', 'Doctor', 'Staff Nurse', 'Relative', 'TBA (Non-Skilled birth attendant)', 'Other'].contains(state.conductedBy))
+          getLabel: (s) {
+            switch (s) {
+              case 'anm':
+                return l10n?.anm ?? '';
+              case 'lhv':
+                return l10n?.lhv ?? '';
+              case 'doctor':
+                return l10n?.doctor ?? '';
+              case 'staffNurse':
+                return l10n?.staffNurse ?? '';
+              case 'relative':
+                return l10n?.relative ?? '';
+              case 'tba':
+                return l10n?.tba ?? '';
+              case 'other':
+                return l10n?.other ?? '';
+              default:
+                return s;
+            }
+          },
+          value:
+              (state.conductedBy == null ||
+                  state.conductedBy!.isEmpty ||
+                  ![
+                    'ANM',
+                    'LHV',
+                    'Doctor',
+                    'Staff Nurse',
+                    'Relative',
+                    'TBA (Non-Skilled birth attendant)',
+                    'Other',
+                  ].contains(state.conductedBy))
               ? l10n.select
               : state.conductedBy!,
           onChanged: (v) => bloc.add(ConductedByChanged(v ?? '')),
-          labelText: 'Who conducted the delivery? *',
+          labelText: l10n.whoConductedDelivery,
         ),
         if (state.conductedBy == 'Other') ...[
           const SizedBox(height: 8),
           CustomTextField(
-            labelText: 'Who else did the delivery ?',
-            hintText: 'Enter name',
+            labelText: l10n.whoElseConductedDelivery,
+            hintText: l10n.enterName,
             initialValue: state.otherConductedByName ?? '',
             onChanged: (v) => bloc.add(OtherConductedByNameChanged(v)),
           ),
@@ -569,7 +617,6 @@ class _OutcomeFormFields extends StatelessWidget {
 
         ApiDropdown<String>(
           items: [
-
             l10n.cesareanDelivery,
             l10n.assistedDelivery,
             l10n.normalDelivery,
@@ -591,14 +638,11 @@ class _OutcomeFormFields extends StatelessWidget {
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         ApiDropdown<String>(
-          items: [ l10n.yes, l10n.no],
+          items: [l10n.yes, l10n.no],
           getLabel: (s) => s,
           value:
               state.complications.isEmpty ||
-                  ![
-                    l10n.yes,
-                    l10n.no,
-                  ].contains(state.complications)
+                  ![l10n.yes, l10n.no].contains(state.complications)
               ? l10n.select
               : state.complications,
           onChanged: (v) => bloc.add(ComplicationsChanged(v ?? '')),
@@ -621,22 +665,58 @@ class _OutcomeFormFields extends StatelessWidget {
               'PPH',
               'Any other',
             ],
-            getLabel: (s) => s,
-            value: (state.complicationType == null ||
-                state.complicationType!.isEmpty ||
-                !['Convulsion', 'Ante Partumhaemorrhage (Aph)', 'Pregnancy Induced Hypertension (PIH)', 'Repeated Abortion', 'Mother Death', 'Congenital Anomaly', 'Blood Transfusion', 'Obstructed Labour', 'PPH', 'Any other']
-                    .contains(state.complicationType))
+            getLabel: (s) {
+              switch (s) {
+                case 'convulsion':
+                  return l10n?.convulsion ?? '';
+                case 'aph':
+                  return l10n?.aph ?? '';
+                case 'pih':
+                  return l10n?.pih ?? '';
+                case 'repeatedAbortion':
+                  return l10n?.repeatedAbortion ?? '';
+                case 'motherDeath':
+                  return l10n?.motherDeath ?? '';
+                case 'congenitalAnomaly':
+                  return l10n?.congenitalAnomaly ?? '';
+                case 'bloodTransfusion':
+                  return l10n?.bloodTransfusion ?? '';
+                case 'obstructedLabour':
+                  return l10n?.obstructedLabour ?? '';
+                case 'pph':
+                  return l10n?.pph ?? '';
+                case 'anyOther':
+                  return l10n?.anyOther ?? '';
+                default:
+                  return s;
+              }
+            },
+            value:
+                (state.complicationType == null ||
+                    state.complicationType!.isEmpty ||
+                    ![
+                      'Convulsion',
+                      'Ante Partumhaemorrhage (Aph)',
+                      'Pregnancy Induced Hypertension (PIH)',
+                      'Repeated Abortion',
+                      'Mother Death',
+                      'Congenital Anomaly',
+                      'Blood Transfusion',
+                      'Obstructed Labour',
+                      'PPH',
+                      'Any other',
+                    ].contains(state.complicationType))
                 ? l10n.select
                 : state.complicationType!,
             onChanged: (v) => bloc.add(ComplicationTypeChanged(v ?? '')),
-            labelText: 'Complication *',
+            labelText: l10n.complication,
           ),
 
           if (state.complicationType == 'Any other') ...[
             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
             CustomTextField(
-              labelText: 'Enter other complication during delivery',
-              hintText: 'Enter complication',
+              labelText: l10n.enterOtherComplication,
+              hintText: l10n.enterComplication,
               initialValue: state.otherComplicationName ?? '',
               onChanged: (v) => bloc.add(OtherComplicationNameChanged(v)),
             ),
@@ -649,7 +729,7 @@ class _OutcomeFormFields extends StatelessWidget {
           CustomDatePicker(
             initialDate: state.dischargeDate,
             isEditable: true,
-            labelText: 'Date of discharge',
+            labelText: l10n.dateOfDischarge,
             onDateChanged: (d) => bloc.add(DischargeDateChanged(d)),
           ),
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -670,10 +750,10 @@ class _OutcomeFormFields extends StatelessWidget {
             },
             child: AbsorbPointer(
               child: CustomTextField(
-                labelText: 'Discharge time (hh:mm)',
-                hintText: 'hh:mm',
+                labelText: l10n.discharge_time,
+                hintText: l10n.hhmm,
                 initialValue: state.dischargeTime ?? '',
-               // suffixIcon: Icon(Icons.access_time),
+                // suffixIcon: Icon(Icons.access_time),
               ),
             ),
           ),
@@ -698,7 +778,10 @@ class _OutcomeFormFields extends StatelessWidget {
                     children: <TextSpan>[
                       TextSpan(
                         text: l10n.outcomeCount.endsWith('*')
-                            ? l10n.outcomeCount.substring(0, l10n.outcomeCount.length - 1)
+                            ? l10n.outcomeCount.substring(
+                                0,
+                                l10n.outcomeCount.length - 1,
+                              )
                             : l10n.outcomeCount,
                       ),
                       if (l10n.outcomeCount.endsWith('*'))
@@ -741,7 +824,7 @@ class _OutcomeFormFields extends StatelessWidget {
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         ApiDropdown<String>(
-          items: [ l10n.yes, l10n.no],
+          items: [l10n.yes, l10n.no],
           getLabel: (s) => s,
           value: state.familyPlanningCounseling.isEmpty
               ? l10n.select
@@ -754,8 +837,8 @@ class _OutcomeFormFields extends StatelessWidget {
         if (state.familyPlanningCounseling == 'Yes') ...[
           const SizedBox(height: 8),
           ApiDropdown<String>(
-            labelText: 'Do you want to adapt family planning method ? *',
-            items: [  l10n.yes, l10n.no],
+            labelText: l10n.adaptFamilyPlanningMethod,
+            items: [l10n.yes, l10n.no],
             getLabel: (s) => s,
             value: state.adaptFpMethod ?? l10n.select,
             onChanged: (v) => bloc.add(AdaptFpMethodChanged(v ?? '')),
@@ -763,9 +846,10 @@ class _OutcomeFormFields extends StatelessWidget {
           ),
 
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-          if (state.adaptFpMethod == 'Yes' && state.familyPlanningCounseling == 'Yes') ...[
+          if (state.adaptFpMethod == 'Yes' &&
+              state.familyPlanningCounseling == 'Yes') ...[
             ApiDropdown<String>(
-              labelText: 'Method of contraception',
+              labelText: l10n.methodOfContra,
               items: const [
                 'Condom',
                 'Mala -N (Daily Contraceptive pill)',
@@ -775,9 +859,32 @@ class _OutcomeFormFields extends StatelessWidget {
                 'ECP (Emergency Contraceptive pill)',
                 'Male Sterilization',
                 'Female Sterilization',
-                'Any Other Specify'
+                'Any Other Specify',
               ],
-              getLabel: (value) => value,
+              getLabel: (s) {
+                switch (s) {
+                  case 'condom':
+                    return l10n?.condom ?? '';
+                  case 'malaN':
+                    return l10n?.malaN ?? '';
+                  case 'antraInjection':
+                    return l10n?.antraInjection ?? '';
+                  case 'copperT':
+                    return l10n?.copperT ?? '';
+                  case 'chhaya':
+                    return l10n?.chhaya ?? '';
+                  case 'ecp':
+                    return l10n?.ecp ?? '';
+                  case 'maleSterilization':
+                    return l10n?.maleSterilization ?? '';
+                  case 'femaleSterilization':
+                    return l10n?.femaleSterilization ?? '';
+                  case 'anyOtherSpecify':
+                    return l10n?.anyOtherSpecify ?? '';
+                  default:
+                    return s;
+                }
+              },
               value: state.fpMethod ?? 'Select',
               onChanged: (value) {
                 if (value != null) {
@@ -789,10 +896,12 @@ class _OutcomeFormFields extends StatelessWidget {
           ],
         ],
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-        if (state.fpMethod == 'Copper -T (IUCD)' && state.familyPlanningCounseling == 'Yes' && state.adaptFpMethod == 'Yes') ...[
+        if (state.fpMethod == 'Copper -T (IUCD)' &&
+            state.familyPlanningCounseling == 'Yes' &&
+            state.adaptFpMethod == 'Yes') ...[
           CustomDatePicker(
-            labelText: 'Date of removal',
-           // initialDate: state.removalDate ?? DateTime.now(),
+            labelText: l10n.dateOfRemoval,
+            // initialDate: state.removalDate ?? DateTime.now(),
             firstDate: DateTime(1900),
             lastDate: DateTime(2100),
             onDateChanged: (date) {
@@ -804,8 +913,8 @@ class _OutcomeFormFields extends StatelessWidget {
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
           const SizedBox(height: 8),
           CustomTextField(
-            labelText: 'Reason for Removal',
-            hintText: 'Enter reason for removal',
+            labelText: l10n.reasonForRemoval,
+            hintText: l10n.enterReasonForRemoval,
             onChanged: (value) {
               context.read<OutcomeFormBloc>().add(RemovalReasonChanged(value));
             },
@@ -815,10 +924,12 @@ class _OutcomeFormFields extends StatelessWidget {
           const SizedBox(height: 8),
         ],
 
-        if (state.fpMethod == 'Atra injection'  && state.familyPlanningCounseling == 'Yes' && state.adaptFpMethod == 'Yes') ...[
+        if (state.fpMethod == 'Atra injection' &&
+            state.familyPlanningCounseling == 'Yes' &&
+            state.adaptFpMethod == 'Yes') ...[
           CustomDatePicker(
-            labelText: 'Date of Antra',
-           // initialDate: state.antraDate ?? DateTime.now(),
+            labelText: l10n.dateOfAntra,
+            // initialDate: state.antraDate ?? DateTime.now(),
             firstDate: DateTime(1900),
             lastDate: DateTime(2100),
             onDateChanged: (date) {
@@ -831,10 +942,12 @@ class _OutcomeFormFields extends StatelessWidget {
           const SizedBox(height: 8),
         ],
 
-        if (state.fpMethod == 'Condom'  && state.familyPlanningCounseling == 'Yes' && state.adaptFpMethod == 'Yes') ...[
+        if (state.fpMethod == 'Condom' &&
+            state.familyPlanningCounseling == 'Yes' &&
+            state.adaptFpMethod == 'Yes') ...[
           CustomTextField(
-            labelText: 'Quantity of Condoms',
-            hintText: 'Quantity of Condoms',
+            labelText: l10n.quantityOfCondoms,
+            hintText:l10n.quantityOfCondoms,
             keyboardType: TextInputType.number,
             onChanged: (value) {
               context.read<OutcomeFormBloc>().add(CondomQuantityChanged(value));
@@ -845,25 +958,28 @@ class _OutcomeFormFields extends StatelessWidget {
           const SizedBox(height: 8),
         ],
 
-        if (state.fpMethod == 'Mala -N (Daily Contraceptive pill)'  && state.familyPlanningCounseling == 'Yes' && state.adaptFpMethod == 'Yes') ...[
+        if (state.fpMethod == 'Mala -N (Daily Contraceptive pill)' &&
+            state.familyPlanningCounseling == 'Yes' &&
+            state.adaptFpMethod == 'Yes') ...[
           CustomTextField(
-            labelText: 'Quantity of Mala -N (Daily Contraceptive pill)',
-            hintText: 'Quantity of Mala -N (Daily Contraceptive pill)',
+            labelText: l10n.quantityOfMalaN,
+            hintText: l10n.quantityOfMalaN,
             keyboardType: TextInputType.number,
             onChanged: (value) {
               context.read<OutcomeFormBloc>().add(MalaQuantityChanged(value));
             },
             controller: TextEditingController(text: state.malaQuantity ?? ''),
-
           ),
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
           const SizedBox(height: 8),
         ],
 
-        if (state.fpMethod == 'Chhaya (Weekly Contraceptive pill)'  && state.familyPlanningCounseling == 'Yes' && state.adaptFpMethod == 'Yes') ...[
+        if (state.fpMethod == 'Chhaya (Weekly Contraceptive pill)' &&
+            state.familyPlanningCounseling == 'Yes' &&
+            state.adaptFpMethod == 'Yes') ...[
           CustomTextField(
-            labelText: 'Chhaya (Weekly Contraceptive pill)',
-            hintText: 'Chhaya (Weekly Contraceptive pill)',
+            labelText: l10n.chhaya,
+            hintText: l10n.chhaya,
             keyboardType: TextInputType.number,
             onChanged: (value) {
               context.read<OutcomeFormBloc>().add(ChhayaQuantityChanged(value));
@@ -874,10 +990,12 @@ class _OutcomeFormFields extends StatelessWidget {
           const SizedBox(height: 8),
         ],
 
-        if (state.fpMethod == 'ECP (Emergency Contraceptive pill)'  && state.familyPlanningCounseling == 'Yes' && state.adaptFpMethod == 'Yes') ...[
+        if (state.fpMethod == 'ECP (Emergency Contraceptive pill)' &&
+            state.familyPlanningCounseling == 'Yes' &&
+            state.adaptFpMethod == 'Yes') ...[
           CustomTextField(
-            labelText: 'ECP (Emergency Contraceptive pill)',
-            hintText: 'ECP (Emergency Contraceptive pill)',
+            labelText:l10n.ecp,
+            hintText: l10n.ecp,
             keyboardType: TextInputType.number,
             onChanged: (value) {
               context.read<OutcomeFormBloc>().add(ECPQuantityChanged(value));
@@ -887,7 +1005,6 @@ class _OutcomeFormFields extends StatelessWidget {
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
           const SizedBox(height: 8),
         ],
-
 
         Padding(
           padding: const EdgeInsets.only(top: 32.0),
