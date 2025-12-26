@@ -3854,7 +3854,7 @@ abstract class AppLocalizations {
   /// No description provided for @submissionCountLabel.
   ///
   /// In en, this message translates to:
-  /// **'Form Submissions'**
+  /// **'Form Submfvissions'**
   String get submissionCountLabel;
 
   /// No description provided for @readLess.
@@ -13642,6 +13642,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your password has been changed successfully'**
   String get successUpdatePassMsg;
+
+  /// No description provided for @diseaseTb.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuberculosis (TB)'**
+  String get diseaseTb;
+
+  /// No description provided for @diseaseHepatitisB.
+  ///
+  /// In en, this message translates to:
+  /// **'Hepatitis B'**
+  String get diseaseHepatitisB;
+
+  /// No description provided for @diseaseAsthma.
+  ///
+  /// In en, this message translates to:
+  /// **'Asthma'**
+  String get diseaseAsthma;
+
+  /// No description provided for @diseaseHighBp.
+  ///
+  /// In en, this message translates to:
+  /// **'High Blood Pressure'**
+  String get diseaseHighBp;
+
+  /// No description provided for @diseaseStiRti.
+  ///
+  /// In en, this message translates to:
+  /// **'STI / RTI'**
+  String get diseaseStiRti;
+
+  /// No description provided for @diseaseHeart.
+  ///
+  /// In en, this message translates to:
+  /// **'Heart Disease'**
+  String get diseaseHeart;
+
+  /// No description provided for @diseaseLiver.
+  ///
+  /// In en, this message translates to:
+  /// **'Liver Disease'**
+  String get diseaseLiver;
+
+  /// No description provided for @diseaseKidney.
+  ///
+  /// In en, this message translates to:
+  /// **'Kidney Disease'**
+  String get diseaseKidney;
+
+  /// No description provided for @diseaseEpilepsy.
+  ///
+  /// In en, this message translates to:
+  /// **'Epilepsy'**
+  String get diseaseEpilepsy;
+
+  /// No description provided for @pleaseSpecifyOtherDisease.
+  ///
+  /// In en, this message translates to:
+  /// **'Please specify other disease'**
+  String get pleaseSpecifyOtherDisease;
+
+  /// No description provided for @calciumVitaminD3TabletsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of Calcium and Vitamin D3 tablets given'**
+  String get calciumVitaminD3TabletsLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

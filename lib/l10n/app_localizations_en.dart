@@ -1899,7 +1899,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rchNumberLabel => 'RCH number';
 
   @override
-  String get submissionCountLabel => 'Form Submissions';
+  String get submissionCountLabel => 'Form Submfvissions';
 
   @override
   String get readLess => 'Read less';
@@ -6797,4 +6797,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get successUpdatePassMsg => 'Your password has been changed successfully';
+
+  @override
+  String get diseaseTb => 'Tuberculosis (TB)';
+
+  @override
+  String get diseaseHepatitisB => 'Hepatitis B';
+
+  @override
+  String get diseaseAsthma => 'Asthma';
+
+  @override
+  String get diseaseHighBp => 'High Blood Pressure';
+
+  @override
+  String get diseaseStiRti => 'STI / RTI';
+
+  @override
+  String get diseaseHeart => 'Heart Disease';
+
+  @override
+  String get diseaseLiver => 'Liver Disease';
+
+  @override
+  String get diseaseKidney => 'Kidney Disease';
+
+  @override
+  String get diseaseEpilepsy => 'Epilepsy';
+
+  @override
+  String get pleaseSpecifyOtherDisease => 'Please specify other disease';
+
+  @override
+  String get calciumVitaminD3TabletsLabel => 'Number of Calcium and Vitamin D3 tablets given';
 }

@@ -431,8 +431,8 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                 height: 0,
                               ),
                               CustomTextField(
-                                labelText: 'Enter Religion',
-                                hintText: 'Enter Religion',
+                                labelText: t!.enter_religion,
+                                hintText: t!.enter_religion,
                                 initialValue: state.otherReligion,
                                 readOnly: true,
                               ),
@@ -484,8 +484,8 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                 height: 0,
                               ),
                               CustomTextField(
-                                labelText: 'Enter Category',
-                                hintText: 'Enter Category',
+                                labelText: t.enterCategory,
+                                hintText:t.enterCategory,
                                 initialValue: state.otherCategory,
                                 readOnly: true,
                               ),
@@ -511,8 +511,8 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                     t?.totalChildrenBornLabel ??
                                         'Total number of children born',
                                     style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ),
@@ -542,8 +542,8 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                       t?.totalLiveChildrenLabel ??
                                           'Total live children',
                                       style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),
@@ -575,8 +575,8 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                       t?.totalMaleChildrenLabel ??
                                           'Total male children',
                                       style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),
@@ -607,8 +607,8 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                       t?.totalFemaleChildrenLabel ??
                                           'Total female children',
                                       style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),
@@ -636,13 +636,6 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                               height: 8,
                             ),
                             // Youngest Child Details
-                            Text(
-                              t?.youngestChildDetail ??
-                                  "yougest child detail" ??
-                                  'Youngest Child Details',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            SizedBox(height: 10),
 
                             Row(
                               children: [
@@ -652,7 +645,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                         'Age of youngest child',
                                     style: TextStyle(
                                       fontSize: 14.sp,
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ),
@@ -731,7 +724,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                               thickness: 0.5,
                               height: 8,
                             ),
-                            // Youngest Child Gender
+                            // Youngest Child Gender '//////
                             ApiDropdown<String>(
                               key: const ValueKey('youngestChildGender'),
                               labelText:
