@@ -296,14 +296,24 @@ class _OutcomeFormFields extends StatelessWidget {
             'Non-Institutional',
             'Other',
           ],
-          getLabel: (s) => s,
-          value:
+          getLabel: (s) {
+            switch (s) {
+              case 'institutional':
+                return l10n?.institutional ?? '';
+              case 'nonInstitutional':
+                return l10n?.nonInstitutional ?? '';
+              case 'other':
+                return l10n?.other ?? '';
+              default:
+                return s;
+            }
+          },          value:
               state.placeOfDelivery.isEmpty ||
                   ![
                     l10n.select,
-                    'Institutional',
-                    'Non-Institutional',
-                    'Other',
+                    l10n.institutional,
+                    l10n.nonInstitutional,
+                    l10n.other,
                   ].contains(state.placeOfDelivery)
               ? l10n.select
               : state.placeOfDelivery,
@@ -314,8 +324,8 @@ class _OutcomeFormFields extends StatelessWidget {
         if (state.placeOfDelivery == 'Other') ...[
           const SizedBox(height: 8),
           CustomTextField(
-            labelText: 'Enter other place of delivery',
-            hintText: 'Enter place',
+            labelText:  l10n.enterOtherPlaceOfDelivery,
+            hintText: l10n.enterPlace,
             initialValue: state.otherPlaceOfDeliveryName ?? '',
             onChanged: (v) => bloc.add(OtherPlaceOfDeliveryNameChanged(v)),
           ),
@@ -327,25 +337,41 @@ class _OutcomeFormFields extends StatelessWidget {
         if (state.placeOfDelivery == 'Institutional') ...[
 
           ApiDropdown<String>(
-            items: [
+            items: const [
 
               'Public',
               'Private',
             ],
-            getLabel: (s) => s,
+            getLabel: (s) {
+              switch (s) {
+                case 'Public':
+                  return l10n?.publicPlace ?? '';
+                case 'Private':
+                  return l10n?.privatePlace ?? '';
+                default:
+                  return s;
+              }
+            },
             value: (state.institutionalPlaceType == null ||
                 state.institutionalPlaceType!.isEmpty ||
-                ![  'Public', 'Private'].contains(state.institutionalPlaceType))
-                ? l10n.select
-                : state.institutionalPlaceType!,
-            onChanged: (v) => bloc.add(InstitutionalPlaceTypeChanged(v ?? '')),
-            labelText: 'Institution place of delivery',
+                !['Public',
+                  'Private',]
+                    .contains(state.institutionalPlaceType))
+                ? null
+                : state.institutionalPlaceType,
+            onChanged: (v) =>
+                bloc.add(InstitutionalPlaceTypeChanged(v ?? '')),
+            labelText:
+            l10n?.institutionPlaceOfDelivery ??
+                'Institution place of delivery',
+            hintText: l10n?.select ?? 'Select',
           ),
+
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
           if (state.institutionalPlaceType == 'Public') ...[
             ApiDropdown<String>(
-              items: [
+              items: const [
 
                 'Sub-Center',
                 'PHC',
@@ -354,35 +380,78 @@ class _OutcomeFormFields extends StatelessWidget {
                 'DH',
                 'MCH',
               ],
-              getLabel: (s) => s,
+              getLabel: (s) {
+                switch (s) {
+                  case 'subCenter':
+                    return l10n?.subCenter ?? '';
+                  case 'phc':
+                    return l10n?.phc ?? '';
+                  case 'chc':
+                    return l10n?.chc ?? '';
+                  case 'rh':
+                    return l10n?.rh ?? '';
+                  case 'dh':
+                    return l10n?.dh ?? '';
+                  case 'mch':
+                    return l10n?.mch ?? '';
+                  default:
+                    return s;
+                }
+              },
               value: (state.institutionalPlaceOfDelivery == null ||
                   state.institutionalPlaceOfDelivery!.isEmpty ||
-                  ![  'Sub-Center', 'PHC', 'CHC', 'RH', 'DH', 'MCH']
-                      .contains(state.institutionalPlaceOfDelivery))
-                  ? l10n.select
-                  : state.institutionalPlaceOfDelivery!,
-              onChanged: (v) => bloc.add(InstitutionalPlaceOfDeliveryChanged(v ?? '')),
-              labelText: 'Institutional place of delivery',
+                  ![
+
+                    'Sub-Center',
+                    'PHC',
+                    'CHC',
+                    'RH',
+                    'DH',
+                    'MCH',
+                  ].contains(state.institutionalPlaceOfDelivery))
+                  ? null
+                  : state.institutionalPlaceOfDelivery,
+              onChanged: (v) =>
+                  bloc.add(InstitutionalPlaceOfDeliveryChanged(v ?? '')),
+              labelText:
+              l10n?.institutionPlaceOfDelivery ??
+                  'Institutional place of delivery',
+              hintText: l10n?.select ?? 'Select',
             ),
+
             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
             const SizedBox(height: 8),
 
           ] else if (state.institutionalPlaceType == 'Private') ...[
             ApiDropdown<String>(
-              items: [
+              items: const [
 
                 'Nursing Home',
                 'Hospital',
               ],
-              getLabel: (s) => s,
+              getLabel: (s) {
+                switch (s) {
+                  case 'nursingHome':
+                    return l10n?.nursingHome ?? '';
+                  case 'hospital':
+                    return l10n?.hospital ?? '';
+                  default:
+                    return s;
+                }
+              },
               value: (state.institutionalPlaceOfDelivery == null ||
                   state.institutionalPlaceOfDelivery!.isEmpty ||
-                  !['Nursing Home', 'Hospital']
+                  ![ 'Nursing Home',
+                    'Hospital',]
                       .contains(state.institutionalPlaceOfDelivery))
-                  ? l10n.select
-                  : state.institutionalPlaceOfDelivery!,
-              onChanged: (v) => bloc.add(InstitutionalPlaceOfDeliveryChanged(v ?? '')),
-              labelText: 'Institutional place of delivery',
+                  ? null
+                  : state.institutionalPlaceOfDelivery,
+              onChanged: (v) =>
+                  bloc.add(InstitutionalPlaceOfDeliveryChanged(v ?? '')),
+              labelText:
+              l10n?.institutionPlaceOfDelivery ??
+                  'Institutional place of delivery',
+              hintText: l10n?.select ?? 'Select',
             ),
             const SizedBox(height: 8),
             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -401,7 +470,18 @@ class _OutcomeFormFields extends StatelessWidget {
               'In Transit',
               'Other',
             ],
-            getLabel: (s) => s,
+            getLabel: (s) {
+              switch (s) {
+                case 'Home Based Delivery':
+                  return l10n?.homeBasedDelivery ?? '';
+                case 'In Transit':
+                  return l10n?.inTransit ?? '';
+                case 'Other':
+                  return l10n?.other ?? '';
+                default:
+                  return s;
+              }
+            },
             value: (state.nonInstitutionalPlaceType == null ||
                 state.nonInstitutionalPlaceType!.isEmpty ||
                 ![  'Home Based delivery', 'In Transit', 'Other']
@@ -409,13 +489,14 @@ class _OutcomeFormFields extends StatelessWidget {
                 ? l10n.select
                 : state.nonInstitutionalPlaceType!,
             onChanged: (v) => bloc.add(NonInstitutionalPlaceTypeChanged(v ?? '')),
-            labelText: 'Non-institutional place of delivery',
+            labelText:   l10n?.institutionPlaceOfDelivery ??
+                'Institutional place of delivery',
           ),
 
           const SizedBox(height: 8),
           if (state.nonInstitutionalPlaceType == 'Other') ...[
             CustomTextField(
-              labelText: 'Enter name of other non-institutional delivery',
+              labelText: l10n?.enterOtherNonInstitutionalDelivery,
               hintText: 'Enter name',
               initialValue: state.otherNonInstitutionalPlaceName ?? '',
               onChanged: (v) => bloc.add(OtherNonInstitutionalPlaceNameChanged(v)),
@@ -426,7 +507,6 @@ class _OutcomeFormFields extends StatelessWidget {
             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
             ApiDropdown<String>(
               items: [
-
                 'Ambulance',
                 'Other',
               ],

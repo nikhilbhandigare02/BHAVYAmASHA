@@ -1021,7 +1021,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 switch (s) {
                                   case 'ANC':
                                     return l10n?.anc ?? '';
-                                  case 'Female':
+                                  case 'PMSMA':
                                     return l10n?.pmsma ?? '';
                                   default:
                                     return s;
@@ -1250,7 +1250,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   l10n?.weeksOfPregnancyLabel ??
                                   'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
-                              readOnly: true,
+                              // readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) =>
                                   bloc.add(WeeksOfPregnancyChanged(v)),
@@ -2299,7 +2299,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                           ).showSnackBar(
                                              SnackBar(
                                               content: Text(
-                                                "Please select visit type",
+                                                l10n?.selectVisitTypeError ??  "Please select visit type",
                                               ),
                                               duration: Duration(seconds: 2),
                                             ),
