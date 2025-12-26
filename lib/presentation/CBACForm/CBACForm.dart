@@ -1185,7 +1185,7 @@ class _PartBTab extends StatelessWidget {
                   builder: (context, state) {
                     return ApiDropdown<String>(
                       labelText: question,
-                      hintText: 'Select Option',
+                      hintText: l10n.select,
                       labelFontSize: 15.sp,
                       items: [l10n.yes, l10n.no],
                       getLabel: (s) => s,
@@ -1744,7 +1744,7 @@ class _PartDTab extends StatelessWidget {
                     width: 300,
                     child: ApiDropdown<String>(
                       labelText: question,
-                      hintText: 'Select Option',
+                      hintText: l10n.select,
                       labelFontSize: 15.sp,
                       items: options,
                       getLabel: (s) => s,
