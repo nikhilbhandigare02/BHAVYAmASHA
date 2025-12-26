@@ -2342,5 +2342,7 @@
   "diseaseKidney": "Kidney Disease",
   "diseaseEpilepsy": "Epilepsy",
   "pleaseSpecifyOtherDisease": "Please specify other disease",
-  "calciumVitaminD3TabletsLabel": "Number of Calcium and Vitamin D3 tablets given"
+  "calciumVitaminD3TabletsLabel": "Number of Calcium and Vitamin D3 tablets given",
+
+  "selectVisitTypeError": "Please select visit type"
 }
