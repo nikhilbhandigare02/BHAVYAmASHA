@@ -1050,10 +1050,13 @@ class LocalStorageDao {
         WHERE modified_date_time IS NOT NULL AND modified_date_time != ''
       ''');
 
-      if (result.isNotEmpty && result.first['last_sync'] != null) {
-        return DateTime.tryParse(result.first['last_sync'] as String);
-      }
-      return null;
+      final dbTime = (result.isNotEmpty && result.first['last_sync'] != null)
+          ? DateTime.tryParse(result.first['last_sync'] as String)
+          : null;
+      final storedTime = await SecureStorageService.getLastSyncTimeStored();
+      if (dbTime == null) return storedTime;
+      if (storedTime == null) return dbTime;
+      return dbTime.isAfter(storedTime) ? dbTime : storedTime;
     } catch (e) {
       print('Error getting last sync time: $e');
       return null;

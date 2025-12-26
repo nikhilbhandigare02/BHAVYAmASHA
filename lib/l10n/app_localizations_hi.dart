@@ -6770,4 +6770,31 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get filariasisProgram => 'फाइलेरिया उन्मूलन कार्यक्रम';
+
+  @override
+  String get validateEmptyUsername => 'कृपया उपयोगकर्ता का नाम दर्ज करें';
+
+  @override
+  String get validateEmptyCP => 'कृपया वर्तमान पासवर्ड दर्ज करें';
+
+  @override
+  String get validateEmptyNP => 'कृपया नया पासवर्ड दर्ज करें';
+
+  @override
+  String get validateEmptyRRP => 'कृपया पुनः नया पासवर्ड दर्ज करें';
+
+  @override
+  String get cpAndNPNotSame => 'वर्तमान पासवर्ड और नया पासवर्ड एक समान नहीं हो सकते.';
+
+  @override
+  String get npAndRRPValidation => 'नया पासवर्ड और दोबारा दर्ज किया गया पासवर्ड एक ही होना चाहिए।';
+
+  @override
+  String get errorMsg => 'एक त्रुटि हुई थी। कृपया दोबारा प्रयास करें।';
+
+  @override
+  String get failUpdatePassMsg => 'पासवर्ड अपडेट करने में विफल';
+
+  @override
+  String get successUpdatePassMsg => 'आपका पासवर्ड सफलतापूर्वक बदल दिया गया है।';
 }

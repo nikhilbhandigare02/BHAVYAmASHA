@@ -23,6 +23,7 @@ class Abhalinkscreen extends StatefulWidget {
 
 class _AbhalinkscreenState extends State<Abhalinkscreen> {
   final AbhaLoginRepository repo = AbhaLoginRepository();
+  var abdmEndExt = '@sbx';
   Timer? _timer;
   int _remainingSeconds = 0;
   bool _showTimer = false;
@@ -71,7 +72,7 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
     });
 
     try {
-      final fullAbha = "$healthInput@abdm";
+      final fullAbha = "$healthInput$abdmEndExt";
       final result = await repo.fetchModes(fullAbha);
 
       print("📥 API Response: $result");
@@ -405,7 +406,7 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
               onTap: disableButtons
                   ? null
                   : () async {
-                final healthId = "${_addressController.text.trim()}@abdm";
+                final healthId = "${_addressController.text.trim()}$abdmEndExt";
 
                 await requestOtp(
                   healthId,
@@ -519,7 +520,7 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
             setState(() {
               _selectedAuthMethod = v;
             });
-            final healthId = "${_addressController.text.trim()}@abdm";
+            final healthId = "${_addressController.text.trim()}$abdmEndExt";
             requestOtp(healthId, v);
           },
         ),
@@ -531,8 +532,8 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
 
 class _AbhaInput extends StatelessWidget {
   final TextEditingController controller;
-  const _AbhaInput({required this.controller, super.key});
-
+   _AbhaInput({required this.controller, super.key});
+  var abdmEndExt = '@sbx';
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -562,8 +563,8 @@ class _AbhaInput extends StatelessWidget {
             ),
           ),
 
-          const Text(
-            '@abdm',
+           Text(
+            '$abdmEndExt',
             style: TextStyle(
               color: Colors.black87,
               fontWeight: FontWeight.w600,

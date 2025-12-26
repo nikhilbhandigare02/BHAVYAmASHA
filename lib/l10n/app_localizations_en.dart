@@ -5011,7 +5011,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get synced => 'Synced';
 
   @override
-  String get noDataFound => 'No data found';
+  String get noDataFound => 'No Record found';
 
   @override
   String get newHouseholdRegistration => 'NEW HOUSEHOLD REGISTRATION';
@@ -6770,4 +6770,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filariasisProgram => 'Filaria Eradication Program';
+
+  @override
+  String get validateEmptyUsername => 'Please enter the username';
+
+  @override
+  String get validateEmptyCP => 'Please enter the current password';
+
+  @override
+  String get validateEmptyNP => 'Please enter the new password';
+
+  @override
+  String get validateEmptyRRP => 'Please re-enter the new password';
+
+  @override
+  String get cpAndNPNotSame => 'The Current password and the new password can not be same.';
+
+  @override
+  String get npAndRRPValidation => 'The new password and the re-entered password must be the same.';
+
+  @override
+  String get errorMsg => 'An error occurred. Please try again.';
+
+  @override
+  String get failUpdatePassMsg => 'Failed to update password';
+
+  @override
+  String get successUpdatePassMsg => 'Your password has been changed successfully';
 }

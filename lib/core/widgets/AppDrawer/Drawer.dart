@@ -27,6 +27,15 @@ class _CustomDrawerState extends State<CustomDrawer> {
   Map<String, dynamic>? userData;
   bool isLoading = true;
   bool isSyncing = false;
+  String _twoDigits(int n) => n.toString().padLeft(2, '0');
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour % 12 == 0 ? 12 : dateTime.hour % 12;
+    final period = dateTime.hour < 12 ? 'am' : 'pm';
+    return '${_twoDigits(hour)}:${_twoDigits(dateTime.minute)}$period';
+  }
+  String _formatDateTime(DateTime dateTime) {
+    return '${_twoDigits(dateTime.day)}-${_twoDigits(dateTime.month)}-${dateTime.year} ${_formatTime(dateTime)}';
+  }
 
   @override
   void initState() {
@@ -276,74 +285,69 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       _buildMenuItem(context, 'assets/images/rupee.png', l10n.drawerIncentivePortal, onTap: () {
                         Navigator.pushNamed(context, Route_Names.incentivePortal);
                       }),
-                      _buildMenuItem(context, 'assets/images/fetch.png', l10n.drawerFetchData, onTap: () async {
+                      _buildMenuItem(context, 'assets/images/fetch.png', l10n.drawerFetchData, onTap: () {
                         final onCompleted = widget.onSyncCompleted;
-                        if (isSyncing) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Sync already in progress')),
-                          );
-                          return;
-                        }
-                        setState(() {
-                          isSyncing = true;
-                        });
-
                         final scaffoldMessenger = ScaffoldMessenger.of(context);
-                        scaffoldMessenger.hideCurrentSnackBar();
-                        final controller = scaffoldMessenger.showSnackBar(
-                          const SnackBar(
-                            content: Text('Data is being fetched...'),
-                            duration: Duration(seconds: 5), // Show for 20 seconds
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
+                        final scaffoldState = Scaffold.maybeOf(context);
 
-                        try { 
-                          // Start the sync operation
-                          // await SyncService.instance.runFullSyncOnce();
-                          await SyncApiCall.allGetApicall();
+                        if (scaffoldState != null && scaffoldState.isDrawerOpen) {
+                          Navigator.pop(context);
+                        }
 
-                          // If still mounted and sync completed successfully
-                          if (mounted) {
-                            // Remove the loading snackbar if still showing
-                            scaffoldMessenger.hideCurrentSnackBar();
-
-                            // Show success message
+                        Future.microtask(() async {
+                          if (isSyncing) {
                             scaffoldMessenger.showSnackBar(
-                              const SnackBar(
-                                content: Text('Data sync completed'),
-                                duration: Duration(seconds: 3),
-                              ),
+                              const SnackBar(content: Text('Sync already in progress')),
                             );
-
-                            // Close drawer if it's open
-                            final scaffoldState = Scaffold.maybeOf(context);
-                            if (scaffoldState != null && scaffoldState.isDrawerOpen) {
-                              Navigator.pop(context);
-                            }
+                            return;
                           }
 
-                          // Notify parent (HomeScreen)
-                          onCompleted?.call();
-                        } catch (e) {
-                          if (!mounted) return;
-
-                          // Remove loading snackbar and show error
-                          scaffoldMessenger
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(
-                              SnackBar(
-                                content: Text('Sync failed: ${e.toString()}'),
-                                duration: const Duration(seconds: 4),
-                              ),
-                            );
-                        } finally {
                           if (mounted) {
                             setState(() {
-                              isSyncing = false;
+                              isSyncing = true;
                             });
                           }
-                        }
+
+                          scaffoldMessenger.hideCurrentSnackBar();
+                          scaffoldMessenger.showSnackBar(
+                            const SnackBar(
+                              content: Text('Data is being fetched'),
+                              duration: Duration(seconds: 5),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+
+                          try {
+                            await SyncApiCall.allGetApicall();
+                            scaffoldMessenger.hideCurrentSnackBar();
+                            final now = DateTime.now();
+                            await SecureStorageService.saveLastSyncTime(now);
+                            final formatted = _formatDateTime(now);
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                content: Text('Data fetching completed'),
+                                duration: const Duration(seconds: 3),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            onCompleted?.call();
+                          } catch (e) {
+                            scaffoldMessenger
+                              ..hideCurrentSnackBar()
+                              ..showSnackBar(
+                                SnackBar(
+                                  content: Text('Sync failed: ${e.toString()}'),
+                                  duration: const Duration(seconds: 4),
+                                ),
+                              );
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                isSyncing = false;
+                              });
+                            }
+                          }
+                        });
                       }),
                       _buildMenuItem(context, 'assets/images/refresh-button.png', l10n.drawerSyncedData, onTap: () {
                         Navigator.pushNamed(context, Route_Names.SyncStatusScreen);

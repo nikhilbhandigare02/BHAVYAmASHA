@@ -868,12 +868,9 @@ class _TodayworkState extends State<Todaywork> {
           continue;
         }
       }
-
-      // Removed duplicate ANC due items query as we're now handling this in the main query above
-
-      if (mounted) {
+        if (mounted) {
         setState(() {
-          _ancItems = items; // Use the already filtered items list
+          _ancItems = items;
         });
         _saveTodayWorkCountsToStorage();
         debugPrint('Updated _ancItems with ${items.length} filtered records');
@@ -1064,8 +1061,6 @@ class _TodayworkState extends State<Todaywork> {
     }
   }
 
-  /// HBNC helper: get next visit date formatted as dd-MM-yyyy, same logic as
-  /// HBNCList._getNextVisitDate
   Future<String?> _getHbncNextVisitDateForDisplay(
       String beneficiaryId,
       String? deliveryDate,

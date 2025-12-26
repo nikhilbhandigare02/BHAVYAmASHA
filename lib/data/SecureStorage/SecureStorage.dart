@@ -15,6 +15,7 @@ class SecureStorageService {
   static const String _keyTodayToDoCount = 'today_todo_visits_count';
   static const String _keyTodayCompletedCount = 'today_completed_visits_count';
   static const String _keyHouseholdAdults = 'household_adults_summary';
+  static const String _keyLastSyncTime = 'last_sync_time';
 
 
   static Future<void> saveToken(String token) async {
@@ -565,5 +566,15 @@ class SecureStorageService {
       print('Error reading household adults summary: $e');
       return [];
     }
+  }
+
+  static Future<void> saveLastSyncTime(DateTime dateTime) async {
+    await _storage.write(key: _keyLastSyncTime, value: dateTime.toIso8601String());
+  }
+
+  static Future<DateTime?> getLastSyncTimeStored() async {
+    final value = await _storage.read(key: _keyLastSyncTime);
+    if (value == null || value.isEmpty) return null;
+    return DateTime.tryParse(value);
   }
 }
