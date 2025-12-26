@@ -2307,13 +2307,62 @@ class _ABHAScreenState extends State<ABHAScreen> {
                             shrinkWrap: true,
                             itemCount: listABHAID.length ?? 0,
                             itemBuilder: (BuildContext context, int index) {
-                              return RadioListTile(
+                              return Card(
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'ABHA Address Linked!',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+
+                                      _rowText('Name', '${verifyOtpAadhaar?.aBHAProfile?.firstName??''} ${verifyOtpAadhaar?.aBHAProfile?.middleName??''} ${verifyOtpAadhaar?.aBHAProfile?.lastName??''}'),
+                                      _rowText('Gender', verifyOtpAadhaar?.aBHAProfile?.gender??''),
+                                      _rowText('Health ID', listABHAID[index].abhaId ?? ''),
+                                      _rowText('Abha No', verifyOtpAadhaar?.aBHAProfile?.aBHANumber??''),
+                                    ],
+                                  ),
+                                                                ),
+                                ),)
+
+
+                                /*RadioListTile(
                                 dense: true,
-                                title: Text(listABHAID[index].abhaId ?? '',
+                                title:  Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'ABHA Address Linked!',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+
+                                      _rowText('Name', '${verifyOtpAadhaar?.aBHAProfile?.firstName??''} ${verifyOtpAadhaar?.aBHAProfile?.middleName??''} ${verifyOtpAadhaar?.aBHAProfile?.lastName??''}'),
+                                      _rowText('Gender', verifyOtpAadhaar?.aBHAProfile?.gender??''),
+                                      _rowText('Health ID', listABHAID[index].abhaId ?? ''),
+                                      _rowText('Abha No', verifyOtpAadhaar?.aBHAProfile?.aBHANumber??''),
+                                    ],
+                                  ),
+                                ),
+
+
+                                    *//* Text(listABHAID[index].abhaId ?? '',
                                     style: TextStyle(
                                         color: Colors.black,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 13)),
+                                        fontSize: 13)),*//*
                                 // Display the title for option 1
                                 // subtitle: Text('Subtitle for Option 1'), // Display a subtitle for option 1
                                 value: listABHAID[index].abhaId ?? '',
@@ -2326,7 +2375,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                         value!; // Update _selectedValue when option 1 is selected
                                   });
                                 },
-                              );
+                              )*/;
                             }),
                       ),
                     ),
@@ -2465,6 +2514,24 @@ class _ABHAScreenState extends State<ABHAScreen> {
           textAlign: TextAlign.center,
         ),*/
         ],
+      ),
+    );
+  }
+
+  Widget _rowText(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: RichText(
+        text: TextSpan(
+          style: TextStyle(color: Colors.black, fontSize: 12),
+          children: [
+            TextSpan(
+              text: '$label: ',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            TextSpan(text: value),
+          ],
+        ),
       ),
     );
   }

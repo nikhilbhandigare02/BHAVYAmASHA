@@ -2370,7 +2370,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             _saveTodayWorkCountsToStorage();
           }
         } else if (badge == 'RI') {
-          // Navigate to Child Tracking Due List form for Routine Immunization
+
           final hhKey =
               item['household_ref_key']?.toString() ??
               item['hhId']?.toString() ??
