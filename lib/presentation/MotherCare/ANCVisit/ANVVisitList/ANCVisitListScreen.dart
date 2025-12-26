@@ -293,7 +293,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         'unique_key_display': uniqueKeyDisplay,
         'BeneficiaryID_display': uniqueKeyDisplay,
         'hhId_display': householdRefKeyDisplay,
-        // Other fields
         'Name': name,
         'Age': age?.toString() ?? 'N/A',
         'Gender': 'Female',
@@ -309,6 +308,9 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       return null;
     }
   }
+
+
+
 
   int? _calculateAge(dynamic dob) {
     if (dob == null) return null;
@@ -455,7 +457,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     final beneficiaryId = data['BeneficiaryID']?.toString() ?? '';
     final hhId = data['hhId']?.toString() ?? '';
 
-    // Use DISPLAY versions for UI
     final uniqueKeyDisplay = data['unique_key_display']?.toString() ?? data['BeneficiaryID_display']?.toString() ?? '';
     final hhIdDisplay = data['hhId_display']?.toString() ?? '';
 
@@ -466,7 +467,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () async {
-        // Get the visit count and high risk status before navigating
         final visitData = await (beneficiaryId.isNotEmpty
             ? _getVisitCount(beneficiaryId)
             : Future.value({'count': 0, 'isHighRisk': false}));
@@ -658,7 +658,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // First Row: 6 items - use DISPLAY version (trimmed)
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,

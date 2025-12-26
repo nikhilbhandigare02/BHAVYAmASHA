@@ -395,23 +395,40 @@ Mother Care Counts:
 
   static Future<Set<String>> _getAncDueBeneficiaryIds() async {
     final db = await DatabaseProvider.instance.database;
-
-    final rows = await db.rawQuery('''
-     SELECT mca.*
+    final currentUserData = await SecureStorageService.getCurrentUserData();
+    final String? ashaUniqueKey =
+    currentUserData?['unique_key']?.toString();
+    final rows = await db.rawQuery(
+      '''
+SELECT mca.*
 FROM mother_care_activities mca
 INNER JOIN (
-    SELECT beneficiary_ref_key,
-           MAX(created_date_time) AS max_date
+    SELECT
+        beneficiary_ref_key,
+        MAX(created_date_time) AS max_date
     FROM mother_care_activities
     WHERE mother_care_state = 'anc_due'
+      AND is_deleted = 0
+      AND current_user_key = ?        -- ✅ ASHA filter (subquery)
     GROUP BY beneficiary_ref_key
 ) latest
   ON mca.beneficiary_ref_key = latest.beneficiary_ref_key
  AND mca.created_date_time = latest.max_date
 INNER JOIN beneficiaries_new bn
   ON mca.beneficiary_ref_key = bn.unique_key
-WHERE bn.is_deleted = 0;
-  ''');
+WHERE bn.is_deleted = 0
+  AND bn.is_migrated = 0
+  AND bn.current_user_key = ?         -- ✅ ASHA filter (beneficiary)
+  AND mca.is_deleted = 0
+  AND mca.current_user_key = ?        -- ✅ ASHA filter (main table)
+ORDER BY mca.created_date_time DESC
+''',
+      [
+        ashaUniqueKey,
+        ashaUniqueKey, // beneficiaries_new
+        ashaUniqueKey, // mother_care_activities
+      ],
+    );
 
     return rows
         .map((e) => e['beneficiary_ref_key']?.toString())
@@ -445,13 +462,16 @@ WITH LatestMCA AS (
     ) AS rn
   FROM ${MotherCareActivitiesTable.table} mca
   WHERE mca.is_deleted = 0
+    AND mca.current_user_key = ?        -- ✅ ASHA filter
 ),
+
 DeliveryOutcomeOnly AS (
   SELECT *
   FROM LatestMCA
   WHERE rn = 1
     AND mother_care_state = 'delivery_outcome'
 ),
+
 LatestANC AS (
   SELECT
     f.beneficiary_ref_key,
@@ -461,11 +481,11 @@ LatestANC AS (
       ORDER BY f.created_date_time DESC, f.id DESC
     ) AS rn
   FROM ${FollowupFormDataTable.table} f
-  WHERE
-    f.forms_ref_key = ?
+  WHERE f.forms_ref_key = ?
     AND f.is_deleted = 0
-    AND f.current_user_key = ?
+    AND f.current_user_key = ?          -- ✅ ASHA filter
 )
+
 SELECT
   d.beneficiary_ref_key,
   d.household_ref_key,
@@ -479,10 +499,12 @@ LEFT JOIN LatestANC a
 ORDER BY d.created_date_time DESC
 ''',
         [
+          ashaUniqueKey,
           ancRefKey,
           ashaUniqueKey,
         ],
       );
+
 
       if (results.isEmpty) {
         return {
@@ -771,17 +793,26 @@ ORDER BY d.created_date_time DESC
   static Future<Map<String, int>> _getHBNCCount() async {
     final db = await DatabaseProvider.instance.database;
     const deliveryOutcomeKey = '4r7twnycml3ej1vg';
-
+    final currentUserData = await SecureStorageService.getCurrentUserData();
+    final String? ashaUniqueKey =
+    currentUserData?['unique_key']?.toString();
     try {
-      // First, get all beneficiary_ref_keys that have either pnc_mother or hbnc_visit state
-      final validBeneficiaries = await db.rawQuery('''
-    SELECT DISTINCT mca.beneficiary_ref_key,
-           MAX(CASE WHEN mca.is_synced = 1 THEN 1 ELSE 0 END) as has_synced
-    FROM mother_care_activities mca
-    WHERE mca.mother_care_state IN ('pnc_mother', 'pnc_mother')
-    AND mca.is_deleted = 0
-    GROUP BY mca.beneficiary_ref_key
-  ''');
+      final validBeneficiaries = await db.rawQuery(
+        '''
+SELECT
+  mca.beneficiary_ref_key,
+  MAX(CASE WHEN mca.is_synced = 1 THEN 1 ELSE 0 END) AS has_synced
+FROM mother_care_activities mca
+WHERE mca.mother_care_state = 'pnc_mother'
+  AND mca.is_deleted = 0
+  AND mca.current_user_key = ?      -- ✅ ASHA filter
+GROUP BY mca.beneficiary_ref_key
+''',
+        [
+          ashaUniqueKey,
+        ],
+      );
+
 
       if (validBeneficiaries.isEmpty) {
         print('ℹ️ No beneficiaries found with pnc_mother or pnc_mother state');
@@ -791,7 +822,6 @@ ORDER BY d.created_date_time DESC
       final beneficiaryKeys = validBeneficiaries.map((e) => e['beneficiary_ref_key'] as String).toList();
       final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
 
-      // Get delivery outcome records only for valid beneficiaries
       final deliveryOutcomeBeneficiaries = await db.rawQuery('''
     SELECT DISTINCT beneficiary_ref_key 
     FROM followup_form_data ffd

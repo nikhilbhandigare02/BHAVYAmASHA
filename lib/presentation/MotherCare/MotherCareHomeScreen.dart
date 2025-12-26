@@ -218,13 +218,16 @@ WITH LatestMCA AS (
     ) AS rn
   FROM ${MotherCareActivitiesTable.table} mca
   WHERE mca.is_deleted = 0
+    AND mca.current_user_key = ?          -- ✅ ASHA filter
 ),
+
 DeliveryOutcomeOnly AS (
   SELECT *
   FROM LatestMCA
   WHERE rn = 1
     AND mother_care_state = 'delivery_outcome'
 ),
+
 LatestANC AS (
   SELECT
     f.beneficiary_ref_key,
@@ -234,12 +237,12 @@ LatestANC AS (
       ORDER BY f.created_date_time DESC, f.id DESC
     ) AS rn
   FROM ${FollowupFormDataTable.table} f
-  WHERE
-    f.forms_ref_key = ?
+  WHERE f.forms_ref_key = ?
     AND f.is_deleted = 0
     AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
-    AND f.current_user_key = ?
+    AND f.current_user_key = ?            -- ✅ ASHA filter
 )
+
 SELECT
   d.beneficiary_ref_key
 FROM DeliveryOutcomeOnly d
@@ -249,10 +252,12 @@ LEFT JOIN LatestANC a
 ORDER BY d.created_date_time DESC
 ''',
         [
+          ashaUniqueKey,
           ancRefKey,
           ashaUniqueKey,
         ],
       );
+
 
       print('✅ Delivery Outcome Count = ${results.length}');
 

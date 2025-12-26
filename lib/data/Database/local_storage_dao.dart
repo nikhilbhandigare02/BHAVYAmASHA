@@ -480,33 +480,26 @@ class LocalStorageDao {
         print('🔍 Form JSON for $beneficiaryId: $formJson');
         if (formJson != null) {
           try {
-            final formData = jsonDecode(formJson) as Map<String, dynamic>;
-            print('🔍 Parsed form data: $formData');
+            final decoded = jsonDecode(formJson) as Map<String, dynamic>;
+            print('🔍 Parsed form data: $decoded');
 
-            // Check if form_data exists and has high_risk field
-            if (formData['anc_form'] != null &&
-                formData['anc_form'] is Map &&
-                formData['anc_form']['high_risk'] != null) {
-
-              final highRiskValue = formData['anc_form']['high_risk'].toString().toLowerCase();
-              print('🔍 Found high_risk in form_data: $highRiskValue');
-
-              isHighRisk = highRiskValue == 'yes' ||
-                  highRiskValue == 'true' ||
-                  highRiskValue == '1' ||
-                  highRiskValue == 'yes';
-            } else {
-              print('⚠️ high_risk field not found in form_data');
+            // Check for high risk in form_data/anc_form
+            final data = decoded['form_data'] ?? decoded['anc_form'];
+            if (data is Map<String, dynamic>) {
+              final hr = data['high_risk'] ?? data['is_high_risk'];
+              isHighRisk = hr == true ||
+                  hr == 1 ||
+                  (hr is String && ['true', 'yes', '1'].contains(hr.toLowerCase()));
+              print('🔍 High risk status from form_data/anc_form: $isHighRisk');
             }
 
-            // Also check top level for backward compatibility
-            if (!isHighRisk && formData['high_risk'] != null) {
-              final highRiskValue = formData['high_risk'].toString().toLowerCase();
-              print('🔍 Found high_risk at top level: $highRiskValue');
-              isHighRisk = highRiskValue == 'yes' ||
-                  highRiskValue == 'true' ||
-                  highRiskValue == '1' ||
-                  highRiskValue == 'yes';
+            // If still not high risk, check top level for backward compatibility
+            if (!isHighRisk) {
+              final hr = decoded['high_risk'] ?? decoded['is_high_risk'];
+              isHighRisk = hr == true ||
+                  hr == 1 ||
+                  (hr is String && ['true', 'yes', '1'].contains(hr.toLowerCase()));
+              print('🔍 High risk status from top level: $isHighRisk');
             }
 
             print('🔍 Final high risk status for $beneficiaryId: $isHighRisk');
@@ -525,7 +518,6 @@ class LocalStorageDao {
       return {'count': 0, 'isHighRisk': false};
     }
   }
-
   Future<List<Map<String, dynamic>>> getAncFormsByBeneficiaryId(String beneficiaryId) async {
     try {
       final db = await _db;
