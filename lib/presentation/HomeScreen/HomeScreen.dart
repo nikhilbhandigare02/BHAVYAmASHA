@@ -779,6 +779,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                         ancVisitCount: ancVisitCount,
                         childRegisteredCount: childRegisteredCount,
                         highRiskCount: highRiskCount,
+                        ncdCount: ncdCount,
                         selectedGridIndex: selectedGridIndex,
                         onGridTap: (index) =>
                             setState(() => selectedGridIndex = index),

@@ -248,6 +248,7 @@ class _UpdatedEligibleCoupleListScreenState
     final beneficiary_ref = (row['unique_key']?.toString() ?? '');
     final uniqueKey = (row['unique_key']?.toString() ?? '');
     final createdDate = row['created_date_time']?.toString() ?? '';
+    final l10n = AppLocalizations.of(context)!;
 
     // Extract member info
     final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
@@ -279,7 +280,9 @@ class _UpdatedEligibleCoupleListScreenState
       'spouseName': spouseName,
       'partnerName': spouseName,  // For backward compatibility
       'dob': dob,
-      'status': isFamilyPlanning ? 'Protected' : 'Unprotected',
+      'status': isFamilyPlanning
+          ? l10n.protected
+          : l10n.unprotected,
       'is_family_planning': isFamilyPlanning,
     };
   }

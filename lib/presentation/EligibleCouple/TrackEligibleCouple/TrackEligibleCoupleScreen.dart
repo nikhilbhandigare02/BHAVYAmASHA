@@ -606,7 +606,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                         minimumSize:  Size.fromHeight(4.5.h),
                       ),
                       child: Text(
-                        t?.previousButton ?? 'पिछला पेज',
+                        t?.previousVisits ?? 'पिछला पेज',
                         style: TextStyle(
                           color: AppColors.background,
                           fontSize: 15.sp,

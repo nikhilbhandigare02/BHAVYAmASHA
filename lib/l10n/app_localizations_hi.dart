@@ -637,16 +637,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacC_fuelQ => 'खाना पकाने के लिए किस प्रकार का ईंधन उपयोग होता है?';
 
   @override
-  String get cbacConsentAgree => 'सहमत';
+  String get cbacConsentAgree => 'सहमत होना';
 
   @override
-  String get cbacConsentBody => 'मुझे आशा द्वारा उस उद्देश्य के बारे में समझाया गया है जिसके लिए मुझसे जानकारी और माप संबंधी निष्कर्ष एकत्र किए जा रहे हैं, ऐसी भाषा में जिसे मैं समझता/समझती हूँ और मैं अपनी व्यक्तिगत स्वास्थ्य प्रोफ़ाइल पर जानकारी और माप संबंधी निष्कर्ष एकत्र करने की सहमति देता/देती हूँ।';
+  String get cbacConsentBody => 'ममुझे आशा द्वारा समझाया गया है, जिस उद्देश्य के लिए मुझसे जानकारी और माप निष्कर्ष एकत्र किए जा रहे हैं, उस भाषा में जिसे मैं समझता हूं और मैं अपने व्यक्तिगत स्वास्थ्य प्रोफ़ाइल पर जानकारी और माप निष्कर्ष एकत्र करने के लिए अपनी सहमति देता हूं।';
 
   @override
   String get cbacConsentDisagree => 'असहमत';
 
   @override
-  String get cbacConsentTitle => 'सहमति फ़ॉर्म';
+  String get cbacConsentTitle => 'सहमति पत्र';
 
   @override
   String get cbacD_opt0 => 'कभी नहीं';
@@ -968,7 +968,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get disabilityPhysicallyHandicap => 'शारीरिक रूप से विकलांग';
 
   @override
-  String get disabilityQuestionLabel => 'क्या व्यक्ति को निम्न में से कोई समस्या है';
+  String get disabilityQuestionLabel => 'क्या व्यक्ती की स्थिती निम्न मे से एक है';
 
   @override
   String get disabilityVisualImpairment => 'दृष्टि बाधित';
@@ -1456,7 +1456,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get idTypeVoterId => 'वोटर आईडी';
 
   @override
-  String get identificationTypeLabel => 'पहचान का प्रकार';
+  String get identificationTypeLabel => 'पहचान प्रकार';
 
   @override
   String get ifscHint => 'आईएफएससी कोड';
@@ -2304,7 +2304,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get unmarried => 'अविवाहित';
 
   @override
-  String get updateButton => 'अपडेट करें';
+  String get updateButton => 'अपडेट';
 
   @override
   String get updatedEligibleCoupleListSubtitle => 'योग्य दम्पत्ति सूची';
@@ -2331,7 +2331,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get userRoleLabel => 'भूमिका:';
 
   @override
-  String get userVillageLabel => 'गाँव';
+  String get userVillageLabel => 'ग्राम';
 
   @override
   String get usernameEmpty => 'उपयोगकर्ता का नाम खाली नहीं हो सकता';
@@ -3216,7 +3216,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get memberRemainsToAdd => 'जोड़ने के लिए बचे हुए सदस्यों की संख्या';
 
   @override
-  String get cbac => 'सीबीएसी';
+  String get cbac => 'सीबीएसी फ़ॉर्म';
 
   @override
   String get videoTutorialList => 'वीडियो शिक्षण की सूची';
@@ -6688,10 +6688,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get present => 'उपस्थित है?';
 
   @override
-  String get hscNameHint => 'एच.एस.सी. का नाम';
+  String get hscNameHint => 'उप स्वास्थ्य केंद्र का नाम';
 
   @override
-  String get hscNameLabel => 'एच.एस.सी. का नाम';
+  String get hscNameLabel => 'उप स्वास्थ्य केंद्र का नाम';
 
   @override
   String get hwcNameHint => 'एच.डब्ल्यू.सी. का नाम';
@@ -6830,4 +6830,13 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get calciumVitaminD3TabletsLabel => 'दी गई कैल्शियम एवं विटामिन डी3 गोलियों की संख्या';
+
+  @override
+  String get protected => 'सुरक्षित';
+
+  @override
+  String get unprotected => 'असुरक्षित';
+
+  @override
+  String get identificationNumber => 'पहचान संख्या';
 }

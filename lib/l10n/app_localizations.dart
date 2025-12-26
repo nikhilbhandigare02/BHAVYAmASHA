@@ -13708,6 +13708,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Number of Calcium and Vitamin D3 tablets given'**
   String get calciumVitaminD3TabletsLabel;
+
+  /// No description provided for @protected.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected'**
+  String get protected;
+
+  /// No description provided for @unprotected.
+  ///
+  /// In en, this message translates to:
+  /// **'Unprotected'**
+  String get unprotected;
+
+  /// No description provided for @identificationNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Identification Number'**
+  String get identificationNumber;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
