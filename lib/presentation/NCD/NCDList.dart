@@ -225,6 +225,8 @@ class _NCDHomeState extends State<Ncdlist> {
   }
 
   // 🧱 Household Card UI - Now fully tappable
+// Fix the _householdCard method with proper null handling:
+
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
@@ -246,7 +248,6 @@ class _NCDHomeState extends State<Ncdlist> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // Navigate to detail screen when card is tapped
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -273,7 +274,7 @@ class _NCDHomeState extends State<Ncdlist> {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        data['hhId'] ?? l10n?.na ?? 'N/A',
+                        data['hhId']?.toString() ?? l10n?.na ?? 'N/A',
                         style: TextStyle(
                             color: primary,
                             fontWeight: FontWeight.w600,
@@ -281,7 +282,6 @@ class _NCDHomeState extends State<Ncdlist> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    // Optional: Add arrow icon to indicate it's tappable
                     Icon(Icons.arrow_forward_ios,
                         color: Colors.black54,
                         size: 16),
@@ -301,35 +301,63 @@ class _NCDHomeState extends State<Ncdlist> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildRow([
-                      _rowText(l10n?.registrationDateLabel ?? 'Registration Date',
-                          data['RegitrationDate']),
-                      _rowText(l10n?.registrationTypeLabel ?? 'Registration Type',
-                          data['RegitrationType']),
-                      _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
-                          data['BeneficiaryID']),
+                      _rowText(
+                          l10n?.registrationDateLabel ?? 'Registration Date',
+                          data['RegitrationDate']?.toString() ?? 'N/A'
+                      ),
+                      _rowText(
+                          l10n?.registrationTypeLabel ?? 'Registration Type',
+                          data['RegitrationType']?.toString() ?? 'N/A'
+                      ),
+                      _rowText(
+                          l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
+                          data['BeneficiaryID']?.toString() ?? 'N/A'
+                      ),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
                       _rowText(
-                          l10n?.villageLabel ?? 'Village', data['village']),
-                      _rowText(l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla',
-                          data[l10n?.tolaMohalla ??'Tola/Mohalla']),
-                      _rowText('RCH ID', data['RichID']),
+                          l10n?.villageLabel ?? 'Village',
+                          data['village']?.toString() ?? 'N/A'
+                      ),
+                      _rowText(
+                          l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla',
+                          data['Tola/Mohalla']?.toString() ?? 'N/A'  // FIXED: Use actual key
+                      ),
+                      _rowText(
+                          'RCH ID',
+                          data['RichID']?.toString() ?? 'N/A'
+                      ),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText(l10n?.thName ?? 'Name', data['Name']),
-                      _rowText(l10n?.ageGenderLabel ?? 'Age | Gender',
-                          data['Age|Gender']),
-                      _rowText(l10n?.mobileLabelSimple ?? 'Mobile No.',
-                          data['Mobileno.']),
+                      _rowText(
+                          l10n?.thName ?? 'Name',
+                          data['Name']?.toString() ?? 'N/A'
+                      ),
+                      _rowText(
+                          l10n?.ageGenderLabel ?? 'Age | Gender',
+                          data['Age|Gender']?.toString() ?? 'N/A'
+                      ),
+                      _rowText(
+                          l10n?.mobileLabelSimple ?? 'Mobile No.',
+                          data['Mobileno.']?.toString() ?? 'N/A'
+                      ),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText(l10n?.fatherNameLabel ?? 'Father Name',
-                          data['FatherName']),
-                      _rowText(l10n?.husbandName ??'Husband Name', data['HusbandName']),
-                      _rowText(l10n?.wifeName ??'Wife Name', data['WifeName']),
+                      _rowText(
+                          l10n?.fatherNameLabel ?? 'Father Name',
+                          data['FatherName']?.toString() ?? 'N/A'
+                      ),
+                      _rowText(
+                          l10n?.husbandName ?? 'Husband Name',
+                          data['HusbandName']?.toString() ?? 'N/A'
+                      ),
+                      _rowText(
+                          l10n?.wifeName ?? 'Wife Name',
+                          data['WifeName']?.toString() ?? 'N/A'
+                      ),
                     ]),
                   ],
                 ),
@@ -340,7 +368,6 @@ class _NCDHomeState extends State<Ncdlist> {
       ),
     );
   }
-
   Widget _buildRow(List<Widget> children) {
     return Row(
       children: [

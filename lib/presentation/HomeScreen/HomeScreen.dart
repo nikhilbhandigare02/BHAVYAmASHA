@@ -89,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       final roleId = details['app_role_id'];
       final parsedRoleId = int.tryParse(roleId.toString()) ?? 0;
 
-      print("FETCHED APP ROLE ID: $parsedRoleId"); // You will see this in logs
+      print("FETCHED APP ROLE ID: $parsedRoleId");
 
       if (mounted) {
         setState(() {
@@ -518,7 +518,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         });
       }
     } catch (e) {
-      print('Error loading NCD (CBAC) forms count: $e');
+      debugPrint('Error loading NCD forms count: $e');
     }
   }
 
@@ -779,6 +779,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                         ancVisitCount: ancVisitCount,
                         childRegisteredCount: childRegisteredCount,
                         highRiskCount: highRiskCount,
+                        ncdCount: ncdCount,
                         selectedGridIndex: selectedGridIndex,
                         onGridTap: (index) =>
                             setState(() => selectedGridIndex = index),
