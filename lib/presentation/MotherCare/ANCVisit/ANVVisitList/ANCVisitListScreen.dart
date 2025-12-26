@@ -41,7 +41,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     final rows = await db.rawQuery(
       '''
     WITH RankedMCA AS (
-      SELECT
+      SELECT DISTINCT
         mca.*,
         ROW_NUMBER() OVER (
           PARTITION BY mca.beneficiary_ref_key
@@ -52,7 +52,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         mca.is_deleted = 0
         AND mca.current_user_key = ?
     )
-    SELECT r.*
+    SELECT DISTINCT r.*
     FROM RankedMCA r
     INNER JOIN beneficiaries_new bn
       ON r.beneficiary_ref_key = bn.unique_key
@@ -122,7 +122,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         } catch (_) {}
       }
 
-      // ---------------- ANC-DUE-ONLY RECORDS ----------------
       for (final ancDue in ancDueRecords) {
         final beneficiaryId =
             ancDue['beneficiary_ref_key']?.toString() ?? '';
@@ -257,7 +256,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       final age = _calculateAge(dob);
       final spouseName = person['spouseName'] ?? person['headName'] ?? '';
 
-      // Store COMPLETE IDs
       final householdRefKey = row['household_ref_key']?.toString() ?? '';
       final uniqueKey = row['unique_key']?.toString() ?? '';
 
@@ -663,7 +661,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                     runSpacing: 8,
                     children: [
                       SizedBox(
-                        width: MediaQuery.of(context).size.width / 4 - 25,
+                        width: MediaQuery.of(context).size.width / 4 - 15,
                         child: _rowText(
                           l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
                           uniqueKeyDisplay.isNotEmpty ? uniqueKeyDisplay : 'N/A',
@@ -677,14 +675,14 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                         ),
                       ),
                       SizedBox(
-                        width: MediaQuery.of(context).size.width / 4 - 55,
+                        width: MediaQuery.of(context).size.width / 4 - 50,
                         child: _rowText(
                           l10n?.ageLabel ?? 'Age/Gender',
-                          ageGender,
+                          "${ageGender}/F",
                         ),
                       ),
                       SizedBox(
-                        width: MediaQuery.of(context).size.width / 4 - 49,
+                        width: MediaQuery.of(context).size.width / 4 - 40,
                         child: _rowText(
                           l10n?.husbandLabel ?? 'Husband',
                           husbandName,
@@ -797,7 +795,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                           ),
                           const SizedBox(width: 4),
                           _ancDateBox(
-                            'PMAMA',
+                            'PMSMA',
                             ancRanges['pmsma_start']!,
                             ancRanges['pmsma_end']!,
                           ),
@@ -852,7 +850,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             label,
             style: TextStyle(
               color: AppColors.background,
-              fontSize: 13.sp,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w500,
             ),
             maxLines: 1,
@@ -863,7 +861,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             '${_formatDate(startDate)}\nTO\n${_formatDate(endDate)}',
             style: TextStyle(
               color: AppColors.background,
-              fontSize: 12.sp,
+              fontSize: 13.sp,
               fontWeight: FontWeight.w400,
             ),
           ),
@@ -880,7 +878,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           title,
           style: TextStyle(
             color: AppColors.background,
-            fontSize: 13.sp,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -890,7 +888,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           style: TextStyle(
             color: AppColors.background,
             fontWeight: FontWeight.w400,
-            fontSize: 12.sp,
+            fontSize: 13.sp,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

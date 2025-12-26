@@ -117,8 +117,34 @@ class ANCUtils {
     return rows;
   }
 
-  static Future<void> loadPregnantWomen() async {
+ static Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final rows = await db.query(
+        'mother_care_activities',
+        columns: ['is_synced',  'created_date_time'],
+        where: 'beneficiary_ref_key = ? AND is_deleted = 0 ',
+        whereArgs: [beneficiaryRefKey],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
 
+      if (rows.isNotEmpty) {
+        return {
+          'is_synced': rows.first['is_synced'] == 1,
+          // 'server_id': rows.first['server_id']
+        };
+      }
+
+      return {'is_synced': false};
+    } catch (e) {
+      print('Error fetching sync status: $e');
+      return {'is_synced': false,};
+    }
+  }
+
+
+  static Future<void> loadPregnantWomen() async {
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       final pregnantWomen = <Map<String, dynamic>>[];
@@ -131,9 +157,7 @@ class ANCUtils {
           .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
           .toSet();
 
-      //  final deliveredBeneficiaryIds = await _getDeliveredBeneficiaryIds();
-      // print('ℹ️ Delivered: ${deliveredBeneficiaryIds.length}');
-
+      // Process regular pregnant women
       for (final row in rows) {
         try {
           final rawInfo = row['beneficiary_info'];
@@ -146,43 +170,34 @@ class ANCUtils {
           final beneficiaryId = row['unique_key']?.toString() ?? '';
           if (beneficiaryId.isEmpty) continue;
 
-          // if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
-          //   continue;
-          // }
-
-          final isPregnant =
-              info['isPregnant']?.toString().toLowerCase() == 'yes';
+          final isPregnant = info['isPregnant']?.toString().toLowerCase() == 'yes';
           final gender = info['gender']?.toString().toLowerCase() ?? '';
           final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
 
-          if ((isPregnant || isAncDue) &&
-              (gender == 'f' || gender == 'female')) {
-            final personData =
-            _processPerson(row, info, isPregnant: true);
-
+          if ((isPregnant || isAncDue) && (gender == 'f' || gender == 'female')) {
+            final personData = _processPerson(row, info, isPregnant: true);
             if (personData != null) {
+              final syncStatus = await _getSyncStatus(beneficiaryId);
+              personData['is_synced'] = syncStatus['is_synced'] ? 1 : 0;
               personData['isAncDue'] = isAncDue;
               pregnantWomen.add(personData);
               processedBeneficiaries.add(beneficiaryId);
             }
           }
-        } catch (_) {}
+        } catch (e) {
+          print('Error processing beneficiary: $e');
+        }
       }
 
-      // ---------------- ANC-DUE-ONLY RECORDS ----------------
+      // Process ANC-due only records
       for (final ancDue in ancDueRecords) {
-        final beneficiaryId =
-            ancDue['beneficiary_ref_key']?.toString() ?? '';
-
-        if (beneficiaryId.isEmpty ||
-            processedBeneficiaries.contains(beneficiaryId)) {
+        final beneficiaryId = ancDue['beneficiary_ref_key']?.toString() ?? '';
+        if (beneficiaryId.isEmpty || processedBeneficiaries.contains(beneficiaryId)) {
           continue;
         }
 
-        // // ❌ EXCLUDE DELIVERED (IMPORTANT)
-        // if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
-        //   continue;
-        // }
+        // Get sync status for this ANC due record
+        final syncStatus = await _getSyncStatus(beneficiaryId);
 
         pregnantWomen.add({
           'BeneficiaryID': beneficiaryId,
@@ -191,11 +206,11 @@ class ANCUtils {
           'isAncDue': true,
           'RegistrationDate': ancDue['created_date_time'],
           '_rawRow': ancDue,
-          'is_synced': ancDue['is_synced'],
+          'is_synced': syncStatus['is_synced'] ? 1 : 0,
         });
       }
 
-      // ---------------- DEDUP + SORT ----------------
+      // Deduplicate and sort
       final Map<String, Map<String, dynamic>> byId = {};
       for (final item in pregnantWomen) {
         final id = item['BeneficiaryID'] ?? item['unique_key'];
@@ -204,19 +219,13 @@ class ANCUtils {
 
       final list = byId.values.toList()
         ..sort((a, b) {
-          final d1 = DateTime.tryParse(
-              a['_rawRow']?['created_date_time'] ?? '');
-          final d2 = DateTime.tryParse(
-              b['_rawRow']?['created_date_time'] ?? '');
-          return (d2 ?? DateTime(0))
-              .compareTo(d1 ?? DateTime(0));
+          final d1 = DateTime.tryParse(a['_rawRow']?['created_date_time'] ?? '');
+          final d2 = DateTime.tryParse(b['_rawRow']?['created_date_time'] ?? '');
+          return (d2 ?? DateTime(0)).compareTo(d1 ?? DateTime(0));
         });
 
-      final int ancSyncCount = pregnantWomen.where((e) => e['is_synced'] == 1).length;
-
-
-
-
+      // Now calculate sync counts
+      final int ancSyncCount = list.where((e) => e['is_synced'] == 1).length;
 
       final deliveryOutcomeResult = await _getDeliveryOutcomeCount();
       final hbncResult = await _getHBNCCount();
@@ -224,8 +233,10 @@ class ANCUtils {
       final deliveryOutcomeCount = deliveryOutcomeResult['total'] ?? 0;
       final hbncCount = hbncResult['total'] ?? 0;
 
-      Constant.motherCareTotal = pregnantWomen.length + deliveryOutcomeCount + hbncCount;
-      //Sync
+      // Update constants
+      Constant.motherCareTotal = list.length + deliveryOutcomeCount + hbncCount;
+
+      // Get sync counts for other components
       final deliveryOutcomeResultSync = await _getDeliveryOutcomeCount();
       final hbncResultSync = await _getHBNCCount();
 
@@ -235,12 +246,13 @@ class ANCUtils {
       final totalSynced = ancSyncCount + deliveryOutcomeSynced + hbncSynced;
       Constant.motherCareSynced = totalSynced;
 
-      list.length;
-    } catch (e) {
+      print('✅ ANC Sync Count: $ancSyncCount');
+      print('✅ Total Mother Care Synced: $totalSynced');
 
+    } catch (e) {
+      print('❌ Error in loadPregnantWomen: $e');
     }
   }
-
 
   static int? _calculateAge(dynamic dob) {
     if (dob == null) return null;
@@ -805,7 +817,7 @@ SELECT
 FROM mother_care_activities mca
 WHERE mca.mother_care_state = 'pnc_mother'
   AND mca.is_deleted = 0
-  AND mca.current_user_key = ?      -- ✅ ASHA filter
+  AND mca.current_user_key = ?      
 GROUP BY mca.beneficiary_ref_key
 ''',
         [
