@@ -595,34 +595,34 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacB_b2_breastLump => 'क्या स्तन में गांठ भी है?';
 
   @override
-  String get cbacB_b2_breastShapeDiff => 'क्या निप्पल/धुचकों में से खून के साथ रिसाव होता है?';
+  String get cbacB_b2_breastShapeDiff => 'क्या स्तन के आकार व नाप में अंतर है?';
 
   @override
-  String get cbacB_b2_depression => 'क्या स्तन के आकार व नाप में अंतर है?';
+  String get cbacB_b2_depression => 'क्या मानसिक अवसाद की स्थिति है?';
 
   @override
   String get cbacB_b2_excessBleeding => 'क्या माहवारी में अत्यधिक रक्तस्त्राव होता है? *';
 
   @override
-  String get cbacB_b2_irregularPeriods => 'क्या मानसिक अवसाद की स्थिति है? *';
+  String get cbacB_b2_irregularPeriods => 'क्या अनियमित माहवारी होती है?';
 
   @override
-  String get cbacB_b2_jointPain => 'क्या बच्चेदानी बाहर आती है? *';
+  String get cbacB_b2_jointPain => 'क्या जोड़ों में दर्द होता है?';
 
   @override
-  String get cbacB_b2_nippleBleed => 'क्या Menopause (माहवारी बंद होने के बाद भी) के बाद रक्तस्राव होता है?';
+  String get cbacB_b2_nippleBleed => 'क्या निप्पल/एरिओला से खून निकल रहा है?';
 
   @override
   String get cbacB_b2_postIntercourseBleed => 'क्या संभोग के उपरांत रक्तस्राव होता है?';
 
   @override
-  String get cbacB_b2_postMenopauseBleed => 'क्या बदबूदार योनिस्त्राव होती है?';
+  String get cbacB_b2_postMenopauseBleed => 'क्या Menopause (माहवारी बंद होने के बाद भी) के बाद रक्तस्राव होता है?';
 
   @override
-  String get cbacB_b2_smellyDischarge => 'क्या अनियमित माहवारी होती है?';
+  String get cbacB_b2_smellyDischarge => 'क्या बदबूदार योनिस्त्राव होती है?';
 
   @override
-  String get cbacB_b2_uterusProlapse => 'क्या जोड़ों में दर्द होता है?';
+  String get cbacB_b2_uterusProlapse => 'क्या बच्चेदानी बाहर आती है? *';
 
   @override
   String get cbacC_businessRiskQ => 'व्यवसायिक जोखिम -';
@@ -634,7 +634,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacC_fuelOther => 'Other';
 
   @override
-  String get cbacC_fuelQ => 'खाना पकाने के लिए किस प्रकार का ईंधन उपयोग ज्याता है?';
+  String get cbacC_fuelQ => 'What type of fuel is used for cooking?';
 
   @override
   String get cbacConsentAgree => 'सहमत होना';
@@ -661,10 +661,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacD_opt3 => 'लगभग हर दिन';
 
   @override
-  String get cbacD_q1 => 'निराश महसूस करना,उदास होना';
+  String get cbacD_q1 => 'Feeling hopeless, depressed';
 
   @override
-  String get cbacD_q2 => 'कार्य करणे में कम रुची या खुशी';
+  String get cbacD_q2 => 'Less interest or pleasure in performing the task';
 
   @override
   String get cbacFormTitle => 'सीबीएसी फॉर्म';
@@ -2697,7 +2697,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get outcomeFormTitle => 'Delivery Outcome';
 
   @override
-  String get deliveryOutcomeDetails => 'Delivery Outcome Details';
+  String get deliveryOutcomeDetails => 'प्रसव परिणाम का विवरण';
 
   @override
   String get deliveryDateLabel => 'Date of Delivery *';
@@ -2757,7 +2757,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get deliveryConductedByOther => 'Other';
 
   @override
-  String get complicationsLabel => 'Complications (if any)';
+  String get complicationsLabel => 'जटिलताएँ (यदि कोई हों)';
 
   @override
   String get complicationBleeding => 'Excessive Bleeding';
@@ -2802,10 +2802,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get gestationWeeks => 'Number of weeks of pregnancy during delivery';
 
   @override
-  String get deliveryTime => 'Delivery Time (hh:mm)';
+  String get deliveryTime => 'प्रसव का समय (घंटा:मिनट)';
 
   @override
-  String get deliveryTimeHint => 'hh:mm';
+  String get deliveryTimeHint => 'घंटा:मिनट';
 
   @override
   String get placeOfDelivery => 'Place of Delivery';
@@ -2829,25 +2829,25 @@ class AppLocalizationsHi extends AppLocalizations {
   String get privateHospital => 'Private Hospital';
 
   @override
-  String get deliveryType => 'Type of Delivery *';
+  String get deliveryType => 'प्रसव का प्रकार *';
 
   @override
-  String get normalDelivery => 'Normal';
+  String get normalDelivery => 'सामान्य';
 
   @override
-  String get cesareanDelivery => 'Cesarean';
+  String get cesareanDelivery => 'सिजेरियन';
 
   @override
-  String get assistedDelivery => 'Assisted/Forceps)';
+  String get assistedDelivery => 'सहायता प्राप्त / फोर्सेप्स';
 
   @override
   String get complications => 'Complications during delivery? *';
 
   @override
-  String get outcomeCount => 'Number of Outcomes *';
+  String get outcomeCount => 'परिणामों की संख्या *';
 
   @override
-  String get familyPlanningCounseling => 'Family Planning Counseling Provided?';
+  String get familyPlanningCounseling => 'क्या परिवार नियोजन परामर्श दिया गया?';
 
   @override
   String get pleaseFillAllFields => 'Please fill all required fields';

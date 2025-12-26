@@ -2177,7 +2177,6 @@
   "cbacB_b1_weightLoss": "क्या वजन लगातार कम हो रहा है?",
   "cbacB_b1_nightSweat": "क्या रात में बहुत पसीना आता है?",
   "cbacB_b1_seizures": "क्या दौरे आते हैं?",
-  "cbacB_b1_openMouth": "क्या मुँह में छाले हैं जो दो सप्ताह से ठीक नहीं हो रहे हैं?",
   "cbacB_b1_swellingMouth": "क्या मुँह में किसी प्रकार का सूजन है जो दो सप्ताह से ठीक नहीं हुआ हो?",
   "cbacB_b1_rashMouth": "क्या मुँह में सफेद या लाल रंग का घेरा / चकत्ता है जो दो सप्ताह से ठीक नहीं हुआ हो?",
   "cbacB_b1_chewPain": "क्या कुछ चबाने में कठिनाई/दर्द होता है?",
@@ -2208,19 +2207,26 @@
 
 
   "cbacB_b2_breastLump": "क्या स्तन में गांठ भी है?",
-  "cbacB_b2_breastShapeDiff": "क्या निप्पल/धुचकों में से खून के साथ रिसाव होता है?",
-  "cbacB_b2_depression": "क्या स्तन के आकार व नाप में अंतर है?",
+  "cbacB_b2_breastShapeDiff": "क्या स्तन के आकार व नाप में अंतर है?",
+  "cbacB_b2_depression": "क्या मानसिक अवसाद की स्थिति है?",
   "cbacB_b2_excessBleeding": "क्या माहवारी में अत्यधिक रक्तस्त्राव होता है? *",
-  "cbacB_b2_irregularPeriods": "क्या मानसिक अवसाद की स्थिति है? *",
-  "cbacB_b2_jointPain": "क्या बच्चेदानी बाहर आती है? *",
-  "cbacB_b2_nippleBleed": "क्या Menopause (माहवारी बंद होने के बाद भी) के बाद रक्तस्राव होता है?",
+  "cbacB_b2_irregularPeriods": "क्या अनियमित माहवारी होती है?",
+  "cbacB_b2_jointPain": "क्या जोड़ों में दर्द होता है?",
+  "cbacB_b2_nippleBleed": "क्या निप्पल/एरिओला से खून निकल रहा है?",
   "cbacB_b2_postIntercourseBleed": "क्या संभोग के उपरांत रक्तस्राव होता है?",
-  "cbacB_b2_postMenopauseBleed": "क्या बदबूदार योनिस्त्राव होती है?",
-  "cbacB_b2_smellyDischarge": "क्या अनियमित माहवारी होती है?",
-  "cbacB_b2_uterusProlapse": "क्या जोड़ों में दर्द होता है?",
-  "cbacC_fuelQ": "खाना पकाने के लिए किस प्रकार का ईंधन उपयोग ज्याता है?",
-  "cbacD_q1": "निराश महसूस करना,उदास होना",
-  "cbacD_q2": "कार्य करणे में कम रुची या खुशी"
+  "cbacB_b2_postMenopauseBleed": "क्या Menopause (माहवारी बंद होने के बाद भी) के बाद रक्तस्राव होता है?",
+  "cbacB_b2_smellyDischarge": "क्या बदबूदार योनिस्त्राव होती है?",
+  "cbacB_b2_uterusProlapse": "क्या बच्चेदानी बाहर आती है? *",
+  "deliveryOutcomeDetails": "प्रसव परिणाम का विवरण",
+  "familyPlanningCounseling": "क्या परिवार नियोजन परामर्श दिया गया?",
+  "outcomeCount": "परिणामों की संख्या *",
+  "complicationsLabel": "जटिलताएँ (यदि कोई हों)",
+  "deliveryType": "प्रसव का प्रकार *",
+  "normalDelivery": "सामान्य",
+  "cesareanDelivery": "सिजेरियन",
+  "assistedDelivery": "सहायता प्राप्त / फोर्सेप्स",
+  "deliveryTime": "प्रसव का समय (घंटा:मिनट)",
+  "deliveryTimeHint": "घंटा:मिनट"
 }
 
 
