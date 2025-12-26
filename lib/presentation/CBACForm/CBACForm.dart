@@ -875,8 +875,8 @@ class _PartATab extends StatelessWidget {
         final waist = state.data['partA.waist'] as String?;
         final familyHx = state.data['partA.familyHistory'] as String?;
         final l10n = AppLocalizations.of(context)!;
-        final scoreColWidth = 32.0;
-        final scoreColRightPadding = 12.0;
+        final scoreColWidth = 36.0;
+        final scoreColRightPadding = 16.0;
 
         Widget header() => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -918,10 +918,10 @@ class _PartATab extends StatelessWidget {
               //  crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 290,
+                    width: 325,
                     child: ApiDropdown<String>(
                       labelText: question,
-                      hintText: 'Select Option',
+                      hintText: l10n.select,
                       labelFontSize: 15.sp,
                       items: items,
                       getLabel: (s) => s,
@@ -930,7 +930,7 @@ class _PartATab extends StatelessWidget {
                       isExpanded: true,
                     ),
                   ),
-                  // const Spacer(),
+                  const Spacer(),
                   rowScore(score),
                 ],
               ),
@@ -941,11 +941,11 @@ class _PartATab extends StatelessWidget {
         }
 
         final itemsAge = <String>[
-          '0 to 29 years',
-          '30 to 39 years',
-          '40 to 49 years',
-          '50 to 59 years',
-          'Over 59 years',
+          '0 to 29 ${l10n.years}',
+          '30 to 39  ${l10n.years}',
+          '40 to 49  ${l10n.years}',
+          '50 to 59  ${l10n.years}',
+          'Over 59  ${l10n.years}',
         ];
         final itemsTobacco = <String>[
           l10n.cbacA_tobNever,
@@ -1707,7 +1707,7 @@ class _PartDTab extends StatelessWidget {
 
         final partAScore = computePartAScore();
         final scoreColWidth = 36.0;
-        final scoreColRightPadding = 1.0;
+        final scoreColRightPadding = 19.0;
 
         Widget header() => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1741,7 +1741,7 @@ class _PartDTab extends StatelessWidget {
                // crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 290,
+                    width: 300,
                     child: ApiDropdown<String>(
                       labelText: question,
                       hintText: 'Select Option',

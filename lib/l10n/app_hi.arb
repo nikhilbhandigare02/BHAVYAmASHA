@@ -167,7 +167,6 @@
   "cbacC_fuelGas": "गैस",
   "cbacC_fuelQ": "खाना पकाने के लिए किस प्रकार का ईंधन उपयोग होता है?",
   "cbacC_fuelWood": "लकड़ी",
-
   "cbacD_opt0": "कभी नहीं",
   "cbacD_opt1": "कुछ ही दिन",
   "cbacD_opt2": "आधे से ज्यादा दिन",
@@ -237,7 +236,7 @@
   "disabilityBedridden": "किसी बीमारी के कारण बिस्तर पर",
   "disabilityNeedHelp": "दैनिक कार्यों के लिए दूसरे व्यक्ति की मदद की आवश्यकता",
   "disabilityPhysicallyHandicap": "शारीरिक रूप से विकलांग",
-  "disabilityQuestionLabel": "क्या व्यक्ती की स्थिती निम्न मे से एक है",
+  "disabilityQuestionLabel": "क्या व्यक्ति को निम्न में से कोई समस्या है",
   "disabilityVisualImpairment": "दृष्टि बाधित",
   "districtHint": "जिला",
   "districtLabel": "जिला",
@@ -2190,7 +2189,7 @@
   "nameOfPregnantWomanLabel": "गर्भवती महिला का नाम",
   "rchNumberLabel": "आरसीएच नंबर",
   "weeksOfPregnancyLabel": "गर्भावस्था के सप्ताहों की संख्या",
-  "orderOfPregnancyLabel": "गर्भावस्था का क्रम (ग्रेविडा)",
+  "orderOfPregnancyLabel": "गर्भावस्था का क्रम (ग्रेवि डा)",
   "isWomanBreastfeedingLabel": "क्या महिला स्तनपान करा रही है?",
   "td1DateLabel": "टी.डी. (टेटनस एवं वयस्क डिप्थीरिया) की पहली खुराक की तिथि",
   "td2DateLabel": "टी.डी. (टेटनस एवं वयस्क डिप्थीरिया) की दूसरी खुराक की तिथि",
@@ -2198,7 +2197,9 @@
   "folicAcidTabletsLabel": "दी गई फोलिक एसिड गोलियों की संख्या",
   "calciumVitaminD3TabletsLabel": "दी गई कैल्शियम एवं विटामिन डी3 गोलियों की संख्या",
 
-
+  "beneficiaryAbsentLabel": "क्या लाभार्थी अनुपस्थित है?",
+  "previousVisitsButton": "पिछली विज़िट्स",
+  "selectVisitTypeError": "कृपया विज़िट का प्रकार चुनें",
 
 
   "updateButton": "अपडेट",
@@ -2210,5 +2211,4 @@
   "cbacConsentTitle": "सहमति पत्र",
   "cbac": "सीबीएसी फ़ॉर्म",
   "identificationNumber": "पहचान संख्या"
-
 }

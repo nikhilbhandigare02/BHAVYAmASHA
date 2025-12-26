@@ -383,7 +383,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get bcmNameLabel => 'ब्लॉक कम्युनिटी मोबिलाइज़र का नाम';
 
   @override
-  String get beneficiaryAbsentLabel => 'Is Beneficiary Absent?';
+  String get beneficiaryAbsentLabel => 'क्या लाभार्थी अनुपस्थित है?';
 
   @override
   String get beneficiaryIdLabel => 'लाभार्थी आईडी';
@@ -968,7 +968,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get disabilityPhysicallyHandicap => 'शारीरिक रूप से विकलांग';
 
   @override
-  String get disabilityQuestionLabel => 'क्या व्यक्ती की स्थिती निम्न मे से एक है';
+  String get disabilityQuestionLabel => 'क्या व्यक्ति को निम्न में से कोई समस्या है';
 
   @override
   String get disabilityVisualImpairment => 'दृष्टि बाधित';
@@ -1815,7 +1815,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get or => 'या';
 
   @override
-  String get orderOfPregnancyLabel => 'गर्भावस्था का क्रम (ग्रेविडा)';
+  String get orderOfPregnancyLabel => 'गर्भावस्था का क्रम (ग्रेवि डा)';
 
   @override
   String get otpGeneratedSuccess => 'OTP generated successfully';
@@ -1878,7 +1878,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get preExistingDiseaseLabel => 'पूर्व-विद्यमान रोग';
 
   @override
-  String get previousVisitsButton => 'PREVIOUS VISITS';
+  String get previousVisitsButton => 'पिछली विज़िट्स';
 
   @override
   String get primaryWaterSourceLabel => 'पानी का मुख्य स्रोत';
@@ -6830,6 +6830,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get calciumVitaminD3TabletsLabel => 'दी गई कैल्शियम एवं विटामिन डी3 गोलियों की संख्या';
+
+  @override
+  String get selectVisitTypeError => 'कृपया विज़िट का प्रकार चुनें';
 
   @override
   String get protected => 'सुरक्षित';

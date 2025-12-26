@@ -6832,6 +6832,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calciumVitaminD3TabletsLabel => 'Number of Calcium and Vitamin D3 tablets given';
 
   @override
+  String get selectVisitTypeError => 'Please select visit type';
+
+  @override
   String get protected => 'Protected';
 
   @override
