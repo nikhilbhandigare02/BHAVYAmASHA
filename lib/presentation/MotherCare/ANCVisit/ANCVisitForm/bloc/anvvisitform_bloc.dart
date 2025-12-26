@@ -316,6 +316,41 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
             print('✅ Successfully inserted mother care activity');
 
+            // Insert tracking_due state in eligible_couple_activities table
+            try {
+              final eligibleCoupleActivityData = {
+                'server_id': null,
+                'household_ref_key': householdRefKey,
+                'beneficiary_ref_key': beneficiaryId,
+                'eligible_couple_state': 'tracking_due',
+                'device_details': jsonEncode({
+                  'id': deviceInfo.deviceId,
+                  'platform': deviceInfo.platform,
+                  'version': deviceInfo.osVersion,
+                }),
+                'app_details': jsonEncode({
+                  'app_version': deviceInfo.appVersion.split('+').first,
+                  'app_name': deviceInfo.appName,
+                  'build_number': deviceInfo.buildNumber,
+                  'package_name': deviceInfo.packageName,
+                }),
+                'parent_user': jsonEncode({}),
+                'current_user_key': ashaUniqueKey,
+                'facility_id': facilityId,
+                'created_date_time': ts,
+                'modified_date_time': ts,
+                'is_synced': 0,
+                'is_deleted': 0,
+              };
+
+              print('Inserting tracking_due state in eligible_couple_activities table');
+              await LocalStorageDao.instance.insertEligibleCoupleActivity(eligibleCoupleActivityData);
+
+              print('✅ Successfully inserted tracking_due state in eligible_couple_activities table');
+            } catch (e) {
+              print('❌ Error inserting tracking_due state in eligible_couple_activities table: $e');
+            }
+
             final db = await _databaseProvider.database;
             final rows = await db.query(
               'beneficiaries_new',
