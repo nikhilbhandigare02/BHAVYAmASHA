@@ -167,10 +167,6 @@
   "cbacC_fuelGas": "गैस",
   "cbacC_fuelQ": "खाना पकाने के लिए किस प्रकार का ईंधन उपयोग होता है?",
   "cbacC_fuelWood": "लकड़ी",
-  "cbacConsentAgree": "सहमत",
-  "cbacConsentBody": "मुझे आशा द्वारा उस उद्देश्य के बारे में समझाया गया है जिसके लिए मुझसे जानकारी और माप संबंधी निष्कर्ष एकत्र किए जा रहे हैं, ऐसी भाषा में जिसे मैं समझता/समझती हूँ और मैं अपनी व्यक्तिगत स्वास्थ्य प्रोफ़ाइल पर जानकारी और माप संबंधी निष्कर्ष एकत्र करने की सहमति देता/देती हूँ।",
-  "cbacConsentDisagree": "असहमत",
-  "cbacConsentTitle": "सहमति फ़ॉर्म",
   "cbacD_opt0": "कभी नहीं",
   "cbacD_opt1": "कुछ ही दिन",
   "cbacD_opt2": "आधे से ज्यादा दिन",
@@ -677,7 +673,6 @@
   "trainingTitle": "भाव्या एम-आशा प्रशिक्षण",
   "trainingTypeLabel": "प्रशिक्षण का प्रकार",
   "unmarried": "अविवाहित",
-  "updateButton": "अपडेट करें",
   "updatedEligibleCoupleListTitle": "अपडेटेड योग्य दम्पत्ति सूची",
   "updatedEligibleCoupleSearchHint": "अपडेटेड पात्र दंपत्ति खोजें",
   "eligibleCoupleSearchHint":"पात्र दंपत्ति खोजें",
@@ -930,7 +925,6 @@
   "confirmYesExit": "हां, बाहर निकलें",
   "confirmNo": "नहीं, यहीं रहें",
   "memberRemainsToAdd": "जोड़ने के लिए बचे हुए सदस्यों की संख्या",
-  "cbac": "सीबीएसी",
   "videoTutorialList": "वीडियो शिक्षण की सूची",
   "trackEligibleCoupleTitle": "योग्य दंपतियों की ट्रैकिंग",
   "financialYearLabel": "वित्तीय वर्ष",
@@ -2203,5 +2197,16 @@
 
   "beneficiaryAbsentLabel": "क्या लाभार्थी अनुपस्थित है?",
   "previousVisitsButton": "पिछली विज़िट्स",
-  "selectVisitTypeError": "कृपया विज़िट का प्रकार चुनें"
+  "selectVisitTypeError": "कृपया विज़िट का प्रकार चुनें",
+
+
+  "updateButton": "अपडेट",
+  "protected": "सुरक्षित",
+  "unprotected": "असुरक्षित",
+  "cbacConsentAgree": "सहमत होना",
+  "cbacConsentBody": "ममुझे आशा द्वारा समझाया गया है, जिस उद्देश्य के लिए मुझसे जानकारी और माप निष्कर्ष एकत्र किए जा रहे हैं, उस भाषा में जिसे मैं समझता हूं और मैं अपने व्यक्तिगत स्वास्थ्य प्रोफ़ाइल पर जानकारी और माप निष्कर्ष एकत्र करने के लिए अपनी सहमति देता हूं।",
+  "cbacConsentDisagree": "असहमत",
+  "cbacConsentTitle": "सहमति पत्र",
+  "cbac": "सीबीएसी फ़ॉर्म",
+  "identificationNumber": "पहचान संख्या"
 }

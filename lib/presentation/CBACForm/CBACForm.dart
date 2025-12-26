@@ -757,8 +757,8 @@ class _PersonalInfoTab extends StatelessWidget {
             return Column(
               children: [
                 CustomTextField(
-                  hintText: 'Identification Number',
-                  labelText: 'Identification Number',
+                  hintText: l10n.identificationNumber,
+                  labelText: l10n.identificationNumber,
                   initialValue: state.data['personal.idNumber']?.toString() ?? '',
                   onChanged: (v) =>
                       bloc.add(CbacFieldChanged('personal.idNumber', v.trim())),
@@ -772,8 +772,8 @@ class _PersonalInfoTab extends StatelessWidget {
           buildWhen: (previous, current) => previous.data['personal.hasConditions'] != current.data['personal.hasConditions'],
           builder: (context, state) {
             return ApiDropdown<String>(
-              hintText: l10n.affiliatedToStateInsuranceLabel,
-              labelText: l10n.affiliatedToStateInsuranceLabel,
+              hintText: l10n.idTypeStateInsurance,
+              labelText: l10n.idTypeStateInsurance,
               items: [l10n.yes, l10n.no],
               value: state.data['personal.hasConditions'],
               getLabel: (s) => s,
@@ -875,8 +875,8 @@ class _PartATab extends StatelessWidget {
         final waist = state.data['partA.waist'] as String?;
         final familyHx = state.data['partA.familyHistory'] as String?;
         final l10n = AppLocalizations.of(context)!;
-        final scoreColWidth = 36.0;
-        final scoreColRightPadding = 16.0;
+        final scoreColWidth = 32.0;
+        final scoreColRightPadding = 12.0;
 
         Widget header() => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -918,7 +918,7 @@ class _PartATab extends StatelessWidget {
               //  crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 325,
+                    width: 290,
                     child: ApiDropdown<String>(
                       labelText: question,
                       hintText: 'Select Option',
@@ -930,7 +930,7 @@ class _PartATab extends StatelessWidget {
                       isExpanded: true,
                     ),
                   ),
-                  const Spacer(),
+                  // const Spacer(),
                   rowScore(score),
                 ],
               ),
@@ -1707,7 +1707,7 @@ class _PartDTab extends StatelessWidget {
 
         final partAScore = computePartAScore();
         final scoreColWidth = 36.0;
-        final scoreColRightPadding = 19.0;
+        final scoreColRightPadding = 1.0;
 
         Widget header() => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1741,7 +1741,7 @@ class _PartDTab extends StatelessWidget {
                // crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 300,
+                    width: 290,
                     child: ApiDropdown<String>(
                       labelText: question,
                       hintText: 'Select Option',
