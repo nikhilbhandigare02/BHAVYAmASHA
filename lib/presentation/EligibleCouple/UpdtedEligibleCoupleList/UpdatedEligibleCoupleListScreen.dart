@@ -74,7 +74,6 @@ class _UpdatedEligibleCoupleListScreenState
 
     final db = await DatabaseProvider.instance.database;
     
-    // Get current user's ASHA unique key
     final currentUser = await _getCurrentUserData();
     final ashaUniqueKey = currentUser?['unique_key']?.toString() ?? '';
     
@@ -90,7 +89,7 @@ class _UpdatedEligibleCoupleListScreenState
     
     final trackingDueRows = await db.query(
       'eligible_couple_activities',
-      columns: ['beneficiary_ref_key', 'current_user_key'],
+      columns: ['beneficiary_ref_key', 'current_user_key', 'is_deleted = 0'],
       where: whereClause,
       whereArgs: whereArgs,
     );
