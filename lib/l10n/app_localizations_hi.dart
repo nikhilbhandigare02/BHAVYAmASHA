@@ -829,7 +829,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacQuestions => 'प्रश्न';
 
   @override
-  String get cbacScore => 'स्कोर';
+  String get cbacScore => 'अंक';
 
   @override
   String get cbacTabGeneral => 'सामान्य जानकारी';
