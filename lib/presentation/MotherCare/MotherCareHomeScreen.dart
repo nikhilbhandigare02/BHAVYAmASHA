@@ -253,8 +253,8 @@ ORDER BY d.created_date_time DESC
 ''',
         [
           ashaUniqueKey,
-          ancRefKey,     // 🔑 LatestANC (forms_ref_key)
-          ashaUniqueKey, // 🔑 LatestANC (ASHA)
+          ancRefKey,
+          ashaUniqueKey,
         ],
       );
 
