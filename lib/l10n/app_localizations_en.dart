@@ -344,10 +344,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ashaIdLabel => 'ASHA ID';
 
   @override
-  String get ashaNameHint => 'Name of ASHA';
+  String get ashaNameHint => 'ASHA Name';
 
   @override
-  String get ashaNameLabel => 'Name of ASHA';
+  String get ashaNameLabel => 'ASHA Name';
 
   @override
   String get ashaProfile => 'ASHA Profile';
@@ -968,7 +968,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disabilityPhysicallyHandicap => 'Physically Handicap';
 
   @override
-  String get disabilityQuestionLabel => 'Whether the person has one of the following';
+  String get disabilityQuestionLabel => 'Whether the person has one of the following conditions';
 
   @override
   String get disabilityVisualImpairment => 'Visual impairment';
@@ -1456,7 +1456,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get idTypeVoterId => 'Voter Card';
 
   @override
-  String get identificationTypeLabel => 'Identification type';
+  String get identificationTypeLabel => 'Identification Type';
 
   @override
   String get ifscHint => 'IFSC code';
@@ -4588,7 +4588,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get healthcareProviderInformation => 'Healthcare Provider Information';
 
   @override
-  String get hsc => 'HSC';
+  String get hsc => 'Name of Health Sub Center';
 
   @override
   String get phc => 'PHC';

@@ -764,13 +764,13 @@ abstract class AppLocalizations {
   /// No description provided for @ashaNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Name of ASHA'**
+  /// **'ASHA Name'**
   String get ashaNameHint;
 
   /// No description provided for @ashaNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Name of ASHA'**
+  /// **'ASHA Name'**
   String get ashaNameLabel;
 
   /// No description provided for @ashaProfile.
@@ -2000,7 +2000,7 @@ abstract class AppLocalizations {
   /// No description provided for @disabilityQuestionLabel.
   ///
   /// In en, this message translates to:
-  /// **'Whether the person has one of the following'**
+  /// **'Whether the person has one of the following conditions'**
   String get disabilityQuestionLabel;
 
   /// No description provided for @disabilityVisualImpairment.
@@ -2972,7 +2972,7 @@ abstract class AppLocalizations {
   /// No description provided for @identificationTypeLabel.
   ///
   /// In en, this message translates to:
-  /// **'Identification type'**
+  /// **'Identification Type'**
   String get identificationTypeLabel;
 
   /// No description provided for @ifscHint.
@@ -9224,7 +9224,7 @@ abstract class AppLocalizations {
   /// No description provided for @hsc.
   ///
   /// In en, this message translates to:
-  /// **'HSC'**
+  /// **'Name of Health Sub Center'**
   String get hsc;
 
   /// No description provided for @phc.

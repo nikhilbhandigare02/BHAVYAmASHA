@@ -868,7 +868,7 @@ class _OutcomeFormFields extends StatelessWidget {
                   case 'malaN':
                     return l10n?.malaN ?? '';
                   case 'antraInjection':
-                    return l10n?.antraInjection ?? '';
+                    return l10n.antraInjection ?? '';
                   case 'copperT':
                     return l10n?.copperT ?? '';
                   case 'chhaya':
