@@ -4342,9 +4342,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get igree4 => 'I consent to the anonymization and subsequent use of my government health records for public health purposes.';
 
   @override
-  String get igree5 => 'I, confirm that I have duly informed and explained the beneficiary of the contents of consent for the aforementioned purposes.';
-
-  @override
   String get igree6 => 'I have been explained about the consent as stated above and hereby provide my consent for the aforementioned purposes.';
 
   @override
@@ -4366,7 +4363,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aadhaarNumber => 'Aadhaar Number';
 
   @override
-  String get iHerebyDeclareThat => 'I hereby declare that';
+  String get iHerebyDeclareThat => 'I hereby declare that:';
 
   @override
   String get agreeAll => 'Agree All';
@@ -6842,4 +6839,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get identificationNumber => 'Identification Number';
+
+  @override
+  String get igree_I => 'I, ';
+
+  @override
+  String get igree_7 => 'I am voluntarily sharing my Aadhaar Number / Virtual ID issued by the Unique Identification Authority of India (\"UIDAI\"), and my demographic information for the purpose of creating an Ayushman Bharat Health Account number (\"ABHA number\") and Ayushman Bharat Health Account address (\"ABHA Address\"). I authorize NHA to use my Aadhaar number / Virtual ID for performing Aadhaar based authentication with UIDAI as per the provisions of the Aadhaar (Targeted Delivery of Financial and other Subsidies, Benefits and Services) Act, 2016 for the aforesaid purpose. I\nunderstand that UIDAI will share my e-KYC details, or response of \"Yes\" with NHA upon successful\nauthentication.';
+
+  @override
+  String get igree5 => 'confirm that I have duly informed and explained the beneficiary of the contents of consent for the aforementioned purposes.';
 }

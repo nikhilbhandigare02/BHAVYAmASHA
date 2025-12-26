@@ -1366,7 +1366,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                         final bloc = context.read<AddFamilyHeadBloc>();
                         bloc.add(LMPChange(d));
                         if (d != null) {
-                          final edd = DateTime(d.year, d.month + 9, d.day + 5);
+                          final edd = d.add(const Duration(days: 277));
                           bloc.add(EDDChange(edd));
                         } else {
                           bloc.add(EDDChange(null));

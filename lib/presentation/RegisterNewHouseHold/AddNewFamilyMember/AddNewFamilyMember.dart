@@ -4191,12 +4191,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               .read<AddnewfamilymemberBloc>();
                                           bloc.add(AnmLMPChange(d));
                                           if (d != null) {
-                                            // Calculate EDD: LMP + 9 months + 5 days (Naegele's rule)
-                                            final edd = DateTime(
-                                              d.year,
-                                              d.month + 9,
-                                              d.day + 5,
-                                            );
+                                            // Calculate EDD: LMP + 277 days
+                                            final edd = d.add(const Duration(days: 277));
                                             bloc.add(AnmEDDChange(edd));
                                           } else {
                                             bloc.add(const AnmEDDChange(null));
@@ -4205,9 +4201,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         validator: (date) =>
                                             Validations.validateLMP(l, date),
                                         firstDate: DateTime.now().subtract(
-                                          const Duration(days: 365),
+                                          const Duration(days: 276),
                                         ),
-                                        lastDate: DateTime.now(),
+                                        lastDate: DateTime.now().subtract(const Duration(days: 31)),
                                       ),
                                     ),
                                     const Divider(

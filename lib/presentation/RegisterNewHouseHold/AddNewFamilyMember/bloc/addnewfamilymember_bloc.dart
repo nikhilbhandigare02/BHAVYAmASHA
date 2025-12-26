@@ -630,6 +630,8 @@ class AddnewfamilymemberBloc
     on<AnmUpdateIsPregnant>(
           (e, emit) => emit(state.copyWith(isPregnant: e.value)),
     );
+    on<AnmLMPChange>((e, emit) => emit(state.copyWith(lmp: e.date)));
+    on<AnmEDDChange>((e, emit) => emit(state.copyWith(edd: e.date)));
     on<AnmUpdateFamilyPlanning>(
           (e, emit) => emit(state.copyWith(isFamilyPlanning: e.value)),
     );

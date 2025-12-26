@@ -50,6 +50,7 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/data/models/abha_model/create/get_states.dart';
 import 'package:medixcel_new/data/models/abha_model/create/verify_otp_aadhaar.dart';
@@ -130,9 +131,43 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
   String clinicToken = '';
   var box = GetStorage();
+  String _userName = '';
+
+  Future<void> _loadUserName() async {
+    try {
+      final userData = await SecureStorageService.getCurrentUserData();
+      if (userData != null) {
+        String fullName = '';
+        if (userData['name'] is Map) {
+          final name = userData['name'] as Map;
+          fullName = [
+            name['first_name'],
+            name['middle_name'],
+            name['last_name']
+          ].where((part) => part != null).join(' ').trim();
+        } else {
+          fullName = [
+            userData['first_name'],
+            userData['middle_name'],
+            userData['last_name'],
+            userData['name']
+          ].where((part) => part != null && part is String).join(' ').trim();
+        }
+
+        if (mounted) {
+          setState(() {
+            _userName = fullName.isNotEmpty ? fullName : '-';
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading user name: $e');
+    }
+  }
 
   @override
   void initState() {
+    _loadUserName();
     abhaIdController.addListener(_filterAbhaId);
 
     listABHAID.add(ABHAID('rohit@inde', true));
@@ -449,6 +484,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
   var checkedValue = false;
   var checkedIAgreeValue_1 = false;
+  var checkedIAgreeValue_7 = false;
   var checkedIAgreeValue_2 = false;
   var checkedIAgreeValue_3 = false;
   var checkedIAgreeValue_4 = false;
@@ -493,6 +529,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
     checkedIAgreeValue_2 = false;
     checkedIAgreeValue_3 = false;
     checkedIAgreeValue_1 = false;
+    checkedIAgreeValue_7 = false;
     checkedIAgreeValue_4 = false;
     checkedIAgreeValue_5 = false;
     checkedIAgreeValue_6 = false;
@@ -1520,9 +1557,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                       border: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey),
                       ),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey),
-                      ),
+
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.green, width: 2),
                       ),
@@ -1553,6 +1588,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                       return null;
                     },
                   ),
+                ),
 
                   /*TextFormField(
                 //readOnly: verifyAbhaFlag==true?true:false,
@@ -1598,7 +1634,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     return null;
                   },
               ),*/
-                ),
+
                 SizedBox(
                   height: 15,
                 ),
@@ -1609,6 +1645,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
             visible: termCondFlag,
             child: Column(
               children: [
+
                 Container(
                   //width: 240.w,
                   height: 50.h,
@@ -1618,10 +1655,13 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     borderRadius: BorderRadius.circular(10.0),
                     border: Border.all(color: AppColors.blueApp, width: 1.w),
                   ),
+
                   child: Align(
+
                     alignment: Alignment.centerLeft,
+
                     child: Text(
-                      '    ${localText.iHerebyDeclareThat}:',
+                      '    ${localText.iHerebyDeclareThat}',
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 11.sp,
@@ -1647,6 +1687,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                           setState(() {
                             checkedValue = newValue!;
                             checkedIAgreeValue_1 = newValue;
+                            checkedIAgreeValue_7 = newValue;
                             checkedIAgreeValue_2 = newValue;
                             checkedIAgreeValue_3 = newValue;
                             checkedIAgreeValue_4 = newValue;
@@ -1663,6 +1704,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                             checkedValue = !checkedValue;
 
                             checkedIAgreeValue_1 = checkedValue;
+                            checkedIAgreeValue_7 = checkedValue;
                             checkedIAgreeValue_2 = checkedValue;
                             checkedIAgreeValue_3 = checkedValue;
                             checkedIAgreeValue_4 = checkedValue;
@@ -1698,6 +1740,51 @@ class _ABHAScreenState extends State<ABHAScreen> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+
+                        Text(
+                          localText.iHerebyDeclareThat,
+                          style: TextStyle(fontSize: 11.0),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              checkedIAgreeValue_7 = !checkedIAgreeValue_7;
+                            });
+
+                            allcheckbosRefresh();
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              //  const SizedBox(width: 10),
+                              Checkbox(
+                                // tristate: true, // Example with tristate
+                                value: checkedIAgreeValue_7,
+                                onChanged: (bool? newValue) {
+                                  setState(() {
+                                    checkedIAgreeValue_7 = newValue!;
+                                  });
+                                  allcheckbosRefresh();
+                                },
+                              ),
+                              // const SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
+                                  localText.igree_7,
+                                  style: TextStyle(fontSize: 11.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
                         InkWell(
                           onTap: () {
                             setState(() {
@@ -1865,7 +1952,10 @@ class _ABHAScreenState extends State<ABHAScreen> {
                               // const SizedBox(width: 10),
                               Flexible(
                                 child: Text(
-                                  localText.igree5,
+                                  '${localText.igree_I}'
+                                      '$_userName, '
+                                      '${localText.igree5}'
+                                  ,
                                   style: TextStyle(fontSize: 11.0),
                                 ),
                               ),
@@ -1930,7 +2020,15 @@ class _ABHAScreenState extends State<ABHAScreen> {
                         // ✅ Aadhaar is valid (non-empty + 12 digits)
                         _aadhaarOTPABHA(sendOTP);
                       } else {
-                        Utils.showToastMessage('Please enter aadhaar number');
+
+                        var msg ="";
+                        if (aadhaarController.text == null || aadhaarController.text.isEmpty) {
+                          msg = 'Please enter Aadhaar number';
+                        }
+                        else if (!RegExp(r'^[2-9][0-9]{11}$').hasMatch(aadhaarController.text)) {
+                          msg = 'Enter a valid 12-digit Aadhaar number';
+                        }
+                        Utils.showToastMessage(msg);
                       }
                     } /*else {
                       _aadhaarOTPABHA(sendOTP);
@@ -2154,8 +2252,9 @@ class _ABHAScreenState extends State<ABHAScreen> {
               child: Column(
                 children: [
                   //For aadhar
-                  if (listMobileAbhaSuggestion != null &&
-                      listMobileAbhaSuggestion.length != 0)
+                  /*if (listMobileAbhaSuggestion != null &&
+                      listMobileAbhaSuggestion.length != 0)*/
+                  if(showTextFieldABHAID)
                     Row(
                       children: [
                         Expanded(
@@ -4678,6 +4777,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
     }
   }
 
+   bool showTextFieldABHAID= false;
   Future<void> _aadhaarabhasuggestions() async {
     //listABHAID = [];
     if (await Utils.isConnected()) {
@@ -4720,9 +4820,15 @@ class _ABHAScreenState extends State<ABHAScreen> {
           // sMessage = abhaSuggestionMobile?.statusCode;
           // Utils.showToastMessage(sMessage);
         } else {
+          listABHAID = [];
           Error400 error400 = Error400.fromJson(response?.data);
           Utils.showToastMessage(error400.errorDetails?.message ??
               'Something went wrong! ${response?.statusCode}');
+          setState(() {
+            showLinkAbhaIdList = true;
+            callAbhaSuggestion = false;
+            listABHAID;
+          });
           /* setState(() {
             checkavailableAbha= false;
             dropdownvalue = defaultDropdownValue;
@@ -4741,6 +4847,9 @@ class _ABHAScreenState extends State<ABHAScreen> {
         if (_isLoading) {
           Navigator.pop(context);
         }
+        setState(() {
+          showTextFieldABHAID = true;
+        });
       }
     } else {
       Utils.showToastMessage(Constant.internetConMsg);
@@ -5138,6 +5247,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
         checkedIAgreeValue_3 == true &&
         checkedIAgreeValue_4 == true &&
         checkedIAgreeValue_5 == true &&
+        checkedIAgreeValue_7 == true &&
         checkedIAgreeValue_6 == true) {
       visible = true;
     }

@@ -1523,7 +1523,7 @@ class _ABHAScreenState extends State<ABHAScreenWithBoth> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    '    ${localText.iHerebyDeclareThat}:',
+                    '    ${localText.iHerebyDeclareThat}',
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 11.sp,
