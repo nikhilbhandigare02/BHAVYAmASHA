@@ -157,7 +157,6 @@ class ANCUtils {
           .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
           .toSet();
 
-      // Process regular pregnant women
       for (final row in rows) {
         try {
           final rawInfo = row['beneficiary_info'];
@@ -585,7 +584,17 @@ ORDER BY d.created_date_time DESC
         processedData.add(formatted);
       }
 
-      syncedCount = processedData.where((e) => e['is_synced'] == 1).length;
+      // Use the new isDeliveryOutcomeSynced method to calculate synced count
+      syncedCount = 0;
+      for (final row in results) {
+        final beneficiaryRefKey = row['beneficiary_ref_key']?.toString();
+        if (beneficiaryRefKey != null && beneficiaryRefKey.isNotEmpty) {
+          final isSynced = await isDeliveryOutcomeSynced(beneficiaryRefKey);
+          if (isSynced) {
+            syncedCount++;
+          }
+        }
+      }
 
     } catch (e) {
       print('❌ Error loading pregnancy outcome couples: $e');
@@ -850,13 +859,10 @@ GROUP BY mca.beneficiary_ref_key
           e['beneficiary_ref_key'] as String
       };
 
-      // Count synced records from the valid beneficiaries that also have delivery outcomes
       int syncedCount = 0;
-      for (final beneficiary in validBeneficiaries) {
-        final beneficiaryRefKey = beneficiary['beneficiary_ref_key'] as String;
-        final hasSynced = (beneficiary['has_synced'] as int) == 1;
-
-        if (deliveryOutcomeBeneficiarySet.contains(beneficiaryRefKey) && hasSynced) {
+      for (final beneficiaryRefKey in deliveryOutcomeBeneficiarySet) {
+        final isSynced = await isHbncSynced(beneficiaryRefKey);
+        if (isSynced) {
           syncedCount++;
         }
       }
@@ -900,6 +906,65 @@ Mother Care Synced Counts:
     } catch (e) {
       print('Error in getMotherCareSyncedTotalCount: $e');
       return 0;
+    }
+  }
+
+  static Future<bool> isDeliveryOutcomeSynced(String beneficiaryRefKey) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final result = await db.query(
+        'mother_care_activities',
+        where: 'beneficiary_ref_key = ? AND mother_care_state = ? ',
+        whereArgs: [beneficiaryRefKey, 'delivery_outcome'],
+        orderBy: 'created_date_time DESC',
+        // limit: 1,
+      );
+
+      if (result.isNotEmpty) {
+        return result.first['is_synced'] == 1;
+      }
+      return false;
+    } catch (e) {
+      print('Error checking sync status: $e');
+      return false;
+    }
+  }
+
+  static Future<bool> isHbncSynced(String beneficiaryId) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+
+      final motherCareResult = await db.query(
+        'mother_care_activities',
+        columns: ['is_synced'],
+        where: 'beneficiary_ref_key = ? AND mother_care_state = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryId, 'pnc_mother'],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      final followupResult = await db.query(
+        'followup_form_data',
+        columns: ['is_synced'],
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryId, '4r7twnycml3ej1vg'],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      // Return true if either record exists and is synced
+      if (motherCareResult.isNotEmpty && motherCareResult.first['is_synced'] == 1) {
+        return true;
+      }
+
+      if (followupResult.isNotEmpty && followupResult.first['is_synced'] == 1) {
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      print('Error checking sync status: $e');
+      return false;
     }
   }
 

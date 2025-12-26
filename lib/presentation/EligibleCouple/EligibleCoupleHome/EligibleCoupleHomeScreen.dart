@@ -122,16 +122,6 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     }
   }
 
-  int _calculateAge(dynamic dobRaw) {
-    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
-    try {
-      final dob = DateTime.tryParse(dobRaw.toString());
-      if (dob == null) return 0;
-      return DateTime.now().difference(dob).inDays ~/ 365;
-    } catch (_) {
-      return 0;
-    }
-  }
 
   Future<void> _printEligibleCoupleActivities() async {
     try {

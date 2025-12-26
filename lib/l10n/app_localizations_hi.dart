@@ -1267,7 +1267,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hintTemp => 'तापमान';
 
   @override
-  String get gridEligibleCouple => 'योग्य दम्पत्ति';
+  String get gridEligibleCouple => 'पहचान की गई योग्य दंपत्तियों की संख्या';
 
   @override
   String get gridEligibleCoupleASHA => 'योग्य दम्पत्ति';
@@ -2307,10 +2307,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get updateButton => 'अपडेट करें';
 
   @override
-  String get updatedEligibleCoupleListSubtitle => 'Eligible Couples List';
+  String get updatedEligibleCoupleListSubtitle => 'योग्य दम्पत्ति सूची';
 
   @override
-  String get updatedEligibleCoupleListTitle => 'पात्र दंपत्ति सूची';
+  String get updatedEligibleCoupleListTitle => 'अपडेटेड योग्य दम्पत्ति सूची';
 
   @override
   String get updatedEligibleCoupleSearchHint => 'अपडेटेड पात्र दंपत्ति खोजें';
@@ -2517,7 +2517,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get childNameLabel => 'बालक का नाम *';
 
   @override
-  String get whoseMobileNumberLabel => 'यह मोबाइल नंबर किसका है';
+  String get whoseMobileNumberLabel => 'मोबाइल उपयोगकर्ता';
 
   @override
   String get mobileNumberLabel => 'मोबाइल नंबर ';
