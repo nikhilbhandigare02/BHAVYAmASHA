@@ -627,7 +627,7 @@
   "rationCardIdLabel": "Ration Card Id",
   "rchIdLabel": "RCH ID",
   "rchNumberLabel": "RCH number",
-  "submissionCountLabel": "Form Submissions",
+  "submissionCountLabel": "Form Submfvissions",
   "readLess": "Read less",
   "readMore": "Read more",
   "reenterPasswordEmpty": "Re-enter password cannot be empty",
@@ -2328,5 +2328,19 @@
   "npAndRRPValidation": "The new password and the re-entered password must be the same.",
   "errorMsg": "An error occurred. Please try again.",
   "failUpdatePassMsg": "Failed to update password",
-  "successUpdatePassMsg": "Your password has been changed successfully"
+  "successUpdatePassMsg": "Your password has been changed successfully",
+
+
+
+  "diseaseTb": "Tuberculosis (TB)",
+  "diseaseHepatitisB": "Hepatitis B",
+  "diseaseAsthma": "Asthma",
+  "diseaseHighBp": "High Blood Pressure",
+  "diseaseStiRti": "STI / RTI",
+  "diseaseHeart": "Heart Disease",
+  "diseaseLiver": "Liver Disease",
+  "diseaseKidney": "Kidney Disease",
+  "diseaseEpilepsy": "Epilepsy",
+  "pleaseSpecifyOtherDisease": "Please specify other disease",
+  "calciumVitaminD3TabletsLabel": "Number of Calcium and Vitamin D3 tablets given"
 }

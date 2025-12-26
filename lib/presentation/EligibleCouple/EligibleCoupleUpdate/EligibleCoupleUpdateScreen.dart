@@ -302,7 +302,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                               child: ApiDropdown<String>(
                                 key: const ValueKey('whoseMobileField'),
                                 labelText:
-                                    "${t?.whoseMobileLabel} *" ??
+                                    "${t?.whoseMobileNumberLabel} *" ??
                                     'Whose mobile no.',
                                 items: const [
                                   'Self',
