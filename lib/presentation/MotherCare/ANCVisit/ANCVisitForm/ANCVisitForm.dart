@@ -910,9 +910,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                               getLabel: (s) {
                                 switch (s) {
                                   case 'ANC':
-                                    return 'ANC';
+                                    return l10n?.anc ?? '';
                                   case 'Female':
-                                    return 'PMSMA';
+                                    return l10n?.pmsma ?? '';
                                   default:
                                     return s;
                                 }
