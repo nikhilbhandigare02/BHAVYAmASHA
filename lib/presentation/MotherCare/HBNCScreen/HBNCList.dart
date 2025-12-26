@@ -157,7 +157,6 @@ class _HBNCListScreenState
 
       final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
 
-      // 2. Add ORDER BY DESC here
       final query = '''
       SELECT * FROM followup_form_data 
       WHERE forms_ref_key = ? 

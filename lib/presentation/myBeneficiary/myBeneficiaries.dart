@@ -33,6 +33,7 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
   int migratedOutCount = 0;
   int guestBeneficiaryCount = 0;
   bool isLoading = true;
+  String? ashaUniqueKey;
 
   @override
   void initState() {
@@ -213,6 +214,16 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
 
         for (final member in members) {
           try {
+            final currentUserData = await SecureStorageService.getCurrentUserData();
+            String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+            // Check if current_user_key matches ashaUniqueKey
+            final currentUserKey = member['current_user_key']?.toString() ?? '';
+            if (ashaUniqueKey != null &&
+                ashaUniqueKey!.isNotEmpty &&
+                currentUserKey != ashaUniqueKey) {
+              continue;
+            }
+
             final info = Map<String, dynamic>.from(member['info'] as Map);
             String rawRelation = (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
             rawRelation = rawRelation.replaceAll('_', ' ');

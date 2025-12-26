@@ -48,6 +48,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   List<Map<String, dynamic>> _riCompletedItems = [];
   int _completedVisitsCount = 0;
   bool todayVisitClick = true;
+  String? ashaUniqueKey;
 
   @override
   void initState() {
@@ -303,16 +304,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       _riCompletedItems = [];
 
       // Get current user key
-      String? ashaUniqueKey;
-      try {
-        final userDataStr = await SecureStorageService.getUserData();
-        if (userDataStr != null) {
-          final userData = jsonDecode(userDataStr);
-          ashaUniqueKey = userData['unique_key']?.toString();
-        }
-      } catch (e) {
-        debugPrint('Error getting user data: $e');
-      }
+
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
 ////////////// Completed ANC Data///////////////////////////
        try {
@@ -336,42 +330,36 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
 
-        try{
+        try {
           String query = 'SELECT * FROM ${FollowupFormDataTable.table} '
               'WHERE forms_ref_key IN ($placeholders) '
               'AND (is_deleted IS NULL OR is_deleted = 0) '
-              'AND DATE(created_date_time) = DATE(?)';
-          List<dynamic> args = [...formKeys, todayStr];
+              'AND DATE(created_date_time) = DATE(?) '
+              'AND current_user_key = ?';  // Added here
 
-          if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-            query += ' AND current_user_key = ?';
-            args.add(ashaUniqueKey);
-          }
+          List<dynamic> args = [...formKeys, todayStr, ashaUniqueKey ?? ''];
 
           final rows = await db.rawQuery(query, args);
-
-          // final count = rows.first['cnt'] as int? ?? 0;
-
 
           for (final row in rows) {
             final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
 
             // Decode form_json
-            final Map<String, dynamic> formJson =
-            row['form_json'] != null ?jsonDecode(row['form_json'] as String): {};
+            final Map<String, dynamic> formJson = row['form_json'] != null
+                ? jsonDecode(row['form_json'] as String)
+                : {};
 
             // Get anc_form
-            final Map<String, dynamic> ancForm =
-                formJson['anc_form'] ?? {};
+            final Map<String, dynamic> ancForm = formJson['anc_form'] ?? {};
 
             final fields = beneficiaryId.isNotEmpty
                 ? await _getBeneficiaryFields(beneficiaryId)
                 : {
-                    'name': ancForm['woman_name']?.toString() ?? '',
-                    'age': ancForm['age']?.toString() ?? '',
-                    'gender': 'Female',
-                    'mobile': ancForm['mobile']?.toString() ?? '-',
-                  };
+              'name': ancForm['woman_name']?.toString() ?? '',
+              'age': ancForm['age']?.toString() ?? '',
+              'gender': 'Female',
+              'mobile': ancForm['mobile']?.toString() ?? '-',
+            };
 
             _ancCompletedItems.add({
               'id': row['id'] ?? '',
@@ -379,7 +367,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               'hhId': row['household_ref_key'] ?? '',
               'unique_key': row['beneficiary_ref_key'] ?? '',
               'BeneficiaryID': row['beneficiary_ref_key'] ?? '',
-
               'name': fields['name'],
               'age': fields['age'],
               'gender': fields['gender']?.isNotEmpty == true ? fields['gender'] : 'Female',
@@ -387,19 +374,18 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               'Current ANC last due date': 'currentAncLastDueDateText',
               'mobile': fields['mobile'],
               'badge': 'ANC',
-
               '_rawRow': row,
             });
           }
+        } catch (e) {
+          print('Error in ANC query: $e');
         }
-        catch(e){}
 
-        try{
+        try {
+          final ecFormKey = FollowupFormDataTable.formUniqueKeys[
+          FollowupFormDataTable.eligibleCoupleTrackingDue
+          ] ?? '';
 
-          final ecFormKey =
-              FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
-                  .eligibleCoupleTrackingDue] ??
-                  '';
           final formKeysEC = <String>[];
           if (ecFormKey.isNotEmpty) formKeysEC.add(ecFormKey);
 
@@ -410,32 +396,24 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           String queryEC = 'SELECT * FROM ${FollowupFormDataTable.table} '
               'WHERE forms_ref_key IN ($placeholdersEC) '
               'AND (is_deleted IS NULL OR is_deleted = 0) '
-              'AND DATE(created_date_time) = DATE(?)';
-          List<dynamic> argsEC = [...formKeysEC, todayStr];
+              'AND DATE(created_date_time) = DATE(?) '
+              'AND current_user_key = ?';  // Added here
 
-          if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-            queryEC += ' AND current_user_key = ?';
-            argsEC.add(ashaUniqueKey);
-          }
+          List<dynamic> argsEC = [...formKeysEC, todayStr, ashaUniqueKey ?? ''];
 
           final rowsEC = await db.rawQuery(queryEC, argsEC);
 
-          // final count = rows.first['cnt'] as int? ?? 0;
-
-
           _eligibleCompletedCoupleItems = [];
+
           for (final row in rowsEC) {
             final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
 
             // Decode form_json
-            final Map<String, dynamic> formJson =
-            row['form_json'] != null
+            final Map<String, dynamic> formJson = row['form_json'] != null
                 ? jsonDecode(row['form_json'] as String)
                 : {};
 
-
-            final Map<String, dynamic> ecForm =
-                formJson['ec_form'] ?? {};
+            final Map<String, dynamic> ecForm = formJson['ec_form'] ?? {};
 
             final fields = beneficiaryId.isNotEmpty
                 ? await _getBeneficiaryFields(beneficiaryId)
@@ -448,32 +426,25 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
             _eligibleCompletedCoupleItems.add({
               'id': row['id'] ?? '',
-              'household_ref_key':
-              row['household_ref_key']?.toString() ?? '',
-              'hhId':
-              row['household_ref_key']?.toString() ?? '',
+              'household_ref_key': row['household_ref_key']?.toString() ?? '',
+              'hhId': row['household_ref_key']?.toString() ?? '',
               'unique_key': row['beneficiary_ref_key'] ?? '',
               'BeneficiaryID': row['beneficiary_ref_key'] ?? '',
-
               'name': fields['name'],
               'age': fields['age'],
               'gender': fields['gender']?.isNotEmpty == true
                   ? fields['gender']
                   : 'Female',
-              'last Visit date':
-              _formatDateOnly(row['created_date_time']?.toString()),
+              'last Visit date': _formatDateOnly(row['created_date_time']?.toString()),
               'Current ANC last due date': 'currentAncLastDueDateText',
               'mobile': fields['mobile'],
               'badge': 'EligibleCouple',
-
               '_rawRow': row,
             });
           }
-
-
-
+        } catch (e) {
+          print('Error in eligible couple query: $e');
         }
-        catch(e){}
 
         try {
           final hbncFormKey =
