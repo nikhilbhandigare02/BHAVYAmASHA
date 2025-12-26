@@ -2168,5 +2168,35 @@
   "npAndRRPValidation": "नया पासवर्ड और दोबारा दर्ज किया गया पासवर्ड एक ही होना चाहिए।",
   "errorMsg": "एक त्रुटि हुई थी। कृपया दोबारा प्रयास करें।",
   "failUpdatePassMsg": "पासवर्ड अपडेट करने में विफल",
-  "successUpdatePassMsg": "आपका पासवर्ड सफलतापूर्वक बदल दिया गया है।"
+  "successUpdatePassMsg": "आपका पासवर्ड सफलतापूर्वक बदल दिया गया है।",
+
+
+
+  "preExistingDiseaseLabel": "पूर्व-विद्यमान रोग",
+  "diseaseTb": "क्षय रोग (टीबी)",
+  "diseaseDiabetes": "मधुमेह",
+  "diseaseHepatitisB": "हेपेटाइटिस बी",
+  "diseaseAsthma": "दमा",
+  "diseaseHighBp": "उच्च रक्तचाप",
+  "diseaseStiRti": "यौन / प्रजनन संक्रमण",
+  "diseaseHeart": "हृदय रोग",
+  "diseaseLiver": "यकृत रोग",
+  "diseaseKidney": "गुर्दा रोग",
+  "diseaseEpilepsy": "मिर्गी",
+  "diseaseOther": "अन्य",
+  "pleaseSpecifyOtherDisease": "कृपया अन्य रोग का विवरण दें",
+  "ancVisitFormTitle": "एएनसी विज़िट फॉर्म",
+  "ancVisitLabel": "एएनसी विज़िट",
+  "dateOfInspectionLabel": "निरीक्षण की तिथि *",
+  "houseNumberLabel": "मकान संख्या",
+  "nameOfPregnantWomanLabel": "गर्भवती महिला का नाम",
+  "rchNumberLabel": "आरसीएच नंबर",
+  "weeksOfPregnancyLabel": "गर्भावस्था के सप्ताहों की संख्या",
+  "orderOfPregnancyLabel": "गर्भावस्था का क्रम (ग्रेविडा)",
+  "isWomanBreastfeedingLabel": "क्या महिला स्तनपान करा रही है?",
+  "td1DateLabel": "टी.डी. (टेटनस एवं वयस्क डिप्थीरिया) की पहली खुराक की तिथि",
+  "td2DateLabel": "टी.डी. (टेटनस एवं वयस्क डिप्थीरिया) की दूसरी खुराक की तिथि",
+  "tdBoosterDateLabel": "टी.डी. (टेटनस एवं वयस्क डिप्थीरिया) बूस्टर की तिथि",
+  "folicAcidTabletsLabel": "दी गई फोलिक एसिड गोलियों की संख्या",
+  "calciumVitaminD3TabletsLabel": "दी गई कैल्शियम एवं विटामिन डी3 गोलियों की संख्या"
 }

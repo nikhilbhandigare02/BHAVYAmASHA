@@ -69,8 +69,13 @@ class _AncvisitformState extends State<Ancvisitform> {
       householdRefKey = raw?['household_ref_key']?.toString();
     }
 
-    if (beneficiaryId == null || beneficiaryId.isEmpty || householdRefKey == null || householdRefKey.isEmpty) {
-      print('Missing parameters for ANC form. BeneficiaryID=$beneficiaryId, hhId=$householdRefKey');
+    if (beneficiaryId == null ||
+        beneficiaryId.isEmpty ||
+        householdRefKey == null ||
+        householdRefKey.isEmpty) {
+      print(
+        'Missing parameters for ANC form. BeneficiaryID=$beneficiaryId, hhId=$householdRefKey',
+      );
     }
 
     _bloc = AnvvisitformBloc(
@@ -101,12 +106,15 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
   }
 
-
   void _updateFormWithData(Map<String, dynamic> formData) {
     // Basic information
     // _bloc.add(VisitTypeChanged(formData['visit_type'] ?? '')); // Don't auto-fill visit type
-    _bloc.add(PlaceOfAncChanged(formData['place_of_anc'] ?? '')); // Don't auto-fill place of ANC
-    _bloc.add(DateOfInspectionChanged(_parseDate(formData['date_of_inspection'])));
+    _bloc.add(
+      PlaceOfAncChanged(formData['place_of_anc'] ?? ''),
+    ); // Don't auto-fill place of ANC
+    _bloc.add(
+      DateOfInspectionChanged(_parseDate(formData['date_of_inspection'])),
+    );
     _bloc.add(HouseNumberChanged(formData['house_number'] ?? ''));
     _bloc.add(WomanNameChanged(formData['woman_name'] ?? ''));
     _bloc.add(HusbandNameChanged(formData['husband_name'] ?? ''));
@@ -123,22 +131,29 @@ class _AncvisitformState extends State<Ancvisitform> {
 
     // Checkbox and boolean fields - convert to Yes/No strings
     if (formData['is_breast_feeding'] != null) {
-      final isBreastFeeding = formData['is_breast_feeding'] == true || formData['is_breast_feeding'] == 'true';
+      final isBreastFeeding =
+          formData['is_breast_feeding'] == true ||
+          formData['is_breast_feeding'] == 'true';
       _bloc.add(IsBreastFeedingChanged(isBreastFeeding ? 'Yes' : 'No'));
     }
 
     if (formData['high_risk'] != null) {
       final v = formData['high_risk'];
       final s = v.toString().toLowerCase();
-      final yesNo = (v == true || s == 'yes' || s == 'true' || s == '1') ? 'Yes' : 'No';
+      final yesNo = (v == true || s == 'yes' || s == 'true' || s == '1')
+          ? 'Yes'
+          : 'No';
       _bloc.add(HighRiskChanged(yesNo));
     }
 
     if (formData['selected_risks'] is List) {
-      final risks = List<String>.from((formData['selected_risks'] as List).map((e) => e.toString()));
+      final risks = List<String>.from(
+        (formData['selected_risks'] as List).map((e) => e.toString()),
+      );
       final hr = formData['high_risk'];
       final hrStr = (hr?.toString() ?? '').toLowerCase();
-      final isHigh = hr == true || hrStr == 'yes' || hrStr == 'true' || hrStr == '1';
+      final isHigh =
+          hr == true || hrStr == 'yes' || hrStr == 'true' || hrStr == '1';
       if (isHigh) {
         _bloc.add(SelectedRisksChanged(risks));
       }
@@ -151,7 +166,9 @@ class _AncvisitformState extends State<Ancvisitform> {
 
     // Other fields
     _bloc.add(FolicAcidTabletsChanged(formData['folic_acid_tablets'] ?? ''));
-    _bloc.add(CalciumVitaminD3TabletsChanged(formData['calcium_vitamin_tablets'] ?? ''));
+    _bloc.add(
+      CalciumVitaminD3TabletsChanged(formData['calcium_vitamin_tablets'] ?? ''),
+    );
 
     if (formData['pre_existing_diseases'] != null) {
       final diseases = List<String>.from(formData['pre_existing_diseases']);
@@ -161,9 +178,7 @@ class _AncvisitformState extends State<Ancvisitform> {
         _bloc.add(OtherDiseaseChanged(formData['other_disease']));
       }
     }
-
   }
-
 
   int _calculateWeeksOfPregnancy(DateTime? lmpDate) {
     if (lmpDate == null) return 0;
@@ -190,7 +205,8 @@ class _AncvisitformState extends State<Ancvisitform> {
 
     // 1. First try to get names directly from the passed data
     final womanName = data['Name']?.toString();
-    final husbandName = data['Husband']?.toString() ?? data['husbandName']?.toString();
+    final husbandName =
+        data['Husband']?.toString() ?? data['husbandName']?.toString();
 
     if (womanName != null && womanName.isNotEmpty) {
       _bloc.add(WomanNameChanged(womanName));
@@ -201,8 +217,11 @@ class _AncvisitformState extends State<Ancvisitform> {
 
     // 2. Fetch and set house number from beneficiary data
     try {
-      final householdRefKey = data['hhId']?.toString() ??
-                            (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['household_ref_key']?.toString() : null);
+      final householdRefKey =
+          data['hhId']?.toString() ??
+          (data['_rawRow'] is Map
+              ? (data['_rawRow'] as Map)['household_ref_key']?.toString()
+              : null);
 
       if (householdRefKey != null && householdRefKey.isNotEmpty) {
         final db = await DatabaseProvider.instance.database;
@@ -215,9 +234,14 @@ class _AncvisitformState extends State<Ancvisitform> {
         if (result.isNotEmpty) {
           for (final row in result) {
             try {
-              final beneficiaryInfo = jsonDecode(row['beneficiary_info'] as String? ?? '{}') as Map<String, dynamic>;
-              if (beneficiaryInfo.containsKey('houseNo') && beneficiaryInfo['houseNo'] != null) {
-                _bloc.add(HouseNumberChanged(beneficiaryInfo['houseNo'].toString()));
+              final beneficiaryInfo =
+                  jsonDecode(row['beneficiary_info'] as String? ?? '{}')
+                      as Map<String, dynamic>;
+              if (beneficiaryInfo.containsKey('houseNo') &&
+                  beneficiaryInfo['houseNo'] != null) {
+                _bloc.add(
+                  HouseNumberChanged(beneficiaryInfo['houseNo'].toString()),
+                );
                 break; // Found house number, no need to check other records
               }
             } catch (e) {
@@ -247,7 +271,8 @@ class _AncvisitformState extends State<Ancvisitform> {
       }
 
       // If not found in beneficiary_info, try _rawRow
-      if ((beneficiaryInfo == null || beneficiaryInfo.isEmpty) && data?['_rawRow'] != null) {
+      if ((beneficiaryInfo == null || beneficiaryInfo.isEmpty) &&
+          data?['_rawRow'] != null) {
         final rawRow = data!['_rawRow'];
         if (rawRow is String) {
           try {
@@ -323,9 +348,10 @@ class _AncvisitformState extends State<Ancvisitform> {
 
       // If we still don't have the woman's name, try to get it from other fields
       if (_bloc.state.womanName == null || _bloc.state.womanName!.isEmpty) {
-        final nameFromData = data['memberName']?.toString() ??
-                           data['headName']?.toString() ??
-                           data['name']?.toString();
+        final nameFromData =
+            data['memberName']?.toString() ??
+            data['headName']?.toString() ??
+            data['name']?.toString();
         if (nameFromData != null && nameFromData.isNotEmpty) {
           _bloc.add(WomanNameChanged(nameFromData));
         }
@@ -333,14 +359,14 @@ class _AncvisitformState extends State<Ancvisitform> {
 
       // If we still don't have the husband's name, try to get it from other fields
       if (_bloc.state.husbandName == null || _bloc.state.husbandName!.isEmpty) {
-        final spouseName = data['spouseName']?.toString() ??
-                          data['headName']?.toString() ??
-                          data['husbandName']?.toString();
+        final spouseName =
+            data['spouseName']?.toString() ??
+            data['headName']?.toString() ??
+            data['husbandName']?.toString();
         if (spouseName != null && spouseName.isNotEmpty) {
           _bloc.add(HusbandNameChanged(spouseName));
         }
       }
-
 
       final dataId = data['id']?.toString() ?? '';
       final dataBeneficiaryId = data['BeneficiaryID']?.toString() ?? '';
@@ -350,11 +376,14 @@ class _AncvisitformState extends State<Ancvisitform> {
       // Try to load existing form data
       try {
         final localStorageDao = LocalStorageDao();
-        final existingForms = await localStorageDao.getFollowupFormsByHouseholdAndBeneficiary(
-          formType: FollowupFormDataTable.ancDueRegistration,
-          householdId: hhId,
-          beneficiaryId: dataBeneficiaryId.isNotEmpty ? dataBeneficiaryId : uniqueKey,
-        );
+        final existingForms = await localStorageDao
+            .getFollowupFormsByHouseholdAndBeneficiary(
+              formType: FollowupFormDataTable.ancDueRegistration,
+              householdId: hhId,
+              beneficiaryId: dataBeneficiaryId.isNotEmpty
+                  ? dataBeneficiaryId
+                  : uniqueKey,
+            );
 
         if (existingForms.isNotEmpty) {
           final formData = existingForms.first;
@@ -368,7 +397,8 @@ class _AncvisitformState extends State<Ancvisitform> {
             try {
               final formJson = jsonDecode(formData['form_json'] as String);
               if (formJson is Map && formJson['anc_form'] is Map) {
-                final formDataMap = formJson['anc_form'] as Map<String, dynamic>;
+                final formDataMap =
+                    formJson['anc_form'] as Map<String, dynamic>;
                 print('📝 Loaded form data: $formDataMap');
 
                 // Update the form with the loaded data
@@ -380,18 +410,25 @@ class _AncvisitformState extends State<Ancvisitform> {
           }
 
           for (var form in existingForms) {
-
             if (form['form_json'] != null) {
               try {
                 final formDataJson = jsonDecode(form['form_json'] as String);
-                final name = formDataJson['womanName'] ?? formDataJson['name'] ?? 'Not found';
+                final name =
+                    formDataJson['womanName'] ??
+                    formDataJson['name'] ??
+                    'Not found';
                 print('  - Name from form: $name');
 
                 // If this is the current beneficiary, log more details
-                if (form['beneficiary_ref_key'] == (dataBeneficiaryId.isNotEmpty ? dataBeneficiaryId : uniqueKey)) {
+                if (form['beneficiary_ref_key'] ==
+                    (dataBeneficiaryId.isNotEmpty
+                        ? dataBeneficiaryId
+                        : uniqueKey)) {
                   print('  Current beneficiary match!');
                   final formJsonString = jsonEncode(formDataJson);
-                  print('  📝 Full form data: ${formJsonString.length > 200 ? formJsonString.substring(0, 200) + '...' : formJsonString}');
+                  print(
+                    '  📝 Full form data: ${formJsonString.length > 200 ? formJsonString.substring(0, 200) + '...' : formJsonString}',
+                  );
                 }
               } catch (e) {
                 print('  ⚠️ Error parsing form_json: $e');
@@ -405,18 +442,23 @@ class _AncvisitformState extends State<Ancvisitform> {
           final latestForm = existingForms.first;
           if (latestForm['form_json'] != null) {
             try {
-              final formDataJson = jsonDecode(latestForm['form_json'] as String);
+              final formDataJson = jsonDecode(
+                latestForm['form_json'] as String,
+              );
               print('\n✨ Found existing form data for this beneficiary');
             } catch (e) {
               print('⚠️ Error processing form data: $e');
             }
           }
         } else {
-          print('ℹ️ No existing ANC forms found for this beneficiary using household+beneficiary. Trying beneficiary-only fallback.');
+          print(
+            'ℹ️ No existing ANC forms found for this beneficiary using household+beneficiary. Trying beneficiary-only fallback.',
+          );
           try {
-            final byBeneficiary = await localStorageDao.getAncFormsByBeneficiaryId(
-              dataBeneficiaryId.isNotEmpty ? dataBeneficiaryId : uniqueKey,
-            );
+            final byBeneficiary = await localStorageDao
+                .getAncFormsByBeneficiaryId(
+                  dataBeneficiaryId.isNotEmpty ? dataBeneficiaryId : uniqueKey,
+                );
 
             if (byBeneficiary.isNotEmpty) {
               final latest = byBeneficiary.first;
@@ -425,8 +467,11 @@ class _AncvisitformState extends State<Ancvisitform> {
               final fd = latest['anc_form'] is Map
                   ? Map<String, dynamic>.from(latest['anc_form'] as Map)
                   : (latest['form_json'] != null
-                  ? ((jsonDecode(latest['form_json'] as String) as Map<String, dynamic>?)?['anc_form'] as Map<String, dynamic>?) ?? {}
-                  : <String, dynamic>{});
+                        ? ((jsonDecode(latest['form_json'] as String)
+                                      as Map<String, dynamic>?)?['anc_form']
+                                  as Map<String, dynamic>?) ??
+                              {}
+                        : <String, dynamic>{});
 
               print('📝 Loaded fallback ANC form data: $fd');
               _updateFormWithData(fd);
@@ -449,15 +494,17 @@ class _AncvisitformState extends State<Ancvisitform> {
           ? dataBeneficiaryId
           : (dataId.isNotEmpty ? dataId : uniqueKey);
 
-      print('  Selected Beneficiary ID: $beneficiaryIdToUse (${beneficiaryIdToUse?.length ?? 0} chars)');
+      print(
+        '  Selected Beneficiary ID: $beneficiaryIdToUse (${beneficiaryIdToUse?.length ?? 0} chars)',
+      );
       print('  Household ID: $hhId (${hhId.length} chars)');
 
       if (beneficiaryIdToUse != null && beneficiaryIdToUse.isNotEmpty) {
         _bloc.add(BeneficiaryIdSet(beneficiaryIdToUse));
 
         try {
-          final beneficiaryRow =
-          await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryIdToUse);
+          final beneficiaryRow = await LocalStorageDao.instance
+              .getBeneficiaryByUniqueKey(beneficiaryIdToUse);
           if (beneficiaryRow != null) {
             final infoRaw = beneficiaryRow['beneficiary_info'];
             Map<String, dynamic> info;
@@ -496,7 +543,8 @@ class _AncvisitformState extends State<Ancvisitform> {
               }
             }
 
-            final womanName = (info['memberName'] ?? info['headName'])?.toString();
+            final womanName = (info['memberName'] ?? info['headName'])
+                ?.toString();
             if (womanName != null && womanName.isNotEmpty) {
               _bloc.add(WomanNameChanged(womanName));
             }
@@ -531,16 +579,23 @@ class _AncvisitformState extends State<Ancvisitform> {
           try {
             final beneficiaryInfoString = data['beneficiary_info'].toString();
             final beneficiaryInfo = jsonDecode(beneficiaryInfoString);
-            if (beneficiaryInfo is Map && beneficiaryInfo['spouseName'] != null) {
-              _bloc.add(HusbandNameChanged(beneficiaryInfo['spouseName'].toString()));
-              print('👨 Set husband name from beneficiary_info: ${beneficiaryInfo['spouseName']}');
+            if (beneficiaryInfo is Map &&
+                beneficiaryInfo['spouseName'] != null) {
+              _bloc.add(
+                HusbandNameChanged(beneficiaryInfo['spouseName'].toString()),
+              );
+              print(
+                '👨 Set husband name from beneficiary_info: ${beneficiaryInfo['spouseName']}',
+              );
             }
           } catch (e) {
             print('⚠️ Error parsing beneficiary_info: $e');
           }
         }
       } else {
-        print('⚠️ No valid beneficiary ID or unique key found in the provided data');
+        print(
+          '⚠️ No valid beneficiary ID or unique key found in the provided data',
+        );
       }
 
       // Fetch house number from secure storage
@@ -548,7 +603,9 @@ class _AncvisitformState extends State<Ancvisitform> {
         try {
           final storageData = await SecureStorageService.getUserData();
           if (storageData != null && storageData.isNotEmpty) {
-            print('🔍 Found data in secure storage, searching for matching beneficiary...');
+            print(
+              '🔍 Found data in secure storage, searching for matching beneficiary...',
+            );
 
             try {
               final Map<String, dynamic> parsedData = jsonDecode(storageData);
@@ -556,7 +613,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                 for (var visit in parsedData['visits']) {
                   try {
                     final visitId = visit['id']?.toString();
-                    final visitBeneficiaryId = visit['BeneficiaryID']?.toString();
+                    final visitBeneficiaryId = visit['BeneficiaryID']
+                        ?.toString();
 
                     // Try to get houseNo from different possible locations
                     String? visitHouseNo;
@@ -565,13 +623,17 @@ class _AncvisitformState extends State<Ancvisitform> {
                     visitHouseNo = visit['houseNo']?.toString();
 
                     // 2. Check nested in beneficiary_info.head_details if not found directly
-                    if (visitHouseNo == null && visit['beneficiary_info'] is Map) {
+                    if (visitHouseNo == null &&
+                        visit['beneficiary_info'] is Map) {
                       final beneficiaryInfo = visit['beneficiary_info'] as Map;
                       if (beneficiaryInfo['head_details'] is Map) {
-                        final headDetails = beneficiaryInfo['head_details'] as Map;
+                        final headDetails =
+                            beneficiaryInfo['head_details'] as Map;
                         visitHouseNo = headDetails['houseNo']?.toString();
                         if (visitHouseNo != null) {
-                          print('   - Found houseNo in beneficiary_info.head_details');
+                          print(
+                            '   - Found houseNo in beneficiary_info.head_details',
+                          );
                         }
                       }
                     }
@@ -589,25 +651,36 @@ class _AncvisitformState extends State<Ancvisitform> {
                       }
                       // Then try nested in _rawRow.beneficiary_info.head_details
                       else if (rawRow['beneficiary_info'] is Map) {
-                        final rawBeneficiaryInfo = rawRow['beneficiary_info'] as Map;
+                        final rawBeneficiaryInfo =
+                            rawRow['beneficiary_info'] as Map;
                         if (rawBeneficiaryInfo['head_details'] is Map) {
-                          final headDetails = rawBeneficiaryInfo['head_details'] as Map;
+                          final headDetails =
+                              rawBeneficiaryInfo['head_details'] as Map;
                           visitHouseNo = headDetails['houseNo']?.toString();
                           if (visitHouseNo != null) {
-                            print('   - Found houseNo in _rawRow.beneficiary_info.head_details');
+                            print(
+                              '   - Found houseNo in _rawRow.beneficiary_info.head_details',
+                            );
                           }
                         }
                       }
                     }
 
-                    final isMatch = (dataId.isNotEmpty && (visitId == dataId || visitBeneficiaryId == dataId)) ||
-                        (dataBeneficiaryId.isNotEmpty && (visitId == dataBeneficiaryId || visitBeneficiaryId == dataBeneficiaryId));
+                    final isMatch =
+                        (dataId.isNotEmpty &&
+                            (visitId == dataId ||
+                                visitBeneficiaryId == dataId)) ||
+                        (dataBeneficiaryId.isNotEmpty &&
+                            (visitId == dataBeneficiaryId ||
+                                visitBeneficiaryId == dataBeneficiaryId));
 
                     if (isMatch) {
                       houseNo = visitHouseNo;
                       print('🏠 Found matching beneficiary in secure storage');
                       print('   - ID: ${visitId ?? 'N/A'}');
-                      print('   - BeneficiaryID: ${visitBeneficiaryId ?? 'N/A'}');
+                      print(
+                        '   - BeneficiaryID: ${visitBeneficiaryId ?? 'N/A'}',
+                      );
                       print('   - House No: ${houseNo ?? 'Not found'}');
                       print('   - Full visit data: $visit');
                       break;
@@ -627,7 +700,9 @@ class _AncvisitformState extends State<Ancvisitform> {
           print('⚠️ Error accessing secure storage: $e');
         }
       } else {
-        print('ℹ️ No valid ID or BeneficiaryID provided for secure storage lookup');
+        print(
+          'ℹ️ No valid ID or BeneficiaryID provided for secure storage lookup',
+        );
       }
 
       // Use visitCount passed from previous screen to determine next ANC visit number (final confirmation)
@@ -642,7 +717,9 @@ class _AncvisitformState extends State<Ancvisitform> {
         }
 
         final nextVisitNumber = (visitCount + 1);
-        print('🔢 visitCount from list screen: $visitCount, nextVisitNumber: $nextVisitNumber');
+        print(
+          '🔢 visitCount from list screen: $visitCount, nextVisitNumber: $nextVisitNumber',
+        );
 
         _bloc.add(VisitNumberChanged(nextVisitNumber.toString()));
       } catch (e) {
@@ -660,15 +737,19 @@ class _AncvisitformState extends State<Ancvisitform> {
 
   Future<void> _loadPreviousLmpFromEligibleCouple() async {
     try {
-      final benId = widget.beneficiaryData?['BeneficiaryID']?.toString() ??
+      final benId =
+          widget.beneficiaryData?['BeneficiaryID']?.toString() ??
           widget.beneficiaryData?['unique_key']?.toString() ??
           (widget.beneficiaryData?['_rawRow'] is Map
-              ? (widget.beneficiaryData?['_rawRow'] as Map)['unique_key']?.toString()
+              ? (widget.beneficiaryData?['_rawRow'] as Map)['unique_key']
+                    ?.toString()
               : null);
 
-      final hhId = widget.beneficiaryData?['hhId']?.toString() ??
+      final hhId =
+          widget.beneficiaryData?['hhId']?.toString() ??
           (widget.beneficiaryData?['_rawRow'] is Map
-              ? (widget.beneficiaryData?['_rawRow'] as Map)['household_ref_key']?.toString()
+              ? (widget.beneficiaryData?['_rawRow'] as Map)['household_ref_key']
+                    ?.toString()
               : null);
 
       if (benId == null || benId.isEmpty || hhId == null || hhId.isEmpty) {
@@ -705,8 +786,11 @@ class _AncvisitformState extends State<Ancvisitform> {
               lmp = DateTime.parse(lmpStr);
             } catch (_) {}
             if (lmp != null) {
-              final same = uiLmp != null &&
-                  lmp.year == uiLmp.year && lmp.month == uiLmp.month && lmp.day == uiLmp.day;
+              final same =
+                  uiLmp != null &&
+                  lmp.year == uiLmp.year &&
+                  lmp.month == uiLmp.month &&
+                  lmp.day == uiLmp.day;
               if (same) {
                 print('Skipping LMP equal to current: $lmp');
                 continue;
@@ -741,10 +825,12 @@ class _AncvisitformState extends State<Ancvisitform> {
 
   Future<void> _loadLastTd1DateFromDb() async {
     try {
-      final benId = widget.beneficiaryData?['BeneficiaryID']?.toString() ??
+      final benId =
+          widget.beneficiaryData?['BeneficiaryID']?.toString() ??
           widget.beneficiaryData?['unique_key']?.toString() ??
           (widget.beneficiaryData?['_rawRow'] is Map
-              ? (widget.beneficiaryData?['_rawRow'] as Map)['unique_key']?.toString()
+              ? (widget.beneficiaryData?['_rawRow'] as Map)['unique_key']
+                    ?.toString()
               : null);
 
       if (benId == null || benId.isEmpty) {
@@ -847,16 +933,23 @@ class _AncvisitformState extends State<Ancvisitform> {
           child: BlocConsumer<AnvvisitformBloc, AnvvisitformState>(
             listener: (context, state) {
               if (state.error != null) {
-                final msg = state.error!.isNotEmpty ? state.error! : (l10n?.somethingWentWrong ?? 'Something went wrong');
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+                final msg = state.error!.isNotEmpty
+                    ? state.error!
+                    : (l10n?.somethingWentWrong ?? 'Something went wrong');
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(msg)));
               }
               if (state.isSuccess) {
                 if (state.givesBirthToBaby == (l10n?.yes ?? 'Yes')) {
                   final count = _childrenCount(state.numberOfChildren);
                   CustomDialog.show(
                     context,
-                    title:l10n?.formSavedSuccessfully ?? 'Form has been saved successfully.',
-                    message: '${l10n?.deliveryOutcome ?? "Delivery outcome"} : $count',
+                    title:
+                        l10n?.formSavedSuccessfully ??
+                        'Form has been saved successfully.',
+                    message:
+                        '${l10n?.deliveryOutcome ?? "Delivery outcome"} : $count',
                     onOkPressed: () {
                       Navigator.of(context, rootNavigator: true).pop();
                       Navigator.pop(context, true);
@@ -864,7 +957,11 @@ class _AncvisitformState extends State<Ancvisitform> {
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n?.saveSuccess ?? 'Form Submitted successfully')),
+                    SnackBar(
+                      content: Text(
+                        l10n?.saveSuccess ?? 'Form Submitted successfully',
+                      ),
+                    ),
                   );
                   Navigator.pop(context, true);
                 }
@@ -879,13 +976,22 @@ class _AncvisitformState extends State<Ancvisitform> {
                   children: [
                     Expanded(
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(left: 8.0),
-                              child: Text(l10n?.ancVisitLabel ?? 'ANC visit', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                              child: Text(
+                                l10n?.ancVisitLabel ?? 'ANC visit',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                             const SizedBox(height: 6),
                             Padding(
@@ -900,13 +1006,17 @@ class _AncvisitformState extends State<Ancvisitform> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
 
                             const SizedBox(height: 12),
                             ApiDropdown<String>(
                               labelText: l10n?.visitTypeLabel ?? 'Visit type *',
 
-                              items: const ['ANC', 'PMSMA',],
+                              items: const ['ANC', 'PMSMA'],
                               getLabel: (s) {
                                 switch (s) {
                                   case 'ANC':
@@ -918,16 +1028,24 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 }
                               },
 
-                              value: state.visitType.isEmpty ? null : state.visitType,
+                              value: state.visitType.isEmpty
+                                  ? null
+                                  : state.visitType,
 
-                              onChanged: (v) => bloc.add(VisitTypeChanged(v ?? '')),
+                              onChanged: (v) =>
+                                  bloc.add(VisitTypeChanged(v ?? '')),
                               hintText: l10n?.select ?? 'Select',
                               validator: validateDropdownRequired,
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
 
                             ApiDropdown<String>(
-                              labelText: l10n?.placeOfAncLabel ?? 'Place of ANC',
+                              labelText:
+                                  l10n?.placeOfAncLabel ?? 'Place of ANC',
                               items: const [
                                 'VHSND/Anganwadi',
                                 'Health Sub-center/Health & Wealth Centre(HSC/HWC)',
@@ -936,60 +1054,121 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 'Referral Hospital(RH)',
                                 'District Hospital(DH)',
                                 'Medical College Hospital(MCH)',
-                                'PMSMA Site'
+                                'PMSMA Site',
                               ],
-                              value: state.placeOfAnc.isEmpty ? null : state.placeOfAnc,
-                              getLabel: (s) => s,
-                              onChanged: (v) => bloc.add(PlaceOfAncChanged(v ?? '')),
+                              value: state.placeOfAnc.isEmpty
+                                  ? null
+                                  : state.placeOfAnc,
+                              getLabel: (s) {
+                                switch (s) {
+                                  case 'VHSND/Anganwadi':
+                                    return l10n?.vhsndAnganwadi ?? '';
+                                  case 'Health Sub-center/Health & Wealth Centre(HSC/HWC)':
+                                    return l10n?.hscHwc ?? '';
+                                  case 'Primary Health Centre(PHC)':
+                                    return l10n?.phcLabel ?? '';
+                                  case 'Community Health Centre(CHC)':
+                                    return l10n?.chcLabel ?? '';
+                                  case 'Referral Hospital(RH)':
+                                    return l10n?.rh ?? '';
+                                  case 'District Hospital(DH)':
+                                    return l10n?.dh ?? '';
+                                  case 'Medical College Hospital(MCH)':
+                                    return l10n?.mch ?? '';
+                                  case 'PMSMA Site':
+                                    return l10n?.pmsmaSite ?? '';
+                                  default:
+                                    return s;
+                                }
+                              },
+                              onChanged: (v) =>
+                                  bloc.add(PlaceOfAncChanged(v ?? '')),
                               hintText: l10n?.select ?? 'Select',
                             ),
 
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
 
                             CustomDatePicker(
-                              labelText: l10n?.dateOfInspectionLabel ?? 'Date of inspection *',
-                              hintText: l10n?.dateOfInspectionLabel ?? 'Date of inspection *',
-                              initialDate: state.dateOfInspection ?? DateTime.now(),
+                              labelText:
+                                  l10n?.dateOfInspectionLabel ??
+                                  'Date of inspection *',
+                              hintText:
+                                  l10n?.dateOfInspectionLabel ??
+                                  'Date of inspection *',
+                              initialDate:
+                                  state.dateOfInspection ?? DateTime.now(),
                               onDateChanged: (d) {
                                 bloc.add(DateOfInspectionChanged(d));
                                 final lmp = bloc.state.lmpDate;
                                 if (lmp != null && d != null) {
                                   final difference = d.difference(lmp).inDays;
                                   final weeks = (difference / 7).floor() + 1;
-                                  bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
+                                  bloc.add(
+                                    WeeksOfPregnancyChanged(weeks.toString()),
+                                  );
                                 }
                               },
                               validator: (date) => validateDateRequired(date),
                             ),
 
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
 
                             CustomTextField(
-                              labelText: l10n?.houseNumberLabel ?? 'House number',
-                              hintText: l10n?.houseNumberLabel ?? 'House number',
+                              labelText:
+                                  l10n?.houseNumberLabel ?? 'House number',
+                              hintText:
+                                  l10n?.houseNumberLabel ?? 'House number',
                               initialValue: state.houseNumber,
                               readOnly: true,
                               onChanged: (v) => bloc.add(HouseNumberChanged(v)),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             CustomTextField(
-                              labelText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
-                              hintText: l10n?.nameOfPregnantWomanLabel ?? 'Name of Pregnant Woman',
+                              labelText:
+                                  l10n?.nameOfPregnantWomanLabel ??
+                                  'Name of Pregnant Woman',
+                              hintText:
+                                  l10n?.nameOfPregnantWomanLabel ??
+                                  'Name of Pregnant Woman',
                               readOnly: true,
                               key: ValueKey('woman_name_${state.womanName}'),
                               initialValue: state.womanName,
                               onChanged: (v) => bloc.add(WomanNameChanged(v)),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             CustomTextField(
-                              labelText: l10n?.husbandNameLabel ?? "Husband's name",
+                              labelText:
+                                  l10n?.husbandNameLabel ?? "Husband's name",
                               readOnly: true,
-                              hintText: l10n?.husbandNameLabel ?? "Husband's name",
-                              key: ValueKey('husband_name_${state.husbandName}'),
+                              hintText:
+                                  l10n?.husbandNameLabel ?? "Husband's name",
+                              key: ValueKey(
+                                'husband_name_${state.husbandName}',
+                              ),
                               initialValue: state.husbandName,
                               onChanged: (v) => bloc.add(HusbandNameChanged(v)),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             CustomTextField(
                               labelText: l10n?.rchNumberLabel ?? 'RCH number',
                               readOnly: true,
@@ -997,63 +1176,113 @@ class _AncvisitformState extends State<Ancvisitform> {
                               initialValue: state.rchNumber,
                               onChanged: (v) => bloc.add(RchNumberChanged(v)),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
 
                             // LMP Date Picker
                             Container(
                               decoration: const BoxDecoration(
                                 color: AppColors.background,
-                                borderRadius: BorderRadius.all(Radius.circular(4)),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(4),
+                                ),
                               ),
                               child: CustomDatePicker(
-                                labelText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
-                                hintText: l10n?.lmpDateLabel ?? 'Date of last menstrual period (LMP) *',
+                                labelText:
+                                    l10n?.lmpDateLabel ??
+                                    'Date of last menstrual period (LMP) *',
+                                hintText:
+                                    l10n?.lmpDateLabel ??
+                                    'Date of last menstrual period (LMP) *',
                                 initialDate: state.lmpDate ?? DateTime.now(),
                                 readOnly: true,
                                 onDateChanged: (d) {
                                   if (d != null) {
                                     bloc.add(LmpDateChanged(d));
-                                    final base = bloc.state.dateOfInspection ?? DateTime.now();
-                                    final difference = base.difference(d).inDays;
+                                    final base =
+                                        bloc.state.dateOfInspection ??
+                                        DateTime.now();
+                                    final difference = base
+                                        .difference(d)
+                                        .inDays;
                                     final weeks = (difference / 7).floor() + 1;
-                                    bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
+                                    bloc.add(
+                                      WeeksOfPregnancyChanged(weeks.toString()),
+                                    );
                                   }
                                 },
                                 validator: (date) => validateDateRequired(date),
                               ),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             CustomDatePicker(
-                              labelText: l10n?.eddDateLabel ?? 'Expected date of delivery (EDD)',
-                              hintText: l10n?.eddDateLabel ?? 'Expected date of delivery (EDD)',
+                              labelText:
+                                  l10n?.eddDateLabel ??
+                                  'Expected date of delivery (EDD)',
+                              hintText:
+                                  l10n?.eddDateLabel ??
+                                  'Expected date of delivery (EDD)',
                               initialDate: state.eddDate,
                               readOnly: true,
                               onDateChanged: (d) => bloc.add(EddDateChanged(d)),
                             ),
 
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             CustomTextField(
-                              key: ValueKey('weeks_of_pregnancy_${state.weeksOfPregnancy}'),
-                              labelText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
-                              hintText: l10n?.weeksOfPregnancyLabel ?? 'No. of weeks of pregnancy',
+                              key: ValueKey(
+                                'weeks_of_pregnancy_${state.weeksOfPregnancy}',
+                              ),
+                              labelText:
+                                  l10n?.weeksOfPregnancyLabel ??
+                                  'No. of weeks of pregnancy',
+                              hintText:
+                                  l10n?.weeksOfPregnancyLabel ??
+                                  'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
                               readOnly: true,
                               keyboardType: TextInputType.number,
-                              onChanged: (v) => bloc.add(WeeksOfPregnancyChanged(v)),
+                              onChanged: (v) =>
+                                  bloc.add(WeeksOfPregnancyChanged(v)),
                             ),
 
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 16),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 16,
+                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(l10n?.orderOfPregnancyLabel ?? 'Order of Pregnancy(Gravida)', style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w600)),
+                                Text(
+                                  l10n?.orderOfPregnancyLabel ??
+                                      'Order of Pregnancy(Gravida)',
+                                  style: TextStyle(
+                                    fontSize: 13.5.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 const SizedBox(height: 6),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     _qtyButton(
                                       icon: Icons.remove,
-                                      onTap: state.gravida > 1 ? () => bloc.add(const GravidaDecremented()) : null,
+                                      onTap: state.gravida > 1
+                                          ? () => bloc.add(
+                                              const GravidaDecremented(),
+                                            )
+                                          : null,
                                       enabled: state.gravida > 1,
                                     ),
                                     const SizedBox(width: 6),
@@ -1062,15 +1291,23 @@ class _AncvisitformState extends State<Ancvisitform> {
                                       height: 32,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
-                                        border: Border.all(color: AppColors.outlineVariant),
+                                        border: Border.all(
+                                          color: AppColors.outlineVariant,
+                                        ),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: Text('${state.gravida > 0 ? state.gravida : 1}'),
+                                      child: Text(
+                                        '${state.gravida > 0 ? state.gravida : 1}',
+                                      ),
                                     ),
                                     const SizedBox(width: 6),
                                     _qtyButton(
                                       icon: Icons.add,
-                                      onTap: state.gravida < 15 ? () => bloc.add(const GravidaIncremented()) : null,
+                                      onTap: state.gravida < 15
+                                          ? () => bloc.add(
+                                              const GravidaIncremented(),
+                                            )
+                                          : null,
                                       enabled: state.gravida < 15,
                                     ),
                                   ],
@@ -1078,20 +1315,37 @@ class _AncvisitformState extends State<Ancvisitform> {
                               ],
                             ),
 
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 16),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 16,
+                            ),
                             ApiDropdown<String>(
-                              labelText: l10n?.isWomanBreastfeedingLabel ?? 'Is woman breastfeeding?',
+                              labelText:
+                                  l10n?.isWomanBreastfeedingLabel ??
+                                  'Is woman breastfeeding?',
                               items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                              value: state.isBreastFeeding.isEmpty ? null : state.isBreastFeeding,
+                              value: state.isBreastFeeding.isEmpty
+                                  ? null
+                                  : state.isBreastFeeding,
                               getLabel: (s) => s,
-                              onChanged: (v) => bloc.add(IsBreastFeedingChanged(v ?? '')),
+                              onChanged: (v) =>
+                                  bloc.add(IsBreastFeedingChanged(v ?? '')),
                               hintText: l10n?.select ?? 'Select',
                             ),
 
-                            Divider(color: const Color.fromRGBO(202, 196, 208, 1), thickness: 0.5, height: 0),
+                            Divider(
+                              color: const Color.fromRGBO(202, 196, 208, 1),
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             CustomDatePicker(
-                              labelText: l10n?.td1DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 1',
-                              hintText: l10n?.td1DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 1',
+                              labelText:
+                                  l10n?.td1DateLabel ??
+                                  'Date of T.D(Tetanus and adult diphtheria) 1',
+                              hintText:
+                                  l10n?.td1DateLabel ??
+                                  'Date of T.D(Tetanus and adult diphtheria) 1',
                               initialDate: state.td1Date,
                               readOnly: (() {
                                 final prev = _prevLmpFromEc;
@@ -1104,13 +1358,22 @@ class _AncvisitformState extends State<Ancvisitform> {
                               })(),
                               onDateChanged: (d) => bloc.add(Td1DateChanged(d)),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             CustomDatePicker(
-                              labelText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
-                              hintText: l10n?.td2DateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) 2',
+                              labelText:
+                                  l10n?.td2DateLabel ??
+                                  'Date of T.D(Tetanus and adult diphtheria) 2',
+                              hintText:
+                                  l10n?.td2DateLabel ??
+                                  'Date of T.D(Tetanus and adult diphtheria) 2',
                               initialDate: state.td2Date,
                               readOnly: (() {
-                                final inspect = state.dateOfInspection ?? DateTime.now();
+                                final inspect =
+                                    state.dateOfInspection ?? DateTime.now();
                                 final td1 = state.td1Date ?? _lastTd1DateFromDb;
                                 if (td1 == null) {
                                   return true;
@@ -1120,14 +1383,23 @@ class _AncvisitformState extends State<Ancvisitform> {
                               })(),
                               onDateChanged: (d) => bloc.add(Td2DateChanged(d)),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             CustomDatePicker(
-                              labelText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
-                              hintText: l10n?.tdBoosterDateLabel ?? 'Date of T.D(Tetanus and adult diphtheria) booster',
+                              labelText:
+                                  l10n?.tdBoosterDateLabel ??
+                                  'Date of T.D(Tetanus and adult diphtheria) booster',
+                              hintText:
+                                  l10n?.tdBoosterDateLabel ??
+                                  'Date of T.D(Tetanus and adult diphtheria) booster',
                               initialDate: state.tdBoosterDate,
                               readOnly: (() {
                                 bool td2Eligible = false;
-                                final inspect = state.dateOfInspection ?? DateTime.now();
+                                final inspect =
+                                    state.dateOfInspection ?? DateTime.now();
                                 final td1 = state.td1Date ?? _lastTd1DateFromDb;
                                 if (inspect != null && td1 != null) {
                                   final days = inspect.difference(td1).inDays;
@@ -1144,46 +1416,69 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 }
                                 return state.gravida < 2;
                               })(),
-                              onDateChanged: (d) => bloc.add(TdBoosterDateChanged(d)),
+                              onDateChanged: (d) =>
+                                  bloc.add(TdBoosterDateChanged(d)),
                             ),
 
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             Builder(
                               builder: (context) {
-                                final weeks = int.tryParse(state.weeksOfPregnancy ?? '0') ?? 0;
+                                final weeks =
+                                    int.tryParse(
+                                      state.weeksOfPregnancy ?? '0',
+                                    ) ??
+                                    0;
                                 final isAfter12Weeks = weeks > 12;
                                 final label = isAfter12Weeks
                                     ? 'Number of Iron & Folic Acid tablets given'
-                                    : (l10n?.folicAcidTabletsLabel ?? 'Number of Folic Acid tablets given');
+                                    : (l10n?.folicAcidTabletsLabel ??
+                                          'Number of Folic Acid tablets given');
                                 return CustomTextField(
                                   labelText: label,
                                   hintText: label,
                                   initialValue: state.folicAcidTablets,
                                   keyboardType: TextInputType.number,
-                                  onChanged: (v) => bloc.add(FolicAcidTabletsChanged(v)),
+                                  onChanged: (v) =>
+                                      bloc.add(FolicAcidTabletsChanged(v)),
                                   validator: validateTabletCount,
                                 );
-                              }
+                              },
                             ),
 
-                            if (int.tryParse(state.weeksOfPregnancy) != null && int.parse(state.weeksOfPregnancy) >= 14) ...[
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            if (int.tryParse(state.weeksOfPregnancy) != null &&
+                                int.parse(state.weeksOfPregnancy) >= 14) ...[
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
                               CustomTextField(
-                                labelText: 'Number of Calcium and Vitamin D3 tablets given',
-                                hintText: 'Enter number of Calcium and Vitamin D3 tablets',
+                                labelText:
+                                    'Number of Calcium and Vitamin D3 tablets given',
+                                hintText:
+                                    'Enter number of Calcium and Vitamin D3 tablets',
                                 initialValue: state.calciumVitaminD3Tablets,
                                 keyboardType: TextInputType.number,
-                                onChanged: (v) => bloc.add(CalciumVitaminD3TabletsChanged(v)),
+                                onChanged: (v) =>
+                                    bloc.add(CalciumVitaminD3TabletsChanged(v)),
                                 validator: validateTabletCount,
                               ),
                             ],
 
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             MultiSelect<String>(
                               items: [
                                 MultiSelectItem(
-                                  label:  'Turbeculosis (TB)',
-                                  value:  'Turbeculosis (TB)',
+                                  label: 'Turbeculosis (TB)',
+                                  value: 'Turbeculosis (TB)',
                                 ),
                                 MultiSelectItem(
                                   label: l10n?.diseaseDiabetes ?? 'Diabetes',
@@ -1191,35 +1486,35 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 ),
                                 MultiSelectItem(
                                   label: 'Hepetitis - B',
-                                  value:  'Hepetitis - B',
+                                  value: 'Hepetitis - B',
                                 ),
                                 MultiSelectItem(
-                                  label:  'Asthma',
-                                  value:   'Asthma',
+                                  label: 'Asthma',
+                                  value: 'Asthma',
                                 ),
                                 MultiSelectItem(
-                                  label:   'High BP',
-                                  value:  'High BP',
+                                  label: 'High BP',
+                                  value: 'High BP',
                                 ),
                                 MultiSelectItem(
-                                  label:   'STI/RTI',
-                                  value:  'STI/RTI',
+                                  label: 'STI/RTI',
+                                  value: 'STI/RTI',
                                 ),
                                 MultiSelectItem(
-                                  label:   'Heart Disease',
-                                  value:  'Heart Disease',
+                                  label: 'Heart Disease',
+                                  value: 'Heart Disease',
                                 ),
                                 MultiSelectItem(
-                                  label:   'Liver Disease',
-                                  value:  'Liver Disease',
+                                  label: 'Liver Disease',
+                                  value: 'Liver Disease',
                                 ),
                                 MultiSelectItem(
-                                  label:   'Kidney Disease',
-                                  value:   'Kidney Disease',
+                                  label: 'Kidney Disease',
+                                  value: 'Kidney Disease',
                                 ),
                                 MultiSelectItem(
-                                  label:   'Epilepsy',
-                                  value:  'Epilepsy',
+                                  label: 'Epilepsy',
+                                  value: 'Epilepsy',
                                 ),
 
                                 MultiSelectItem(
@@ -1228,37 +1523,54 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 ),
                               ],
                               selectedValues: state.selectedDiseases,
-                              labelText: l10n?.preExistingDiseaseLabel ?? 'Pre - Existing disease',
+                              labelText:
+                                  l10n?.preExistingDiseaseLabel ??
+                                  'Pre - Existing disease',
                               hintText: l10n?.select ?? 'Select',
                               onSelectionChanged: (values) {
                                 final selected = List<String>.from(values);
                                 bloc.add(PreExistingDiseasesChanged(selected));
 
                                 // Clear other disease field if 'Other' is not selected
-                                if (!selected.contains(l10n?.diseaseOther ?? 'Other')) {
+                                if (!selected.contains(
+                                  l10n?.diseaseOther ?? 'Other',
+                                )) {
                                   bloc.add(OtherDiseaseChanged(''));
                                 }
                               },
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
- 
-                            if (state.selectedDiseases.contains(l10n?.diseaseOther ?? 'Other'))
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
+
+                            if (state.selectedDiseases.contains(
+                              l10n?.diseaseOther ?? 'Other',
+                            ))
                               CustomTextField(
                                 labelText: 'Please specify other disease',
-                                hintText:  'Please specify other disease',
+                                hintText: 'Please specify other disease',
                                 initialValue: state.otherDisease,
-                                onChanged: (v) => bloc.add(OtherDiseaseChanged(v)),
+                                onChanged: (v) =>
+                                    bloc.add(OtherDiseaseChanged(v)),
                                 validator: (value) {
-                                  if (state.selectedDiseases.contains(l10n?.diseaseOther ?? 'Other') &&
+                                  if (state.selectedDiseases.contains(
+                                        l10n?.diseaseOther ?? 'Other',
+                                      ) &&
                                       (value == null || value.isEmpty)) {
-                                    return l10n?.requiredField ?? 'This field is required';
+                                    return l10n?.requiredField ??
+                                        'This field is required';
                                   }
                                   return null;
                                 },
                               ),
 
-
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             CustomTextField(
                               labelText: l10n?.weightKgLabel ?? 'Weight (Kg)',
                               hintText: l10n?.weightKgLabel ?? 'Weight (Kg)',
@@ -1267,7 +1579,11 @@ class _AncvisitformState extends State<Ancvisitform> {
                               onChanged: (v) => bloc.add(WeightChanged(v)),
                               validator: validateWeightKg,
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             CustomTextField(
                               labelText: l10n?.systolicLabel ?? 'Systolic',
                               hintText: l10n?.systolicLabel ?? 'Systolic',
@@ -1276,7 +1592,11 @@ class _AncvisitformState extends State<Ancvisitform> {
                               onChanged: (v) => bloc.add(SystolicChanged(v)),
                               readOnly: true,
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             CustomTextField(
                               labelText: l10n?.diastolicLabel ?? 'Diastolic',
                               hintText: l10n?.diastolicLabel ?? 'Diastolic',
@@ -1285,61 +1605,100 @@ class _AncvisitformState extends State<Ancvisitform> {
                               onChanged: (v) => bloc.add(DiastolicChanged(v)),
                               readOnly: true,
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             CustomTextField(
-                              labelText: l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
-                              hintText: l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
+                              labelText:
+                                  l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
+                              hintText:
+                                  l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
                               initialValue: state.hemoglobin,
                               keyboardType: TextInputType.number,
                               onChanged: (v) => bloc.add(HemoglobinChanged(v)),
                               readOnly: true,
                             ),
 
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             ApiDropdown<String>(
-                              labelText: l10n?.anyHighRiskProblemLabel ?? 'Is there any high risk problem?',
+                              labelText:
+                                  l10n?.anyHighRiskProblemLabel ??
+                                  'Is there any high risk problem?',
                               items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                              value: state.highRisk.isEmpty ? null : state.highRisk,
+                              value: state.highRisk.isEmpty
+                                  ? null
+                                  : state.highRisk,
                               getLabel: (s) => s,
-                              onChanged: (v) => bloc.add(HighRiskChanged(v ?? '')),
+                              onChanged: (v) =>
+                                  bloc.add(HighRiskChanged(v ?? '')),
                               hintText: l10n?.select ?? 'Select',
                             ),
                             if (state.highRisk == 'Yes') ...[
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
                               MultiSelect<String>(
-                                items: [
-                                  'Severe Anemia',
-                                  'Pregnancy Induced Hypertension, pre-eclampsia, Eclampsia',
-                                  'Syphilis, HIV Positive, Hepatitis B, Hepatitis C',
-                                  'Gestational Diabetes',
-                                  'Hypothyroidism',
-                                  'Teenage Pregnancy (<20 year)/ Pregnancy after 35 Year',
-                                  'Pregnant With Twins Or More',
-                                  'Mal Presentation of baby(Breech/Transverse/Oblique)',
-                                  'Previous Cesarean Delivery',
-                                  'Placenta Previa',
-                                  'Previous History of Neo-Natal Death, Still Birth, Premature Birth, Repeated Abortion,PIH,PPH,APH,Obstructed Labour',
-                                  'RH Negative'
-                                ].map((risk) => MultiSelectItem<String>(
-                                  label: risk,
-                                  value: risk,
-                                )).toList(),
+                                items:
+                                    [
+                                          'Severe Anemia',
+                                          'Pregnancy Induced Hypertension, pre-eclampsia, Eclampsia',
+                                          'Syphilis, HIV Positive, Hepatitis B, Hepatitis C',
+                                          'Gestational Diabetes',
+                                          'Hypothyroidism',
+                                          'Teenage Pregnancy (<20 year)/ Pregnancy after 35 Year',
+                                          'Pregnant With Twins Or More',
+                                          'Mal Presentation of baby(Breech/Transverse/Oblique)',
+                                          'Previous Cesarean Delivery',
+                                          'Placenta Previa',
+                                          'Previous History of Neo-Natal Death, Still Birth, Premature Birth, Repeated Abortion,PIH,PPH,APH,Obstructed Labour',
+                                          'RH Negative',
+                                        ]
+                                        .map(
+                                          (risk) => MultiSelectItem<String>(
+                                            label: risk,
+                                            value: risk,
+                                          ),
+                                        )
+                                        .toList(),
                                 selectedValues: state.selectedRisks,
                                 labelText: 'Select risks',
                                 hintText: 'Select risks',
                                 onSelectionChanged: (values) {
-                                  bloc.add(SelectedRisksChanged(List<String>.from(values)));
+                                  bloc.add(
+                                    SelectedRisksChanged(
+                                      List<String>.from(values),
+                                    ),
+                                  );
                                 },
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-                              if (!(int.tryParse(state.weeksOfPregnancy) != null && int.parse(state.weeksOfPregnancy) > 30)) ...[
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
+                              if (!(int.tryParse(state.weeksOfPregnancy) !=
+                                      null &&
+                                  int.parse(state.weeksOfPregnancy) > 30)) ...[
                                 const SizedBox(height: 8),
                                 ApiDropdown<String>(
-                                  labelText: 'Any complication leading to abortion?',
+                                  labelText:
+                                      'Any complication leading to abortion?',
                                   items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                                  value: state.hasAbortionComplication.isEmpty ? null : state.hasAbortionComplication,
+                                  value: state.hasAbortionComplication.isEmpty
+                                      ? null
+                                      : state.hasAbortionComplication,
                                   getLabel: (s) => s,
-                                  onChanged: (v) => bloc.add(HasAbortionComplicationChanged(v ?? '')),
+                                  onChanged: (v) => bloc.add(
+                                    HasAbortionComplicationChanged(v ?? ''),
+                                  ),
                                   hintText: l10n?.select ?? 'Select',
                                 ),
                               ],
@@ -1349,69 +1708,121 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   labelText: 'Date of Abortion',
                                   hintText: 'Date of Abortion',
                                   initialDate: state.abortionDate,
-                                  onDateChanged: (d) => bloc.add(AbortionDateChanged(d)),
+                                  onDateChanged: (d) =>
+                                      bloc.add(AbortionDateChanged(d)),
                                 ),
                               ],
                             ],
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                             if (int.tryParse(state.weeksOfPregnancy) != null &&
                                 int.parse(state.weeksOfPregnancy) > 30) ...[
                               ApiDropdown<String>(
-                                labelText: 'Did the pregnant woman give birth to a baby?',
+                                labelText:
+                                    'Did the pregnant woman give birth to a baby?',
                                 items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                                value: state.givesBirthToBaby.isEmpty ? null : state.givesBirthToBaby,
+                                value: state.givesBirthToBaby.isEmpty
+                                    ? null
+                                    : state.givesBirthToBaby,
                                 getLabel: (s) => s,
-                                onChanged: (v) => bloc.add(GivesBirthToBaby(v ?? '')),
+                                onChanged: (v) =>
+                                    bloc.add(GivesBirthToBaby(v ?? '')),
                                 hintText: l10n?.select ?? 'Select',
                               ),
-                              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                              Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0,
+                              ),
 
-                              if (state.givesBirthToBaby == (l10n?.yes ?? 'Yes')) ...[
+                              if (state.givesBirthToBaby ==
+                                  (l10n?.yes ?? 'Yes')) ...[
                                 ApiDropdown<String>(
                                   labelText: 'Delivery outcome *',
-                                  items: ["Live birth", "Still birth", "Newborn death"],
-                                  value: state.deliveryOutcome.isEmpty ? null : state.deliveryOutcome,
+                                  items: [
+                                    "Live birth",
+                                    "Still birth",
+                                    "Newborn death",
+                                  ],
+                                  value: state.deliveryOutcome.isEmpty
+                                      ? null
+                                      : state.deliveryOutcome,
                                   getLabel: (s) => s,
-                                  onChanged: (v) => bloc.add(DeliveryOutcomeChanged(v ?? '')),
+                                  onChanged: (v) =>
+                                      bloc.add(DeliveryOutcomeChanged(v ?? '')),
                                   hintText: l10n?.select ?? 'Select',
-                                  validator: state.givesBirthToBaby == 'Yes' ? validateDropdownRequired : null,
+                                  validator: state.givesBirthToBaby == 'Yes'
+                                      ? validateDropdownRequired
+                                      : null,
                                 ),
-                                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                Divider(
+                                  color: AppColors.divider,
+                                  thickness: 0.5,
+                                  height: 0,
+                                ),
 
-                                if (state.deliveryOutcome == "Live birth" && state.givesBirthToBaby == (l10n?.yes ?? 'Yes')) ...[
+                                if (state.deliveryOutcome == "Live birth" &&
+                                    state.givesBirthToBaby ==
+                                        (l10n?.yes ?? 'Yes')) ...[
                                   ApiDropdown<String>(
                                     labelText: 'Number of Children *',
                                     items: ["One Child", "Twins", "Triplets"],
-                                    value: state.numberOfChildren.isEmpty ? null : state.numberOfChildren,
+                                    value: state.numberOfChildren.isEmpty
+                                        ? null
+                                        : state.numberOfChildren,
                                     getLabel: (s) => s,
-                                    onChanged: (v) => bloc.add(NumberOfChildrenChanged(v ?? "")),
+                                    onChanged: (v) => bloc.add(
+                                      NumberOfChildrenChanged(v ?? ""),
+                                    ),
                                     hintText: l10n?.select ?? 'Select',
                                     validator: validateDropdownRequired,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
                                 ],
-                                if (state.numberOfChildren == "One Child" && state.givesBirthToBaby == (l10n?.yes ?? 'Yes' ) && state.deliveryOutcome == "Live birth") ...[
+                                if (state.numberOfChildren == "One Child" &&
+                                    state.givesBirthToBaby ==
+                                        (l10n?.yes ?? 'Yes') &&
+                                    state.deliveryOutcome == "Live birth") ...[
                                   // Baby 1 Name
                                   CustomTextField(
                                     labelText: "Baby's Name *",
                                     hintText: "Enter Baby's Name",
                                     initialValue: state.baby1Name,
-                                    onChanged: (v) => bloc.add(Baby1NameChanged(v)),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby1NameChanged(v)),
                                     validator: validateRequired,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   // Baby 1 Gender
                                   ApiDropdown<String>(
                                     labelText: "Baby's Gender *",
                                     items: ["Male", "Female", "Transgender"],
-                                    value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
+                                    value: state.baby1Gender.isEmpty
+                                        ? null
+                                        : state.baby1Gender,
                                     getLabel: (s) => s,
-                                    onChanged: (v) => bloc.add(Baby1GenderChanged(v ?? "")),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby1GenderChanged(v ?? "")),
                                     hintText: l10n?.select ?? 'Select',
                                     validator: validateDropdownRequired,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   // Baby 1 Weight
                                   CustomTextField(
@@ -1419,174 +1830,279 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     hintText: "Enter Baby's Weight",
                                     initialValue: state.baby1Weight,
                                     keyboardType: TextInputType.number,
-                                    onChanged: (v) => bloc.add(Baby1WeightChanged(v)),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby1WeightChanged(v)),
                                     validator: validateBabyWeight,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
                                 ],
-                                if (state.numberOfChildren == "Twins" && state.givesBirthToBaby == (l10n?.yes ?? 'Yes')&& state.deliveryOutcome == "Live birth") ...[
+                                if (state.numberOfChildren == "Twins" &&
+                                    state.givesBirthToBaby ==
+                                        (l10n?.yes ?? 'Yes') &&
+                                    state.deliveryOutcome == "Live birth") ...[
                                   CustomTextField(
                                     labelText: "First Baby  Name *",
                                     hintText: "Enter First Baby  Name",
                                     initialValue: state.baby1Name,
-                                    onChanged: (v) => bloc.add(Baby1NameChanged(v)),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby1NameChanged(v)),
                                     validator: validateRequired,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   ApiDropdown<String>(
                                     labelText: "First Baby  Gender *",
                                     items: ["Male", "Female", "Transgender"],
-                                    value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
+                                    value: state.baby1Gender.isEmpty
+                                        ? null
+                                        : state.baby1Gender,
                                     getLabel: (s) => s,
-                                    onChanged: (v) => bloc.add(Baby1GenderChanged(v ?? "")),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby1GenderChanged(v ?? "")),
                                     hintText: l10n?.select ?? 'Select',
                                     validator: validateDropdownRequired,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   CustomTextField(
-                                    labelText: "First Baby Weight (1200–4000gms) *",
+                                    labelText:
+                                        "First Baby Weight (1200–4000gms) *",
                                     hintText: "Enter First Baby  Weight",
                                     initialValue: state.baby1Weight,
                                     keyboardType: TextInputType.number,
-                                    onChanged: (v) => bloc.add(Baby1WeightChanged(v)),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby1WeightChanged(v)),
                                     validator: validateBabyWeight,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   // ========== BABY 2 ==========
                                   CustomTextField(
                                     labelText: "Second Baby  Name *",
                                     hintText: "Enter Second Baby Name",
                                     initialValue: state.baby2Name,
-                                    onChanged: (v) => bloc.add(Baby2NameChanged(v)),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby2NameChanged(v)),
                                     validator: validateRequired,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   ApiDropdown<String>(
                                     labelText: "Second Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
-                                    value: state.baby2Gender.isEmpty ? null : state.baby2Gender,
+                                    value: state.baby2Gender.isEmpty
+                                        ? null
+                                        : state.baby2Gender,
                                     getLabel: (s) => s,
-                                    onChanged: (v) => bloc.add(Baby2GenderChanged(v ?? "")),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby2GenderChanged(v ?? "")),
                                     hintText: l10n?.select ?? 'Select',
                                     validator: validateDropdownRequired,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   CustomTextField(
-                                    labelText: "Second Baby Weight (1200–4000gms) *",
+                                    labelText:
+                                        "Second Baby Weight (1200–4000gms) *",
                                     hintText: "Enter Second Baby Weight",
                                     initialValue: state.baby2Weight,
                                     keyboardType: TextInputType.number,
-                                    onChanged: (v) => bloc.add(Baby2WeightChanged(v)),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby2WeightChanged(v)),
                                     validator: validateBabyWeight,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
                                 ],
-                                if (state.numberOfChildren == "Triplets" && state.givesBirthToBaby == (l10n?.yes ?? 'Yes') && state.deliveryOutcome == "Live birth") ...[
+                                if (state.numberOfChildren == "Triplets" &&
+                                    state.givesBirthToBaby ==
+                                        (l10n?.yes ?? 'Yes') &&
+                                    state.deliveryOutcome == "Live birth") ...[
                                   // ========== BABY 1 ==========
                                   CustomTextField(
                                     labelText: "First Baby  Name *",
                                     hintText: "Enter First Baby  Name",
                                     initialValue: state.baby1Name,
-                                    onChanged: (v) => bloc.add(Baby1NameChanged(v)),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby1NameChanged(v)),
                                     validator: validateRequired,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   ApiDropdown<String>(
                                     labelText: "First Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
-                                    value: state.baby1Gender.isEmpty ? null : state.baby1Gender,
+                                    value: state.baby1Gender.isEmpty
+                                        ? null
+                                        : state.baby1Gender,
                                     getLabel: (s) => s,
-                                    onChanged: (v) => bloc.add(Baby1GenderChanged(v ?? "")),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby1GenderChanged(v ?? "")),
                                     hintText: l10n?.select ?? 'Select',
                                     validator: validateDropdownRequired,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   CustomTextField(
-                                    labelText: "First Baby Weight (1200–4000gms) *",
+                                    labelText:
+                                        "First Baby Weight (1200–4000gms) *",
                                     hintText: "Enter First Baby Weight",
                                     initialValue: state.baby1Weight,
                                     keyboardType: TextInputType.number,
-                                    onChanged: (v) => bloc.add(Baby1WeightChanged(v)),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby1WeightChanged(v)),
                                     validator: validateBabyWeight,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   // ========== BABY 2 ==========
                                   CustomTextField(
                                     labelText: "Second Baby Name *",
                                     hintText: "Enter Second Baby Name",
                                     initialValue: state.baby2Name,
-                                    onChanged: (v) => bloc.add(Baby2NameChanged(v)),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby2NameChanged(v)),
                                     validator: validateRequired,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   ApiDropdown<String>(
                                     labelText: "Second Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
-                                    value: state.baby2Gender.isEmpty ? null : state.baby2Gender,
+                                    value: state.baby2Gender.isEmpty
+                                        ? null
+                                        : state.baby2Gender,
                                     getLabel: (s) => s,
-                                    onChanged: (v) => bloc.add(Baby2GenderChanged(v ?? "")),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby2GenderChanged(v ?? "")),
                                     hintText: l10n?.select ?? 'Select',
                                     validator: validateDropdownRequired,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   CustomTextField(
-                                    labelText: "Second Baby Weight (1200–4000gms) *",
+                                    labelText:
+                                        "Second Baby Weight (1200–4000gms) *",
                                     hintText: "Enter Second Baby Weight",
                                     initialValue: state.baby2Weight,
                                     keyboardType: TextInputType.number,
-                                    onChanged: (v) => bloc.add(Baby2WeightChanged(v)),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby2WeightChanged(v)),
                                     validator: validateBabyWeight,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   // ========== BABY 3 ==========
                                   CustomTextField(
                                     labelText: "Third Baby Name *",
                                     hintText: "Enter Third Baby Name",
                                     initialValue: state.baby3Name,
-                                    onChanged: (v) => bloc.add(Baby3NameChanged(v)),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby3NameChanged(v)),
                                     validator: validateRequired,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   ApiDropdown<String>(
                                     labelText: "Third Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
-                                    value: state.baby3Gender.isEmpty ? null : state.baby3Gender,
+                                    value: state.baby3Gender.isEmpty
+                                        ? null
+                                        : state.baby3Gender,
                                     getLabel: (s) => s,
-                                    onChanged: (v) => bloc.add(Baby3GenderChanged(v ?? "")),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby3GenderChanged(v ?? "")),
                                     hintText: l10n?.select ?? 'Select',
                                     validator: validateDropdownRequired,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
 
                                   CustomTextField(
-                                    labelText: "Third Baby Weight (1200–4000gms) *",
+                                    labelText:
+                                        "Third Baby Weight (1200–4000gms) *",
                                     hintText: "Enter Third Baby Weight",
                                     initialValue: state.baby3Weight,
                                     keyboardType: TextInputType.number,
-                                    onChanged: (v) => bloc.add(Baby3WeightChanged(v)),
+                                    onChanged: (v) =>
+                                        bloc.add(Baby3WeightChanged(v)),
                                     validator: validateBabyWeight,
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
                                 ],
                               ],
                             ],
 
                             ApiDropdown<String>(
-                              labelText: l10n?.beneficiaryAbsentLabel ?? 'Is Beneficiary Absent?',
+                              labelText:
+                                  l10n?.beneficiaryAbsentLabel ??
+                                  'Is Beneficiary Absent?',
                               items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                              value: state.beneficiaryAbsent.isEmpty ? null : state.beneficiaryAbsent,
+                              value: state.beneficiaryAbsent.isEmpty
+                                  ? null
+                                  : state.beneficiaryAbsent,
                               getLabel: (s) => s,
                               onChanged: (v) {
                                 bloc.add(BeneficiaryAbsentChanged(v ?? ''));
@@ -1597,23 +2113,28 @@ class _AncvisitformState extends State<Ancvisitform> {
                               },
                               hintText: l10n?.select ?? 'Select',
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
 
                             if (state.beneficiaryAbsent == (l10n?.yes ?? 'Yes'))
+                              CustomTextField(
+                                labelText: 'Reason for Absence',
+                                hintText: 'Enter the reason for absence',
+                                initialValue: state.absenceReason,
+                                onChanged: (v) =>
+                                    bloc.add(AbsenceReasonChanged(v)),
+                                validator:
+                                    null, // Made non-mandatory as requested
+                              ),
 
-                                  CustomTextField(
-                                    labelText: 'Reason for Absence',
-                                    hintText: 'Enter the reason for absence',
-                                    initialValue: state.absenceReason,
-                                    onChanged: (v) => bloc.add(AbsenceReasonChanged(v)),
-                                    validator: null, // Made non-mandatory as requested
-
-                                  ),
-
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-
-
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
+                            ),
                           ],
                         ),
                       ),
@@ -1639,11 +2160,19 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 child: SizedBox(
                                   height: 4.5.h,
                                   child: RoundButton(
-                                    title: l10n?.previousVisitsButton ?? 'PREVIOUS VISITS',
+                                    title:
+                                        l10n?.previousVisitsButton ??
+                                        'PREVIOUS VISITS',
                                     color: AppColors.primary,
                                     borderRadius: 4,
                                     onPress: () {
-                                      final benId = widget.beneficiaryData?['BeneficiaryID']?.toString() ?? widget.beneficiaryData?['unique_key']?.toString() ?? '';
+                                      final benId =
+                                          widget
+                                              .beneficiaryData?['BeneficiaryID']
+                                              ?.toString() ??
+                                          widget.beneficiaryData?['unique_key']
+                                              ?.toString() ??
+                                          '';
                                       Navigator.pushNamed(
                                         context,
                                         Route_Names.Previousvisit,
@@ -1658,7 +2187,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 child: SizedBox(
                                   height: 4.5.h,
                                   child: RoundButton(
-                                    title: state.isSubmitting ? (l10n?.savingButton ?? 'SAVING...') : (l10n?.saveButton ?? 'SAVE'),
+                                    title: state.isSubmitting
+                                        ? (l10n?.savingButton ?? 'SAVING...')
+                                        : (l10n?.saveButton ?? 'SAVE'),
                                     color: AppColors.primary,
                                     borderRadius: 4,
                                     onPress: () {
@@ -1668,17 +2199,25 @@ class _AncvisitformState extends State<Ancvisitform> {
                                         bloc.add(const SubmitPressed());
                                       } else {
                                         if (visitType.isEmpty) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             const SnackBar(
-                                              content: Text("Please select visit type"),
+                                              content: Text(
+                                                "Please select visit type",
+                                              ),
                                               duration: Duration(seconds: 2),
                                             ),
                                           );
                                           return;
                                         }
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           const SnackBar(
-                                            content: Text("Please fill all required fields correctly"),
+                                            content: Text(
+                                              "Please fill all required fields correctly",
+                                            ),
                                             duration: Duration(seconds: 2),
                                           ),
                                         );
@@ -1704,7 +2243,11 @@ class _AncvisitformState extends State<Ancvisitform> {
   }
 }
 
-Widget _qtyButton({required IconData icon, required VoidCallback? onTap, required bool enabled}) {
+Widget _qtyButton({
+  required IconData icon,
+  required VoidCallback? onTap,
+  required bool enabled,
+}) {
   return InkWell(
     onTap: onTap,
     borderRadius: BorderRadius.circular(4),
