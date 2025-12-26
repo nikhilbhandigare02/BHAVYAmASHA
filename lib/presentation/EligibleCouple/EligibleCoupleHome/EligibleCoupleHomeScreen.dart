@@ -90,6 +90,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         AND b.is_deleted = 0
         AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
         AND e.current_user_key = ?
+        AND (b.beneficiary_info IS NULL OR b.beneficiary_info NOT LIKE '%"gender":"male"%')
     ''', [currentUserKey])) ?? 0;
 
       // Get protected count (has family planning)
@@ -103,6 +104,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
         AND e.current_user_key = ?
         AND (b.is_family_planning = 1 OR b.is_family_planning = '1' OR b.is_family_planning = 'true')
+        AND (b.beneficiary_info IS NULL OR b.beneficiary_info NOT LIKE '%"gender":"male"%')
     ''', [currentUserKey])) ?? 0;
 
       return {

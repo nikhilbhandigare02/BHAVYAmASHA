@@ -1562,6 +1562,7 @@ class LocalStorageDao {
         AND e.eligible_couple_state = 'eligible_couple'
         AND e.is_deleted = 0
         AND e.current_user_key = ?
+        AND (b.beneficiary_info IS NULL OR b.beneficiary_info NOT LIKE '%"gender":"male"%')
     ''', [currentUserKey])) ?? 0;
 
       // Get tracking due count
@@ -1574,6 +1575,7 @@ class LocalStorageDao {
         AND e.eligible_couple_state = 'tracking_due'
         AND e.is_deleted = 0
         AND e.current_user_key = ?
+        AND (b.beneficiary_info IS NULL OR b.beneficiary_info NOT LIKE '%"gender":"male"%')
     ''', [currentUserKey])) ?? 0;
 
       return {
