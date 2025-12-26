@@ -1457,9 +1457,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 height: 0,
                               ),
                               CustomTextField(
-                                labelText:
+                                labelText:l10n?.calciumVitaminD3TabletsLabel ??
                                     'Number of Calcium and Vitamin D3 tablets given',
-                                hintText:
+                                hintText:l10n?.calciumVitaminD3TabletsLabel ??
                                     'Enter number of Calcium and Vitamin D3 tablets',
                                 initialValue: state.calciumVitaminD3Tablets,
                                 keyboardType: TextInputType.number,
@@ -1477,46 +1477,45 @@ class _AncvisitformState extends State<Ancvisitform> {
                             MultiSelect<String>(
                               items: [
                                 MultiSelectItem(
-                                  label: 'Turbeculosis (TB)',
-                                  value: 'Turbeculosis (TB)',
+                                  label: l10n?.tuberculosisLabel ?? 'Turbeculosis (TB)',
+                                  value: l10n?.tuberculosisLabel ?? 'Turbeculosis (TB)',
                                 ),
                                 MultiSelectItem(
                                   label: l10n?.diseaseDiabetes ?? 'Diabetes',
                                   value: l10n?.diseaseDiabetes ?? 'Diabetes',
                                 ),
                                 MultiSelectItem(
-                                  label: 'Hepetitis - B',
-                                  value: 'Hepetitis - B',
+                                  label: l10n?.hepetitisB ?? 'Hepetitis - B',
+                                  value: l10n?.hepetitisB ?? 'Hepetitis - B',
                                 ),
                                 MultiSelectItem(
-                                  label: 'Asthma',
-                                  value: 'Asthma',
+                                  label: l10n?.asthma ?? 'Asthma',
+                                  value: l10n?.asthma ?? 'Asthma',
                                 ),
                                 MultiSelectItem(
-                                  label: 'High BP',
-                                  value: 'High BP',
+                                  label: l10n?.highBP ?? 'High BP',
+                                  value: l10n?.highBP ?? 'High BP',
                                 ),
                                 MultiSelectItem(
-                                  label: 'STI/RTI',
-                                  value: 'STI/RTI',
+                                  label: l10n?.stirti ?? 'STI/RTI',
+                                  value: l10n?.stirti ?? 'STI/RTI',
                                 ),
                                 MultiSelectItem(
-                                  label: 'Heart Disease',
-                                  value: 'Heart Disease',
+                                  label: l10n?.heartDisease ?? 'Heart Disease',
+                                  value: l10n?.heartDisease ?? 'Heart Disease',
                                 ),
                                 MultiSelectItem(
-                                  label: 'Liver Disease',
-                                  value: 'Liver Disease',
+                                  label: l10n?.diseaseLiver ?? 'Liver Disease',
+                                  value: l10n?.diseaseLiver ?? 'Liver Disease',
                                 ),
                                 MultiSelectItem(
-                                  label: 'Kidney Disease',
-                                  value: 'Kidney Disease',
+                                  label: l10n?.diseaseKidney ?? 'Kidney Disease',
+                                  value: l10n?.diseaseKidney ?? 'Kidney Disease',
                                 ),
                                 MultiSelectItem(
-                                  label: 'Epilepsy',
-                                  value: 'Epilepsy',
+                                  label: l10n?.diseaseEpilepsy ?? 'Epilepsy',
+                                  value: l10n?.diseaseEpilepsy ?? 'Epilepsy',
                                 ),
-
                                 MultiSelectItem(
                                   label: l10n?.diseaseOther ?? 'Other',
                                   value: l10n?.diseaseOther ?? 'Other',
@@ -1646,31 +1645,56 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 height: 0,
                               ),
                               MultiSelect<String>(
-                                items:
-                                    [
-                                          'Severe Anemia',
-                                          'Pregnancy Induced Hypertension, pre-eclampsia, Eclampsia',
-                                          'Syphilis, HIV Positive, Hepatitis B, Hepatitis C',
-                                          'Gestational Diabetes',
-                                          'Hypothyroidism',
-                                          'Teenage Pregnancy (<20 year)/ Pregnancy after 35 Year',
-                                          'Pregnant With Twins Or More',
-                                          'Mal Presentation of baby(Breech/Transverse/Oblique)',
-                                          'Previous Cesarean Delivery',
-                                          'Placenta Previa',
-                                          'Previous History of Neo-Natal Death, Still Birth, Premature Birth, Repeated Abortion,PIH,PPH,APH,Obstructed Labour',
-                                          'RH Negative',
-                                        ]
-                                        .map(
-                                          (risk) => MultiSelectItem<String>(
-                                            label: risk,
-                                            value: risk,
-                                          ),
-                                        )
-                                        .toList(),
+                                items: const [
+                                  'riskSevereAnemia',
+                                  'riskPIH',
+                                  'riskInfections',
+                                  'riskGestationalDiabetes',
+                                  'riskHypothyroidism',
+                                  'riskTeenagePregnancy',
+                                  'riskTwins',
+                                  'riskMalPresentation',
+                                  'riskPreviousCesarean',
+                                  'riskPreviousHistory',
+                                  'riskRhNegative',
+                                ]
+                                    .map(
+                                      (risk) => MultiSelectItem<String>(
+                                    label: () {
+                                      switch (risk) {
+                                        case 'riskSevereAnemia':
+                                          return l10n?.riskSevereAnemia ?? '';
+                                        case 'riskPIH':
+                                          return l10n?.riskPIH ?? '';
+                                        case 'riskInfections':
+                                          return l10n?.riskInfections ?? '';
+                                        case 'riskGestationalDiabetes':
+                                          return l10n?.riskGestationalDiabetes ?? '';
+                                        case 'riskHypothyroidism':
+                                          return l10n?.riskHypothyroidism ?? '';
+                                        case 'riskTeenagePregnancy':
+                                          return l10n?.riskTeenagePregnancy ?? '';
+                                        case 'riskTwins':
+                                          return l10n?.riskTwins ?? '';
+                                        case 'riskMalPresentation':
+                                          return l10n?.riskMalPresentation ?? '';
+                                        case 'riskPreviousCesarean':
+                                          return l10n?.riskPreviousCesarean ?? '';
+                                        case 'riskPreviousHistory':
+                                          return l10n?.riskPreviousHistory ?? '';
+                                        case 'riskRhNegative':
+                                          return l10n?.riskRhNegative ?? '';
+                                        default:
+                                          return risk;
+                                      }
+                                    }(),
+                                    value: risk,
+                                  ),
+                                )
+                                    .toList(),
                                 selectedValues: state.selectedRisks,
-                                labelText: 'Select risks',
-                                hintText: 'Select risks',
+                                labelText: l10n?.selectRisks ??'Select risks',
+                                hintText: l10n?.selectRisks ??'Select risks',
                                 onSelectionChanged: (values) {
                                   bloc.add(
                                     SelectedRisksChanged(
@@ -1689,7 +1713,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   int.parse(state.weeksOfPregnancy) > 30)) ...[
                                 const SizedBox(height: 8),
                                 ApiDropdown<String>(
-                                  labelText:
+                                  labelText:l10n?.abortionComplication ??
                                       'Any complication leading to abortion?',
                                   items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
                                   value: state.hasAbortionComplication.isEmpty
@@ -1705,8 +1729,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                               if (state.hasAbortionComplication == 'Yes') ...[
                                 const SizedBox(height: 16),
                                 CustomDatePicker(
-                                  labelText: 'Date of Abortion',
-                                  hintText: 'Date of Abortion',
+                                  labelText: l10n?.dateOfAbortion ??'Date of Abortion',
+                                  hintText:l10n?.dateOfAbortion ?? 'Date of Abortion',
                                   initialDate: state.abortionDate,
                                   onDateChanged: (d) =>
                                       bloc.add(AbortionDateChanged(d)),
@@ -1721,7 +1745,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             if (int.tryParse(state.weeksOfPregnancy) != null &&
                                 int.parse(state.weeksOfPregnancy) > 30) ...[
                               ApiDropdown<String>(
-                                labelText:
+                                labelText:l10n?.didPregnantWomanGiveBirth ??
                                     'Did the pregnant woman give birth to a baby?',
                                 items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
                                 value: state.givesBirthToBaby.isEmpty
@@ -1741,7 +1765,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               if (state.givesBirthToBaby ==
                                   (l10n?.yes ?? 'Yes')) ...[
                                 ApiDropdown<String>(
-                                  labelText: 'Delivery outcome *',
+                                  labelText:l10n?.deliveryOutcomeLabel ?? 'Delivery outcome *',
                                   items: [
                                     "Live birth",
                                     "Still birth",
@@ -1750,8 +1774,18 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   value: state.deliveryOutcome.isEmpty
                                       ? null
                                       : state.deliveryOutcome,
-                                  getLabel: (s) => s,
-                                  onChanged: (v) =>
+                                  getLabel: (s) {
+                                    switch (s) {
+                                      case 'liveBirth':
+                                        return l10n?.liveBirth ?? '';
+                                      case 'stillBirth':
+                                        return l10n?.stillBirth ?? '';
+                                      case 'newbornDeath':
+                                        return l10n?.newbornDeath ?? '';
+                                      default:
+                                        return s;
+                                    }
+                                  },                                  onChanged: (v) =>
                                       bloc.add(DeliveryOutcomeChanged(v ?? '')),
                                   hintText: l10n?.select ?? 'Select',
                                   validator: state.givesBirthToBaby == 'Yes'
@@ -1768,13 +1802,23 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     state.givesBirthToBaby ==
                                         (l10n?.yes ?? 'Yes')) ...[
                                   ApiDropdown<String>(
-                                    labelText: 'Number of Children *',
+                                    labelText:l10n?.numberOfChildrenLabel ?? 'Number of Children *',
                                     items: ["One Child", "Twins", "Triplets"],
                                     value: state.numberOfChildren.isEmpty
                                         ? null
                                         : state.numberOfChildren,
-                                    getLabel: (s) => s,
-                                    onChanged: (v) => bloc.add(
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'oneChild':
+                                          return l10n?.oneChild ?? '';
+                                        case 'twins':
+                                          return l10n?.twins ?? '';
+                                        case 'triplets':
+                                          return l10n?.triplets ?? '';
+                                        default:
+                                          return s;
+                                      }
+                                    },                                    onChanged: (v) => bloc.add(
                                       NumberOfChildrenChanged(v ?? ""),
                                     ),
                                     hintText: l10n?.select ?? 'Select',
@@ -1792,8 +1836,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     state.deliveryOutcome == "Live birth") ...[
                                   // Baby 1 Name
                                   CustomTextField(
-                                    labelText: "Baby's Name *",
-                                    hintText: "Enter Baby's Name",
+                                    labelText:l10n?.babysName ?? "Baby's Name *",
+                                    hintText:l10n?.enterBabyName ?? "Enter Baby's Name",
                                     initialValue: state.baby1Name,
                                     onChanged: (v) =>
                                         bloc.add(Baby1NameChanged(v)),
@@ -1807,13 +1851,23 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   // Baby 1 Gender
                                   ApiDropdown<String>(
-                                    labelText: "Baby's Gender *",
+                                    labelText:l10n?.babyGenderLabel ?? "Baby's Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby1Gender.isEmpty
                                         ? null
                                         : state.baby1Gender,
-                                    getLabel: (s) => s,
-                                    onChanged: (v) =>
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'male':
+                                          return l10n?.male ?? '';
+                                        case 'female':
+                                          return l10n?.female ?? '';
+                                        case 'transgender':
+                                          return l10n?.transgender ?? '';
+                                        default:
+                                          return s;
+                                      }
+                                    },                                    onChanged: (v) =>
                                         bloc.add(Baby1GenderChanged(v ?? "")),
                                     hintText: l10n?.select ?? 'Select',
                                     validator: validateDropdownRequired,
@@ -1826,8 +1880,8 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   // Baby 1 Weight
                                   CustomTextField(
-                                    labelText: "Baby's Weight (1200–4000gms) *",
-                                    hintText: "Enter Baby's Weight",
+                                    labelText: l10n?.babyWeightLabel ?? "Baby's Weight (1200–4000gms) *",
+                                    hintText:l10n?.enterBabyWeight ?? "Enter Baby's Weight",
                                     initialValue: state.baby1Weight,
                                     keyboardType: TextInputType.number,
                                     onChanged: (v) =>
@@ -1845,8 +1899,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                                         (l10n?.yes ?? 'Yes') &&
                                     state.deliveryOutcome == "Live birth") ...[
                                   CustomTextField(
-                                    labelText: "First Baby  Name *",
-                                    hintText: "Enter First Baby  Name",
+                                    labelText:l10n?.firstBabyName ?? "First Baby  Name *",
+                                    hintText:l10n?.enterFirstBabyName ?? "Enter First Baby  Name",
                                     initialValue: state.baby1Name,
                                     onChanged: (v) =>
                                         bloc.add(Baby1NameChanged(v)),
@@ -1859,12 +1913,23 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   ),
 
                                   ApiDropdown<String>(
-                                    labelText: "First Baby  Gender *",
+                                    labelText:l10n?.firstBabyGender ?? "First Baby  Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby1Gender.isEmpty
                                         ? null
                                         : state.baby1Gender,
-                                    getLabel: (s) => s,
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'male':
+                                          return l10n?.male ?? '';
+                                        case 'female':
+                                          return l10n?.female ?? '';
+                                        case 'transgender':
+                                          return l10n?.transgender ?? '';
+                                        default:
+                                          return s;
+                                      }
+                                    },
                                     onChanged: (v) =>
                                         bloc.add(Baby1GenderChanged(v ?? "")),
                                     hintText: l10n?.select ?? 'Select',
@@ -1877,9 +1942,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   ),
 
                                   CustomTextField(
-                                    labelText:
+                                    labelText:l10n?.firstBabyWeight ??
                                         "First Baby Weight (1200–4000gms) *",
-                                    hintText: "Enter First Baby  Weight",
+                                    hintText: l10n?.enterFirstBabyWeight ?? "Enter First Baby  Weight",
                                     initialValue: state.baby1Weight,
                                     keyboardType: TextInputType.number,
                                     onChanged: (v) =>
@@ -1894,8 +1959,8 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   // ========== BABY 2 ==========
                                   CustomTextField(
-                                    labelText: "Second Baby  Name *",
-                                    hintText: "Enter Second Baby Name",
+                                    labelText:l10n?.secondBabyName ?? "Second Baby  Name *",
+                                    hintText:l10n?.enterSecondBabyName ?? "Enter Second Baby Name",
                                     initialValue: state.baby2Name,
                                     onChanged: (v) =>
                                         bloc.add(Baby2NameChanged(v)),
@@ -1908,13 +1973,23 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   ),
 
                                   ApiDropdown<String>(
-                                    labelText: "Second Baby Gender *",
+                                    labelText:l10n?.secondBabyGender ?? "Second Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby2Gender.isEmpty
                                         ? null
                                         : state.baby2Gender,
-                                    getLabel: (s) => s,
-                                    onChanged: (v) =>
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'male':
+                                          return l10n?.male ?? '';
+                                        case 'female':
+                                          return l10n?.female ?? '';
+                                        case 'transgender':
+                                          return l10n?.transgender ?? '';
+                                        default:
+                                          return s;
+                                      }
+                                    },                                    onChanged: (v) =>
                                         bloc.add(Baby2GenderChanged(v ?? "")),
                                     hintText: l10n?.select ?? 'Select',
                                     validator: validateDropdownRequired,
@@ -1926,9 +2001,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   ),
 
                                   CustomTextField(
-                                    labelText:
+                                    labelText:l10n?.secondBabyWeight ??
                                         "Second Baby Weight (1200–4000gms) *",
-                                    hintText: "Enter Second Baby Weight",
+                                    hintText:l10n?.enterSecondBabyWeight ?? "Enter Second Baby Weight",
                                     initialValue: state.baby2Weight,
                                     keyboardType: TextInputType.number,
                                     onChanged: (v) =>
@@ -1947,8 +2022,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     state.deliveryOutcome == "Live birth") ...[
                                   // ========== BABY 1 ==========
                                   CustomTextField(
-                                    labelText: "First Baby  Name *",
-                                    hintText: "Enter First Baby  Name",
+                                    labelText:l10n?.firstBabyName ?? "First Baby  Name *",
+                                    hintText: l10n?.enterFirstBabyName ?? "Enter First Baby  Name",
                                     initialValue: state.baby1Name,
                                     onChanged: (v) =>
                                         bloc.add(Baby1NameChanged(v)),
@@ -1961,12 +2036,23 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   ),
 
                                   ApiDropdown<String>(
-                                    labelText: "First Baby Gender *",
+                                    labelText:l10n?.firstBabyGender ?? "First Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby1Gender.isEmpty
                                         ? null
                                         : state.baby1Gender,
-                                    getLabel: (s) => s,
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'male':
+                                          return l10n?.male ?? '';
+                                        case 'female':
+                                          return l10n?.female ?? '';
+                                        case 'transgender':
+                                          return l10n?.transgender ?? '';
+                                        default:
+                                          return s;
+                                      }
+                                    },
                                     onChanged: (v) =>
                                         bloc.add(Baby1GenderChanged(v ?? "")),
                                     hintText: l10n?.select ?? 'Select',
@@ -1979,9 +2065,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   ),
 
                                   CustomTextField(
-                                    labelText:
+                                    labelText:l10n?.firstBabyWeight ??
                                         "First Baby Weight (1200–4000gms) *",
-                                    hintText: "Enter First Baby Weight",
+                                    hintText:l10n?.enterFirstBabyWeight ?? "Enter First Baby Weight",
                                     initialValue: state.baby1Weight,
                                     keyboardType: TextInputType.number,
                                     onChanged: (v) =>
@@ -1996,8 +2082,8 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   // ========== BABY 2 ==========
                                   CustomTextField(
-                                    labelText: "Second Baby Name *",
-                                    hintText: "Enter Second Baby Name",
+                                    labelText:l10n?.secondBabyName ?? "Second Baby Name *",
+                                    hintText:l10n?.enterSecondBabyName ?? "Enter Second Baby Name",
                                     initialValue: state.baby2Name,
                                     onChanged: (v) =>
                                         bloc.add(Baby2NameChanged(v)),
@@ -2010,7 +2096,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   ),
 
                                   ApiDropdown<String>(
-                                    labelText: "Second Baby Gender *",
+                                    labelText:l10n?.secondBabyGender ?? "Second Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby2Gender.isEmpty
                                         ? null
@@ -2028,9 +2114,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   ),
 
                                   CustomTextField(
-                                    labelText:
-                                        "Second Baby Weight (1200–4000gms) *",
-                                    hintText: "Enter Second Baby Weight",
+                                    labelText:l10n?.secondBabyWeight ?? "Second Baby Weight (1200–4000gms) *",
+                                    hintText: l10n?.enterSecondBabyWeight ??"Enter Second Baby Weight",
                                     initialValue: state.baby2Weight,
                                     keyboardType: TextInputType.number,
                                     onChanged: (v) =>
@@ -2045,8 +2130,8 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   // ========== BABY 3 ==========
                                   CustomTextField(
-                                    labelText: "Third Baby Name *",
-                                    hintText: "Enter Third Baby Name",
+                                    labelText: l10n?.thirdBabyName ?? "Third Baby Name *",
+                                    hintText: l10n?.enterThirdBabyName  ?? "Enter Third Baby Name",
                                     initialValue: state.baby3Name,
                                     onChanged: (v) =>
                                         bloc.add(Baby3NameChanged(v)),
@@ -2059,12 +2144,23 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   ),
 
                                   ApiDropdown<String>(
-                                    labelText: "Third Baby Gender *",
+                                    labelText: l10n?.thirdBabyGender,
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby3Gender.isEmpty
                                         ? null
                                         : state.baby3Gender,
-                                    getLabel: (s) => s,
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'male':
+                                          return l10n?.male ?? '';
+                                        case 'female':
+                                          return l10n?.female ?? '';
+                                        case 'transgender':
+                                          return l10n?.transgender ?? '';
+                                        default:
+                                          return s;
+                                      }
+                                    },
                                     onChanged: (v) =>
                                         bloc.add(Baby3GenderChanged(v ?? "")),
                                     hintText: l10n?.select ?? 'Select',
@@ -2077,9 +2173,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   ),
 
                                   CustomTextField(
-                                    labelText:
-                                        "Third Baby Weight (1200–4000gms) *",
-                                    hintText: "Enter Third Baby Weight",
+                                    labelText:l10n?.thirdBabyWeight ?? "Third Baby Weight (1200–4000gms) *",
+                                    hintText: l10n?.enterThirdBabyWeight ?? "Enter Third Baby Weight",
                                     initialValue: state.baby3Weight,
                                     keyboardType: TextInputType.number,
                                     onChanged: (v) =>
@@ -2121,8 +2216,8 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                             if (state.beneficiaryAbsent == (l10n?.yes ?? 'Yes'))
                               CustomTextField(
-                                labelText: 'Reason for Absence',
-                                hintText: 'Enter the reason for absence',
+                                labelText: l10n?.reasonForAbsence,
+                                hintText: l10n?.reasonForAbsence,
                                 initialValue: state.absenceReason,
                                 onChanged: (v) =>
                                     bloc.add(AbsenceReasonChanged(v)),
@@ -2202,7 +2297,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(
-                                            const SnackBar(
+                                             SnackBar(
                                               content: Text(
                                                 "Please select visit type",
                                               ),
@@ -2214,9 +2309,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                                         ScaffoldMessenger.of(
                                           context,
                                         ).showSnackBar(
-                                          const SnackBar(
+                                           SnackBar(
                                             content: Text(
-                                              "Please fill all required fields correctly",
+                                              l10n?.pleaseFillFieldsCorrectly ?? "Please fill all required fields correctly",
                                             ),
                                             duration: Duration(seconds: 2),
                                           ),

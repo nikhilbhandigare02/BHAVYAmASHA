@@ -13709,6 +13709,12 @@ abstract class AppLocalizations {
   /// **'Number of Calcium and Vitamin D3 tablets given'**
   String get calciumVitaminD3TabletsLabel;
 
+  /// No description provided for @selectVisitTypeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select visit type'**
+  String get selectVisitTypeError;
+
   /// No description provided for @protected.
   ///
   /// In en, this message translates to:
