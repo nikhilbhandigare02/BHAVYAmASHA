@@ -259,7 +259,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       final householdRefKey = row['household_ref_key']?.toString() ?? '';
       final uniqueKey = row['unique_key']?.toString() ?? '';
 
-      // Get TRIMMED versions for display only
       final householdRefKeyDisplay = _getLast11Chars(householdRefKey);
       final uniqueKeyDisplay = _getLast11Chars(uniqueKey);
 

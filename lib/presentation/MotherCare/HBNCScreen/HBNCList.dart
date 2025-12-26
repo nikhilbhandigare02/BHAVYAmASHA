@@ -71,7 +71,6 @@ class _HBNCListScreenState
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // Check mother_care_activities table
       final motherCareResult = await db.query(
         'mother_care_activities',
         columns: ['is_synced'],
@@ -209,7 +208,6 @@ class _HBNCListScreenState
             continue;
           }
 
-          // Skip if this beneficiary has already been processed
           if (processedBeneficiaries.contains(beneficiaryRefKey)) {
             print('ℹ️ Skipping duplicate outcome for beneficiary: $beneficiaryRefKey');
             continue;
