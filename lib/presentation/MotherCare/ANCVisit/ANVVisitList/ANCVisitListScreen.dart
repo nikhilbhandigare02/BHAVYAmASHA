@@ -259,6 +259,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       final householdRefKey = row['household_ref_key']?.toString() ?? '';
       final uniqueKey = row['unique_key']?.toString() ?? '';
 
+      // Get TRIMMED versions for display only
       final householdRefKeyDisplay = _getLast11Chars(householdRefKey);
       final uniqueKeyDisplay = _getLast11Chars(uniqueKey);
 
@@ -677,7 +678,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                         width: MediaQuery.of(context).size.width / 4 - 50,
                         child: _rowText(
                           l10n?.ageLabel ?? 'Age/Gender',
-                          "${ageGender}/F",
+                          "${ageGender}",
                         ),
                       ),
                       SizedBox(
@@ -860,7 +861,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             '${_formatDate(startDate)}\nTO\n${_formatDate(endDate)}',
             style: TextStyle(
               color: AppColors.background,
-              fontSize: 13.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w400,
             ),
           ),
@@ -887,7 +888,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           style: TextStyle(
             color: AppColors.background,
             fontWeight: FontWeight.w400,
-            fontSize: 13.sp,
+            fontSize: 12.sp,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

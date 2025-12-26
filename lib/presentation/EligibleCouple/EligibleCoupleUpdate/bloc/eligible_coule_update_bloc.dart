@@ -386,7 +386,6 @@ class EligibleCouleUpdateBloc
 
       final updatedBeneficiaryInfoJson = jsonEncode(beneficiaryInfo);
 
-      // Update the database
       final updateCount = await db.update(
         'beneficiaries_new',
         {
