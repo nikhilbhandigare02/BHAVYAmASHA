@@ -67,7 +67,6 @@ class _EligibleCoupleIdentifiedScreenState
       setState(() { _isLoading = true; });
       final db = await DatabaseProvider.instance.database;
 
-      // Get current user's unique key
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
       
@@ -80,10 +79,8 @@ class _EligibleCoupleIdentifiedScreenState
         return;
       }
 
-      // Build the query to join beneficiaries with eligible_couple_activities
-      // Using current_user_key for filtering as modified_by doesn't exist
       final query = '''
-        SELECT b.*, e.eligible_couple_state 
+        SELECT DISTINCT b.*, e.eligible_couple_state 
         FROM beneficiaries_new b
         INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
         WHERE b.is_deleted = 0 
@@ -134,8 +131,13 @@ class _EligibleCoupleIdentifiedScreenState
       for (final member in filteredRows) {
         final info = _toStringMap(member['beneficiary_info']);
         final memberUniqueKey = member['unique_key']?.toString() ?? '';
-
-
+        
+        // Check gender and skip if male
+        final gender = info['gender']?.toString().toLowerCase() ?? '';
+        if (gender == 'male') {
+          print('Skipping male record: $memberUniqueKey');
+          continue;
+        }
 
         couples.add(_formatCoupleData(
           _toStringMap(member),
