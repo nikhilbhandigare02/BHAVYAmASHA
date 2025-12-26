@@ -420,7 +420,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
           final rowsEC = await db.rawQuery(queryEC, argsEC);
 
-          // final count = rows.first['cnt'] as int? ?? 0;
+
 
 
           _eligibleCompletedCoupleItems = [];
