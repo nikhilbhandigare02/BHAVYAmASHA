@@ -448,7 +448,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacA_actLT150 => 'सप्ताह में 150 मिनट से कम';
 
   @override
-  String get cbacA_activityQ => 'क्या आप सप्ताह में कम से कम 150 मिनट शारीरिक गतिविधि करते हैं? (कम से कम 30 मिनट प्रतिदिन, सप्ताह में 5 दिन) *';
+  String get cbacA_activityQ => 'क्या आप सप्ताह में कम से कम 150 मिनट शारीरिक गतिविधियां करते हैं? (प्रतिदिन कम-से-कम 30 मिनट, सप्ताह में 5 दिन) *';
 
   @override
   String get cbacA_age30to39 => '30 से 39 वर्ष';
@@ -466,10 +466,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacA_ageQ => 'आपकी आयु क्या है? (वर्ष में) *';
 
   @override
-  String get cbacA_alcoholQ => 'क्या आप रोजाना शराब/मद्यपान करते हैं? *';
+  String get cbacA_alcoholQ => 'क्या आप शराब / मदिरा का प्रतिदिन सेवन करते हैं? *';
 
   @override
-  String get cbacA_familyQ => 'क्या आपके परिवार (माता-पिता, भाई-बहन) में किसी को उच्च रक्तचाप, मधुमेह या हृदय रोग है? *';
+  String get cbacA_familyQ => 'क्या आपके परिवार (माता-पिता, भाई-बहन) में से * कोई भी उच्च रक्तचाप, मधुमेह अथवा हृदय रोग से पीड़ित है *';
 
   @override
   String get cbacA_tobDaily => 'प्रतिदिन करते हैं';
@@ -481,7 +481,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacA_tobSometimes => 'पहले करते थे या वर्तमान में कभी-कभी करते हैं';
 
   @override
-  String get cbacA_tobaccoQ => 'क्या आप धूम्रपान करते हैं या गुटखा/खैनी जैसे बिना धुएँ वाले तंबाकू उत्पादों का सेवन करते हैं? *';
+  String get cbacA_tobaccoQ => 'क्या आप धूम्रपान या धूम्रपान रहित तम्बाकू उत्पाद * यथा गुटका / खैनी का सेवन करते हैं? *';
 
   @override
   String get cbacA_waist81to90 => '81 से 90 सेमी';
@@ -493,7 +493,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacA_waistLE80 => '80 सेमी या कम';
 
   @override
-  String get cbacA_waistQ => 'कमर माप (सेमी में) *';
+  String get cbacA_waistQ => 'कमर का माप (से. मी. में) *';
 
   @override
   String get cbacB_b1_bloodMucus => 'क्या बलगम में खून आता है?';
@@ -508,121 +508,121 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacB_b1_chewPain => 'क्या कुछ चबाने में कठिनाई/दर्द होता है?';
 
   @override
-  String get cbacB_b1_closeEyelidsDifficulty => 'क्या पलकों को बंद करने में कठिनाई है?';
+  String get cbacB_b1_closeEyelidsDifficulty => 'क्या पलकों को बंद करने में कठिनाई होती है?';
 
   @override
-  String get cbacB_b1_cough2w => 'क्या खांसी दो सप्ताह से अधिक समय तक रहती है?';
+  String get cbacB_b1_cough2w => 'क्या दो सप्ताह से ज्यादा खाँसी होती है?';
 
   @override
-  String get cbacB_b1_druggs => 'क्या आप वर्तमान में एंटी-टीबी दवाएं ले रहे हैं?';
+  String get cbacB_b1_druggs => 'क्या आप वर्तमान में टी.बी. रोधक दवाइयां ले रहे हैं';
 
   @override
-  String get cbacB_b1_eyePain => 'क्या एक सप्ताह से अधिक समय से आंखों में दर्द है?';
+  String get cbacB_b1_eyePain => 'क्या एक सप्ताह से अधिक से आँखों में दर्द है?';
 
   @override
-  String get cbacB_b1_eyeRedness => 'क्या एक सप्ताह से अधिक समय से आंखों में लाली है?';
+  String get cbacB_b1_eyeRedness => 'क्या एक सप्ताह से अधिक से आँखों में लालिमा है?';
 
   @override
-  String get cbacB_b1_fever2w => 'क्या बुखार दो सप्ताह से अधिक समय तक रहा है?';
+  String get cbacB_b1_fever2w => 'क्या दो सप्ताह से अधिक का बुखार है?';
 
   @override
-  String get cbacB_b1_hearingDifficulty => 'क्या सुनने में परेशानी/कठिनाई होती है?';
+  String get cbacB_b1_hearingDifficulty => 'क्या सुनने में परेशानी / कठिनाई होती है?';
 
   @override
-  String get cbacB_b1_history => 'क्या आपके परिवार के किसी सदस्य को पहले टीबी रहा है?';
+  String get cbacB_b1_history => 'क्या आपके परिवार के किसी सदस्य को टी.बी. होने का कोई पिछला इतिहास है? ';
 
   @override
-  String get cbacB_b1_holdingDifficulty => 'क्या उंगलियों से कुछ पकड़ने में कठिनाई होती है?';
+  String get cbacB_b1_holdingDifficulty => 'क्या उंगलियों से कोई चीज पकड़ने में कठिनाई होती है?';
 
   @override
-  String get cbacB_b1_legWeaknessWalk => 'क्या पैरों में कमजोरी है जिसके कारण चलने में कठिनाई होती है?';
+  String get cbacB_b1_legWeaknessWalk => 'क्या पैरों में कमजोरी जिसके कारण चलने में कठिनाई होती है?';
 
   @override
   String get cbacB_b1_nightSweat => 'क्या रात में बहुत पसीना आता है?';
 
   @override
-  String get cbacB_b1_numbnessHotCold => 'क्या हथेलियों या पैरों के तलवों में गर्म/ठंडे स्पर्श पर संवेदना नहीं होती (सुन्नपन)?';
+  String get cbacB_b1_numbnessHotCold => 'क्या हथेली या पैर के तलवों में गरम/ठंडा छूने पर कुछ महसूस नहीं (सुन्नापन) होता है?';
 
   @override
-  String get cbacB_b1_openMouth => 'क्या मुंह खोलने में परेशानी होती है?';
+  String get cbacB_b1_openMouth => 'क्या मुॅंह  खोलने में परेशानी होती है?';
 
   @override
-  String get cbacB_b1_palmsSores => 'क्या हथेलियों या तलवों पर अक्सर घाव हो जाते हैं?';
+  String get cbacB_b1_palmsSores => 'क्या हथेली या तलवों में बार-बार घाव होता है?';
 
   @override
-  String get cbacB_b1_rashMouth => 'क्या मुंह में सफेद या लाल घेरा/दाने हैं जो दो सप्ताह में नहीं भरे हैं?';
+  String get cbacB_b1_rashMouth => 'क्या मुँह में सफेद या लाल रंग का घेरा / चकत्ता है जो दो सप्ताह से ठीक नहीं हुआ हो?';
 
   @override
   String get cbacB_b1_readingDifficulty => 'क्या पढ़ने में कठिनाई होती है?';
 
   @override
-  String get cbacB_b1_scratchesCracks => 'क्या उंगलियों या पैर की उंगलियों पर खरोंच/दरारें/फटना है?';
+  String get cbacB_b1_scratchesCracks => 'क्या हाथ या पैरों की उंगलियों में खरोंच / दरार/फटता है?';
 
   @override
-  String get cbacB_b1_seizures => 'क्या दौरे पड़ते हैं?';
+  String get cbacB_b1_seizures => 'क्या दौरे आते हैं?';
 
   @override
-  String get cbacB_b1_skinLump => 'क्या त्वचा पर कोई गांठ है?';
+  String get cbacB_b1_skinLump => 'कहीं त्वचा में गांठ तो नहीं है?';
 
   @override
-  String get cbacB_b1_skinRashDiscolor => 'क्या त्वचा पर कोई दाने या रंग बदलना है जो संवेदनहीन हो?';
+  String get cbacB_b1_skinRashDiscolor => 'क्या त्वचा पर चकत्ता या रंग में परिवर्तन (दाग) है, जिसमें कोई संवेदना नहीं है?';
 
   @override
-  String get cbacB_b1_skinThick => 'क्या कहीं त्वचा मोटी है?';
+  String get cbacB_b1_skinThick => 'कहीं पर त्वचा मोटी तो नहीं है?';
 
   @override
-  String get cbacB_b1_swellingMouth => 'क्या मुंह में कोई सूजन है जो दो सप्ताह में नहीं भरी है?';
+  String get cbacB_b1_swellingMouth => 'क्या मुँह में किसी प्रकार का सूजन है जो दो सप्ताह से ठीक नहीं हुआ हो?';
 
   @override
-  String get cbacB_b1_tingling => 'क्या हथेलियों या तलवों में अक्सर झनझनाहट होती है?';
+  String get cbacB_b1_tingling => 'क्या हथेली या तलवों में बार-बार झुनझुनी होती है?';
 
   @override
-  String get cbacB_b1_tinglingNumbness => 'क्या हाथों या पैरों में झनझनाहट और सुन्नपन होता है?';
+  String get cbacB_b1_tinglingNumbness => 'क्या हाथ या पैरों में झुनझुनी होना और सुन्न हो जाता है?';
 
   @override
-  String get cbacB_b1_tuberculosisFamily => 'क्या आपके परिवार में कोई वर्तमान में क्षय रोग (टीबी) से पीड़ित है?';
+  String get cbacB_b1_tuberculosisFamily => 'क्या आपके परिवार में वर्तमान में कोई क्षय रोग (टी.बी.) से पीड़ित है?';
 
   @override
-  String get cbacB_b1_ulcers => 'क्या मुंह के छाले दो सप्ताह से नहीं भर रहे हैं?';
+  String get cbacB_b1_ulcers => 'Have mouth ulcers that are not healing for two weeks?';
 
   @override
-  String get cbacB_b1_visionBlurred => 'क्या आपकी दृष्टि धुंधली है?';
+  String get cbacB_b1_visionBlurred => 'क्या धुंधला दिखाई देता है?';
 
   @override
-  String get cbacB_b1_weightLoss => 'क्या आपका वजन लगातार घट रहा है?';
+  String get cbacB_b1_weightLoss => 'क्या वजन लगातार कम हो रहा है?';
 
   @override
-  String get cbacB_b2_breastLump => 'क्या स्तन में भी कोई गांठ है?';
+  String get cbacB_b2_breastLump => 'क्या स्तन में गांठ भी है?';
 
   @override
-  String get cbacB_b2_breastShapeDiff => 'क्या स्तन के आकार और आकार में अंतर है?';
+  String get cbacB_b2_breastShapeDiff => 'क्या स्तन के आकार व नाप में अंतर है?';
 
   @override
   String get cbacB_b2_depression => 'क्या मानसिक अवसाद की स्थिति है?';
 
   @override
-  String get cbacB_b2_excessBleeding => 'क्या मासिक धर्म के दौरान अधिक रक्तस्राव होता है?';
+  String get cbacB_b2_excessBleeding => 'क्या माहवारी में अत्यधिक रक्तस्त्राव होता है? *';
 
   @override
-  String get cbacB_b2_irregularPeriods => 'क्या माहवारी अनियमित है?';
+  String get cbacB_b2_irregularPeriods => 'क्या अनियमित माहवारी होती है?';
 
   @override
-  String get cbacB_b2_jointPain => 'क्या आपको जोड़ों में दर्द है?';
+  String get cbacB_b2_jointPain => 'क्या जोड़ों में दर्द होता है?';
 
   @override
   String get cbacB_b2_nippleBleed => 'क्या निप्पल/एरिओला से खून निकल रहा है?';
 
   @override
-  String get cbacB_b2_postIntercourseBleed => 'क्या संभोग के बाद रक्तस्राव होता है?';
+  String get cbacB_b2_postIntercourseBleed => 'क्या संभोग के उपरांत रक्तस्राव होता है?';
 
   @override
-  String get cbacB_b2_postMenopauseBleed => 'क्या रजोनिवृत्ति के बाद (मासिक बंद होने के बाद) रक्तस्राव होता है?';
+  String get cbacB_b2_postMenopauseBleed => 'क्या Menopause (माहवारी बंद होने के बाद भी) के बाद रक्तस्राव होता है?';
 
   @override
-  String get cbacB_b2_smellyDischarge => 'क्या बदबूदार योनि स्राव होता है?';
+  String get cbacB_b2_smellyDischarge => 'क्या बदबूदार योनिस्त्राव होती है?';
 
   @override
-  String get cbacB_b2_uterusProlapse => 'क्या गर्भाशय बाहर आ जाता है?';
+  String get cbacB_b2_uterusProlapse => 'क्या बच्चेदानी बाहर आती है? *';
 
   @override
   String get cbacC_businessRiskQ => 'व्यवसायिक जोखिम -';
@@ -634,7 +634,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacC_fuelOther => 'Other';
 
   @override
-  String get cbacC_fuelQ => 'खाना पकाने के लिए किस प्रकार का ईंधन उपयोग होता है?';
+  String get cbacC_fuelQ => 'What type of fuel is used for cooking?';
 
   @override
   String get cbacConsentAgree => 'सहमत होना';
@@ -661,10 +661,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cbacD_opt3 => 'लगभग हर दिन';
 
   @override
-  String get cbacD_q1 => 'निराश, उदास महसूस होना';
+  String get cbacD_q1 => 'Feeling hopeless, depressed';
 
   @override
-  String get cbacD_q2 => 'काम करने में कम रुचि या आनंद';
+  String get cbacD_q2 => 'Less interest or pleasure in performing the task';
 
   @override
   String get cbacFormTitle => 'सीबीएसी फॉर्म';
@@ -851,12 +851,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String cbacTotalScorePartA(Object score) {
-    return 'कुल स्कोर (भाग A) $score';
+    return 'कुल प्राप्तांक (Part A) (भाग A) $score';
   }
 
   @override
   String cbacTotalScorePartD(Object score) {
-    return 'कुल स्कोर (भाग D) $score';
+    return 'कुल प्राप्तांक (Part A) (भाग D) $score';
   }
 
   @override
@@ -1456,7 +1456,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get idTypeVoterId => 'वोटर आईडी';
 
   @override
-  String get identificationTypeLabel => 'पहचान प्रकार';
+  String get identificationTypeLabel => 'पहचान का प्रकार';
 
   @override
   String get ifscHint => 'आईएफएससी कोड';
@@ -2331,7 +2331,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get userRoleLabel => 'भूमिका:';
 
   @override
-  String get userVillageLabel => 'ग्राम';
+  String get userVillageLabel => 'गाँव';
 
   @override
   String get usernameEmpty => 'उपयोगकर्ता का नाम खाली नहीं हो सकता';
@@ -2697,7 +2697,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get outcomeFormTitle => 'Delivery Outcome';
 
   @override
-  String get deliveryOutcomeDetails => 'Delivery Outcome Details';
+  String get deliveryOutcomeDetails => 'प्रसव परिणाम का विवरण';
 
   @override
   String get deliveryDateLabel => 'Date of Delivery *';
@@ -2757,7 +2757,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get deliveryConductedByOther => 'Other';
 
   @override
-  String get complicationsLabel => 'Complications (if any)';
+  String get complicationsLabel => 'जटिलताएँ (यदि कोई हों)';
 
   @override
   String get complicationBleeding => 'Excessive Bleeding';
@@ -2796,19 +2796,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dataSavedSuccessMessage => 'Data saved successfully';
 
   @override
-  String get deliveryDate => 'Date of Delivery *';
+  String get deliveryDate => 'प्रसव की तिथि';
 
   @override
-  String get gestationWeeks => 'Number of weeks of pregnancy during delivery';
+  String get gestationWeeks => 'पप्रसव के दौरान गर्भावस्था के सप्ताहों की संख्या।';
 
   @override
-  String get deliveryTime => 'Delivery Time (hh:mm)';
+  String get deliveryTime => 'प्रसव का समय (घंटा:मिनट)';
 
   @override
-  String get deliveryTimeHint => 'hh:mm';
+  String get deliveryTimeHint => 'घंटा:मिनट';
 
   @override
-  String get placeOfDelivery => 'Place of Delivery';
+  String get placeOfDelivery => 'डिलिवरी का स्थान';
 
   @override
   String get selectPlaceOfDelivery => 'Select Place of Delivery *';
@@ -2829,25 +2829,25 @@ class AppLocalizationsHi extends AppLocalizations {
   String get privateHospital => 'Private Hospital';
 
   @override
-  String get deliveryType => 'Type of Delivery *';
+  String get deliveryType => 'प्रसव का प्रकार *';
 
   @override
-  String get normalDelivery => 'Normal';
+  String get normalDelivery => 'सामान्य';
 
   @override
-  String get cesareanDelivery => 'Cesarean';
+  String get cesareanDelivery => 'सिजेरियन';
 
   @override
-  String get assistedDelivery => 'Assisted/Forceps)';
+  String get assistedDelivery => 'सहायता प्राप्त / फोर्सेप्स';
 
   @override
   String get complications => 'Complications during delivery? *';
 
   @override
-  String get outcomeCount => 'Number of Outcomes *';
+  String get outcomeCount => 'परिणामों की संख्या *';
 
   @override
-  String get familyPlanningCounseling => 'Family Planning Counseling Provided?';
+  String get familyPlanningCounseling => 'क्या परिवार नियोजन परामर्श दिया गया?';
 
   @override
   String get pleaseFillAllFields => 'Please fill all required fields';
@@ -5551,7 +5551,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get privatePlace => 'प्राइवेट';
 
   @override
-  String get institutionPlaceOfDelivery => 'प्रसव का संस्थागत स्थान';
+  String get institutionPlaceOfDelivery => 'प्रसव का संस्थागत ';
 
   @override
   String get nursingHome => 'नर्सिंग होम';
@@ -5569,7 +5569,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get nonInstitutionalPlaceOfDelivery => 'प्रसव का गैर संस्थागत स्थान';
 
   @override
-  String get enterOtherNonInstitutionalDelivery => 'अन्य गैर-संस्थागत प्रसव का नाम दर्ज करें';
+  String get enterOtherNonInstitutionalDelivery => 'अन्य गैर-संस्थागत स्थान नाम दर्ज करें';
 
   @override
   String get enterName => 'नाम दर्ज करें';
@@ -5645,6 +5645,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get enterOtherComplication => 'प्रसव के दौरान अन्य जटिलता दर्ज करें';
+
+  @override
+  String get enterComplicationDuringDelivery => 'प्रसव के दौरान जटिलता?';
 
   @override
   String get discharge_time => 'डिस्चार्ज का समय (hh:mm)';
@@ -6685,10 +6688,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get present => 'उपस्थित है?';
 
   @override
-  String get hscNameHint => 'उप स्वास्थ्य केंद्र का नाम';
+  String get hscNameHint => 'एच.एस.सी. का नाम';
 
   @override
-  String get hscNameLabel => 'उप स्वास्थ्य केंद्र का नाम';
+  String get hscNameLabel => 'एच.एस.सी. का नाम';
 
   @override
   String get hwcNameHint => 'एच.डब्ल्यू.सी. का नाम';
@@ -6839,6 +6842,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get identificationNumber => 'पहचान संख्या';
+
+  @override
+  String get deliveryOutcomeDialogue => 'प्रपत्र सफलतापूर्वक संरक्षित कर दिया गया है।';
+
+  @override
+  String get savedBeneficiary => 'लाभार्थी को प्रसव के बाद की देखभाल (एचबीएनसी) की सूची में जोड़ा दिया गया है।';
 
   @override
   String get igree_I => 'मैं, ';

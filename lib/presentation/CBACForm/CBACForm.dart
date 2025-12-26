@@ -1185,7 +1185,7 @@ class _PartBTab extends StatelessWidget {
                   builder: (context, state) {
                     return ApiDropdown<String>(
                       labelText: question,
-                      hintText: 'Select Option',
+                      hintText: l10n.select,
                       labelFontSize: 15.sp,
                       items: [l10n.yes, l10n.no],
                       getLabel: (s) => s,
@@ -1245,7 +1245,8 @@ class _PartBTab extends StatelessWidget {
         BlocBuilder<CbacFormBloc, CbacFormState>(
           buildWhen: (previous, current) => previous.data['personal.gender'] != current.data['personal.gender'],
           builder: (context, state) {
-            final isFemale = state.data['personal.gender'] == l10n.genderFemale;
+            final isFemale = state.data['personal.gender_code'] == 'F' || 
+                       state.data['personal.gender'] == 'Female';
             if (!isFemale) return const SizedBox.shrink();
             
             return Column(
@@ -1384,8 +1385,9 @@ class _PartCTabState extends State<_PartCTab> {
     required List<String> options,
     required Function(String) onChanged,
   }) {
+    final l10n = AppLocalizations.of(context);
     final selected = value.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
-    final displayText = selected.isEmpty ? 'Select Option' : selected.join(', ');
+    final displayText = selected.isEmpty ? l10n!.select : selected.join(', ');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1744,7 +1746,7 @@ class _PartDTab extends StatelessWidget {
                     width: 300,
                     child: ApiDropdown<String>(
                       labelText: question,
-                      hintText: 'Select Option',
+                      hintText: l10n.select,
                       labelFontSize: 15.sp,
                       items: options,
                       getLabel: (s) => s,

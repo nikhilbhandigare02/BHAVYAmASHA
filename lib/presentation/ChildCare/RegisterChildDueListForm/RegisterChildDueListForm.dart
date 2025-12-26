@@ -604,7 +604,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                       ),
                                     )
                                         : RoundButton(
-                                      title: 'VERIFY',
+                                      title: l10n!.verify,
                                       borderRadius: 8,
                                       fontSize: 12,
                                       onPress: () {
@@ -620,7 +620,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
                             CustomTextField(
                               labelText: l10n?.rchChildSerialHint ?? 'Register Serial Number',
-                              hintText: 'Enter serial number',
+                              hintText: l10n?.enterSerialNumber,
                               initialValue: state.registerSerialNumber,
                               onChanged: (v) => bloc.add(SerialNumberOFRegister(v)),
                             ),
@@ -632,7 +632,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                               onDateChanged: (d) => bloc.add(DateOfBirthChanged(d)),
                               validator: (date) {
                                 if (date == null) {
-                                  return _captureError('Please enter Date of Birth');
+                                  return _captureError(l10n?.pleaseEnterDob);
                                 }
                                 return null;
                               },
@@ -647,7 +647,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                               onDateChanged: (d) => bloc.add(DateOfRegistrationChanged(d)),
                               validator: (date) {
                                 if (date == null) {
-                                  return _captureError('Please enter Date of Registration');
+                                  return _captureError(l10n?.pleaseEnterDor);
 
                                 }
                                 return null;
@@ -657,12 +657,12 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
                             CustomTextField(
                               labelText: l10n?.childNameLabel ?? "Child's name *",
-                              hintText: 'Enter full name of the child',
+                              hintText: l10n?.enterFullNameChild,
                               initialValue: state.childName,
                               onChanged: (v) => bloc.add(ChildNameChanged(v)),
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return _captureError("Please enter Child's name");
+                                  return _captureError(l10n!.enterFullNameChild);
                                 }
                                 return null;
                               },
@@ -680,7 +680,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                 hintText: l10n?.select ?? 'Select',
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return _captureError('Please enter Gender');
+                                    return _captureError(l10n?.pleaseEnterGender);
                                   }
                                   return null;
                                 },
@@ -690,12 +690,12 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
                             CustomTextField(
                               labelText: "${l10n?.motherNameLabel} *" ?? "Mother's name*",
-                              hintText: 'Enter mother\'s name',
+                              hintText: l10n?.enterMothersName,
                               initialValue: state.motherName,
                               onChanged: (v) => bloc.add(MotherNameChanged(v)),
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return _captureError("Please enter Mother's name");
+                                  return _captureError(l10n?.pleaseEnterMothersName);
                                 }
                                 return null;
                               },
@@ -704,7 +704,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
                             CustomTextField(
                               labelText: l10n?.fatherNameLabel ?? "Father's name",
-                              hintText: 'Enter father\'s name',
+                              hintText: l10n?.fatherNameHint,
                               initialValue: state.fatherName,
                               onChanged: (v) => bloc.add(FatherNameChanged(v)),
                             ),
@@ -712,13 +712,13 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
                             CustomTextField(
                               labelText: "${l10n?.addressLabel} *" ?? 'Address',
-                              hintText: 'Enter address',
+                              hintText:l10n?.enterAddress,
                               initialValue: state.address,
                               onChanged: (v) => bloc.add(AddressChanged(v)),
                               maxLines: 2,
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return _captureError('Please enter Address');
+                                  return _captureError(l10n?.pleaseEnterAddress);
                                 }
                                 return null;
                               },
@@ -741,7 +741,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                 hintText: l10n?.select ?? 'Select',
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return _captureError('Please enter Whose mobile number');
+                                    return _captureError(l10n?.pleaseEnterWhoseMobileNumber);
                                   }
                                   return null;
                                 },
@@ -751,18 +751,18 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
                             CustomTextField(
                               labelText: "${l10n?.mobileNumberLabel} *" ?? 'Mobile number *',
-                              hintText: 'Enter 10-digit mobile number',
+                              hintText: l10n?.enter10DigitMobileNumber,
                               initialValue: state.mobileNumber,
                               keyboardType: TextInputType.phone,
                               onChanged: (v) => bloc.add(MobileNumberChanged(v)),
                               validator: (value) {
                                 final text = value?.trim() ?? '';
                                 if (text.isEmpty) {
-                                  return _captureError('Please enter Mobile number');
+                                  return _captureError(l10n?.pleaseEnterMobileNumber);
                                 }
                                 final regex = RegExp(r'^[6-9]\d{9}$');
                                 if (!regex.hasMatch(text)) {
-                                  return _captureError('Mobile no. must be 10 digits and start with 6-9');
+                                  return _captureError(l10n?.mobileMustBe10DigitsAndStartWith);
                                 }
                                 return null;
                               },
@@ -776,7 +776,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                 Expanded(
                                   child: CustomTextField(
                                     labelText: l10n?.mothersRchIdLabel ?? "Mother's RCH ID number",
-                                    hintText: 'Enter mother\'s RCH ID',
+                                    hintText: l10n?.enterMothersRchId,
                                     initialValue: state.mothersRchIdNumber,
                                     onChanged: (v) => bloc.add(MothersRchIdNumberChanged(v)),
                                   ),
@@ -796,7 +796,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                       ),
                                     )
                                         : RoundButton(
-                                      title: 'VERIFY',
+                                      title: l10n!.verify,
                                       borderRadius: 8,
                                       fontSize: 12,
                                       onPress: () {
@@ -827,15 +827,15 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
                             CustomTextField(
                               labelText: l10n?.birthCertificateNumberLabel ?? 'Birth Certificate Number',
-                              hintText: 'Enter birth certificate number if available',
+                              hintText: l10n?.enterBirthCertificateNumber,
                               initialValue: state.birthCertificateNumber,
                               onChanged: (v) => bloc.add(BirthCertificateNumberChanged(v)),
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                             CustomTextField(
-                              labelText:'Weight (500-12500)gms',
-                              hintText: 'Enter weight',
+                              labelText:l10n?.child_weight,
+                              hintText: l10n?.enterWeight,
                               initialValue: state.weightGrams,
                               keyboardType: TextInputType.number,
                               onChanged: (v) => bloc.add(WeightGramsChanged(v)),
@@ -847,11 +847,11 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
                                 final parsed = int.tryParse(text);
                                 if (parsed == null) {
-                                  return _captureError('Please enter a valid weight in grams');
+                                  return _captureError(l10n?.enterValidWeight);
                                 }
 
                                 if (parsed < 500 || parsed > 12500) {
-                                  return _captureError('Weight must be between 500 and 12500 grams');
+                                  return _captureError(l10n?.weightRangeError);
                                 }
 
                                 return null;
@@ -860,8 +860,8 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                             CustomTextField(
-                              labelText: 'Birth weight (1200-4000)gms',
-                              hintText: 'Enter birth weight',
+                              labelText:l10n?.birthWeightRange,
+                              hintText:l10n?.enterBirthWeight,
                               initialValue: state.birthWeightGrams,
                               keyboardType: TextInputType.number,
                               onChanged: (v) => bloc.add(BirthWeightGramsChanged(v)),
@@ -873,11 +873,11 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
                                 final parsed = int.tryParse(text);
                                 if (parsed == null) {
-                                  return _captureError('Please enter a valid birth weight in grams');
+                                  return _captureError(l10n?.enterValidBirthWeight);
                                 }
 
                                 if (parsed < 1200 || parsed > 4000) {
-                                  return _captureError('Please enter a valid birth weight in grams');
+                                  return _captureError(l10n?.enterValidBirthWeight);
                                 }
 
                                 return null;
@@ -898,10 +898,10 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                       l10n?.religionMuslim ?? 'Muslim',
                                       l10n?.religionChristian ?? 'Christian',
                                       l10n?.religionSikh ?? 'Sikh',
-                                      'Buddism',
-                                      'Jainism',
-                                      'Parsi',
-                                      'Do not want to disclose',
+                                      l10n?.religionBuddhism ?? 'Buddism',
+                                     l10n?.religionJainism ?? 'Jainism',
+                                      l10n?.religionParsi ?? 'Parsi',
+                                      l10n?.religionNotDisclosed ?? 'Do not want to disclose',
                                       l10n?.other ?? 'Other',
                                     ],
                                     value: state.religion.isEmpty ? null : state.religion,
@@ -920,13 +920,13 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                     Padding(
                                       padding: const EdgeInsets.only(top: 8.0),
                                       child: CustomTextField(
-                                        labelText: 'Specify Religion',
-                                        hintText: 'Enter your religion',
+                                        labelText: l10n?.specifyReligionLabel,
+                                        hintText: l10n?.enterReligion,
                                         initialValue: state.customReligion,
                                         onChanged: (v) => bloc.add(CustomReligionChanged(v)),
                                         validator: (value) {
                                           if (state.religion == 'Other' && (value == null || value.trim().isEmpty)) {
-                                            return 'Please specify your religion';
+                                            return l10n?.pleaseSpecifyReligion;
                                           }
                                           return null;
                                         },

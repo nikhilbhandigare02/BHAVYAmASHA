@@ -344,10 +344,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ashaIdLabel => 'ASHA ID';
 
   @override
-  String get ashaNameHint => 'Name of ASHA';
+  String get ashaNameHint => 'ASHA Name';
 
   @override
-  String get ashaNameLabel => 'Name of ASHA';
+  String get ashaNameLabel => 'ASHA Name';
 
   @override
   String get ashaProfile => 'ASHA Profile';
@@ -968,7 +968,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disabilityPhysicallyHandicap => 'Physically Handicap';
 
   @override
-  String get disabilityQuestionLabel => 'Whether the person has one of the following';
+  String get disabilityQuestionLabel => 'Whether the person has one of the following conditions';
 
   @override
   String get disabilityVisualImpairment => 'Visual impairment';
@@ -1456,7 +1456,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get idTypeVoterId => 'Voter Card';
 
   @override
-  String get identificationTypeLabel => 'Identification type';
+  String get identificationTypeLabel => 'Identification Type';
 
   @override
   String get ifscHint => 'IFSC code';
@@ -4363,7 +4363,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aadhaarNumber => 'Aadhaar Number';
 
   @override
-  String get iHerebyDeclareThat => 'I hereby declare that:';
+  String get iHerebyDeclareThat => 'I hereby declare that';
 
   @override
   String get agreeAll => 'Agree All';
@@ -4585,7 +4585,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get healthcareProviderInformation => 'Healthcare Provider Information';
 
   @override
-  String get hsc => 'HSC';
+  String get hsc => 'Name of Health Sub Center';
 
   @override
   String get phc => 'PHC';
@@ -5645,6 +5645,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterOtherComplication => 'Enter other complication during delivery';
+
+  @override
+  String get enterComplicationDuringDelivery => 'complication during delivery';
 
   @override
   String get discharge_time => 'Discharge time (hh:mm)';
@@ -6839,6 +6842,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get identificationNumber => 'Identification Number';
+
+  @override
+  String get deliveryOutcomeDialogue => 'Form has been saved successfully';
+
+  @override
+  String get savedBeneficiary => 'Beneficiary has been added to HBNC list';
 
   @override
   String get igree_I => 'I, ';

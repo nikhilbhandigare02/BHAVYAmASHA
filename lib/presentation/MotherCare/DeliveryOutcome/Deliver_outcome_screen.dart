@@ -698,17 +698,17 @@ ORDER BY d.created_date_time DESC
                     children: [
                       Row(
                         children: [
-                          Expanded(child: _rowText('Registration Date', registrationDate)),
+                          Expanded(child: _rowText(t!.registrationDateLabel, registrationDate)),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('Beneficiary ID', beneficiaryId)),
+                          Expanded(child: _rowText(t.beneficiaryIdLabel, beneficiaryId)),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText('RCH ID', richId)),
+                          Expanded(child: _rowText(t.rchIdLabel, richId)),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          Expanded(child: _rowText('Name', name)),
+                          Expanded(child: _rowText(t.nameLabel, name)),
                           const SizedBox(width: 12),
                           Expanded(
                             child: FutureBuilder<String>(
@@ -770,7 +770,7 @@ ORDER BY d.created_date_time DESC
                               }(),
                               builder: (context, snapshot) {
                                 final val = snapshot.data ?? ageGender;
-                                return _rowText('Age | Gender', val);
+                                return _rowText(t.ageGenderLabel, val);
                               },
                             ),
                           ),
@@ -802,7 +802,7 @@ ORDER BY d.created_date_time DESC
                               }(),
                               builder: (context, snapshot) {
                                 final val = snapshot.data ?? mobileNo;
-                                return _rowText('Mobile No.', val);
+                                return _rowText(t.mobileNumber, val);
                               },
                             ),
                           ),
@@ -811,7 +811,7 @@ ORDER BY d.created_date_time DESC
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          Expanded(child: _rowText('Husband Name', husbandName)),
+                          Expanded(child: _rowText(t.husbandName, husbandName)),
                         ],
                       ),
                     ],

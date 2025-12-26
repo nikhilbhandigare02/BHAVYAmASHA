@@ -764,13 +764,13 @@ abstract class AppLocalizations {
   /// No description provided for @ashaNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Name of ASHA'**
+  /// **'ASHA Name'**
   String get ashaNameHint;
 
   /// No description provided for @ashaNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Name of ASHA'**
+  /// **'ASHA Name'**
   String get ashaNameLabel;
 
   /// No description provided for @ashaProfile.
@@ -2000,7 +2000,7 @@ abstract class AppLocalizations {
   /// No description provided for @disabilityQuestionLabel.
   ///
   /// In en, this message translates to:
-  /// **'Whether the person has one of the following'**
+  /// **'Whether the person has one of the following conditions'**
   String get disabilityQuestionLabel;
 
   /// No description provided for @disabilityVisualImpairment.
@@ -2972,7 +2972,7 @@ abstract class AppLocalizations {
   /// No description provided for @identificationTypeLabel.
   ///
   /// In en, this message translates to:
-  /// **'Identification type'**
+  /// **'Identification Type'**
   String get identificationTypeLabel;
 
   /// No description provided for @ifscHint.
@@ -8774,7 +8774,7 @@ abstract class AppLocalizations {
   /// No description provided for @iHerebyDeclareThat.
   ///
   /// In en, this message translates to:
-  /// **'I hereby declare that:'**
+  /// **'I hereby declare that'**
   String get iHerebyDeclareThat;
 
   /// No description provided for @agreeAll.
@@ -9218,7 +9218,7 @@ abstract class AppLocalizations {
   /// No description provided for @hsc.
   ///
   /// In en, this message translates to:
-  /// **'HSC'**
+  /// **'Name of Health Sub Center'**
   String get hsc;
 
   /// No description provided for @phc.
@@ -11338,6 +11338,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter other complication during delivery'**
   String get enterOtherComplication;
+
+  /// No description provided for @enterComplicationDuringDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'complication during delivery'**
+  String get enterComplicationDuringDelivery;
 
   /// No description provided for @discharge_time.
   ///
@@ -13726,6 +13732,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Identification Number'**
   String get identificationNumber;
+
+  /// No description provided for @deliveryOutcomeDialogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Form has been saved successfully'**
+  String get deliveryOutcomeDialogue;
+
+  /// No description provided for @savedBeneficiary.
+  ///
+  /// In en, this message translates to:
+  /// **'Beneficiary has been added to HBNC list'**
+  String get savedBeneficiary;
 
   /// No description provided for @igree_I.
   ///
