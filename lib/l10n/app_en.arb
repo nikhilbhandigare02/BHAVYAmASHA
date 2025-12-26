@@ -1932,6 +1932,7 @@
   "dateOfDischarge": "Date of discharge",
   "enterComplication": "Enter complication",
   "enterOtherComplication": "Enter other complication during delivery",
+  "enterComplicationDuringDelivery": "complication during delivery",
   "discharge_time": "Discharge time (hh:mm)",
   "adaptFamilyPlanningMethod": "Do you want to adapt family planning method?",
   "formSavedSuccessfullyMsg": "Form saved successfully",
@@ -2348,5 +2349,7 @@
   "selectVisitTypeError": "Please select visit type",
   "protected": "Protected",
   "unprotected": "Unprotected",
-  "identificationNumber": "Identification Number"
+  "identificationNumber": "Identification Number",
+  "deliveryOutcomeDialogue": "Form has been saved successfully",
+  "savedBeneficiary": "Beneficiary has been added to HBNC list"
 }

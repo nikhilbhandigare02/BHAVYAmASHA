@@ -11345,6 +11345,12 @@ abstract class AppLocalizations {
   /// **'Enter other complication during delivery'**
   String get enterOtherComplication;
 
+  /// No description provided for @enterComplicationDuringDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'complication during delivery'**
+  String get enterComplicationDuringDelivery;
+
   /// No description provided for @discharge_time.
   ///
   /// In en, this message translates to:
@@ -13732,6 +13738,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Identification Number'**
   String get identificationNumber;
+
+  /// No description provided for @deliveryOutcomeDialogue.
+  ///
+  /// In en, this message translates to:
+  /// **'Form has been saved successfully'**
+  String get deliveryOutcomeDialogue;
+
+  /// No description provided for @savedBeneficiary.
+  ///
+  /// In en, this message translates to:
+  /// **'Beneficiary has been added to HBNC list'**
+  String get savedBeneficiary;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

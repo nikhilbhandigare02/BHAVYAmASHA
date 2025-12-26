@@ -5650,6 +5650,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterOtherComplication => 'Enter other complication during delivery';
 
   @override
+  String get enterComplicationDuringDelivery => 'complication during delivery';
+
+  @override
   String get discharge_time => 'Discharge time (hh:mm)';
 
   @override
@@ -6842,4 +6845,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get identificationNumber => 'Identification Number';
+
+  @override
+  String get deliveryOutcomeDialogue => 'Form has been saved successfully';
+
+  @override
+  String get savedBeneficiary => 'Beneficiary has been added to HBNC list';
 }

@@ -1776,16 +1776,17 @@ class _AncvisitformState extends State<Ancvisitform> {
                                       : state.deliveryOutcome,
                                   getLabel: (s) {
                                     switch (s) {
-                                      case 'liveBirth':
+                                      case 'Live birth':
                                         return l10n?.liveBirth ?? '';
-                                      case 'stillBirth':
+                                      case 'Still birth':
                                         return l10n?.stillBirth ?? '';
-                                      case 'newbornDeath':
+                                      case 'Newborn death':
                                         return l10n?.newbornDeath ?? '';
                                       default:
                                         return s;
                                     }
-                                  },                                  onChanged: (v) =>
+                                  },
+                                  onChanged: (v) =>
                                       bloc.add(DeliveryOutcomeChanged(v ?? '')),
                                   hintText: l10n?.select ?? 'Select',
                                   validator: state.givesBirthToBaby == 'Yes'
@@ -1809,12 +1810,12 @@ class _AncvisitformState extends State<Ancvisitform> {
                                         : state.numberOfChildren,
                                     getLabel: (s) {
                                       switch (s) {
-                                        case 'oneChild':
-                                          return l10n?.oneChild ?? '';
-                                        case 'twins':
-                                          return l10n?.twins ?? '';
-                                        case 'triplets':
-                                          return l10n?.triplets ?? '';
+                                        case 'One Child':
+                                          return l10n!.oneChild;
+                                        case 'Twins':
+                                          return l10n!.twins ;
+                                        case 'Triplets':
+                                          return l10n!.triplets ;
                                         default:
                                           return s;
                                       }

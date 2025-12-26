@@ -283,7 +283,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
         print('✅ ANC visit form saved successfully with ID: $formId');
 
-        if (state.givesBirthToBaby == 'Yes') {
+        if (state.givesBirthToBaby == 'Yes' || state.givesBirthToBaby == 'हाँ') {
           try {
             final deviceInfo = await DeviceInfo.getDeviceInfo();
             final ts = DateTime.now().toIso8601String();
@@ -316,7 +316,6 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
             print('✅ Successfully inserted mother care activity');
 
-            // Insert tracking_due state in eligible_couple_activities table
             try {
               final eligibleCoupleActivityData = {
                 'server_id': null,

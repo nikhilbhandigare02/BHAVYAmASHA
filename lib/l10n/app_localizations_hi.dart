@@ -2796,10 +2796,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dataSavedSuccessMessage => 'Data saved successfully';
 
   @override
-  String get deliveryDate => 'Date of Delivery *';
+  String get deliveryDate => 'प्रसव की तिथि';
 
   @override
-  String get gestationWeeks => 'Number of weeks of pregnancy during delivery';
+  String get gestationWeeks => 'पप्रसव के दौरान गर्भावस्था के सप्ताहों की संख्या।';
 
   @override
   String get deliveryTime => 'प्रसव का समय (घंटा:मिनट)';
@@ -2808,7 +2808,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get deliveryTimeHint => 'घंटा:मिनट';
 
   @override
-  String get placeOfDelivery => 'Place of Delivery';
+  String get placeOfDelivery => 'डिलिवरी का स्थान';
 
   @override
   String get selectPlaceOfDelivery => 'Select Place of Delivery *';
@@ -5554,7 +5554,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get privatePlace => 'प्राइवेट';
 
   @override
-  String get institutionPlaceOfDelivery => 'प्रसव का संस्थागत स्थान';
+  String get institutionPlaceOfDelivery => 'प्रसव का संस्थागत ';
 
   @override
   String get nursingHome => 'नर्सिंग होम';
@@ -5572,7 +5572,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get nonInstitutionalPlaceOfDelivery => 'प्रसव का गैर संस्थागत स्थान';
 
   @override
-  String get enterOtherNonInstitutionalDelivery => 'अन्य गैर-संस्थागत प्रसव का नाम दर्ज करें';
+  String get enterOtherNonInstitutionalDelivery => 'अन्य गैर-संस्थागत स्थान नाम दर्ज करें';
 
   @override
   String get enterName => 'नाम दर्ज करें';
@@ -5648,6 +5648,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get enterOtherComplication => 'प्रसव के दौरान अन्य जटिलता दर्ज करें';
+
+  @override
+  String get enterComplicationDuringDelivery => 'प्रसव के दौरान जटिलता?';
 
   @override
   String get discharge_time => 'डिस्चार्ज का समय (hh:mm)';
@@ -6842,4 +6845,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get identificationNumber => 'पहचान संख्या';
+
+  @override
+  String get deliveryOutcomeDialogue => 'प्रपत्र सफलतापूर्वक संरक्षित कर दिया गया है।';
+
+  @override
+  String get savedBeneficiary => 'लाभार्थी को प्रसव के बाद की देखभाल (एचबीएनसी) की सूची में जोड़ा दिया गया है।';
 }

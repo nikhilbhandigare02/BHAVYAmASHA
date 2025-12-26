@@ -73,8 +73,8 @@ class _OutcomeFormView extends StatelessWidget {
               Future.microtask(() {
                 CustomDialog.show(
                   context,
-                  title: 'Form has been saved successfully',
-                  message: 'Beneficiary has been added to HBNC list',
+                  title: l10n.deliveryOutcomeDialogue,
+                  message: l10n.savedBeneficiary,
                   onOkPressed: () {
                     Navigator.of(context, rootNavigator: true).pop();
                     Navigator.pop(context);
@@ -329,12 +329,12 @@ class _OutcomeFormFields extends StatelessWidget {
           items: ['Institutional', 'Non-Institutional', 'Other'],
           getLabel: (s) {
             switch (s) {
-              case 'institutional':
-                return l10n?.institutional ?? '';
-              case 'nonInstitutional':
-                return l10n?.nonInstitutional ?? '';
-              case 'other':
-                return l10n?.other ?? '';
+              case 'Institutional':
+                return l10n.institutional ;
+              case 'Non-Institutional':
+                return l10n.nonInstitutional;
+              case 'Other':
+                return l10n.other;
               default:
                 return s;
             }
@@ -342,7 +342,7 @@ class _OutcomeFormFields extends StatelessWidget {
           value:
               state.placeOfDelivery.isEmpty ||
                   ![
-                    l10n.select,
+
                     l10n.institutional,
                     l10n.nonInstitutional,
                     l10n.other,
@@ -350,7 +350,7 @@ class _OutcomeFormFields extends StatelessWidget {
               ? l10n.select
               : state.placeOfDelivery,
           onChanged: (v) => bloc.add(PlaceOfDeliveryChanged(v ?? '')),
-          labelText: l10n.selectPlaceOfDelivery,
+          labelText: l10n.placeOfDelivery,
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         if (state.placeOfDelivery == 'Other') ...[
@@ -365,7 +365,6 @@ class _OutcomeFormFields extends StatelessWidget {
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         ],
 
-        // Replace the institutional dropdowns section with this fixed code:
         if (state.placeOfDelivery == 'Institutional') ...[
           ApiDropdown<String>(
             items: const ['Public', 'Private'],
@@ -402,17 +401,17 @@ class _OutcomeFormFields extends StatelessWidget {
               items: const ['Sub-Center', 'PHC', 'CHC', 'RH', 'DH', 'MCH'],
               getLabel: (s) {
                 switch (s) {
-                  case 'subCenter':
+                  case 'Sub-Center':
                     return l10n?.subCenter ?? '';
-                  case 'phc':
+                  case 'PHC':
                     return l10n?.phc ?? '';
-                  case 'chc':
+                  case 'CHC':
                     return l10n?.chc ?? '';
-                  case 'rh':
+                  case 'RH':
                     return l10n?.rh ?? '';
-                  case 'dh':
+                  case 'DH':
                     return l10n?.dh ?? '';
-                  case 'mch':
+                  case 'MCH':
                     return l10n?.mch ?? '';
                   default:
                     return s;
@@ -446,9 +445,9 @@ class _OutcomeFormFields extends StatelessWidget {
               items: const ['Nursing Home', 'Hospital'],
               getLabel: (s) {
                 switch (s) {
-                  case 'nursingHome':
+                  case 'Nursing Home':
                     return l10n?.nursingHome ?? '';
-                  case 'hospital':
+                  case 'Hospital':
                     return l10n?.hospital ?? '';
                   default:
                     return s;
@@ -466,7 +465,7 @@ class _OutcomeFormFields extends StatelessWidget {
               onChanged: (v) =>
                   bloc.add(InstitutionalPlaceOfDeliveryChanged(v ?? '')),
               labelText:
-                  l10n?.institutionPlaceOfDelivery ??
+                  l10n?.nonInstitutionalPlaceOfDelivery ??
                   'Institutional place of delivery',
               hintText: l10n?.select ?? 'Select',
             ),
@@ -503,7 +502,7 @@ class _OutcomeFormFields extends StatelessWidget {
             onChanged: (v) =>
                 bloc.add(NonInstitutionalPlaceTypeChanged(v ?? '')),
             labelText:
-                l10n?.institutionPlaceOfDelivery ??
+                l10n?.nonInstitutionalPlaceOfDelivery ??
                 'Institutional place of delivery',
           ),
 
@@ -646,8 +645,8 @@ class _OutcomeFormFields extends StatelessWidget {
               ? l10n.select
               : state.complications,
           onChanged: (v) => bloc.add(ComplicationsChanged(v ?? '')),
-          hintText: l10n.selectOption,
-          labelText: l10n.complications,
+          hintText: l10n.enterComplicationDuringDelivery,
+          labelText: l10n.enterComplicationDuringDelivery,
         ),
         if (state.complications == l10n.yes) ...[
           const SizedBox(height: 8),
@@ -667,25 +666,25 @@ class _OutcomeFormFields extends StatelessWidget {
             ],
             getLabel: (s) {
               switch (s) {
-                case 'convulsion':
+                case 'Convulsion':
                   return l10n?.convulsion ?? '';
-                case 'aph':
+                case 'Ante Partumhaemorrhage (Aph)':
                   return l10n?.aph ?? '';
-                case 'pih':
+                case 'Pregnancy Induced Hypertension (PIH)':
                   return l10n?.pih ?? '';
-                case 'repeatedAbortion':
+                case 'Repeated Abortion':
                   return l10n?.repeatedAbortion ?? '';
-                case 'motherDeath':
+                case 'Mother Death':
                   return l10n?.motherDeath ?? '';
-                case 'congenitalAnomaly':
+                case 'Congenital Anomaly':
                   return l10n?.congenitalAnomaly ?? '';
-                case 'bloodTransfusion':
+                case 'Blood Transfusion':
                   return l10n?.bloodTransfusion ?? '';
-                case 'obstructedLabour':
+                case 'Obstructed Labour':
                   return l10n?.obstructedLabour ?? '';
-                case 'pph':
+                case 'PPH':
                   return l10n?.pph ?? '';
-                case 'anyOther':
+                case 'Any other':
                   return l10n?.anyOther ?? '';
                 default:
                   return s;
@@ -824,8 +823,17 @@ class _OutcomeFormFields extends StatelessWidget {
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         ApiDropdown<String>(
-          items: [l10n.yes, l10n.no],
-          getLabel: (s) => s,
+          items: ["Yes", "No"],
+          getLabel: (s) {
+            switch (s) {
+              case 'No':
+                return l10n.no;
+              case 'Yes':
+                return l10n.yes ?? '';
+              default:
+                return s;
+            }
+          },
           value: state.familyPlanningCounseling.isEmpty
               ? l10n.select
               : state.familyPlanningCounseling,
@@ -838,8 +846,17 @@ class _OutcomeFormFields extends StatelessWidget {
           const SizedBox(height: 8),
           ApiDropdown<String>(
             labelText: l10n.adaptFamilyPlanningMethod,
-            items: [l10n.yes, l10n.no],
-            getLabel: (s) => s,
+            items: ["Yes", "No"],
+            getLabel: (s) {
+              switch (s) {
+                case 'No':
+                  return l10n.no;
+                case 'Yes':
+                  return l10n.yes ?? '';
+                default:
+                  return s;
+              }
+            },
             value: state.adaptFpMethod ?? l10n.select,
             onChanged: (v) => bloc.add(AdaptFpMethodChanged(v ?? '')),
             hintText: l10n.selectOption,
@@ -863,23 +880,23 @@ class _OutcomeFormFields extends StatelessWidget {
               ],
               getLabel: (s) {
                 switch (s) {
-                  case 'condom':
+                  case 'Condom':
                     return l10n?.condom ?? '';
-                  case 'malaN':
+                  case 'Mala -N (Daily Contraceptive pill)':
                     return l10n?.malaN ?? '';
-                  case 'antraInjection':
+                  case 'Atra injection':
                     return l10n.antraInjection ?? '';
-                  case 'copperT':
+                  case 'Copper -T (IUCD)':
                     return l10n?.copperT ?? '';
-                  case 'chhaya':
+                  case 'Chhaya (Weekly Contraceptive pill)':
                     return l10n?.chhaya ?? '';
-                  case 'ecp':
+                  case 'ECP (Emergency Contraceptive pill)':
                     return l10n?.ecp ?? '';
-                  case 'maleSterilization':
+                  case 'Male Sterilization':
                     return l10n?.maleSterilization ?? '';
-                  case 'femaleSterilization':
+                  case 'Female Sterilization':
                     return l10n?.femaleSterilization ?? '';
-                  case 'anyOtherSpecify':
+                  case 'Any Other Specify':
                     return l10n?.anyOtherSpecify ?? '';
                   default:
                     return s;
