@@ -471,8 +471,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   Future<void> _loadChildRegisteredCount() async {
     try {
-      //final count = await _childCareCountProvider.getRegisteredChildCount();
-      final result = await _childCareCountProvider.getRegisteredChildCountTotalAndSync();
+       final result = await _childCareCountProvider.getRegisteredChildCountTotalAndSync();
       final total = result['total']!;
       final synced = result['synced']!;
       if (mounted) {

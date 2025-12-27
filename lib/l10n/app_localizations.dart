@@ -8729,12 +8729,6 @@ abstract class AppLocalizations {
   /// **'I consent to the anonymization and subsequent use of my government health records for public health purposes.'**
   String get igree4;
 
-  /// No description provided for @igree5.
-  ///
-  /// In en, this message translates to:
-  /// **'I, confirm that I have duly informed and explained the beneficiary of the contents of consent for the aforementioned purposes.'**
-  String get igree5;
-
   /// No description provided for @igree6.
   ///
   /// In en, this message translates to:
@@ -13750,6 +13744,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Beneficiary has been added to HBNC list'**
   String get savedBeneficiary;
+
+  /// No description provided for @igree_I.
+  ///
+  /// In en, this message translates to:
+  /// **'I, '**
+  String get igree_I;
+
+  /// No description provided for @igree_7.
+  ///
+  /// In en, this message translates to:
+  /// **'I am voluntarily sharing my Aadhaar Number / Virtual ID issued by the Unique Identification Authority of India (\"UIDAI\"), and my demographic information for the purpose of creating an Ayushman Bharat Health Account number (\"ABHA number\") and Ayushman Bharat Health Account address (\"ABHA Address\"). I authorize NHA to use my Aadhaar number / Virtual ID for performing Aadhaar based authentication with UIDAI as per the provisions of the Aadhaar (Targeted Delivery of Financial and other Subsidies, Benefits and Services) Act, 2016 for the aforesaid purpose. I\nunderstand that UIDAI will share my e-KYC details, or response of \"Yes\" with NHA upon successful\nauthentication.'**
+  String get igree_7;
+
+  /// No description provided for @igree5.
+  ///
+  /// In en, this message translates to:
+  /// **'confirm that I have duly informed and explained the beneficiary of the contents of consent for the aforementioned purposes.'**
+  String get igree5;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
