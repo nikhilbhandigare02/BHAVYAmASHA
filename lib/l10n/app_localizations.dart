@@ -5504,7 +5504,7 @@ abstract class AppLocalizations {
   /// No description provided for @placeOfDeliveryLabel.
   ///
   /// In en, this message translates to:
-  /// **'Place of Delivery *'**
+  /// **'Place of Delivery'**
   String get placeOfDeliveryLabel;
 
   /// No description provided for @placeOfDeliveryHome.

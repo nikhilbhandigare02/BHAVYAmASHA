@@ -904,7 +904,7 @@
   "outcomeTypeAbortion": "Abortion",
   "birthWeightLabel": "Birth Weight (in kg)",
   "genderOfChildLabel": "Gender of Child",
-  "placeOfDeliveryLabel": "Place of Delivery *",
+  "placeOfDeliveryLabel": "Place of Delivery",
   "placeOfDeliveryHome": "Home",
   "placeOfDeliveryGovt": "Government Facility",
   "placeOfDeliveryPrivate": "Private Facility",

@@ -942,7 +942,14 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                               : 'N/A',
                         ),
                       ),
-                      const SizedBox(width: 140),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _rowText(
+                           '',
+                          '',
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: _rowText(
                           l10n?.fatherNameLabel ?? 'Father\'s Name',

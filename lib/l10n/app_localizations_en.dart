@@ -2724,7 +2724,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get genderOfChildLabel => 'Gender of Child';
 
   @override
-  String get placeOfDeliveryLabel => 'Place of Delivery *';
+  String get placeOfDeliveryLabel => 'Place of Delivery';
 
   @override
   String get placeOfDeliveryHome => 'Home';

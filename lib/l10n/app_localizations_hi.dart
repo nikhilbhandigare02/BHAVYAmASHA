@@ -99,7 +99,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get occupationRetired => 'सेवानिवृत्त';
 
   @override
-  String get occupationOther => 'अन्य';
+  String get occupationOther => '';
 
   @override
   String get enterOccupationOther => 'व्यवसाय दर्ज करने';
@@ -950,7 +950,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get declarationIntro => 'I hereby declare that:';
 
   @override
-  String get deliveryOutcomeTitle => 'प्रसूति\nपरिणाम';
+  String get deliveryOutcomeTitle => 'प्रसव का परिणाम';
 
   @override
   String get detailsLabel => 'विवरण';
@@ -1728,7 +1728,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get motherInLaw => 'सास';
 
   @override
-  String get motherNameLabel => 'माता का नाम';
+  String get motherNameLabel => 'माँ  का नाम';
 
   @override
   String get mukhiyaMobileHint => 'मुखिया का मोबाइल नंबर';
@@ -2502,7 +2502,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get description => 'विवरण';
 
   @override
-  String get rchIdChildLabel => 'आरसीएच आईडी (बालक)';
+  String get rchIdChildLabel => 'आरसीएच आईडी (बच्चा)';
 
   @override
   String get rchChildSerialHint => 'आरसीएच रजिस्टर में बालक का क्रमांक';
@@ -2514,7 +2514,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dateOfRegistrationLabel => 'पंजीकरण तिथि *';
 
   @override
-  String get childNameLabel => 'बालक का नाम *';
+  String get childNameLabel => 'बच्चे  का नाम *';
 
   @override
   String get whoseMobileNumberLabel => 'मोबाइल उपयोगकर्ता';
@@ -2523,7 +2523,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get mobileNumberLabel => 'मोबाइल नंबर ';
 
   @override
-  String get mothersRchIdLabel => 'माता का RCH आईडी नंबर';
+  String get mothersRchIdLabel => 'माता का आरसीएच आईडी नंबर';
 
   @override
   String get birthCertificateIssuedLabel => 'क्या जन्म प्रमाणपत्र जारी किया गया है?';
@@ -2724,7 +2724,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get genderOfChildLabel => 'Gender of Child';
 
   @override
-  String get placeOfDeliveryLabel => 'Place of Delivery *';
+  String get placeOfDeliveryLabel => 'Place of Delivery';
 
   @override
   String get placeOfDeliveryHome => 'Home';
@@ -2808,7 +2808,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get deliveryTimeHint => 'घंटा:मिनट';
 
   @override
-  String get placeOfDelivery => 'डिलिवरी का स्थान';
+  String get placeOfDelivery => 'डिलीवरी का स्थान *';
 
   @override
   String get selectPlaceOfDelivery => 'Select Place of Delivery *';
@@ -2817,7 +2817,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get selectOption => 'Select';
 
   @override
-  String get subCenter => 'Sub-Center';
+  String get subCenter => 'उप केंद्र';
 
   @override
   String get chc => 'सी.एच.सी.';
@@ -4324,7 +4324,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get healthId => 'हेल्थ आईडी';
 
   @override
-  String get verify => 'सत्यापित करें';
+  String get verify => 'जाँचे';
 
   @override
   String get createAbha => 'ABHA बनाएं';
@@ -4588,10 +4588,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get healthcareProviderInformation => 'स्वास्थ्य सेवा प्रदाता की जानकारी';
 
   @override
-  String get hsc => 'एचएससी.';
+  String get hsc => 'एच.एस.सी.';
 
   @override
-  String get phc => 'पीएचसी';
+  String get phc => 'पी.एच.सी';
 
   @override
   String get familyHistory => 'पारिवारिक इतिहास';
@@ -5326,13 +5326,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get chcLabel => 'सामुदायिक स्वास्थ्य केंद्र (CHC)';
 
   @override
-  String get rh => 'रेफरल अस्पताल (RH)';
+  String get rh => 'आर ए्च';
 
   @override
-  String get dh => 'जिला अस्पताल (DH)';
+  String get dh => 'डि.ए्च ';
 
   @override
-  String get mch => 'मेडिकल कॉलेज अस्पताल (MCH)';
+  String get mch => 'एम सी ए्च';
 
   @override
   String get pmsmaSite => 'पी.एम.एस.एम.ए साइट';
@@ -5554,7 +5554,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get privatePlace => 'प्राइवेट';
 
   @override
-  String get institutionPlaceOfDelivery => 'प्रसव का संस्थागत ';
+  String get institutionPlaceOfDelivery => 'प्रसव का संस्थागत स्थान';
 
   @override
   String get nursingHome => 'नर्सिंग होम';
@@ -5593,19 +5593,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get lhv => 'एलएचवी';
 
   @override
-  String get doctor => 'डॉक्टर';
+  String get doctor => 'चितीक्सक';
 
   @override
-  String get staffNurse => 'स्टाफ नर्स';
+  String get staffNurse => 'स्टाफ परिचारिका';
 
   @override
   String get tba => 'टीबीए (गैर-कुशल जन्म परिचारक)';
 
   @override
-  String get whoConductedDelivery => 'डिलीवरी किसने कराई?';
+  String get whoConductedDelivery => 'प्रसव किसने कराई? *';
 
   @override
-  String get whoElseConductedDelivery => 'डिलीवरी किसने और कराई?';
+  String get whoElseConductedDelivery => 'प्रसव किसने कराई?';
 
   @override
   String get convulsion => 'पेशी-स्फुरण के साथ बेहोशी और ऐंठन';
@@ -5650,7 +5650,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get enterOtherComplication => 'प्रसव के दौरान अन्य जटिलता दर्ज करें';
 
   @override
-  String get enterComplicationDuringDelivery => 'प्रसव के दौरान जटिलता?';
+  String get enterComplicationDuringDelivery => 'प्रसव के दौरान अन्य जटिलता?';
 
   @override
   String get discharge_time => 'डिस्चार्ज का समय (hh:mm)';

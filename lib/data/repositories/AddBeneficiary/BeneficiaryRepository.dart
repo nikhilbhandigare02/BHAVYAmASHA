@@ -382,7 +382,6 @@ class BeneficiaryRepository {
       'relation': info['relation'] ?? info['relation_to_head'] ?? '',
       'name': fullName,
 
-      // Head-style fields (for compatibility with AddFamilyHead)
       'houseNo': info['houseNo'],
       'headName': fullName,
       'fatherName': info['father_name'] ?? info['fatherName'],
