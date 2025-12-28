@@ -73,8 +73,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   bool _argsHandled = false;
 
   bool _isMemberDetails = false;
-  String _fatherOption = 'Select';
-  String _motherOption = 'Select';
+  String _fatherOption = '';
+  String _motherOption = '';
   int _currentStep = 0;
   bool _tabListenerAttached = false;
   bool _syncingGender = false;
@@ -271,8 +271,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
     print('HHID passed to AddNewFamilyMember: ${widget.hhId}');
 
-    _fatherOption = 'Select';
-    _motherOption = 'Select';
+    _fatherOption = '';
+    _motherOption = '';
 
     _headName = widget.headName;
     _headGender = widget.headGender;
@@ -432,9 +432,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
 
   List<String> _getMobileOwnerList(String gender) {
-    const common = [
-
-    ];
+    const common = [];
 
     gender = gender.toLowerCase();
 
@@ -451,7 +449,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         'Neighbour',
         'Relative',
         'Other',
-
       ];
     }
 
@@ -468,7 +465,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         'Neighbour',
         'Relative',
         'Other',
-
       ];
     }
 
@@ -486,10 +482,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         'Neighbour',
         'Relative',
         'Other',
-
       ];
     }
 
+    // Fallback if gender is unknown
     return [
       'Self',
       'Husband',
@@ -1145,8 +1141,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       st.hasChildren == 'Yes';
                               final String firstTabTitle =
                               (st.memberType == 'Child')
-                                  ? 'Child Details'
-                                  : 'Member Details';
+                                  ? l.childDetails
+                                  : l.memberDetails;
                               Widget buildTabs(Widget tabBar) {
                                 return Container(
                                   color: AppColors.primary,
@@ -2114,7 +2110,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               value: _fatherOption,
                                               validator: (value) {
                                                 if (!_isEdit) {
-                                                  if (_fatherOption == 'Select' ||
+                                                  if (_fatherOption == l.select ||
                                                       _fatherOption.isEmpty) {
                                                     return 'Please select or enter ${l.fatherGuardianNameLabel.toLowerCase()}';
                                                   }
@@ -2126,7 +2122,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 setState(() {
                                                   _fatherOption = v;
                                                 });
-                                                if (v != 'Select' &&
+                                                if (v != l.select &&
                                                     v != 'Other') {
                                                   context
                                                       .read<
@@ -2601,10 +2597,49 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   _section(
                                     ApiDropdown<String>(
                                       labelText: '${l.whoseMobileLabel} *',
-                                      items: _getMobileOwnerList(
-                                        state.gender ?? '',
-                                      ),
-                                      getLabel: (s) => s,
+                                      items: _getMobileOwnerList(state.gender ?? ''),
+                                      getLabel: (s) {
+                                        switch (s) {
+                                          case 'Self':
+                                            return "${l.self}";
+
+                                          case 'Husband':
+                                            return '${l.husbandLabel} ';
+
+                                          case 'Mother':
+                                            return '${l.mother} ';
+
+                                          case 'Father':
+                                            return '${l.father}';
+
+                                          case 'Wife':
+                                            return '${l.wife} ';
+
+                                          case 'Son':
+                                            return '${l.son}';
+
+                                          case 'Daughter':
+                                            return '${l.daughter} ';
+
+                                          case 'Mother In Law':
+                                            return '${l.motherInLaw} ';
+
+                                          case 'Father In Law':
+                                            return '${l.fatherInLaw}';
+
+                                          case 'Neighbour':
+                                            return '${l.neighbour} ';
+
+                                          case 'Relative':
+                                            return "${l.relative} ";
+
+                                          case 'Other':
+                                            return '${l.other} ';
+
+                                          default:
+                                            return s;
+                                        }
+                                      },
                                       value: state.mobileOwner,
                                       onChanged: (v) async {
                                         if (v == null) return;
@@ -3616,10 +3651,49 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   _section(
                                     ApiDropdown<String>(
                                       labelText: '${l.whoseMobileLabel} *',
-                                      items: _getMobileOwnerList(
-                                        state.gender ?? '',
-                                      ),
-                                      getLabel: (s) => s,
+                                      items: _getMobileOwnerList(state.gender ?? ''),
+                                      getLabel: (s) {
+                                        switch (s) {
+                                          case 'Self':
+                                            return "${l.self}";
+
+                                          case 'Husband':
+                                            return '${l.husbandLabel} ';
+
+                                          case 'Mother':
+                                            return '${l.mother} ';
+
+                                          case 'Father':
+                                            return '${l.father}';
+
+                                          case 'Wife':
+                                            return '${l.wife} ';
+
+                                          case 'Son':
+                                            return '${l.son}';
+
+                                          case 'Daughter':
+                                            return '${l.daughter} ';
+
+                                          case 'Mother In Law':
+                                            return '${l.motherInLaw} ';
+
+                                          case 'Father In Law':
+                                            return '${l.fatherInLaw}';
+
+                                          case 'Neighbour':
+                                            return '${l.neighbour} ';
+
+                                          case 'Relative':
+                                            return "${l.relative} ";
+
+                                          case 'Other':
+                                            return '${l.other} ';
+
+                                          default:
+                                            return s;
+                                        }
+                                      },
                                       value: state.mobileOwner,
                                       onChanged: (v) async {
                                         if (v == null) return;
@@ -3987,28 +4061,31 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   _section(
                                     ApiDropdown<String>(
                                       labelText: '${l.maritalStatusLabel} *',
+                                      hintText: '${l.maritalStatusLabel} *',
                                       items: const [
-                                        'Married',
                                         'Unmarried',
+                                        'Married',
+                                        'Divorced',
+                                        'Separated',
                                         'Widow',
                                         'Widower',
-                                        'Separated',
-                                        'Divorced',
+
+
                                       ],
                                       getLabel: (s) {
                                         switch (s) {
                                           case 'Married':
-                                            return l.married;
+                                            return l.maritalStatusMarried;
                                           case 'Unmarried':
-                                            return l.unmarried;
+                                            return l.maritalStatusUnmarried;
                                           case 'Widow':
-                                            return l.widowed;
+                                            return l.maritalStatusWidowed;
                                           case 'Widower':
-                                            return 'Widower';
+                                            return l.maritalStatusWidower;
                                           case 'Separated':
-                                            return l.separated;
+                                            return l.separatedMarried;
                                           case 'Divorced':
-                                            return l.divorced;
+                                            return l.maritalStatusDivorced;
                                           default:
                                             return s;
                                         }
@@ -4250,7 +4327,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         ),
                                         validator: (value) {
                                           if (value == null ||
-                                              value == 'Select') {
+                                              value == l.select) {
                                             return l?.please_select_family_planning_status ??'Please select family planning status';
                                           }
                                           return null;
@@ -4268,7 +4345,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         ApiDropdown<String>(
                                           labelText: '${l.methodOfContra} *',
                                           items: const [
-                                            'Select',
                                             'Condom',
                                             'Mala -N (Daily Contraceptive pill)',
                                             'Antra injection',
@@ -4281,8 +4357,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           ],
                                           getLabel: (value) {
                                             switch (value) {
-                                              case 'Select':
-                                                return l.select;
+
                                               case 'Condom':
                                                 return l.condom;
                                               case 'Mala -N (Daily Contraceptive pill)':

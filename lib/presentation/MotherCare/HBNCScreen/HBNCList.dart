@@ -502,7 +502,7 @@ class _HBNCListScreenState
       },
       child: Scaffold(
         appBar: AppHeader(
-          screenTitle: 'HBNC List',
+          screenTitle: l10n!.hbncListTitle,
           showBack: true,
           onBackTap: () {
             if (Navigator.of(context).canPop()) {
@@ -647,7 +647,7 @@ class _HBNCListScreenState
                         return Row(
                           children: [
                             Text(
-                              'Visits : ',
+                              '${t!.visitsLabel} : ',
                               style: TextStyle(
                                 color: Colors.black87,
                                 fontSize: 14.sp,
@@ -703,21 +703,21 @@ class _HBNCListScreenState
                       children: [
                         Expanded(
                           child: _rowText(
-                            'Registration Date',
+                            t!.registrationDate,
                             data['registrationDate']?.toString() ?? 'N/A',
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _rowText(
-                            'Beneficiary ID',
+                            t.beneficiaryId,
                             data['beneficiaryId']?.toString() ?? 'N/A',
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _rowText(
-                            'RCH ID',
+                            t.rchIdLabel,
                             data['rchId']?.toString() ?? 'N/A',
                           ),
                         ),
@@ -730,21 +730,21 @@ class _HBNCListScreenState
                       children: [
                         Expanded(
                           child: _rowText(
-                            'Name',
+                            t.nameLabel,
                             data['name']?.toString() ?? 'N/A',
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _rowText(
-                            'Age | Gender',
+                            t.ageGenderLabel,
                             '${data['age']?.toString() ?? '0'} Y | ${data['gender']?.toString() ?? 'N/A'}',
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _rowText(
-                            'Husband Name',
+                            t.husbandName,
                             data['husbandName']?.toString() ?? 'N/A',
                           ),
                         ),
@@ -757,14 +757,14 @@ class _HBNCListScreenState
                       children: [
                         Expanded(
                           child: _rowText(
-                            'Mobile no.',
+                            t.mobileNumber,
                             data['mobile']?.toString() ?? 'N/A',
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _rowText(
-                            'Previous HBNC Date',
+                            t.previousHBNCDate,
                             (data['visitCount'] as int?) != null && (data['visitCount'] as int) > 0
                                 ? data['previousHBNCDate']?.toString() ?? 'Not Available'
                                 : 'Not Available',
@@ -773,7 +773,7 @@ class _HBNCListScreenState
                         const SizedBox(width: 12),
                         Expanded(
                           child: _rowText(
-                            'Next HBNC Date',
+                            t.nextHBNCDate,
                             data['nextHBNCDate']?.toString() ?? 'Not Available',
                           ),
                         ),

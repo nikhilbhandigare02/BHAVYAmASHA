@@ -919,7 +919,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10.0, vertical: 4),
                     child: Text(
-                      'Refresh',
+                      l10n!.refresh,
                       style: TextStyle(
                           color: AppColors.onSurface, fontSize: 14.sp),
                     ),

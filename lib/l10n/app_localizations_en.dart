@@ -3285,7 +3285,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deathRegister => 'Death Register';
 
   @override
-  String get migratedOut => 'Migrated Out';
+  String get migratedOut => 'Migrated out';
 
   @override
   String get guestBeneficiaryList => 'Guest Beneficiary List';
@@ -3466,6 +3466,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deceasedChildDetails => 'Deceased Child Details';
+
+  @override
+  String get childDetails => 'Child Details';
+
+  @override
+  String get memberDetails => 'Member Details';
 
   @override
   String get hello => 'Hello';
@@ -6857,4 +6863,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get igree5 => 'confirm that I have duly informed and explained the beneficiary of the contents of consent for the aforementioned purposes.';
+
+  @override
+  String get birthDosesTab => 'BIRTH DOSES';
+
+  @override
+  String get sixWeekTab => '6 WEEK';
+
+  @override
+  String get tenWeekTab => '10 WEEK';
+
+  @override
+  String get fourteenWeekTab => '14 WEEK';
+
+  @override
+  String get nineMonthTab => '9 MONTHS';
+
+  @override
+  String get sixteenToTwentyFourMonthTab => '16-24 MONTHS';
+
+  @override
+  String get fiveToSixYearTab => '5-6 YEAR';
+
+  @override
+  String get tenYearTab => '10 YEAR';
+
+  @override
+  String get sixteenYearTab => '16 YEAR';
+
+  @override
+  String get bcg => 'BCG';
+
+  @override
+  String get hepatitis => 'Hepatitis B - 0';
+
+  @override
+  String get opv => 'O.P.V - 0';
+
+  @override
+  String get vit => 'VIT - K';
+
+  @override
+  String get caseClosure => 'Case closure';
+
+  @override
+  String get onTheWay => 'On the way';
+
+  @override
+  String get eclampsiaServeHypertension => 'Eclampsia/ Serve Hypertension';
+
+  @override
+  String get otherReasonApartFromMaternalComplication => 'Other reason apart from maternal complication';
 }

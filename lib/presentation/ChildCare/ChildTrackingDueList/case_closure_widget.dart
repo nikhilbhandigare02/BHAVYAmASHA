@@ -3,6 +3,7 @@ import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 
 class CaseClosureWidget extends StatefulWidget {
   final bool isCaseClosureChecked;
@@ -51,54 +52,66 @@ class CaseClosureWidget extends StatefulWidget {
 }
 
 class _CaseClosureWidgetState extends State<CaseClosureWidget> {
-  final List<String> _closureReasons = [
+  List<String> _closureReasons(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return [
+      l.death,
+      l.migratedOut,
+      l.other,
+    ];
+  }
 
-    'Death',
-    'Migrated out',
-    'Other',
-  ];
+  List<String> _migrationTypes(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return [
+      l.temporary,
+      l.permanent
+    ];
+  }
 
-  final List<String> _migrationTypes = [
+  List<String> _probableCauses(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return [
+      l.measles,
+      l.lowBirthWeight,
+      l.highFever,
+      l.diarrhoea,
+      l.pneumonia,
+      l.anyOtherSpecify,
+    ];
+  }
 
-    'Temporary',
-    'Permanent'
-  ];
+  List<String> _deathPlaces(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return [
+      l.migratedOut,
+      l.home,
+      l.onTheWay,
+      l.facility,
+      l.other
+    ];
+  }
 
-  final List<String> _probableCauses = [
-
-    'Measles',
-    'Low birth weight',
-    'High fever',
-    'Diarrhoea',
-    'Pneumonia',
-    'Any other (specify)',
-  ];
-
-  final List<String> _deathPlaces = [
-'Migrated Out',
-    'Home',
-    'On the way',
-    'Facility',
-    'Other'
-  ];
-
-  final List<String> _deathReasons = [
-    'PH',
-    'PPH',
-    'Severe Anaemia',
-    'Sepsis',
-    'Obstruct Labour',
-    'Malpresentation'
-    'Eclampsia/ Serve Hypertension',
-    'Unsafe Abortion',
-    'Surgical Complication',
-    'Other reason apart from maternal complication',
-    'Other Specify'
-
-  ];
+  List<String> _deathReasons(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return [
+      l.ph,
+      l.pph,
+      l.severeAnaemia,
+      l.sepsis,
+      l.obstructLabour,
+      l.malpresentation,
+      l.eclampsia_severe_hypertension,
+      l.unsafeAbortion,
+      l.surgicalComplication,
+      l.other_reason_not_maternal_complication,
+      l.otherSpecify
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -111,9 +124,9 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
                 widget.onCaseClosureChanged(value ?? false);
               },
             ),
-            const Text(
-              'Case closure',
-              style: TextStyle(fontSize: 16),
+            Text(
+              l.caseClosure,
+              style: const TextStyle(fontSize: 16),
             ),
           ],
         ),
@@ -121,14 +134,14 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
           const SizedBox(height: 16),
           // Reason of Closure Dropdown
           ApiDropdown<String>(
-            labelText: 'Reason of Closure',
-            items: _closureReasons,
+            labelText: l.reasonOfClosure,
+            items: _closureReasons(context),
             value: widget.selectedClosureReason,
             getLabel: (value) => value,
             onChanged: (value) {
               if (value != null) {
                 widget.onClosureReasonChanged(value);
-                if (value != 'Death') {
+                if (value != l.death) {
                   widget.onDateOfDeathChanged(null);
                   widget.onProbableCauseChanged(null);
                   widget.onDeathPlaceChanged(null);
@@ -142,10 +155,10 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
           const Divider(thickness: 0.5, height: 1, color: AppColors.divider),
 
           // Migration Type Dropdown
-          if (widget.selectedClosureReason == 'Migrated out') ...[
+          if (widget.selectedClosureReason == l.migratedOut) ...[
             ApiDropdown<String>(
-              labelText: 'Migration Type',
-              items: _migrationTypes,
+              labelText: l.migrationType,
+              items: _migrationTypes(context),
               value: widget.migrationType,
               getLabel: (value) => value,
               onChanged: widget.onMigrationTypeChanged,
@@ -154,10 +167,10 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
           ],
 
           // Other Reason TextField
-          if (widget.selectedClosureReason == 'Other') ...[
+          if (widget.selectedClosureReason == l.other) ...[
             CustomTextField(
-              labelText: 'Specify Reason',
-              hintText: 'Enter reason for closure',
+              labelText: l.specifyReason,
+              hintText: l.enterReasonForClosure,
               controller: widget.otherReasonController,
               maxLines: 2,
               onChanged: (value) {},
@@ -166,10 +179,10 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
           ],
 
           // Death Related Fields
-          if (widget.selectedClosureReason == 'Death') ...[
+          if (widget.selectedClosureReason == l.death) ...[
             // Date of Death
             CustomDatePicker(
-              labelText: 'Date of Death',
+              labelText: l.dateOfDeathLabel,
               initialDate: widget.dateOfDeath,
               lastDate: DateTime.now(),
               onDateChanged: widget.onDateOfDeathChanged,
@@ -178,13 +191,13 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
 
             // Probable Cause of Death
             ApiDropdown<String>(
-              labelText: 'Probable Cause of Death',
-              items: _probableCauses,
+              labelText: l.probableCauseOfDeath,
+              items: _probableCauses(context),
               value: widget.probableCauseOfDeath,
               getLabel: (value) => value,
               onChanged: (value) {
                 widget.onProbableCauseChanged(value);
-                final showOtherField = (value == 'Any other (specify)');
+                final showOtherField = (value == l.anyOtherSpecify);
                 widget.onShowOtherCauseFieldChanged(showOtherField);
                 if (!showOtherField) {
                   widget.otherCauseController.clear();
@@ -195,7 +208,7 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
 
             if (widget.showOtherCauseField) ...[
               CustomTextField(
-                labelText: 'Specify cause of death',
+                labelText: l.specifyCauseOfDeath,
                 controller: widget.otherCauseController,
                 onChanged: (value) {},
               ),
@@ -204,8 +217,8 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
             const Divider(thickness: 0.5, height: 1, color: AppColors.divider),
             // Death Place
             ApiDropdown<String>(
-              labelText: 'Death Place',
-              items: _deathPlaces,
+              labelText: l.deathPlace,
+              items: _deathPlaces(context),
               value: widget.deathPlace,
               getLabel: (value) => value,
               onChanged: widget.onDeathPlaceChanged,
@@ -214,13 +227,13 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
 
             // Reason of Death
             ApiDropdown<String>(
-              labelText: 'Reason of Death',
-              items: _deathReasons,
+              labelText: l.reasonOfDeath,
+              items: _deathReasons(context),
               value: widget.reasonOfDeath,
               getLabel: (value) => value,
               onChanged: (value) {
                 widget.onReasonOfDeathChanged(value);
-                if (value != 'Other Specify') {
+                if (value != l.otherSpecify) {
                   widget.otherReasonController.clear();
                 }
               },
@@ -228,9 +241,9 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
             ),
             const Divider(thickness: 0.5, height: 1, color: AppColors.divider),
             // Other Reason of Death TextField
-            if (widget.reasonOfDeath == 'Other Specify') ...[
+            if (widget.reasonOfDeath == l.otherSpecify) ...[
               CustomTextField(
-                labelText: 'Other reason of Death',
+                labelText: l.otherReasonOfDeath,
                 controller: widget.otherReasonController,
                 onChanged: (value) {},
               ),

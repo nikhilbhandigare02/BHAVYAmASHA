@@ -6626,7 +6626,7 @@ abstract class AppLocalizations {
   /// No description provided for @migratedOut.
   ///
   /// In en, this message translates to:
-  /// **'Migrated Out'**
+  /// **'Migrated out'**
   String get migratedOut;
 
   /// No description provided for @guestBeneficiaryList.
@@ -6988,6 +6988,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Deceased Child Details'**
   String get deceasedChildDetails;
+
+  /// No description provided for @childDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Child Details'**
+  String get childDetails;
+
+  /// No description provided for @memberDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Member Details'**
+  String get memberDetails;
 
   /// No description provided for @hello.
   ///
@@ -13762,6 +13774,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'confirm that I have duly informed and explained the beneficiary of the contents of consent for the aforementioned purposes.'**
   String get igree5;
+
+  /// No description provided for @birthDosesTab.
+  ///
+  /// In en, this message translates to:
+  /// **'BIRTH DOSES'**
+  String get birthDosesTab;
+
+  /// No description provided for @sixWeekTab.
+  ///
+  /// In en, this message translates to:
+  /// **'6 WEEK'**
+  String get sixWeekTab;
+
+  /// No description provided for @tenWeekTab.
+  ///
+  /// In en, this message translates to:
+  /// **'10 WEEK'**
+  String get tenWeekTab;
+
+  /// No description provided for @fourteenWeekTab.
+  ///
+  /// In en, this message translates to:
+  /// **'14 WEEK'**
+  String get fourteenWeekTab;
+
+  /// No description provided for @nineMonthTab.
+  ///
+  /// In en, this message translates to:
+  /// **'9 MONTHS'**
+  String get nineMonthTab;
+
+  /// No description provided for @sixteenToTwentyFourMonthTab.
+  ///
+  /// In en, this message translates to:
+  /// **'16-24 MONTHS'**
+  String get sixteenToTwentyFourMonthTab;
+
+  /// No description provided for @fiveToSixYearTab.
+  ///
+  /// In en, this message translates to:
+  /// **'5-6 YEAR'**
+  String get fiveToSixYearTab;
+
+  /// No description provided for @tenYearTab.
+  ///
+  /// In en, this message translates to:
+  /// **'10 YEAR'**
+  String get tenYearTab;
+
+  /// No description provided for @sixteenYearTab.
+  ///
+  /// In en, this message translates to:
+  /// **'16 YEAR'**
+  String get sixteenYearTab;
+
+  /// No description provided for @bcg.
+  ///
+  /// In en, this message translates to:
+  /// **'BCG'**
+  String get bcg;
+
+  /// No description provided for @hepatitis.
+  ///
+  /// In en, this message translates to:
+  /// **'Hepatitis B - 0'**
+  String get hepatitis;
+
+  /// No description provided for @opv.
+  ///
+  /// In en, this message translates to:
+  /// **'O.P.V - 0'**
+  String get opv;
+
+  /// No description provided for @vit.
+  ///
+  /// In en, this message translates to:
+  /// **'VIT - K'**
+  String get vit;
+
+  /// No description provided for @caseClosure.
+  ///
+  /// In en, this message translates to:
+  /// **'Case closure'**
+  String get caseClosure;
+
+  /// No description provided for @onTheWay.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get onTheWay;
+
+  /// No description provided for @eclampsiaServeHypertension.
+  ///
+  /// In en, this message translates to:
+  /// **'Eclampsia/ Serve Hypertension'**
+  String get eclampsiaServeHypertension;
+
+  /// No description provided for @otherReasonApartFromMaternalComplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Other reason apart from maternal complication'**
+  String get otherReasonApartFromMaternalComplication;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

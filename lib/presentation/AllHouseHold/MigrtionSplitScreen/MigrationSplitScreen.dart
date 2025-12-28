@@ -70,6 +70,8 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
   final List<Map<String, dynamic>> _memberTypes = [];
 
   String get _selectedMemberLabel {
+    final l10n =  AppLocalizations.of(context);
+
     if (_selectedAdults.isNotEmpty) {
       return _selectedAdults.join(', ');
     }
@@ -77,16 +79,17 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         .where((type) => type['selected'] == true)
         .toList();
     if (selected.isEmpty) {
-      return 'Select member type';
+      return l10n!.selectAMember;
     }
     return selected.map((type) => type['label']).join(', ');
   }
 
   String get _selectedChildLabel {
+   final l10n =  AppLocalizations.of(context);
     if (_selectedChildren.isNotEmpty) {
       return _selectedChildren.join(', ');
     }
-    return 'Select a child';
+    return l10n!.selectChild;
   }
 
   bool get _isMemberTypeSelected => _selectedAdults.isNotEmpty;
@@ -717,7 +720,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                       ),
                       SizedBox(width: 8),
                       Text(
-                        l10n?.splitLabel ?? 'SPLIT',
+                        l10n?.split ?? 'SPLIT',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -727,7 +730,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                     ],
                   )
                 : Text(
-                    l10n?.splitLabel ?? 'SPLIT',
+                    l10n?.split ?? 'SPLIT',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
