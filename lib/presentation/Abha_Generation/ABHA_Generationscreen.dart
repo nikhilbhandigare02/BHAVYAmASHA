@@ -35,7 +35,8 @@ class _AbhaGenerationscreenState extends State<AbhaGenerationscreen> {
     return BlocProvider(
       create: (_) => AbhaGenerationBloc(),
       child: Scaffold(
-        appBar: AppHeader(screenTitle: l10n.gridAbhaGeneration ?? 'ABHA Generation', showBack: true),
+        appBar: AppHeader(screenTitle:" l10n.gridAbhaGeneration ?? 'ABHA Generation'",
+            showBack: true),
         body: SafeArea(
           child: Form(
             key: _formKey,
@@ -69,10 +70,27 @@ class _AbhaGenerationscreenState extends State<AbhaGenerationscreen> {
                             hintText: l10n.mobileLabelSimple ?? 'Mobile Number',
                             keyboardType: TextInputType.number,
                             maxLength: 10,
+
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return l10n.mobileNumberRequired ?? 'Mobile number is required';
+                              }
+                              final mobileRegex = RegExp(r'^[6-9][0-9]{9}$');
+                              if (!mobileRegex.hasMatch(value)) {
+                                return l10n.validMobileNumber ??
+                                    'Enter a valid mobile number starting with 6–9';
+                              }
+                              if (RegExp(r'^(\d)\1{9}$').hasMatch(value)) {
+                                return l10n.validMobileNumber ??
+                                    'Enter a valid mobile number';
+                              }
+                              return null;
+                            },
                             onChanged: (v) => context
                                 .read<AbhaGenerationBloc>()
                                 .add(AbhaUpdateMobile(v.trim())),
                           ),
+
                           Divider(
                               color: AppColors.divider,
                               thickness: 0.5,
@@ -184,9 +202,11 @@ class _AbhaGenerationscreenState extends State<AbhaGenerationscreen> {
                         width: double.infinity,
                         child: RoundButton(
                           title: l10n.abhaGenerateOtpButton ?? 'GENERATE OTP',
-                          onPress: () => context
-                              .read<AbhaGenerationBloc>()
-                              .add(AbhaGenerateOtp()),
+                          onPress: () {
+                            if (_formKey.currentState!.validate()) {
+                              context.read<AbhaGenerationBloc>().add(AbhaGenerateOtp());
+                            }
+                          },
                           color: AppColors.primary,
                           borderRadius: 8,
                           isLoading: state.postApiStatus ==
