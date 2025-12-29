@@ -120,7 +120,16 @@ class _HBNCListScreenState
       if (s.isEmpty) return 1;
       final decoded = jsonDecode(s);
       final fd = (decoded is Map) ? Map<String, dynamic>.from(decoded['anc_form'] as Map? ?? {}) : <String, dynamic>{};
-      final raw = fd['number_of_children']?.toString().trim().toLowerCase() ?? '';
+      
+      // Check for children_arr first (new structure)
+      final childrenArr = fd['children_arr'] as List?;
+      if (childrenArr != null && childrenArr.isNotEmpty) {
+        final count = childrenArr.length;
+        print('👶 Child count from children_arr: $count for beneficiary $beneficiaryId');
+        return (count > 3) ? 3 : (count < 1) ? 1 : count;
+      }
+      
+      final raw = fd['live_birth']?.toString().trim().toLowerCase() ?? '';
       if (raw.isEmpty) return 1;
       if (raw == 'one' || raw == 'single' || raw == '1') return 1;
       if (raw == 'twins' || raw == 'twin' || raw == '2') return 2;
@@ -698,7 +707,6 @@ class _HBNCListScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // First Row: Registration Date, Beneficiary ID, RCH ID
                     Row(
                       children: [
                         Expanded(
@@ -752,7 +760,6 @@ class _HBNCListScreenState
                     ),
                     const SizedBox(height: 10),
 
-                    // Third Row: Mobile no., Previous HBNC Date, Next HBNC Date
                     Row(
                       children: [
                         Expanded(

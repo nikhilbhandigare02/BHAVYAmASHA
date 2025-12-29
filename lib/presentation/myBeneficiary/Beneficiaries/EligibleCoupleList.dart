@@ -35,180 +35,70 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // --- 1. Get Current User Key ---
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
 
-      // --- 2. Build Query Condition ---
-      String? where;
-      List<Object?>? whereArgs;
-
-      // Only apply filter if the key exists and is not empty
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        where = 'current_user_key = ?';
-        whereArgs = [ashaUniqueKey];
+      if (currentUserKey.isEmpty) {
+        setState(() {
+          _filtered = [];
+        });
+        return;
       }
 
-      final households = <String, List<Map<String, dynamic>>>{};
+      final query = '''
+        SELECT DISTINCT b.*, e.eligible_couple_state 
+        FROM beneficiaries_new b
+        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+        WHERE b.is_deleted = 0 
+          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+          AND e.eligible_couple_state = 'eligible_couple'
+          AND e.is_deleted = 0
+          AND e.current_user_key = ?
+        ORDER BY b.created_date_time DESC
+      ''';
 
-      // --- 3. Query with Filter ---
-      final allBeneficiaries = await db.query(
-          'beneficiaries_new',
-          where: where,        // Applied the condition
-          whereArgs: whereArgs // Passed the key
-      );
+      final rows = await db.rawQuery(query, [currentUserKey]);
+      if (rows.isEmpty) {
+        setState(() {
+          _filtered = [];
+        });
+        return;
+      }
 
-      // --- Existing Processing Logic ---
-      for (final row in allBeneficiaries) {
+      final filteredRows = rows.map((row) {
+        final Map<String, dynamic> mappedRow = Map<String, dynamic>.from(row);
         try {
-          final hhId = row['household_ref_key']?.toString() ?? '';
-          if (hhId.isEmpty) continue;
-
-          final info = row['beneficiary_info'] is String
-              ? jsonDecode(row['beneficiary_info'] as String)
-              : (row['beneficiary_info'] as Map?) ?? {};
-
-          if (info is! Map) continue;
-
-          // Add to household group
-          if (!households.containsKey(hhId)) {
-            households[hhId] = [];
-          }
-
-          households[hhId]!.add({
-            ...row,
-            'info': info,
-          });
-        } catch (e) {
-          print('Error processing beneficiary: $e');
-        }
-      }
-
-      final trackingFormKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
-      final Map<String, String> latestFpMethod = {};
-      if (trackingFormKey.isNotEmpty) {
-        final trackingRows = await db.query(
-          FollowupFormDataTable.table,
-          columns: ['beneficiary_ref_key', 'form_json', 'created_date_time', 'id'],
-          where: 'forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
-          whereArgs: [trackingFormKey],
-          orderBy: 'created_date_time DESC, id DESC',
-        );
-        for (final row in trackingRows) {
-          final key = row['beneficiary_ref_key']?.toString() ?? '';
-          if (key.isEmpty) continue;
-          if (latestFpMethod.containsKey(key)) continue;
-          final formJsonStr = row['form_json']?.toString() ?? '';
-          if (formJsonStr.isEmpty) continue;
-          try {
-            final decoded = jsonDecode(formJsonStr);
-            Map<String, dynamic> formData = decoded is Map<String, dynamic>
-                ? Map<String, dynamic>.from(decoded)
-                : <String, dynamic>{};
-            if (decoded is Map && decoded['form_data'] is Map) {
-              formData = Map<String, dynamic>.from(decoded['form_data'] as Map);
-            }
-            final fpMethod = formData['fp_method']?.toString().toLowerCase().trim();
-            if (fpMethod != null) {
-              latestFpMethod[key] = fpMethod;
-            }
-          } catch (_) {}
-        }
-      }
-      final Set<String> sterilizedBeneficiaries = latestFpMethod.entries
-          .where((e) => e.value == 'male sterilization' || e.value == 'female sterilization')
-          .map((e) => e.key)
-          .toSet();
+          mappedRow['beneficiary_info'] = jsonDecode(mappedRow['beneficiary_info'] ?? '{}');
+        } catch (_) {}
+        return mappedRow;
+      }).toList();
 
       final couples = <Map<String, dynamic>>[];
-
-      // Process each household
-      for (final hhId in households.keys) {
-        final members = households[hhId]!;
-        Map<String, dynamic>? head;
-        Map<String, dynamic>? spouse;
-
-        for (final member in members) {
-          try {
-            final info = Map<String, dynamic>.from(member['info'] as Map);
-            String rawRelation = (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
-            rawRelation = rawRelation.replaceAll('_', ' ');
-            if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
-              rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
-            }
-            final relation = () {
-              if (rawRelation == 'self' || rawRelation == 'head' || rawRelation == 'family head') return 'self';
-              if (rawRelation == 'spouse' || rawRelation == 'wife' || rawRelation == 'husband') return 'spouse';
-              return rawRelation;
-            }();
-            if (relation == 'self') {
-              head = info;
-            } else if (relation == 'spouse') {
-              spouse = info;
-            }
-          } catch (_) {}
+      for (final member in filteredRows) {
+        final infoRaw = member['beneficiary_info'];
+        final info = infoRaw is Map<String, dynamic> ? infoRaw : <String, dynamic>{};
+        final gender = (info['gender']?.toString().toLowerCase() ?? '');
+        if (gender == 'male') {
+          continue;
         }
-
-        const allowedRelations = <String>{
-          'self',
-          'spouse',
-          'husband',
-          'son',
-          'daughter',
-          'father',
-          'mother',
-          'brother',
-          'sister',
-          'wife',
-          'nephew',
-          'niece',
-          'grand father',
-          'grand mother',
-          'father in law',
-          'mother in low',
-          'grand son',
-          'grand daughter',
-          'son in law',
-          'daughter in law',
-          'other',
-        };
-
-        for (final member in members) {
-          try {
-            final info = Map<String, dynamic>.from(member['info'] as Map);
-            String rawRelation = (info['relation_to_head'] ?? info['relation'])?.toString().toLowerCase().trim() ?? '';
-            rawRelation = rawRelation.replaceAll('_', ' ');
-            if (rawRelation.endsWith(' w') || rawRelation.endsWith(' h')) {
-              rawRelation = rawRelation.substring(0, rawRelation.length - 2).trim();
-            }
-            if (!allowedRelations.contains(rawRelation)) continue;
-            if (!_isEligibleFemale(info, head: head)) continue;
-            final memberUniqueKey = member['unique_key']?.toString() ?? '';
-            if (memberUniqueKey.isNotEmpty && sterilizedBeneficiaries.contains(memberUniqueKey)) continue;
-
-            final gender = info['gender']?.toString().toLowerCase() ?? '';
-            final dob = info['dob'];
-            final age = _calculateAge(dob);
-            couples.add({
-              'hhId': hhId,
-              'name': info['memberName']?.toString() ?? info['headName']?.toString() ?? 'Unknown',
-              'age': age,
-              'age_gender': _formatAgeGender(dob, gender),
-              'mobile': info['mobileNo']?.toString() ?? '',
-              'status': 'Eligible Couple',
-              '_raw': member,
-            });
-          } catch (e) {
-            print('Error processing household member: $e');
-          }
-        }
+        final hhId = member['household_ref_key']?.toString() ?? '';
+        final name = info['memberName']?.toString() ?? info['headName']?.toString() ?? 'Unknown';
+        final ageGender = _formatAgeGender(info['dob'], info['gender']);
+        couples.add({
+          'hhId': hhId,
+          'name': name,
+          'age_gender': ageGender,
+          'status': 'Eligible Couple',
+        });
       }
 
       setState(() {
         _filtered = couples;
       });
     } catch (e) {
-      print('Error loading eligible couples: $e');
+      setState(() {
+        _filtered = [];
+      });
     }
   }
 

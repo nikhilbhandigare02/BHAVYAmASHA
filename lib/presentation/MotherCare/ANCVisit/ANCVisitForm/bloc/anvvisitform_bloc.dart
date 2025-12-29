@@ -126,7 +126,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             break;
         }
       }
-      
+
       emit(state.copyWith(
         numberOfChildren: e.value,
         baby1Name: baby1Name,
@@ -182,7 +182,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
       final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'ANC Due Registration';
       final formsRefKey = 'bt7gs9rl1a5d26mz';
 
-      
+
       final formData = {
         'form_type': formType,
         'form_name': formName,
@@ -201,7 +201,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           'rch_number': state.rchNumber,
           'lmp_date': state.lmpDate?.toIso8601String(),
           'edd_date': state.eddDate?.toIso8601String(),
-          'weeks_of_pregnancy': state.weeksOfPregnancy,
+          'week_of_pregnancy': state.weeksOfPregnancy,
           'gravida': state.gravida,
           'selected_risks': state.selectedRisks,
           'has_abortion_complication': state.hasAbortionComplication,
@@ -220,19 +220,10 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           'hemoglobin': state.hemoglobin,
           'pregnantWoman': state.givesBirthToBaby,
           'high_risk': state.highRisk,
-          'gives_birth_to_baby': state.givesBirthToBaby,
+          'has_pw_given_birth': state.givesBirthToBaby,
           'beneficiary_absent': state.beneficiaryAbsent,
           'delivery_outcome': state.deliveryOutcome,
-          'number_of_children': state.numberOfChildren,
-          'baby1_name': state.baby1Name,
-          'baby1_gender': state.baby1Gender,
-          'baby1_weight': state.baby1Weight,
-          'baby2_name': state.baby2Name,
-          'baby2_gender': state.baby2Gender,
-          'baby2_weight': state.baby2Weight,
-          'baby3_name': state.baby3Name,
-          'baby3_gender': state.baby3Gender,
-          'baby3_weight': state.baby3Weight,
+          'children_arr': _buildChildrenArray(state),
           "anc_visit_interval":"0",
         },
         'created_at': now,
@@ -401,7 +392,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             'date_of_inspection': state.dateOfInspection?.toIso8601String(),
             'lmp_date': state.lmpDate?.toIso8601String(),
             'edd_date': state.eddDate?.toIso8601String(),
-            'weeks_of_pregnancy': state.weeksOfPregnancy,
+            'week_of_pregnancy': state.weeksOfPregnancy,
             'gravida': state.gravida,
             'is_breast_feeding': state.isBreastFeeding,
             'td1_date': state.td1Date?.toIso8601String(),
@@ -419,7 +410,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             'diastolic': state.diastolic,
             'hemoglobin': state.hemoglobin,
             'high_risk': state.highRisk,
-            'gives_birth_to_baby': state.givesBirthToBaby,
+            'has_pw_given_birth': state.givesBirthToBaby,
             'beneficiary_absent': state.beneficiaryAbsent,
             'anc_visit_interval':'0',
             'form_data': formDataForDb,
@@ -514,5 +505,45 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         error: 'Failed to save form data. Please try again.',
       ));
     }
+  }
+
+  // Helper function to build children array from state
+  List<Map<String, dynamic>> _buildChildrenArray(AnvvisitformState state) {
+    final children = <Map<String, dynamic>>[];
+
+    // Add baby 1 if data exists
+    if (state.baby1Name?.isNotEmpty == true ||
+        state.baby1Gender?.isNotEmpty == true ||
+        state.baby1Weight?.isNotEmpty == true) {
+      children.add({
+        'name': state.baby1Name ?? '',
+        'gender': state.baby1Gender ?? '',
+        'weight_at_birth': state.baby1Weight ?? '',
+      });
+    }
+
+    // Add baby 2 if data exists
+    if (state.baby2Name?.isNotEmpty == true ||
+        state.baby2Gender?.isNotEmpty == true ||
+        state.baby2Weight?.isNotEmpty == true) {
+      children.add({
+        'name': state.baby2Name ?? '',
+        'gender': state.baby2Gender ?? '',
+        'weight_at_birth': state.baby2Weight ?? '',
+      });
+    }
+
+    // Add baby 3 if data exists
+    if (state.baby3Name?.isNotEmpty == true ||
+        state.baby3Gender?.isNotEmpty == true ||
+        state.baby3Weight?.isNotEmpty == true) {
+      children.add({
+        'name': state.baby3Name ?? '',
+        'gender': state.baby3Gender ?? '',
+        'weight_at_birth': state.baby3Weight ?? '',
+      });
+    }
+
+    return children;
   }
 }

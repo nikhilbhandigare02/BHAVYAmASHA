@@ -131,15 +131,15 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
 
         String? errorMessage;
         if (state.deliveryDate == null) {
-          errorMessage = 'Delivery date is required';
+          errorMessage = event.localizedMessages?['deliveryDateRequired'] ?? 'Delivery date is required';
         } else if (isPlaceInvalid) {
-          errorMessage = 'Place of delivery is required';
+          errorMessage = event.localizedMessages?['placeOfDeliveryRequired'] ?? 'Place of delivery is required';
         } else if (isDeliveryTypeInvalid) {
-          errorMessage = 'Delivery type is required';
+          errorMessage = event.localizedMessages?['deliveryTypeRequired'] ?? 'Delivery type is required';
         } else if (isOutcomeInvalid) {
-          errorMessage = 'Outcome count is required and must be a number';
+          errorMessage = event.localizedMessages?['outcomeCountRequired'] ?? 'Outcome count is required and must be a number';
         } else if (state.familyPlanningCounseling.isEmpty || state.familyPlanningCounseling == 'Select') {
-          errorMessage = 'Family planning counseling is required';
+          errorMessage = event.localizedMessages?['familyPlanningCounselingRequired'] ?? 'Family planning counseling is required';
         }
 
         if (errorMessage != null) {
@@ -185,7 +185,6 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
               'discharge_time': state.dischargeTime,
               'place_of_delivery': state.placeOfDelivery,
               'other_place_of_delivery_name': state.otherPlaceOfDeliveryName,
-              // Add new institutional delivery fields
               'institutional_place_type': state.institutionalPlaceType,
               'institutional_place_of_delivery': state.institutionalPlaceOfDelivery,
               'conducted_by': state.conductedBy,
@@ -470,9 +469,28 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
                         final geoLocationJson = jsonEncode(locationData);
 
                         for (int i = 1; i <= count; i++) {
-                          final childName = (formSource['baby${i}_name'] ?? '').toString();
-                          final childGender = (formSource['baby${i}_gender'] ?? '').toString();
-                          final childWeight = formSource['baby${i}_weight'];
+                          String childName = '';
+                          String childGender = '';
+                          dynamic childWeight = null;
+                          
+                          // Check for children_arr first (new structure)
+                          final childrenArr = formSource['children_arr'] as List?;
+                          if (childrenArr != null && childrenArr.isNotEmpty && i <= childrenArr.length) {
+                            final childData = childrenArr[i - 1] as Map<String, dynamic>?;
+                            if (childData != null) {
+                              childName = childData['name']?.toString() ?? '';
+                              childGender = childData['gender']?.toString() ?? '';
+                              childWeight = childData['weight_at_birth'];
+                              print('👶 Using child data from children_arr for child $i: name=$childName, gender=$childGender, weight=$childWeight');
+                            }
+                          } else {
+                            // Fallback to old field structure for backward compatibility
+                            childName = (formSource['baby${i}_name'] ?? '').toString();
+                            childGender = (formSource['baby${i}_gender'] ?? '').toString();
+                            childWeight = (formSource['baby${i}_weight']);
+                            print('👶 Using child data from old fields for child $i: name=$childName, gender=$childGender, weight=$childWeight');
+                          }
+                          
                           final fatherName = (formSource['husband_name'] ?? '').toString();
                           final motherName = (formSource['woman_name'] ?? '').toString();
 
@@ -631,7 +649,7 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
               emit(state.copyWith(
                 submitting: false,
                 submitted: false,
-                errorMessage: 'Failed to save delivery outcome to secure storage.',
+                errorMessage: event.localizedMessages?['failedToSaveDeliveryOutcomeSecure'] ?? 'Failed to save delivery outcome to secure storage.',
               ));
             }
           } catch (e) {
@@ -639,7 +657,7 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
             emit(state.copyWith(
               submitting: false,
               submitted: false,
-              errorMessage: 'Failed to save delivery outcome to database.',
+              errorMessage: event.localizedMessages?['failedToSaveDeliveryOutcomeDatabase'] ?? 'Failed to save delivery outcome to database.',
             ));
           }
         } catch (e, stackTrace) {
@@ -648,7 +666,7 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
           emit(state.copyWith(
             submitting: false,
             submitted: false,
-            errorMessage: 'An unexpected error occurred. Please try again.',
+            errorMessage: event.localizedMessages?['unexpectedErrorOccurred'] ?? 'An unexpected error occurred. Please try again.',
           ));
         }
       } catch (e) {
@@ -656,7 +674,7 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
         emit(state.copyWith(
           submitting: false,
           submitted: false,
-          errorMessage: 'An unexpected error occurred. Please try again.',
+          errorMessage: event.localizedMessages?['unexpectedErrorOccurred'] ?? 'An unexpected error occurred. Please try again.',
         ));
       }
     });

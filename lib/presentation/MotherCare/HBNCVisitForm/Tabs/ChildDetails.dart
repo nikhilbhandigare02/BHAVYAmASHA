@@ -103,13 +103,33 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
             if (decoded is Map && decoded['anc_form'] is Map) {
               final fd = Map<String, dynamic>.from(decoded['anc_form'] as Map);
               final outcome = fd['delivery_outcome']?.toString();
-              final number_of_children = fd['number_of_children']?.toString();
-              final idx = widget.childIndex <= 1 ? 1 : (widget.childIndex >= 3 ? 3 : widget.childIndex);
-              final sfx = idx.toString();
-              final babyName = fd['baby${sfx}_name']?.toString();
-              final babyGender = fd['baby${sfx}_gender']?.toString();
-              final babyWeight = fd['baby${sfx}_weight']?.toString();
-              if (mounted && outcome == 'Live birth') {
+              
+              // Check for children_arr first (new structure)
+              final childrenArr = fd['children_arr'] as List?;
+              String? babyName, babyGender, babyWeight;
+              
+              if (childrenArr != null && childrenArr.isNotEmpty) {
+                final childIndex = widget.childIndex - 1; // Convert to 0-based index
+                if (childIndex < childrenArr.length) {
+                  final childData = childrenArr[childIndex] as Map<String, dynamic>?;
+                  if (childData != null) {
+                    babyName = childData['name']?.toString();
+                    babyGender = childData['gender']?.toString();
+                    babyWeight = childData['weight_at_birth']?.toString();
+                    print('👶 Loaded child data from children_arr for child ${widget.childIndex}: name=$babyName, gender=$babyGender, weight=$babyWeight');
+                  }
+                }
+              } else {
+                // Fallback to old field structure for backward compatibility
+                final idx = widget.childIndex <= 1 ? 1 : (widget.childIndex >= 3 ? 3 : widget.childIndex);
+                final sfx = idx.toString();
+                babyName = fd['baby${sfx}_name']?.toString();
+                babyGender = fd['baby${sfx}_gender']?.toString();
+                babyWeight = fd['baby${sfx}_weight']?.toString();
+                print('👶 Loaded child data from old fields for child ${widget.childIndex}: name=$babyName, gender=$babyGender, weight=$babyWeight');
+              }
+              
+              if (mounted && (outcome == 'Live birth' || outcome == 'live_birth')) {
                 final bloc = context.read<HbncVisitBloc>();
                 bloc.add(NewbornDetailsChanged(field: 'babyCondition', value: 'alive', childIndex: widget.childIndex));
                 if (babyName != null && babyName.isNotEmpty) {

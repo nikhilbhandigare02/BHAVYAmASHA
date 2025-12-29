@@ -65,17 +65,39 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
     try {
       final db = await DatabaseProvider.instance.database;
       final deliveryOutcomeKey = '4r7twnycml3ej1vg';
-
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      final results = await db.query(
-        'followup_form_data',
-        where: 'forms_ref_key = ? AND current_user_key = ?',
-        whereArgs: [deliveryOutcomeKey, ashaUniqueKey],
+      final validBeneficiaries = await db.rawQuery('''
+      SELECT DISTINCT mca.beneficiary_ref_key 
+      FROM mother_care_activities mca
+      WHERE mca.mother_care_state ='pnc_mother'
+      AND mca.is_deleted = 0
+      AND mca.current_user_key = ?
+    ''', [ashaUniqueKey]);
+
+      if (validBeneficiaries.isEmpty) {
+        print('No beneficiaries found with pnc_mother or hbnc_visit state');
+        return [];
+      }
+
+      final beneficiaryKeys = validBeneficiaries.map((e) => e['beneficiary_ref_key']).toList();
+      final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
+
+      final query = '''
+      SELECT * FROM followup_form_data 
+      WHERE forms_ref_key = ? 
+      AND current_user_key = ?
+      AND beneficiary_ref_key IN ($placeholders)
+      ORDER BY created_date_time DESC
+    ''';
+
+      final results = await db.rawQuery(
+        query,
+        [deliveryOutcomeKey, ashaUniqueKey, ...beneficiaryKeys],
       );
 
-      print('Fetched ${results.length} delivery outcome records');
+      print('Fetched ${results.length} delivery outcome records with valid mother care states');
       return results;
     } catch (e) {
       print('Error fetching delivery outcome data: $e');
@@ -223,6 +245,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
                         },
                       ),
                     ),
+
         ],
       ),
     );

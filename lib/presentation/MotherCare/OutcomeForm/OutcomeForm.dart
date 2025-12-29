@@ -173,7 +173,7 @@ class _OutcomeFormView extends StatelessWidget {
                           decoded['anc_form'] as Map,
                         );
                         final flag =
-                            (fd['gives_birth_to_baby']?.toString() ?? '')
+                            (fd['has_pw_given_birth']?.toString() ?? '')
                                 .toLowerCase();
                         if (flag == 'yes') {
                           print(
@@ -181,36 +181,50 @@ class _OutcomeFormView extends StatelessWidget {
                           );
                         }
                         final weeks =
-                            fd['weeks_of_pregnancy']?.toString() ?? '';
+                            fd['week_of_pregnancy']?.toString() ?? '';
                         if (weeks.isNotEmpty) {
                           context.read<OutcomeFormBloc>().add(
                             GestationWeeksChanged(weeks),
                           );
                         }
-                        final children =
-                            fd['number_of_children']?.toString() ?? '';
-                        if (children.isNotEmpty) {
-                          final t = children.trim().toLowerCase();
-                          String numeric;
-                          if (t == 'one child' || t == 'one' || t == '1') {
-                            numeric = '1';
-                          } else if (t == 'twins' || t == 'two' || t == '2') {
-                            numeric = '2';
-                          } else if (t == 'triplets' ||
-                              t == 'three' ||
-                              t == '3') {
-                            numeric = '3';
-                          } else {
-                            final n = int.tryParse(children);
-                            numeric = n?.toString() ?? children;
-                          }
+                        // Derive children count from children_arr array
+                        final childrenArr = fd['children_arr'] as List?;
+                        final childCount = childrenArr?.length.toString() ?? '';
+                        if (childCount.isNotEmpty && childCount != '0') {
                           context.read<OutcomeFormBloc>().add(
-                            OutcomeCountChanged(numeric),
+                            OutcomeCountChanged(childCount),
                           );
+                        }
+
+                        // Prefill delivery outcome if available
+                        final deliveryOutcome = fd['delivery_outcome']?.toString() ?? '';
+                        if (deliveryOutcome.isNotEmpty) {
+                          // Map delivery outcome to delivery type
+                          String deliveryType = '';
+                          switch (deliveryOutcome.toLowerCase()) {
+                            case 'live_birth':
+                            case 'live birth':
+                              deliveryType = 'Live Birth';
+                              break;
+                            case 'still_birth':
+                            case 'still birth':
+                              deliveryType = 'Still Birth';
+                              break;
+                            default:
+                              deliveryType = deliveryOutcome;
+                          }
+                          // Note: This would require adding DeliveryTypeChanged event call if needed
+                        }
+
+                        // Prefill place of ANC if available (could map to place of delivery)
+                        final placeOfAnc = fd['place_of_anc']?.toString() ?? '';
+                        if (placeOfAnc.isNotEmpty) {
+                          // Could potentially map this to place of delivery
+                          print('Place of ANC from data: $placeOfAnc');
                         }
                       }
                     } catch (e) {
-                      print('Error loading ANC gives_birth_to_baby record: $e');
+                      print('Error loading ANC data for prefilling: $e');
                     }
                   }(),
                   builder: (context, snapshot) => const SizedBox.shrink(),
@@ -251,7 +265,7 @@ class _OutcomeFormFields extends StatelessWidget {
           isEditable: true,
           labelText: l10n.deliveryDate,
           onDateChanged: (d) => bloc.add(DeliveryDateChanged(d)),
-          // readOnly: true,
+           readOnly: true,
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         const SizedBox(height: 8),
@@ -264,8 +278,8 @@ class _OutcomeFormFields extends StatelessWidget {
                 child: Text(
                   l10n.gestationWeeks,
                   style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
@@ -797,10 +811,35 @@ class _OutcomeFormFields extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               SizedBox(
+                width: 25,
+                height: 25,
+                child: InkWell(
+                  onTap: () {
+                    final n = int.tryParse(state.outcomeCount) ?? 0;
+                    final v = n > 0 ? (n - 1).toString() : '0';
+                    bloc.add(OutcomeCountChanged(v));
+                  },
+                  child: Container(
+
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.zero,
+
+                    ),
+                    child: const Icon(Icons.remove, size: 18,color: Colors.white,),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              SizedBox(
                 width: 50,
                 child: TextField(
                   keyboardType: TextInputType.number,
                   onChanged: (v) => bloc.add(OutcomeCountChanged(v)),
+                  textAlign: TextAlign.center,
+                  textAlignVertical: TextAlignVertical.center,
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 8,
@@ -817,6 +856,26 @@ class _OutcomeFormFields extends StatelessWidget {
                     ),
                   ),
                   controller: TextEditingController(text: state.outcomeCount),
+                ),
+              ),
+              const SizedBox(width: 6),
+              SizedBox(
+                width: 25,
+                height: 25,
+                child: InkWell(
+                  onTap: () {
+                    final n = int.tryParse(state.outcomeCount) ?? 0;
+                    final v = (n + 1).toString();
+                    bloc.add(OutcomeCountChanged(v));
+                  },
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    child: const Icon(Icons.add, size: 18),
+                  ),
                 ),
               ),
             ],
@@ -1046,8 +1105,22 @@ class _OutcomeFormFields extends StatelessWidget {
                                 ?.child
                             as _OutcomeFormView)
                         .beneficiaryData;
+                
+                // Pass localized messages to the BLoC
                 bloc.add(
-                  OutcomeFormSubmitted(beneficiaryData: beneficiaryData),
+                  OutcomeFormSubmitted(
+                    beneficiaryData: beneficiaryData,
+                    localizedMessages: {
+                      'deliveryDateRequired': l10n.deliveryDateRequired,
+                      'placeOfDeliveryRequired': l10n.placeOfDeliveryRequired,
+                      'deliveryTypeRequired': l10n.deliveryTypeRequired,
+                      'outcomeCountRequired': l10n.outcomeCountRequired,
+                      'familyPlanningCounselingRequired': l10n.familyPlanningCounselingRequired,
+                      'failedToSaveDeliveryOutcomeSecure': l10n.failedToSaveDeliveryOutcomeSecure,
+                      'failedToSaveDeliveryOutcomeDatabase': l10n.failedToSaveDeliveryOutcomeDatabase,
+                      'unexpectedErrorOccurred': l10n.unexpectedErrorOccurred,
+                    },
+                  ),
                 );
               },
             ),

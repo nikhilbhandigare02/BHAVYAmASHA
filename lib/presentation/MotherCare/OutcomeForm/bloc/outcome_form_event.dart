@@ -310,9 +310,10 @@ class ECPQuantityChanged extends OutcomeFormEvent {
 
 class OutcomeFormSubmitted extends OutcomeFormEvent {
   final Map<String, dynamic>? beneficiaryData;
+  final Map<String, String>? localizedMessages;
   
-  const OutcomeFormSubmitted({this.beneficiaryData});
+  const OutcomeFormSubmitted({this.beneficiaryData, this.localizedMessages});
   
   @override
-  List<Object?> get props => [beneficiaryData];
+  List<Object?> get props => [beneficiaryData, localizedMessages];
 }

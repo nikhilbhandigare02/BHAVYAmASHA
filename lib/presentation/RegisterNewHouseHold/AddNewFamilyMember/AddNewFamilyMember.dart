@@ -1945,7 +1945,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         case 'Father':
                                           return l.relationFather;
                                         case 'Mother':
-                                          return l.relationMother;
+                                          return l.mother;
                                         case 'Brother':
                                           return l.relationBrother;
                                         case 'Sister':
@@ -2112,7 +2112,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 if (!_isEdit) {
                                                   if (_fatherOption == l.select ||
                                                       _fatherOption.isEmpty) {
-                                                    return 'Please select or enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                                    return '${l.fatherGuardianNameRequired.toLowerCase()}';
                                                   }
                                                 }
                                                 return null;
@@ -2182,7 +2182,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             validator: (value) {
                                               if (value == null ||
                                                   value.trim().isEmpty) {
-                                                return 'Please enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                                return '${l.fatherGuardianNameRequired.toLowerCase()}';
                                               }
                                               return null;
                                             },
@@ -2220,7 +2220,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 if (!_isEdit) {
                                                   if (_motherOption == 'Select' ||
                                                       _motherOption.isEmpty) {
-                                                    return 'Please select or enter ${l.motherNameLabel.toLowerCase()}';
+                                                    return ' ${l.motherGuardianNameRequired.toLowerCase()}';
                                                   }
                                                 }
                                                 return null;
@@ -2282,7 +2282,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             validator: (value) {
                                               if (value == null ||
                                                   value.trim().isEmpty) {
-                                                return 'Please enter ${l.motherNameLabel.toLowerCase()}';
+                                                return ' ${l.motherGuardianNameRequired.toLowerCase()}';
                                               }
                                               return null;
                                             },
@@ -4135,6 +4135,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       onChanged: (v) => context
                                           .read<AddnewfamilymemberBloc>()
                                           .add(AnmUpdateAgeAtMarriage(v)),
+
+
                                     ),
                                   ),
                                   Divider(
@@ -4151,9 +4153,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       onChanged: (v) => context
                                           .read<AddnewfamilymemberBloc>()
                                           .add(AnmUpdateSpouseName(v.trim())),
-                                      validator: (value) => _captureAnmError(
-                                        Validations.validateSpousName(l, value),
-                                      ),
+                                      validator: (value) {
+                                        if (state.maritalStatus == 'Married') {
+                                          return _captureAnmError(Validations.validateSpousName(l, value));
+                                        }
+                                        return null;
+                                      },
                                     ),
                                   ),
                                   Divider(

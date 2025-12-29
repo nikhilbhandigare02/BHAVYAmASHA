@@ -72,6 +72,7 @@ WITH LatestMCA AS (
     ) AS rn
   FROM mother_care_activities mca
   WHERE mca.is_deleted = 0
+    AND mca.current_user_key = ?
 ),
 DeliveryOutcomeOnly AS (
   SELECT *
@@ -88,10 +89,8 @@ LatestANC AS (
       ORDER BY f.created_date_time DESC, f.id DESC
     ) AS rn
   FROM ${FollowupFormDataTable.table} f
-  WHERE
-    f.forms_ref_key = ?
+  WHERE f.forms_ref_key = ?
     AND f.is_deleted = 0
-    AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
     AND f.current_user_key = ?
 )
 SELECT
@@ -105,8 +104,8 @@ LEFT JOIN LatestANC a
   ON a.beneficiary_ref_key = d.beneficiary_ref_key
  AND a.rn = 1
 ORDER BY d.created_date_time DESC
-''',
-        [ancRefKey, ashaUniqueKey],
+'''
+      , [ashaUniqueKey, ancRefKey, ashaUniqueKey],
       );
 
       if (results.isEmpty) {
