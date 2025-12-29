@@ -12,11 +12,8 @@ class AddBeneficiaryApiHelper {
   Future<void> syncBeneficiaryByUniqueKey({
     required String uniqueKey,
   }) async {
-    // Get current timestamp
     final ts = DateTime.now().toIso8601String();
-    // Device info will be extracted from the saved beneficiary data
     try {
-      // 1. Fetch beneficiary data from local storage
       final saved = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(uniqueKey);
       if (saved == null) {
         print('Beneficiary with uniqueKey $uniqueKey not found in local database');
@@ -159,7 +156,7 @@ class AddBeneficiaryApiHelper {
     }
 
     final beneficiaryInfoApi = {
-      'house_no': (info['houseNo']),
+      'house_no': info['houseNo'] ?? '',
       'name': {
         'first_name': (info['headName'] ?? info['memberName'] ?? info['name'] ?? '').toString(),
         'middle_name': '',
@@ -168,52 +165,123 @@ class AddBeneficiaryApiHelper {
       'gender': _genderCode(info['gender']?.toString()),
       'dob': _yyyyMMdd(info['dob']?.toString()),
       'marital_status': (info['maritalStatus'] ?? 'married').toString().toLowerCase(),
-      'aadhaar': (info['aadhaar'] ?? info['aadhar'])?.toString(),
-      'phone': (info['mobileNo'] ?? '').toString(),
+      'age': info['age'] ?? info['approxAge'],
+      'date_of_birth': info['date_of_birth'] ?? info['dob'],
+      
+      // Family head details
+      'family_head_adhar_no': info['family_head_adhar_no'] ?? '',
+      'name_of_family_head': info['headName'] ?? info['memberName'] ?? info['name'],
+      'name_of_spouse': info['name_of_spouse'] ?? info['spouseName'] ?? '',
+      'occupation': info['occupation'] ?? '',
+      'education': info['education'] ?? '',
+      'religion': info['religion'] ?? '',
+      'category': info['category'] ?? '',
+      'age_at_marrige': info['ageAtMarriage'],
+      
+      // Family member details
+      'ben_type': info['ben_type'] ?? (info['memberType'] == 'child' ? 'Child' : 'adult'),
+      'relaton_with_family_head': info['relaton_with_family_head'] ?? info['relation_to_head'] ?? info['relation'] ?? 'self',
+      'birth_order': info['birth_order'],
+      'member_name': info['member_name'] ?? info['headName'] ?? info['memberName'] ?? info['name'],
+      'father_or_spouse_name': info['father_or_spouse_name'] ?? info['fatherName'] ?? info['spouseName'] ?? '',
+      'mother_name': info['mother_name'] ?? info['motherName'] ?? '',
+      'adhar_no': info['adhar_no'] ?? info['aadhaar'] ?? info['aadhar'],
+      
+      // Children information
+      'have_children': info['have_children'] ?? info['hasChildren'] ?? 'no',
+      'total_children': info['total_children'] ?? info['totalBorn'],
+      'total_live_children': info['total_live_children'] ?? info['totalLive'],
+      'total_male_children': info['total_male_children'] ?? info['totalMale'],
+      'total_female_children': info['total_female_children'] ?? info['totalFemale'],
+      'age_of_youngest_child': info['age_of_youngest_child'] ?? info['youngestAge'],
+      'age_of_youngest_child_unit': info['age_of_youngest_child_unit'] ?? info['ageUnit'] ?? 'year',
+      'gender_of_younget_child': info['gender_of_younget_child'] ?? info['youngestGender'],
+      
+      // Contact & identification
+      'phone': info['phone'] ?? info['mobileNo'] ?? '',
+      'mobile_no': info['mobile_no'] ?? info['mobileNo'] ?? '',
+      'whose_mob_no': info['whose_mob_no'] ?? info['mobileOwner'] ?? '',
+      'abha_no': info['abha_no'] ?? info['abhaAddress'] ?? info['abhaNumber'],
+      'voter_id': info['voter_id'] ?? info['voterId'],
+      'ration_card_id': info['ration_card_id'] ?? info['rationCardId'],
+      'personal_health_id': info['personal_health_id'] ?? info['personalHealthId'],
+      'account_number': info['account_number'] ?? info['bankAcc'] ?? info['bankAccountNumber'],
+      'ifsc_code': info['ifsc_code'] ?? info['ifsc'] ?? info['ifscCode'],
+      'bank_name': info['bank_name'] ?? info['bankName'],
+      'branch_name': info['branch_name'] ?? info['branchName'],
+      
+      // Address information
+      'village_name': info['village_name'] ?? info['village'] ?? '',
+      'ward_no': info['ward_no'] ?? info['wardNo'],
+      'ward_name': info['ward_name'] ?? info['ward'],
+      'mohalla_name': info['mohalla_name'] ?? info['mohalla'] ?? info['mohallaTola'],
       'address': {
-        'state': working['state'] ?? userDetails['stateName'],
-        'district': working['district'] ?? userDetails['districtName'],
-        'block': working['block'] ?? userDetails['blockName'],
-        'village': info['village'] ?? working['village'] ?? userDetails['villageName'],
+        'state': working['state'] ?? userDetails['stateName'] ?? info['state'],
+        'district': working['district'] ?? userDetails['districtName'] ?? info['district'],
+        'block': working['block'] ?? userDetails['blockName'] ?? info['block'],
+        'village': info['village_name'] ?? info['village'] ?? working['village'] ?? userDetails['villageName'],
         'pincode': working['pincode'] ?? userDetails['pincode'],
       }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty)),
+      
+      // Health & pregnancy
+      'is_women_pregenant': info['is_women_pregenant'] ?? info['isPregnant'],
+      'lmp_date': info['lmp_date'] ?? info['lmp'],
+      'edd_date': info['edd_date'] ?? info['edd'],
+      'weight': info['weight'],
+      'is_birth_certificate_issued': info['is_birth_certificate_issued'] ?? info['birthCertificate'],
+      'is_school_going_child': info['is_school_going_child'] ?? info['childSchool'],
+      
+      // Family planning
+      'is_family_planning': info['is_family_planning'] ?? row['is_family_planning'] ?? 0,
+      'method_of_contraception': info['method_of_contraception'],
+      'quantity_of_condoms': info['quantity_of_condoms'],
+      'quantity_of_mala_n_daily': info['quantity_of_mala_n_daily'],
+      'quantity_of_chhaya_weekly': info['quantity_of_chhaya_weekly'],
+      'quantity_of_ecp': info['quantity_of_ecp'],
+      'date_of_antra': info['date_of_antra'],
+      'removal_date': info['removal_date'],
+      'reason': info['reason'],
+      
+      // Disease information
+      'suffering_from_a_serious_illness': info['suffering_from_a_serious_illness'],
+      'non_communicable_diseases': info['non_communicable_diseases'],
+      'communicable_diseases': info['communicable_diseases'],
+      'ncd_registration_id': info['ncd_registration_id'],
+      'nikshay_id': info['nikshay_id'],
+      'any_other_communicable_diseases': info['any_other_communicable_diseases'],
+      
+      // Death information
+      'date_of_death': info['date_of_death'],
+      'death_place': info['death_place'],
+      'reason_of_death': info['reason_of_death'],
+      'other_reason_for_death': info['other_reason_for_death'],
+      
+      // Socio-economic
+      'poverty_line': info['poverty_line'],
+      'is_migrated': info['is_migrated'],
+      'type_of_beneficiary': info['type_of_beneficiary'] ?? info['beneficiaryType'] ?? 'staying_in_house',
+      
+      // Verification flags
       'is_abha_verified': info['is_abha_verified'] ?? false,
       'is_rch_id_verified': info['is_rch_id_verified'] ?? false,
       'is_fetched_from_abha': info['is_fetched_from_abha'] ?? false,
       'is_fetched_from_rch': info['is_fetched_from_rch'] ?? false,
-      'ben_type': info['ben_type'] ?? (info['memberType'] ?? 'adult'),
-      'mother_ben_ref_key': info['mother_ben_ref_key'] ?? row['mother_key']?.toString() ?? '',
-      'father_ben_ref_key': info['father_ben_ref_key'] ?? row['father_key']?.toString() ?? '',
-      'relaton_with_family_head':
-          info['relaton_with_family_head'] ?? info['relation_to_head'] ?? 'self',
+      
+      // Member status and flags
       'member_status': info['member_status'] ?? 'alive',
-      'member_name': info['member_name'] ?? info['headName'] ?? info['memberName'] ?? info['name'],
-      'father_or_spouse_name':
-          info['father_or_spouse_name'] ?? info['fatherName'] ?? info['spouseName'] ?? '',
-      'have_children': info['have_children'] ?? info['hasChildren'],
-      'is_family_planning': info['is_family_planning'] ?? row['is_family_planning'] ?? 0,
-      'total_children': info['total_children'] ?? info['totalBorn'],
-      'total_live_children': info['total_live_children'] ?? info['totalLive'],
-      'total_male_children': info['total_male_children'] ?? info['totalMale'],
-      'age_of_youngest_child': info['age_of_youngest_child'] ?? info['youngestAge'],
-      'gender_of_younget_child': info['gender_of_younget_child'] ?? info['youngestGender'],
-      'whose_mob_no': info['whose_mob_no'] ?? info['mobileOwner'],
-      'mobile_no': info['mobile_no'] ?? info['mobileNo'],
+      'is_new_member': info['is_new_member'] ?? true,
+      'isFamilyhead': info['isFamilyhead'] ?? false,
+      'isFamilyheadWife': info['isFamilyheadWife'] ?? false,
+      
+      // DOB components
       'dob_day': info['dob_day'],
       'dob_month': info['dob_month'],
       'dob_year': info['dob_year'],
       'age_by': info['age_by'],
-      'date_of_birth': info['date_of_birth'] ?? info['dob'],
-      'age': info['age'] ?? info['approxAge'],
-      'village_name': info['village_name'] ?? info['village'],
-      'is_new_member': info['is_new_member'] ?? true,
-      'isFamilyhead': info['isFamilyhead'] ?? true,
-      'isFamilyheadWife': info['isFamilyheadWife'] ?? false,
-      'age_of_youngest_child_unit':
-          info['age_of_youngest_child_unit'] ?? info['ageUnit'],
-      'type_of_beneficiary':
-          info['type_of_beneficiary'] ?? info['beneficiaryType'] ?? 'staying_in_house',
-      'name_of_spouse': info['name_of_spouse'] ?? info['spouseName'] ?? '',
+      
+      // Family relationships
+      'mother_ben_ref_key': info['mother_ben_ref_key'] ?? row['mother_key']?.toString() ?? '',
+      'father_ben_ref_key': info['father_ben_ref_key'] ?? row['father_key']?.toString() ?? '',
     }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty));
 
     return {

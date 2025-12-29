@@ -164,12 +164,10 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
           final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Delivery Outcome';
           final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '';
 
-          String? beneficiaryRefKey = beneficiaryId.isNotEmpty ? beneficiaryId : null;
 
 
           String householdRefKey = event.beneficiaryData?['householdId']?.toString() ?? '';
 
-          // In outcome_form_bloc.dart, update the formData map to include the new fields
           final formData  = {
             'form_type': formType,
             'form_name': formName,
