@@ -587,7 +587,7 @@ sfgfdd
                             physics: const NeverScrollableScrollPhysics(),
                             mainAxisSpacing: 1.h,
                             crossAxisSpacing: 3.w,
-                            childAspectRatio: 1.5,
+                            childAspectRatio: 1.7,
                             children: [
                               SyncCard(title:l10n?.household ?? 'Household', total: Constant.householdTotal, synced: Constant.householdTotalSync),
                               SyncCard(title:l10n?.beneficiary ?? 'Beneficiary', total: _beneficiaryTotal, synced: _beneficiarySynced),
@@ -649,13 +649,14 @@ class _SyncCardState extends State<SyncCard> {
     final l10n = AppLocalizations.of(context);
 
     return Card(
+
       color: AppColors.onPrimary,
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5.h),
+        padding: EdgeInsets.symmetric(horizontal:3.w, vertical: 1.5.h),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               widget.title,
@@ -682,7 +683,7 @@ class _SyncCardState extends State<SyncCard> {
                     text: '${widget.total}',
                     style: TextStyle(
                       fontSize: 14.sp,
-                      color: Colors.black,
+                      color: Colors.black87,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -706,7 +707,7 @@ class _SyncCardState extends State<SyncCard> {
                     text: '${widget.synced}',
                     style: TextStyle(
                       fontSize: 14.sp,
-                      color: Colors.black,
+                      color: Colors.black87,
                       fontWeight: FontWeight.bold ,
                     ),
                   ),
