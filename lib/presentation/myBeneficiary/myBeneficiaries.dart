@@ -101,7 +101,6 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
 
       int familyCount = familyHeads.length;
 
-      // Group all beneficiaries by household for other counts
       final householdGroups = <String, List<Map<String, dynamic>>>{};
       for (final row in allBeneficiaries) {
         try {
@@ -290,6 +289,8 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
 
       final poCount = await _getPregnancyOutcomeCount();
       final hbnc = await _getHBNCCount();
+      final ecCount = await _getEligibleCoupleCount();
+      final pwCount = await _getPregnantWomenCount();
       final lbw = await _getLBWReferredCount();
       final abortion = await _getAbortionListCount();
       final death = await _getDeathRegisterCount();
@@ -300,8 +301,8 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
       if (mounted) {
         setState(() {
           familyUpdateCount = familyCount;
-          eligibleCoupleCount = coupleCount;
-          pregnantWomenCount = pregnantCount;
+          eligibleCoupleCount = ecCount;
+          pregnantWomenCount = pwCount;
           pregnancyOutcomeCount = poCount;
           hbcnCount = hbnc;
           lbwReferredCount = lbw;
@@ -420,6 +421,7 @@ WITH LatestMCA AS (
     ) AS rn
   FROM mother_care_activities mca
   WHERE mca.is_deleted = 0
+    AND mca.current_user_key = ?
 ),
 DeliveryOutcomeOnly AS (
   SELECT *
@@ -449,7 +451,7 @@ LEFT JOIN LatestANC a
   ON a.beneficiary_ref_key = d.beneficiary_ref_key
  AND a.rn = 1
 ''',
-        [ancRefKey, ashaUniqueKey],
+        [ashaUniqueKey, ancRefKey, ashaUniqueKey],
       );
 
       return results.length;
@@ -461,43 +463,145 @@ LEFT JOIN LatestANC a
   Future<int> _getHBNCCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
-      final deliveryKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.deliveryOutcome] ?? '';
-      if (deliveryKey.isEmpty) return 0;
-
-      // --- 1. Get Current User Key ---
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) return 0;
 
-      // --- 2. Build Query with JOIN matching HBNCList screen selection ---
-      String sql = '''
-      SELECT COUNT(DISTINCT f.beneficiary_ref_key) as c 
-      FROM ${FollowupFormDataTable.table} f
-      INNER JOIN beneficiaries_new b ON f.beneficiary_ref_key = b.unique_key
-      WHERE f.forms_ref_key = ? 
-      AND f.is_deleted = 0 
-      AND b.is_deleted = 0
-    ''';
+      const deliveryOutcomeKey = '4r7twnycml3ej1vg';
 
-      List<Object?> args = [
-        deliveryKey,
-      ];
+      final validBeneficiaries = await db.rawQuery('''
+        SELECT DISTINCT mca.beneficiary_ref_key 
+        FROM mother_care_activities mca
+        WHERE mca.mother_care_state = 'pnc_mother'
+          AND mca.is_deleted = 0
+          AND mca.current_user_key = ?
+      ''', [ashaUniqueKey]);
 
-      // --- 3. Add User Condition ---
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        sql += ' AND f.current_user_key = ?';
-        args.add(ashaUniqueKey);
+      if (validBeneficiaries.isEmpty) return 0;
+
+      final beneficiaryKeys = validBeneficiaries
+          .map((e) => e['beneficiary_ref_key']?.toString())
+          .where((id) => id != null && id!.isNotEmpty)
+          .cast<String>()
+          .toList();
+
+      final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
+      final query = '''
+        SELECT beneficiary_ref_key FROM followup_form_data
+        WHERE forms_ref_key = ?
+          AND current_user_key = ?
+          AND beneficiary_ref_key IN ($placeholders)
+          AND (is_deleted IS NULL OR is_deleted = 0)
+      ''';
+
+      final results = await db.rawQuery(
+        query,
+        [deliveryOutcomeKey, ashaUniqueKey, ...beneficiaryKeys],
+      );
+
+      final unique = results
+          .map((e) => e['beneficiary_ref_key']?.toString())
+          .where((id) => id != null && id!.isNotEmpty)
+          .cast<String>()
+          .toSet();
+
+      return unique.length;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  Future<int> _getEligibleCoupleCount() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
+      if (currentUserKey.isEmpty) return 0;
+
+      final query = '''
+        SELECT DISTINCT b.*, e.eligible_couple_state 
+        FROM beneficiaries_new b
+        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+        WHERE b.is_deleted = 0 
+          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+          AND e.eligible_couple_state = 'eligible_couple'
+          AND e.is_deleted = 0
+          AND e.current_user_key = ?
+        ORDER BY b.created_date_time DESC
+      ''';
+
+      final rows = await db.rawQuery(query, [currentUserKey]);
+      if (rows.isEmpty) return 0;
+
+      int count = 0;
+      for (final row in rows) {
+        try {
+          final Map<String, dynamic> mappedRow = Map<String, dynamic>.from(row);
+          Map<String, dynamic> info = {};
+          try {
+            info = jsonDecode(mappedRow['beneficiary_info'] ?? '{}');
+          } catch (_) {}
+          final gender = (info['gender']?.toString().toLowerCase() ?? '');
+          if (gender == 'male') continue;
+          count++;
+        } catch (_) {}
+      }
+      return count;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<int> _getPregnantWomenCount() async {
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final processedBeneficiaries = <String>{};
+      final ancDueRecords = await _getAncDueRecords();
+      final ancDueBeneficiaryIds = ancDueRecords
+          .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
+          .where((id) => id.isNotEmpty)
+          .toSet();
+
+      final pregnantWomen = <Map<String, dynamic>>[];
+      for (final row in rows) {
+        try {
+          final rawInfo = row['beneficiary_info'];
+          if (rawInfo == null) continue;
+          final Map<String, dynamic> info = rawInfo is String
+              ? Map<String, dynamic>.from(jsonDecode(rawInfo))
+              : Map<String, dynamic>.from(rawInfo as Map);
+
+          final beneficiaryId = row['unique_key']?.toString() ?? '';
+          if (beneficiaryId.isEmpty) continue;
+
+          final isPregnant = _isPregnant(info);
+          final gender = info['gender']?.toString().toLowerCase() ?? '';
+          final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
+
+          if ((isPregnant || isAncDue) && (gender == 'f' || gender == 'female')) {
+            pregnantWomen.add({'BeneficiaryID': beneficiaryId, 'unique_key': beneficiaryId});
+            processedBeneficiaries.add(beneficiaryId);
+          }
+        } catch (_) {}
       }
 
-      final result = await db.rawQuery(sql, args);
+      for (final anc in ancDueRecords) {
+        final beneficiaryId = anc['beneficiary_ref_key']?.toString() ?? '';
+        if (beneficiaryId.isEmpty || processedBeneficiaries.contains(beneficiaryId)) continue;
+        pregnantWomen.add({'BeneficiaryID': beneficiaryId, 'unique_key': beneficiaryId});
+      }
 
-      final row = result.isNotEmpty ? result.first : null;
-      final v = row?['c'];
+      final byBeneficiary = <String, Map<String, dynamic>>{};
+      for (final item in pregnantWomen) {
+        final benId = item['BeneficiaryID']?.toString() ?? '';
+        final uniqueKey = item['unique_key']?.toString() ?? '';
+        final key = benId.isNotEmpty ? benId : uniqueKey;
+        if (key.isEmpty) continue;
+        byBeneficiary[key] = item;
+      }
 
-      if (v is int) return v;
-      if (v is num) return v.toInt();
-      return 0;
-    } catch (e) {
-      print('Error counting HBNC: $e');
+      return byBeneficiary.length;
+    } catch (_) {
       return 0;
     }
   }
