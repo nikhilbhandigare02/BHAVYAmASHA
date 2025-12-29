@@ -549,102 +549,77 @@ sfgfdd
           ),
           body: Column(
             children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(3.w),
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+              SingleChildScrollView(
                 child: Padding(
                   padding: EdgeInsets.all(3.w),
-                  child: _isLoading
-                      ? Center(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 4.h),
-                            child: const CircularProgressIndicator(color: Colors.white),
-                          ),
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              l10n?.syncStatus ?? 'Sync Status',
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-
-                            GridView.count(
-                              crossAxisCount: 2,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              mainAxisSpacing: 1.5.h,
-                              crossAxisSpacing: 3.w,
-                              childAspectRatio: 1.5,
-                              children: [
-                                SyncCard(title:l10n?.household ?? 'Household', total: Constant.householdTotal, synced: Constant.householdTotalSync),
-                                SyncCard(title:l10n?.beneficiary ?? 'Beneficiary', total: _beneficiaryTotal, synced: _beneficiarySynced),
-                                SyncCard(title:l10n?.followUpLabel ?? 'Follow Up', total: _followupTotal, synced: _followupSynced),
-                                SyncCard(title:l10n?.gridEligibleCoupleASHA ?? 'Eligible Couple', total: _eligibleCoupleTotal, synced: _eligibleCoupleSynced),
-                                SyncCard(title:l10n?.gridMotherCare ?? 'Mother Care', total: Constant.motherCareTotal, synced: Constant.motherCareSynced),
-                                SyncCard(title:l10n?.gridChildCare ?? 'Child Care', total: Constant.childRegisteredtotal, synced: Constant.childRegisteredtotalSync),],
-                            ),
-
-                            SizedBox(height: 2.h),
-                            if (_lastSyncedAt != null)
-                              Row(
-                                children: [
-                                  Text(
-                                    '${l10n?.lastSynced ??"Last synced"}: ${_formatDateTime(_lastSyncedAt!)}',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  const Icon(Icons.check_circle, color: Colors.white, size: 16),
-                                ],
-                              ),
-                          ],
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Padding(
+                    padding: EdgeInsets.all(3.w),
+                    child: _isLoading
+                    ? Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 4.h),
+                          child: const CircularProgressIndicator(color: Colors.white),
                         ),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l10n?.syncStatus ?? 'Sync Status',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(height: 2.h),
+
+                          GridView.count(
+                            crossAxisCount: 2,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            mainAxisSpacing: 1.h,
+                            crossAxisSpacing: 3.w,
+                            childAspectRatio: 1.5,
+                            children: [
+                              SyncCard(title:l10n?.household ?? 'Household', total: Constant.householdTotal, synced: Constant.householdTotalSync),
+                              SyncCard(title:l10n?.beneficiary ?? 'Beneficiary', total: _beneficiaryTotal, synced: _beneficiarySynced),
+                              SyncCard(title:l10n?.followUpLabel ?? 'Follow Up', total: _followupTotal, synced: _followupSynced),
+                              SyncCard(title:l10n?.gridEligibleCoupleASHA ?? 'Eligible Couple', total: _eligibleCoupleTotal, synced: _eligibleCoupleSynced),
+                              SyncCard(title:l10n?.gridMotherCare ?? 'Mother Care', total: Constant.motherCareTotal, synced: Constant.motherCareSynced),
+                              SyncCard(title:l10n?.gridChildCare ?? 'Child Care', total: Constant.childRegisteredtotal, synced: Constant.childRegisteredtotalSync),],
+                          ),
+
+                          // SizedBox(height: 2.h),
+                          if (_lastSyncedAt != null)
+                            Row(
+                              children: [
+                                Text(
+                                  '${l10n?.lastSynced ??"Last synced"}: ${_formatDateTime(_lastSyncedAt!)}',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                const Icon(Icons.check_circle, color: Colors.white, size: 16),
+                              ],
+                            ),
+                        ],
                       ),
                     ),
                   ),
                 ),
               ),
-              // // Logout button at the bottom
-              // Container(
-              //   width: double.infinity,
-              //   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              //   child: ElevatedButton.icon(
-              //     onPressed: () {
-              //       // Add your logout logic here
-              //       // For example:
-              //       // Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-              //     },
-              //     icon: Icon(Icons.logout, color: Colors.white),
-              //     label: Text(
-              //       'Logout',
-              //       style: TextStyle(fontSize: 16, color: Colors.white),
-              //     ),
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor: AppColors.primary,
-              //       padding: EdgeInsets.symmetric(vertical: 15),
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(8),
-              //       ),
-              //     ),
-              //   ),
-              // ),
+
             ],
           ),
         );
@@ -674,9 +649,9 @@ class _SyncCardState extends State<SyncCard> {
     final l10n = AppLocalizations.of(context);
 
     return Card(
-      color: Colors.white,
+      color: AppColors.onPrimary,
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5.h),
         child: Column(
@@ -688,7 +663,7 @@ class _SyncCardState extends State<SyncCard> {
               style: TextStyle(
                 fontSize: 15.sp,
                 color: Colors.blue[800],
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w900,
               ),
             ),
             SizedBox(height: 0.8.h),
@@ -700,7 +675,7 @@ class _SyncCardState extends State<SyncCard> {
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.blue[800],
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   TextSpan(
@@ -708,7 +683,7 @@ class _SyncCardState extends State<SyncCard> {
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.black,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
@@ -724,7 +699,7 @@ class _SyncCardState extends State<SyncCard> {
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.blue[800],
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   TextSpan(
@@ -732,7 +707,7 @@ class _SyncCardState extends State<SyncCard> {
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.black,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.bold ,
                     ),
                   ),
                 ],

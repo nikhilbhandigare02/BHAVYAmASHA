@@ -5654,13 +5654,13 @@ abstract class AppLocalizations {
   /// No description provided for @gestationWeeks.
   ///
   /// In en, this message translates to:
-  /// **'Number of weeks of pregnancy during delivery'**
+  /// **'No. of weeks of pregnancy during delivery'**
   String get gestationWeeks;
 
   /// No description provided for @deliveryTime.
   ///
   /// In en, this message translates to:
-  /// **'Delivery Time (hh:mm)'**
+  /// **'Time of delivery (hh:mm)'**
   String get deliveryTime;
 
   /// No description provided for @deliveryTimeHint.
@@ -5672,7 +5672,7 @@ abstract class AppLocalizations {
   /// No description provided for @placeOfDelivery.
   ///
   /// In en, this message translates to:
-  /// **'Place of Delivery'**
+  /// **'Place of delivery *'**
   String get placeOfDelivery;
 
   /// No description provided for @selectPlaceOfDelivery.
@@ -5714,7 +5714,7 @@ abstract class AppLocalizations {
   /// No description provided for @deliveryType.
   ///
   /// In en, this message translates to:
-  /// **'Type of Delivery *'**
+  /// **'Type of delivery *'**
   String get deliveryType;
 
   /// No description provided for @normalDelivery.
@@ -5744,7 +5744,7 @@ abstract class AppLocalizations {
   /// No description provided for @outcomeCount.
   ///
   /// In en, this message translates to:
-  /// **'Number of Outcomes *'**
+  /// **'Delivery outcome *'**
   String get outcomeCount;
 
   /// No description provided for @familyPlanningCounseling.
@@ -11258,7 +11258,7 @@ abstract class AppLocalizations {
   /// No description provided for @whoConductedDelivery.
   ///
   /// In en, this message translates to:
-  /// **'Who conducted the delivery?'**
+  /// **'Who conducted delivery? *'**
   String get whoConductedDelivery;
 
   /// No description provided for @whoElseConductedDelivery.
@@ -11354,7 +11354,7 @@ abstract class AppLocalizations {
   /// No description provided for @enterComplicationDuringDelivery.
   ///
   /// In en, this message translates to:
-  /// **'complication during delivery'**
+  /// **'complication during delivery *'**
   String get enterComplicationDuringDelivery;
 
   /// No description provided for @discharge_time.

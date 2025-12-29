@@ -2799,16 +2799,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliveryDate => 'Date of Delivery *';
 
   @override
-  String get gestationWeeks => 'Number of weeks of pregnancy during delivery';
+  String get gestationWeeks => 'No. of weeks of pregnancy during delivery';
 
   @override
-  String get deliveryTime => 'Delivery Time (hh:mm)';
+  String get deliveryTime => 'Time of delivery (hh:mm)';
 
   @override
   String get deliveryTimeHint => 'hh:mm';
 
   @override
-  String get placeOfDelivery => 'Place of Delivery';
+  String get placeOfDelivery => 'Place of delivery *';
 
   @override
   String get selectPlaceOfDelivery => 'Select Place of Delivery *';
@@ -2829,7 +2829,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privateHospital => 'Private Hospital';
 
   @override
-  String get deliveryType => 'Type of Delivery *';
+  String get deliveryType => 'Type of delivery *';
 
   @override
   String get normalDelivery => 'Normal';
@@ -2844,7 +2844,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get complications => 'Complications during delivery? *';
 
   @override
-  String get outcomeCount => 'Number of Outcomes *';
+  String get outcomeCount => 'Delivery outcome *';
 
   @override
   String get familyPlanningCounseling => 'Family Planning Counseling Provided?';
@@ -5605,7 +5605,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tba => 'TBA (Non-Skilled birth attendant)';
 
   @override
-  String get whoConductedDelivery => 'Who conducted the delivery?';
+  String get whoConductedDelivery => 'Who conducted delivery? *';
 
   @override
   String get whoElseConductedDelivery => 'Who else did the delivery?';
@@ -5653,7 +5653,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterOtherComplication => 'Enter other complication during delivery';
 
   @override
-  String get enterComplicationDuringDelivery => 'complication during delivery';
+  String get enterComplicationDuringDelivery => 'complication during delivery *';
 
   @override
   String get discharge_time => 'Discharge time (hh:mm)';

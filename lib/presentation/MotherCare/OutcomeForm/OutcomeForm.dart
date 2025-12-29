@@ -251,7 +251,7 @@ class _OutcomeFormFields extends StatelessWidget {
           isEditable: true,
           labelText: l10n.deliveryDate,
           onDateChanged: (d) => bloc.add(DeliveryDateChanged(d)),
-          // readOnly: true,
+           readOnly: true,
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         const SizedBox(height: 8),
@@ -264,8 +264,8 @@ class _OutcomeFormFields extends StatelessWidget {
                 child: Text(
                   l10n.gestationWeeks,
                   style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
@@ -797,10 +797,35 @@ class _OutcomeFormFields extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               SizedBox(
+                width: 25,
+                height: 25,
+                child: InkWell(
+                  onTap: () {
+                    final n = int.tryParse(state.outcomeCount) ?? 0;
+                    final v = n > 0 ? (n - 1).toString() : '0';
+                    bloc.add(OutcomeCountChanged(v));
+                  },
+                  child: Container(
+
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.zero,
+
+                    ),
+                    child: const Icon(Icons.remove, size: 18,color: Colors.white,),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              SizedBox(
                 width: 50,
                 child: TextField(
                   keyboardType: TextInputType.number,
                   onChanged: (v) => bloc.add(OutcomeCountChanged(v)),
+                  textAlign: TextAlign.center,
+                  textAlignVertical: TextAlignVertical.center,
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 8,
@@ -817,6 +842,26 @@ class _OutcomeFormFields extends StatelessWidget {
                     ),
                   ),
                   controller: TextEditingController(text: state.outcomeCount),
+                ),
+              ),
+              const SizedBox(width: 6),
+              SizedBox(
+                width: 25,
+                height: 25,
+                child: InkWell(
+                  onTap: () {
+                    final n = int.tryParse(state.outcomeCount) ?? 0;
+                    final v = (n + 1).toString();
+                    bloc.add(OutcomeCountChanged(v));
+                  },
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    child: const Icon(Icons.add, size: 18),
+                  ),
                 ),
               ),
             ],
