@@ -24,6 +24,7 @@ class Abhalinkscreen extends StatefulWidget {
 class _AbhalinkscreenState extends State<Abhalinkscreen> {
   final AbhaLoginRepository repo = AbhaLoginRepository();
   var abdmEndExt = '@sbx';
+  // var abdmEndExt = '@abdm';
   Timer? _timer;
   int _remainingSeconds = 0;
   bool _showTimer = false;
@@ -59,9 +60,10 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
   AbhaFetchModes? abhaFetchModes;
   Future<void> callFetchModesAPI() async {
     final healthInput = _addressController.text.trim();
+    print("➡ ABHA Address: $healthInput");
     if (healthInput.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter ABHA address")),
+         SnackBar(content: Text("Please enter ABHA address")),
       );
       return;
     }
@@ -73,6 +75,7 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
 
     try {
       final fullAbha = "$healthInput$abdmEndExt";
+      print("➡ ABHA Address: $fullAbha");
       final result = await repo.fetchModes(fullAbha);
 
       print("📥 API Response: $result");
@@ -134,41 +137,66 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
 
   AbhaSelectMode? abhaSelectMode;
   Future<void> requestOtp(String healthId, String authMode) async {
+    // 🔒 Prevent duplicate API calls
+    if (_loading) {
+      print("⏳ OTP request already in progress");
+      return;
+    }
+
+    print("📤 OTP REQUEST START");
+    print("➡ Health ID: $healthId");
+    print("➡ Auth Mode: $authMode");
+
     setState(() {
       _loading = true;
       _error = null;
     });
 
     try {
+      print("🚀 Calling selectModes API...");
+
       final result = await repo.selectModes(healthId, authMode);
 
-      print("📥 OTP Request Response: $result");
+      // 🔥 FORCE RESPONSE LOG
+      print("📥 OTP RESPONSE RECEIVED");
+      print(result);
 
-      // 🔥 CHECK IF API RETURNED ERROR (but still status 200)
+      if (result == null) {
+        print("❌ RESULT IS NULL");
+        setState(() => _loading = false);
+        return;
+      }
+
+      // ❌ Error case
       if (result["status_code"] != null && result["status_code"] != 200) {
-        String msg = result["message"] ?? "OTP request failed";
+        final msg = result["message"] ?? "OTP request failed";
+        print("❌ OTP ERROR: $msg");
 
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(msg)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(msg)));
 
         setState(() {
           _loading = false;
           _error = msg;
         });
-        return; // STOP HERE
+        return;
       }
 
-      // 🔥 If no txnId → also treat as error
+      // ❌ txnId missing
       _txnId = result["txnId"];
       if (_txnId == null) {
-        String msg = result["message"] ?? "txnId missing";
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(msg)));
+        final msg = result["message"] ?? "txnId missing";
+        print("❌ OTP ERROR: txnId missing");
+
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(msg)));
+
         setState(() => _loading = false);
         return;
       }
+
+      print("✅ OTP SENT SUCCESS");
+      print("➡ txnId: $_txnId");
 
       setState(() {
         _showOtpInput = true;
@@ -178,12 +206,14 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result["message"] ?? "OTP sent successfully")),
       );
-    } catch (e) {
+    } catch (e, stack) {
+      print("❌ OTP EXCEPTION: $e");
+      print(stack);
+
       setState(() => _loading = false);
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -362,6 +392,9 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
 
     // 🔥 Disable buttons during timer
     bool disableButtons = _showTimer;
+    bool disableResend = _showTimer;
+    bool enableVerify = _otpController.text.trim().length == 6;
+
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -370,7 +403,7 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
 
         CustomTextField(
           controller: _otpController,
-          labelText: "Enter OTP",
+          labelText: localText.enterOtp,
           hintText: "Please enter OTP",
           keyboardType: TextInputType.number,
           maxLength: 6,
@@ -403,10 +436,11 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             GestureDetector(
-              onTap: disableButtons
+              onTap: disableResend
                   ? null
                   : () async {
-                final healthId = "${_addressController.text.trim()}$abdmEndExt";
+                final healthId =
+                    "${_addressController.text.trim()}$abdmEndExt";
 
                 await requestOtp(
                   healthId,
@@ -419,19 +453,15 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
                 width: 100,
                 height: 30,
                 decoration: BoxDecoration(
-                  color: disableButtons
+                  color: disableResend
                       ? Colors.yellow.withOpacity(0.4)
-                      : Colors.yellow, // filled color
+                      : Colors.yellow,
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.refresh,
-                      size: 16,
-                      color: Colors.white, // icon white
-                    ),
+                  children:  [
+                    Icon(Icons.refresh, size: 16, color: Colors.white),
                     SizedBox(width: 6),
                     Text(
                       localText.resendOtp,
@@ -439,16 +469,16 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
                         color: Colors.white,
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 0.3,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
+
             Spacer(),
             GestureDetector(
-              onTap: (!disableButtons && isOtpEntered)
+              onTap: enableVerify
                   ? () {
                 getOtp(
                   _otpController.text.trim(),
@@ -460,19 +490,16 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
                 width: 100,
                 height: 30,
                 decoration: BoxDecoration(
-                  color: (!disableButtons && isOtpEntered)
+                  color: enableVerify
                       ? AppColors.greenHighlight
-                      : Colors.green.shade200, // filled color
+                      : Colors.green.shade200,
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.check_box_outlined,
-                      size: 16,
-                      color: Colors.white, // icon white
-                    ),
+                  children:  [
+                    Icon(Icons.check_box_outlined,
+                        size: 16, color: Colors.white),
                     SizedBox(width: 6),
                     Text(
                       localText.verifyOtp,
@@ -486,6 +513,7 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
                 ),
               ),
             ),
+
           ],
         ),
       ],
@@ -534,6 +562,7 @@ class _AbhaInput extends StatelessWidget {
   final TextEditingController controller;
    _AbhaInput({required this.controller, super.key});
   var abdmEndExt = '@sbx';
+  // var abdmEndExt = '@abdm';
   @override
   Widget build(BuildContext context) {
     return Container(
