@@ -273,6 +273,8 @@ class _OutcomeFormFields extends StatelessWidget {
                 width: 50,
                 child: TextField(
                   keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  textAlignVertical: TextAlignVertical.center,
                   onChanged: (v) => bloc.add(GestationWeeksChanged(v)),
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.symmetric(
@@ -810,7 +812,7 @@ class _OutcomeFormFields extends StatelessWidget {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: AppColors.primary,
-                      border: Border.all(color: Colors.grey),
+
                       borderRadius: BorderRadius.zero,
 
                     ),
@@ -857,10 +859,10 @@ class _OutcomeFormFields extends StatelessWidget {
                   child: Container(
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
+                      color: AppColors.primary,
                       borderRadius: BorderRadius.zero,
                     ),
-                    child: const Icon(Icons.add, size: 18),
+                    child: const Icon(Icons.add, size: 18, color: Colors.white,),
                   ),
                 ),
               ),
