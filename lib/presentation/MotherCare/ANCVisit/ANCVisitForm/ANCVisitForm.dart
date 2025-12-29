@@ -255,12 +255,9 @@ class _AncvisitformState extends State<Ancvisitform> {
       print('Error fetching house number: $e');
     }
 
-    // Extract LMP and EDD from beneficiary data
     try {
-      // Try to get beneficiary info from different possible locations
       Map<String, dynamic>? beneficiaryInfo = {};
 
-      // First try to get from beneficiary_info field
       if (data?['beneficiary_info'] is String) {
         try {
           beneficiaryInfo = jsonDecode(data!['beneficiary_info']);
@@ -309,7 +306,6 @@ class _AncvisitformState extends State<Ancvisitform> {
         }
       }
 
-      // Process EDD date
       final eddDateStr = beneficiaryInfo?['edd']?.toString();
       if (eddDateStr != null && eddDateStr.isNotEmpty) {
         try {

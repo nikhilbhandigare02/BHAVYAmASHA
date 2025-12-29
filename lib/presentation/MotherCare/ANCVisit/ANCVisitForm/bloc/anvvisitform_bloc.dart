@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../../core/utils/device_info_utils.dart';
 import '../../../../../core/utils/enums.dart';
@@ -188,43 +189,63 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         'form_name': formName,
         'unique_key': formsRefKey,
         'anc_form': {
-          'anc_visit_no': state.ancVisitNo,
+          'anc_visit': state.ancVisitNo,
           'visit_type': state.visitType,
-          'beneficiaryId': beneficiaryId,
-          'beneficiary_ref_key': beneficiaryId,
-          'household_ref_key': householdRefKey,
           'place_of_anc': state.placeOfAnc,
-          'date_of_inspection': state.dateOfInspection?.toIso8601String(),
-          'house_number': state.houseNumber,
-          'woman_name': state.womanName,
+          'date_of_inspection': state.dateOfInspection != null 
+              ? DateFormat('yyyy-MM-dd HH:mm:ss').format(state.dateOfInspection!)
+              : '',
+          'house_no': state.houseNumber,
+          'pw_name': state.womanName,
           'husband_name': state.husbandName,
-          'rch_number': state.rchNumber,
+          'rch_reg_no_of_pw': state.rchNumber,
           'lmp_date': state.lmpDate?.toIso8601String(),
           'edd_date': state.eddDate?.toIso8601String(),
           'week_of_pregnancy': state.weeksOfPregnancy,
-          'gravida': state.gravida,
-          'selected_risks': state.selectedRisks,
-          'has_abortion_complication': state.hasAbortionComplication,
-          'abortion_date': state.abortionDate?.toIso8601String(),
-          'is_breast_feeding': state.isBreastFeeding,
-          'td1_date': state.td1Date?.toIso8601String(),
-          'td2_date': state.td2Date?.toIso8601String(),
-          'td_booster_date': state.tdBoosterDate?.toIso8601String(),
-          'folic_acid_tablets': state.folicAcidTablets,
-          'calcium_vitamin_tablets': state.calciumVitaminD3Tablets,
-          'pre_existing_diseases': state.selectedDiseases,
-          'other_disease': state.otherDisease,
+          'order_of_pregnancy': state.gravida,
+          'is_breastfeeding': state.isBreastFeeding,
+          'date_of_td1': state.td1Date != null 
+              ? DateFormat('yyyy-MM-dd').format(state.td1Date!)
+              : '',
+          'date_of_td2': state.td2Date != null 
+              ? DateFormat('yyyy-MM-dd').format(state.td2Date!)
+              : '',
+          'date_of_td_booster': state.tdBoosterDate != null 
+              ? DateFormat('yyyy-MM-dd').format(state.tdBoosterDate!)
+              : '',
+          'folic_acid_tab_quantity': state.folicAcidTablets,
+          'iron_and_folic_acid_tab_quantity': '', // Add if needed
+          'calcium_and_vit_d_tab_quantity': state.calciumVitaminD3Tablets,
+          'has_albendazole_tab_given': '', // Add if needed
+          'pre_exist_desease': state.selectedDiseases.isNotEmpty ? state.selectedDiseases.join(',') : '',
+          'other_pre_exist_desease': state.otherDisease,
           'weight': state.weight,
-          'systolic': state.systolic,
-          'diastolic': state.diastolic,
+          'bp_of_pw_systolic': state.systolic,
+          'bp_of_pw_diastolic': state.diastolic,
           'hemoglobin': state.hemoglobin,
-          'pregnantWoman': state.givesBirthToBaby,
-          'high_risk': state.highRisk,
-          'has_pw_given_birth': state.givesBirthToBaby,
-          'beneficiary_absent': state.beneficiaryAbsent,
-          'delivery_outcome': state.deliveryOutcome,
+          'is_high_risk': state.highRisk?.toLowerCase() == 'yes' ? 'yes' : 'no',
+          'high_risk_details': state.selectedRisks,
+          'is_abortion': state.hasAbortionComplication,
+          'date_of_abortion': state.abortionDate != null 
+              ? DateFormat('yyyy-MM-dd').format(state.abortionDate!)
+              : '',
+          'is_family_planning_counselling': '', // Add if needed
+          'is_family_planning': '', // Add if needed
+          'method_of_contraception': '', // Add if needed
+          'has_pw_given_birth': state.givesBirthToBaby?.toLowerCase() == 'yes' ? 'yes' : 'no',
+          'delivery_outcome': state.deliveryOutcome?.toLowerCase() == 'live birth' ? 'live_birth' : 
+                             state.deliveryOutcome?.toLowerCase() == 'still birth' ? 'still_birth' : 
+                             state.deliveryOutcome?.toLowerCase() ?? '',
+          'live_birth': state.numberOfChildren == "One Child" ? "1" : 
+                       state.numberOfChildren == "Twins" ? "2" : 
+                       state.numberOfChildren == "Triplets" ? "3" : "",
           'children_arr': _buildChildrenArray(state),
-          "anc_visit_interval":"0",
+          'ancVisitDates': _buildAncVisitDates(state),
+          'prev_visit_date': '',
+          'current_stage': _calculateCurrentStage(state),
+          'completedVisited': state.ancVisitNo,
+          'anc_visit_interval': "4",
+          'next_visit_date': _calculateNextVisitDate(state),
         },
         'created_at': now,
         'updated_at': now,
@@ -434,11 +455,11 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           if (dbRows.isNotEmpty) {
             final saved = Map<String, dynamic>.from(dbRows.first);
 
+            Map<String, dynamic> formDataJson = {};
             Map<String, dynamic> deviceJson = {};
             Map<String, dynamic> appJson = {};
-            Map<String, dynamic> geoJson = {};
             Map<String, dynamic> formRoot = {};
-            Map<String, dynamic> formDataJson = {};
+            Map<String, dynamic> geoJson = {};
 
             try {
               if (saved['device_details'] is String && (saved['device_details'] as String).isNotEmpty) {
@@ -469,15 +490,6 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
               }
             } catch (_) {}
 
-            // All meta values should come from DB / form_json
-            final String userId = (saved['current_user_key'] ?? formRoot['user_id'] ?? formDataJson['user_id'] ?? '').toString();
-            final String facility = (saved['facility_id']?.toString() ?? formRoot['facility_id']?.toString() ?? formDataJson['facility_id']?.toString() ?? '');
-            final String appRoleId = (formRoot['app_role_id'] ?? formDataJson['app_role_id'] ?? '').toString();
-            final String createdAt = (saved['created_date_time'] ?? formRoot['created_date_time'] ?? formDataJson['created_date_time'] ?? '').toString();
-            final String modifiedAt = (saved['modified_date_time'] ?? formRoot['modified_date_time'] ?? formDataJson['modified_date_time'] ?? '').toString();
-
-            final dbHouseholdRefKey = (saved['household_ref_key'] ?? householdRefKey).toString();
-            final dbBeneficiaryRefKey = (saved['beneficiary_ref_key'] ?? beneficiaryId).toString();
 
           }
         } catch (e) {
@@ -545,5 +557,76 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     }
 
     return children;
+  }
+
+  // Helper function to build ANC visit dates array
+  List<Map<String, dynamic>> _buildAncVisitDates(AnvvisitformState state) {
+    final visitDates = <Map<String, dynamic>>[];
+    final lmpDate = state.lmpDate;
+    final eddDate = state.eddDate;
+    
+    if (lmpDate != null && eddDate != null) {
+      // ANC Visit 1: Up to 12 weeks
+      visitDates.add({
+        'from': DateFormat('yyyy-MM-dd HH:mm:ss').format(lmpDate),
+        'to': DateFormat('yyyy-MM-dd HH:mm:ss').format(lmpDate.add(Duration(days: 84))), // 12 weeks
+      });
+      
+      // ANC Visit 2: 13-20 weeks
+      final visit2From = lmpDate.add(Duration(days: 85));
+      visitDates.add({
+        'from': DateFormat('yyyy-MM-dd HH:mm:ss').format(visit2From),
+        'to': DateFormat('yyyy-MM-dd HH:mm:ss').format(lmpDate.add(Duration(days: 140))), // 20 weeks
+      });
+      
+      // ANC Visit 3: 21-28 weeks
+      final visit3From = lmpDate.add(Duration(days: 141));
+      visitDates.add({
+        'from': DateFormat('yyyy-MM-dd HH:mm:ss').format(visit3From),
+        'to': DateFormat('yyyy-MM-dd HH:mm:ss').format(lmpDate.add(Duration(days: 196))), // 28 weeks
+      });
+      
+      // ANC Visit 4: 29-32 weeks
+      final visit4From = lmpDate.add(Duration(days: 197));
+      visitDates.add({
+        'from': DateFormat('yyyy-MM-dd HH:mm:ss').format(visit4From),
+        'to': DateFormat('yyyy-MM-dd HH:mm:ss').format(lmpDate.add(Duration(days: 224))), // 32 weeks
+      });
+      
+      // ANC Visit 5: 33-36 weeks
+      final visit5From = lmpDate.add(Duration(days: 225));
+      visitDates.add({
+        'from': DateFormat('yyyy-MM-dd HH:mm:ss').format(visit5From),
+        'to': DateFormat('yyyy-MM-dd HH:mm:ss').format(lmpDate.add(Duration(days: 252))), // 36 weeks
+      });
+      
+      // ANC Visit 6: 37-40 weeks
+      final visit6From = lmpDate.add(Duration(days: 253));
+      final visit6To = eddDate.isBefore(lmpDate.add(Duration(days: 280))) ? eddDate : lmpDate.add(Duration(days: 280));
+      visitDates.add({
+        'from': DateFormat('yyyy-MM-dd HH:mm:ss').format(visit6From),
+        'to': DateFormat('yyyy-MM-dd HH:mm:ss').format(visit6To),
+      });
+    }
+    
+    return visitDates;
+  }
+
+  // Helper function to calculate current stage based on weeks of pregnancy
+  int _calculateCurrentStage(AnvvisitformState state) {
+    final weeks = int.tryParse(state.weeksOfPregnancy ?? '0') ?? 0;
+    if (weeks <= 12) return 1;
+    if (weeks <= 20) return 2;
+    if (weeks <= 28) return 3;
+    if (weeks <= 32) return 4;
+    if (weeks <= 36) return 5;
+    return 6;
+  }
+
+  // Helper function to calculate next visit date
+  String _calculateNextVisitDate(AnvvisitformState state) {
+    final currentDate = state.dateOfInspection ?? DateTime.now();
+    final nextVisitDate = currentDate.add(Duration(days: 28)); // 4 weeks interval
+    return DateFormat('yyyy-MM-dd HH:mm:ss').format(nextVisitDate);
   }
 }

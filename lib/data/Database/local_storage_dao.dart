@@ -1316,7 +1316,6 @@ class LocalStorageDao {
 
     if (ashaUniqueKey.isEmpty) return [];
 
-    // First, get all beneficiaries with anc_due status
     final beneficiaries = await db.rawQuery('''
       SELECT DISTINCT B.*
       FROM beneficiaries_new B

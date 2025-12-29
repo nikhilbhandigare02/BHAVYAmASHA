@@ -109,33 +109,67 @@ class _HBNCListScreenState
     try {
       if (beneficiaryId.isEmpty) return 1;
       final db = await DatabaseProvider.instance.database;
-      final refKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
-      if (refKey.isEmpty) return 1;
-      final rows = await db.rawQuery(
-        'SELECT * FROM ${FollowupFormDataTable.table} WHERE forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 ORDER BY created_date_time DESC LIMIT 1',
-        [refKey, beneficiaryId],
-      );
-      if (rows.isEmpty) return 1;
-      final s = rows.first['form_json']?.toString() ?? '';
-      if (s.isEmpty) return 1;
-      final decoded = jsonDecode(s);
-      final fd = (decoded is Map) ? Map<String, dynamic>.from(decoded['anc_form'] as Map? ?? {}) : <String, dynamic>{};
       
-      // Check for children_arr first (new structure)
-      final childrenArr = fd['children_arr'] as List?;
-      if (childrenArr != null && childrenArr.isNotEmpty) {
-        final count = childrenArr.length;
-        print('👶 Child count from children_arr: $count for beneficiary $beneficiaryId');
-        return (count > 3) ? 3 : (count < 1) ? 1 : count;
+      // First try to get from ANC form
+      final ancRefKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+      if (ancRefKey.isNotEmpty) {
+        final ancRows = await db.rawQuery(
+          'SELECT * FROM ${FollowupFormDataTable.table} WHERE forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 ORDER BY created_date_time DESC LIMIT 1',
+          [ancRefKey, beneficiaryId],
+        );
+        if (ancRows.isNotEmpty) {
+          final s = ancRows.first['form_json']?.toString() ?? '';
+          if (s.isNotEmpty) {
+            final decoded = jsonDecode(s);
+            final fd = (decoded is Map) ? Map<String, dynamic>.from(decoded['anc_form'] as Map? ?? {}) : <String, dynamic>{};
+            
+            // Check for children_arr first (new structure)
+            final childrenArr = fd['children_arr'] as List?;
+            if (childrenArr != null && childrenArr.isNotEmpty) {
+              final count = childrenArr.length;
+              print('👶 Child count from children_arr: $count for beneficiary $beneficiaryId');
+              return (count > 3) ? 3 : (count < 1) ? 1 : count;
+            }
+            
+            final raw = fd['live_birth']?.toString().trim().toLowerCase() ?? '';
+            if (raw.isNotEmpty) {
+              if (raw == 'one' || raw == 'single' || raw == '1') return 1;
+              if (raw == 'twins' || raw == 'twin' || raw == '2') return 2;
+              if (raw == 'triplets' || raw == 'triplet' || raw == '3') return 3;
+              final n = int.tryParse(raw);
+              if (n != null && n >= 1) {
+                return (n > 3 ? 3 : n);
+              }
+            }
+          }
+        }
       }
       
-      final raw = fd['live_birth']?.toString().trim().toLowerCase() ?? '';
-      if (raw.isEmpty) return 1;
-      if (raw == 'one' || raw == 'single' || raw == '1') return 1;
-      if (raw == 'twins' || raw == 'twin' || raw == '2') return 2;
-      if (raw == 'triplets' || raw == 'triplet' || raw == '3') return 3;
-      final n = int.tryParse(raw);
-      return (n == null || n < 1) ? 1 : (n > 3 ? 3 : n);
+      // If ANC form doesn't have live_birth count, check delivery outcome form
+      final deliveryOutcomeKey = '4r7twnycml3ej1vg';
+      final deliveryRows = await db.rawQuery(
+        'SELECT * FROM ${FollowupFormDataTable.table} WHERE forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 ORDER BY created_date_time DESC LIMIT 1',
+        [deliveryOutcomeKey, beneficiaryId],
+      );
+      
+      if (deliveryRows.isNotEmpty) {
+        final s = deliveryRows.first['form_json']?.toString() ?? '';
+        if (s.isNotEmpty) {
+          final decoded = jsonDecode(s);
+          final formData = (decoded is Map) ? Map<String, dynamic>.from(decoded['form_data'] as Map? ?? {}) : <String, dynamic>{};
+          
+          final outcomeCount = formData['outcome_count']?.toString() ?? '';
+          if (outcomeCount.isNotEmpty) {
+            final n = int.tryParse(outcomeCount);
+            if (n != null && n >= 1) {
+              print('👶 Child count from delivery outcome: $n for beneficiary $beneficiaryId');
+              return (n > 3 ? 3 : n);
+            }
+          }
+        }
+      }
+      
+      return 1;
     } catch (e) {
       print('❌ Error determining child_tab_count for $beneficiaryId: $e');
       return 1;

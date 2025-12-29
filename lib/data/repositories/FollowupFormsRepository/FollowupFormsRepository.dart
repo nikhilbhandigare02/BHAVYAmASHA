@@ -39,8 +39,6 @@ class FollowupFormsRepository {
 
     print('📌 Remaining followup forms to sync: $remainingToSync');
 
-
-    // Do not resend already-synced rows
     final int isSynced = (saved['is_synced'] is int) ? saved['is_synced'] as int : 0;
     if (isSynced == 1) {
       return {'skipped': true, 'reason': 'already_synced'};
@@ -395,19 +393,19 @@ final formType = formJsonValue['form_type'];
             'date_of_inspection': src['date_of_inspection'],
             'house_number': _pick(src, 'house_number', 'house_no'),
 
-            // ---------------- PERSONAL ----------------
+
             'woman_name': _pick(src, 'woman_name', 'pw_name'),
             'husband_name': src['husband_name'],
             'rch_number': _pick(src, 'rch_number', 'rch_reg_no_of_pw'),
 
-            // ---------------- PREGNANCY ----------------
-            'lmp_date': src['lmp_date'],
-            'edd_date': src['edd_date'],
+
+            'lmp_date': _pick(src,'lmp_date', 'lmp') ,
+            'edd_date': _pick(src, 'edd_date' 'edd'),
             'weeks_of_pregnancy':
             _pick(src, 'weeks_of_pregnancy', 'week_of_pregnancy'),
             'gravida': _pick(src, 'gravida', 'order_of_pregnancy'),
 
-            // ---------------- RISK ----------------
+
             'selected_risks':
             _pick(src, 'selected_risks', 'high_risk_details') ?? [],
             'high_risk': _pick(src, 'high_risk', 'is_high_risk'),
@@ -415,7 +413,6 @@ final formType = formJsonValue['form_type'];
             _pick(src, 'has_abortion_complication', 'is_abortion'),
             'abortion_date': _pick(src, 'abortion_date', 'date_of_abortion'),
 
-            // ---------------- HEALTH ----------------
             'is_breast_feeding':
             _pick(src, 'is_breast_feeding', 'is_breastfeeding'),
             'weight': src['weight'],
@@ -423,24 +420,23 @@ final formType = formJsonValue['form_type'];
             'diastolic': _pick(src, 'diastolic', 'bp_of_pw_diastolic'),
             'hemoglobin': src['hemoglobin'],
 
-            // ---------------- IMMUNIZATION ----------------
             'td1_date': _pick(src, 'td1_date', 'date_of_td1'),
             'td2_date': _pick(src, 'td2_date', 'date_of_td2'),
             'td_booster_date': _pick(src, 'td_booster_date', 'date_of_td_booster'),
 
-            // ---------------- MEDICATION ----------------
             'folic_acid_tablets':
             _pick(src, 'folic_acid_tablets', 'folic_acid_tab_quantity'),
             'pre_existing_disease':
             _pick(src, 'pre_existing_disease', 'pre_exist_desease'),
 
-            // ---------------- DELIVERY (STRING ALWAYS) ----------------
             'gives_birth_to_baby': _normalizeYesNo(
               _pick(src, 'gives_birth_to_baby', 'has_pw_given_birth'),
             ),
             'delivery_outcome': src['delivery_outcome'],
+            'delivery_outcome': src['delivery_outcome'],
+            'delivery_outcome': src['delivery_outcome'],
+            'delivery_outcome': src['delivery_outcome'],
 
-            // ---------------- STATUS ----------------
             'beneficiary_absent':
             _pick(src, 'beneficiary_absent', 'is_beneficiary_absent'),
             'anc_visit_interval':
@@ -602,7 +598,6 @@ final formType = formJsonValue['form_type'];
 
           formDataMap = {
             ...src,
-            // ensure core BLoC-managed fields exist with expected keys
             'current_tab': src['current_tab'],
             'current_tab_index': src['current_tab_index'],
             'weight_grams': src['weight_grams'],

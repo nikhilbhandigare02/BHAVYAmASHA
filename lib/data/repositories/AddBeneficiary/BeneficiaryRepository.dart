@@ -315,8 +315,6 @@ class BeneficiaryRepository {
   }
 
   Map<String, dynamic> _mapBeneficiaryInfo(Map<String, dynamic> rec) {
-
-
     dynamic rawInfo = rec['beneficiary_info'];
     Map<String, dynamic> info;
 
@@ -342,8 +340,7 @@ class BeneficiaryRepository {
       return info;
     }
 
-
-
+    // Map API fields to local structure
     final nameMap = info['name'] is Map
         ? Map<String, dynamic>.from(info['name'] as Map)
         : <String, dynamic>{};
@@ -378,84 +375,143 @@ class BeneficiaryRepository {
         : <String, dynamic>{};
 
     final mapped = <String, dynamic>{
-      'memberType': info['memberType'],
-      'relation': info['relation'] ?? info['relation_to_head'] ?? '',
+      // Basic info - API to local mapping
+      'memberType': info['ben_type'] == 'Child' ? 'child' : 'adult',
+      'relation': info['relaton_with_family_head'] ?? info['relation_to_head'] ?? '',
       'name': fullName,
+      
+      // Household info
+      'houseNo': info['house_no'] ?? '',
+      'headName': info['member_name'] ?? fullName,
+      'fatherName': info['father_or_spouse_name'],
+      'motherName': info['mother_name'] ?? '',
+      
+      // DOB / age - API mapping
+      'useDob': true,
+      'dob': info['dob']?.toString() ?? info['date_of_birth']?.toString(),
+      'approxAge': info['age'],
+      'years': info['age'],
+      'months': 0,
+      'days': 0,
+      'updateDay': DateTime.now().day,
+      'updateMonth': DateTime.now().month,
+      'updateYear': DateTime.now().year,
 
-      'houseNo': info['houseNo'],
-      'headName': fullName,
-      'fatherName': info['father_name'] ?? info['fatherName'],
-      'motherName': info['mother_name'] ?? info['motherName'],
+      // Children summary - API mapping
+      'children': info['have_children'] == 'yes' ? [] : [],
+      'birthOrder': info['birth_order'],
+      'totalBorn': info['total_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),
+      'totalLive': info['total_live_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),
+      'totalMale': info['total_male_children'] ?? 0,
+      'totalFemale': info['total_female_children'] ?? 0,
+      'youngestAge': info['age_of_youngest_child'],
+      'ageUnit': info['age_of_youngest_child_unit'] ?? 'years',
+      'youngestGender': info['gender_of_younget_child'],
 
-      // DOB / age
-      'useDob': info['useDob'] ?? true,
-      'dob': info['dob']?.toString(),
-      'approxAge': info['approxAge'],
-      'years': info['years'],
-      'months': info['months'],
-      'days': info['days'],
-      'updateDay': info['updateDay'],
-      'updateMonth': info['updateMonth'],
-      'updateYear': info['updateYear'],
-
-      // Children summary (for compatibility with children bloc)
-      'children': info['children'] ?? [],
-      'birthOrder': info['birthOrder'],
-      'totalBorn': info['totalBorn'],
-      'totalLive': info['totalLive'],
-      'totalMale': info['totalMale'],
-      'totalFemale': info['totalFemale'],
-      'youngestAge': info['youngestAge'],
-      'ageUnit': info['ageUnit'],
-      'youngestGender': info['youngestGender'],
-
-      // Demographics
+      // Demographics - API mapping
       'gender': _genderText(info['gender']?.toString()),
       'occupation': info['occupation'],
       'education': info['education'],
       'religion': info['religion'],
       'category': info['category'],
 
-      // Health / pregnancy
-      'hasChildren': info['hasChildren'],
-      'isPregnant': info['isPregnant'],
-      'lmp': info['lmp']?.toString(),
-      'edd': info['edd']?.toString(),
-      'beneficiaryType': info['beneficiaryType'],
+      // Health / pregnancy - API mapping
+      'hasChildren': info['have_children'] ?? 'no',
+      'isPregnant': info['is_women_pregenant'] ?? '',
+      'lmp': info['lmp_date']?.toString(),
+      'edd': info['edd_date']?.toString(),
+      'beneficiaryType': info['type_of_beneficiary'] ?? info['ben_type'],
 
-      // Contact & IDs
-      'mobileOwner': info['mobileOwner'],
-      'mobileNo': (info['mobileNo'] ?? info['phone'])?.toString(),
-      'abhaAddress': info['abhaAddress'],
-      'abhaNumber': info['abhaNumber'],
-      'voterId': info['voterId'],
-      'rationId': info['rationId'],
-      'rationCardId': info['rationCardId'],
-      'phId': info['phId'],
-      'personalHealthId': info['personalHealthId'],
-      'bankAcc': info['bankAcc'],
-      'bankAccountNumber': info['bankAccountNumber'],
-      'ifsc': info['ifsc'],
-      'ifscCode': info['ifscCode'],
+      // Contact & IDs - API mapping
+      'mobileOwner': info['whose_mob_no'] ?? '',
+      'mobileNo': (info['mobile_no'] ?? info['phone'])?.toString(),
+      'abhaAddress': info['abha_no'],
+      'abhaNumber': info['abha_no'],
+      'voterId': info['voter_id'],
+      'rationId': info['ration_id'],
+      'rationCardId': info['ration_card_id'],
+      'phId': info['ph_id'],
+      'personalHealthId': info['personal_health_id'],
+      'bankAcc': info['account_number'],
+      'bankAccountNumber': info['account_number'],
+      'ifsc': info['ifsc_code'],
+      'ifscCode': info['ifsc_code'],
 
-      // Marital
-      'maritalStatus': _titleCase((info['marital_status'] ?? info['maritalStatus'])?.toString()),
-      'ageAtMarriage': info['ageAtMarriage'],
-      'spouseName': info['spouseName'],
+      // Marital - API mapping
+      'maritalStatus': _titleCase(info['marital_status']?.toString()),
+      'ageAtMarriage': info['age_at_marrige'],
+      'spouseName': info['name_of_spouse'] ?? info['father_or_spouse_name'],
 
-      // Address fields flattened to match local structure
-      'village': addr['village'],
-      'ward': info['ward'],
-      'wardNo': info['wardNo'],
-      'mohalla': info['mohalla'],
-      'mohallaTola': info['mohallaTola'],
+      // Address fields - API mapping
+      'village': info['village_name'] ?? addr['village'] ?? '',
+      'ward': info['ward_name'] ?? '',
+      'wardNo': info['ward_no'] ?? '',
+      'mohalla': info['mohalla_name'] ?? '',
+      'mohallaTola': info['mohalla_name'] ?? '',
+      'state': addr['state'] ?? '',
+      'district': addr['district'] ?? '',
+      'block': addr['block'] ?? '',
 
-      // Misc fields that may be used in local flows
+      // Misc fields - API mapping
       'weight': info['weight'],
-      'childSchool': info['childSchool'],
-      'birthCertificate': info['birthCertificate'],
-      'memberStatus': info['memberStatus'],
-      'relation_to_head': info['relation_to_head'] ?? info['relationToHead'] ?? '',
+      'childSchool': info['is_school_going_child'],
+      'birthCertificate': info['is_birth_certificate_issued'],
+      'memberStatus': info['member_status'] ?? '',
+      'relation_to_head': info['relaton_with_family_head'] ?? info['relationToHead'] ?? '',
+      
+      // Additional API-specific fields
+      'is_abha_verified': info['is_abha_verified'] ?? false,
+      'is_rch_id_verified': info['is_rch_id_verified'] ?? false,
+      'is_fetched_from_abha': info['is_fetched_from_abha'] ?? false,
+      'is_fetched_from_rch': info['is_fetched_from_rch'] ?? false,
+      'ben_type': info['ben_type'] ?? '',
+      'is_new_member': info['is_new_member'] ?? false,
+      'isFamilyhead': info['isFamilyhead'] ?? false,
+      'isFamilyheadWife': info['isFamilyheadWife'] ?? false,
+      'type_of_beneficiary': info['type_of_beneficiary'] ?? '',
+      
+      // Family planning fields
+      'is_family_planning': info['is_family_planning'] ?? 0,
+      'method_of_contraception': info['method_of_contraception'],
+      
+      // Bank details
+      'bankName': info['bank_name'],
+      'branchName': info['branch_name'],
+      
+      // Disease/health conditions
+      'suffering_from_a_serious_illness': info['suffering_from_a_serious_illness'],
+      'non_communicable_diseases': info['non_communicable_diseases'],
+      'communicable_diseases': info['communicable_diseases'],
+      'ncd_registration_id': info['ncd_registration_id'],
+      'nikshay_id': info['nikshay_id'],
+      'any_other_communicable_diseases': info['any_other_communicable_diseases'],
+      
+      // Death related fields
+      'date_of_death': info['date_of_death'],
+      'death_place': info['death_place'],
+      'reason_of_death': info['reason_of_death'],
+      'other_reason_for_death': info['other_reason_for_death'],
+      
+      // Aadhaar details
+      'adhar_no': info['adhar_no'],
+      'family_head_adhar_no': info['family_head_adhar_no'],
+      
+      // Poverty status
+      'poverty_line': info['poverty_line'],
+      
+      // Migration status
+      'is_migrated': info['is_migrated'],
+      
+      // Contraception quantities
+      'quantity_of_condoms': info['quantity_of_condoms'],
+      'quantity_of_mala_n_daily': info['quantity_of_mala_n_daily'],
+      'quantity_of_chhaya_weekly': info['quantity_of_chhaya_weekly'],
+      'quantity_of_ecp': info['quantity_of_ecp'],
+      
+      // Family planning dates
+      'date_of_antra': info['date_of_antra'],
+      'removal_date': info['removal_date'],
+      'reason': info['reason'],
     };
 
     mapped.removeWhere((key, value) => value == null);
