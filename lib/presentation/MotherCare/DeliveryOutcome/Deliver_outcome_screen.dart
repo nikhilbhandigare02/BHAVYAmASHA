@@ -526,7 +526,7 @@ ORDER BY d.created_date_time DESC
                 : _filtered.isEmpty
                 ? Center(
               child: Text(
-                'No pregnancy outcomes found',
+                l10n?.noPregnancyOutcomesFound ?? 'No pregnancy outcomes found',
                 style: TextStyle(
                   fontSize: 16.sp,
                   color: Colors.grey,
@@ -566,9 +566,7 @@ ORDER BY d.created_date_time DESC
     final displayHhId = (hhId.length > 11) ? hhId.substring(hhId.length - 11) : hhId;
 
 
-    print('🔄 Rendering card for: $name');
-    print('   - HH ID: $hhId, Reg Date: $registrationDate');
-    print('   - Mobile: $mobileNo, RCH: $richId');
+
 
     return Card(
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
@@ -591,9 +589,7 @@ ORDER BY d.created_date_time DESC
               beneficiaryData['unique_key'] = beneficiaryRefKey;
               beneficiaryData['BeneficiaryID'] = beneficiaryRefKey;
 
-              print('🔑 Passing to form:');
-              print('   - unique_key: ${beneficiaryData['household_id']}');
-              print('   - BeneficiaryID: ${beneficiaryData['BeneficiaryID']}');
+
             }
 
             else if (data['BeneficiaryID'] != null) {
@@ -603,7 +599,7 @@ ORDER BY d.created_date_time DESC
 
             if ((beneficiaryData['BeneficiaryID'] as String?)?.isEmpty ?? true) {
               print('❌ No BeneficiaryID could be determined!');
-              showAppSnackBar(context, 'Error: Missing beneficiary information');
+              showAppSnackBar(context, t.errorMissingBeneficiaryInfo ?? 'Error: Missing beneficiary information');
               return;
             }
 

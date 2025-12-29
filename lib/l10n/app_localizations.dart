@@ -3929,11 +3929,65 @@ abstract class AppLocalizations {
   /// **'Father'**
   String get relationFather;
 
-  /// No description provided for @relationMother.
+  /// No description provided for @noPregnancyOutcomesFound.
   ///
   /// In en, this message translates to:
-  /// **'Mother'**
-  String get relationMother;
+  /// **'No pregnancy outcomes found'**
+  String get noPregnancyOutcomesFound;
+
+  /// No description provided for @errorMissingBeneficiaryInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: Missing beneficiary information'**
+  String get errorMissingBeneficiaryInfo;
+
+  /// No description provided for @deliveryDateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery date is required'**
+  String get deliveryDateRequired;
+
+  /// No description provided for @placeOfDeliveryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Place of delivery is required'**
+  String get placeOfDeliveryRequired;
+
+  /// No description provided for @deliveryTypeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery type is required'**
+  String get deliveryTypeRequired;
+
+  /// No description provided for @outcomeCountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Outcome count is required and must be a number'**
+  String get outcomeCountRequired;
+
+  /// No description provided for @familyPlanningCounselingRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Family planning counseling is required'**
+  String get familyPlanningCounselingRequired;
+
+  /// No description provided for @failedToSaveDeliveryOutcomeSecure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save delivery outcome to secure storage'**
+  String get failedToSaveDeliveryOutcomeSecure;
+
+  /// No description provided for @failedToSaveDeliveryOutcomeDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save delivery outcome to database'**
+  String get failedToSaveDeliveryOutcomeDatabase;
+
+  /// No description provided for @unexpectedErrorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred. Please try again.'**
+  String get unexpectedErrorOccurred;
 
   /// No description provided for @relationOther.
   ///
@@ -11098,12 +11152,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'High Risk'**
   String get high_Risk;
-
-  /// No description provided for @noPregnancyOutcomesFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No pregnancy outcomes found'**
-  String get noPregnancyOutcomesFound;
 
   /// No description provided for @nextHBNCDate.
   ///

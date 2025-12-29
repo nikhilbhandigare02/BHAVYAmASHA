@@ -1593,6 +1593,22 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     );
   }
 
+  String? _normalizeGender(String? gender) {
+    if (gender == null || gender.isEmpty) return null;
+    
+    final normalized = gender.toLowerCase().trim();
+    switch (normalized) {
+      case 'male':
+        return 'Male';
+      case 'female':
+        return 'Female';
+      case 'transgender':
+        return 'Transgender';
+      default:
+        return gender; // Return as-is if it doesn't match known patterns
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
@@ -1606,8 +1622,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               DateTime? _parseDate(String? iso) =>
                   (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
 
-              // Extract years, months, days from stored approximate age string, e.g.
-              // "35 years 2 months 10 days" -> ("35","2","10")
+
               String? _approxPart(String? approx, int index) {
                 if (approx == null) return null;
                 final s = approx.trim();
@@ -1638,7 +1653,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     years: years,
                     months: months,
                     days: days,
-                    gender: m['gender'],
+                    gender: _normalizeGender(m['gender']),
                     occupation: m['occupation'] == 'Other'
                         ? 'Other'
                         : m['occupation'],
@@ -1675,7 +1690,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     beneficiaryType: m['beneficiaryType'],
                     maritalStatus: m['maritalStatus'],
                     ageAtMarriage: m['ageAtMarriage'],
-                    spouseName: m['spouseName'],
+                    spouseName: (m['spouseName'] != null && m['spouseName'].toString().trim().isNotEmpty)
+                        ? m['spouseName']
+                        : m['memberName'],
                     AfhRichIdChange: m['AfhRichIdChange'],
                     hasChildren: m['hasChildren'],
                     isPregnant: m['isPregnant'],
@@ -2060,8 +2077,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           ),
                         ];
 
-                        final showSpouse = state.maritalStatus == 'Married';
-                        final showChildren = state.hasChildren == 'Yes';
+                        final showSpouse = state.maritalStatus == 'Married' || state.maritalStatus == 'married';
+                        final showChildren = state.hasChildren == 'Yes' || state.hasChildren == 'yes';
 
                         if (showSpouse) {
                           final spBloc = context.read<SpousBloc>();

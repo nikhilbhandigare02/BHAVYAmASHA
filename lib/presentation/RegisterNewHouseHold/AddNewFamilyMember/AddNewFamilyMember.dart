@@ -1945,7 +1945,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         case 'Father':
                                           return l.relationFather;
                                         case 'Mother':
-                                          return l.relationMother;
+                                          return l.mother;
                                         case 'Brother':
                                           return l.relationBrother;
                                         case 'Sister':

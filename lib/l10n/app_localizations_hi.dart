@@ -1501,7 +1501,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get incentiveFormBeneficiaryCountLabel => 'लाभार्थी की संख्या : [*]';
 
   @override
-  String get incentiveFormBeneficiaryCountHint => 'लाभार्थियों की संख्या';
+  String get incentiveFormBeneficiaryCountHint => 'Number of beneficiaries';
 
   @override
   String get incentiveFormWorkAmountLabel => 'कार्य की राशी : [*]';
@@ -1938,7 +1938,34 @@ class AppLocalizationsHi extends AppLocalizations {
   String get relationFather => 'पिता';
 
   @override
-  String get relationMother => 'माता';
+  String get noPregnancyOutcomesFound => 'कोई गर्भावस्था का परिणाम नहीं मिला';
+
+  @override
+  String get errorMissingBeneficiaryInfo => 'त्रुटि: लाभार्थी की जानकारी गायब है';
+
+  @override
+  String get deliveryDateRequired => 'प्रसव की तिथि आवश्यक है';
+
+  @override
+  String get placeOfDeliveryRequired => 'प्रसव स्थान आवश्यक है';
+
+  @override
+  String get deliveryTypeRequired => 'प्रसव प्रकार आवश्यक है';
+
+  @override
+  String get outcomeCountRequired => 'परिणाम की संख्या आवश्यक है और एक संख्या होनी चाहिए';
+
+  @override
+  String get familyPlanningCounselingRequired => 'परिवार नियोजन परामर्श आवश्यक है';
+
+  @override
+  String get failedToSaveDeliveryOutcomeSecure => 'सुरक्षित स्टोरेज में प्रसव परिणाम सहेजने में विफल';
+
+  @override
+  String get failedToSaveDeliveryOutcomeDatabase => 'डेटाबेस में प्रसव परिणाम सहेजने में विफल';
+
+  @override
+  String get unexpectedErrorOccurred => 'एक अप्रत्याशित त्रुटि हुई। कृपया फिर से प्रयास करें।';
 
   @override
   String get relationOther => 'Other';
@@ -5525,9 +5552,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get high_Risk => 'उच्च जोखिम';
-
-  @override
-  String get noPregnancyOutcomesFound => 'कोई गर्भावस्था का परिणाम नहीं मिला';
 
   @override
   String get nextHBNCDate => 'अगली एचबीएनसी तिथि';

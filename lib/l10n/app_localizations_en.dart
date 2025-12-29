@@ -1938,7 +1938,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get relationFather => 'Father';
 
   @override
-  String get relationMother => 'Mother';
+  String get noPregnancyOutcomesFound => 'No pregnancy outcomes found';
+
+  @override
+  String get errorMissingBeneficiaryInfo => 'Error: Missing beneficiary information';
+
+  @override
+  String get deliveryDateRequired => 'Delivery date is required';
+
+  @override
+  String get placeOfDeliveryRequired => 'Place of delivery is required';
+
+  @override
+  String get deliveryTypeRequired => 'Delivery type is required';
+
+  @override
+  String get outcomeCountRequired => 'Outcome count is required and must be a number';
+
+  @override
+  String get familyPlanningCounselingRequired => 'Family planning counseling is required';
+
+  @override
+  String get failedToSaveDeliveryOutcomeSecure => 'Failed to save delivery outcome to secure storage';
+
+  @override
+  String get failedToSaveDeliveryOutcomeDatabase => 'Failed to save delivery outcome to database';
+
+  @override
+  String get unexpectedErrorOccurred => 'An unexpected error occurred. Please try again.';
 
   @override
   String get relationOther => 'Other';
@@ -5525,9 +5552,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get high_Risk => 'High Risk';
-
-  @override
-  String get noPregnancyOutcomesFound => 'No pregnancy outcomes found';
 
   @override
   String get nextHBNCDate => 'Next HBNC Date';
