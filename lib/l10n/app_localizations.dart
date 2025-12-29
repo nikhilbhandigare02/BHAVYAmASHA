@@ -3929,11 +3929,65 @@ abstract class AppLocalizations {
   /// **'Father'**
   String get relationFather;
 
-  /// No description provided for @relationMother.
+  /// No description provided for @noPregnancyOutcomesFound.
   ///
   /// In en, this message translates to:
-  /// **'Mother'**
-  String get relationMother;
+  /// **'No pregnancy outcomes found'**
+  String get noPregnancyOutcomesFound;
+
+  /// No description provided for @errorMissingBeneficiaryInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: Missing beneficiary information'**
+  String get errorMissingBeneficiaryInfo;
+
+  /// No description provided for @deliveryDateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery date is required'**
+  String get deliveryDateRequired;
+
+  /// No description provided for @placeOfDeliveryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Place of delivery is required'**
+  String get placeOfDeliveryRequired;
+
+  /// No description provided for @deliveryTypeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery type is required'**
+  String get deliveryTypeRequired;
+
+  /// No description provided for @outcomeCountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Outcome count is required and must be a number'**
+  String get outcomeCountRequired;
+
+  /// No description provided for @familyPlanningCounselingRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Family planning counseling is required'**
+  String get familyPlanningCounselingRequired;
+
+  /// No description provided for @failedToSaveDeliveryOutcomeSecure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save delivery outcome to secure storage'**
+  String get failedToSaveDeliveryOutcomeSecure;
+
+  /// No description provided for @failedToSaveDeliveryOutcomeDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save delivery outcome to database'**
+  String get failedToSaveDeliveryOutcomeDatabase;
+
+  /// No description provided for @unexpectedErrorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred. Please try again.'**
+  String get unexpectedErrorOccurred;
 
   /// No description provided for @relationOther.
   ///
@@ -11099,12 +11153,6 @@ abstract class AppLocalizations {
   /// **'High Risk'**
   String get high_Risk;
 
-  /// No description provided for @noPregnancyOutcomesFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No pregnancy outcomes found'**
-  String get noPregnancyOutcomesFound;
-
   /// No description provided for @nextHBNCDate.
   ///
   /// In en, this message translates to:
@@ -13655,6 +13703,276 @@ abstract class AppLocalizations {
   /// **'Your password has been changed successfully'**
   String get successUpdatePassMsg;
 
+  /// No description provided for @invalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter valid user credentials'**
+  String get invalidCredentials;
+
+  /// No description provided for @authenticationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed. Please check your credentials'**
+  String get authenticationFailed;
+
+  /// No description provided for @pleaseEnterUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter username'**
+  String get pleaseEnterUsername;
+
+  /// No description provided for @pleaseEnterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter password'**
+  String get pleaseEnterPassword;
+
+  /// No description provided for @pleaseEnterValidUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter valid username'**
+  String get pleaseEnterValidUsername;
+
+  /// No description provided for @pleaseEnterValidPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter valid password'**
+  String get pleaseEnterValidPassword;
+
+  /// No description provided for @enterValidNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter valid number'**
+  String get enterValidNumber;
+
+  /// No description provided for @selectAgeUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Select age unit'**
+  String get selectAgeUnit;
+
+  /// No description provided for @fatherGuardianNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **' Please enter Father / Guardian name'**
+  String get fatherGuardianNameRequired;
+
+  /// No description provided for @motherGuardianNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **' Please enter mother name'**
+  String get motherGuardianNameRequired;
+
+  /// No description provided for @youngestChildAgeDaysRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter age of Youngest Child between Days '**
+  String get youngestChildAgeDaysRange;
+
+  /// No description provided for @youngestChildAgeMonthsRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter age of Youngest Child between Months'**
+  String get youngestChildAgeMonthsRange;
+
+  /// No description provided for @youngestChildAgeYearsRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter age of Youngest Child between Years'**
+  String get youngestChildAgeYearsRange;
+
+  /// No description provided for @pleaseEnterHouseNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter House number'**
+  String get pleaseEnterHouseNumber;
+
+  /// No description provided for @houseNumberValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'House number can only contain letters, numbers, spaces, dash or slash'**
+  String get houseNumberValidation;
+
+  /// No description provided for @pleaseEnterDateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Date of birth'**
+  String get pleaseEnterDateOfBirth;
+
+  /// No description provided for @dateOfBirthFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth cannot be in the future'**
+  String get dateOfBirthFuture;
+
+  /// No description provided for @ageMustBe15Years.
+  ///
+  /// In en, this message translates to:
+  /// **'Age must be 15 years or more'**
+  String get ageMustBe15Years;
+
+  /// No description provided for @ageCannotBeMoreThan110.
+  ///
+  /// In en, this message translates to:
+  /// **'Age cannot be more than 110 years'**
+  String get ageCannotBeMoreThan110;
+
+  /// No description provided for @pleaseEnterAgeBetween15To110.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter age between 15 to 110 years'**
+  String get pleaseEnterAgeBetween15To110;
+
+  /// No description provided for @yearsBetween0And110.
+  ///
+  /// In en, this message translates to:
+  /// **'Years must be between 0 and 110'**
+  String get yearsBetween0And110;
+
+  /// No description provided for @monthsBetween0And11.
+  ///
+  /// In en, this message translates to:
+  /// **'Months must be between 0 and 11'**
+  String get monthsBetween0And11;
+
+  /// No description provided for @daysBetween0And30.
+  ///
+  /// In en, this message translates to:
+  /// **'Days must be between 0 and 30'**
+  String get daysBetween0And30;
+
+  /// No description provided for @ageCannotBeZero.
+  ///
+  /// In en, this message translates to:
+  /// **'Age cannot be zero'**
+  String get ageCannotBeZero;
+
+  /// No description provided for @minimumAge15Years.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum age must be 15 years'**
+  String get minimumAge15Years;
+
+  /// No description provided for @maximumAge110Years.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum age is 110 years'**
+  String get maximumAge110Years;
+
+  /// No description provided for @pleaseEnterAgeBetween1DayTo15Year.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the age between 1 day to 15 year'**
+  String get pleaseEnterAgeBetween1DayTo15Year;
+
+  /// No description provided for @pleaseEnterLMP.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter LMP'**
+  String get pleaseEnterLMP;
+
+  /// No description provided for @pleaseEnterMethodOfContraception.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Method of contraception'**
+  String get pleaseEnterMethodOfContraception;
+
+  /// No description provided for @pleaseEnterExpectedDeliveryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Expected Delivery Date'**
+  String get pleaseEnterExpectedDeliveryDate;
+
+  /// No description provided for @pleaseEnterFamilyPlanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Are you/your partner adopting family planning'**
+  String get pleaseEnterFamilyPlanning;
+
+  /// No description provided for @pleaseEnterWhoseMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Whose mobile'**
+  String get pleaseEnterWhoseMobile;
+
+  /// No description provided for @pleaseEnterMobileNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Mobile no.'**
+  String get pleaseEnterMobileNo;
+
+  /// No description provided for @mobileNo10DigitsStart6To9.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile no. must be 10 digits and start with 6-9'**
+  String get mobileNo10DigitsStart6To9;
+
+  /// No description provided for @pleaseEnterMaritalStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Marital Status'**
+  String get pleaseEnterMaritalStatus;
+
+  /// No description provided for @pleaseEnterFamilyHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Family Head'**
+  String get pleaseEnterFamilyHead;
+
+  /// No description provided for @familyHeadLettersOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Head can only contain letters'**
+  String get familyHeadLettersOnly;
+
+  /// No description provided for @pleaseEnterRelationWithFamilyHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Please Enter Relation with family head'**
+  String get pleaseEnterRelationWithFamilyHead;
+
+  /// No description provided for @pleaseEnterSpouseName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Spouse Name'**
+  String get pleaseEnterSpouseName;
+
+  /// No description provided for @pleaseEnterIsWomanPregnant.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Is Woman Pregnant'**
+  String get pleaseEnterIsWomanPregnant;
+
+  /// No description provided for @pleaseEnterRelationHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Relation head'**
+  String get pleaseEnterRelationHead;
+
+  /// No description provided for @pleaseEnterNameOfMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Name of Member'**
+  String get pleaseEnterNameOfMember;
+
+  /// No description provided for @pleaseEnterMemberType.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Member type'**
+  String get pleaseEnterMemberType;
+
+  /// No description provided for @invalidMemberType.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid member type'**
+  String get invalidMemberType;
+
+  /// No description provided for @accountNumberAtLeast10Digits.
+  ///
+  /// In en, this message translates to:
+  /// **'Account number must be at least 10 digits'**
+  String get accountNumberAtLeast10Digits;
+
   /// No description provided for @diseaseTb.
   ///
   /// In en, this message translates to:
@@ -13876,6 +14194,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other reason apart from maternal complication'**
   String get otherReasonApartFromMaternalComplication;
+
+  /// No description provided for @loadData.
+  ///
+  /// In en, this message translates to:
+  /// **'Data is being fetched'**
+  String get loadData;
+
+  /// No description provided for @loadDataComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Data fetching completed '**
+  String get loadDataComplete;
+
+  /// No description provided for @dataNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'User data not available '**
+  String get dataNotFound;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

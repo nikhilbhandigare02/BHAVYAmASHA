@@ -1091,8 +1091,22 @@ class _OutcomeFormFields extends StatelessWidget {
                                 ?.child
                             as _OutcomeFormView)
                         .beneficiaryData;
+                
+                // Pass localized messages to the BLoC
                 bloc.add(
-                  OutcomeFormSubmitted(beneficiaryData: beneficiaryData),
+                  OutcomeFormSubmitted(
+                    beneficiaryData: beneficiaryData,
+                    localizedMessages: {
+                      'deliveryDateRequired': l10n.deliveryDateRequired,
+                      'placeOfDeliveryRequired': l10n.placeOfDeliveryRequired,
+                      'deliveryTypeRequired': l10n.deliveryTypeRequired,
+                      'outcomeCountRequired': l10n.outcomeCountRequired,
+                      'familyPlanningCounselingRequired': l10n.familyPlanningCounselingRequired,
+                      'failedToSaveDeliveryOutcomeSecure': l10n.failedToSaveDeliveryOutcomeSecure,
+                      'failedToSaveDeliveryOutcomeDatabase': l10n.failedToSaveDeliveryOutcomeDatabase,
+                      'unexpectedErrorOccurred': l10n.unexpectedErrorOccurred,
+                    },
+                  ),
                 );
               },
             ),

@@ -290,7 +290,7 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                       case 'Father':
                                         return l.relationFather;
                                       case 'Mother':
-                                        return l.relationMother;
+                                        return l.mother;
                                       case 'Brother':
                                         return l.relationBrother;
                                       case 'Sister':

@@ -31,20 +31,18 @@ String? captureSpousError(String? message) {
   }
   return null;
 }
-bool validateAllSpousFields(SpousState state) {
+bool validateAllSpousFields(SpousState state, AppLocalizations l) {
   final form = spousFormKey.currentState;
   bool isValid = true;
 
-  // Clear previous errors
   spousLastFormError = null;
 
-  // Validate form fields if form exists
   if (form != null) {
     isValid = form.validate();
   }
 
   if (state.mobileOwner == null || state.mobileOwner!.isEmpty) {
-    spousLastFormError = 'Whose mobile number is required';
+    spousLastFormError = l.whoseMobileNumberRequired;
     if (isValid) {
       scrollToFirstError();
     }
@@ -56,7 +54,7 @@ bool validateAllSpousFields(SpousState state) {
   if (state.mobileOwner == 'Other' &&
       (state.mobileOwnerOtherRelation == null ||
           state.mobileOwnerOtherRelation!.trim().isEmpty)) {
-    spousLastFormError = 'Please specify relation with mobile number holder';
+    spousLastFormError = l.relation_with_mobile_holder_required;
     if (isValid) {
       scrollToFirstError();
     }
@@ -65,13 +63,13 @@ bool validateAllSpousFields(SpousState state) {
 
   if (state.mobileOwner != 'Family Head') {
     if (state.mobileNo == null || state.mobileNo!.trim().isEmpty) {
-      spousLastFormError = 'Mobile number is required';
+      spousLastFormError = l.mobileNumberRequired;
       if (isValid) {
         scrollToFirstError();
       }
       isValid = false;
     } else if (!RegExp(r'^[6-9]\d{9}$').hasMatch(state.mobileNo!)) {
-      spousLastFormError = 'Mobile number must be 10 digits and start with 6-9';
+      spousLastFormError = l.mobileNo10DigitsStart6To9;
       if (isValid) {
         scrollToFirstError();
       }
@@ -81,7 +79,7 @@ bool validateAllSpousFields(SpousState state) {
 
   if (state.gender == 'Female' &&
       (state.isPregnant == null || state.isPregnant!.isEmpty)) {
-    spousLastFormError = 'Please select if the woman is pregnant';
+    spousLastFormError = l.pleaseEnterIsWomanPregnant;
     if (isValid) {
       scrollToFirstError();
     }
@@ -90,14 +88,14 @@ bool validateAllSpousFields(SpousState state) {
 
   if (state.isPregnant == 'Yes') {
     if (state.lmp == null) {
-      spousLastFormError = 'Last menstrual period date is required';
+      spousLastFormError = l.pleaseEnterLMP;
       if (isValid) {
         scrollToFirstError();
       }
       isValid = false;
     }
     if (state.edd == null) {
-      spousLastFormError = 'Expected delivery date is required';
+      spousLastFormError = l.pleaseEnterExpectedDeliveryDate;
       if (isValid) {
         scrollToFirstError();
       }
@@ -541,7 +539,6 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
     if (gender != null) {
       spBloc.add(SpUpdateGender(gender));
-      // Also update relation if needed (e.g. if head is male → spouse female)
       final headGender = context.read<AddFamilyHeadBloc>().state.gender;
       final expectedRelation = headGender == 'Male' ? 'Wife' : 'Husband';
       if (gender == 'Female' && headGender == 'Male') {
@@ -607,7 +604,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     'Wife',
                   ],
                   validator: (value) => captureSpousError(
-                    value == null || value.isEmpty ? 'Relation with family head is required' : null,
+                    value == null || value.isEmpty ? l.relationWithFamilyHeadRequired : null,
                   ),
 
                   getLabel: (s) {
@@ -688,7 +685,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   // ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Name of member is required';
+                      return l.pleaseEnterNameOfMember;
                     }
                     return null;
                   },
@@ -724,7 +721,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   onChanged: widget.isEdit ? null : (v) => context.read<SpousBloc>().add(SpUpdateSpouseName(v.trim())),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Spouse name is required';
+                      return l.pleaseEnterSpouseName;
                     }
                     return null;
                   },
@@ -1176,8 +1173,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     children: [
                       Expanded(
                         child: CustomTextField(
-                            labelText: 'RCH ID',
-                            hintText: 'Enter 12 digit RCH ID',
+                            labelText: l.rchIdLabel,
+                            hintText: l.enter_12_digit_rch_id,
                             keyboardType: TextInputType.number,
                             initialValue: state.RichIDChanged,
                             inputFormatters: [
@@ -1195,7 +1192,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                               if (value.isNotEmpty && value.length != 12) {
                                 WidgetsBinding.instance.addPostFrameCallback((_) {
                                   if (mounted) {
-                                    showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
+                                    showAppSnackBar(context, l.rch_id_must_be_12_digits);
                                   }
                                 });
                               }
@@ -1205,7 +1202,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                                 return null; // Field is optional
                               }
                               if (value.length != 12) {
-                                return 'Must be 12 digits';
+                                return  l.rch_id_must_be_12_digits;
                               }
                               return null;
                             }
@@ -1216,22 +1213,22 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         height: 3.5.h,
                         width: 15.h,
                         child: RoundButton(
-                          title: 'VERIFY',
+                          title: l.verify,
                           width: 160,
                           borderRadius: 8,
                           fontSize: 12,
                           onPress: () async {
                             final rchIdText = state.RichIDChanged?.trim() ?? '';
                             if (rchIdText.isEmpty) {
-                              showAppSnackBar(context, 'Please enter RCH ID');
+                              showAppSnackBar(context, l.enter_12_digit_rch_id);
                               return;
                             }
                             if (rchIdText.length != 12) {
-                              showAppSnackBar(context, 'RCH ID must be exactly 12 digits');
+                              showAppSnackBar(context, l.rch_id_must_be_12_digits);
                               return;
                             }
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Verifying RCH ID...'), duration: Duration(seconds: 10)),
+                              SnackBar(content: Text(l.verifying_rch_id), duration: Duration(seconds: 10)),
                             );
                             if (state.gender == 'Female') {
                               final result = await fetchRCHDataForScreen(
@@ -1247,13 +1244,14 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                                     ? DateTime.tryParse(data['dob'])
                                     : null));
 
-                                showAppSnackBar(context, 'RCH ID verified and data loaded successfully!');
+                                showAppSnackBar(context, l.rchIdVerifiedSuccess);
                               } else {
-                                final message = result?['message'] ?? 'Invalid or not found RCH ID';
+                                final message = result?['message'] ?? l.failed_to_fetch_rch_data;
                                 showAppSnackBar(context, message);
                               }
                             } else {
-                              showAppSnackBar(context, 'RCH ID is only applicable for female members');
+                              showAppSnackBar(context, l.rchIdFemaleOnly
+                              );
                             }
                           },
                         ),
@@ -1389,7 +1387,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   // ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return captureSpousError('Whose mobile number is required');
+                      return captureSpousError(l.whoseMobileNumberRequired);
                     }
                     return captureSpousError(null);
                   },
@@ -1411,7 +1409,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       validator: (value) {
                         if (state.mobileOwner == 'Other') {
                           if (value == null || value.trim().isEmpty) {
-                            return captureSpousError('Relation with mobile no. holder is required');
+                            return captureSpousError(l.relation_with_mobile_holder_required);
                           }
                           return captureSpousError(null);
                         }
@@ -1441,11 +1439,11 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     }
 
                     if (value == null || value.trim().isEmpty) {
-                      return captureSpousError('Mobile number is required');
+                      return captureSpousError(l.mobileNumberRequired);
                     }
 
                     if (!RegExp(r'^[6-9]\d{9}$').hasMatch(value)) {
-                      return captureSpousError('Mobile number must be 10 digits and start with 6-9');
+                      return captureSpousError(l.mobileNo10DigitsStart6To9);
                     }
 
                     // Clear any previous error if validation passes
@@ -1483,11 +1481,12 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                         if (mounted) {
                           showAppSnackBar(
                               context,
-                              'Bank account number must be between 11 to 18 digits'
+                              l.bank_account_length_error
                           );
                         }
                       });
-                      return 'Invalid length';
+                      return                               l.bank_account_length_error
+                      ;
                     }
 
                     return null;
@@ -1519,9 +1518,9 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
                     String? error;
                     if (value.length != 11) {
-                      error = 'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                      error = l.ifscValidationMessage;
                     } else if (!RegExp(r'^[A-Z]{4}0\d{6}$').hasMatch(value)) {
-                      error = 'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                      error = l.ifscValidationMessage;
                     }
 
                     if (error != null) {
@@ -1630,7 +1629,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     // ),
                     validator: (value) {
                       if (state.gender == 'Female' && (value == null || value.isEmpty)) {
-                        return captureSpousError('Please select is the women pregnant');
+                        return captureSpousError(l.pleaseEnterIsWomanPregnant);
                       }
                       return captureSpousError(null);
                     },
@@ -1663,7 +1662,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       },
                       validator: (date) {
                         if (state.isPregnant == 'Yes' && date == null) {
-                          return captureSpousError('Last menstrual period date is required');
+                          return captureSpousError(l.pleaseEnterLMP);
                         }
                         return captureSpousError(null);
                       },
@@ -1688,7 +1687,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       },
                       validator: (date) {
                         if (state.isPregnant == 'Yes' && date == null) {
-                          return captureSpousError('Expected delivery date is required');
+                          return captureSpousError(l.pleaseEnterExpectedDeliveryDate);
                         }
                         return captureSpousError(null);
                       },

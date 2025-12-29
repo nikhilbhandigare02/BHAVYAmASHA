@@ -19,6 +19,7 @@ import 'bloc/anvvisitform_bloc.dart';
 import 'package:medixcel_new/core/widgets/MultiSelect/MultiSelect.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:medixcel_new/core/widgets/SuccessDialogbox/SuccessDialogbox.dart';
+import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 
 class Ancvisitform extends StatefulWidget {
   final Map<String, dynamic>? beneficiaryData;
@@ -936,9 +937,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                 final msg = state.error!.isNotEmpty
                     ? state.error!
                     : (l10n?.somethingWentWrong ?? 'Something went wrong');
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(msg)));
+                showAppSnackBar(context, msg);
               }
               if (state.isSuccess) {
                 if (state.givesBirthToBaby == (l10n?.yes ?? 'Yes')) {
@@ -956,12 +955,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                     },
                   );
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        l10n?.saveSuccess ?? 'Form Submitted successfully',
-                      ),
-                    ),
+                  showAppSnackBar(
+                    context,
+                    l10n?.saveSuccess ?? 'Form Submitted successfully',
                   );
                   Navigator.pop(context, true);
                 }
@@ -2295,27 +2291,15 @@ class _AncvisitformState extends State<Ancvisitform> {
                                         bloc.add(const SubmitPressed());
                                       } else {
                                         if (visitType.isEmpty) {
-                                          ScaffoldMessenger.of(
+                                          showAppSnackBar(
                                             context,
-                                          ).showSnackBar(
-                                             SnackBar(
-                                              content: Text(
-                                                l10n?.selectVisitTypeError ??  "Please select visit type",
-                                              ),
-                                              duration: Duration(seconds: 2),
-                                            ),
+                                            l10n?.selectVisitTypeError ?? "Please select visit type",
                                           );
                                           return;
                                         }
-                                        ScaffoldMessenger.of(
+                                        showAppSnackBar(
                                           context,
-                                        ).showSnackBar(
-                                           SnackBar(
-                                            content: Text(
-                                              l10n?.pleaseFillFieldsCorrectly ?? "Please fill all required fields correctly",
-                                            ),
-                                            duration: Duration(seconds: 2),
-                                          ),
+                                          l10n?.pleaseFillFieldsCorrectly ?? "Please fill all required fields correctly",
                                         );
                                       }
                                     },

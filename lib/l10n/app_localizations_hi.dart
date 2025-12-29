@@ -1501,7 +1501,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get incentiveFormBeneficiaryCountLabel => 'लाभार्थी की संख्या : [*]';
 
   @override
-  String get incentiveFormBeneficiaryCountHint => 'लाभार्थियों की संख्या';
+  String get incentiveFormBeneficiaryCountHint => 'Number of beneficiaries';
 
   @override
   String get incentiveFormWorkAmountLabel => 'कार्य की राशी : [*]';
@@ -1938,7 +1938,34 @@ class AppLocalizationsHi extends AppLocalizations {
   String get relationFather => 'पिता';
 
   @override
-  String get relationMother => 'माता';
+  String get noPregnancyOutcomesFound => 'कोई गर्भावस्था का परिणाम नहीं मिला';
+
+  @override
+  String get errorMissingBeneficiaryInfo => 'त्रुटि: लाभार्थी की जानकारी गायब है';
+
+  @override
+  String get deliveryDateRequired => 'प्रसव की तिथि आवश्यक है';
+
+  @override
+  String get placeOfDeliveryRequired => 'प्रसव स्थान आवश्यक है';
+
+  @override
+  String get deliveryTypeRequired => 'प्रसव प्रकार आवश्यक है';
+
+  @override
+  String get outcomeCountRequired => 'परिणाम की संख्या आवश्यक है और एक संख्या होनी चाहिए';
+
+  @override
+  String get familyPlanningCounselingRequired => 'परिवार नियोजन परामर्श आवश्यक है';
+
+  @override
+  String get failedToSaveDeliveryOutcomeSecure => 'सुरक्षित स्टोरेज में प्रसव परिणाम सहेजने में विफल';
+
+  @override
+  String get failedToSaveDeliveryOutcomeDatabase => 'डेटाबेस में प्रसव परिणाम सहेजने में विफल';
+
+  @override
+  String get unexpectedErrorOccurred => 'एक अप्रत्याशित त्रुटि हुई। कृपया फिर से प्रयास करें।';
 
   @override
   String get relationOther => 'Other';
@@ -5527,9 +5554,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get high_Risk => 'उच्च जोखिम';
 
   @override
-  String get noPregnancyOutcomesFound => 'कोई गर्भावस्था का परिणाम नहीं मिला';
-
-  @override
   String get nextHBNCDate => 'अगली एचबीएनसी तिथि';
 
   @override
@@ -6805,6 +6829,141 @@ class AppLocalizationsHi extends AppLocalizations {
   String get successUpdatePassMsg => 'आपका पासवर्ड सफलतापूर्वक बदल दिया गया है।';
 
   @override
+  String get invalidCredentials => 'कृपया वैध उपयोगकर्ता प्रमाण-पत्र दर्ज करें';
+
+  @override
+  String get authenticationFailed => 'प्रमाणीकरण विफल हुआ। कृपया अपने प्रमाण-पत्र जांचें';
+
+  @override
+  String get pleaseEnterUsername => 'कृपया उपयोगकर्ता नाम दर्ज करें';
+
+  @override
+  String get pleaseEnterPassword => 'कृपया पासवर्ड दर्ज करें';
+
+  @override
+  String get pleaseEnterValidUsername => 'कृपया वैध उपयोगकर्ता नाम दर्ज करें';
+
+  @override
+  String get pleaseEnterValidPassword => 'कृपया वैध पासवर्ड दर्ज करें';
+
+  @override
+  String get enterValidNumber => 'कृपया वैध संख्या दर्ज करें';
+
+  @override
+  String get selectAgeUnit => 'कृपया आयु की इकाई चुनें';
+
+  @override
+  String get fatherGuardianNameRequired => 'कृपया पिता / अभिभावक का नाम दर्ज करें';
+
+  @override
+  String get motherGuardianNameRequired => 'कृपया माता का नाम दर्ज करें';
+
+  @override
+  String get youngestChildAgeDaysRange => 'कृपया सबसे छोटे बच्चे की आयु दिनों में दर्ज करें ';
+
+  @override
+  String get youngestChildAgeMonthsRange => 'कृपया सबसे छोटे बच्चे की आयु महीनों में दर्ज करें ';
+
+  @override
+  String get youngestChildAgeYearsRange => 'कृपया सबसे छोटे बच्चे की आयु वर्षों में दर्ज करें ';
+
+  @override
+  String get pleaseEnterHouseNumber => 'कृपया मकान नंबर दर्ज करें';
+
+  @override
+  String get houseNumberValidation => 'मकान नंबर में केवल अक्षर, संख्या, स्पेस, डैश (-) या स्लैश (/) हो सकते हैं';
+
+  @override
+  String get pleaseEnterDateOfBirth => 'कृपया जन्म तिथि दर्ज करें';
+
+  @override
+  String get dateOfBirthFuture => 'जन्म तिथि भविष्य की नहीं हो सकती';
+
+  @override
+  String get ageMustBe15Years => 'आयु कम से कम 15 वर्ष होनी चाहिए';
+
+  @override
+  String get ageCannotBeMoreThan110 => 'आयु 110 वर्ष से अधिक नहीं हो सकती';
+
+  @override
+  String get pleaseEnterAgeBetween15To110 => 'कृपया 15 से 110 वर्ष के बीच की आयु दर्ज करें';
+
+  @override
+  String get yearsBetween0And110 => 'वर्ष 0 से 110 के बीच होने चाहिए';
+
+  @override
+  String get monthsBetween0And11 => 'महीने 0 से 11 के बीच होने चाहिए';
+
+  @override
+  String get daysBetween0And30 => 'दिन 0 से 30 के बीच होने चाहिए';
+
+  @override
+  String get ageCannotBeZero => 'आयु शून्य नहीं हो सकती';
+
+  @override
+  String get minimumAge15Years => 'न्यूनतम आयु 15 वर्ष होनी चाहिए';
+
+  @override
+  String get maximumAge110Years => 'अधिकतम आयु 110 वर्ष है';
+
+  @override
+  String get pleaseEnterAgeBetween1DayTo15Year => 'कृपया 1 दिन से 15 वर्ष के बीच की आयु दर्ज करें';
+
+  @override
+  String get pleaseEnterLMP => 'कृपया अंतिम मासिक धर्म तिथि (LMP) दर्ज करें';
+
+  @override
+  String get pleaseEnterMethodOfContraception => 'कृपया गर्भनिरोधक विधि दर्ज करें';
+
+  @override
+  String get pleaseEnterExpectedDeliveryDate => 'कृपया अपेक्षित प्रसव तिथि दर्ज करें';
+
+  @override
+  String get pleaseEnterFamilyPlanning => 'कृपया बताएं कि आप/आपका साथी परिवार नियोजन अपना रहे हैं या नहीं';
+
+  @override
+  String get pleaseEnterWhoseMobile => 'कृपया बताएं यह मोबाइल किसका है';
+
+  @override
+  String get pleaseEnterMobileNo => 'कृपया मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get mobileNo10DigitsStart6To9 => 'मोबाइल नंबर 10 अंकों का होना चाहिए और 6 से 9 के बीच से शुरू होना चाहिए';
+
+  @override
+  String get pleaseEnterMaritalStatus => 'कृपया वैवाहिक स्थिति दर्ज करें';
+
+  @override
+  String get pleaseEnterFamilyHead => 'कृपया परिवार के मुखिया का नाम दर्ज करें';
+
+  @override
+  String get familyHeadLettersOnly => 'परिवार के मुखिया का नाम केवल अक्षरों में होना चाहिए';
+
+  @override
+  String get pleaseEnterRelationWithFamilyHead => 'कृपया परिवार के मुखिया से संबंध दर्ज करें';
+
+  @override
+  String get pleaseEnterSpouseName => 'कृपया पति/पत्नी का नाम दर्ज करें';
+
+  @override
+  String get pleaseEnterIsWomanPregnant => 'कृपया बताएं महिला गर्भवती है या नहीं';
+
+  @override
+  String get pleaseEnterRelationHead => 'कृपया मुखिया से संबंध दर्ज करें';
+
+  @override
+  String get pleaseEnterNameOfMember => 'कृपया सदस्य का नाम दर्ज करें';
+
+  @override
+  String get pleaseEnterMemberType => 'कृपया सदस्य का प्रकार दर्ज करें';
+
+  @override
+  String get invalidMemberType => 'अमान्य सदस्य प्रकार';
+
+  @override
+  String get accountNumberAtLeast10Digits => 'खाता संख्या कम से कम 10 अंकों की होनी चाहिए';
+
+  @override
   String get diseaseTb => 'क्षय रोग (टीबी)';
 
   @override
@@ -6914,4 +7073,13 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get otherReasonApartFromMaternalComplication => 'Other reason apart from maternal complication';
+
+  @override
+  String get loadData => 'डेटा लोड किया जा रहा है';
+
+  @override
+  String get loadDataComplete => 'डेटा प्राप्त करना पूर्ण हुआ';
+
+  @override
+  String get dataNotFound => 'उपयोगकर्ता डेटा उपलब्ध नहीं है';
 }

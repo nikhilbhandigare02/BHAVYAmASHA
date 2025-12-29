@@ -44,36 +44,36 @@ class Validations {
 
     final value = int.tryParse(raw);
     if (value == null) {
-      return 'Enter valid number';
+      return l10n.enterValidNumber;
     }
     if (unit == null || unit.isEmpty) {
-      return 'Select age unit';
+      return l10n.selectAgeUnit;
     }
 
     if (unit == l10n.days) {
       if (value < 1 || value > 30) {
-        return 'Please enter age of Youngest Child between ${l10n.days}: 1 day to 30 days';
+        return '${l10n.youngestChildAgeDaysRange} ${l10n.days}: 1 day to 30 days';
       }
     } else if (unit == l10n.months) {
       if (value < 1 || value > 11) {
-        return 'Please enter age of Youngest Child between ${l10n.months}: 1 month to 11 months';
+        return '${l10n.youngestChildAgeMonthsRange} ${l10n.months}: 1 month to 11 months';
       }
     } else if (unit == l10n.years) {
       if (value < 1 || value > 90) {
-        return 'Please enter age of Youngest Child between ${l10n.years}: 1 year to 90 years';
+        return '${l10n.youngestChildAgeYearsRange} ${l10n.years}: 1 year to 90 years';
       }
     }
     return null;
   }
   static String? validateHouseNo(AppLocalizations l10n, String? houseNo) {
     if (houseNo == null || houseNo.isEmpty) {
-      return 'Please enter House number';
+      return l10n.enterHouseNumber;
     }
 
     // Allow only letters, numbers, space, dash, and slash
     final regex = RegExp(r'^[a-zA-Z0-9\s\-\/]+$');
     if (!regex.hasMatch(houseNo)) {
-      return 'House number can only contain letters, numbers, spaces, dash or slash';
+      return l10n.houseNumberValidation;
     }
 
     return null;
@@ -88,7 +88,7 @@ class Validations {
       return l10n.newPasswordTooShort;
     }
 
-    return null; // ✅ Valid
+    return null;
   }
 
   static String? validateReEnterPassword(AppLocalizations l10n, String? password, String? newPassword) {
@@ -109,7 +109,7 @@ class Validations {
 
   static String? validateDOB(AppLocalizations l10n, DateTime? dob) {
     if (dob == null) {
-      return 'Please enter Date of birth';
+      return l10n.pleaseEnterDateOfBirth;
     }
 
     final today = DateTime.now();
@@ -117,7 +117,7 @@ class Validations {
     final todayDate = DateTime(today.year, today.month, today.day);
 
     if (dobDate.isAfter(todayDate)) {
-      return 'Date of birth cannot be in the future';
+      return l10n.dateOfBirthFuture;
     }
 
     int years = today.year - dob.year;
@@ -139,12 +139,12 @@ class Validations {
 
     // Check if age is exactly 15 years or more
     if (years < 15 || (years == 15 && (months < 0 || (months == 0 && days < 0)))) {
-      return 'Age must be 15 years or more';
+      return l10n.ageMustBe15Years;
     }
 
     // Check maximum age (110 years)
     if (years > 110 || (years == 110 && (months > 0 || days > 0))) {
-      return 'Age cannot be more than 110 years';
+      return l10n.ageCannotBeMoreThan110;
     }
 
     return null; // ✅ valid
@@ -159,39 +159,37 @@ class Validations {
     if ((years?.trim().isEmpty ?? true) &&
         (months?.trim().isEmpty ?? true) &&
         (days?.trim().isEmpty ?? true)) {
-      return 'Please enter age between 15 to 110 years';
+      return l10n.pleaseEnterAgeBetween15To110;
     }
 
-    // Parse values, defaulting to 0 if empty or invalid
     final y = int.tryParse((years ?? '').trim()) ?? 0;
     final m = int.tryParse((months ?? '').trim()) ?? 0;
     final d = int.tryParse((days ?? '').trim()) ?? 0;
 
-    // Validate individual fields
     if (y < 0 || y > 110) {
-      return 'Years must be between 0 and 110';
+      return l10n.yearsBetween0And110;
     }
     if (m < 0 || m > maxMonths) {
-      return 'Months must be between 0 and 11';
+      return l10n.monthsBetween0And11;
     }
     if (d < 0 || d > maxDays) {
-      return 'Days must be between 0 and 30';
+      return l10n.daysBetween0And30;
     }
 
     // Check if all zeros
     if (y == 0 && m == 0 && d == 0) {
-      return 'Age cannot be zero';
+      return l10n.ageCannotBeZero;
     }
 
     // Calculate total years for range check
     final totalYears = y + (m / 12.0) + (d / 365.0);
 
     if (totalYears < minAgeYears) {
-      return 'Minimum age must be $minAgeYears years';
+      return l10n.minimumAge15Years;
     }
 
     if (totalYears > maxAgeYears) {
-      return 'Maximum age is $maxAgeYears years';
+      return l10n.maximumAge110Years;
     }
 
     return null;
@@ -210,36 +208,33 @@ class Validations {
     final dd = d ?? 0;
 
     if (yy == 0 && mm == 0 && dd == 0) {
-      return 'Please enter the age between 1 day to 15 year';
+      return l10n.pleaseEnterAgeBetween1DayTo15Year;
     }
 
     final totalYears = yy + (mm / 12.0) + (dd / 365.0);
 
     if (totalYears < minAgeYears || totalYears > maxAgeYears) {
-      return 'Please enter the age between 1 day to 15 year';
+      return l10n.pleaseEnterAgeBetween1DayTo15Year;;
     }
 
     return null;
   }
   static String? validateLMP(AppLocalizations l10n, DateTime? dob) {
     if (dob == null) {
-      return 'Please enter LMP'; // or l10n.dobRequired
+      return l10n.pleaseEnterLMP;
     }
-
-
-
-    return null; // ✅ valid
+    return null;
   }
+
   static String? validateAntra(AppLocalizations l10n, String? antra) {
     if (antra == null || antra.trim().isEmpty || antra == 'Select') {
-      return 'Please enter Method of contraception';
+      return l10n.pleaseEnterMethodOfContraception;
     }
-
     return null;
   }
   static String? validateEDD(AppLocalizations l10n, DateTime? dob) {
     if (dob == null) {
-      return 'Please enter Expected Delivery Date ';
+      return l10n.pleaseEnterExpectedDeliveryDate;
     }
 
 
@@ -248,7 +243,7 @@ class Validations {
   }
   static String? validateAdoptingPlan(AppLocalizations l10n, String? dob) {
     if (dob == null || dob.trim().isEmpty || dob == 'Select') {
-      return 'Please enter Are you/your partner adopting family planning';
+      return l10n.pleaseEnterFamilyPlanning;
     }
 
     return null; // ✅ valid
@@ -256,26 +251,26 @@ class Validations {
 
   static String? validateGender(AppLocalizations l10n, String? gender) {
     if (gender == null || gender.isEmpty) {
-      return 'Please enter Gender';
+      return l10n.pleaseEnterGender;
     }
 
     return null;
   }
   static String? validateWhoMobileNo(AppLocalizations l10n, String? mobileNo) {
     if (mobileNo == null || mobileNo.isEmpty) {
-      return 'Please enter Whose mobile';
+      return l10n.pleaseEnterWhoseMobile;
     }
 
     return null;
   }
   static String? validateMobileNo(AppLocalizations l10n, String? mobileNo) {
     if (mobileNo == null || mobileNo.isEmpty) {
-      return 'Please enter Mobile no.';
+      return l10n.pleaseEnterMobileNo;
     }
 
     final regex = RegExp(r'^[6-9]\d{9}$');
     if (!regex.hasMatch(mobileNo)) {
-      return 'Mobile no. must be 10 digits and start with 6-9';
+      return l10n.mobileNo10DigitsStart6To9;
     }
 
     return null; // ✅ valid
@@ -283,20 +278,20 @@ class Validations {
 
   static String? validateMaritalStatus(AppLocalizations l10n, String? maritalStatus) {
     if (maritalStatus == null || maritalStatus.isEmpty) {
-      return 'Please enter Marital Status';
+      return l10n.pleaseEnterMaritalStatus;
     }
 
     return null;
   }
   static String? validateFamilyHead(AppLocalizations l10n, String? familyHead) {
     if (familyHead == null || familyHead.isEmpty) {
-      return 'Please enter Family Head';
+      return l10n.pleaseEnterFamilyHead;
     }
 
     // Only letters and spaces allowed between words
     final regex = RegExp(r'^[a-zA-Z\s]+$');
     if (!regex.hasMatch(familyHead)) {
-      return 'Family Head can only contain letters';
+      return l10n.familyHeadLettersOnly;
     }
 
     return null;
@@ -304,7 +299,7 @@ class Validations {
 
   static String? validateFamilyHeadRelation(AppLocalizations l10n, String? familyHead) {
     if (familyHead == null || familyHead.isEmpty) {
-      return 'Please Enter Relation with family head';
+      return l10n.enter_relation_with_family_head;
     }
 
 
@@ -314,28 +309,29 @@ class Validations {
 
   static String? validateSpousName(AppLocalizations l10n, String? spousName) {
     if (spousName == null || spousName.isEmpty) {
-      return 'Please enter FSpous Name';
+      return l10n.pleaseEnterSpouseName;
     }
 
     return null;
   }
+
   static String? validateIsPregnant(AppLocalizations l10n, String? isPregnant) {
     if (isPregnant == null || isPregnant.isEmpty) {
-      return 'Please enter Is Woman Pregnant';
+      return l10n.pleaseEnterIsWomanPregnant;
     }
 
     return null;
   }
   static String? validateRelationWithHead(AppLocalizations l10n, String? relation) {
     if (relation == null || relation.isEmpty) {
-      return 'Please enter Relation head';
+      return l10n.enter_relation_with_family_head;
     }
 
     return null;
   }
   static String? validateNameofMember(AppLocalizations l10n, String? name) {
     if (name == null || name.isEmpty) {
-      return 'Please enter Name of Member';
+      return l10n.pleaseEnterNameOfMember;
     }
 
     return null;
@@ -343,31 +339,24 @@ class Validations {
 
   static String? validateMemberType(AppLocalizations l10n, String? memberType) {
     if (memberType == null || memberType.isEmpty) {
-      return 'Please enter Member type';
+      return l10n.pleaseEnterMemberType;
     }
     if (!['Adult', 'Child'].contains(memberType)) {
-      return 'Invalid member type';
+      return l10n.invalidMemberType;
     }
     return null;
   }
 
   static String? validateBankAccountNumber(AppLocalizations l10n, String? accountNumber) {
-    // If the field is empty, it's valid (not required)
     if (accountNumber == null || accountNumber.trim().isEmpty) {
       return null;
     }
 
-    // Remove any non-digit characters
     final digitsOnly = accountNumber.replaceAll(RegExp(r'[^0-9]'), '');
 
-    // If something is entered, it must be at least 10 digits
     if (digitsOnly.length < 10) {
-      return 'Account number must be at least 10 digits';
+      return l10n.accountNumberAtLeast10Digits;
     }
-
     return null;
   }
-
-
-
 }
