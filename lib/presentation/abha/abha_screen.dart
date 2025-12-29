@@ -93,6 +93,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
   TextEditingController mobileController = new TextEditingController();
   TextEditingController otpController = new TextEditingController();
   TextEditingController aadhaarController = new TextEditingController();
+  bool isAadhaarValid = false;
 
   bool verifyAbhaFlag = false;
   bool searchFlag = false;
@@ -1551,6 +1552,17 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     style: const TextStyle(fontSize: 11),
                     keyboardType: TextInputType.number,
                     maxLength: 12,
+                    onChanged: (value) {
+                      if (RegExp(r'^[2-9][0-9]{11}$').hasMatch(value)) {
+                        setState(() {
+                          isAadhaarValid = true;
+                        });
+                      } else {
+                        setState(() {
+                          isAadhaarValid = false;
+                        });
+                      }
+                    },
                     decoration: InputDecoration(
                       hintText: localText.aadhaarNumber,
 
@@ -1559,7 +1571,9 @@ class _ABHAScreenState extends State<ABHAScreen> {
                       ),
 
                       focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.green, width: 2),
+                        borderSide: BorderSide(
+                            color: isAadhaarValid ? Colors.green : Colors.grey,
+                            width: 2),
                       ),
                       errorBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.red),
