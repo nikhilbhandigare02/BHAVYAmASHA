@@ -173,7 +173,7 @@ class _OutcomeFormView extends StatelessWidget {
                           decoded['anc_form'] as Map,
                         );
                         final flag =
-                            (fd['gives_birth_to_baby']?.toString() ?? '')
+                            (fd['has_pw_given_birth']?.toString() ?? '')
                                 .toLowerCase();
                         if (flag == 'yes') {
                           print(
@@ -181,36 +181,50 @@ class _OutcomeFormView extends StatelessWidget {
                           );
                         }
                         final weeks =
-                            fd['weeks_of_pregnancy']?.toString() ?? '';
+                            fd['week_of_pregnancy']?.toString() ?? '';
                         if (weeks.isNotEmpty) {
                           context.read<OutcomeFormBloc>().add(
                             GestationWeeksChanged(weeks),
                           );
                         }
-                        final children =
-                            fd['number_of_children']?.toString() ?? '';
-                        if (children.isNotEmpty) {
-                          final t = children.trim().toLowerCase();
-                          String numeric;
-                          if (t == 'one child' || t == 'one' || t == '1') {
-                            numeric = '1';
-                          } else if (t == 'twins' || t == 'two' || t == '2') {
-                            numeric = '2';
-                          } else if (t == 'triplets' ||
-                              t == 'three' ||
-                              t == '3') {
-                            numeric = '3';
-                          } else {
-                            final n = int.tryParse(children);
-                            numeric = n?.toString() ?? children;
-                          }
+                        // Derive children count from children_arr array
+                        final childrenArr = fd['children_arr'] as List?;
+                        final childCount = childrenArr?.length.toString() ?? '';
+                        if (childCount.isNotEmpty && childCount != '0') {
                           context.read<OutcomeFormBloc>().add(
-                            OutcomeCountChanged(numeric),
+                            OutcomeCountChanged(childCount),
                           );
+                        }
+
+                        // Prefill delivery outcome if available
+                        final deliveryOutcome = fd['delivery_outcome']?.toString() ?? '';
+                        if (deliveryOutcome.isNotEmpty) {
+                          // Map delivery outcome to delivery type
+                          String deliveryType = '';
+                          switch (deliveryOutcome.toLowerCase()) {
+                            case 'live_birth':
+                            case 'live birth':
+                              deliveryType = 'Live Birth';
+                              break;
+                            case 'still_birth':
+                            case 'still birth':
+                              deliveryType = 'Still Birth';
+                              break;
+                            default:
+                              deliveryType = deliveryOutcome;
+                          }
+                          // Note: This would require adding DeliveryTypeChanged event call if needed
+                        }
+
+                        // Prefill place of ANC if available (could map to place of delivery)
+                        final placeOfAnc = fd['place_of_anc']?.toString() ?? '';
+                        if (placeOfAnc.isNotEmpty) {
+                          // Could potentially map this to place of delivery
+                          print('Place of ANC from data: $placeOfAnc');
                         }
                       }
                     } catch (e) {
-                      print('Error loading ANC gives_birth_to_baby record: $e');
+                      print('Error loading ANC data for prefilling: $e');
                     }
                   }(),
                   builder: (context, snapshot) => const SizedBox.shrink(),

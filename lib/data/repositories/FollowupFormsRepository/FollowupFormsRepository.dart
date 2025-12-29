@@ -389,7 +389,6 @@ final formType = formJsonValue['form_type'];
           }
 
           formDataMap = {
-            // ---------------- BASIC ----------------
             'anc_visit_no': _pick(src, 'anc_visit_no', 'anc_visit'),
             'visit_type': src['visit_type'],
             'place_of_anc': src['place_of_anc'],
