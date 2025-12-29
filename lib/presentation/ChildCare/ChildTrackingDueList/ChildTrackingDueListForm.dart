@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 
 import '../../../core/utils/app_info_utils.dart';
 import '../../../core/utils/device_info_utils.dart';
@@ -55,20 +56,23 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: tabs.length, vsync: this);
-    _tabController.addListener(() {
-      if (!_tabController.indexIsChanging) {
-        context.read<ChildTrackingFormBloc>().add(TabChanged(_tabController.index));
-      }
-    });
+    // TabController will be initialized in didChangeDependencies when context is available
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
-    // Load form data from arguments only once
+
+    // Initialize TabController only once when context is available
     if (!_formDataLoaded) {
+      _tabController = TabController(length: getTabs(context).length, vsync: this);
+      _tabController.addListener(() {
+        if (!_tabController.indexIsChanging) {
+          context.read<ChildTrackingFormBloc>().add(TabChanged(_tabController.index));
+        }
+      });
+
+      // Load form data from arguments only once
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       if (args != null && args['formData'] is Map<String, dynamic>) {
         _formData.addAll(args['formData'] as Map<String, dynamic>);
@@ -140,7 +144,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       final db = await DatabaseProvider.instance.database;
       final now = DateTime.now().toIso8601String();
       final currentTabIndex = _tabController.index;
-      final currentTabName = tabs[currentTabIndex];
+      final currentTabName = getTabs(context)[currentTabIndex];
 
       final formType = FollowupFormDataTable.childTrackingDue;
       final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Child Tracking Due';
@@ -191,7 +195,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         'created_at': now,
         'updated_at': now,
       };
-      
+
       debugPrint('Form data to be saved:');
       final formDataMap = formData['form_data'] as Map<String, dynamic>?;
       debugPrint('  child_details: ${formDataMap?['child_details']}');
@@ -218,7 +222,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       if (householdRefKey.isEmpty && _formData['household_id'] != null) {
         final householdId = _formData['household_id'].toString();
         debugPrint('Querying beneficiaries with household_id: $householdId');
-        
+
         List<Map<String, dynamic>> beneficiaryMaps = await db.query(
           'beneficiaries_new',
           where: 'household_ref_key = ?',
@@ -324,18 +328,11 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
 
       if (formId > 0) {
-        debugPrint('✅ Child Tracking Form saved successfully with ID: $formId');
-        debugPrint('📋 Tab: $currentTabName (Index: $currentTabIndex)');
-        debugPrint('🏠 Household Ref Key: $householdRefKey');
-        debugPrint('👤 Beneficiary Ref Key: $beneficiaryRefKey');
-        debugPrint('👨 Mother Key: $motherKey');
-        debugPrint('👴 Father Key: $fatherKey');
-        debugPrint('📱 Form Type: $formType');
+
  final closureReason = _getSelectedClosureReason(currentTabIndex);
         if (closureReason == 'Death') {
           debugPrint('🔴 Death case closure detected. Updating beneficiary record...');
-          
-          // Prepare death details JSON
+
           final deathDetails = {
             'date_of_death': _getDateOfDeath(currentTabIndex)?.toIso8601String(),
             'probable_cause_of_death': _getProbableCauseOfDeath(currentTabIndex),
@@ -346,12 +343,9 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
             'recorded_date': now,
           };
 
-          // Update beneficiary record with death information
           try {
-            // Get child name for additional verification
             final childName = _formData['child_name']?.toString() ?? '';
-            
-            // Query beneficiary by unique_key or name match
+
             List<Map<String, dynamic>> beneficiaryRecords = await db.query(
               'beneficiaries_new',
               where: 'unique_key = ? OR (beneficiary_info LIKE ?)',
@@ -361,7 +355,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
             if (beneficiaryRecords.isNotEmpty) {
               final beneficiary = beneficiaryRecords.first;
               final beneficiaryId = beneficiary['id'];
- 
+
               await db.update(
                 'beneficiaries_new',
                 {
@@ -430,21 +424,25 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
     _tabController.dispose();
     super.dispose();
   }
-  final List<String> tabs = [
-    'BIRTH DOSES',
-    '6 WEEK',
-    '10 WEEK',
-    '14 WEEK',
-    '9 MONTHS',
-    '16-24 MONTHS',
-    '5-6 YEAR',
-    '10 YEAR',
-    '16 YEAR',
-  ];
+  List<String> getTabs(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return [
+      l.birthDosesTab,
+      l.sixWeekTab,
+      l.tenWeekTab,
+      l.fourteenWeekTab,
+      l.nineMonthTab,
+      l.sixteenToTwentyFourMonthTab,
+      l.fiveToSixYearTab,
+      l.tenYearTab,
+      l.sixteenYearTab,
+    ];
+  }
 
   Widget _buildBirthDoseTab() {
     final tabIndex = 0; // Birth Dose tab
     _initializeTabState(tabIndex);
+    final l = AppLocalizations.of(context);
     return SafeArea(
       child: Column(
         children: [
@@ -454,11 +452,11 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow('Date of Visits', _getBirthDateFormatted()),
+                  _infoRow(l!.dateOfVisit, _getBirthDateFormatted()),
                   const Divider(),
                   const SizedBox(height: 8),
                   CustomTextField(
-                    labelText: 'Weight (1.2–90)kg',
+                    labelText: l.weightLabel,
                     initialValue: _formData['weight_grams'] != null
                         ? '${(int.tryParse(_formData['weight_grams'].toString()) ?? 0) / 1000}'
                         : null,
@@ -474,7 +472,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
                   const SizedBox(height: 16),
                   _buildDoseTable(),
-                  const SizedBox(height: 16),  
+                  const SizedBox(height: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -559,7 +557,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: RoundButton(
-                title: _isSaving ? 'SAVING...' : 'SAVE',
+                title: _isSaving ? '' : l.saveButton,
                 onPress: _isSaving ? () {} : _saveForm,
                 height: 34,
                 borderRadius: 4,
@@ -632,9 +630,10 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'Tracking Due',
+        screenTitle: l!.trackingDueTitle,
         showBack: true,
       ),
       body: Column(
@@ -647,30 +646,31 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               indicatorColor: Colors.white,
               labelColor: Colors.white,
               unselectedLabelColor: Colors.white70,
-              tabs: tabs.map((e) => Tab(text: e)).toList(),
+              tabs: getTabs(context).map((e) => Tab(text: e)).toList(),
             ),
           ),
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: tabs.map((tabName) {
-                if (tabName == 'BIRTH DOSES') {
+              children: getTabs(context).map((tabName) {
+                final tabs = getTabs(context);
+                if (tabName == l.birthDosesTab) {
                   return _buildBirthDoseTab();
-                } else if (tabName == '6 WEEK') {
+                } else if (tabName == l.sixWeekTab) {
                   return _buildSixWeekTab();
-                } else if (tabName == '10 WEEK') {
+                } else if (tabName == l.tenWeekTab) {
                   return _buildTenWeekTab();
-                } else if (tabName == '14 WEEK') {
+                } else if (tabName == l.fourteenWeekTab) {
                   return _buildFourteenWeekTab();
-                } else if (tabName == '9 MONTHS') {
+                } else if (tabName == l.nineMonthTab) {
                   return _buildNineMonthTab();
-                } else if (tabName == '16-24 MONTHS') {
+                } else if (tabName == l.sixteenToTwentyFourMonthTab) {
                   return _buildSixteenToTwentyFourMonthTab();
-                } else if (tabName == '5-6 YEAR') {
+                } else if (tabName == l.fiveToSixYearTab) {
                   return _buildFiveToSixYearTab();
-                } else if (tabName == '10 YEAR') {
+                } else if (tabName == l.tenYearTab) {
                   return _buildTenYearTab();
-                } else if (tabName == '16 YEAR') {
+                } else if (tabName == l.sixteenYearTab) {
                   return _buildSixteenYearTab();
                 }
                 return Center(
@@ -1910,35 +1910,36 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
   Widget _buildDoseTable() {
     final birthDueDate = _getBirthDateFormatted();
+    final l = AppLocalizations.of(context);
     final data = [
-      {'name': 'BCG', 'due': birthDueDate},
-      {'name': 'Hepatitis B - 0', 'due': birthDueDate},
-      {'name': 'O. P. V. - 0', 'due': birthDueDate},
-      {'name': 'VIT - K', 'due': birthDueDate},
+      {'name': l!.bcg, 'due': birthDueDate},
+      {'name': l.hepatitis, 'due': birthDueDate},
+      {'name': l.opv, 'due': birthDueDate},
+      {'name': l.vit, 'due': birthDueDate},
     ];
 
     return Table(
-      columnWidths: const {
+      columnWidths:  {
         0: FlexColumnWidth(2.5),
         1: FlexColumnWidth(1.5),
         2: FlexColumnWidth(2),
       },
-      border: const TableBorder(horizontalInside: BorderSide(width: 0.5)),
+      border:  TableBorder(horizontalInside: BorderSide(width: 0.5)),
       children: [
-        const TableRow(
+         TableRow(
           decoration: BoxDecoration(color: Color(0xFFF2F2F2)),
           children: [
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Birth Doses', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l!.birthDosesTab, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Due Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.doseTableDueDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Actual Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.doseTableActualDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),

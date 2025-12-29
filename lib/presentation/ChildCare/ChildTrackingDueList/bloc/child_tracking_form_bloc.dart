@@ -158,7 +158,6 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
       final now = DateTime.now().toIso8601String();
       final currentTabIndex = event.currentTabIndex;
 
-      // Tab names mapping
       const tabs = [
         'BIRTH DOSE',
         '6 WEEK',

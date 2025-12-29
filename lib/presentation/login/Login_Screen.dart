@@ -302,12 +302,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         if (state.postApiStatus == PostApiStatus.success) {
                                           final message = state.error.isNotEmpty
                                               ? state.error 
-                                              : "Login Sucessfully";
+                                              : "Login Successfully";
                                               
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
                                               content: Text(
-                                               "User Login Sucessfully",
+                                               message,
                                                 style: const TextStyle(color: Colors.white),
                                               ),
                                               backgroundColor: Colors.black,
@@ -339,7 +339,20 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         } else if (state.postApiStatus == PostApiStatus.error) {
                                           String errorMessage;
 
-                                          if (state.error.contains("invalid") ||
+                                          // Try to extract message from JSON format first
+                                          if (state.error.contains('"msg":')) {
+                                            try {
+                                              final startIndex = state.error.indexOf('"msg":"') + 7;
+                                              final endIndex = state.error.indexOf('"', startIndex);
+                                              if (startIndex != -1 && endIndex != -1) {
+                                                errorMessage = state.error.substring(startIndex, endIndex);
+                                              } else {
+                                                errorMessage = "Authentication failed. Please check your credentials.";
+                                              }
+                                            } catch (e) {
+                                              errorMessage = "Authentication failed. Please check your credentials.";
+                                            }
+                                          } else if (state.error.contains("invalid") ||
                                               state.error.contains("not match") ||
                                               state.error.contains("not exist")) {
                                             errorMessage = "User does not exist. Please enter valid credentials";

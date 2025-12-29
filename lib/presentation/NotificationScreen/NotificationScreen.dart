@@ -71,8 +71,7 @@ class _NotificationscreenState extends State<Notificationscreen> {
         backgroundColor: Colors.white,
           appBar: AppHeader(
             screenTitle: l10n.notifications,
-            showBack: false,
-
+            showBack: true,
           ),
         body: FutureBuilder<List<Map<String, dynamic>>>(
           future: _notificationFuture,

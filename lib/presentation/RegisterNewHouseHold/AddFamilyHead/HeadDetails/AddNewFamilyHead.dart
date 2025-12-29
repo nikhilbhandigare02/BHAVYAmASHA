@@ -1907,7 +1907,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             context: context,
             title: l.confirmAttentionTitle,
             message: l.confirmCloseFormMsg,
-            yesText: l.confirmYes,
+            yesText: l.yes,
             noText: l.confirmNo,
           );
           return shouldExit ?? false;

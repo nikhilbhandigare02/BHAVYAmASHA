@@ -326,11 +326,12 @@ class _OutcomeFormFields extends StatelessWidget {
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
         ApiDropdown<String>(
-          items: ['Institutional', 'Non-Institutional', 'Other'],
+          items: const ['Institutional', 'Non-Institutional', 'Other'],
+
           getLabel: (s) {
             switch (s) {
               case 'Institutional':
-                return l10n.institutional ;
+                return l10n.institutional;
               case 'Non-Institutional':
                 return l10n.nonInstitutional;
               case 'Other':
@@ -339,19 +340,19 @@ class _OutcomeFormFields extends StatelessWidget {
                 return s;
             }
           },
-          value:
-              state.placeOfDelivery.isEmpty ||
-                  ![
 
-                    l10n.institutional,
-                    l10n.nonInstitutional,
-                    l10n.other,
-                  ].contains(state.placeOfDelivery)
-              ? l10n.select
+          value: state.placeOfDelivery.isEmpty ||
+              !['Institutional', 'Non-Institutional', 'Other']
+                  .contains(state.placeOfDelivery)
+              ? null
               : state.placeOfDelivery,
-          onChanged: (v) => bloc.add(PlaceOfDeliveryChanged(v ?? '')),
+
+          onChanged: (v) =>
+              bloc.add(PlaceOfDeliveryChanged(v ?? '')),
+
           labelText: l10n.placeOfDelivery,
         ),
+
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         if (state.placeOfDelivery == 'Other') ...[
           const SizedBox(height: 8),
@@ -567,20 +568,20 @@ class _OutcomeFormFields extends StatelessWidget {
           ],
           getLabel: (s) {
             switch (s) {
-              case 'anm':
-                return l10n?.anm ?? '';
-              case 'lhv':
-                return l10n?.lhv ?? '';
-              case 'doctor':
-                return l10n?.doctor ?? '';
-              case 'staffNurse':
-                return l10n?.staffNurse ?? '';
-              case 'relative':
-                return l10n?.relative ?? '';
-              case 'tba':
-                return l10n?.tba ?? '';
-              case 'other':
-                return l10n?.other ?? '';
+              case 'ANM':
+                return l10n.anm ;
+              case 'LHV':
+                return l10n.lhv ;
+              case 'Doctor':
+                return l10n.doctor ;
+              case 'Staff Nurse':
+                return l10n.staffNurse ;
+              case 'Relative':
+                return l10n.relative;
+              case 'TBA (Non-Skilled birth attendant)':
+                return l10n.tba ;
+              case 'Other':
+                return l10n.other ;
               default:
                 return s;
             }
@@ -603,6 +604,8 @@ class _OutcomeFormFields extends StatelessWidget {
           labelText: l10n.whoConductedDelivery,
         ),
         if (state.conductedBy == 'Other') ...[
+          Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
           const SizedBox(height: 8),
           CustomTextField(
             labelText: l10n.whoElseConductedDelivery,
@@ -839,13 +842,13 @@ class _OutcomeFormFields extends StatelessWidget {
               : state.familyPlanningCounseling,
           onChanged: (v) => bloc.add(FamilyPlanningCounselingChanged(v ?? '')),
           hintText: l10n.selectOption,
-          labelText: l10n.familyPlanningCounseling,
+          labelText:"${ l10n.familyPlanningCounseling} *",
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         if (state.familyPlanningCounseling == 'Yes') ...[
           const SizedBox(height: 8),
           ApiDropdown<String>(
-            labelText: l10n.adaptFamilyPlanningMethod,
+            labelText: "${l10n.adaptFamilyPlanningMethod} *",
             items: ["Yes", "No"],
             getLabel: (s) {
               switch (s) {
@@ -866,12 +869,12 @@ class _OutcomeFormFields extends StatelessWidget {
           if (state.adaptFpMethod == 'Yes' &&
               state.familyPlanningCounseling == 'Yes') ...[
             ApiDropdown<String>(
-              labelText: l10n.methodOfContra,
+              labelText: "${l10n.methodOfContra} *",
               items: const [
-                'Condom',
-                'Mala -N (Daily Contraceptive pill)',
                 'Atra injection',
                 'Copper -T (IUCD)',
+                'Condom',
+                'Mala -N (Daily Contraceptive pill)',
                 'Chhaya (Weekly Contraceptive pill)',
                 'ECP (Emergency Contraceptive pill)',
                 'Male Sterilization',
@@ -902,7 +905,7 @@ class _OutcomeFormFields extends StatelessWidget {
                     return s;
                 }
               },
-              value: state.fpMethod ?? 'Select',
+              value: state.fpMethod ?? l10n.select,
               onChanged: (value) {
                 if (value != null) {
                   context.read<OutcomeFormBloc>().add(FpMethodChanged(value));

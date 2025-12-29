@@ -2572,6 +2572,90 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     );
   }
 
+  // Helper method to get translated title for expansion tiles
+  String _getTranslatedTitle(String key, AppLocalizations l10n) {
+    // Map English keys to translation keys
+    switch (key) {
+      case 'Family Survey List':
+        return l10n.listFamilySurvey;
+      case 'Eligible Couple Due List':
+        return l10n.listEligibleCoupleDue;
+      case 'ANC List':
+        return l10n.listANC;
+      case 'HBNC List':
+        return l10n.listHBNC;
+      case 'Routine Immunization (RI)':
+        return l10n.listRoutineImmunization;
+      default:
+        // If the key is already a translation key, return it directly
+        if (key == l10n.listFamilySurvey || 
+            key == l10n.listEligibleCoupleDue || 
+            key == l10n.listANC || 
+            key == l10n.listHBNC || 
+            key == l10n.listRoutineImmunization) {
+          return key;
+        }
+        return key; // Fallback to original key
+    }
+  }
+
+  // Helper method to get count for To Do visits
+  String _getCountForEntry(String key, AppLocalizations l10n) {
+    // Check against English keys first (for backward compatibility)
+    if (key == 'Family Survey List' || key == l10n.listFamilySurvey) {
+      return "${_familySurveyItems.length}";
+    } else if (key == 'Eligible Couple Due List' || key == l10n.listEligibleCoupleDue) {
+      return "${_eligibleCoupleItems.length}";
+    } else if (key == 'ANC List' || key == l10n.listANC) {
+      return "${_ancItems.length}";
+    } else if (key == 'HBNC List' || key == l10n.listHBNC) {
+      return "${_hbncItems.length}";
+    } else if (key == 'Routine Immunization (RI)' || key == l10n.listRoutineImmunization) {
+      return "${_riItems.length}";
+    } else {
+      return "${widget.apiData[key]?.length ?? 0}";
+    }
+  }
+
+  // Helper method to get count for Completed visits
+  String _getCompletedCountForEntry(String key, AppLocalizations l10n) {
+    // Check against English keys first (for backward compatibility)
+    if (key == 'Family Survey List' || key == l10n.listFamilySurvey) {
+      return "${_familySurveyItems.length}";
+    } else if (key == 'Eligible Couple Due List' || key == l10n.listEligibleCoupleDue) {
+      return "${_eligibleCompletedCoupleItems.length}";
+    } else if (key == 'ANC List' || key == l10n.listANC) {
+      return "${_ancCompletedItems.length}";
+    } else if (key == 'HBNC List' || key == l10n.listHBNC) {
+      return "${_hbncCompletedItems.length}";
+    } else if (key == 'Routine Immunization (RI)' || key == l10n.listRoutineImmunization) {
+      return "${_riCompletedItems.length}";
+    } else {
+      return "${widget.apiData[key]?.length ?? 0}";
+    }
+  }
+
+  // Helper method to check entry type for children logic
+  bool _isAncList(String key, AppLocalizations l10n) {
+    return key == 'ANC List' || key == l10n.listANC;
+  }
+
+  bool _isFamilySurveyList(String key, AppLocalizations l10n) {
+    return key == 'Family Survey List' || key == l10n.listFamilySurvey;
+  }
+
+  bool _isEligibleCoupleList(String key, AppLocalizations l10n) {
+    return key == 'Eligible Couple Due List' || key == l10n.listEligibleCoupleDue;
+  }
+
+  bool _isHbncList(String key, AppLocalizations l10n) {
+    return key == 'HBNC List' || key == l10n.listHBNC;
+  }
+
+  bool _isRoutineImmunizationList(String key, AppLocalizations l10n) {
+    return key == 'Routine Immunization (RI)' || key == l10n.listRoutineImmunization;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -2767,7 +2851,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                       },
                       initiallyExpanded: _expandedKey == entry.key,
                       title: Text(
-                        entry.key,
+                        _getTranslatedTitle(entry.key, l10n),
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 15.sp,
@@ -2780,17 +2864,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            entry.key == l10n.listFamilySurvey
-                                ? "${_familySurveyItems.length}"
-                                : entry.key == l10n.listEligibleCoupleDue
-                                ? "${_eligibleCoupleItems.length}"
-                                : entry.key == l10n.listANC
-                                ? "${_ancItems.length}"
-                                : entry.key == l10n.listHBNC
-                                ? "${_hbncItems.length}"
-                                : entry.key == l10n.listRoutineImmunization
-                                ? "${_riItems.length}"
-                                : "${entry.value.length}",
+                            _getCountForEntry(entry.key, l10n),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: _expandedKey == entry.key
@@ -2813,7 +2887,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           ),
                         ],
                       ),
-                      children: entry.key == l10n.listANC
+                      children: _isAncList(entry.key, l10n)
                           ? (_ancItems.isEmpty
                                 ? [
                         Card(
@@ -2830,7 +2904,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         ),
                                   ]
                                 : _getAncListItems())
-                          : entry.key == l10n.listFamilySurvey
+                          : _isFamilySurveyList(entry.key, l10n)
                           ? (_familySurveyItems.isEmpty
                                 ? [
                         Card(
@@ -2851,7 +2925,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                         (item) => _routineCard(item, context),
                                       )
                                       .toList())
-                          : entry.key == l10n.listEligibleCoupleDue
+                          : _isEligibleCoupleList(entry.key, l10n)
                           ? (_eligibleCoupleItems.isEmpty
                                 ? [
                         Card(
@@ -2872,7 +2946,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                         (item) => _routineCard(item, context),
                                       )
                                       .toList())
-                          : entry.key == l10n.listHBNC
+                          : _isHbncList(entry.key, l10n)
                           ? (_hbncItems.isEmpty
                                 ? [
                         Card(
@@ -2893,7 +2967,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                         (item) => _routineCard(item, context),
                                       )
                                       .toList())
-                          : entry.key == l10n.listRoutineImmunization
+                          : _isRoutineImmunizationList(entry.key, l10n)
                           ? _riItems.isEmpty
                                 ? [
                         Card(
@@ -2951,7 +3025,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                       },
                       initiallyExpanded: _expandedKey == entry.key,
                       title: Text(
-                        entry.key,
+                        _getTranslatedTitle(entry.key, l10n),
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 15.sp,
@@ -2964,17 +3038,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            entry.key == l10n.listFamilySurvey
-                                ? "${_familySurveyItems.length}"
-                                : entry.key == l10n.listEligibleCoupleDue
-                                ? "${_eligibleCompletedCoupleItems.length}"
-                                : entry.key == l10n.listANC
-                                ? "${_ancCompletedItems.length}"
-                                : entry.key == l10n.listHBNC
-                                ? "${_hbncCompletedItems.length}"
-                                : entry.key == l10n.listRoutineImmunization
-                                ? "${_riCompletedItems.length}"
-                                : "${entry.value.length}",
+                            _getCompletedCountForEntry(entry.key, l10n),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: _expandedKey == entry.key
@@ -2997,7 +3061,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           ),
                         ],
                       ),
-                      children: entry.key == l10n.listANC
+                      children: _isAncList(entry.key, l10n)
                           ? (_ancCompletedItems.isEmpty
                           ? [
                         Card(
@@ -3014,7 +3078,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         ),
                       ]
                           : _getAncListCompletedItems())
-                          : entry.key == l10n.listFamilySurvey
+                          : _isFamilySurveyList(entry.key, l10n)
                           ? (_familySurveyItems.isEmpty
                           ? [
                         Card(
@@ -3035,7 +3099,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                             (item) => _routineCard(item, context),
                       )
                           .toList())
-                          : entry.key == l10n.listEligibleCoupleDue
+                          : _isEligibleCoupleList(entry.key, l10n)
                           ? (_eligibleCompletedCoupleItems.isEmpty
                           ? [
                         Card(
@@ -3052,7 +3116,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         ),
                       ]
                           : _getECListCompletedItems())
-                          : entry.key == l10n.listHBNC
+                          : _isHbncList(entry.key, l10n)
                           ? (_hbncCompletedItems.isEmpty
                           ? [
                         Card(
@@ -3069,7 +3133,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         ),
                       ]
                           : _getHBNCListCompletedItems())
-                          : entry.key == l10n.listRoutineImmunization
+                          : _isRoutineImmunizationList(entry.key, l10n)
                           ? _riCompletedItems.isEmpty
                           ? [
                         Card(

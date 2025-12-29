@@ -134,6 +134,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
     _firstError = null;
   }
 
+
   static String? _captureError(String? message) {
     if (message != null && _firstError == null) {
       _firstError = message;
@@ -535,6 +536,77 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
         bloc.add(AddressChanged(args['village'].toString().trim()));
       }
     }
+    List<String> _getMobileOwnerList(String gender) {
+      const common = [];
+
+      gender = gender.toLowerCase();
+
+      if (gender == 'female') {
+        return [
+          'Self',
+          'Husband',
+          'Father',
+          'Mother',
+          'Son',
+          'Daughter',
+          'Father In Law',
+          'Mother In Law',
+          'Neighbour',
+          'Relative',
+          'Other',
+        ];
+      }
+
+      if (gender == 'male') {
+        return [
+          'Self',
+          'Wife',
+          'Father',
+          'Mother',
+          'Son',
+          'Daughter',
+          'Father In Law',
+          'Mother In Law',
+          'Neighbour',
+          'Relative',
+          'Other',
+        ];
+      }
+
+      if (gender == 'transgender') {
+        return [
+          'Self',
+          'Husband',
+          'Wife',
+          'Father',
+          'Mother',
+          'Son',
+          'Daughter',
+          'Father In Law',
+          'Mother In Law',
+          'Neighbour',
+          'Relative',
+          'Other',
+        ];
+      }
+
+      // Fallback if gender is unknown
+      return [
+        'Self',
+        'Husband',
+        'Wife',
+        'Father',
+        'Mother',
+        'Son',
+        'Daughter',
+        'Father In Law',
+        'Mother In Law',
+        'Neighbour',
+        'Relative',
+        'Other',
+        ...common,
+      ];
+    }
 
     return BlocProvider.value(
       value: bloc,
@@ -586,7 +658,18 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                     hintText: l10n?.rchChildSerialHint ?? 'Enter RCH ID of the child',
                                     initialValue: state.rchIdChild,
                                     maxLength: 12,
+                                    keyboardType: TextInputType.number,
                                     onChanged: (v) => bloc.add(RchIdChildChanged(v)),
+                                    validator: (value) {
+                                      final text = value?.trim() ?? '';
+                                      if (text.isNotEmpty) {
+                                        final regex = RegExp(r'^\d{12}$');
+                                        if (!regex.hasMatch(text)) {
+                                          return _captureError('RCH ID must be exactly 12 digits');
+                                        }
+                                      }
+                                      return null;
+                                    },
                                   ),
                                 ),
                                 const SizedBox(width: 10),
@@ -640,7 +723,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                             CustomDatePicker(
-                              labelText: l10n?.dateOfRegistrationLabel ?? 'Date of Registration *',
+                              labelText: l10n?.registrationDateLabel ?? 'Date of Registration *',
                               initialDate: state.dateOfRegistration,
                               firstDate: DateTime.now(),
                               lastDate: DateTime(DateTime.now().year, DateTime.now().month + 1, 0), // End of current month
@@ -728,17 +811,54 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 3.0),
                               child: ApiDropdown<String>(
-                                labelText: "${l10n?.whoseMobileNumberLabel} *" ?? 'Whose mobile number is this',
-                                items: [
-                                  l10n?.headOfFamily ?? 'Head of the family',
-                                  l10n?.mother ?? 'Mother',
-                                  l10n?.father ?? 'Father',
-                                  l10n?.other ?? 'Other',
-                                ],
+                                labelText: "${l10n?.whoseMobileLabel} *" ?? 'Whose mobile number is this',
+                                items: _getMobileOwnerList(state.gender ?? ''),
+                                getLabel: (s) {
+                                  switch (s) {
+                                    case 'Self':
+                                      return "${l10n?.self}";
+
+                                    case 'Husband':
+                                      return '${l10n?.husbandLabel} ';
+
+                                    case 'Mother':
+                                      return '${l10n?.mother} ';
+
+                                    case 'Father':
+                                      return '${l10n?.father}';
+
+                                    case 'Wife':
+                                      return '${l10n?.wife} ';
+
+                                    case 'Son':
+                                      return '${l10n?.son}';
+
+                                    case 'Daughter':
+                                      return '${l10n?.daughter} ';
+
+                                    case 'Mother In Law':
+                                      return '${l10n?.motherInLaw} ';
+
+                                    case 'Father In Law':
+                                      return '${l10n?.fatherInLaw}';
+
+                                    case 'Neighbour':
+                                      return '${l10n?.neighbour} ';
+
+                                    case 'Relative':
+                                      return "${l10n?.relative} ";
+
+                                    case 'Other':
+                                      return '${l10n?.other} ';
+
+                                    default:
+                                      return s;
+                                  }
+                                },
                                 value: state.whoseMobileNumber.isEmpty ? null : state.whoseMobileNumber,
-                                getLabel: (s) => s,
+
                                 onChanged: (v) => bloc.add(WhoseMobileNumberChanged(v ?? '')),
-                                hintText: l10n?.select ?? 'Select',
+                                hintText: l10n!.select ?? 'Select',
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return _captureError(l10n?.pleaseEnterWhoseMobileNumber);
@@ -776,35 +896,47 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                 Expanded(
                                   child: CustomTextField(
                                     labelText: l10n?.mothersRchIdLabel ?? "Mother's RCH ID number",
-                                    hintText: l10n?.enterMothersRchId,
+                                    hintText: l10n?.mothersRchIdLabel,
                                     initialValue: state.mothersRchIdNumber,
+                                    maxLength: 12,
+                                    keyboardType: TextInputType.number,
                                     onChanged: (v) => bloc.add(MothersRchIdNumberChanged(v)),
+                                    validator: (value) {
+                                      final text = value?.trim() ?? '';
+                                      if (text.isNotEmpty) {
+                                        final regex = RegExp(r'^\d{12}$');
+                                        if (!regex.hasMatch(text)) {
+                                          return _captureError("Mother's RCH ID must be exactly 12 digits");
+                                        }
+                                      }
+                                      return null;
+                                    },
                                   ),
                                 ),
-                                const SizedBox(width: 10),
-                                SizedBox(
-                                  height: 50,
-                                  width: 80,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(top: 20),
-                                    child: state.isSubmitting
-                                        ? const Center(
-                                      child: SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(strokeWidth: 3),
-                                      ),
-                                    )
-                                        : RoundButton(
-                                      title: l10n!.verify,
-                                      borderRadius: 8,
-                                      fontSize: 12,
-                                      onPress: () {
-                                        // Add verification logic here
-                                      },
-                                    ),
-                                  ),
-                                ),
+                                // const SizedBox(width: 10),
+                                // SizedBox(
+                                //   height: 50,
+                                //   width: 80,
+                                //   child: Padding(
+                                //     padding: const EdgeInsets.only(top: 20),
+                                //     child: state.isSubmitting
+                                //         ? const Center(
+                                //       child: SizedBox(
+                                //         width: 24,
+                                //         height: 24,
+                                //         child: CircularProgressIndicator(strokeWidth: 3),
+                                //       ),
+                                //     )
+                                //         : RoundButton(
+                                //       title: l10n!.verify,
+                                //       borderRadius: 8,
+                                //       fontSize: 12,
+                                //       onPress: () {
+                                //         // Add verification logic here
+                                //       },
+                                //     ),
+                                //   ),
+                                // ),
                               ],
                             ),
                             const SizedBox(height: 5),
@@ -820,7 +952,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                     : (state.birthCertificateIssued.isEmpty ? null : state.birthCertificateIssued),
                                 getLabel: (s) => s,
                                 onChanged: (v) => bloc.add(BirthCertificateIssuedChanged(v ?? '')),
-                                hintText: l10n?.choose ?? 'choose',
+                                hintText: l10n?.select ?? 'choose',
                               ),
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -913,7 +1045,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                         bloc.add(CustomReligionChanged(''));
                                       }
                                     },
-                                    hintText: l10n?.choose ?? 'choose',
+                                    hintText: l10n?.select ?? 'choose',
                                   ),
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                                   if (state.religion == 'Other')
@@ -966,7 +1098,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                         bloc.add(CustomCasteChanged(''));
                                       }
                                     },
-                                    hintText: l10n?.choose ?? 'choose',
+                                    hintText: l10n!.select ?? 'choose',
                                   ),
                                   Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                                   if (state.caste == 'Other')
