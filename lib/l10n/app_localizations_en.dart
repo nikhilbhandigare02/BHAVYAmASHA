@@ -6805,6 +6805,141 @@ class AppLocalizationsEn extends AppLocalizations {
   String get successUpdatePassMsg => 'Your password has been changed successfully';
 
   @override
+  String get invalidCredentials => 'Please enter valid user credentials';
+
+  @override
+  String get authenticationFailed => 'Authentication failed. Please check your credentials';
+
+  @override
+  String get pleaseEnterUsername => 'Please enter username';
+
+  @override
+  String get pleaseEnterPassword => 'Please enter password';
+
+  @override
+  String get pleaseEnterValidUsername => 'Please enter valid username';
+
+  @override
+  String get pleaseEnterValidPassword => 'Please enter valid password';
+
+  @override
+  String get enterValidNumber => 'Enter valid number';
+
+  @override
+  String get selectAgeUnit => 'Select age unit';
+
+  @override
+  String get fatherGuardianNameRequired => ' Please enter Father / Guardian name';
+
+  @override
+  String get motherGuardianNameRequired => ' Please enter mother name';
+
+  @override
+  String get youngestChildAgeDaysRange => 'Please enter age of Youngest Child between Days ';
+
+  @override
+  String get youngestChildAgeMonthsRange => 'Please enter age of Youngest Child between Months';
+
+  @override
+  String get youngestChildAgeYearsRange => 'Please enter age of Youngest Child between Years';
+
+  @override
+  String get pleaseEnterHouseNumber => 'Please enter House number';
+
+  @override
+  String get houseNumberValidation => 'House number can only contain letters, numbers, spaces, dash or slash';
+
+  @override
+  String get pleaseEnterDateOfBirth => 'Please enter Date of birth';
+
+  @override
+  String get dateOfBirthFuture => 'Date of birth cannot be in the future';
+
+  @override
+  String get ageMustBe15Years => 'Age must be 15 years or more';
+
+  @override
+  String get ageCannotBeMoreThan110 => 'Age cannot be more than 110 years';
+
+  @override
+  String get pleaseEnterAgeBetween15To110 => 'Please enter age between 15 to 110 years';
+
+  @override
+  String get yearsBetween0And110 => 'Years must be between 0 and 110';
+
+  @override
+  String get monthsBetween0And11 => 'Months must be between 0 and 11';
+
+  @override
+  String get daysBetween0And30 => 'Days must be between 0 and 30';
+
+  @override
+  String get ageCannotBeZero => 'Age cannot be zero';
+
+  @override
+  String get minimumAge15Years => 'Minimum age must be 15 years';
+
+  @override
+  String get maximumAge110Years => 'Maximum age is 110 years';
+
+  @override
+  String get pleaseEnterAgeBetween1DayTo15Year => 'Please enter the age between 1 day to 15 year';
+
+  @override
+  String get pleaseEnterLMP => 'Please enter LMP';
+
+  @override
+  String get pleaseEnterMethodOfContraception => 'Please enter Method of contraception';
+
+  @override
+  String get pleaseEnterExpectedDeliveryDate => 'Please enter Expected Delivery Date';
+
+  @override
+  String get pleaseEnterFamilyPlanning => 'Please enter Are you/your partner adopting family planning';
+
+  @override
+  String get pleaseEnterWhoseMobile => 'Please enter Whose mobile';
+
+  @override
+  String get pleaseEnterMobileNo => 'Please enter Mobile no.';
+
+  @override
+  String get mobileNo10DigitsStart6To9 => 'Mobile no. must be 10 digits and start with 6-9';
+
+  @override
+  String get pleaseEnterMaritalStatus => 'Please enter Marital Status';
+
+  @override
+  String get pleaseEnterFamilyHead => 'Please enter Family Head';
+
+  @override
+  String get familyHeadLettersOnly => 'Family Head can only contain letters';
+
+  @override
+  String get pleaseEnterRelationWithFamilyHead => 'Please Enter Relation with family head';
+
+  @override
+  String get pleaseEnterSpouseName => 'Please enter Spouse Name';
+
+  @override
+  String get pleaseEnterIsWomanPregnant => 'Please enter Is Woman Pregnant';
+
+  @override
+  String get pleaseEnterRelationHead => 'Please enter Relation head';
+
+  @override
+  String get pleaseEnterNameOfMember => 'Please enter Name of Member';
+
+  @override
+  String get pleaseEnterMemberType => 'Please enter Member type';
+
+  @override
+  String get invalidMemberType => 'Invalid member type';
+
+  @override
+  String get accountNumberAtLeast10Digits => 'Account number must be at least 10 digits';
+
+  @override
   String get diseaseTb => 'Tuberculosis (TB)';
 
   @override
@@ -6914,4 +7049,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get otherReasonApartFromMaternalComplication => 'Other reason apart from maternal complication';
+
+  @override
+  String get loadData => 'Data is being fetched';
+
+  @override
+  String get loadDataComplete => 'Data fetching completed ';
+
+  @override
+  String get dataNotFound => 'User data not available ';
 }

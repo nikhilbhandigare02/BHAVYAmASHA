@@ -562,7 +562,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                         AfhUpdateGender(v),
                       ),
                 validator: (v) =>
-                    _captureError(v == null ? 'Gender is required' : null),
+                    _captureError(v == null ? l.genderRequired : null),
               ),
             ),
           ),
@@ -778,8 +778,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           if (state.category == 'Other')
             _Section(
               child: CustomTextField(
-                labelText: 'Enter Category',
-                hintText: 'Enter Category',
+                labelText: l.enterCategory,
+                hintText: l.enterCategory,
                 initialValue: state.otherCategory,
                 onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
                   AfhUpdateOtherCategory(v.trim()),
@@ -819,9 +819,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           Route_Names.Abhalinkscreen,
                         );
 
-                        debugPrint("BACK FROM ABHA SCREEN");
-                        debugPrint("ABHA RESULT: $result");
-
                         if (result is Map<String, dynamic>) {
                           if (!mounted) return;
                           _handleAbhaProfileResult(
@@ -846,32 +843,31 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   children: [
                     Expanded(
                       child: CustomTextField(
-                        labelText: 'RCH ID',
-                        hintText: 'Enter 12 digit RCH ID',
+                        labelText: l.rchIdLabel,
+                        hintText: l.enter_12_digit_rch_id,
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(12),
                         ],
-                        onChanged: (v) {
-                          // Clear previous snackbar
-                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
+                        onChanged: (v) {
+                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
                           final value = v.trim();
                           context.read<AddFamilyHeadBloc>().add(
                             AfhRichIdChange(value),
                           );
 
-                          // Show error if not empty and not exactly 12 digits
                           if (value.isNotEmpty && value.length != 12) {
                             WidgetsBinding.instance.addPostFrameCallback((_) {
                               if (mounted) {
                                 showAppSnackBar(
                                   context,
-                                  'RCH ID must be exactly 12 digits',
+                                  l.rch_id_must_be_12_digits,
                                 );
                               }
-                            });
+                            }
+                            );
                           }
                         },
                         validator: (value) {
@@ -879,7 +875,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                             return null; // Field is optional
                           }
                           if (value.length != 12) {
-                            return 'Must be 12 digits';
+                            return l.rch_id_must_be_12_digits;
                           }
                           return null;
                         },
@@ -890,7 +886,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       height: 3.h,
                       width: 15.h,
                       child: RoundButton(
-                        title: 'VERIFY',
+                        title: l.verify,
                         width: 40.w,
                         borderRadius: 1.h,
                         fontSize: 14.sp,
@@ -902,21 +898,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
                           // Validate
                           if (rchId.isEmpty) {
-                            showAppSnackBar(context, "Please enter RCH ID");
+                            showAppSnackBar(context, l.please_enter_rch_id_first);
                             return;
                           }
 
                           if (rchId.length != 12) {
                             showAppSnackBar(
                               context,
-                              "RCH ID must be exactly 12 digits",
+                              l.rch_id_must_be_12_digits,
                             );
                             return;
                           }
 
-                          print("VERIFY PRESSED → Calling API…");
-                          print("RCH ID: $rchId");
-                          print("requestFor: 1");
 
                           final response = await fetchRCHDataForScreen(
                             int.parse(rchId),
@@ -928,12 +921,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           if (response == null) {
                             showAppSnackBar(
                               context,
-                              "Failed to fetch RCH data",
+                              l.failedTo_fetch_rch_data,
                             );
                           } else {
                             showAppSnackBar(
                               context,
-                              "RCH Verified Successfully!",
+                              l.rchVerifiedSuccessfully,
                             );
                           }
                         },
@@ -1019,7 +1012,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 validator: (value) => state.mobileOwner == 'Other'
                     ? _captureError(
                         (value == null || value.trim().isEmpty)
-                            ? 'Relation with mobile no. holder is required'
+                            ? l.relation_with_mobile_holder_required
                             : null,
                       )
                     : null,
@@ -1132,7 +1125,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                             if (mounted) {
                               showAppSnackBar(
                                 context,
-                                'Bank account number must be between 11 to 18 digits',
+                                l.bank_account_length_error,
                               );
                             }
                           });
@@ -1176,10 +1169,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 String? error;
                 if (value.length != 11) {
                   error =
-                      'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                      l.validIfscCode;
                 } else if (!RegExp(r'^[A-Z]{4}0\d{6}$').hasMatch(value)) {
                   error =
-                      'please enter valid 11 characters IFSC code , with first 4 characters in uppercase letters, 5th characters must be 0 and the remaining characters being digits';
+                      '${l.validIfscCode}';
                 }
 
                 if (error != null) {
@@ -1699,8 +1692,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 ),
               );
             } else {
-              // New insert: prefill village from the same source as AppDrawer
-              // using secure storage user data. Fallback to legacy format if needed.
+
               SecureStorageService.getCurrentUserData().then((data) async {
                 Map<String, dynamic>? user = data;
                 if (user == null || user.isEmpty) {
@@ -1753,13 +1745,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             final m = widget.initial;
             if (m == null || m.isEmpty) return SpousBloc();
 
-            // Helper function to get value with fallback to non-prefixed key
             dynamic getValue(String key) => m['sp_$key'] ?? m[key];
 
             DateTime? _parseDate(String? iso) =>
                 (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
 
-            // Extract years, months, days from stored approximate age string
             String? _approxPart(String? approx, int index) {
               if (approx == null) return null;
               final s = approx.trim();
@@ -1774,7 +1764,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             final updateMonths = _approxPart(approx, 1);
             final updateDays = _approxPart(approx, 2);
 
-            // Get values for fields with "Other" options
             final occupation = getValue('occupation');
             final otherOccupation = getValue('other_occupation');
             final religion = getValue('religion');
@@ -1784,7 +1773,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             final mobileOwner = getValue('mobileOwner');
             final mobileOwnerOtherRelation = getValue('mobile_owner_relation');
 
-            // Additional fields
             final familyPlanningCounseling = getValue(
               'familyPlanningCounseling',
             );
@@ -1939,7 +1927,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   }
                 }
               }
-              // Attach spouse and children details JSON if available
               try {
                 final sp = context.read<SpousBloc>().state;
                 result['spousedetails'] = sp.toJson();
@@ -2101,9 +2088,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                 : (state.gender == 'Female')
                                 ? 'Male'
                                 : null;
-                            // Hydrate only minimal shared fields so spouse
-                            // record stays independent from head record, and
-                            // only when there is no existing DB state.
+
                             spBloc.add(
                               SpHydrate(
                                 SpousState(
@@ -2160,8 +2145,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                     }
                                   },
                                 ),
-                                // Spouse -> Head: when names are edited on
-                                // spouse tab, push them back to head form.
+
                                 BlocListener<SpousBloc, SpousState>(
                                   listenWhen: (p, c) =>
                                       p.memberName != c.memberName ||
@@ -2443,10 +2427,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                                     ?.validate() ??
                                                                 false;
 
-                                                            final areAllFieldsValid =
-                                                                validateAllSpousFields(
-                                                                  spousState,
-                                                                );
+                                                            final areAllFieldsValid = validateAllSpousFields(
+                                                              spousState,
+                                                              AppLocalizations.of(context)!,
+                                                            );
 
                                                             if (!isFormValid ||
                                                                 !areAllFieldsValid) {
@@ -2509,10 +2493,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                                 false;
 
                                                             // Then validate all fields including custom validations
-                                                            final areAllFieldsValid =
-                                                                validateAllSpousFields(
-                                                                  spousState,
-                                                                );
+                                                            final areAllFieldsValid = validateAllSpousFields(
+                                                              spousState,
+                                                              AppLocalizations.of(context)!,
+                                                            );
+
 
                                                             if (!isFormValid ||
                                                                 !areAllFieldsValid) {

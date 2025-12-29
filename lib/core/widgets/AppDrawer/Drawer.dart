@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/routes/Route_Name.dart';
@@ -310,8 +311,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
                           scaffoldMessenger.hideCurrentSnackBar();
                           scaffoldMessenger.showSnackBar(
-                            const SnackBar(
-                              content: Text('Data is being fetched'),
+                             SnackBar(
+                              content: Text(l10n.loadData),
                               duration: Duration(seconds: 5),
                               behavior: SnackBarBehavior.floating,
                             ),
@@ -325,7 +326,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                             final formatted = _formatDateTime(now);
                             scaffoldMessenger.showSnackBar(
                               SnackBar(
-                                content: Text('Data fetching completed'),
+                                content: Text(l10n.loadDataComplete),
                                 duration: const Duration(seconds: 3),
                                 behavior: SnackBarBehavior.floating,
                               ),
@@ -399,7 +400,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                                 ],
                               ]
                             else
-                              _buildErrorState('User data not available'),
+                              _buildErrorState(l10n.dataNotFound),
                             SizedBox(height: 1.h),
                             Text(
                               _appVersion,

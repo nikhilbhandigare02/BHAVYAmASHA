@@ -300,9 +300,28 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                     BlocListener<LoginBloc, LoginState>(
                                       listener: (context, state) {
                                         if (state.postApiStatus == PostApiStatus.success) {
-                                          final message = state.error.isNotEmpty
-                                              ? state.error 
-                                              : "Login Successfully";
+                                          String message;
+                                          
+                                          if (state.error.isNotEmpty) {
+                                            final apiMessage = state.error;
+                                            
+                                            // Translate common API success messages based on language
+                                            if (apiMessage.toLowerCase().contains("login") && 
+                                                (apiMessage.toLowerCase().contains("success") || 
+                                                 apiMessage.toLowerCase().contains("successful"))) {
+                                              message = l10n.loginSuccess;
+                                            } else if (apiMessage.toLowerCase().contains("welcome")) {
+                                              message = l10n.welcome;
+                                            } else if (apiMessage.toLowerCase().contains("authenticated") ||
+                                                       apiMessage.toLowerCase().contains("verification")) {
+                                              message = l10n.loginSuccess;
+                                            } else {
+                                              // Show original API message if no specific translation found
+                                              message = apiMessage;
+                                            }
+                                          } else {
+                                            message = l10n.loginSuccess;
+                                          }
                                               
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
@@ -345,21 +364,32 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                               final startIndex = state.error.indexOf('"msg":"') + 7;
                                               final endIndex = state.error.indexOf('"', startIndex);
                                               if (startIndex != -1 && endIndex != -1) {
-                                                errorMessage = state.error.substring(startIndex, endIndex);
+                                                final apiMessage = state.error.substring(startIndex, endIndex);
+                                                
+                                                // Translate common API messages based on language
+                                                if (apiMessage.toLowerCase().contains("please enter valid user credentials")) {
+                                                  errorMessage = l10n.invalidCredentials;
+                                                } else if (apiMessage.toLowerCase().contains("authentication") || 
+                                                         apiMessage.toLowerCase().contains("unauthorized")) {
+                                                  errorMessage = l10n.authenticationFailed;
+                                                } else {
+                                                  // Show the original API message if no specific translation found
+                                                  errorMessage = apiMessage;
+                                                }
                                               } else {
-                                                errorMessage = "Authentication failed. Please check your credentials.";
+                                                errorMessage = l10n.authenticationFailed;
                                               }
                                             } catch (e) {
-                                              errorMessage = "Authentication failed. Please check your credentials.";
+                                              errorMessage = l10n.authenticationFailed;
                                             }
                                           } else if (state.error.contains("invalid") ||
                                               state.error.contains("not match") ||
                                               state.error.contains("not exist")) {
-                                            errorMessage = "User does not exist. Please enter valid credentials";
+                                            errorMessage = l10n.invalidCredentials;
                                           } else if (state.error.contains("timeout") ||
                                               state.error.contains("no response") ||
                                               state.error.isEmpty) {
-                                            errorMessage = "Something went wrong, please try again later";
+                                            errorMessage = l10n.errorMsg;
                                           } else {
                                             errorMessage = state.error;
                                           }
@@ -385,12 +415,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                                   final password = context.read<LoginBloc>().state.password;
 
                                                   if (username.isEmpty && password.isEmpty) {
-                                                    _showSnackBar(context, "Please enter valid username");
+                                                    _showSnackBar(context, l10n.pleaseEnterValidUsername);
                                                     return;
                                                   }
 
                                                   if (username.isNotEmpty && password.isEmpty) {
-                                                    _showSnackBar(context, "Please enter valid password");
+                                                    _showSnackBar(context, l10n.pleaseEnterValidPassword);
                                                     return;
                                                   }
 

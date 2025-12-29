@@ -698,7 +698,6 @@ class _HBNCListScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // First Row: Registration Date, Beneficiary ID, RCH ID
                     Row(
                       children: [
                         Expanded(
@@ -752,7 +751,6 @@ class _HBNCListScreenState
                     ),
                     const SizedBox(height: 10),
 
-                    // Third Row: Mobile no., Previous HBNC Date, Next HBNC Date
                     Row(
                       children: [
                         Expanded(

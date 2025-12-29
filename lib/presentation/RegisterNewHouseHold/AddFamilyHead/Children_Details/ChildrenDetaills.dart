@@ -72,7 +72,6 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
     final l = AppLocalizations.of(context)!;
     return BlocListener<ChildrenBloc, ChildrenState>(
       listener: (context, state) {
-        // Propagate children count to both head and member flows when available.
         try {
           context.read<head_bloc.AddFamilyHeadBloc>()
               .add(head_bloc.ChildrenChanged(state.totalLive.toString()));
@@ -87,21 +86,18 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
           String? _validateYoungestAge(String raw, {String? overrideUnit}) {
             final unit = overrideUnit ?? state.ageUnit;
             
-            // Only validate if age is not empty
             if (raw.isNotEmpty && raw.trim().isNotEmpty) {
-              // If age is entered but no unit is selected
               if (unit == null || unit.isEmpty) {
                 return 'Please select age unit';
               }
               
               final msg = Validations.validateYoungestChildAge(l, raw, unit);
               
-              // For the inline validation, we'll show a simpler message
               if (msg != null) {
-                if (msg.startsWith('Please enter age of Youngest Child')) {
-                  return null; // Suppress the long range message for inline validation
+                if (msg.startsWith(l.selectAgeUnit)) {
+                  return null;
                 }
-                return 'Please enter valid age for selected unit';
+                return l.selectAgeUnit;
               }
             }
             
