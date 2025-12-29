@@ -185,7 +185,6 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
               'discharge_time': state.dischargeTime,
               'place_of_delivery': state.placeOfDelivery,
               'other_place_of_delivery_name': state.otherPlaceOfDeliveryName,
-              // Add new institutional delivery fields
               'institutional_place_type': state.institutionalPlaceType,
               'institutional_place_of_delivery': state.institutionalPlaceOfDelivery,
               'conducted_by': state.conductedBy,
@@ -470,9 +469,28 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
                         final geoLocationJson = jsonEncode(locationData);
 
                         for (int i = 1; i <= count; i++) {
-                          final childName = (formSource['baby${i}_name'] ?? '').toString();
-                          final childGender = (formSource['baby${i}_gender'] ?? '').toString();
-                          final childWeight = formSource['baby${i}_weight'];
+                          String childName = '';
+                          String childGender = '';
+                          dynamic childWeight = null;
+                          
+                          // Check for children_arr first (new structure)
+                          final childrenArr = formSource['children_arr'] as List?;
+                          if (childrenArr != null && childrenArr.isNotEmpty && i <= childrenArr.length) {
+                            final childData = childrenArr[i - 1] as Map<String, dynamic>?;
+                            if (childData != null) {
+                              childName = childData['name']?.toString() ?? '';
+                              childGender = childData['gender']?.toString() ?? '';
+                              childWeight = childData['weight_at_birth'];
+                              print('👶 Using child data from children_arr for child $i: name=$childName, gender=$childGender, weight=$childWeight');
+                            }
+                          } else {
+                            // Fallback to old field structure for backward compatibility
+                            childName = (formSource['baby${i}_name'] ?? '').toString();
+                            childGender = (formSource['baby${i}_gender'] ?? '').toString();
+                            childWeight = (formSource['baby${i}_weight']);
+                            print('👶 Using child data from old fields for child $i: name=$childName, gender=$childGender, weight=$childWeight');
+                          }
+                          
                           final fatherName = (formSource['husband_name'] ?? '').toString();
                           final motherName = (formSource['woman_name'] ?? '').toString();
 
