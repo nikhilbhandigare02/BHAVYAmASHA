@@ -483,6 +483,7 @@ sfgfdd
         AND e.eligible_couple_state = 'eligible_couple'
         AND e.is_deleted = 0
         ${currentUserKey.isNotEmpty ? "AND e.current_user_key = '$currentUserKey'" : ""}
+        AND (b.beneficiary_info IS NULL OR b.beneficiary_info NOT LIKE '%"gender":"male"%')
     ''';
 
       print('🔍 Total query: $totalQuery');
@@ -500,6 +501,7 @@ sfgfdd
         AND e.is_deleted = 0
         AND e.is_synced = 1
         ${currentUserKey.isNotEmpty ? "AND e.current_user_key = '$currentUserKey'" : ""}
+        AND (b.beneficiary_info IS NULL OR b.beneficiary_info NOT LIKE '%"gender":"male"%')
     ''';
 
       print('🔍 Synced query: $syncedQuery');
@@ -527,6 +529,8 @@ sfgfdd
       }
     }
   }
+
+  
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
