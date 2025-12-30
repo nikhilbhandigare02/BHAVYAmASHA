@@ -170,78 +170,113 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
       final db = await DatabaseProvider.instance.database;
       final now = DateTime.now().toIso8601String();
 
-      // Form type and keys
       final formType = FollowupFormDataTable.ancDueRegistration;
       final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'ANC Due Registration';
       final formsRefKey = 'bt7gs9rl1a5d26mz';
 
 
-      final formData = {
-        'form_type': formType,
-        'form_name': formName,
-        'unique_key': formsRefKey,
+      final Map<String, dynamic> formData = {
         'anc_form': {
           'anc_visit': state.ancVisitNo,
-          'visit_type': state.visitType,
-          'place_of_anc': state.placeOfAnc,
-          'date_of_inspection': state.dateOfInspection != null 
+          'visit_type': 'anc',
+
+          'place_of_anc': state.placeOfAnc ?? '',
+
+          'date_of_inspection': state.dateOfInspection != null
               ? DateFormat('yyyy-MM-dd HH:mm:ss').format(state.dateOfInspection!)
               : '',
+
           'house_no': state.houseNumber,
           'pw_name': state.womanName,
           'husband_name': state.husbandName,
-          'rch_reg_no_of_pw': state.rchNumber,
-          'lmp_date': state.lmpDate?.toIso8601String(),
-          'edd_date': state.eddDate?.toIso8601String(),
+          'rch_reg_no_of_pw': state.rchNumber ?? '',
+
+          // IMPORTANT: server expects ISO / datetime string
+          'lmp_date': state.lmpDate != null
+              ? state.lmpDate!.toIso8601String()
+              : '',
+
+          'edd_date': state.eddDate != null
+              ? DateFormat('yyyy-MM-dd HH:mm:ss').format(state.eddDate!)
+              : '',
+
           'week_of_pregnancy': state.weeksOfPregnancy,
           'order_of_pregnancy': state.gravida,
-          'is_breastfeeding': state.isBreastFeeding,
-          'date_of_td1': state.td1Date != null 
+
+          'is_breastfeeding': state.isBreastFeeding ?? '',
+
+          'date_of_td1': state.td1Date != null
               ? DateFormat('yyyy-MM-dd').format(state.td1Date!)
               : '',
-          'date_of_td2': state.td2Date != null 
+
+          'date_of_td2': state.td2Date != null
               ? DateFormat('yyyy-MM-dd').format(state.td2Date!)
               : '',
-          'date_of_td_booster': state.tdBoosterDate != null 
+
+          'date_of_td_booster': state.tdBoosterDate != null
               ? DateFormat('yyyy-MM-dd').format(state.tdBoosterDate!)
               : '',
-          'folic_acid_tab_quantity': state.folicAcidTablets,
-          'iron_and_folic_acid_tab_quantity': '', // Add if needed
-          'calcium_and_vit_d_tab_quantity': state.calciumVitaminD3Tablets,
-          'has_albendazole_tab_given': '', // Add if needed
-          'pre_exist_desease': state.selectedDiseases.isNotEmpty ? state.selectedDiseases.join(',') : '',
-          'other_pre_exist_desease': state.otherDisease,
-          'weight': state.weight,
-          'bp_of_pw_systolic': state.systolic,
-          'bp_of_pw_diastolic': state.diastolic,
-          'hemoglobin': state.hemoglobin,
+
+          'folic_acid_tab_quantity': state.folicAcidTablets ?? '',
+          'iron_and_folic_acid_tab_quantity': '',
+          'calcium_and_vit_d_tab_quantity': state.calciumVitaminD3Tablets ?? '',
+          'has_albendazole_tab_given': '',
+
+          'pre_exist_desease': state.selectedDiseases.isNotEmpty
+              ? state.selectedDiseases.join(',')
+              : '',
+
+          'other_pre_exist_desease': state.otherDisease ?? '',
+
+          'weight': state.weight ?? '',
+          'bp_of_pw_systolic': state.systolic ?? '',
+          'bp_of_pw_diastolic': state.diastolic ?? '',
+          'hemoglobin': state.hemoglobin ?? '',
+
           'is_high_risk': state.highRisk?.toLowerCase() == 'yes' ? 'yes' : 'no',
           'high_risk_details': state.selectedRisks,
-          'is_abortion': state.hasAbortionComplication,
-          'date_of_abortion': state.abortionDate != null 
+
+          'is_abortion': state.hasAbortionComplication ?? '',
+          'date_of_abortion': state.abortionDate != null
               ? DateFormat('yyyy-MM-dd').format(state.abortionDate!)
               : '',
-          'is_family_planning_counselling': '', // Add if needed
-          'is_family_planning': '', // Add if needed
-          'method_of_contraception': '', // Add if needed
-          'has_pw_given_birth': state.givesBirthToBaby?.toLowerCase() == 'yes' ? 'yes' : 'no',
-          'delivery_outcome': state.deliveryOutcome?.toLowerCase() == 'live birth' ? 'live_birth' : 
-                             state.deliveryOutcome?.toLowerCase() == 'still birth' ? 'still_birth' : 
-                             state.deliveryOutcome?.toLowerCase() ?? '',
-          'live_birth': state.numberOfChildren == "One Child" ? "1" : 
-                       state.numberOfChildren == "Twins" ? "2" : 
-                       state.numberOfChildren == "Triplets" ? "3" : "",
+
+          'is_family_planning_counselling': '',
+          'is_family_planning': '',
+          'method_of_contraception': '',
+
+          'has_pw_given_birth':
+          state.givesBirthToBaby?.toLowerCase() == 'yes' ? 'yes' : 'no',
+
+          'delivery_outcome':
+          state.deliveryOutcome?.toLowerCase() == 'live birth'
+              ? 'live_birth'
+              : state.deliveryOutcome?.toLowerCase() == 'still birth'
+              ? 'still_birth'
+              : '',
+
+          'live_birth': state.numberOfChildren == "One Child"
+              ? "1"
+              : state.numberOfChildren == "Twins"
+              ? "2"
+              : state.numberOfChildren == "Triplets"
+              ? "3"
+              : "",
+
           'children_arr': _buildChildrenArray(state),
+
           'ancVisitDates': _buildAncVisitDates(state),
+
           'prev_visit_date': '',
+
           'current_stage': _calculateCurrentStage(state),
           'completedVisited': state.ancVisitNo,
           'anc_visit_interval': "4",
+
           'next_visit_date': _calculateNextVisitDate(state),
-        },
-        'created_at': now,
-        'updated_at': now,
+        }
       };
+
 
       final currentUser = await UserInfo.getCurrentUser();
       final userDetails = currentUser?['details'] is String
@@ -255,33 +290,33 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
 
 
       final formDataForDb  = {
-        'server_id': '',
-        'forms_ref_key': formsRefKey,
-        'household_ref_key': householdRefKey,
-        'beneficiary_ref_key': beneficiaryId,
-        'mother_key': '',
-        'father_key': '',
-        'child_care_state': '',
-        'device_details': jsonEncode({
-          'id': await DeviceInfo.getDeviceInfo().then((value) => value.deviceId),
-          'platform': await DeviceInfo.getDeviceInfo().then((value) => value.platform),
-          'version': await DeviceInfo.getDeviceInfo().then((value) => value.osVersion),
-        }),
-        'app_details': jsonEncode({
-          'app_version': await DeviceInfo.getDeviceInfo().then((value) => value.appVersion.split('+').first),
-          'app_name': await DeviceInfo.getDeviceInfo().then((value) => value.appName),
-          'build_number': await DeviceInfo.getDeviceInfo().then((value) => value.buildNumber),
-          'package_name': await DeviceInfo.getDeviceInfo().then((value) => value.packageName),
-        }),
-        'parent_user': '',
-        'current_user_key': ashaUniqueKey,
-        'facility_id': facilityId,
-        'form_json': jsonEncode(formData),
-        'created_date_time': now,
-        'modified_date_time': now,
-        'is_synced': 0,
-        'is_deleted': 0,
-      };
+          'server_id': '',
+          'forms_ref_key': formsRefKey,
+          'household_ref_key': householdRefKey,
+          'beneficiary_ref_key': beneficiaryId,
+          'mother_key': '',
+          'father_key': '',
+          'child_care_state': '',
+          'device_details': jsonEncode({
+            'id': await DeviceInfo.getDeviceInfo().then((value) => value.deviceId),
+            'platform': await DeviceInfo.getDeviceInfo().then((value) => value.platform),
+            'version': await DeviceInfo.getDeviceInfo().then((value) => value.osVersion),
+          }),
+          'app_details': jsonEncode({
+            'app_version': await DeviceInfo.getDeviceInfo().then((value) => value.appVersion.split('+').first),
+            'app_name': await DeviceInfo.getDeviceInfo().then((value) => value.appName),
+            'build_number': await DeviceInfo.getDeviceInfo().then((value) => value.buildNumber),
+            'package_name': await DeviceInfo.getDeviceInfo().then((value) => value.packageName),
+          }),
+          'parent_user': '',
+          'current_user_key': ashaUniqueKey,
+          'facility_id': facilityId,
+          'form_json': jsonEncode(formData),
+          'created_date_time': now,
+          'modified_date_time': now,
+          'is_synced': 0,
+          'is_deleted': 0,
+        };
 
       try {
         final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
