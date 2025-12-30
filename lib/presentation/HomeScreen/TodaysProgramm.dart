@@ -2668,8 +2668,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    // Calculate total count for To Do Visits card across all expansion tiles
-    final familyCount = _familySurveyItems.length;
+     final familyCount = _familySurveyItems.length;
     final eligibleCoupleCount = _eligibleCoupleItems.length;
     final ancCount = _ancItems.length;
     final hbncCount = _hbncItems.length;

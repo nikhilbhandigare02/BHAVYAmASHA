@@ -142,6 +142,7 @@ class _ResetpasswordState extends State<Resetpassword> {
                 // Submit Button at Bottom
 // Update the BlocListener in ResetPassword.dart
                 BlocListener<ResetPasswordBloc, ResetPasswordState>(
+                  listenWhen: (prev, curr) => prev.postApiStatus != curr.postApiStatus,
                   listener: (context, state) {
                     if (state.postApiStatus == PostApiStatus.success) {
                       showAppSnackBar(context, state.successMessage);
