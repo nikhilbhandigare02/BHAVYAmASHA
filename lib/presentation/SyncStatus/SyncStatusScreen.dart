@@ -602,7 +602,7 @@ sfgfdd
                             Row(
                               children: [
                                 Text(
-                                  '${l10n?.lastSynced ??"Last synced"}: ${_formatDateTime(_lastSyncedAt!)}',
+                                  '${l10n?.lastSynced ??"Last synced at: "}: ${_formatDateTime(_lastSyncedAt!)}',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 15.sp,

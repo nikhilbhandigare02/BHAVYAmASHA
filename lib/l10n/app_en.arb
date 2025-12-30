@@ -1726,7 +1726,7 @@
   "household": "Household",
   "beneficiary": "Beneficiary",
   "followUpLabel": "Follow Up",
-  "lastSynced": "Last synced",
+  "lastSynced": "Last synced at",
   "synced": "Synced",
   "noDataFound": "No Record found",
   "newHouseholdRegistration": "NEW HOUSEHOLD REGISTRATION",
