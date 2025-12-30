@@ -87,81 +87,86 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).orientation == Orientation.landscape ? 18.h : 11.h,
-      color: Theme.of(context).colorScheme.primary,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 22.0),
-        child: Row(
-          children: [
-            // Back / Menu
-            (showBack ?? false)
-                ? IconButton(
-              icon: Icon(
-                Icons.arrow_back,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-              onPressed: onBackTap ?? () => Navigator.of(context).pop(),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-            )
-                : IconButton(
-              icon: Icon(
-                Icons.menu,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-              onPressed: onMenuTap ?? () => Scaffold.of(context).openDrawer(),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-            ),
-
-            SizedBox(width: 1.w),
-
-            Expanded(
-              child: Text(
-                screenTitle,
-                style: TextStyle(
-                  fontSize: 17.sp,
-                  fontWeight: FontWeight.w700,
+    return SafeArea(
+      right: true,
+      top: false,
+      left: false,
+      child: Container(
+        height: MediaQuery.of(context).orientation == Orientation.landscape ? 18.h : 11.h,
+        color: Theme.of(context).colorScheme.primary,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 22.0),
+          child: Row(
+            children: [
+              // Back / Menu
+              (showBack ?? false)
+                  ? IconButton(
+                icon: Icon(
+                  Icons.arrow_back,
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
+                onPressed: onBackTap ?? () => Navigator.of(context).pop(),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              )
+                  : IconButton(
+                icon: Icon(
+                  Icons.menu,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+                onPressed: onMenuTap ?? () => Scaffold.of(context).openDrawer(),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
               ),
-            ),
-
-            // *** ICONS (Only shown if exist — else ZERO width) ***
-            if (_hasIcon1)
-              _buildIcon(
-                icon: icon1,
-                imagePath: icon1Image,
-                widget: icon1Widget,
-                onTap: onIcon1Tap,
-                context: context,
+      
+              SizedBox(width: 1.w),
+      
+              Expanded(
+                child: Text(
+                  screenTitle,
+                  style: TextStyle(
+                    fontSize: 17.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-
-            if (_hasIcon2)
-              _buildIcon(
-                icon: icon2,
-                imagePath: icon2Image,
-                widget: icon2Widget,
-                onTap: onIcon2Tap,
-                context: context,
-              ),
-
-            if (_hasIcon3)
-              _buildIcon(
-                icon: icon3,
-                imagePath: icon3Image,
-                widget: icon3Widget,
-                onTap: onIcon3Tap,
-                context: context,
-              ),
-          ],
+      
+              // *** ICONS (Only shown if exist — else ZERO width) ***
+              if (_hasIcon1)
+                _buildIcon(
+                  icon: icon1,
+                  imagePath: icon1Image,
+                  widget: icon1Widget,
+                  onTap: onIcon1Tap,
+                  context: context,
+                ),
+      
+              if (_hasIcon2)
+                _buildIcon(
+                  icon: icon2,
+                  imagePath: icon2Image,
+                  widget: icon2Widget,
+                  onTap: onIcon2Tap,
+                  context: context,
+                ),
+      
+              if (_hasIcon3)
+                _buildIcon(
+                  icon: icon3,
+                  imagePath: icon3Image,
+                  widget: icon3Widget,
+                  onTap: onIcon3Tap,
+                  context: context,
+                ),
+            ],
+          ),
         ),
+      
       ),
-
     );
   }
 }
