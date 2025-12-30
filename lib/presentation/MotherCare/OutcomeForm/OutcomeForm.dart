@@ -168,28 +168,37 @@ class _OutcomeFormView extends StatelessWidget {
                       }
                       if (formJsonRaw.isEmpty) return;
                       final decoded = jsonDecode(formJsonRaw);
-                      if (decoded is Map && decoded['anc_form'] is Map) {
-                        final fd = Map<String, dynamic>.from(
-                          decoded['anc_form'] as Map,
-                        );
-                        final flag =
-                            (fd['has_pw_given_birth']?.toString() ?? '')
-                                .toLowerCase();
+                      
+                      // Handle both JSON formats
+                      Map<String, dynamic> formData = {};
+                      
+                      // Format 1: {"form_type":"mother_care","form_name":"mother_care","form_data":{...}}
+                      if (decoded is Map && decoded['form_data'] is Map) {
+                        formData = Map<String, dynamic>.from(decoded['form_data'] as Map);
+                      }
+                      // Format 2: {"anc_form": {...}}
+                      else if (decoded is Map && decoded['anc_form'] is Map) {
+                        formData = Map<String, dynamic>.from(decoded['anc_form'] as Map);
+                      }
+                      
+                      if (formData.isNotEmpty) {
+                        // Map fields from both formats to common variables
+                        final flag = _getBirthFlag(formData);
                         if (flag == 'yes') {
                           print(
                             'ANC record with gives_birth_to_baby YES: ${results.first}',
                           );
                         }
-                        final weeks =
-                            fd['week_of_pregnancy']?.toString() ?? '';
+                        
+                        final weeks = _getWeeksOfPregnancy(formData);
                         if (weeks.isNotEmpty) {
                           context.read<OutcomeFormBloc>().add(
                             GestationWeeksChanged(weeks),
                           );
                         }
-                        // Derive children count from children_arr array
-                        final childrenArr = fd['children_arr'] as List?;
-                        final childCount = childrenArr?.length.toString() ?? '';
+                        
+                        // Derive children count from children_arr array or other fields
+                        final childCount = _getChildCount(formData);
                         if (childCount.isNotEmpty && childCount != '0') {
                           context.read<OutcomeFormBloc>().add(
                             OutcomeCountChanged(childCount),
@@ -197,7 +206,7 @@ class _OutcomeFormView extends StatelessWidget {
                         }
 
                         // Prefill delivery outcome if available
-                        final deliveryOutcome = fd['delivery_outcome']?.toString() ?? '';
+                        final deliveryOutcome = _getDeliveryOutcome(formData);
                         if (deliveryOutcome.isNotEmpty) {
                           // Map delivery outcome to delivery type
                           String deliveryType = '';
@@ -217,7 +226,7 @@ class _OutcomeFormView extends StatelessWidget {
                         }
 
                         // Prefill place of ANC if available (could map to place of delivery)
-                        final placeOfAnc = fd['place_of_anc']?.toString() ?? '';
+                        final placeOfAnc = _getPlaceOfAnc(formData);
                         if (placeOfAnc.isNotEmpty) {
                           // Could potentially map this to place of delivery
                           print('Place of ANC from data: $placeOfAnc');
@@ -1154,4 +1163,66 @@ class _SectionHeader extends StatelessWidget {
       ),
     );
   }
+}
+
+// Helper functions to handle both JSON formats
+String _getBirthFlag(Map<String, dynamic> formData) {
+  // Format 1: gives_birth_to_baby
+  final format1Flag = formData['gives_birth_to_baby']?.toString() ?? '';
+  // Format 2: has_pw_given_birth
+  final format2Flag = formData['has_pw_given_birth']?.toString() ?? '';
+  
+  return (format1Flag.isNotEmpty ? format1Flag : format2Flag).toLowerCase();
+}
+
+String _getWeeksOfPregnancy(Map<String, dynamic> formData) {
+  // Format 1: weeks_of_pregnancy
+  final format1Weeks = formData['weeks_of_pregnancy']?.toString() ?? '';
+  // Format 2: week_of_pregnancy
+  final format2Weeks = formData['week_of_pregnancy']?.toString() ?? '';
+  
+  return format1Weeks.isNotEmpty ? format1Weeks : format2Weeks;
+}
+
+String _getChildCount(Map<String, dynamic> formData) {
+  // Format 2: Derive from children_arr array
+  final childrenArr = formData['children_arr'] as List?;
+  final childCount = childrenArr?.length.toString() ?? '';
+  
+  if (childCount.isNotEmpty && childCount != '0') {
+    return childCount;
+  }
+  
+  // Format 1: Check for other possible indicators of child count
+  // Look for any field that might indicate number of children
+  final possibleFields = [
+    'number_of_children',
+    'children_count',
+    'live_birth',
+    'child_count'
+  ];
+  
+  for (final field in possibleFields) {
+    final value = formData[field]?.toString() ?? '';
+    if (value.isNotEmpty && value != '0' && value != 'null') {
+      return value;
+    }
+  }
+  
+  // If no direct child count found, return empty
+  return '';
+}
+
+String _getDeliveryOutcome(Map<String, dynamic> formData) {
+  // Both formats use delivery_outcome
+  return formData['delivery_outcome']?.toString() ?? '';
+}
+
+String _getPlaceOfAnc(Map<String, dynamic> formData) {
+  // Format 1: place_of_anc
+  final format1Place = formData['place_of_anc']?.toString() ?? '';
+  // Format 2: place_of_anc (same field name)
+  final format2Place = formData['place_of_anc']?.toString() ?? '';
+  
+  return format1Place.isNotEmpty ? format1Place : format2Place;
 }
