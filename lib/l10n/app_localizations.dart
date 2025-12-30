@@ -10148,7 +10148,7 @@ abstract class AppLocalizations {
   /// No description provided for @lastSynced.
   ///
   /// In en, this message translates to:
-  /// **'Last synced'**
+  /// **'Last synced at'**
   String get lastSynced;
 
   /// No description provided for @synced.

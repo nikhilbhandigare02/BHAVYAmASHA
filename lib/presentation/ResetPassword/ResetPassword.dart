@@ -169,9 +169,7 @@ class _ResetpasswordState extends State<Resetpassword> {
                           color: AppColors.primary,
                           isLoading: state.postApiStatus == PostApiStatus.loading,
                           onPress: () {
-                            if (_formKey.currentState!.validate()) {
-                              context.read<ResetPasswordBloc>().add(ResetPasswordButton());
-                            }
+                            context.read<ResetPasswordBloc>().add(ResetPasswordButton());
                           },
                         ),
                       );
