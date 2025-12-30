@@ -145,7 +145,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'Family Update',
+        screenTitle: l10n!.familyUpdate,
         showBack: true,
       ),
       drawer: const CustomDrawer(),

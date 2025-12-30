@@ -243,7 +243,7 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'Guest Beneficiaries',
+        screenTitle:l10n!.guestBeneficiaryList,
         showBack: true,
       ),
       drawer: const CustomDrawer(),

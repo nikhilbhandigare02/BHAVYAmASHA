@@ -887,11 +887,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                               },
                             ),
                             Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-
                                 Expanded(
                                   child: CustomTextField(
                                     labelText: l10n?.mothersRchIdLabel ?? "Mother's RCH ID number",
@@ -905,7 +903,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                       if (text.isNotEmpty) {
                                         final regex = RegExp(r'^\d{12}$');
                                         if (!regex.hasMatch(text)) {
-                                          return _captureError("Mother's RCH ID must be exactly 12 digits");
+                                          return _captureError(l10n.motherRchIdError);
                                         }
                                       }
                                       return null;

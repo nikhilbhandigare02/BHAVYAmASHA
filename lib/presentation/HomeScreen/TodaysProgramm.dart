@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../data/Database/local_storage_dao.dart';
 import '../../data/Database/database_provider.dart';
 import '../../data/Database/tables/followup_form_data_table.dart';
+import '../../data/Database/tables/mother_care_activities_table.dart';
 import '../../data/SecureStorage/SecureStorage.dart';
 import '../../core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
 import '../../l10n/app_localizations.dart';
@@ -331,13 +332,24 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
 
         try {
-          String query = 'SELECT * FROM ${FollowupFormDataTable.table} '
+          String query = 'SELECT * FROM ${FollowupFormDataTable.table} f '
               'WHERE forms_ref_key IN ($placeholders) '
-              'AND (is_deleted IS NULL OR is_deleted = 0) '
-              'AND DATE(created_date_time) = DATE(?) '
-              'AND current_user_key = ?';  // Added here
+              'AND (f.is_deleted IS NULL OR f.is_deleted = 0) '
+              'AND DATE(f.created_date_time) = DATE(?) '
+              'AND f.current_user_key = ? '
+              'AND EXISTS ('
+              '  SELECT 1 FROM ${MotherCareActivitiesTable.table} m '
+              '  WHERE m.beneficiary_ref_key = f.beneficiary_ref_key '
+              '    AND (m.is_deleted IS NULL OR m.is_deleted = 0) '
+              '    AND m.id = ('
+              '      SELECT MAX(id) FROM ${MotherCareActivitiesTable.table} '
+              '      WHERE beneficiary_ref_key = f.beneficiary_ref_key '
+              '        AND (is_deleted IS NULL OR is_deleted = 0) '
+              '    ) '
+              '    AND m.mother_care_state = ? '
+              ')';
 
-          List<dynamic> args = [...formKeys, todayStr, ashaUniqueKey ?? ''];
+          List<dynamic> args = [...formKeys, todayStr, ashaUniqueKey ?? '', 'anc_due'];
 
           final rows = await db.rawQuery(query, args);
 
