@@ -175,7 +175,7 @@ class _Lbwrefered extends State<Lbwrefered> {
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'LBW Referred',
+        screenTitle: l10n!.lbwReferred,
         showBack: true,
       ),
       drawer: const CustomDrawer(),
