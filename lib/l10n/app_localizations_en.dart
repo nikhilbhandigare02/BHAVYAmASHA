@@ -7094,4 +7094,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dataNotFound => 'User data not available ';
+
+  @override
+  String get motherRchIdError => 'Mother\'s RCH ID must be exactly 12 digits';
 }
