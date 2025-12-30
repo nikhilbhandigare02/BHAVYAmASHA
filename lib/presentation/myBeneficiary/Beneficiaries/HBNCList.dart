@@ -39,28 +39,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
   void _onSearchChanged() {
 
   }
-
-  Future<int> _getVisitCount(String beneficiaryId) async {
-    try {
-      if (beneficiaryId.isEmpty) return 0;
-
-      final db = await DatabaseProvider.instance.database;
-      final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
-
-      final List<Map<String, dynamic>> results = await db.query(
-        FollowupFormDataTable.table,
-        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
-        whereArgs: [beneficiaryId, hbncVisitKey],
-        columns: ['id'],
-      );
-
-      return results.length;
-    } catch (e) {
-      print('Error in _getVisitCount: $e');
-      return 0;
-    }
-  }
-
+ 
   Future<List<Map<String, dynamic>>> _getDeliveryOutcomeData() async {
     try {
       final db = await DatabaseProvider.instance.database;
@@ -89,6 +68,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
       WHERE forms_ref_key = ? 
       AND current_user_key = ?
       AND beneficiary_ref_key IN ($placeholders)
+      AND (is_deleted IS NULL OR is_deleted = 0)
       ORDER BY created_date_time DESC
     ''';
 
@@ -162,7 +142,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
           final db = await DatabaseProvider.instance.database;
           final beneficiaryResults = await db.query(
             'beneficiaries_new',
-            where: 'unique_key = ? AND is_deleted = 0',
+            where: 'unique_key = ?',
             whereArgs: [beneficiaryRefKey],
           );
 

@@ -274,7 +274,7 @@ class _OutcomeFormFields extends StatelessWidget {
           isEditable: true,
           labelText: l10n.deliveryDate,
           onDateChanged: (d) => bloc.add(DeliveryDateChanged(d)),
-           readOnly: true,
+         //  readOnly: true,
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         const SizedBox(height: 8),

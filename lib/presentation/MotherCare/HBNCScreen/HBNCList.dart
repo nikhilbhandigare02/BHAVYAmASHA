@@ -145,8 +145,7 @@ class _HBNCListScreenState
         }
       }
       
-      // If ANC form doesn't have live_birth count, check delivery outcome form
-      final deliveryOutcomeKey = '4r7twnycml3ej1vg';
+       final deliveryOutcomeKey = '4r7twnycml3ej1vg';
       final deliveryRows = await db.rawQuery(
         'SELECT * FROM ${FollowupFormDataTable.table} WHERE forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 ORDER BY created_date_time DESC LIMIT 1',
         [deliveryOutcomeKey, beneficiaryId],
