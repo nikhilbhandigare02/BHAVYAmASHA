@@ -244,7 +244,7 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'Pregnant Women List',
+        screenTitle: l10n!.pregnantWomenList,
         showBack: true,
       ),
       drawer: const CustomDrawer(),

@@ -37,6 +37,19 @@ class _DeathRegisterState extends State<DeathRegister> {
     super.dispose();
   }
 
+  Future<String> _getMemberType(String uniqueKey) async {
+    try {
+      final beneficiary = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(uniqueKey);
+      if (beneficiary != null && beneficiary['beneficiary_info'] is Map) {
+        final beneficiaryInfo = Map<String, dynamic>.from(beneficiary['beneficiary_info']);
+        return beneficiaryInfo['memberType']?.toString() ?? 'Adult';
+      }
+    } catch (e) {
+      print('Error fetching memberType for $uniqueKey: $e');
+    }
+    return 'Adult';
+  }
+
   Future<void> _loadDeathRecords() async {
     try {
       print('🔍 [DeathRegister] Fetching death records...');
@@ -243,7 +256,7 @@ class _DeathRegisterState extends State<DeathRegister> {
           if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
             years--;
           }
-          age = '$years years';
+          age = '$years Y';
         }
       } catch (e) {
         print('Error parsing DOB: $e');
@@ -252,18 +265,12 @@ class _DeathRegisterState extends State<DeathRegister> {
       age = '${beneficiaryInfo['age']} years';
     }
 
-    final gender = (beneficiaryInfo['gender'] ?? '').toString().toLowerCase() == 'm' ? 'Male' : 'Female';
+    final gender = (beneficiaryInfo['gender'] ?? '').toString().toLowerCase() == 'm' ? 'M' : 'F';
     final hhId = data['household_ref_key']?.toString() ?? 'N/A';
-    final mobile = beneficiaryInfo['mobileNo'] ?? beneficiaryInfo['mobile'] ?? 'N/A';
+    final uniqueKey = data['unique_key']?.toString() ?? '';
 
-    // Parse death details
     final deathDate = deathDetails['date_of_death'] ?? deathDetails['deathDate'] ?? 'Not recorded';
-    final causeOfDeath = deathDetails['probable_cause_of_death'] ?? deathDetails['causeOfDeath'] ?? 'Not specified';
     final deathPlace = deathDetails['death_place'] ?? deathDetails['deathPlace'] ?? 'Not specified';
-    final otherCause = deathDetails['other_cause_of_death'] ?? deathDetails['otherCause'];
-    final deathReason = deathDetails['reason_of_death'] ?? deathDetails['deathReason'];
-    final otherReason = deathDetails['other_reason'] ?? deathDetails['otherReason'];
-    final recordedDate = deathDetails['recorded_date'] ?? deathDetails['recordedDate'];
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -304,20 +311,28 @@ class _DeathRegisterState extends State<DeathRegister> {
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text(
-                    'Death Record',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12.5,
-                    ),
-                  ),
+                // MemberType Badge
+                FutureBuilder<String>(
+                  future: _getMemberType(uniqueKey),
+                  builder: (context, snapshot) {
+                    final memberType = snapshot.data ?? 'Adult';
+                    
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        memberType,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -351,25 +366,28 @@ class _DeathRegisterState extends State<DeathRegister> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        _formatDate(deathDate),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 13,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            _formatDate(deathDate),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
 
-                // Second Row: Age & Gender and Place of Death
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Text(
-                        '$age • $gender',
+                        '$age | $gender',
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w400,
@@ -381,7 +399,7 @@ class _DeathRegisterState extends State<DeathRegister> {
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
-                        deathPlace,
+                        deathPlace ?? "N/A",
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w400,
@@ -412,24 +430,4 @@ class _DeathRegisterState extends State<DeathRegister> {
     }
   }
 
-  void _showDeathDetails(BuildContext context, Map<String, dynamic> data) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Death Record Details'),
-        content: SingleChildScrollView(
-          child: Text(
-            const JsonEncoder.withIndent('  ').convert(data),
-            style: const TextStyle(fontFamily: 'monospace'),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -383,7 +383,7 @@ ORDER BY d.created_date_time DESC
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'Pregnancy Outcome',
+        screenTitle: l10n!.pregnancyOutcome,
         showBack: true,
       ),
       drawer: const CustomDrawer(),

@@ -247,6 +247,18 @@ class DbMigration {
         int isDeath = (row["is_death"] == 1) ? 1 : 0;
         int isMigrated = (row["is_migrated"] == 1) ? 1 : 0;
 
+        dynamic resolvedDeathDate;
+
+        final dynamic rawDeathDate =
+            row["date_of_death"] ?? form["date_of_death"];
+
+        if (rawDeathDate != null &&
+            rawDeathDate.toString().trim().isNotEmpty &&
+            rawDeathDate.toString() != "null") {
+          resolvedDeathDate = rawDeathDate;
+        } else {
+          resolvedDeathDate = row["created_date_time"];
+        }
         Map<String, dynamic>? deathDetailsMap;
 
         final String reasonOfCloser =
@@ -258,7 +270,7 @@ class DbMigration {
         if (reasonOfCloser.isNotEmpty) {
           deathDetailsMap = {
             "reason_of_closer": reasonOfCloser,
-            "date_of_death": row["date_of_death"] ?? form["date_of_death"],
+            "date_of_death": resolvedDeathDate,
             "cause_of_death": row["cause_of_death"] ?? form["cause_of_death"],
             "death_place": row["death_place"] ?? form["death_place"],
             "remark": form["remark"],
@@ -464,7 +476,6 @@ class DbMigration {
           ',"created_by":"' || ifnull(a.created_by, '') || '"' ||
           ',"modified_by":"' || ifnull(a.modified_by, '') || '"' ||
         '}'),
-
         a.is_deleted
 
       FROM followup_forms_data a
