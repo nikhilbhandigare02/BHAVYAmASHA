@@ -591,8 +591,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                   padding: const EdgeInsets.only(right: 12.0),
                   child: Image.asset(
                     'assets/images/img_1.png',
-                    height: 2.8.h,
-                    width: 2.8.h,
+                    height: MediaQuery.of(context).orientation == Orientation.landscape ? 5.h : 2.7.h,
+                    width: MediaQuery.of(context).orientation == Orientation.landscape ? 5.h : 2.7.h,
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),

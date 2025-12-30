@@ -40,7 +40,7 @@ class RoundButton extends StatelessWidget {
     final isLandscape = screenSize.width > screenSize.height;
     
     // Calculate responsive dimensions
-    final double baseSize = isLandscape ? screenSize.height * 0.06 : screenSize.height * 0.06;
+    final double baseSize = isLandscape ? screenSize.width * 0.06 : screenSize.height * 0.06;
     final double buttonHeight = height ?? baseSize.clamp(44.0, 60.0);
     final double buttonWidth = width ?? double.infinity;
     final double buttonFontSize = fontSize ?? (buttonHeight * 0.32).clamp(12.0, 18.0);

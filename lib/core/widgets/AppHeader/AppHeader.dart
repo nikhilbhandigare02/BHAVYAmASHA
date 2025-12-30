@@ -64,8 +64,8 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.only(right: 12.0),
           child: Image.asset(
             imagePath,
-            height: 2.8.h,
-            width: 2.8.h,
+            height: MediaQuery.of(context).orientation == Orientation.landscape ? 5.h : 2.7.h,
+            width: MediaQuery.of(context).orientation == Orientation.landscape ? 5.h : 2.7.h,
             color: Theme.of(context).colorScheme.onPrimary,
           ),
         ),
@@ -92,10 +92,10 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       top: false,
       left: false,
       child: Container(
-        height: preferredSize.height,
+        height: MediaQuery.of(context).orientation == Orientation.landscape ? 18.h : 11.h,
         color: Theme.of(context).colorScheme.primary,
         child: Padding(
-          padding: EdgeInsets.only(top: 3.5.h),
+          padding: const EdgeInsets.only(top: 22.0),
           child: Row(
             children: [
               // Back / Menu
@@ -121,7 +121,6 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       
               SizedBox(width: 1.w),
       
-              // *** TITLE: FULL WIDTH, NO WRAP, NO TRIM WHEN SPACE AVAILABLE ***
               Expanded(
                 child: Text(
                   screenTitle,
@@ -166,6 +165,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
             ],
           ),
         ),
+      
       ),
     );
   }

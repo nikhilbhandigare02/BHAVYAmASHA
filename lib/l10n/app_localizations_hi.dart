@@ -1947,6 +1947,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get otpIsRequired => 'ओटीपी आवश्यक है';
 
   @override
+  String get lastHbnc => 'अंतिम एचबीएनसी विज़िट की नियत तिथि';
+
+  @override
   String get pleaseEnterAbhaAddress => 'कृपया ABHA पता दर्ज करें';
 
   @override

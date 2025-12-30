@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -29,7 +30,12 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
     Emitter<ResetPasswordState> emit,
   ) {
     debugPrint('Username: ${event.username}');
-    emit(state.copyWith(username: event.username));
+    emit(state.copyWith(
+      username: event.username,
+      postApiStatus: PostApiStatus.initial,
+      error: '',
+      successMessage: '',
+    ));
   }
 
   void _onCurrentPassChange(
@@ -37,7 +43,12 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
     Emitter<ResetPasswordState> emit,
   ) {
     debugPrint('Current Password: ${event.currentPassword}');
-    emit(state.copyWith(currentPassword: event.currentPassword));
+    emit(state.copyWith(
+      currentPassword: event.currentPassword,
+      postApiStatus: PostApiStatus.initial,
+      error: '',
+      successMessage: '',
+    ));
   }
 
   void _onNewPassChange(
@@ -45,7 +56,12 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
     Emitter<ResetPasswordState> emit,
   ) {
     debugPrint('New Password: ${event.newPassword}');
-    emit(state.copyWith(newPasswordPassword: event.newPassword));
+    emit(state.copyWith(
+      newPasswordPassword: event.newPassword,
+      postApiStatus: PostApiStatus.initial,
+      error: '',
+      successMessage: '',
+    ));
   }
 
   void _onReEnterPassChange(
@@ -53,7 +69,12 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
     Emitter<ResetPasswordState> emit,
   ) {
     debugPrint('Re-enter Password: ${event.reEnterPassword}');
-    emit(state.copyWith(reEnterPassword: event.reEnterPassword));
+    emit(state.copyWith(
+      reEnterPassword: event.reEnterPassword,
+      postApiStatus: PostApiStatus.initial,
+      error: '',
+      successMessage: '',
+    ));
   }
 
   // Update the _onResetPassButton method in reset_password_bloc.dart
@@ -170,10 +191,14 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
             ),
           );
         } else {
+          final lm = message.toLowerCase();
+          final friendly = (lm.contains('unauthorized') || lm.contains('invalid auth') || lm.contains('authentication'))
+              ? 'Please enter the correct password'
+              : message;
           emit(
             state.copyWith(
               postApiStatus: PostApiStatus.error,
-              error: message,
+              error: friendly,
               successMessage: '',
             ),
           );
@@ -188,13 +213,37 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
         );
       }
     } catch (e) {
-      print("eeeeeeeee $e");
+      final raw = e.toString();
+      String err = raw;
+      try {
+        final match = RegExp(r'\{[\s\S]*\}').firstMatch(raw);
+        if (match != null) {
+          final jsonStr = match.group(0)!;
+          final map = jsonDecode(jsonStr) as Map<String, dynamic>;
+          final apiMsg = (map['msg'] ?? map['message'] ?? '').toString();
+          if (apiMsg.isNotEmpty) {
+            err = apiMsg;
+          }
+        } else if (raw.contains('"msg":"')) {
+          final start = raw.indexOf('"msg":"') + 7;
+          final end = raw.indexOf('"', start);
+          if (start >= 7 && end > start) {
+            err = raw.substring(start, end);
+          }
+        }
+      } catch (_) {}
+
+      final lower = err.toLowerCase();
+      if (lower.contains('unauthorized') || lower.contains('invalid auth') || lower.contains('authentication')) {
+        err = 'Please enter the correct current password';
+      } else if (err.isEmpty) {
+        err = l10n?.errorMsg ?? 'An error occurred. Please try again.';
+      }
+
       emit(
         state.copyWith(
           postApiStatus: PostApiStatus.error,
-          error: e.toString().contains('Exception:')
-              ? e.toString().split('Exception: ')[1]
-              : l10n?.errorMsg ?? 'An error occurred. Please try again.',
+          error: err,
           successMessage: '',
         ),
       );

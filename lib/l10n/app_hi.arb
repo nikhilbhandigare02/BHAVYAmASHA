@@ -1864,6 +1864,8 @@
   "grandDaughter": "पोती",
   "authenticationMode": "प्रमाणीकरण मोड",
   "pleaseEnterOtp": "कृपया ओटीपी दर्ज करें",
+  "lastHbnc": "अंतिम एचबीएनसी विज़िट की नियत तिथि",
+
   "otpIsRequired": "ओटीपी आवश्यक है",
   "pleaseEnterAbhaAddress": "कृपया ABHA पता दर्ज करें",
   "sonInLaw": "दामाद",

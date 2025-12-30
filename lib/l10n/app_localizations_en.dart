@@ -1947,6 +1947,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otpIsRequired => 'OTP is required';
 
   @override
+  String get lastHbnc => 'Last HBNC Vsit Due date';
+
+  @override
   String get pleaseEnterAbhaAddress => 'Please enter ABHA address';
 
   @override
@@ -5047,7 +5050,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get followUpLabel => 'Follow Up';
 
   @override
-  String get lastSynced => 'Last synced';
+  String get lastSynced => 'Last synced at';
 
   @override
   String get synced => 'Synced';

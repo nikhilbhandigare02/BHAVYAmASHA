@@ -162,7 +162,7 @@ class AuthRepository {
     } on AppExceptions {
       rethrow;
     } catch (e) {
-      throw AppExceptions('An error occurred while changing password. Please try again.');
+      rethrow;
     }
   }
 
