@@ -63,20 +63,15 @@ class _Lbwrefered extends State<Lbwrefered> {
           var weight = _parseNumFlexible(info['weight'])?.toDouble();
           var birthWeight = _parseNumFlexible(info['birthWeight'])?.toDouble();
 
-          // Flexible LBW condition logic
           bool isLbw = false;
 
           if (weight != null && birthWeight != null) {
-            // Both present: BOTH must satisfy their conditions
             isLbw = (weight <= 1.6 && birthWeight <= 1600);
           } else if (weight != null && birthWeight == null) {
-            // Only weight present: check weight condition only
             isLbw = (weight <= 1.6);
           } else if (weight == null && birthWeight != null) {
-            // Only birthWeight present: check birthWeight condition only
             isLbw = (birthWeight <= 1600);
           }
-          // If both are null, isLbw remains false
 
           if (!isLbw) continue;
           passed++;
