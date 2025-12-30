@@ -120,12 +120,22 @@ class NetworkServiceApi extends BaseApiServices{
         case 404:
           throw FetchDataException('Not Found: $url');
         case 500:
+        case 501:
         default:
           print('❌ Server error: ${response.statusCode}');
           print('Response body: ${response.body}');
-          throw FetchDataException(
-            'Error occurred while communicating with server. Status code: ${response.statusCode}',
-          );
+          try {
+            final data = jsonDecode(response.body);
+            final message = (data is Map<String, dynamic>)
+                ? (data['msg'] ?? data['message'] ?? 'Error occurred while communicating with server. Status code: ${response.statusCode}')
+                : 'Error occurred while communicating with server. Status code: ${response.statusCode}';
+            throw FetchDataException(message.toString());
+          } catch (_) {
+            final fallback = response.body.isNotEmpty
+                ? response.body
+                : 'Error occurred while communicating with server. Status code: ${response.statusCode}';
+            throw FetchDataException(fallback);
+          }
       }
     } on SocketException catch (e) {
       print('🌐 Network error: $e'

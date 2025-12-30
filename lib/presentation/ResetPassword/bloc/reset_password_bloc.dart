@@ -235,9 +235,7 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
 
       final lower = err.toLowerCase();
       if (lower.contains('unauthorized') || lower.contains('invalid auth') || lower.contains('authentication')) {
-        err = 'Please enter the correct password';
-      } else if (raw.contains('Status code: 500') || raw.contains(' 500') || raw.contains(' 501') || lower.contains('server error')) {
-        err = err.isNotEmpty ? err : (l10n?.errorMsg ?? 'An error occurred. Please try again.');
+        err = 'Please enter the correct current password';
       } else if (err.isEmpty) {
         err = l10n?.errorMsg ?? 'An error occurred. Please try again.';
       }

@@ -643,6 +643,7 @@
   "authenticationMode": "Authentication Mode",
   "pleaseEnterOtp": "Please enter OTP",
   "otpIsRequired": "OTP is required",
+  "lastHbnc": "Last HBNC Vsit Due date",
   "pleaseEnterAbhaAddress": "Please enter ABHA address",
   "noPregnancyOutcomesFound": "No pregnancy outcomes found",
   "errorMissingBeneficiaryInfo": "Error: Missing beneficiary information",
@@ -2462,7 +2463,8 @@
   "loadData": "Data is being fetched",
   "loadDataComplete": "Data fetching completed ",
   "dataNotFound": "User data not available ",
-  "motherRchIdError": "Mother's RCH ID must be exactly 12 digits"
+  "motherRchIdError": "Mother's RCH ID must be exactly 12 digits",
+  ""
 
 
 }
