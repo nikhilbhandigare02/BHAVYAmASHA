@@ -1938,6 +1938,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get relationFather => 'Father';
 
   @override
+  String get authenticationMode => 'Authentication Mode';
+
+  @override
+  String get pleaseEnterOtp => 'Please enter OTP';
+
+  @override
+  String get otpIsRequired => 'OTP is required';
+
+  @override
+  String get pleaseEnterAbhaAddress => 'Please enter ABHA address';
+
+  @override
   String get noPregnancyOutcomesFound => 'No pregnancy outcomes found';
 
   @override
@@ -3114,7 +3126,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logoutMessage => 'Are you sure you want to logout?';
 
   @override
-  String get spousDetails => 'Spous Details';
+  String get spousDetails => 'Spouse Details';
 
   @override
   String get relationWithFamilyHead => 'Relation with the family head';

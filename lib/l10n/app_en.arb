@@ -1042,7 +1042,7 @@
   "exitAppMessage": "Are you sure you want to exit?",
   "logoutTitle": "Logout",
   "logoutMessage": "Are you sure you want to logout?",
-  "spousDetails":"Spous Details",
+  "spousDetails":"Spouse Details",
   "relationWithFamilyHead": "Relation with the family head",
   "nameOfMember": "Name of member",
   "nameOfMemberHint": "Enter member name",
@@ -2461,7 +2461,8 @@
   "deathPlace": "Death Place",
   "loadData": "Data is being fetched",
   "loadDataComplete": "Data fetching completed ",
-  "dataNotFound": "User data not available "
+  "dataNotFound": "User data not available ",
+  "motherRchIdError": "Mother's RCH ID must be exactly 12 digits"
 
 
 }

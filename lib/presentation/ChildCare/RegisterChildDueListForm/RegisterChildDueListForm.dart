@@ -73,7 +73,6 @@ class BeneficiaryData {
       mobileOwner: json['mobileOwner']?.toString(),
       otherReligion: json['otherReligion']?.toString(),
       otherCategory: json['otherCategory']?.toString(),
-
     );
   }
 
@@ -665,7 +664,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                       if (text.isNotEmpty) {
                                         final regex = RegExp(r'^\d{12}$');
                                         if (!regex.hasMatch(text)) {
-                                          return _captureError('RCH ID must be exactly 12 digits');
+                                          return _captureError(l10n?.rch_id_must_be_12_digits);
                                         }
                                       }
                                       return null;
@@ -1105,13 +1104,13 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                     Padding(
                                       padding: const EdgeInsets.only(top: 8.0),
                                       child: CustomTextField(
-                                        labelText: 'Specify Category',
-                                        hintText: 'Enter your category',
+                                        labelText: l10n.specifyCategoryShort,
+                                        hintText: l10n.enter_category,
                                         initialValue: state.customCaste,
                                         onChanged: (v) => bloc.add(CustomCasteChanged(v)),
                                         validator: (value) {
                                           if (state.caste == 'Other' && (value == null || value.trim().isEmpty)) {
-                                            return 'Please specify your category';
+                                            return l10n.specifyCategory;
                                           }
                                           return null;
                                         },
@@ -1154,7 +1153,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
                               final isValid = form.validate();
                               if (!isValid) {
-                                final msg = _firstError ?? 'Please correct the highlighted fields.';
+                                final msg = _firstError ?? l10n.correctHighlightedFields;
                                 showAppSnackBar(context, msg);
                                 return;
                               }

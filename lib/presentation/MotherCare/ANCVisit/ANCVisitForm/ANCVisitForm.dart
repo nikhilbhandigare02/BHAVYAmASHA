@@ -305,7 +305,16 @@ class _AncvisitformState extends State<Ancvisitform> {
         }
       }
 
-      
+      final eddDateStr = beneficiaryInfo?['edd']?.toString();
+      if (eddDateStr != null && eddDateStr.isNotEmpty) {
+        try {
+          final eddDate = DateTime.parse(eddDateStr);
+          _bloc.add(EddDateChanged(eddDate));
+          print('✅ Set EDD date from beneficiary data: $eddDate');
+        } catch (e) {
+          print('Error parsing EDD date "$eddDateStr": $e');
+        }
+      }
     } catch (e) {
       print('⚠️ Error processing beneficiary data: $e');
     }
@@ -520,7 +529,15 @@ class _AncvisitformState extends State<Ancvisitform> {
               }
             }
 
-            
+            if (info['edd'] != null) {
+              try {
+                final eddDate = DateTime.parse(info['edd'].toString());
+                _bloc.add(EddDateChanged(eddDate));
+                print('📅 Set EDD date from beneficiary info: $eddDate');
+              } catch (e) {
+                print('⚠️ Error parsing EDD date: ${info['edd']} - $e');
+              }
+            }
 
             final womanName = (info['memberName'] ?? info['headName'])
                 ?.toString();

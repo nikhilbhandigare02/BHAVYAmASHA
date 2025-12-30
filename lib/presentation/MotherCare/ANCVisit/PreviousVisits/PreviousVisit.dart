@@ -50,10 +50,10 @@ class _PreviousvisitState extends State<Previousvisit> {
         created = dateRaw.isEmpty ? '-' : dateRaw;
       }
 
-      String week = fd['weeks_of_pregnancy']?.toString() ?? '';
+      String week = fd['week_of_pregnancy']?.toString() ?? '';
       if (week.trim().isEmpty) week = '-';
 
-      String risk = fd['high_risk']?.toString() ?? '';
+      String risk = fd['is_high_risk']?.toString() ?? '';
       if (risk.trim().isEmpty) risk = '-';
 
       list.add({'date': created, 'week': week, 'risk': risk});
