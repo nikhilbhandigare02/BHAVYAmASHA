@@ -2464,7 +2464,7 @@
   "loadDataComplete": "Data fetching completed ",
   "dataNotFound": "User data not available ",
   "motherRchIdError": "Mother's RCH ID must be exactly 12 digits",
-  ""
+
 
 
 }

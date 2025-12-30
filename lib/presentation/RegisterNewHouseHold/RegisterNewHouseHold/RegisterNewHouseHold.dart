@@ -387,8 +387,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                       const SizedBox(width: 120, height: 44),
 
                     SizedBox(
-                      width: 25.5.w,
-                      height: 4.5.h,
+                      height: MediaQuery.of(context).size.width > MediaQuery.of(context).size.height ? 9.h : 5.h,
+                      width: MediaQuery.of(context).size.width > MediaQuery.of(context).size.height ? 20.w : 12.h,
                       child: Builder(
                         builder: (context) {
                           final idx = _tabController.index;
@@ -957,8 +957,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         if (!_hideAddMemberButton)
           Center(
             child: SizedBox(
-              height: 5.h,
-              width: 25.h,
+              height: MediaQuery.of(context).size.width > MediaQuery.of(context).size.height ? 9.h : 5.h,
+              width: MediaQuery.of(context).size.width > MediaQuery.of(context).size.height ? 40.w : 25.h,
               child: RoundButton(
                 title: headAdded
                     ? (l10n?.addNewMemberButton ?? 'ADD NEW MEMBER')
@@ -966,7 +966,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                 icon: Icons.add_circle_outline,
                 color: AppColors.green,
                 borderRadius: 8,
-                height: 5.h,
+                height: MediaQuery.of(context).size.width > MediaQuery.of(context).size.height ? 7.h : 5.h,
                 fontSize: 15.sp,
                 iconSize: 20.sp,
                 onPress: () {
