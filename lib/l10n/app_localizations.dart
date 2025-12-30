@@ -14236,6 +14236,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'User data not available '**
   String get dataNotFound;
+
+  /// No description provided for @motherRchIdError.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother\'s RCH ID must be exactly 12 digits'**
+  String get motherRchIdError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

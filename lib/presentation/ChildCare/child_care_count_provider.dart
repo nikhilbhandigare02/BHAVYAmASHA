@@ -424,14 +424,17 @@ class ChildCareCountProvider {
     B.is_death,
     C.child_care_state
   FROM beneficiaries_new B
-  INNER JOIN child_care_activities C
+  INNER JOIN (
+    SELECT beneficiary_ref_key, child_care_state
+    FROM child_care_activities
+    WHERE current_user_key = ?
+    GROUP BY beneficiary_ref_key
+  ) C
     ON B.unique_key = C.beneficiary_ref_key
   WHERE 
     B.is_deleted = 0
     AND B.is_adult = 0
     AND B.is_migrated = 0
-    AND C.is_deleted = 0
-    AND C.current_user_key = ?
     AND B.current_user_key = ?
     AND C.child_care_state IN ('registration_due', 'tracking_due')
   ORDER BY B.created_date_time DESC
@@ -498,11 +501,9 @@ class ChildCareCountProvider {
       developer.log('Getting registered child count...', name: 'ChildCareCountProvider');
       final db = await DatabaseProvider.instance.database;
       
-      // Get current user's unique key
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       
-      // Build where clause based on whether we have a user key
       String whereClause = 'is_deleted = ? AND is_adult = ?';
       List<dynamic> whereArgs = [0, 0]; // is_deleted = 0, is_adult = 0 (child)
       
@@ -517,14 +518,17 @@ class ChildCareCountProvider {
     B.is_death,
     C.child_care_state
   FROM beneficiaries_new B
-  INNER JOIN child_care_activities C
+  INNER JOIN (
+    SELECT beneficiary_ref_key, child_care_state
+    FROM child_care_activities
+    WHERE current_user_key = ?
+    GROUP BY beneficiary_ref_key
+  ) C
     ON B.unique_key = C.beneficiary_ref_key
   WHERE 
     B.is_deleted = 0
     AND B.is_adult = 0
     AND B.is_migrated = 0
-    AND C.is_deleted = 0
-    AND C.current_user_key = ?
     AND B.current_user_key = ?
     AND C.child_care_state IN ('registration_due', 'tracking_due')
   ORDER BY B.created_date_time DESC

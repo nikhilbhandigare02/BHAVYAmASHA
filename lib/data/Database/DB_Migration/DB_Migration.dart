@@ -246,31 +246,31 @@ class DbMigration {
         // First, get the direct column values from the old database
         int isDeath = (row["is_death"] == 1) ? 1 : 0;
         int isMigrated = (row["is_migrated"] == 1) ? 1 : 0;
+
         Map<String, dynamic>? deathDetailsMap;
 
-        if (isDeath == 0 && isMigrated == 0) {
-          final String reasonOfCloser =
-          (row["reason_of_closer"] ?? form["reason_of_closer"] ?? "")
-              .toString()
-              .trim()
-              .toLowerCase();
+        final String reasonOfCloser =
+        (row["reason_of_closer"] ?? form["reason_of_closer"] ?? "")
+            .toString()
+            .trim()
+            .toLowerCase();
 
-          if (reasonOfCloser.isNotEmpty) {
-            deathDetailsMap = {
-              "reason_of_closer": reasonOfCloser,
-              "date_of_death": row["date_of_death"] ?? form["date_of_death"],
-              "cause_of_death": row["cause_of_death"] ?? form["cause_of_death"],
-              "death_place": row["death_place"] ?? form["death_place"],
-              "remark": form["remark"],
-            };
+        if (reasonOfCloser.isNotEmpty) {
+          deathDetailsMap = {
+            "reason_of_closer": reasonOfCloser,
+            "date_of_death": row["date_of_death"] ?? form["date_of_death"],
+            "cause_of_death": row["cause_of_death"] ?? form["cause_of_death"],
+            "death_place": row["death_place"] ?? form["death_place"],
+            "remark": form["remark"],
+          };
 
-            if (reasonOfCloser == "death") {
-              isDeath = 1;
-            } else if (reasonOfCloser == "migrate_out" || reasonOfCloser == "migration") {
-              isMigrated = 1;
-            }
+          if (reasonOfCloser == "death") {
+            isDeath = 1;
+          } else if (reasonOfCloser == "migrate_out" || reasonOfCloser == "migration") {
+            isMigrated = 1;
           }
         }
+
 
 
         final existing = await db.query(
