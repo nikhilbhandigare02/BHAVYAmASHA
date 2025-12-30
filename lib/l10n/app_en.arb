@@ -643,6 +643,7 @@
   "authenticationMode": "Authentication Mode",
   "pleaseEnterOtp": "Please enter OTP",
   "otpIsRequired": "OTP is required",
+  "lastHbnc": "Last HBNC Vsit Due date",
   "pleaseEnterAbhaAddress": "Please enter ABHA address",
   "noPregnancyOutcomesFound": "No pregnancy outcomes found",
   "errorMissingBeneficiaryInfo": "Error: Missing beneficiary information",

@@ -3947,6 +3947,12 @@ abstract class AppLocalizations {
   /// **'OTP is required'**
   String get otpIsRequired;
 
+  /// No description provided for @lastHbnc.
+  ///
+  /// In en, this message translates to:
+  /// **'Last HBNC Vsit Due date'**
+  String get lastHbnc;
+
   /// No description provided for @pleaseEnterAbhaAddress.
   ///
   /// In en, this message translates to:
