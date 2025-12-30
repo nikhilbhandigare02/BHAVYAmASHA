@@ -85,7 +85,6 @@ class FollowupFormsRepository {
       }
     } catch (_) {}
 
-    // All meta values should come from DB row + stored form_json + user details (same pattern as EC tracking)
     final String dbUserId = (saved['current_user_key'] ?? formRoot['user_id'] ?? '').toString();
     final String dbFacility = (saved['facility_id']?.toString() ?? formRoot['facility_id']?.toString() ?? '').toString();
 
@@ -235,7 +234,6 @@ final formType = formJsonValue['form_type'];
         }
       }
     } catch (e) {
-      // Best-effort update; log and continue
       print('Error updating followup_form_data after add_followup_forms1: $e');
     }
 
@@ -393,7 +391,6 @@ final formType = formJsonValue['form_type'];
             'date_of_inspection': src['date_of_inspection'],
             'house_number': _pick(src, 'house_number', 'house_no'),
 
-
             'woman_name': _pick(src, 'woman_name', 'pw_name'),
             'husband_name': src['husband_name'],
             'rch_number': _pick(src, 'rch_number', 'rch_reg_no_of_pw'),
@@ -433,9 +430,7 @@ final formType = formJsonValue['form_type'];
               _pick(src, 'gives_birth_to_baby', 'has_pw_given_birth'),
             ),
             'delivery_outcome': src['delivery_outcome'],
-            'delivery_outcome': src['delivery_outcome'],
-            'delivery_outcome': src['delivery_outcome'],
-            'delivery_outcome': src['delivery_outcome'],
+            'live_birth': src['live_birth'],
 
             'beneficiary_absent':
             _pick(src, 'beneficiary_absent', 'is_beneficiary_absent'),

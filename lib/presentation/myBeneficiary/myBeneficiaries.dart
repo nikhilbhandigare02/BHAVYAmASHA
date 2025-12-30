@@ -93,6 +93,9 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
               .toLowerCase();
           isHeadByRelation = relation == 'head';
 
+          final gender = (info['gender'] ?? '').toString().toLowerCase();
+          if (gender != 'male') return false;
+
           return isConfiguredHead || isHeadByRelation;
         } catch (_) {
           return false;

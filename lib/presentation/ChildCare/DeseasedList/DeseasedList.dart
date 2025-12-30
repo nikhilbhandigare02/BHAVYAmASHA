@@ -149,7 +149,9 @@ class _DeseasedListState extends State<DeseasedList> {
               beneficiaryInfo['motherName'] ??
                   beneficiaryInfo['mother_name']),
           'causeOFDeath': getValue(
-              deathDetails['cause_of_death']),
+            deathDetails['cause_of_death'] ??
+                deathDetails['probable_cause_of_death'],
+          ),
           'reason': getValue(
               deathDetails['reason_of_death']),
           'place': getValue(

@@ -1938,6 +1938,18 @@ class AppLocalizationsHi extends AppLocalizations {
   String get relationFather => 'पिता';
 
   @override
+  String get authenticationMode => 'प्रमाणीकरण मोड';
+
+  @override
+  String get pleaseEnterOtp => 'कृपया ओटीपी दर्ज करें';
+
+  @override
+  String get otpIsRequired => 'ओटीपी आवश्यक है';
+
+  @override
+  String get pleaseEnterAbhaAddress => 'कृपया ABHA पता दर्ज करें';
+
+  @override
   String get noPregnancyOutcomesFound => 'कोई गर्भावस्था का परिणाम नहीं मिला';
 
   @override

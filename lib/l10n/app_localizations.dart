@@ -3929,6 +3929,30 @@ abstract class AppLocalizations {
   /// **'Father'**
   String get relationFather;
 
+  /// No description provided for @authenticationMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication Mode'**
+  String get authenticationMode;
+
+  /// No description provided for @pleaseEnterOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter OTP'**
+  String get pleaseEnterOtp;
+
+  /// No description provided for @otpIsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP is required'**
+  String get otpIsRequired;
+
+  /// No description provided for @pleaseEnterAbhaAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter ABHA address'**
+  String get pleaseEnterAbhaAddress;
+
   /// No description provided for @noPregnancyOutcomesFound.
   ///
   /// In en, this message translates to:
@@ -6284,7 +6308,7 @@ abstract class AppLocalizations {
   /// No description provided for @spousDetails.
   ///
   /// In en, this message translates to:
-  /// **'Spous Details'**
+  /// **'Spouse Details'**
   String get spousDetails;
 
   /// No description provided for @relationWithFamilyHead.

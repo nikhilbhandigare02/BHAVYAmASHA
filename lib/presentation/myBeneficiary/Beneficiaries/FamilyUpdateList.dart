@@ -38,7 +38,6 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
 
       final heads = <Map<String, dynamic>>[];
 
-      // Create a map of household_ref_key to head_id (same as _loadData)
       final headKeyByHousehold = <String, String>{};
       for (final hh in households) {
         try {
@@ -49,7 +48,6 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         } catch (_) {}
       }
 
-      // Filter to get only family heads (same logic as _loadData)
       final familyHeads = rows.where((r) {
         try {
           final householdRefKey = (r['household_ref_key'] ?? '').toString();
@@ -58,7 +56,6 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
 
           final configuredHeadKey = headKeyByHousehold[householdRefKey];
 
-          // Exclude dead or migrated (same as _loadData)
           final isDeath = r['is_death'] == 1;
           final isMigrated = r['is_migrated'] == 1;
           if (isDeath || isMigrated) return false;
@@ -83,6 +80,10 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
               .toString()
               .toLowerCase();
           isHeadByRelation = relation == 'head';
+
+          // Filter for male gender only
+          final gender = (info['gender'] ?? '').toString().toLowerCase();
+          if (gender != 'male') return false;
 
           return isConfiguredHead || isHeadByRelation;
         } catch (_) {
