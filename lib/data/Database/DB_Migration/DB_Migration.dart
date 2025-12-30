@@ -165,8 +165,12 @@ class DbMigration {
         "birthOrder",
         "children",
         "isFamilyhead",
-        "isFamilyheadWife"
+        "isFamilyheadWife",
+        "weight",
+        "birthWeight",
       ];
+      // weight
+      // weight_at_birth
 
       final Map<String, String> keyMapping = {
         "beneficiaryType": "type_of_beneficiary",
@@ -212,7 +216,9 @@ class DbMigration {
         "rationCardId": "ration_card_id",
         "memberStatus": "member_status",
         "isFamilyhead": "isFamilyhead",
-        "isFamilyheadWife": "isFamilyheadWife"
+        "isFamilyheadWife": "isFamilyheadWife",
+        "weight": "weight",
+        "birthWeight": "weight_at_birth"
       };
 
       for (final row in oldRows) {

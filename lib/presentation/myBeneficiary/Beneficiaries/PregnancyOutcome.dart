@@ -9,6 +9,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/local_storage_dao.dart';
+import '../../../data/Database/tables/beneficiaries_table.dart';
 import '../../../data/Database/tables/followup_form_data_table.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
 
@@ -121,6 +122,51 @@ ORDER BY d.created_date_time DESC
 
       for (final row in results) {
         try {
+          final beneficiaryRefKey = row['beneficiary_ref_key']?.toString();
+
+          if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
+            continue;
+          }
+
+          Map<String, dynamic>? beneficiaryRow;
+
+          try {
+            beneficiaryRow = await LocalStorageDao.instance
+                .getBeneficiaryByUniqueKey(beneficiaryRefKey);
+
+            if (beneficiaryRow == null) {
+              final fallback = await db.query(
+                'beneficiaries_new',
+                where:
+                'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND current_user_key = ?',
+                whereArgs: [beneficiaryRefKey, ashaUniqueKey],
+                limit: 1,
+              );
+
+              if (fallback.isNotEmpty) {
+                final legacy = Map<String, dynamic>.from(fallback.first);
+
+                Map<String, dynamic> info = {};
+                try {
+                  final formJson = legacy['form_json'];
+                  if (formJson is String && formJson.isNotEmpty) {
+                    final decoded = jsonDecode(formJson);
+                    if (decoded is Map) {
+                      info = Map<String, dynamic>.from(decoded);
+                    }
+                  }
+                } catch (_) {}
+
+                beneficiaryRow = {
+                  ...legacy,
+                  'beneficiary_info': info,
+                  'geo_location': {},
+                  'death_details': {},
+                };
+              }
+            }
+          } catch (_) {}
+
           final formJsonStr = row['form_json']?.toString() ?? '{}';
           Map<String, dynamic> formJson = {};
           Map<String, dynamic> formData = {};
@@ -133,25 +179,114 @@ ORDER BY d.created_date_time DESC
             }
           } catch (_) {}
 
-          final womanName = formData['woman_name']?.toString() ?? 'Unknown';
-          final husbandName = formData['husband_name']?.toString() ?? 'N/A';
+          // First try to get name from beneficiary info if available
+          String womanName = 'Unknown';
+          if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
+            try {
+              final info = beneficiaryRow['beneficiary_info'] is Map
+                  ? Map<String, dynamic>.from(beneficiaryRow['beneficiary_info'] as Map)
+                  : (beneficiaryRow['beneficiary_info'] is String
+                  ? jsonDecode(beneficiaryRow['beneficiary_info'] as String)
+                  : <String, dynamic>{});
+
+              womanName = (info['headName'] ?? info['name'] ??info['memberName'] ?? info['spouseName']?? info['woman_name'] ?? 'Unknown').toString();
+            } catch (e) {
+              print('⚠️ Error parsing beneficiary_info: $e');
+            }
+          }
+
+          if (womanName == 'Unknown') {
+            womanName = (formData['woman_name'] ?? formData['name'] ?? formData['memberName'] ?? formData['headName'] ?? 'Unknown').toString();
+          }
+
+          // Try to get husband name from beneficiary info first
+          String husbandName = 'N/A';
+          if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
+            try {
+              final info = beneficiaryRow['beneficiary_info'] is Map
+                  ? Map<String, dynamic>.from(beneficiaryRow['beneficiary_info'] as Map)
+                  : (beneficiaryRow['beneficiary_info'] is String
+                  ? jsonDecode(beneficiaryRow['beneficiary_info'] as String)
+                  : <String, dynamic>{});
+
+              husbandName = (info['spouseName'] ?? info['spouse_name'] ?? info['husbandName'] ?? info['husband_name'] ?? 'N/A').toString();
+            } catch (e) {
+              print('⚠️ Error parsing beneficiary_info for spouse name: $e');
+            }
+          }
+
+          if (husbandName == 'N/A') {
+            husbandName = (formData['husband_name'] ?? formData['spouse_name'] ?? formData['spouseName'] ?? formData['husbandName'] ?? 'N/A').toString();
+          }
+
           final lmpDate = formData['lmp_date']?.toString() ?? '';
           final eddDate = formData['edd_date']?.toString() ?? '';
           final weeksOfPregnancy = formData['weeks_of_pregnancy']?.toString() ?? '';
           final mobileNo = formData['mobile_no']?.toString() ?? '';
+
+          // Calculate age and gender from beneficiary info
+          String ageYearsDisplay = '';
+          String gender = '';
+          String mobileFromBeneficiary = mobileNo;
+
+          if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
+            try {
+              final info = beneficiaryRow['beneficiary_info'] is Map
+                  ? Map<String, dynamic>.from(beneficiaryRow['beneficiary_info'] as Map)
+                  : <String, dynamic>{};
+
+              final dob = info['dob']?.toString();
+              int ageYears = _calculateAge(dob);
+
+              if (ageYears == 0) {
+                final updateYearStr = info['updateYear']?.toString() ?? '';
+                final approxAgeStr = info['approxAge']?.toString() ?? '';
+                final parsedUpdateYear = int.tryParse(updateYearStr);
+                if (parsedUpdateYear != null && parsedUpdateYear > 0) {
+                  ageYears = parsedUpdateYear;
+                } else if (approxAgeStr.isNotEmpty) {
+                  final matches = RegExp(r"\d+").allMatches(approxAgeStr).toList();
+                  if (matches.isNotEmpty) {
+                    ageYears = int.tryParse(matches.first.group(0) ?? '') ?? 0;
+                  }
+                }
+              }
+              ageYearsDisplay = ageYears > 0 ? ageYears.toString() : '';
+
+              gender = info['gender']?.toString() ?? '';
+              if (gender.toLowerCase() == 'f') {
+                gender = 'F';
+              } else if (gender.toLowerCase() == 'female') {
+                gender = 'F';
+              }
+
+              final m = (info['mobileNo']?.toString() ?? info['mobile']?.toString() ?? info['phone']?.toString() ?? '').trim();
+              if (m.isNotEmpty) {
+                mobileFromBeneficiary = m;
+              }
+            } catch (e) {
+              print('⚠️ Error extracting beneficiary_info for $beneficiaryRefKey: $e');
+            }
+          }
+
+          final ageGenderCombined = (ageYearsDisplay.isNotEmpty || gender.isNotEmpty)
+              ? '${ageYearsDisplay.isNotEmpty ? ageYearsDisplay : 'N/A'} | ${gender.isNotEmpty ? gender : 'N/A'}'
+              : 'N/A';
 
           processedData.add({
             'hhId': row['household_ref_key']?.toString() ?? '',
             'beneficiaryId': row['beneficiary_ref_key']?.toString() ?? '',
             'name': womanName,
             'husbandName': husbandName,
-            'mobileNo': mobileNo,
+            'mobileNo': mobileFromBeneficiary,
             'lmpDate': lmpDate,
             'eddDate': eddDate,
             'weeksOfPregnancy': weeksOfPregnancy,
             'formId': row['form_id']?.toString() ?? '',
             'formData': formData,
-            'age': _calculatePregnancyWeeks(lmpDate, eddDate, weeksOfPregnancy),
+            'age': ageGenderCombined,
+            'beneficiaryRow': beneficiaryRow,
+            '_rawRow': row,
           });
         } catch (e) {
           print(' Error processing delivery outcome row: $e');
@@ -248,7 +383,7 @@ ORDER BY d.created_date_time DESC
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'Pregnant Women List',
+        screenTitle: 'Pregnancy Outcome',
         showBack: true,
       ),
       drawer: const CustomDrawer(),
@@ -313,8 +448,7 @@ ORDER BY d.created_date_time DESC
     final hhId = data['hhId']?.toString() ?? '';
     final displayHhId = hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId;
     final name = data['name'] ?? 'N/A';
-    final age = data['age'] ?? 'N/A';
-    final gender = 'Female'; // Since these are pregnant women
+    final ageGender = data['age'] ?? 'N/A';
     final status = 'Pregnant';
 
     return Container(
@@ -351,6 +485,7 @@ ORDER BY d.created_date_time DESC
                       style: TextStyle(
                         color: primary,
                         fontWeight: FontWeight.w600,
+                        fontSize: 15.sp
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -399,7 +534,7 @@ ORDER BY d.created_date_time DESC
                 ),
 
                 // Age and Gender
-                _infoRow('', '$age | $gender', isWrappable: true),
+                _infoRow('', ageGender, isWrappable: true),
   ]
             ),
           ),
