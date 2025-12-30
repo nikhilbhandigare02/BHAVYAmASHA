@@ -1551,7 +1551,6 @@ class LocalStorageDao {
     }
 
     try {
-      // Get total eligible couples
       final totalCount = Sqflite.firstIntValue(await db.rawQuery('''
       SELECT COUNT(DISTINCT b.unique_key)
       FROM beneficiaries_new b

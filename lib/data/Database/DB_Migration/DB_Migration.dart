@@ -468,7 +468,6 @@ class DbMigration {
         a.created_by,
         a.modified_date_time,
 
-        -- JSON object for parent_user
         ('{' ||
           '"app_role_id":' || ifnull(a.app_role_id, 0) ||
           ',"is_guest":' || ifnull(a.is_guest, 0) ||

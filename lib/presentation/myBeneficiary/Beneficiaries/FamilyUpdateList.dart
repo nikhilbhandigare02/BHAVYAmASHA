@@ -151,8 +151,6 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
       drawer: const CustomDrawer(),
       body: Column(
         children: [
-
-
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
