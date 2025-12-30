@@ -2300,7 +2300,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           if (result == true && mounted) {
             setState(() {
               _completedVisitsCount++;
-              // Remove the item from the ANC items list
               _ancItems.removeWhere(
                 (element) =>
                     element['unique_key'] == item['unique_key'] &&
@@ -2310,7 +2309,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             _saveTodayWorkCountsToStorage();
           }
         } else if (badge == 'HBNC') {
-          // Navigate to HBNC Visit Form with full beneficiary IDs
           final fullBeneficiaryId = item['fullBeneficiaryId']?.toString() ?? '';
           final fullHhId = item['fullHhId']?.toString() ?? '';
           if (fullBeneficiaryId.isEmpty || fullHhId.isEmpty) return;
@@ -2332,7 +2330,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           if (result == true && mounted) {
             setState(() {
               _completedVisitsCount++;
-              // Remove the item from the HBNC items list
               _hbncItems.removeWhere(
                 (element) =>
                     element['fullBeneficiaryId'] == item['fullBeneficiaryId'],
@@ -2494,13 +2491,13 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         ],
 
                         if (item['spouse_name'] != null && item['spouse_name'].toString().isNotEmpty) ...[
-                          Text(
-                            '${l10n?.spouse ?? "Spouse"}: ${item['spouse_name']}',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14.sp,
-                            ),
-                          ),
+                          // Text(
+                          //   '${l10n?.spouse ?? "Spouse"}: ${item['spouse_name']}',
+                          //   style: TextStyle(
+                          //     color: Colors.white,
+                          //     fontSize: 14.sp,
+                          //   ),
+                          // ),
                           const SizedBox(height: 2),
                         ],
 
@@ -2587,8 +2584,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       case 'Routine Immunization (RI)':
         return l10n.listRoutineImmunization;
       default:
-        // If the key is already a translation key, return it directly
-        if (key == l10n.listFamilySurvey || 
+        if (key == l10n.listFamilySurvey ||
             key == l10n.listEligibleCoupleDue || 
             key == l10n.listANC || 
             key == l10n.listHBNC || 
