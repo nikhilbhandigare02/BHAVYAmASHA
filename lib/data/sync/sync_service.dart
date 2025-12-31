@@ -137,7 +137,6 @@ class SyncService {
     }
   }
 
-  // In sync_service.dart
   Future<void> syncUnsyncedEligibleCoupleActivities() async {
     try {
       await _eligibleCoupleApiHelper.syncUnsyncedEligibleCoupleActivities();
@@ -173,8 +172,39 @@ class SyncService {
       final resp = await _ccRepo.submitChildCareActivities(payload);
       final success = resp is Map && resp['success'] == true;
       if (success) {
-        for (final r in list) {
-          await _dao.markChildCareActivitySyncedById(r['id'] as int? ?? 0);
+        // Extract server IDs from API response and update local records
+        if (resp['data'] is List) {
+          final responseData = resp['data'] as List;
+          for (final apiItem in responseData) {
+            if (apiItem is! Map) continue;
+            
+            final apiUniqueKey = apiItem['unique_key']?.toString();
+            final apiBeneficiaryRefKey = apiItem['beneficiaries_registration_ref_key']?.toString();
+            final apiChildCareType = apiItem['child_care_type']?.toString();
+            final serverId = apiItem['_id']?.toString();
+            
+            // Find matching local record
+            final matchingLocalRecord = list.firstWhere(
+              (localRecord) => 
+                localRecord['household_ref_key']?.toString() == apiUniqueKey &&
+                localRecord['beneficiary_ref_key']?.toString() == apiBeneficiaryRefKey &&
+                localRecord['child_care_state']?.toString() == apiChildCareType,
+              orElse: () => {},
+            );
+            
+            if (matchingLocalRecord.isNotEmpty) {
+              await _dao.markChildCareActivitySyncedById(
+                matchingLocalRecord['id'] as int? ?? 0,
+                serverId: serverId,
+              );
+              print('ChildCare Push: Updated record ${matchingLocalRecord['id']} with server_id=$serverId');
+            }
+          }
+        } else {
+          // Fallback if response structure is different
+          for (final r in list) {
+            await _dao.markChildCareActivitySyncedById(r['id'] as int? ?? 0);
+          }
         }
         print('ChildCare Push: Marked ${list.length} activity(ies) as synced');
       } else {

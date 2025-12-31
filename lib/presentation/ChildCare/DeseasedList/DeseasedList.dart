@@ -218,7 +218,7 @@ class _DeseasedListState extends State<DeseasedList> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'Deceased Child List',
+        screenTitle: l10n!.child_deseased_list,
         showBack: true,
       ),
       body: _isLoading
@@ -228,6 +228,7 @@ class _DeseasedListState extends State<DeseasedList> {
   }
 
   Widget _buildMainContent() {
+    final t = AppLocalizations.of(context);
     return Column(
       children: [
         // Search Box (always visible)
@@ -236,7 +237,7 @@ class _DeseasedListState extends State<DeseasedList> {
           child: TextField(
             controller: _searchCtrl,
             decoration: InputDecoration(
-              hintText: 'Search by name, ID, or mobile',
+              hintText: t!.child_deseased_search,
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(4.0),
@@ -355,9 +356,9 @@ class _DeseasedListState extends State<DeseasedList> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildRow([
-                      _rowText('Registration Date', data['RegitrationDate'] ?? 'N/A'),
-                      _rowText('Registration Type', data['RegitrationType'] ?? 'N/A'),
-                      _rowText('Beneficiary ID',
+                      _rowText(l10n!.registrationDate, data['RegitrationDate'] ?? 'N/A'),
+                      _rowText(l10n.registrationTypeLabel, data['RegitrationType'] ?? 'N/A'),
+                      _rowText(l10n.beneficiaryId,
                           (data['BeneficiaryID']?.toString().length ?? 0) > 11
                               ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11)
                               : (data['BeneficiaryID']?.toString() ?? 'N/A')
@@ -365,21 +366,21 @@ class _DeseasedListState extends State<DeseasedList> {
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText('Name', data['Name'] ?? 'N/A'),
-                      _rowText('Age | Gender', data['Age|Gender'] ?? 'N/A'),
-                      _rowText('RCH ID', data['RchID'] ?? 'N/A'),
+                      _rowText(l10n.nameLabel, data['Name'] ?? 'N/A'),
+                      _rowText(l10n.ageGenderLabel, data['Age|Gender'] ?? 'N/A'),
+                      _rowText(l10n.rchIdLabel, data['RchID'] ?? 'N/A'),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText('Father Name', data['FatherName'] ?? 'N/A'),
-                      _rowText('Mobile No.', data['Mobileno.'] ?? 'N/A'),
-                      _rowText('Date of Death', data['DateofDeath'] ?? 'N/A'),
+                      _rowText(l10n.fatherName, data['FatherName'] ?? 'N/A'),
+                      _rowText(l10n.mobileNumber, data['Mobileno.'] ?? 'N/A'),
+                      _rowText(l10n.dateOfDeathLabel, data['DateofDeath'] ?? 'N/A'),
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText('Cause of Death', data['causeOFDeath'] ?? 'Not specified'),
-                      _rowText('Reason', data['reason'] ?? 'Not specified'),
-                      _rowText('Place', data['place'] ?? 'Not specified'),
+                      _rowText(l10n.causeOfDeathLabel, data['causeOFDeath'] ?? 'Not specified'),
+                      _rowText(l10n.reasonOfDeath, data['reason'] ?? 'Not specified'),
+                      _rowText(l10n.placeLabel, data['place'] ?? 'Not specified'),
                     ]),
                   ],
                 ),

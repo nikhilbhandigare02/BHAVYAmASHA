@@ -225,6 +225,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
+    final l10n = AppLocalizations.of(context);
 
     return InkWell(
       onTap: () {
@@ -276,7 +277,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      data['status'] ?? '',
+                      l10n?.badgePNC ?? 'PNC',
                       style: const TextStyle(
                         color: Colors.green, // ✅ Text color
                         fontWeight: FontWeight.bold,

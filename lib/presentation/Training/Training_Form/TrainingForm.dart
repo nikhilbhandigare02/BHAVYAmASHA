@@ -17,8 +17,9 @@ class Trainingform extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocProvider(
-      create: (_) => TrainingBloc(),
+      create: (_) => TrainingBloc()..add(InitializeWithLocalization(l10n)),
       child: const _TrainingFormView(),
     );
   }
@@ -49,7 +50,7 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
       listener: (context, state) {
         if (state.status == FormStatus.success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Training scheduled successfully')),
+            SnackBar(content: Text(l10n.trainingSuccess)),
           );
           Navigator.pop(context, true);
         } else if (state.status == FormStatus.failure && state.error != null) {

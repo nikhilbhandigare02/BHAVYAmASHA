@@ -279,7 +279,7 @@ class _AbortionlistState extends State<Abortionlist> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      'HRP',
+                      l10n?.badgeHRP ?? 'HRP',
                       style: TextStyle(
                         color: Colors.red[600],
                         fontWeight: FontWeight.bold,

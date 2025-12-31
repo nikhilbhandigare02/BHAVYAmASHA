@@ -187,7 +187,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
-
+    final l10n = AppLocalizations.of(context);
     return InkWell(
       onTap: () {
 
@@ -238,7 +238,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      data['status'] ?? '',
+                      l10n?.badgeEligibleCouple ?? 'Eligible Couple',
                       style: const TextStyle(
                         color: Colors.green,
                         fontWeight: FontWeight.bold,
@@ -247,12 +247,9 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-
                 ],
               ),
             ),
-
-
             Container(
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.95),

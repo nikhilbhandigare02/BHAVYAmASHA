@@ -39,6 +39,33 @@ class TrainingState extends Equatable {
         error: null,
       );
 
+  factory TrainingState.localized(AppLocalizations l10n) => TrainingState(
+        trainingTypes: [l10n.trainingTypeReceiving, l10n.trainingTypeProviding],
+        trainingNames: [
+          l10n.trainingNameAshaModule1,
+          l10n.trainingNameAshaModule2,
+          l10n.trainingNameAshaModule3,
+          l10n.trainingNameAshaModule4,
+          l10n.trainingNameAshaModule567,
+          l10n.ncd,
+          l10n.hbnc,
+          l10n.hbyc,
+          l10n.ashaFacilitatorTraining,
+          l10n.inductionTraining,
+          l10n.maa,
+          l10n.idcf,
+          l10n.otherTraining,
+        ],
+        trainingType: null,
+        trainingName: null,
+        householdNumber: null,
+        date: null,
+        place: null,
+        days: null,
+        status: FormStatus.initial,
+        error: null,
+      );
+
   bool get isValid {
     final d = int.tryParse(days ?? '');
     return (trainingType != null && trainingType!.isNotEmpty && trainingType != 'Select') &&

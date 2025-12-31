@@ -637,7 +637,10 @@ class _UpdatedEligibleCoupleListScreenState
                   Row(
                     children: [
                       Expanded(child: _rowText(t?.mobileLabelSimple ?? 'Mobile No.', data['mobileno']?.toString() ?? '')),
-                      const SizedBox(width: 120
+                      const SizedBox(width: 8
+                      ),
+                      Expanded(child: _rowText( '',  '')),
+                      const SizedBox(width: 8
                       ),
                       Expanded(child: _rowText(t?.husbandName?? 'Husband Name', data['spouseName']?.toString() ?? '')),
                     ],

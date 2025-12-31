@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/utils/enums.dart';
 import '../../../../data/Database/User_Info.dart';
 import '../../../../data/Database/database_provider.dart';
 import '../../../../data/Database/local_storage_dao.dart';
 import '../../../../data/Database/tables/training_data_table.dart';
+import '../../../../l10n/app_localizations.dart';
 
 part 'training_event.dart';
 part 'training_state.dart';
@@ -16,6 +18,10 @@ class TrainingBloc extends Bloc<TrainingEvent, TrainingState> {
   final String formRefKey = "training_form_ref";
 
   TrainingBloc() : super(TrainingState.initial()) {
+
+    on<InitializeWithLocalization>((event, emit) {
+      emit(TrainingState.localized(event.l10n));
+    });
 
     on<TrainingTypeChanged>((event, emit) {
       emit(state.copyWith(

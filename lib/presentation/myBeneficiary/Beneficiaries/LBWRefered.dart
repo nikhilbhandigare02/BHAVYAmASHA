@@ -200,6 +200,7 @@ class _Lbwrefered extends State<Lbwrefered> {
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
+    final l10n = AppLocalizations.of(context);
 
     return InkWell(
       onTap: () {
@@ -251,7 +252,7 @@ class _Lbwrefered extends State<Lbwrefered> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      data['status'] ?? '',
+                      l10n?.badgeLBW ?? 'LBW',
                       style: const TextStyle(
                         color: Colors.green,
                         fontWeight: FontWeight.bold,

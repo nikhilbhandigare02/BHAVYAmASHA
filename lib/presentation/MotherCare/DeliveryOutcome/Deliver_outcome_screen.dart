@@ -483,11 +483,8 @@ ORDER BY d.created_date_time DESC
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'Delivery Outcome List',
+        screenTitle: l10n!.deliveryOutcomeList,
         showBack: true,
-
-
-
       ),
 
       body: Column(
@@ -821,8 +818,8 @@ ORDER BY d.created_date_time DESC
   }
 
   Widget _rowText(String title, String value) {
-
-    final displayValue = (title == 'Beneficiary ID' && value.length > 11)
+    final l10n = AppLocalizations.of(context);
+    final displayValue = (title == l10n!.beneficiaryIdLabel && value.length > 11)
         ? '${value.substring(value.length - 11)}'
         : value;
 

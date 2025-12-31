@@ -32,15 +32,10 @@ class _PregnancyoutcomeState extends State<Pregnancyoutcome> {
   void initState() {
     super.initState();
     _loadPregnancyCases();
-    _searchCtrl.addListener(_onSearchChanged);
+
   }
 
-  @override
-  void dispose() {
-    _searchCtrl.removeListener(_onSearchChanged);
-    _searchCtrl.dispose();
-    super.dispose();
-  }
+
 
   Future<void> _loadPregnancyCases() async {
     setState(() => _isLoading = true);
@@ -349,31 +344,8 @@ ORDER BY d.created_date_time DESC
     }
   }
 
-  void _onSearchChanged() {
-    final q = _searchCtrl.text.trim().toLowerCase();
-    setState(() {
-      if (q.isEmpty) {
-        _filtered = _allData;
-      } else {
-        _filtered = _allData.where((e) {
-          return ((e['hhId'] ?? '') as String).toLowerCase().contains(q) ||
-              ((e['name'] ?? '') as String).toLowerCase().contains(q) ||
-              ((e['mobileNo'] ?? '') as String).toLowerCase().contains(q);
-        }).toList();
-      }
-    });
-  }
 
-  String _formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return 'N/A';
-    try {
-      final date = DateTime.tryParse(dateStr);
-      if (date == null) return 'Invalid date';
-      return '${_twoDigits(date.day)}-${_twoDigits(date.month)}-${date.year}';
-    } catch (e) {
-      return 'N/A';
-    }
-  }
+
 
   String _twoDigits(int n) => n >= 10 ? '$n' : '0$n';
 
@@ -391,21 +363,7 @@ ORDER BY d.created_date_time DESC
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // Search Bar
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: TextField(
-                    controller: _searchCtrl,
-                    decoration: InputDecoration(
-                      hintText: 'Search by HH ID, Name or Mobile',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-                    ),
-                  ),
-                ),
+
 
                 Expanded(
                   child: _filtered.isEmpty
@@ -426,6 +384,7 @@ ORDER BY d.created_date_time DESC
 
   Widget _pregnancyCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
+    final l10n = AppLocalizations.of(context);
     final hhId = data['hhId']?.toString() ?? '';
     final displayHhId = hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId;
     final name = data['name'] ?? 'N/A';
@@ -479,7 +438,7 @@ ORDER BY d.created_date_time DESC
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    status,
+                    l10n?.badgePregnant ?? 'Pregnant',
                     style: const TextStyle(
                       color: Colors.green,
                       fontWeight: FontWeight.bold,

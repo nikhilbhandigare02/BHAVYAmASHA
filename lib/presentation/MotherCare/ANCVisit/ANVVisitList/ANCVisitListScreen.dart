@@ -605,7 +605,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                                 ],
                               ),
                               child: Text(
-                                'HRP',
+                                l10n!.hrp,
                                 style: TextStyle(
                                   color: Colors.red[700],
                                   fontWeight: FontWeight.bold,
