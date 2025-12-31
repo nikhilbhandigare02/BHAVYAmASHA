@@ -7100,4 +7100,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get motherRchIdError => 'Mother\'s RCH ID must be exactly 12 digits';
+
+  @override
+  String get nextVisit => 'Next HBNC visit due date';
 }
