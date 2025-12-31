@@ -6862,6 +6862,15 @@ class AppLocalizationsHi extends AppLocalizations {
   String get pleaseEnterValidPassword => 'कृपया वैध पासवर्ड दर्ज करें';
 
   @override
+  String get pleaseEnterCorrectCurrentPassword => 'कृपया सही वर्तमान पासवर्ड दर्ज करें';
+
+  @override
+  String get invalidGenderMaleZero => 'कृपया सही लिंग चुनें क्योंकि कुल पुरुष बच्चों की संख्या 0 है';
+
+  @override
+  String get invalidGenderFemaleZero => 'कृपया सही लिंग चुनें क्योंकि कुल महिला बच्चों की संख्या 0 है';
+
+  @override
   String get enterValidNumber => 'कृपया वैध संख्या दर्ज करें';
 
   @override

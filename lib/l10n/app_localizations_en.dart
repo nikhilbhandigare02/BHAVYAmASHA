@@ -1791,7 +1791,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noPreviousVisits => 'No previous visits found';
 
   @override
-  String get noRecordFound => 'No Record Found.';
+  String get noRecordFound => 'No Record Found';
 
   @override
   String get notAvailable => 'Not Available';
@@ -6860,6 +6860,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pleaseEnterValidPassword => 'Please enter valid password';
+
+  @override
+  String get pleaseEnterCorrectCurrentPassword => 'Please enter correct current password';
+
+  @override
+  String get invalidGenderMaleZero => 'Please select valid gender since total number of male children is 0';
+
+  @override
+  String get invalidGenderFemaleZero => 'Please select valid gender since total number of female children is 0';
 
   @override
   String get enterValidNumber => 'Enter valid number';

@@ -202,21 +202,9 @@ class _AbortionlistState extends State<Abortionlist> {
                 ),
               ),
             )
-          else if (displayVisits.isEmpty)
+        else if (displayVisits.isEmpty)
               Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.assignment_late_outlined, size: 48, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No high-risk ANC visits found',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                ),
+                child: _buildNoRecordCard(context),
               )
             else
               Expanded(
@@ -400,6 +388,37 @@ class _AbortionlistState extends State<Abortionlist> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNoRecordCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Card(
+        color: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 50.0, horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                l10n?.noRecordFound ?? 'No Record Found',
+                style: TextStyle(
+                  fontSize: 17.sp,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

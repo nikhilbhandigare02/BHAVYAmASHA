@@ -13,6 +13,10 @@ import '../../core/widgets/TextField/TextField.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:medixcel_new/data/repositories/Auth_Repository/auth_repository.dart';
 import '../../core/widgets/SnackBar/app_snackbar.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
+import 'package:medixcel_new/data/Database/User_Info.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class Resetpassword extends StatefulWidget {
   const Resetpassword({super.key});
@@ -169,7 +173,28 @@ class _ResetpasswordState extends State<Resetpassword> {
                           title: l10n.updateButton,
                           color: AppColors.primary,
                           isLoading: state.postApiStatus == PostApiStatus.loading,
-                          onPress: () {
+                          onPress: () async {
+                            final entered = context.read<ResetPasswordBloc>().state.username?.trim() ?? '';
+                            try {
+                              final currentUser = await SecureStorageService.getCurrentUserData();
+                              final stored = (currentUser?['username'] ?? currentUser?['userName'])?.toString().trim() ?? '';
+                              if (stored.isNotEmpty && entered.isNotEmpty && entered.toLowerCase() != stored.toLowerCase()) {
+                                showAppSnackBar(context, l10n.pleaseEnterValidUsername); 
+                                return;
+                              }
+                              final lookupUsername = stored.isNotEmpty ? stored : entered;
+                              if (lookupUsername.isNotEmpty) {
+                                final userRow = await UserInfo.getUserByUsername(lookupUsername);
+                                final currentPass = context.read<ResetPasswordBloc>().state.currentPassword?.trim() ?? '';
+                                if ((userRow?['password']?.toString().isNotEmpty ?? false) && currentPass.isNotEmpty) {
+                                  final hashed = sha256.convert(utf8.encode(currentPass)).toString();
+                                  if (hashed != userRow!['password']?.toString()) {
+                                    showAppSnackBar(context, l10n.pleaseEnterCorrectCurrentPassword);
+                                    return;
+                                  }
+                                }
+                              }
+                            } catch (_) {}
                             context.read<ResetPasswordBloc>().add(ResetPasswordButton());
                           },
                         ),

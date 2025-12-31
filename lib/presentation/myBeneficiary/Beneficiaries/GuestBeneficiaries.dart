@@ -36,6 +36,20 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
   }
 
   void _onSearchChanged() {
+    final query = _searchCtrl.text.trim().toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        _loadGuestBeneficiaries();
+      } else {
+        _filtered = _filtered.where((beneficiary) {
+          return (beneficiary['name']?.toString().toLowerCase() ?? '').contains(query) ||
+              (beneficiary['hhId']?.toString().toLowerCase() ?? '').contains(query) ||
+              (beneficiary['mobileNo']?.toString().toLowerCase() ?? '').contains(query) ||
+              (beneficiary['rchId']?.toString().toLowerCase() ?? '').contains(query) ||
+              (beneficiary['father_spouse']?.toString().toLowerCase() ?? '').contains(query);
+        }).toList();
+      }
+    });
   }
 
 
@@ -164,31 +178,6 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
     }
   }
 
-  String _calculateAge(String? dob) {
-    if (dob == null || dob.isEmpty) return 'N/A';
-    try {
-      final birthDate = DateTime.parse(dob);
-      final now = DateTime.now();
-      int years = now.year - birthDate.year;
-      int months = now.month - birthDate.month;
-
-      if (now.day < birthDate.day) {
-        months--;
-      }
-      if (months < 0) {
-        years--;
-        months += 12;
-      }
-
-      if (years > 0) {
-        return '$years ${years == 1 ? 'year' : 'years'}';
-      } else {
-        return '$months ${months == 1 ? 'month' : 'months'}';
-      }
-    } catch (e) {
-      return 'N/A';
-    }
-  }
 
   String _formatAgeShort(dynamic ageValue, String? dob) {
     try {
@@ -240,6 +229,41 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    
+    // Add search bar widget here
+    final searchBar = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: TextField(
+        controller: _searchCtrl,
+        decoration: InputDecoration(
+          hintText: 'Guest Beneficiaries Search',
+          hintStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black54,
+          ),
+          prefixIcon: const Icon(Icons.search),
+          filled: true,
+          fillColor: AppColors.background,
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 12,
+            horizontal: 12,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: AppColors.outlineVariant),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+        ),
+      ),
+    );
 
     return Scaffold(
       appBar: AppHeader(
@@ -249,29 +273,47 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
       drawer: const CustomDrawer(),
       body: Column(
         children: [
-
+          searchBar,
           _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _filtered.isEmpty
-              ? Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'No guest beneficiaries found',
-                style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-              ),
-            ),
-          )
-              : Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
-            ),
-          ),
+                  ? Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                      child: Card(
+                        color: Colors.white,
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 50.0, horizontal: 20.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,  // Add this
+                            children: [
+                              Text(
+                                l10n?.noRecordFound ?? 'No Record Found', 
+                                style: TextStyle(
+                                    fontSize: 17.sp,
+                                    color: Colors.black54,
+                                    fontWeight: FontWeight.w600
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  : Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                        itemCount: _filtered.length,
+                        itemBuilder: (context, index) {
+                          final data = _filtered[index];
+                          return _householdCard(context, data);
+                        },
+                      ),
+                    ),
         ],
       ),
     );

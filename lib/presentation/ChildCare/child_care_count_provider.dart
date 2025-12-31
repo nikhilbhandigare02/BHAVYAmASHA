@@ -7,6 +7,8 @@ import 'dart:developer' as developer;
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
 
+import '../../data/Database/tables/beneficiaries_table.dart';
+
 class ChildCareCountProvider {
   static final ChildCareCountProvider _instance = ChildCareCountProvider._internal();
   factory ChildCareCountProvider() => _instance;
@@ -1343,79 +1345,40 @@ class ChildCareCountProvider {
       return false;
     }
   }
-  // // Helper method to check if age is in HBYC range (3-15 months)
-  // bool _isAgeInRange(String? dobStr) {
-  //   if (dobStr == null || dobStr.isEmpty) return false;
-  //
-  //   try {
-  //     final dob = DateTime.tryParse(dobStr);
-  //     if (dob == null) return false;
-  //
-  //     final now = DateTime.now();
-  //     final ageInMonths = (now.year - dob.year) * 12 + (now.month - dob.month);
-  //
-  //     // Check if age is between 3 and 15 months
-  //     return ageInMonths >= 3 && ageInMonths <= 15;
-  //   } catch (e) {
-  //     developer.log('Error calculating age: $e', name: 'ChildCareCountProvider');
-  //     return false;
-  //   }
-  // }
+
 
   Future<int> getDeceasedCount() async {
     try {
       developer.log('Getting deceased count...', name: 'ChildCareCountProvider');
       final db = await DatabaseProvider.instance.database;
-      
+
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-      
-      String whereClause = 'is_deleted = ? AND is_adult = ? AND is_death = ?';
-      List<dynamic> whereArgs = [0, 0, 1]; // is_deleted = 0, is_adult = 0, is_death = 1
-      
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        whereClause += ' AND current_user_key = ?';
-        whereArgs.add(ashaUniqueKey);
-      }
 
-      // Get count of deceased children for current user
-      final List<Map<String, dynamic>> rows = await db.query(
-        'beneficiaries_new',
-        where: whereClause,
-        whereArgs: whereArgs,
+      // Use the EXACT same query logic as _loadDeceasedList
+      final List<Map<String, dynamic>> deceasedBeneficiaries = await db.rawQuery(
+        '''
+      SELECT 
+        b.*,
+        h.household_info AS household_data,
+        h.created_date_time AS household_created_date,
+        h.household_info AS hh_info
+      FROM ${BeneficiariesTable.table} b
+      LEFT JOIN households h 
+        ON b.household_ref_key = h.unique_key
+      WHERE b.is_death = 1
+        AND b.is_deleted = 0
+        AND b.is_migrated = 0
+        ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
+      ''',
+        ashaUniqueKey != null && ashaUniqueKey.isNotEmpty
+            ? [ashaUniqueKey]
+            : [],
       );
 
-      int deceasedCount = 0;
+      int deceasedCount = deceasedBeneficiaries.length;
 
-      for (final row in rows) {
-        try {
-          final info = row['beneficiary_info'] is String
-              ? jsonDecode(row['beneficiary_info'] as String)
-              : row['beneficiary_info'];
-
-          if (info is! Map) continue;
-
-          final memberType = info['memberType']?.toString() ?? '';
-          final relation = info['relation']?.toString() ?? '';
-          final name = info['name']?.toString() ??
-              info['memberName']?.toString() ??
-              info['member_name']?.toString() ?? '';
-
-          // Only count if it's a child and has a name
-          if ((memberType.toLowerCase() == 'child' ||
-              relation.toLowerCase() == 'child' ||
-              relation.toLowerCase() == 'son' ||
-              relation.toLowerCase() == 'daughter') &&
-              name.isNotEmpty) {
-            deceasedCount++;
-          }
-        } catch (e) {
-          developer.log('Error processing deceased beneficiary: $e', name: 'ChildCareCountProvider');
-          continue;
-        }
-      }
-
-      developer.log('Found $deceasedCount deceased children', name: 'ChildCareCountProvider');
+      developer.log('Found $deceasedCount deceased beneficiaries', name: 'ChildCareCountProvider');
       return deceasedCount;
 
     } catch (e, stackTrace) {

@@ -350,7 +350,6 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
           debugPrint('✅ Loaded ${_childBeneficiaries.length} child beneficiaries');
           debugPrint('✅ Filtered list contains ${_filtered.length} records');
 
-          // Log first few records for verification
           final count = _childBeneficiaries.length > 5 ? 5 : _childBeneficiaries.length;
           for (int i = 0; i < count; i++) {
             debugPrint('Record $i: ${_childBeneficiaries[i]['Name']} (ID: ${_childBeneficiaries[i]['BeneficiaryID']})');

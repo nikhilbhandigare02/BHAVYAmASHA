@@ -141,10 +141,10 @@ class _DeathRegisterState extends State<DeathRegister> {
           _isLoading
               ? const Expanded(child: Center(child: CircularProgressIndicator()))
               : _deathRecords.isEmpty
-              ? _buildEmptyState(context)
+              ? _buildNoRecordCard(context)
               : Expanded(
             child: _filtered.isEmpty
-                ? _buildNoResults()
+                ? _buildNoRecordCard(context)
                 : ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               itemCount: _filtered.length,
@@ -159,75 +159,33 @@ class _DeathRegisterState extends State<DeathRegister> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
-    return Expanded(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.assignment_late_outlined,
-              size: 64,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No death records found',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'There are no death records in the database.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _loadDeathRecords,
-              icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('Refresh'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ],
+  Widget _buildNoRecordCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Card(
+        color: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
         ),
-      ),
-    );
-  }
-
-  Widget _buildNoResults() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.search_off_outlined,
-            size: 64,
-            color: Colors.grey,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 50.0, horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                l10n?.noRecordFound ?? 'No Record Found',
+                style: TextStyle(
+                  fontSize: 17.sp,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            'No matching records found',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Try a different search term',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[600],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -409,26 +409,7 @@ ORDER BY d.created_date_time DESC
 
                 Expanded(
                   child: _filtered.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.pregnant_woman_outlined,
-                                size: 50,
-                                color: Colors.grey[400],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No pregnancy cases found',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
+                      ? _buildNoRecordCard(context)
                       : ListView.builder(
                           padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                           itemCount: _filtered.length,
@@ -569,6 +550,37 @@ ORDER BY d.created_date_time DESC
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNoRecordCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Card(
+        color: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 50.0, horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                l10n?.noRecordFound ?? 'No Record Found',
+                style: TextStyle(
+                  fontSize: 17.sp,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

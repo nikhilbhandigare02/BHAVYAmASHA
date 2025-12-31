@@ -211,6 +211,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     return Validations.validateYoungestChildAge(l, s.youngestAge, s.ageUnit);
   }
 
+  String? _validateYoungestGender(ChildrenState s, AppLocalizations l) {
+    if (s.youngestGender == 'Male' && s.totalMale == 0) {
+      return l.invalidGenderMaleZero;
+    }
+    if (s.youngestGender == 'Female' && s.totalFemale == 0) {
+      return l.invalidGenderFemaleZero;
+    }
+    return null;
+  }
+
   Widget _Section({required Widget child}) {
     return child;
   }
@@ -437,7 +447,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   ),
                   Row(
                     children: [
-                      // --- Years ---
+                   
                       Expanded(
                         child: CustomTextField(
                           labelText: l.years,
@@ -2571,6 +2581,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                                 showAppSnackBar(
                                                                   context,
                                                                   l.malePlusFemaleError,
+                                                                );
+                                                                return;
+                                                              }
+                                                              final youngestGenderErr = _validateYoungestGender(ch, l);
+                                                              if (youngestGenderErr != null) {
+                                                                showAppSnackBar(
+                                                                  context,
+                                                                  youngestGenderErr,
                                                                 );
                                                                 return;
                                                               }

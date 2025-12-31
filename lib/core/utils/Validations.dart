@@ -36,8 +36,7 @@ class Validations {
     return null;
   }
 
-  // Youngest child age validation used in Children details and Head submit.
-  // rawAge is the numeric string, unit is one of l10n.days / l10n.months / l10n.years.
+
   static String? validateYoungestChildAge(AppLocalizations l10n, String? rawAge, String? unit) {
     final raw = (rawAge ?? '').trim();
     if (raw.isEmpty) return null;

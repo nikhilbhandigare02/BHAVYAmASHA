@@ -181,17 +181,18 @@ class _Lbwrefered extends State<Lbwrefered> {
       drawer: const CustomDrawer(),
       body: Column(
         children: [
-
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
-            ),
-          ),
+          _filtered.isEmpty
+              ? _buildNoRecordCard(context)
+              : Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    itemCount: _filtered.length,
+                    itemBuilder: (context, index) {
+                      final data = _filtered[index];
+                      return _householdCard(context, data);
+                    },
+                  ),
+                ),
         ],
       ),
     );
@@ -333,6 +334,37 @@ class _Lbwrefered extends State<Lbwrefered> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNoRecordCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Card(
+        color: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 50.0, horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                l10n?.noRecordFound ?? 'No Record Found',
+                style: TextStyle(
+                  fontSize: 17.sp,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

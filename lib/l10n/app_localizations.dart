@@ -3638,7 +3638,7 @@ abstract class AppLocalizations {
   /// No description provided for @noRecordFound.
   ///
   /// In en, this message translates to:
-  /// **'No Record Found.'**
+  /// **'No Record Found'**
   String get noRecordFound;
 
   /// No description provided for @notAvailable.
@@ -13768,6 +13768,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter valid password'**
   String get pleaseEnterValidPassword;
+
+  /// No description provided for @pleaseEnterCorrectCurrentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter correct current password'**
+  String get pleaseEnterCorrectCurrentPassword;
+
+  /// No description provided for @invalidGenderMaleZero.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select valid gender since total number of male children is 0'**
+  String get invalidGenderMaleZero;
+
+  /// No description provided for @invalidGenderFemaleZero.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select valid gender since total number of female children is 0'**
+  String get invalidGenderFemaleZero;
 
   /// No description provided for @enterValidNumber.
   ///
