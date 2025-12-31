@@ -2658,11 +2658,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               mobileNumber = widget.headSpouseMobile;
                                               print('📱 [AddNewMember] Using spouse mobile from props: $mobileNumber');
                                               shouldFetchFromDb = false;
-                                            } 
-                                            else if (state.mobileNo != null && state.mobileNo!.isNotEmpty) {
-                                              mobileNumber = state.mobileNo;
-                                              print('📱 [AddNewMember] Using spouse mobile from state: $mobileNumber');
-                                              shouldFetchFromDb = false;
                                             }
                                           }
                                           else if ((v == 'Family Head' || v == 'Father') &&
@@ -3711,11 +3706,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             if (widget.headSpouseMobile != null && widget.headSpouseMobile!.isNotEmpty) {
                                               mobileNumber = widget.headSpouseMobile;
                                               print('📱 [AddNewMember] Using spouse mobile from props: $mobileNumber');
-                                              shouldFetchFromDb = false;
-                                            }
-                                            else if (state.mobileNo != null && state.mobileNo!.isNotEmpty) {
-                                              mobileNumber = state.mobileNo;
-                                              print('📱 [AddNewMember] Using spouse mobile from state: $mobileNumber');
                                               shouldFetchFromDb = false;
                                             }
                                           }

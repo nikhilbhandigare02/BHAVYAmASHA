@@ -1787,11 +1787,23 @@ abstract class AppLocalizations {
   /// **'Registered Child Beneficiary list'**
   String get childRegisteredBeneficiaryListTitle;
 
+  /// No description provided for @childRegisteredBeneficiaryListSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Registered Child Beneficiary'**
+  String get childRegisteredBeneficiaryListSearch;
+
   /// No description provided for @childRegisteredDueListTitle.
   ///
   /// In en, this message translates to:
   /// **'Child Registered Due List'**
   String get childRegisteredDueListTitle;
+
+  /// No description provided for @childRegisteredDueListSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Child Registered Due '**
+  String get childRegisteredDueListSearch;
 
   /// No description provided for @childTrackingDueListTitle.
   ///
@@ -1799,11 +1811,23 @@ abstract class AppLocalizations {
   /// **'Child Tracking Due List'**
   String get childTrackingDueListTitle;
 
+  /// No description provided for @childTrackingDueSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Child Tracking Due'**
+  String get childTrackingDueSearch;
+
   /// No description provided for @searchHintchildTrackingDueListTitle.
   ///
   /// In en, this message translates to:
   /// **'Search Child Tracking Due'**
   String get searchHintchildTrackingDueListTitle;
+
+  /// No description provided for @trainingSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Training scheduled successfully'**
+  String get trainingSuccess;
 
   /// No description provided for @children0to1.
   ///
@@ -10082,7 +10106,7 @@ abstract class AppLocalizations {
   /// No description provided for @categoryANC.
   ///
   /// In en, this message translates to:
-  /// **'ANC'**
+  /// **'ANC DUE'**
   String get categoryANC;
 
   /// No description provided for @categoryPNC.
@@ -10094,7 +10118,7 @@ abstract class AppLocalizations {
   /// No description provided for @categoryRI.
   ///
   /// In en, this message translates to:
-  /// **'RI'**
+  /// **'Child Tracking'**
   String get categoryRI;
 
   /// No description provided for @enter10DigitNumber.
@@ -12989,6 +13013,12 @@ abstract class AppLocalizations {
   /// **'Deceased Child List'**
   String get child_deseased_list;
 
+  /// No description provided for @child_deseased_search.
+  ///
+  /// In en, this message translates to:
+  /// **'Deceased Child Search'**
+  String get child_deseased_search;
+
   /// No description provided for @searchByNameIdMobile.
   ///
   /// In en, this message translates to:
@@ -13451,6 +13481,84 @@ abstract class AppLocalizations {
   /// **'HBYC'**
   String get hbyc;
 
+  /// No description provided for @badgeFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get badgeFamily;
+
+  /// No description provided for @badgeEligibleCouple.
+  ///
+  /// In en, this message translates to:
+  /// **'Eligible Couple'**
+  String get badgeEligibleCouple;
+
+  /// No description provided for @badgeHRP.
+  ///
+  /// In en, this message translates to:
+  /// **'HRP'**
+  String get badgeHRP;
+
+  /// No description provided for @badgeAdult.
+  ///
+  /// In en, this message translates to:
+  /// **'Adult'**
+  String get badgeAdult;
+
+  /// No description provided for @badgeChild.
+  ///
+  /// In en, this message translates to:
+  /// **'Child'**
+  String get badgeChild;
+
+  /// No description provided for @badgeInfant.
+  ///
+  /// In en, this message translates to:
+  /// **'Infant'**
+  String get badgeInfant;
+
+  /// No description provided for @badgeGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get badgeGuest;
+
+  /// No description provided for @badgePNC.
+  ///
+  /// In en, this message translates to:
+  /// **'PNC'**
+  String get badgePNC;
+
+  /// No description provided for @badgeLBW.
+  ///
+  /// In en, this message translates to:
+  /// **'LBW'**
+  String get badgeLBW;
+
+  /// No description provided for @badgeMigrated.
+  ///
+  /// In en, this message translates to:
+  /// **'Migrated'**
+  String get badgeMigrated;
+
+  /// No description provided for @badgePregnant.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnant'**
+  String get badgePregnant;
+
+  /// No description provided for @trainingTypeReceiving.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving'**
+  String get trainingTypeReceiving;
+
+  /// No description provided for @trainingTypeProviding.
+  ///
+  /// In en, this message translates to:
+  /// **'Providing'**
+  String get trainingTypeProviding;
+
   /// No description provided for @ashaFacilitatorTraining.
   ///
   /// In en, this message translates to:
@@ -13480,6 +13588,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other Training'**
   String get otherTraining;
+
+  /// No description provided for @trainingNameAshaModule1.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA module 1'**
+  String get trainingNameAshaModule1;
+
+  /// No description provided for @trainingNameAshaModule2.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA module 2'**
+  String get trainingNameAshaModule2;
+
+  /// No description provided for @trainingNameAshaModule3.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA module 3'**
+  String get trainingNameAshaModule3;
+
+  /// No description provided for @trainingNameAshaModule4.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA module 4'**
+  String get trainingNameAshaModule4;
+
+  /// No description provided for @trainingNameAshaModule567.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA module 5,6 & 7'**
+  String get trainingNameAshaModule567;
 
   /// No description provided for @receiving.
   ///

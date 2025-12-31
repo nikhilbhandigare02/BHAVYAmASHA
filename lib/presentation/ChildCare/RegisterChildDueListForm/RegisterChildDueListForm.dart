@@ -964,7 +964,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
                             CustomTextField(
                               labelText:l10n?.child_weight,
-                              hintText: l10n?.enterWeight,
+                              hintText: l10n?.child_weight,
                               initialValue: state.weightGrams,
                               keyboardType: TextInputType.number,
                               onChanged: (v) => bloc.add(WeightGramsChanged(v)),
@@ -1073,21 +1073,47 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   ApiDropdown<String>(
-                                    labelText: 'Category',
-                                    items: [
-                                      'Do not want to disclose',
+                                    labelText: l10n.categoryLabel,
+                                    items: const [
+                                      'NotDisclosed',
                                       'General',
                                       'OBC',
                                       'SC',
                                       'ST',
-                                      'Pichda Varg 1',
-                                      'Pichda Varg 2',
-                                      'Atyant Pichda Varg',
-                                      "Don't Know",
-                                      "Other",
+                                      'PichdaVarg1',
+                                      'PichdaVarg2',
+                                      'AtyantPichdaVarg',
+                                      'DontKnow',
+                                      'Other',
                                     ],
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'NotDisclosed':
+                                          return l10n.categoryNotDisclosed;
+                                        case 'General':
+                                          return l10n.categoryGeneral;
+                                        case 'OBC':
+                                          return l10n.categoryOBC;
+                                        case 'SC':
+                                          return l10n.categorySC;
+                                        case 'ST':
+                                          return l10n.categoryST;
+                                        case 'PichdaVarg1':
+                                          return l10n.categoryPichdaVarg1;
+                                        case 'PichdaVarg2':
+                                          return l10n.categoryPichdaVarg2;
+                                        case 'AtyantPichdaVarg':
+                                          return l10n.categoryAtyantPichdaVarg;
+                                        case 'DontKnow':
+                                          return l10n.categoryDontKnow;
+                                        case 'Other':
+                                          return l10n.religionOther;
+                                        default:
+                                          return s;
+                                      }
+                                    },
                                     value: state.caste.isEmpty ? null : state.caste,
-                                    getLabel: (s) => s,
+
                                     onChanged: (v) {
                                       bloc.add(CasteChanged(v ?? ''));
                                       // Clear custom caste when changing from 'Other' to something else

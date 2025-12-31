@@ -50,6 +50,19 @@ class _DeathRegisterState extends State<DeathRegister> {
     return 'Adult';
   }
 
+  String _getLocalizedMemberType(String memberType, AppLocalizations? l10n) {
+    switch (memberType.toLowerCase()) {
+      case 'adult':
+        return l10n?.badgeAdult ?? 'Adult';
+      case 'child':
+        return l10n?.badgeChild ?? 'Child';
+      case 'infant':
+        return l10n?.badgeInfant ?? 'Infant';
+      default:
+        return l10n?.badgeAdult ?? 'Adult';
+    }
+  }
+
   Future<void> _loadDeathRecords() async {
     try {
       print('🔍 [DeathRegister] Fetching death records...');
@@ -324,7 +337,7 @@ class _DeathRegisterState extends State<DeathRegister> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        memberType,
+                        _getLocalizedMemberType(memberType, l10n),
                         style: const TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.bold,

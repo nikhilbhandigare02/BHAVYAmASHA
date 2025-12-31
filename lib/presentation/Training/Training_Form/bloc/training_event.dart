@@ -6,6 +6,13 @@ abstract class TrainingEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class InitializeWithLocalization extends TrainingEvent {
+  final AppLocalizations l10n;
+  const InitializeWithLocalization(this.l10n);
+  @override
+  List<Object?> get props => [l10n];
+}
+
 class TrainingTypeChanged extends TrainingEvent {
   final String type;
   const TrainingTypeChanged(this.type);

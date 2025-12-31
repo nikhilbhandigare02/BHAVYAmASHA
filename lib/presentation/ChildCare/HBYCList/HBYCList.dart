@@ -629,7 +629,7 @@ class _HBYCListState extends State<HBYCList> {
                       ]),
                       const SizedBox(height: 8),
                       _buildRow([
-                        _rowText(l10n?.nameLabelSimple ?? 'Name', data['Name']),
+                        _rowText(l10n?.nameLabel ?? 'Name', data['Name']),
                         _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender']),
                         _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RchID']),
                       ]),

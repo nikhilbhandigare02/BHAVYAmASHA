@@ -863,13 +863,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get childRegisteredBeneficiaryListTitle => 'Registered Child Beneficiary list';
 
   @override
+  String get childRegisteredBeneficiaryListSearch => 'Search Registered Child Beneficiary';
+
+  @override
   String get childRegisteredDueListTitle => 'Child Registered Due List';
+
+  @override
+  String get childRegisteredDueListSearch => 'Search Child Registered Due ';
 
   @override
   String get childTrackingDueListTitle => 'Child Tracking Due List';
 
   @override
+  String get childTrackingDueSearch => 'Search Child Tracking Due';
+
+  @override
   String get searchHintchildTrackingDueListTitle => 'Search Child Tracking Due';
+
+  @override
+  String get trainingSuccess => 'Training scheduled successfully';
 
   @override
   String get children0to1 => '0-1 year old children';
@@ -5017,13 +5029,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get districtManer => 'Maner';
 
   @override
-  String get categoryANC => 'ANC';
+  String get categoryANC => 'ANC DUE';
 
   @override
   String get categoryPNC => 'PNC';
 
   @override
-  String get categoryRI => 'RI';
+  String get categoryRI => 'Child Tracking';
 
   @override
   String get enter10DigitNumber => 'Enter 10 digit number';
@@ -6472,6 +6484,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get child_deseased_list => 'Deceased Child List';
 
   @override
+  String get child_deseased_search => 'Deceased Child Search';
+
+  @override
   String get searchByNameIdMobile => 'Search by name, ID, or mobile';
 
   @override
@@ -6703,6 +6718,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hbyc => 'HBYC';
 
   @override
+  String get badgeFamily => 'Family';
+
+  @override
+  String get badgeEligibleCouple => 'Eligible Couple';
+
+  @override
+  String get badgeHRP => 'HRP';
+
+  @override
+  String get badgeAdult => 'Adult';
+
+  @override
+  String get badgeChild => 'Child';
+
+  @override
+  String get badgeInfant => 'Infant';
+
+  @override
+  String get badgeGuest => 'Guest';
+
+  @override
+  String get badgePNC => 'PNC';
+
+  @override
+  String get badgeLBW => 'LBW';
+
+  @override
+  String get badgeMigrated => 'Migrated';
+
+  @override
+  String get badgePregnant => 'Pregnant';
+
+  @override
+  String get trainingTypeReceiving => 'Receiving';
+
+  @override
+  String get trainingTypeProviding => 'Providing';
+
+  @override
   String get ashaFacilitatorTraining => 'ASHA Facilitator training';
 
   @override
@@ -6716,6 +6770,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get otherTraining => 'Other Training';
+
+  @override
+  String get trainingNameAshaModule1 => 'ASHA module 1';
+
+  @override
+  String get trainingNameAshaModule2 => 'ASHA module 2';
+
+  @override
+  String get trainingNameAshaModule3 => 'ASHA module 3';
+
+  @override
+  String get trainingNameAshaModule4 => 'ASHA module 4';
+
+  @override
+  String get trainingNameAshaModule567 => 'ASHA module 5,6 & 7';
 
   @override
   String get receiving => 'Receiving';

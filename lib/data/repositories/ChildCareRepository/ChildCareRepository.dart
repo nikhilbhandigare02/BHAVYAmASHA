@@ -125,7 +125,7 @@ class ChildCareRepository {
 
       final row = {
         'server_id': serverId,
-        'household_ref_key': rec['unique_key']?.toString(),
+        'household_ref_key': rec['household_ref_key']?.toString() ?? rec['unique_key']?.toString(),
         'beneficiary_ref_key': rec['beneficiaries_registration_ref_key']?.toString(),
         'mother_key': rec['mother_key']?.toString(),
         'father_key': rec['father_key']?.toString(),

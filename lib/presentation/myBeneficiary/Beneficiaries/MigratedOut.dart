@@ -153,6 +153,7 @@ class _Migratedout extends State<Migratedout> {
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
+    final l10n = AppLocalizations.of(context);
 
     return InkWell(
       onTap: () {
@@ -204,7 +205,7 @@ class _Migratedout extends State<Migratedout> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      data['status'] ?? '',
+                      l10n?.badgeMigrated ?? 'Migrated',
                       style: const TextStyle(
                         color: Colors.green,
                         fontWeight: FontWeight.bold,

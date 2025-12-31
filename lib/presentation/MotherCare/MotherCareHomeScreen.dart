@@ -290,7 +290,7 @@ ORDER BY d.created_date_time DESC
       final validBeneficiaries = await db.rawQuery('''
       SELECT DISTINCT mca.beneficiary_ref_key 
       FROM mother_care_activities mca
-      WHERE mca.mother_care_state IN ('pnc_mother', 'pnc_mother')
+      WHERE mca.mother_care_state = 'pnc_mother'
       AND mca.is_deleted = 0
       AND mca.current_user_key = ?
     ''', [ashaUniqueKey]);

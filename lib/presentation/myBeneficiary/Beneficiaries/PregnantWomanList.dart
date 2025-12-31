@@ -224,6 +224,17 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
     }
   }
 
+  String _getLocalizedBadge(String badge, AppLocalizations? l10n) {
+    switch (badge) {
+      case 'ANC DUE':
+        return l10n?.categoryANC ?? 'ANC DUE';
+      case 'Pregnant':
+        return l10n?.badgePregnant ?? 'Pregnant';
+      default:
+        return badge;
+    }
+  }
+
   void _onSearchChanged() {
     final q = _searchCtrl.text.trim().toLowerCase();
     setState(() {
@@ -269,6 +280,7 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
+    final l10n = AppLocalizations.of(context);
 
     return InkWell(
       onTap: () {
@@ -320,7 +332,7 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      data['status'] ?? '',
+                      _getLocalizedBadge(data['status'] ?? '', l10n),
                       style: const TextStyle(
                         color: Colors.green,
                         fontWeight: FontWeight.bold,

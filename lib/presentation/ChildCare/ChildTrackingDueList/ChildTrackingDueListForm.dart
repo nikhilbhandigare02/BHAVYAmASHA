@@ -329,8 +329,9 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
       if (formId > 0) {
 
- final closureReason = _getSelectedClosureReason(currentTabIndex);
-        if (closureReason == 'Death') {
+        final l10n = AppLocalizations.of(context);
+        final closureReason = _getSelectedClosureReason(currentTabIndex);
+        if (closureReason == l10n?.death) {
           debugPrint('🔴 Death case closure detected. Updating beneficiary record...');
 
           final deathDetails = {
@@ -379,7 +380,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         }
 
         if (mounted) {
-          showAppSnackBar(context, 'Form saved successfully!');
+          showAppSnackBar(context, l10n!.formSavedSuccessfully);
 
           // Pop with result to refresh the list
           Navigator.pop(context, {
