@@ -209,35 +209,16 @@ sfgfdd
       //   _childCareSynced = childSyncedResult.first['count'] as int? ?? 0;
       // }
 
-      // Get followup counts directly from followup_form_data table
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        // Get total followup count for current user
-        final followupTotalResult = await db.rawQuery(
-          'SELECT COUNT(*) as count FROM followup_form_data WHERE is_deleted = 0 AND current_user_key = ?',
-          [ashaUniqueKey],
-        );
-        _followupTotal = followupTotalResult.first['count'] as int? ?? 0;
+      // Get follow-up counts from all records (not filtered by user)
+      final followupTotalResult = await db.rawQuery(
+        'SELECT COUNT(*) as count FROM followup_form_data WHERE is_deleted = 0',
+      );
+      _followupTotal = followupTotalResult.first['count'] as int? ?? 0;
 
-        // Get synced followup count for current user
-        final followupSyncedResult = await db.rawQuery(
-          'SELECT COUNT(*) as count FROM followup_form_data WHERE is_deleted = 0 AND is_synced = 1 AND current_user_key = ?',
-          [ashaUniqueKey],
-        );
-        _followupSynced = followupSyncedResult.first['count'] as int? ?? 0;
-      }
-      // else {
-      //   // Get total followup count for all users
-      //   final followupTotalResult = await db.rawQuery(
-      //     'SELECT COUNT(*) as count FROM followup_form_data WHERE is_deleted = 0',
-      //   );
-      //   _followupTotal = followupTotalResult.first['count'] as int? ?? 0;
-      //
-      //   // Get synced followup count for all users
-      //   final followupSyncedResult = await db.rawQuery(
-      //     'SELECT COUNT(*) as count FROM followup_form_data WHERE is_deleted = 0 AND is_synced = 1',
-      //   );
-      //   _followupSynced = followupSyncedResult.first['count'] as int? ?? 0;
-      // }
+      final followupSyncedResult = await db.rawQuery(
+        'SELECT COUNT(*) as count FROM followup_form_data WHERE is_deleted = 0 AND is_synced = 1',
+      );
+      _followupSynced = followupSyncedResult.first['count'] as int? ?? 0;
 
       if (!mounted) return;
 
