@@ -14248,6 +14248,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mother\'s RCH ID must be exactly 12 digits'**
   String get motherRchIdError;
+
+  /// No description provided for @nextVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'Next HBNC visit due date'**
+  String get nextVisit;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

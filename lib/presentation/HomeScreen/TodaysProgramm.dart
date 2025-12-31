@@ -1340,7 +1340,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             'age': age,
             'gender': gender,
             'mobile': mobile,
-            'spouse_name': spouseName,
+            // spouse_name removed as requested
             'household_ref_key': householdRefKey,
             'delivery_date': formData['delivery_date']?.toString() ?? '-',
             'last_visit_date': lastVisitDate ?? '-',
@@ -1353,9 +1353,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             'last Visit date':
                 lastVisitDate ??
                 '-', // Ensure this matches the card's expected field name
-            'Current HBNC last due date':
+            'next hbnc visit due date':
                 nextVisitDate ??
-                '-', // Ensure this matches the card's expected field name
+                '-', // Changed from 'Current HBNC last due date' to 'next hbnc visit due date'
             'fullBeneficiaryId': beneficiaryRefKey, // Add this for navigation
             'fullHhId': householdRefKey, // Add this for navigation
           };
@@ -2490,20 +2490,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           const SizedBox(height: 2),
                         ],
 
-                        if (item['spouse_name'] != null && item['spouse_name'].toString().isNotEmpty) ...[
-                          Text(
-                            '${l10n?.spouse ?? "Spouse"}: ${item['spouse_name']}',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                        ],
+                        // spouse_name display removed as requested
 
-                        if (item['last Visit date'] != null) ...[
+                        if (item['next hbnc visit due date'] != null) ...[
                           Text(
-                            '${l10n?.lastVisit ?? "Last Visit"}: ${item['last Visit date']}',
+                            '${l10n?.nextVisit ?? "Next HBNC Visit Due Date"}: ${item['next hbnc visit due date']}',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14.sp,

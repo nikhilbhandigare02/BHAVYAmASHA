@@ -7100,4 +7100,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get motherRchIdError => 'माता का RCH ID ठीक 12 अंकों का होना चाहिए';
+
+  @override
+  String get nextVisit => 'अगली HBNC विज़िट की नियत तिथि';
 }
