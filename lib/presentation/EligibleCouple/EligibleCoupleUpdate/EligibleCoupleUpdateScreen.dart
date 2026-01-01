@@ -421,6 +421,10 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                 onChanged: null, // Readonly
                                 hintText: t?.select ?? 'Select',
                               ),
+                            ),Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
                             ),
 
 
@@ -475,6 +479,11 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                   .read<EligibleCouleUpdateBloc>()
                                   .add(CategoryChanged(value)),
                               readOnly: true,
+                            ),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
                             ),
 
                             if (state.category == 'Other')

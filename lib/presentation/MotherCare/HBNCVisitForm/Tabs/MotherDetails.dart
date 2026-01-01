@@ -25,16 +25,21 @@ class MotherDetailsTab extends StatelessWidget {
 
         String? _asString(dynamic v) => v == null ? null : '$v';
 
-        return ListView(
-          padding: const EdgeInsets.all(8),
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                   ApiDropdown<String>(
                     labelText: t.motherStatusLabel,
+                    validator: (v) => (v == null || v.isEmpty)
+                        ? t.requiredField
+                        : null,
                     items: const ['alive', 'death'],
                     getLabel: (e) => e == 'alive' ? t.alive : t.dead,
                     value: _asString(m['motherStatus']),
@@ -46,6 +51,7 @@ class MotherDetailsTab extends StatelessWidget {
                   if (m['motherStatus'] == 'death') ...[
                     CustomDatePicker(
                       labelText: t.date_of_death,
+                      validator: (v) => v == null ? t.requiredField : null,
                       initialDate: m['dateOfDeath'] is DateTime
                           ? m['dateOfDeath'] as DateTime
                           : null,
@@ -56,6 +62,9 @@ class MotherDetailsTab extends StatelessWidget {
                     const Divider(),
                     ApiDropdown<String>(
                       labelText: t.place_of_death,
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? t.requiredField
+                          : null,
                       items: [
                         t.home,
                         t.migrated_out,
@@ -112,6 +121,9 @@ class MotherDetailsTab extends StatelessWidget {
                   ] else ...[
                     ApiDropdown<String>(
                       labelText: t.mcpCardAvailableLabelMother,
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? t.requiredField
+                          : null,
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: _asString(m['mcpCardAvailable']),
@@ -127,6 +139,9 @@ class MotherDetailsTab extends StatelessWidget {
                     if (m['mcpCardAvailable'] == 'Yes') ...[
                       ApiDropdown<String>(
                         labelText: t.has_mcp_card_filled,
+                        validator: (v) => (v == null || v.isEmpty)
+                            ? t.requiredField
+                            : null,
                         items: const ['Yes', 'No'],
                         getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                         value: _asString(m['mcpCardFilled']),
@@ -142,6 +157,9 @@ class MotherDetailsTab extends StatelessWidget {
 
                     ApiDropdown<String>(
                       labelText: t.postDeliveryProblemsLabel,
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? t.requiredField
+                          : null,
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: _asString(m['postDeliveryProblems']),
@@ -157,6 +175,9 @@ class MotherDetailsTab extends StatelessWidget {
                     if (m['postDeliveryProblems'] == 'Yes') ...[
                       ApiDropdown<String>(
                         labelText: t.excessive_bleeding,
+                        validator: (v) => (v == null || v.isEmpty)
+                            ? t.requiredField
+                            : null,
                         items: const ['Yes', 'No'],
                         getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                         value: _asString(m['excessiveBleeding']),
@@ -186,6 +207,9 @@ class MotherDetailsTab extends StatelessWidget {
                     // Breastfeeding problems
                     ApiDropdown<String>(
                       labelText: t.breastfeedingProblemsLabel,
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? t.requiredField
+                          : null,
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: _asString(m['breastfeedingProblems']),
@@ -215,6 +239,9 @@ class MotherDetailsTab extends StatelessWidget {
                       const Divider(),
                       CustomTextField(
                         labelText: t.breastfeeding_problem_help,
+                        validator: (v) => (v == null || v.isEmpty)
+                            ? t.requiredField
+                            : null,
                         hintText: t.write_take_action,
                         initialValue: _asString(m['breastfeedingHelpGiven']),
                         onChanged: (val) => context.read<HbncVisitBloc>().add(
@@ -257,6 +284,9 @@ class MotherDetailsTab extends StatelessWidget {
 
                     ApiDropdown<int>(
                       labelText: t.padsPerDayLabel,
+                      validator: (v) => (v == null)
+                          ? t.requiredField
+                          : null,
                       items: const [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                       getLabel: (e) => e.toString(),
                       value: (m['padsPerDay'] is int)
@@ -270,6 +300,9 @@ class MotherDetailsTab extends StatelessWidget {
 
                     ApiDropdown<String>(
                       labelText: "${t.mothersTemperatureLabel} *",
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? t.requiredField
+                          : null,
                       hintText: t.selectOption,
                       items: const [
                         'Temperature upto 102 degree F(38.9 degree C)',
@@ -304,6 +337,9 @@ class MotherDetailsTab extends StatelessWidget {
                             children: [
                               ApiDropdown<String>(
                                 labelText: "${t.paracetamolGivenLabel} *",
+                                validator: (v) => (v == null || v.isEmpty)
+                                    ? t.requiredField
+                                    : null,
                                 items: const ['Yes', 'No'],
                                 getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                                 value: _asString(m['paracetamolGiven']),
@@ -324,6 +360,9 @@ class MotherDetailsTab extends StatelessWidget {
                     const Divider(height: 0),
                     ApiDropdown<String>(
                       labelText: "${t.foulDischargeHighFeverLabel} *",
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? t.requiredField
+                          : null,
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: _asString(m['foulDischargeHighFever']),
@@ -353,6 +392,9 @@ class MotherDetailsTab extends StatelessWidget {
                     // New questions (as per request) - Yes/No
                     ApiDropdown<String>(
                       labelText: "${t.milkNotProducingOrLessLabel} *",
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? t.requiredField
+                          : null,
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: _asString(m['milkNotProducingOrLess']),
@@ -397,6 +439,9 @@ class MotherDetailsTab extends StatelessWidget {
                     // Refer to Hospital & Refer to
                     ApiDropdown<String>(
                       labelText: "${t.refer_to_hospital} *",
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? t.requiredField
+                          : null,
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: _asString(m['referHospital']),
@@ -412,6 +457,9 @@ class MotherDetailsTab extends StatelessWidget {
                     if (m['referHospital'] == 'Yes') ...[
                       ApiDropdown<String>(
                         labelText: "${t.referToLabel} *",
+                        validator: (v) => (v == null || v.isEmpty)
+                            ? t.requiredField
+                            : null,
                         items: [
                           t.visitTypePhc,
                           t.chc,
@@ -433,7 +481,9 @@ class MotherDetailsTab extends StatelessWidget {
               ),
             ),
           ],
-        );
+        ),
+      ),
+    );
       },
     );
   }

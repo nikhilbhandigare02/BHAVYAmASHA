@@ -330,12 +330,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
         FocusScope.of(context).unfocus();
       },
       behavior: HitTestBehavior.opaque,
-      child: ListView(
+      child: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.5.h),
-        children: [
-          _Section(
-            child: CustomTextField(
-              labelText: '${l.houseNoLabel} *',
+        child: Column(
+          children: [
+            _Section(
+              child: CustomTextField(
+                labelText: '${l.houseNoLabel} *',
               hintText: l.houseNoHint,
               initialValue: state.houseNo,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
@@ -1600,7 +1601,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           ],
         ],
       ),
-    );
+    ));
   }
 
   String? _normalizeGender(String? gender) {
@@ -2327,6 +2328,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                               _lastFormError!,
                                                             );
                                                           }
+                                                          _scrollToFirstError();
                                                           return;
                                                         }
                                                         context
@@ -2436,6 +2438,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                                 context,
                                                                 msg,
                                                               );
+                                                              _scrollToFirstError();
                                                             }
                                                           } else if (i == 1) {
                                                             clearSpousFormError();
@@ -2471,28 +2474,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                                 msg,
                                                               );
 
-                                                              WidgetsBinding.instance.addPostFrameCallback((
-                                                                _,
-                                                              ) {
-                                                                final form =
-                                                                    spousFormKey
-                                                                            .currentContext
-                                                                            ?.findRenderObject()
-                                                                        as RenderBox?;
-                                                                if (form !=
-                                                                    null) {
-                                                                  Scrollable.ensureVisible(
-                                                                    spousFormKey
-                                                                        .currentContext!,
-                                                                    duration: const Duration(
-                                                                      milliseconds:
-                                                                          300,
-                                                                    ),
-                                                                    curve: Curves
-                                                                        .easeInOut,
-                                                                  );
-                                                                }
-                                                              });
+                                                              scrollToFirstError();
                                                             }
                                                           }
                                                           if (!canProceed)
@@ -2537,28 +2519,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                               );
 
                                                               // Scroll to the first error in the form
-                                                              WidgetsBinding.instance.addPostFrameCallback((
-                                                                _,
-                                                              ) {
-                                                                final form =
-                                                                    spousFormKey
-                                                                            .currentContext
-                                                                            ?.findRenderObject()
-                                                                        as RenderBox?;
-                                                                if (form !=
-                                                                    null) {
-                                                                  Scrollable.ensureVisible(
-                                                                    spousFormKey
-                                                                        .currentContext!,
-                                                                    duration: const Duration(
-                                                                      milliseconds:
-                                                                          300,
-                                                                    ),
-                                                                    curve: Curves
-                                                                        .easeInOut,
-                                                                  );
-                                                                }
-                                                              });
+                                                              scrollToFirstError();
 
                                                               return;
                                                             }
