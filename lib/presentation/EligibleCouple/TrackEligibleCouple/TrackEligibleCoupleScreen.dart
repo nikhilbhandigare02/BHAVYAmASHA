@@ -110,7 +110,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
           children: [
             // Visit Date
             CustomDatePicker(
-              labelText: t?.visitDateLabel ?? 'भ्रमण की तिथि',
+              labelText: t?.dateOfVisit ?? 'भ्रमण की तिथि',
               initialDate: DateTime.now(),
               firstDate: DateTime(1900),
               lastDate: DateTime(2100),
@@ -548,7 +548,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       const SizedBox(height: 8),
                       CustomTextField(
                         labelText: t?.reasonForAbsent ?? 'Reason for absent',
-                        hintText: t?.enterReason ?? 'Enter reason',
+                        hintText: t?.reasonForAbsent ?? 'Enter reason',
                         onChanged: (val) {
                           context
                               .read<TrackEligibleCoupleBloc>()
