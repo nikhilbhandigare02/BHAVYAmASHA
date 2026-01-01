@@ -2493,9 +2493,8 @@
   "nextVisit": "Next HBNC visit due date",
   "enterMobileToSearchAbha": "Enter mobile number to search ABHA",
   "invalidMobileNumber": "Invalid mobile number",
-<<<<<<< HEAD
-  "  ": "Enter a valid Indian mobile number"
-=======
+  "enterValidIndianMobile": "Enter a valid Indian mobile number",
+
   "enterValid10DigitMobile": "Enter a valid 10-digit mobile number",
   "selectToProceed": "Select to proceed",
   "selectAbhaNumber": "Select ABHA number",
@@ -2505,7 +2504,6 @@
   "abhaAddressLinked": "ABHA Address Linked!",
   "selectAbhaId": "Select ABHA ID",
   "mobileNumberMismatch": "Mobile number mismatch"
->>>>>>> 0d8baaa88f0c4d9e2eab86a94874f85bf74da424
 
 
 

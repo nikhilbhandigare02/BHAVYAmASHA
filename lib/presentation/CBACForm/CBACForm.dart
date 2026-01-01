@@ -2,12 +2,9 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/data/Database/User_Info.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
@@ -1204,6 +1201,8 @@ class _PartBTab extends StatelessWidget {
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
+      physics: const ClampingScrollPhysics(),
+      controller: ScrollController(keepScrollOffset: true),
       children: [
         chip(l10n.cbacPartB1),
         ...qRow("${l10n.cbacB_b1_breath}", 'partB.b1.breath'),

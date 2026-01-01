@@ -632,8 +632,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   if (isEnableSearch) {
                     if (mobileController.text.isEmpty) {
                       Utils.showToastMessage(localText.pleaseEnterMobileNumber);
-                      Utils.showToastMessage(
-                          'Enter valid 10-digit mobile number');
+                      Utils.showToastMessage(localText.enterValid10DigitMobile);
                     } else {
                       setState(() {
                         refresh();

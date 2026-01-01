@@ -7189,6 +7189,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get invalidMobileNumber => 'अमान्य मोबाइल नंबर';
 
   @override
+  String get enterValidIndianMobile => 'मान्य भारतीय मोबाइल नंबर दर्ज करें';
+
+  @override
   String get enterValid10DigitMobile => 'मान्य 10 अंकों का मोबाइल नंबर दर्ज करें';
 
   @override

@@ -5192,7 +5192,7 @@ abstract class AppLocalizations {
   /// No description provided for @childNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Child\'s name *'**
+  /// **'Name of child *'**
   String get childNameLabel;
 
   /// No description provided for @whoseMobileNumberLabel.
@@ -5210,7 +5210,7 @@ abstract class AppLocalizations {
   /// No description provided for @mothersRchIdLabel.
   ///
   /// In en, this message translates to:
-  /// **'Mother\'s RCH ID number'**
+  /// **'RCH ID no. of mother'**
   String get mothersRchIdLabel;
 
   /// No description provided for @birthCertificateIssuedLabel.
@@ -14422,6 +14422,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid mobile number'**
   String get invalidMobileNumber;
+
+  /// No description provided for @enterValidIndianMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid Indian mobile number'**
+  String get enterValidIndianMobile;
 
   /// No description provided for @enterValid10DigitMobile.
   ///
