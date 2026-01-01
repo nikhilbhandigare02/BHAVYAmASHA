@@ -1,4 +1,4 @@
-package io.lite.uat_maasha
+package io.uat.bhavya_maasha
 
 import io.flutter.embedding.android.FlutterActivity
 
