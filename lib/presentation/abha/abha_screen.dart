@@ -4354,7 +4354,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
   }
 
   static Future<bool?> showAadharAlert(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return showDialog<bool>(
       context: context,
       barrierDismissible: false, // forces user to choose Yes or No
