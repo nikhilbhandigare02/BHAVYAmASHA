@@ -6542,7 +6542,7 @@ abstract class AppLocalizations {
   /// No description provided for @voterIdHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter Voter ID'**
+  /// **'Voter ID'**
   String get voterIdHint;
 
   /// No description provided for @rationCardId.
@@ -6554,7 +6554,7 @@ abstract class AppLocalizations {
   /// No description provided for @rationCardIdHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter Ration Card ID'**
+  /// **' Ration Card ID'**
   String get rationCardIdHint;
 
   /// No description provided for @personalHealthId.
@@ -6566,7 +6566,7 @@ abstract class AppLocalizations {
   /// No description provided for @personalHealthIdHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter 14-digit Personal Health ID'**
+  /// **'Personal Health ID'**
   String get personalHealthIdHint;
 
   /// No description provided for @confirmAttentionTitle.
@@ -8606,7 +8606,7 @@ abstract class AppLocalizations {
   /// No description provided for @genderLabel.
   ///
   /// In en, this message translates to:
-  /// **'Gender: '**
+  /// **'Gender '**
   String get genderLabel;
 
   /// No description provided for @abhaIdLabel.
@@ -10376,7 +10376,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectOptionLabel.
   ///
   /// In en, this message translates to:
-  /// **'Select Option'**
+  /// **'Select'**
   String get selectOptionLabel;
 
   /// No description provided for @screeningDate.

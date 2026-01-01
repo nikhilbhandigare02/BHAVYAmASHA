@@ -284,7 +284,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get announcements => 'घोषणा';
 
   @override
-  String get selectOptions => 'विकल्प चुनें';
+  String get selectOptions => 'चुनें';
 
   @override
   String get antenatal => 'अगली प्रसव पूर्व तिथि:';
@@ -3327,7 +3327,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get pregnancyOutcome => 'गर्भावस्था का परिणाम';
 
   @override
-  String get hbcnList => 'एचबीसीएन सूची';
+  String get hbcnList => 'HBNC List';
 
   @override
   String get lbwReferred => 'एलबीडब्ल्यू रेफर';

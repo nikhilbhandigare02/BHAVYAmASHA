@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/core/utils/responsive_font.dart';
 import 'package:sizer/sizer.dart';
 
 // Custom TextInputFormatter for Title Case
@@ -90,21 +91,25 @@ class _CustomTextFieldState extends State<CustomTextField> {
   TextEditingController? _controller;
   bool _isDirty = false;
 
-  List<TextSpan> _buildLabelTextSpans(String text) {
+  List<TextSpan> _buildLabelTextSpans(String text, BuildContext context) {
     if (!text.endsWith(' *')) {
-      return [TextSpan(text: text,style:  TextStyle(
-        fontSize: 15.5.sp, // <-- Add your desired font size here
+      return [TextSpan(text: text, style:  TextStyle(
+        fontSize: ResponsiveFont.getTextFieldLabelFontSize(context),
+        color: AppColors.onSurface,
+        fontWeight: FontWeight.w500,
       ), )];
     }
 
     final parts = text.split(' *');
     return [
       TextSpan(text: parts[0], style:  TextStyle(
-        fontSize: 15.5.sp, // <-- Add your desired font size here
+        fontSize: ResponsiveFont.getTextFieldLabelFontSize(context),
+        color: AppColors.onSurface,
+        fontWeight: FontWeight.w500,
       )),
       const TextSpan(
         text: ' *',
-        style: TextStyle(color: Colors.red),
+        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
       ),
     ];
   }
@@ -185,7 +190,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     final TextStyle inputStyle = TextStyle(
-      fontSize: 15.sp,
+      fontSize: ResponsiveFont.getInputFontSize(context),
       color: AppColors.onSurfaceVariant,
       height: 1.5,
     );
@@ -244,21 +249,23 @@ class _CustomTextFieldState extends State<CustomTextField> {
         alignLabelWithHint: true,
         isDense: true,
         label: (widget.labelText != null && widget.labelText!.isNotEmpty)
-            ? Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: RichText(
-            text: TextSpan(
-              children: _buildLabelTextSpans(widget.labelText!),
-              style: inputStyle.copyWith(
-                color: AppColors.onSurface,
-                fontWeight: FontWeight.w500,
+            ? Builder(
+              builder: (context) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: RichText(
+                  text: TextSpan(
+                    children: _buildLabelTextSpans(widget.labelText!, context),
+                    style: inputStyle.copyWith(
+                      color: AppColors.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  softWrap: true,
+                  maxLines: widget.labelMaxLines,
+                  overflow: TextOverflow.visible,
+                ),
               ),
-            ),
-            softWrap: true,
-            maxLines: widget.labelMaxLines,
-            overflow: TextOverflow.visible,
-          ),
-        )
+            )
             : null,
         labelStyle: inputStyle.copyWith(
           color: AppColors.onSurface,
@@ -270,7 +277,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
         ),
         floatingLabelBehavior: FloatingLabelBehavior.always,
         hintText: widget.hintText,
-        hintStyle: inputStyle.copyWith(color: AppColors.onSurfaceVariant),
+        hintStyle: inputStyle.copyWith(
+          color: AppColors.grey,
+          fontSize: ResponsiveFont.textFieldgetHintFontSize(context),
+        ),
         suffixText: widget.suffixText,
 
         prefixIcon: widget.prefixIcon != null
