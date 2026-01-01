@@ -3243,19 +3243,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voterId => 'Voter ID';
 
   @override
-  String get voterIdHint => 'Enter Voter ID';
+  String get voterIdHint => 'Voter ID';
 
   @override
   String get rationCardId => 'Ration Card ID';
 
   @override
-  String get rationCardIdHint => 'Enter Ration Card ID';
+  String get rationCardIdHint => ' Ration Card ID';
 
   @override
   String get personalHealthId => 'Personal Health ID (ABHA ID)';
 
   @override
-  String get personalHealthIdHint => 'Enter 14-digit Personal Health ID';
+  String get personalHealthIdHint => 'Personal Health ID';
 
   @override
   String get confirmAttentionTitle => 'Confirm Action';
@@ -4279,7 +4279,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addNew => '+ Add New';
 
   @override
-  String get genderLabel => 'Gender: ';
+  String get genderLabel => 'Gender ';
 
   @override
   String get abhaIdLabel => 'ABHA Id: ';
@@ -5164,7 +5164,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get correctHighlightedErrors => 'Please correct the highlighted errors before continuing.';
 
   @override
-  String get selectOptionLabel => 'Select Option';
+  String get selectOptionLabel => 'Select';
 
   @override
   String get screeningDate => 'Screening Date';

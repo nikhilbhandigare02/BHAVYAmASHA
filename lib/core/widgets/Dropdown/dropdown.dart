@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/core/utils/responsive_font.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -62,24 +63,26 @@ class ApiDropdown<T> extends StatelessWidget {
         ? labelText!.substring(0, labelText!.length - 2).trim()
         : labelText!;
 
-    return RichText(
-      text: TextSpan(
-        style: TextStyle(
-          fontSize: 13.5.sp,
-          color: AppColors.onSurface,
-          fontWeight: FontWeight.w500,
+    return Builder(
+      builder: (context) => RichText(
+        text: TextSpan(
+          style: TextStyle(
+            fontSize: ResponsiveFont.getLabelFontSize(context),
+            color: AppColors.onSurface,
+            fontWeight: FontWeight.w500,
+          ),
+          children: [
+            TextSpan(text: base),
+            if (required)
+              const TextSpan(
+                text: '*',
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              ),
+          ],
         ),
-        children: [
-          TextSpan(text: base),
-          if (required)
-            const TextSpan(
-              text: '*',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-            ),
-        ],
+        maxLines: labelMaxLines,
+        overflow: TextOverflow.visible,
       ),
-      maxLines: labelMaxLines,
-      overflow: TextOverflow.visible,
     );
   }
 
@@ -88,7 +91,7 @@ class ApiDropdown<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final TextStyle inputStyle = TextStyle(
-      fontSize: 15.sp,
+      fontSize: ResponsiveFont.getInputFontSize(context),
       fontWeight: FontWeight.w500,
       color: AppColors.onSurfaceVariant,
       height: 1,
@@ -133,7 +136,7 @@ class ApiDropdown<T> extends StatelessWidget {
                                 if (_labelWidget != null)
                                   DefaultTextStyle(
                                     style: TextStyle(
-                                      fontSize: labelFontSize ?? 14.sp,
+                                      fontSize: ResponsiveFont.getLabelFontSize(context),
                                       color: AppColors.onSurface,
                                       fontWeight: FontWeight.w500,
                                       height: 1.2,
@@ -149,9 +152,10 @@ class ApiDropdown<T> extends StatelessWidget {
                                       : (hintText ?? l10n.selectOptionLabel),
                                   style: inputStyle.copyWith(
                                     color: value != null
-                                        ? AppColors.onSurface
-                                        : AppColors.onSurfaceVariant,
+                                        ? AppColors.onSurfaceVariant
+                                        : AppColors.grey,
                                     fontWeight: FontWeight.w400,
+                                    fontSize: ResponsiveFont.getHintFontSize(context)
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),

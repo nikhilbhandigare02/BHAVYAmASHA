@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/core/utils/responsive_font.dart';
 import 'package:sizer/sizer.dart';
 
 // A custom date picker widget that provides a text field interface.
@@ -162,30 +163,32 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
         ? widget.labelText.substring(0, widget.labelText.length - 2).trim()
         : widget.labelText;
 
-    return Padding(
-      padding: const EdgeInsets.only(left: 4.0),
-      child: RichText(
-        text: TextSpan(
-          style: TextStyle(
-            fontSize: 13.5.sp,
-            color: AppColors.onSurface,
-            fontWeight: FontWeight.w500,
-          ),
-          children: [
-            TextSpan(text: base),
-            if (required)
-              const TextSpan(
-                text: '*',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
+    return Builder(
+      builder: (context) => Padding(
+        padding: const EdgeInsets.only(left: 4.0),
+        child: RichText(
+          text: TextSpan(
+            style: TextStyle(
+              fontSize: ResponsiveFont.getLabelFontSize(context),
+              color: AppColors.onSurface,
+              fontWeight: FontWeight.w500,
+            ),
+            children: [
+              TextSpan(text: base),
+              if (required)
+                const TextSpan(
+                  text: '*',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
+          maxLines: widget.labelMaxLines,
+          overflow: TextOverflow.visible,
+          softWrap: true,
         ),
-        maxLines: widget.labelMaxLines,
-        overflow: TextOverflow.visible,
-        softWrap: true,
       ),
     );
   }
@@ -194,7 +197,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
   Widget build(BuildContext context) {
     // Match the TextField's input style
     final TextStyle inputStyle = TextStyle(
-      fontSize: 15.sp,
+      fontSize: ResponsiveFont.getInputFontSize(context),
       color: AppColors.onSurfaceVariant,
       height: 1.5,
     );
@@ -202,6 +205,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     // Style for hint text to match TextField
     final hintStyle = inputStyle.copyWith(
       color: Theme.of(context).hintColor,
+      fontSize: ResponsiveFont.getHintFontSize(context),
     );
 
     return GestureDetector(
