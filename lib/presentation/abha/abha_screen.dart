@@ -191,7 +191,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (value) {
-                        setState(() {}); // Trigger rebuild on search
+                        setState(() {});
                       },
                     ),
                     SizedBox(height: 10),
@@ -372,14 +372,14 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
   @override
   Widget createVerifyAbha(BuildContext context) {
-    //final localText = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
     return ScreenUtilInit(
         designSize: const Size(360, 690),
         minTextAdapt: true,
         splitScreenMode: true,
         builder: (_, __) => Scaffold(
               appBar: AppHeader(
-                screenTitle: 'ABHA Generation',
+                screenTitle: l10n.gridAbhaGeneration ,
                 showBack: false,
               ),
               drawer: CustomDrawer(),
@@ -575,7 +575,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                       fillColor:
                           isEnableSearch ? Colors.white : Colors.grey.shade200,
 
-                      hintText: "Enter mobile no to search ABHA",
+                      hintText: localText.enterMobileToSearchAbha ,
                       // border: OutlineInputBorder(
                       //   borderRadius: BorderRadius.only(
                       //     topLeft: Radius.circular(5),
@@ -611,12 +611,12 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
                       // Must start with 6, 7, 8 or 9
                       if (!RegExp(r'^[6-9]').hasMatch(value)) {
-                        return 'Enter valid Indian mobile number';
+                        return localText.enterValidIndianMobile;
                       }
 
                       // Reject if all digits are the same (1111111111, 9999999999)
                       if (RegExp(r'^(\d)\1{9}$').hasMatch(value)) {
-                        return 'Invalid mobile number';
+                        return localText.invalidMobileNumber;
                       }
 
                       return null;
@@ -1529,7 +1529,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(
-                            color: isAadhaarValid ? Colors.green : Colors.grey,
+                            color: isAadhaarValid ? Colors.green : Colors.red,
                             width: 2),
                       ),
                       errorBorder: UnderlineInputBorder(
@@ -2006,15 +2006,15 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     }*/
                   },
                   child: Padding(
-                    padding: EdgeInsets.only(top: 20),
+                    padding: EdgeInsets.all(12),
                     child: Container(
-                      width: 100.w,
+                      width: 150.w,
                       height: 30.h,
                       decoration: BoxDecoration(
-                        color: Colors.amberAccent,
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(5.0),
                         border:
-                            Border.all(color: Colors.amberAccent, width: 1.w),
+                            Border.all(color:  AppColors.primary, width: 1.w),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -2028,7 +2028,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                           SizedBox(width: 6.w),
                           // Small space between icon and text
                           Text(
-                            localText.sendOtp,
+                           localText.generateOtp,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 11.sp,
@@ -2060,12 +2060,12 @@ class _ABHAScreenState extends State<ABHAScreen> {
                 ),
                 CustomTextField(
                   controller: otpController,
-                  hintText: "Please enter OTP",
+                  hintText: localText.pleaseEnterOtp,
                   keyboardType: TextInputType.number,
                   maxLength: 6,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "OTP is required";
+                      return localText.otpIsRequired;
                     }
                     return null;
                   },
@@ -2131,19 +2131,19 @@ class _ABHAScreenState extends State<ABHAScreen> {
                             if (otpController.text.isNotEmpty) {
                               _aadhaarOTPABHA(verifyOTP);
                             } else {
-                              Utils.showToastMessage('Please enter OTP');
+                              Utils.showToastMessage(localText.pleaseEnterOtp);
                             }
                           } else if (dropdownvalue == 'Mobile') {
                             if (otpController.text.isNotEmpty) {
                               _aadhaarOTPABHA(verifyOTP);
                             } else {
-                              Utils.showToastMessage('Please enter OTP');
+                              Utils.showToastMessage(localText.pleaseEnterOtp);
                             }
                           } else {
                             if (otpController.text.isNotEmpty) {
                               _verifyOTPLinkExisting(otpController.text);
                             } else {
-                              Utils.showToastMessage('Please enter OTP');
+                              Utils.showToastMessage(localText.pleaseEnterOtp);
                             }
                           }
                         },
@@ -2290,7 +2290,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter OTP';
+                                return localText.pleaseEnterOtp;
                               }
                               return null;
                             },
@@ -4354,6 +4354,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
   }
 
   static Future<bool?> showAadharAlert(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return showDialog<bool>(
       context: context,
       barrierDismissible: false, // forces user to choose Yes or No

@@ -889,10 +889,14 @@ class _PartATab extends StatelessWidget {
         final renderObject = ctx.findRenderObject();
         if (renderObject != null) {
           final viewport = RenderAbstractViewport.of(renderObject);
-          final target = viewport.getOffsetToReveal(renderObject, 0.0).offset;
+          final rawTarget = viewport.getOffsetToReveal(renderObject, 0.0).offset;
+          final pos = _scrollController.position;
+          final target = rawTarget.clamp(pos.minScrollExtent, pos.maxScrollExtent).toDouble();
+          final distance = (pos.pixels - target).abs();
+          final ms = (200 + (distance * 0.35)).clamp(250, 900).toInt();
           _scrollController.animateTo(
             target,
-            duration: const Duration(milliseconds: 350),
+            duration: Duration(milliseconds: ms),
             curve: Curves.easeInOut,
           );
           return true;
@@ -1384,10 +1388,14 @@ class _PartBTab extends StatelessWidget {
         final renderObject = ctx.findRenderObject();
         if (renderObject != null) {
           final viewport = RenderAbstractViewport.of(renderObject);
-          final target = viewport.getOffsetToReveal(renderObject, 0.0).offset;
+          final rawTarget = viewport.getOffsetToReveal(renderObject, 0.0).offset;
+          final pos = _scrollController.position;
+          final target = rawTarget.clamp(pos.minScrollExtent, pos.maxScrollExtent).toDouble();
+          final distance = (pos.pixels - target).abs();
+          final ms = (200 + (distance * 0.35)).clamp(250, 900).toInt();
           _scrollController.animateTo(
             target,
-            duration: const Duration(milliseconds: 350),
+            duration: Duration(milliseconds: ms),
             curve: Curves.easeInOut,
           );
           return true;

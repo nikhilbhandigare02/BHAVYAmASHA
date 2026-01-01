@@ -122,7 +122,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                 (pregnantCountMap[householdRefKey] ?? 0) + 1;
           }
 
-          // Age groups
           final dob = info['dob']?.toString();
           if (dob != null && dob.isNotEmpty) {
             final birthDate = DateTime.tryParse(dob);

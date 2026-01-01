@@ -345,41 +345,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   Future<void> _loadHouseholdCount() async {
     householdCount = 0;
     try {
-      // Use households table count directly so the dashboard value
-      // matches the total number of household records shown in the
-      // All Household screen.
-      // Mirror AllHouseholdScreen logic so that the dashboard count is
-      // based on the same derived family-head list.
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final households = await LocalStorageDao.instance.getAllHouseholds();
-
-      final headKeyByHousehold = <String, String>{};
-      for (final hh in households) {
-        try {
-          final hhRefKey = (hh['unique_key'] ?? '').toString();
-          final headId = (hh['head_id'] ?? '').toString();
-          if (hhRefKey.isEmpty || headId.isEmpty) continue;
-          headKeyByHousehold[hhRefKey] = headId;
-        } catch (_) {}
-      }
-
-      final familyHeads = rows.where((r) {
-        try {
-          final householdRefKey = (r['household_ref_key'] ?? '').toString();
-          final uniqueKey = (r['unique_key'] ?? '').toString();
-          if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
-
-          final configuredHeadKey = headKeyByHousehold[householdRefKey];
-          if (configuredHeadKey == null || configuredHeadKey.isEmpty) return false;
-
-          final isDeath = r['is_death'] == 1;
-          final isMigrated = r['is_migrated'] == 1;
-
-          return configuredHeadKey == uniqueKey && !isDeath && !isMigrated;
-        } catch (_) {
-          return false;
-        }
-      }).toList();
+      // Use the centralized loadAllHouseholdData function from LocalStorageDao
+      // This ensures the dashboard count matches the All Household screen
+      final familyHeads = await LocalStorageDao.instance.loadAllHouseholdData();
 
       final syncedCount = familyHeads.where((r) {
         final s = r['is_synced'];

@@ -35,7 +35,7 @@ class _AbhaGenerationscreenState extends State<AbhaGenerationscreen> {
     return BlocProvider(
       create: (_) => AbhaGenerationBloc(),
       child: Scaffold(
-        appBar: AppHeader(screenTitle:" l10n.gridAbhaGeneration ?? 'ABHA Generation'",
+        appBar: AppHeader(screenTitle:l10n.gridAbhaGeneration ?? 'ABHA Generation',
             showBack: true),
         body: SafeArea(
           child: Form(
@@ -128,8 +128,8 @@ class _AbhaGenerationscreenState extends State<AbhaGenerationscreen> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 12),
                                   child: CustomTextField(
-                                    labelText: l10n.abhaAadhaarNumberLabel ?? 'Aadhaar Number',
-                                    hintText: l10n.abhaAadhaarNumberLabel ?? 'Aadhaar Number',
+                                    labelText: l10n.abhaAadhaarNumberLabel ,
+                                    hintText: l10n.abhaAadhaarNumberLabel,
                                     keyboardType: TextInputType.number,
                                     maxLength: 12,
                                     onChanged: (v) => context

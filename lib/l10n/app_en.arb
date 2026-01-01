@@ -852,10 +852,10 @@
   "rchChildSerialHint": "Serial number of the child in the RCH register",
   "dateOfBirthLabel": "Date of Birth *",
   "dateOfRegistrationLabel": "Date of Registration *",
-  "childNameLabel": "Child's name *",
+  "childNameLabel": "Name of child *",
   "whoseMobileNumberLabel": "Whose mobile number is this",
   "mobileNumberLabel": "mobile number",
-  "mothersRchIdLabel": "Mother's RCH ID number",
+  "mothersRchIdLabel": "RCH ID no. of mother",
   "birthCertificateIssuedLabel": "Is birth certificate issued?",
   "birthCertificateNumberLabel": "birth certificate number",
   "weightGramLabel": "Weight (g)",
@@ -890,7 +890,7 @@
   "colorGreen": "Green",
   "colorYellow": "Yellow",
   "colorRed": "Red",
- "motherReportsTempOrChestIndrawingLabel": "The mother tells that the child feels hot or cold when touching and the temperature of the child is more than 37.5° C",
+ "motherReportsTempOrChestIndrawingLabel": "The mother tells that the child feels hot or cold when touching and the temperature of the child is more than 37.5° C or less than 35.5° C and the chest is pulled inward while breathing",
   "bleedingUmbilicalCordLabel": "Is Umbilical cord bleeding",
   "newbornSeizuresLabel": "Is the child having seizures?",
   "stoppedCryingLabel": "Has the child stopped crying?",
@@ -2493,6 +2493,8 @@
   "nextVisit": "Next HBNC visit due date",
   "enterMobileToSearchAbha": "Enter mobile number to search ABHA",
   "invalidMobileNumber": "Invalid mobile number",
+  "enterValidIndianMobile": "Enter a valid Indian mobile number",
+
   "enterValid10DigitMobile": "Enter a valid 10-digit mobile number",
   "selectToProceed": "Select to proceed",
   "selectAbhaNumber": "Select ABHA number",
@@ -2501,7 +2503,7 @@
   "pleaseEnterAbhaId": "Please enter ABHA ID",
   "abhaAddressLinked": "ABHA Address Linked!",
   "selectAbhaId": "Select ABHA ID",
-  "mobileNumberMismatch": "Mobile number mismatch",
+  "mobileNumberMismatch": "Mobile number mismatch"
 
 
 

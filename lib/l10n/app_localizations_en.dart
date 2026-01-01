@@ -1581,13 +1581,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get isPregnantLabel => 'Is the woman pregnant?';
+  String get isPregnantLabel => 'Is woman pregnant?';
 
   @override
   String get isWomanBreastfeedingLabel => 'Is woman breastfeeding?';
 
   @override
-  String get isWomanPregnantQuestion => 'Is the Woman Pregnant?';
+  String get isWomanPregnantQuestion => 'Is Woman Pregnant?';
 
   @override
   String get kitchenInsideLabel => 'Is the kitchen inside the house';
@@ -2568,7 +2568,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dateOfRegistrationLabel => 'Date of Registration *';
 
   @override
-  String get childNameLabel => 'Child\'s name *';
+  String get childNameLabel => 'Name of child *';
 
   @override
   String get whoseMobileNumberLabel => 'Whose mobile number is this';
@@ -2577,7 +2577,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mobileNumberLabel => 'mobile number';
 
   @override
-  String get mothersRchIdLabel => 'Mother\'s RCH ID number';
+  String get mothersRchIdLabel => 'RCH ID no. of mother';
 
   @override
   String get birthCertificateIssuedLabel => 'Is birth certificate issued?';
@@ -2682,7 +2682,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get colorRed => 'Red';
 
   @override
-  String get motherReportsTempOrChestIndrawingLabel => 'The mother reports that the child feels hot or cold when touching and the temperature of the child is more than 37.5°C  or less than 35.5°C, and the chest is pulled inward while breathing.';
+  String get motherReportsTempOrChestIndrawingLabel => 'The mother tells that the child feels hot or cold when touching and the temperature of the child is more than 37.5° C or less than 35.5° C and the chest is pulled inward while breathing';
 
   @override
   String get bleedingUmbilicalCordLabel => 'Is Umbilical cord bleeding';
@@ -2730,7 +2730,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postDeliveryProblemConvulsions => 'Convulsions';
 
   @override
-  String get mealsPerDayLabel => 'No. of times does a mother take a full meal in 24 hours?';
+  String get mealsPerDayLabel => 'No. of times mother takes full meal in 24 hours?';
 
   @override
   String get padsPerDayLabel => 'How many pads have been changed in a day for bleeding? *';
@@ -2853,7 +2853,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliveryDate => 'Date of Delivery *';
 
   @override
-  String get gestationWeeks => 'No. of weeks of pregnancy during delivery';
+  String get gestationWeeks => 'No. of weeks of pregnancy during delivery.';
 
   @override
   String get deliveryTime => 'Time of delivery (hh:mm)';
@@ -6121,10 +6121,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get is_birth_certificate_issued => 'Is birth certificate issued?';
 
   @override
-  String get enter_religion => 'Enter Religion';
+  String get enter_religion => ' Religion';
 
   @override
-  String get enter_category => 'Enter Category';
+  String get enter_category => ' Category';
 
   @override
   String get invalid_length => 'Invalid length';
@@ -7190,4 +7190,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterValidIndianMobile => 'Enter a valid Indian mobile number';
+
+  @override
+  String get enterValid10DigitMobile => 'Enter a valid 10-digit mobile number';
+
+  @override
+  String get selectToProceed => 'Select to proceed';
+
+  @override
+  String get selectAbhaNumber => 'Select ABHA number';
+
+  @override
+  String get pleaseEnterAadhaar => 'Please enter Aadhaar number';
+
+  @override
+  String get enterValid12DigitAadhaar => 'Enter a valid 12-digit Aadhaar number';
+
+  @override
+  String get pleaseEnterAbhaId => 'Please enter ABHA ID';
+
+  @override
+  String get abhaAddressLinked => 'ABHA Address Linked!';
+
+  @override
+  String get selectAbhaId => 'Select ABHA ID';
+
+  @override
+  String get mobileNumberMismatch => 'Mobile number mismatch';
 }
