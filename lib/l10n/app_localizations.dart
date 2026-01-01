@@ -3218,7 +3218,7 @@ abstract class AppLocalizations {
   /// No description provided for @isPregnantLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the woman pregnant?'**
+  /// **'Is woman pregnant?'**
   String get isPregnantLabel;
 
   /// No description provided for @isWomanBreastfeedingLabel.
@@ -3230,7 +3230,7 @@ abstract class AppLocalizations {
   /// No description provided for @isWomanPregnantQuestion.
   ///
   /// In en, this message translates to:
-  /// **'Is the Woman Pregnant?'**
+  /// **'Is Woman Pregnant?'**
   String get isWomanPregnantQuestion;
 
   /// No description provided for @kitchenInsideLabel.
@@ -5420,7 +5420,7 @@ abstract class AppLocalizations {
   /// No description provided for @motherReportsTempOrChestIndrawingLabel.
   ///
   /// In en, this message translates to:
-  /// **'The mother reports that the child feels hot or cold when touching and the temperature of the child is more than 37.5°C  or less than 35.5°C, and the chest is pulled inward while breathing.'**
+  /// **'The mother tells that the child feels hot or cold when touching and the temperature of the child is more than 37.5° C or less than 35.5° C and the chest is pulled inward while breathing'**
   String get motherReportsTempOrChestIndrawingLabel;
 
   /// No description provided for @bleedingUmbilicalCordLabel.
@@ -5516,7 +5516,7 @@ abstract class AppLocalizations {
   /// No description provided for @mealsPerDayLabel.
   ///
   /// In en, this message translates to:
-  /// **'No. of times does a mother take a full meal in 24 hours?'**
+  /// **'No. of times mother takes full meal in 24 hours?'**
   String get mealsPerDayLabel;
 
   /// No description provided for @padsPerDayLabel.
@@ -5762,7 +5762,7 @@ abstract class AppLocalizations {
   /// No description provided for @gestationWeeks.
   ///
   /// In en, this message translates to:
-  /// **'No. of weeks of pregnancy during delivery'**
+  /// **'No. of weeks of pregnancy during delivery.'**
   String get gestationWeeks;
 
   /// No description provided for @deliveryTime.
@@ -12290,13 +12290,13 @@ abstract class AppLocalizations {
   /// No description provided for @enter_religion.
   ///
   /// In en, this message translates to:
-  /// **'Enter Religion'**
+  /// **' Religion'**
   String get enter_religion;
 
   /// No description provided for @enter_category.
   ///
   /// In en, this message translates to:
-  /// **'Enter Category'**
+  /// **' Category'**
   String get enter_category;
 
   /// No description provided for @invalid_length.
@@ -14423,11 +14423,59 @@ abstract class AppLocalizations {
   /// **'Invalid mobile number'**
   String get invalidMobileNumber;
 
-  /// No description provided for @enterValidIndianMobile.
+  /// No description provided for @enterValid10DigitMobile.
   ///
   /// In en, this message translates to:
-  /// **'Enter a valid Indian mobile number'**
-  String get enterValidIndianMobile;
+  /// **'Enter a valid 10-digit mobile number'**
+  String get enterValid10DigitMobile;
+
+  /// No description provided for @selectToProceed.
+  ///
+  /// In en, this message translates to:
+  /// **'Select to proceed'**
+  String get selectToProceed;
+
+  /// No description provided for @selectAbhaNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Select ABHA number'**
+  String get selectAbhaNumber;
+
+  /// No description provided for @pleaseEnterAadhaar.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Aadhaar number'**
+  String get pleaseEnterAadhaar;
+
+  /// No description provided for @enterValid12DigitAadhaar.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid 12-digit Aadhaar number'**
+  String get enterValid12DigitAadhaar;
+
+  /// No description provided for @pleaseEnterAbhaId.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter ABHA ID'**
+  String get pleaseEnterAbhaId;
+
+  /// No description provided for @abhaAddressLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'ABHA Address Linked!'**
+  String get abhaAddressLinked;
+
+  /// No description provided for @selectAbhaId.
+  ///
+  /// In en, this message translates to:
+  /// **'Select ABHA ID'**
+  String get selectAbhaId;
+
+  /// No description provided for @mobileNumberMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile number mismatch'**
+  String get mobileNumberMismatch;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

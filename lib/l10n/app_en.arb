@@ -890,7 +890,7 @@
   "colorGreen": "Green",
   "colorYellow": "Yellow",
   "colorRed": "Red",
- "motherReportsTempOrChestIndrawingLabel": "The mother tells that the child feels hot or cold when touching and the temperature of the child is more than 37.5° C",
+ "motherReportsTempOrChestIndrawingLabel": "The mother tells that the child feels hot or cold when touching and the temperature of the child is more than 37.5° C or less than 35.5° C and the chest is pulled inward while breathing",
   "bleedingUmbilicalCordLabel": "Is Umbilical cord bleeding",
   "newbornSeizuresLabel": "Is the child having seizures?",
   "stoppedCryingLabel": "Has the child stopped crying?",
@@ -2501,7 +2501,7 @@
   "pleaseEnterAbhaId": "Please enter ABHA ID",
   "abhaAddressLinked": "ABHA Address Linked!",
   "selectAbhaId": "Select ABHA ID",
-  "mobileNumberMismatch": "Mobile number mismatch",
+  "mobileNumberMismatch": "Mobile number mismatch"
 
 
 

@@ -7189,5 +7189,29 @@ class AppLocalizationsHi extends AppLocalizations {
   String get invalidMobileNumber => 'अमान्य मोबाइल नंबर';
 
   @override
-  String get enterValidIndianMobile => 'मान्य भारतीय मोबाइल नंबर दर्ज करें';
+  String get enterValid10DigitMobile => 'मान्य 10 अंकों का मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get selectToProceed => 'आगे बढ़ने के लिए चयन करें';
+
+  @override
+  String get selectAbhaNumber => 'ABHA नंबर चुनें';
+
+  @override
+  String get pleaseEnterAadhaar => 'कृपया आधार नंबर दर्ज करें';
+
+  @override
+  String get enterValid12DigitAadhaar => 'मान्य 12 अंकों का आधार नंबर दर्ज करें';
+
+  @override
+  String get pleaseEnterAbhaId => 'कृपया ABHA ID दर्ज करें';
+
+  @override
+  String get abhaAddressLinked => 'ABHA पता लिंक हो गया है!';
+
+  @override
+  String get selectAbhaId => 'ABHA ID चुनें';
+
+  @override
+  String get mobileNumberMismatch => 'मोबाइल नंबर मेल नहीं खा रहा है';
 }
