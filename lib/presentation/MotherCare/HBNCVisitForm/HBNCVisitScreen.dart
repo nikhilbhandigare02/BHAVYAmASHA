@@ -17,7 +17,7 @@ import 'package:medixcel_new/core/widgets/SuccessDialogbox/SuccessDialogbox.dart
 
 class HbncVisitScreen extends StatefulWidget {
   final Map<String, dynamic>? beneficiaryData;
-  
+
   const HbncVisitScreen({super.key, this.beneficiaryData});
 
   @override
@@ -48,8 +48,11 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
     _tabController.dispose();
     super.dispose();
   }
+
+  // Enhanced scroll to first error with GlobalKey support
   void _scrollToFirstError() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // First try using the form field approach
       final errorField = _findFirstErrorField();
       if (errorField != null && errorField.context != null) {
         Scrollable.ensureVisible(
@@ -58,9 +61,52 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
         );
+        return;
       }
+
+      // If form field approach doesn't work, try using GlobalKeys from tabs
+      _scrollToFirstErrorUsingKeys();
     });
   }
+
+  // Scroll using GlobalKeys from MotherDetailsTab
+  void _scrollToFirstErrorUsingKeys() {
+    final currentTab = _tabController.index;
+
+    // Only works for MotherDetailsTab (index 1)
+    if (currentTab == 1) {
+      // Get all field keys from MotherDetailsTab
+      final fieldKeys = MotherDetailsTab.fieldKeys;
+
+      // Try to find the first visible key with an error
+      for (final entry in fieldKeys.entries) {
+        final key = entry.value;
+        final context = key.currentContext;
+
+        if (context != null) {
+          // Check if this field has an error by looking for FormField
+          final widget = context.widget;
+          if (widget is StatefulWidget) {
+            final state = context as StatefulElement;
+            final formFieldState = state.state;
+
+            if (formFieldState is FormFieldState && formFieldState.hasError) {
+              Scrollable.ensureVisible(
+                context,
+                alignment: 0.1,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+              return;
+            }
+          }
+        }
+      }
+    }
+
+    // For other tabs (GeneralDetails, ChildDetails), use the form field approach
+  }
+
   FormFieldState<dynamic>? _findFirstErrorField() {
     FormFieldState<dynamic>? firstErrorField;
     final formContext = _formKey.currentContext;
@@ -87,7 +133,6 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
     return firstErrorField;
   }
 
-
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
@@ -96,69 +141,27 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
     print(('from screen form',beneficiaryData?['child_tab_count'] as int?) ?? 1);
 
     return BlocProvider(
-      create: (context) => HbncVisitBloc(),
-      child: Builder(
-        builder: (context) => Scaffold(
-          body: SafeArea(
-            bottom: true,
-            top: false,
-            child: BlocListener<HbncVisitBloc, HbncVisitState>(
-              listenWhen: (previous, current) =>
-                  (previous.validationTick != current.validationTick) ||
-                  (previous.isSaving && !current.isSaving),
-              listener: (context, state) {
-                final idx = _tabController.index;
-                if (state.lastValidatedIndex == idx && state.validationErrors.isNotEmpty) {
-                  final t = AppLocalizations.of(context)!;
-                  final first = state.validationErrors.first;
-                  final localized = _mapErrorCodeToText(t, first);
-                  showAppSnackBar(context, localized);
-                  _scrollToFirstError();
-                  if (_saveTapLocked) {
-                    setState(() {
-                      _saveTapLocked = false;
-                      _saveRequested = false;
-                      _saveInProgress = false;
-                    });
-                  }
-                }
+        create: (context) => HbncVisitBloc(),
+        child: Builder(
+          builder: (context) => Scaffold(
+            body: SafeArea(
+              bottom: true,
+              top: false,
+              child: BlocListener<HbncVisitBloc, HbncVisitState>(
+                listenWhen: (previous, current) =>
+                (previous.validationTick != current.validationTick) ||
+                    (previous.isSaving && !current.isSaving),
+                listener: (context, state) {
+                  final idx = _tabController.index;
+                  if (state.lastValidatedIndex == idx && state.validationErrors.isNotEmpty) {
+                    final t = AppLocalizations.of(context)!;
+                    final first = state.validationErrors.first;
+                    final localized = _mapErrorCodeToText(t, first);
+                    showAppSnackBar(context, localized);
 
-                if (state.saveSuccess && !state.isSaving) {
-                  showAppSnackBar(context, 'Form saved successfully.');
-                  if (mounted) {
-                    final dynamic dayRaw = state.visitDetails['visitNumber'];
-                    final int visitDay = dayRaw is int ? dayRaw : int.tryParse(dayRaw?.toString() ?? '') ?? 0;
-                    if (visitDay == 42) {
-                      if (!_navigationTriggered) {
-                        _navigationTriggered = true;
-                        CustomDialog.show(
-                        context,
-                        title:t?.formSavedSuccessfully ??  'Form has been saved successfully',
-                        message:t?.postNatalMssg ?? 'The post natal care of beneficiary has been completed',
-                        onOkPressed: () {
-                          Navigator.of(context, rootNavigator: true).pop();
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            Route_Names.HBNCScreen,
-                                (route) => false,
-                          );
-                        },
-                        );
-                      }
-                    } else {
-                      if (!_navigationTriggered) {
-                        _navigationTriggered = true;
-                        Future.delayed(const Duration(milliseconds: 2000), () {
-                          if (mounted) {
-                            Navigator.pushNamedAndRemoveUntil(
-                              context,
-                              Route_Names.HBNCScreen,
-                              (route) => false,
-                            );
-                          }
-                        });
-                      }
-                    }
+                    // Scroll to first error when validation fails
+                    _scrollToFirstError();
+
                     if (_saveTapLocked) {
                       setState(() {
                         _saveTapLocked = false;
@@ -167,201 +170,260 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                       });
                     }
                   }
-                }
 
-                if (!state.isSaving && !state.saveSuccess && state.errorMessage != null) {
-                  if (_saveTapLocked) {
-                    setState(() {
-                      _saveTapLocked = false;
-                      _saveRequested = false;
-                      _saveInProgress = false;
-                    });
+                  if (state.saveSuccess && !state.isSaving) {
+                    showAppSnackBar(context, 'Form saved successfully.');
+                    if (mounted) {
+                      final dynamic dayRaw = state.visitDetails['visitNumber'];
+                      final int visitDay = dayRaw is int ? dayRaw : int.tryParse(dayRaw?.toString() ?? '') ?? 0;
+                      if (visitDay == 42) {
+                        if (!_navigationTriggered) {
+                          _navigationTriggered = true;
+                          CustomDialog.show(
+                            context,
+                            title:t?.formSavedSuccessfully ??  'Form has been saved successfully',
+                            message:t?.postNatalMssg ?? 'The post natal care of beneficiary has been completed',
+                            onOkPressed: () {
+                              Navigator.of(context, rootNavigator: true).pop();
+                              Navigator.pushNamedAndRemoveUntil(
+                                context,
+                                Route_Names.HBNCScreen,
+                                    (route) => false,
+                              );
+                            },
+                          );
+                        }
+                      } else {
+                        if (!_navigationTriggered) {
+                          _navigationTriggered = true;
+                          Future.delayed(const Duration(milliseconds: 2000), () {
+                            if (mounted) {
+                              Navigator.pushNamedAndRemoveUntil(
+                                context,
+                                Route_Names.HBNCScreen,
+                                    (route) => false,
+                              );
+                            }
+                          });
+                        }
+                      }
+                      if (_saveTapLocked) {
+                        setState(() {
+                          _saveTapLocked = false;
+                          _saveRequested = false;
+                          _saveInProgress = false;
+                        });
+                      }
+                    }
                   }
-                }
 
-                if (state.lastValidatedIndex == idx &&
-                    !state.lastValidationWasSave &&
-                    state.validationErrors.isEmpty) {
-                  final newIndex = idx + 1;
-                  if (newIndex < _tabController.length) {
-                    _tabController.animateTo(newIndex);
-                    context.read<HbncVisitBloc>().add(TabChanged(newIndex));
+                  if (!state.isSaving && !state.saveSuccess && state.errorMessage != null) {
+                    if (_saveTapLocked) {
+                      setState(() {
+                        _saveTapLocked = false;
+                        _saveRequested = false;
+                        _saveInProgress = false;
+                      });
+                    }
                   }
-                }
 
-                // Handle save after validation
-                if (state.lastValidatedIndex == idx &&
-                    state.lastValidationWasSave &&
-                    state.validationErrors.isEmpty) {
-                  if (_saveRequested && !_saveInProgress) {
-                    final beneficiaryData = (widget as dynamic).beneficiaryData;
-                    _saveInProgress = true;
-                    context.read<HbncVisitBloc>().add(
-                      SaveHbncVisit(beneficiaryData: beneficiaryData),
-                    );
+                  if (state.lastValidatedIndex == idx &&
+                      !state.lastValidationWasSave &&
+                      state.validationErrors.isEmpty) {
+                    final newIndex = idx + 1;
+                    if (newIndex < _tabController.length) {
+                      _tabController.animateTo(newIndex);
+                      context.read<HbncVisitBloc>().add(TabChanged(newIndex));
+                    }
                   }
-                }
-              },
-              child: Column(
-                children: [
-                  AppHeader(
-                    screenTitle: t.hbncListTitle,
-                    showBack: true,
-                    icon1Widget: Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Text(
-                            t.previousVisits,
-                            style: TextStyle(
-                              color: AppColors.onSurfaceVariant,
-                              fontWeight: FontWeight.w600,
+
+                  // Handle save after validation
+                  if (state.lastValidatedIndex == idx &&
+                      state.lastValidationWasSave &&
+                      state.validationErrors.isEmpty) {
+                    if (_saveRequested && !_saveInProgress) {
+                      final beneficiaryData = (widget as dynamic).beneficiaryData;
+                      _saveInProgress = true;
+                      context.read<HbncVisitBloc>().add(
+                        SaveHbncVisit(beneficiaryData: beneficiaryData),
+                      );
+                    }
+                  }
+                },
+                child: Column(
+                  children: [
+                    AppHeader(
+                      screenTitle: t.hbncListTitle,
+                      showBack: true,
+                      icon1Widget: Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.background,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Text(
+                              t.previousVisits,
+                              style: TextStyle(
+                                color: AppColors.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
                       ),
+                      onIcon1Tap: () {
+                        Navigator.pushNamed(context, Route_Names.previousVisit);
+                      },
                     ),
-                    onIcon1Tap: () {
-                      Navigator.pushNamed(context, Route_Names.previousVisit);
-                    },
-                  ),
-                  Container(
-                    color: AppColors.primary,
-                    child: TabBar(
-                      controller: _tabController,
-                      isScrollable: true, 
-                      labelColor: Colors.white,
-                      unselectedLabelColor: Colors.white70,
-                      indicatorColor: Colors.white,
-                      indicatorWeight: 3,
-                      labelStyle: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      tabs: [
-                        Tab(text: t.tabGeneralDetails),
-                        Tab(text: t.tabMotherDetails),
-                        ...List.generate(_childCount, (i) => Tab(text: '${t.tabNewbornDetails} ${i + 1}')),
-                      ],
-                      onTap: (index) =>
-                          context.read<HbncVisitBloc>().add(TabChanged(index)),
-                    ),
-                  ),
-
-                  Expanded(
-                    child: Form(
-                      key: _formKey,
-                      child: TabBarView(
+                    Container(
+                      color: AppColors.primary,
+                      child: TabBar(
                         controller: _tabController,
-                        children: [
-                          GeneralDetailsTab(beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? ''),
-                          const MotherDetailsTab(),
-                          ...List.generate(_childCount, (i) => ChildDetailsTab(
-                                beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? '',
-                                childTabCount: (beneficiaryData?['child_tab_count'] as int?) ?? 1,
-                                childIndex: i + 1,
-                              )),
+                        isScrollable: true,
+                        labelColor: Colors.white,
+                        unselectedLabelColor: Colors.white70,
+                        indicatorColor: Colors.white,
+                        indicatorWeight: 3,
+                        labelStyle: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        tabs: [
+                          Tab(text: t.tabGeneralDetails),
+                          Tab(text: t.tabMotherDetails),
+                          ...List.generate(_childCount, (i) => Tab(text: '${t.tabNewbornDetails} ${i + 1}')),
+                        ],
+                        onTap: (index) =>
+                            context.read<HbncVisitBloc>().add(TabChanged(index)),
+                      ),
+                    ),
+
+                    Expanded(
+                      child: Form(
+                        key: _formKey,
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            GeneralDetailsTab(beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? ''),
+                            const MotherDetailsTab(),
+                            ...List.generate(_childCount, (i) => ChildDetailsTab(
+                              beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? '',
+                              childTabCount: (beneficiaryData?['child_tab_count'] as int?) ?? 1,
+                              childIndex: i + 1,
+                            )),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 4,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 0),
+                          ),
                         ],
                       ),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 4,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 0), // TOP shadow
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: AnimatedBuilder(
-                        animation: _tabController,
-                        builder: (context, _) {
-                          final idx = _tabController.index;
-                          final isLast = idx >= _tabController.length - 1;
-                          final t = AppLocalizations.of(context)!;
-                          return Row(
-                            children: [
-                              Expanded(
-                                child: RoundButton(
-                                  title: t.previousButton,
-                                  height: 34,
-                                  onPress: () {
-                                    final newIndex = idx - 1;
-                                    _tabController.animateTo(newIndex);
-                                    context
-                                        .read<HbncVisitBloc>()
-                                        .add(TabChanged(newIndex));
-                                  },
-                                  disabled: idx == 0,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                              const SizedBox(width: 30),
-                              Expanded(
-                                child: isLast
-                                    ? BlocConsumer<HbncVisitBloc, HbncVisitState>(
-                                  listener: (context, state) {},
-                                  builder: (context, state) {
-                                    return RoundButton(
-                                      height: 34,
-                                      title: t.saveButton,
-                                      isLoading: state.isSaving,
-                                      disabled: state.isSaving || _saveTapLocked,
-                                      onPress: () {
-                                        if (!state.isSaving && !_saveTapLocked) {
-                                          setState(() {
-                                            _saveTapLocked = true;
-                                            _saveRequested = true;
-                                            _navigationTriggered = false;
-                                          });
-                                          if (_formKey.currentState?.validate() ?? true) {
-                                            context.read<HbncVisitBloc>().add(
-                                              ValidateSection(
-                                                _tabController.index,
-                                                isSave: true,
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      },
-                                    );
-                                  },
-                                )
-                                    : RoundButton(
-                                  height: 34,
-                                  title: t.nextButton,
-                                  onPress: () {
-                                    if (_formKey.currentState?.validate() ?? true) {
+                      child: Padding(
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        child: AnimatedBuilder(
+                          animation: _tabController,
+                          builder: (context, _) {
+                            final idx = _tabController.index;
+                            final isLast = idx >= _tabController.length - 1;
+                            final t = AppLocalizations.of(context)!;
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: RoundButton(
+                                    title: t.previousButton,
+                                    height: 34,
+                                    onPress: () {
+                                      final newIndex = idx - 1;
+                                      _tabController.animateTo(newIndex);
                                       context
                                           .read<HbncVisitBloc>()
-                                          .add(ValidateSection(idx));
-                                    }
-                                  },
+                                          .add(TabChanged(newIndex));
+                                    },
+                                    disabled: idx == 0,
+                                    color: AppColors.primary,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          );
-                        },
+                                const SizedBox(width: 30),
+                                Expanded(
+                                  child: isLast
+                                      ? BlocConsumer<HbncVisitBloc, HbncVisitState>(
+                                    listener: (context, state) {},
+                                    builder: (context, state) {
+                                      return RoundButton(
+                                        height: 34,
+                                        title: t.saveButton,
+                                        isLoading: state.isSaving,
+                                        disabled: state.isSaving || _saveTapLocked,
+                                        onPress: () {
+                                          if (!state.isSaving && !_saveTapLocked) {
+                                            setState(() {
+                                              _saveTapLocked = true;
+                                              _saveRequested = true;
+                                              _navigationTriggered = false;
+                                            });
+                                            if (_formKey.currentState?.validate() ?? true) {
+                                              context.read<HbncVisitBloc>().add(
+                                                ValidateSection(
+                                                  _tabController.index,
+                                                  isSave: true,
+                                                ),
+                                              );
+                                            } else {
+                                              showAppSnackBar(
+                                                context,
+                                                'Please fill all mandatory fields',
+                                              );
+                                              // Scroll to first error on save
+                                              _scrollToFirstError();
+                                            }
+                                          }
+                                        },
+                                      );
+                                    },
+                                  )
+                                      : RoundButton(
+                                    height: 34,
+                                    title: t.nextButton,
+                                    onPress: () {
+                                      if (_formKey.currentState?.validate() ?? true) {
+                                        context
+                                            .read<HbncVisitBloc>()
+                                            .add(ValidateSection(idx));
+                                      } else {
+                                        // Scroll to first error on next button
+                                        _scrollToFirstError();
+                                        showAppSnackBar(
+                                          context,
+                                          'Please fill all mandatory fields',
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ));
+        ));
   }
 
   String _mapErrorCodeToText(AppLocalizations t, String code) {
@@ -379,7 +441,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
       'err_counseling_advice_required': t.err_counseling_advice_required,
       'err_milk_not_producing_or_less_required': t.err_milk_not_producing_or_less_required,
       'err_nipple_cracks_pain_or_engorged_required': t.err_nipple_cracks_pain_or_engorged_required,
-      'err_baby_condition_required': t.err_baby_condition_required, 
+      'err_baby_condition_required': t.err_baby_condition_required,
       'err_baby_name_required': t.err_baby_name_required,
       'err_baby_gender_required': t.err_baby_gender_required,
       'err_baby_weight_required': t.err_baby_weight_required,
