@@ -1040,6 +1040,13 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               final initialMember = Map<String, dynamic>.from(_memberForms[idx]);
               final isSpouseRow = (m['isSpouseRow'] ?? '0').toString() == '1';
               final int initialStep = isSpouseRow ? 1 : 0;
+              
+              // Ensure marital status is set to 'Married' when opening spouse cards
+              // so that the spouse tab becomes accessible
+              if (isSpouseRow) {
+                initialMember['maritalStatus'] = 'Married';
+              }
+              
               final result = await Navigator.of(context).push<Map<String, dynamic>>(
                 MaterialPageRoute(
                   builder: (_) => AddNewFamilyMemberScreen(

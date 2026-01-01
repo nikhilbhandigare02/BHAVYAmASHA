@@ -7181,4 +7181,13 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get nextVisit => 'अगली HBNC विज़िट की नियत तिथि';
+
+  @override
+  String get enterMobileToSearchAbha => 'ABHA खोजने के लिए मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get invalidMobileNumber => 'अमान्य मोबाइल नंबर';
+
+  @override
+  String get enterValidIndianMobile => 'मान्य भारतीय मोबाइल नंबर दर्ज करें';
 }

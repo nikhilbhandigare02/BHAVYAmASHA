@@ -2490,7 +2490,10 @@
   "loadDataComplete": "Data fetching completed ",
   "dataNotFound": "User data not available ",
   "motherRchIdError": "Mother's RCH ID must be exactly 12 digits",
-  "nextVisit": "Next HBNC visit due date"
+  "nextVisit": "Next HBNC visit due date",
+  "enterMobileToSearchAbha": "Enter mobile number to search ABHA",
+  "invalidMobileNumber": "Invalid mobile number",
+  "enterValidIndianMobile": "Enter a valid Indian mobile number"
 
 
 

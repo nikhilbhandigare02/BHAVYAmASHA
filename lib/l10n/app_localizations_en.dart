@@ -7181,4 +7181,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nextVisit => 'Next HBNC visit due date';
+
+  @override
+  String get enterMobileToSearchAbha => 'Enter mobile number to search ABHA';
+
+  @override
+  String get invalidMobileNumber => 'Invalid mobile number';
+
+  @override
+  String get enterValidIndianMobile => 'Enter a valid Indian mobile number';
 }

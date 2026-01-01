@@ -14410,6 +14410,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next HBNC visit due date'**
   String get nextVisit;
+
+  /// No description provided for @enterMobileToSearchAbha.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter mobile number to search ABHA'**
+  String get enterMobileToSearchAbha;
+
+  /// No description provided for @invalidMobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid mobile number'**
+  String get invalidMobileNumber;
+
+  /// No description provided for @enterValidIndianMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid Indian mobile number'**
+  String get enterValidIndianMobile;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

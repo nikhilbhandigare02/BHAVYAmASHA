@@ -2361,7 +2361,10 @@
   "invalidMemberType": "अमान्य सदस्य प्रकार",
   "accountNumberAtLeast10Digits": "खाता संख्या कम से कम 10 अंकों की होनी चाहिए",
   "motherRchIdError": "माता का RCH ID ठीक 12 अंकों का होना चाहिए",
-  "nextVisit": "अगली HBNC विज़िट की नियत तिथि"
+  "nextVisit": "अगली HBNC विज़िट की नियत तिथि",
+  "enterMobileToSearchAbha": "ABHA खोजने के लिए मोबाइल नंबर दर्ज करें",
+  "invalidMobileNumber": "अमान्य मोबाइल नंबर",
+  "enterValidIndianMobile": "मान्य भारतीय मोबाइल नंबर दर्ज करें"
 }
 
 
