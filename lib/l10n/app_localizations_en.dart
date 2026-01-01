@@ -2568,7 +2568,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dateOfRegistrationLabel => 'Date of Registration *';
 
   @override
-  String get childNameLabel => 'Child\'s name *';
+  String get childNameLabel => 'Name of child *';
 
   @override
   String get whoseMobileNumberLabel => 'Whose mobile number is this';
@@ -2577,7 +2577,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mobileNumberLabel => 'mobile number';
 
   @override
-  String get mothersRchIdLabel => 'Mother\'s RCH ID number';
+  String get mothersRchIdLabel => 'RCH ID no. of mother';
 
   @override
   String get birthCertificateIssuedLabel => 'Is birth certificate issued?';
@@ -7187,6 +7187,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidMobileNumber => 'Invalid mobile number';
+
+  @override
+  String get enterValidIndianMobile => 'Enter a valid Indian mobile number';
 
   @override
   String get enterValid10DigitMobile => 'Enter a valid 10-digit mobile number';
