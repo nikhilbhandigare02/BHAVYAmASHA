@@ -93,6 +93,46 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     return message;
   }
 
+  void _scrollToFirstError() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final errorField = _findFirstErrorField();
+      if (errorField != null && errorField.context != null) {
+        Scrollable.ensureVisible(
+          errorField.context!,
+          alignment: 0.1,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  FormFieldState<dynamic>? _findFirstErrorField() {
+    FormFieldState<dynamic>? firstErrorField;
+    final formContext = _formKey.currentContext;
+
+    if (formContext == null) return null;
+
+    void visitElement(Element element) {
+      if (firstErrorField != null) return;
+
+      if (element.widget is FormField) {
+        final formField = element as StatefulElement;
+        final field = formField.state as FormFieldState<dynamic>?;
+
+        if (field != null && field.hasError) {
+          firstErrorField = field;
+          return;
+        }
+      }
+
+      element.visitChildren(visitElement);
+    }
+
+    formContext.visitChildElements(visitElement);
+    return firstErrorField;
+  }
+
   String? _headName;
   String? _headGender;
   String? _spouseName;
@@ -1269,14 +1309,15 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                             if (_currentStep == 2) {
                               return SizedBox.expand(child: Childrendetaills());
                             }
-                            return ListView(
+                            return SingleChildScrollView(
                               padding: const EdgeInsets.fromLTRB(
                                 12,
                                 12,
                                 12,
                                 100,
                               ),
-                              children: [
+                              child: Column(
+                                children: [
                                 _section(
                                   ApiDropdown<String>(
                                     labelText: l.memberTypeLabel,
@@ -4631,7 +4672,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   ],
                                 ],
                               ],
-                            );
+                            ));
                           },
                         ),
                       ),
@@ -4823,6 +4864,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 _anmLastFormError ??
                                                     l?.pleaseCorrectErrors ?? 'Please correct the highlighted errors before continuing.';
                                             showAppSnackBar(context, msg);
+                                            _scrollToFirstError();
                                             return;
                                           }
 
