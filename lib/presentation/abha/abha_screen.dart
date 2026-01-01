@@ -1,53 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart' show DateFormat;
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
-import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
@@ -586,7 +544,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              "Mobile No.",
+             localText.mobileLabel,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -643,12 +601,12 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter mobile number';
+                        return localText.pleaseEnterMobileNumber;
                       }
 
                       // Must be exactly 10 digits
                       if (value.length != 10) {
-                        return 'Mobile number must be 10 digits';
+                        return localText.validMobileNumber;
                       }
 
                       // Must start with 6, 7, 8 or 9
@@ -673,8 +631,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                 onTap: () {
                   if (isEnableSearch) {
                     if (mobileController.text.isEmpty) {
-                      Utils.showToastMessage('Please enter mobile number');
-                    } else if (mobileController.text.length != 10) {
+                      Utils.showToastMessage(localText.pleaseEnterMobileNumber);
                       Utils.showToastMessage(
                           'Enter valid 10-digit mobile number');
                     } else {
