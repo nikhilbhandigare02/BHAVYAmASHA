@@ -96,6 +96,48 @@ class _AncvisitformState extends State<Ancvisitform> {
     super.dispose();
   }
 
+  // Helper to find and scroll to the first error field
+  void _scrollToFirstError() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final errorField = _findFirstErrorField();
+      if (errorField != null && errorField.context != null) {
+        Scrollable.ensureVisible(
+          errorField.context!,
+          alignment: 0.1,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  // Helper method to find the first field with an error
+  FormFieldState<dynamic>? _findFirstErrorField() {
+    FormFieldState<dynamic>? firstErrorField;
+    final formContext = _formKey.currentContext;
+
+    if (formContext == null) return null;
+
+    void visitElement(Element element) {
+      if (firstErrorField != null) return;
+
+      if (element.widget is FormField) {
+        final formField = element as StatefulElement;
+        final field = formField.state as FormFieldState<dynamic>?;
+
+        if (field?.hasError == true) {
+          firstErrorField = field;
+          return;
+        }
+      }
+
+      element.visitChildren(visitElement);
+    }
+
+    formContext.visitChildElements(visitElement);
+    return firstErrorField;
+  }
+
   DateTime? _parseDate(String? dateString) {
     if (dateString == null || dateString.isEmpty) return null;
     try {
@@ -1241,7 +1283,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   l10n?.weeksOfPregnancyLabel ??
                                   'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
-                              readOnly: true,
+                             // readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) =>
                                   bloc.add(WeeksOfPregnancyChanged(v)),
@@ -2288,14 +2330,17 @@ class _AncvisitformState extends State<Ancvisitform> {
                                         if (visitType.isEmpty) {
                                           showAppSnackBar(
                                             context,
-                                            l10n?.selectVisitTypeError ?? "Please select visit type",
+                                            l10n?.selectVisitTypeError ??
+                                                "Please select visit type",
                                           );
-                                          return;
+                                        } else {
+                                          showAppSnackBar(
+                                            context,
+                                            l10n?.pleaseFillFieldsCorrectly ??
+                                                "Please fill all required fields correctly",
+                                          );
                                         }
-                                        showAppSnackBar(
-                                          context,
-                                          l10n?.pleaseFillFieldsCorrectly ?? "Please fill all required fields correctly",
-                                        );
+                                        _scrollToFirstError();
                                       }
                                     },
                                     disabled: state.isSubmitting,

@@ -48,6 +48,44 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
     _tabController.dispose();
     super.dispose();
   }
+  void _scrollToFirstError() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final errorField = _findFirstErrorField();
+      if (errorField != null && errorField.context != null) {
+        Scrollable.ensureVisible(
+          errorField.context!,
+          alignment: 0.1,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+  FormFieldState<dynamic>? _findFirstErrorField() {
+    FormFieldState<dynamic>? firstErrorField;
+    final formContext = _formKey.currentContext;
+
+    if (formContext == null) return null;
+
+    void visitElement(Element element) {
+      if (firstErrorField != null) return;
+
+      if (element.widget is FormField) {
+        final formField = element as StatefulElement;
+        final field = formField.state as FormFieldState<dynamic>?;
+
+        if (field?.hasError == true) {
+          firstErrorField = field;
+          return;
+        }
+      }
+
+      element.visitChildren(visitElement);
+    }
+
+    formContext.visitChildElements(visitElement);
+    return firstErrorField;
+  }
 
 
   @override
@@ -75,6 +113,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                   final first = state.validationErrors.first;
                   final localized = _mapErrorCodeToText(t, first);
                   showAppSnackBar(context, localized);
+                  _scrollToFirstError();
                   if (_saveTapLocked) {
                     setState(() {
                       _saveTapLocked = false;
@@ -303,9 +342,11 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                                   height: 34,
                                   title: t.nextButton,
                                   onPress: () {
-                                    context
-                                        .read<HbncVisitBloc>()
-                                        .add(ValidateSection(idx));
+                                    if (_formKey.currentState?.validate() ?? true) {
+                                      context
+                                          .read<HbncVisitBloc>()
+                                          .add(ValidateSection(idx));
+                                    }
                                   },
                                 ),
                               ),
