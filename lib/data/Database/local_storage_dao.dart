@@ -931,6 +931,106 @@ class LocalStorageDao {
     return count ?? 0;
   }
 
+  Future<List<Map<String, dynamic>>> loadDeceasedList() async {
+    try {
+      final db = await _db;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      final List<Map<String, dynamic>> deceasedBeneficiaries = await db.rawQuery(
+        '''
+      SELECT 
+        b.*,
+        h.household_info AS household_data,
+        h.created_date_time AS household_created_date,
+        h.household_info AS hh_info
+      FROM beneficiaries_new b
+      LEFT JOIN households h 
+        ON b.household_ref_key = h.unique_key
+      WHERE b.is_death = 1
+        AND b.is_deleted = 0
+        AND b.is_migrated = 0
+        ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
+      ORDER BY b.created_date_time DESC
+      ''',
+        ashaUniqueKey != null && ashaUniqueKey.isNotEmpty
+            ? [ashaUniqueKey]
+            : [],
+      );
+
+      return deceasedBeneficiaries;
+    } catch (e) {
+      print('Error loading deceased list: $e');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> loadAllHouseholdData() async {
+    try {
+      final rows = await getAllBeneficiaries();
+      final households = await getAllHouseholds();
+
+      /// Household -> configured head map
+      final headKeyByHousehold = <String, String>{};
+      for (final hh in households) {
+        try {
+          final hhRefKey = (hh['unique_key'] ?? '').toString();
+          final headId = (hh['head_id'] ?? '').toString();
+          if (hhRefKey.isEmpty || headId.isEmpty) continue;
+          headKeyByHousehold[hhRefKey] = headId;
+        } catch (_) {}
+      }
+
+      /// --------- FAMILY HEAD FILTER ----------
+      final familyHeads = rows.where((r) {
+        try {
+          final householdRefKey = (r['household_ref_key'] ?? '').toString();
+          final uniqueKey = (r['unique_key'] ?? '').toString();
+          if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
+
+          // Exclude migrated & death
+          if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
+
+          final rawInfo = r['beneficiary_info'];
+          Map<String, dynamic> info;
+          if (rawInfo is Map) {
+            info = Map<String, dynamic>.from(rawInfo);
+          } else if (rawInfo is String && rawInfo.isNotEmpty) {
+            info = Map<String, dynamic>.from(jsonDecode(rawInfo));
+          } else {
+            info = {};
+          }
+
+          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+
+          final bool isConfiguredHead =
+              configuredHeadKey != null && configuredHeadKey == uniqueKey;
+
+          final relation = (info['relation_to_head'] ?? info['relation'] ?? '')
+              .toString()
+              .toLowerCase();
+
+          final bool isHeadByRelation =
+              relation == 'head' || relation == 'self';
+
+          // ✅ NEW CONDITION
+          final bool isFamilyHead =
+              info['isFamilyHead'] == true ||
+                  info['isFamilyHead']?.toString().toLowerCase() == 'true';
+
+          return isConfiguredHead || isHeadByRelation || isFamilyHead;
+        } catch (_) {
+          return false;
+        }
+      }).toList();
+
+      return familyHeads;
+    } catch (e) {
+      print('Error loading all household data: $e');
+      return [];
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getUpdatedEligibleCouples() async {
     print('🔍 Starting to fetch updated eligible couples...');
     
@@ -2815,6 +2915,73 @@ class LocalStorageDao {
 }
 
 extension LocalStorageDaoReads on LocalStorageDao {
+  /// Get family update count - counts family heads from beneficiaries
+  Future<int> getFamilyUpdateCount() async {
+    try {
+      final rows = await getAllBeneficiaries();
+      final households = await getAllHouseholds();
+
+      /// Household -> configured head map
+      final headKeyByHousehold = <String, String>{};
+      for (final hh in households) {
+        try {
+          final hhRefKey = (hh['unique_key'] ?? '').toString();
+          final headId = (hh['head_id'] ?? '').toString();
+          if (hhRefKey.isEmpty || headId.isEmpty) continue;
+          headKeyByHousehold[hhRefKey] = headId;
+        } catch (_) {}
+      }
+
+      /// --------- FAMILY HEAD FILTER ----------
+      final familyHeads = rows.where((r) {
+        try {
+          final householdRefKey = (r['household_ref_key'] ?? '').toString();
+          final uniqueKey = (r['unique_key'] ?? '').toString();
+          if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
+
+          // Exclude migrated & death
+          if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
+
+          final rawInfo = r['beneficiary_info'];
+          Map<String, dynamic> info;
+          if (rawInfo is Map) {
+            info = Map<String, dynamic>.from(rawInfo);
+          } else if (rawInfo is String && rawInfo.isNotEmpty) {
+            info = Map<String, dynamic>.from(jsonDecode(rawInfo));
+          } else {
+            info = {};
+          }
+
+          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+
+          final bool isConfiguredHead =
+              configuredHeadKey != null && configuredHeadKey == uniqueKey;
+
+          final relation = (info['relation_to_head'] ?? info['relation'] ?? '')
+              .toString()
+              .toLowerCase();
+
+          final bool isHeadByRelation =
+              relation == 'head' || relation == 'self';
+
+          // ✅ NEW CONDITION
+          final bool isFamilyHead =
+              info['isFamilyHead'] == true ||
+                  info['isFamilyHead']?.toString().toLowerCase() == 'true';
+
+          return isConfiguredHead || isHeadByRelation || isFamilyHead;
+        } catch (_) {
+          return false;
+        }
+      }).toList();
+
+      return familyHeads.length;
+    } catch (e) {
+      print('Error getting family update count: $e');
+      return 0;
+    }
+  }
+
   Future<String> getLatestBeneficiaryServerId() async {
     try {
       final db = await _db;

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
@@ -12,6 +13,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/local_storage_dao.dart';
 import '../../AllHouseHold/HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
+import '../../RegisterNewHouseHold/AddFamilyHead/HeadDetails/AddNewFamilyHead.dart';
 
 class FamliyUpdate extends StatefulWidget {
   const FamliyUpdate({super.key});
@@ -22,22 +24,70 @@ class FamliyUpdate extends StatefulWidget {
 
 class _FamliyUpdateState extends State<FamliyUpdate> {
   final TextEditingController _searchCtrl = TextEditingController();
-
+  List<Map<String, dynamic>> _items = [];
   List<Map<String, dynamic>> _filtered = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadHeads();
+    _loadData();
+    _searchCtrl.addListener(_onSearchChanged);
   }
 
-  Future<void> _loadHeads() async {
+  @override
+  void dispose() {
+    _searchCtrl.removeListener(_onSearchChanged);
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    final q = _searchCtrl.text.trim().toLowerCase();
+    setState(() {
+      if (q.isEmpty) {
+        _filtered = List<Map<String, dynamic>>.from(_items);
+      } else {
+        _filtered = _items.where((e) {
+          final hhId = (e['hhId'] ?? '').toString().toLowerCase();
+          final houseNo = (e['houseNo'] ?? '').toString().toLowerCase();
+          final name = (e['name'] ?? '').toString().toLowerCase();
+          final mobile = (e['mobile'] ?? '').toString().toLowerCase();
+
+          final raw = (e['_raw'] as Map<String, dynamic>? ?? const {});
+          final fullHhRef = (raw['household_ref_key'] ?? '').toString();
+          final searchHhRef = fullHhRef.length > 11
+              ? fullHhRef.substring(fullHhRef.length - 11).toLowerCase()
+              : fullHhRef.toLowerCase();
+
+          return hhId.contains(q) ||
+              houseNo.contains(q) ||
+              name.contains(q) ||
+              mobile.contains(q) ||
+              searchHhRef.contains(q);
+        }).toList();
+      }
+    });
+  }
+
+  Future<void> _loadData() async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       final households = await LocalStorageDao.instance.getAllHouseholds();
 
-      final heads = <Map<String, dynamic>>[];
+      final pregnantCountMap = <String, int>{};
+      final elderlyCountMap = <String, int>{};
+      final child0to1Map = <String, int>{};
+      final child1to2Map = <String, int>{};
+      final child2to5Map = <String, int>{};
 
+      /// Household -> configured head map
       final headKeyByHousehold = <String, String>{};
       for (final hh in households) {
         try {
@@ -48,96 +98,235 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         } catch (_) {}
       }
 
+      /// --------- AGGREGATE COUNTS ----------
+      for (final row in rows) {
+        try {
+          final info = Map<String, dynamic>.from(
+            (row['beneficiary_info'] is String
+                ? jsonDecode(row['beneficiary_info'])
+                : row['beneficiary_info'] ?? {}),
+          );
+
+          final householdRefKey = (row['household_ref_key'] ?? '').toString();
+
+          // Pregnant
+          final isPregnant =
+              info['isPregnant']?.toString().toLowerCase() == 'yes' ||
+                  info['isPregnant'] == true;
+
+          if (isPregnant) {
+            pregnantCountMap[householdRefKey] =
+                (pregnantCountMap[householdRefKey] ?? 0) + 1;
+          }
+
+          final dob = info['dob']?.toString();
+          if (dob != null && dob.isNotEmpty) {
+            final birthDate = DateTime.tryParse(dob);
+            if (birthDate != null) {
+              final now = DateTime.now();
+              int ageInMonths =
+                  (now.year - birthDate.year) * 12 +
+                      now.month -
+                      birthDate.month;
+              if (now.day < birthDate.day) ageInMonths--;
+
+              if (ageInMonths >= 0 && ageInMonths < 12) {
+                child0to1Map[householdRefKey] =
+                    (child0to1Map[householdRefKey] ?? 0) + 1;
+              } else if (ageInMonths >= 12 && ageInMonths < 24) {
+                child1to2Map[householdRefKey] =
+                    (child1to2Map[householdRefKey] ?? 0) + 1;
+              } else if (ageInMonths >= 24 && ageInMonths < 60) {
+                child2to5Map[householdRefKey] =
+                    (child2to5Map[householdRefKey] ?? 0) + 1;
+              } else if (ageInMonths >= 65 * 12) {
+                elderlyCountMap[householdRefKey] =
+                    (elderlyCountMap[householdRefKey] ?? 0) + 1;
+              }
+            }
+          }
+        } catch (_) {}
+      }
+
+      /// --------- FAMILY HEAD FILTER ----------
       final familyHeads = rows.where((r) {
         try {
           final householdRefKey = (r['household_ref_key'] ?? '').toString();
           final uniqueKey = (r['unique_key'] ?? '').toString();
           if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
 
-          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+          // Exclude migrated & death
+          if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
 
-          final isDeath = r['is_death'] == 1;
-          final isMigrated = r['is_migrated'] == 1;
-          if (isDeath || isMigrated) return false;
-
-          bool isConfiguredHead = false;
-          if (configuredHeadKey != null && configuredHeadKey.isNotEmpty) {
-            isConfiguredHead = configuredHeadKey == uniqueKey;
-          }
-
-          bool isHeadByRelation = false;
           final rawInfo = r['beneficiary_info'];
           Map<String, dynamic> info;
           if (rawInfo is Map) {
-            info = Map<String, dynamic>.from(rawInfo as Map);
+            info = Map<String, dynamic>.from(rawInfo);
           } else if (rawInfo is String && rawInfo.isNotEmpty) {
             info = Map<String, dynamic>.from(jsonDecode(rawInfo));
           } else {
-            info = <String, dynamic>{};
+            info = {};
           }
+
+          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+
+          final bool isConfiguredHead =
+              configuredHeadKey != null && configuredHeadKey == uniqueKey;
 
           final relation = (info['relation_to_head'] ?? info['relation'] ?? '')
               .toString()
               .toLowerCase();
-          isHeadByRelation = relation == 'head';
 
-          // Filter for male gender only
-          final gender = (info['gender'] ?? '').toString().toLowerCase();
-          if (gender != 'male') return false;
+          final bool isHeadByRelation =
+              relation == 'head' || relation == 'self';
 
-          return isConfiguredHead || isHeadByRelation;
+          // ✅ NEW CONDITION
+          final bool isFamilyHead =
+              info['isFamilyHead'] == true ||
+                  info['isFamilyHead']?.toString().toLowerCase() == 'true';
+
+          return isConfiguredHead || isHeadByRelation || isFamilyHead;
         } catch (_) {
           return false;
         }
       }).toList();
 
-      // Create a map of household_ref_key to household data
-      final householdMap = {
-        for (var hh in households) hh['household_ref_key']: hh
-      };
+      /// --------- MAP TO UI MODEL ----------
+      final mapped = familyHeads.map<Map<String, dynamic>>((r) {
+        final info = Map<String, dynamic>.from(
+          (r['beneficiary_info'] is String
+              ? jsonDecode(r['beneficiary_info'])
+              : r['beneficiary_info'] ?? {}),
+        );
 
-      // Process each family head
-      for (final row in familyHeads) {
-        try {
-          final info = row['beneficiary_info'] is String
-              ? jsonDecode(row['beneficiary_info'] as String)
-              : row['beneficiary_info'];
+        final householdRefKey = (r['household_ref_key'] ?? '').toString();
+        final membersForHousehold = rows.where((b) {
+          return (b['household_ref_key'] ?? '') == householdRefKey &&
+              b['is_deleted'] != 1;
+        }).toList();
 
-          if (info is! Map) continue;
+        int totalExpectedChildren = 0;
+        final Set<String> parentNames = <String>{};
+        for (final b in membersForHousehold) {
+          final rawInfo = b['beneficiary_info'];
+          Map<String, dynamic> bi;
+          if (rawInfo is Map) {
+            bi = Map<String, dynamic>.from(rawInfo);
+          } else if (rawInfo is String && rawInfo.isNotEmpty) {
+            bi = Map<String, dynamic>.from(jsonDecode(rawInfo));
+          } else {
+            bi = <String, dynamic>{};
+          }
 
-          final householdRefKey = row['household_ref_key']?.toString() ?? '';
-          final householdData = householdMap[householdRefKey] ?? {};
-
-          heads.add({
-            'hhId': householdRefKey,
-            'name': info['headName']?.toString() ?? info['memberName']?.toString() ?? '',
-            'mobile': info['mobileNo']?.toString() ?? '',
-            'mohalla': info['mohalla']?.toString() ?? '',
-            'village': info['village']?.toString() ?? '',
-            'unique_key': row['unique_key']?.toString() ?? '',
-            '_raw': row,
-            'household': householdData,
-          });
-        } catch (e) {
-          print('Error parsing beneficiary: $e');
+          final hasChildrenRaw = bi['hasChildren'] ?? bi['have_children'];
+          final hasChildren = hasChildrenRaw == true ||
+              hasChildrenRaw?.toString().toLowerCase() == 'yes';
+          if (hasChildren) {
+            final tlRaw = bi['totalLive'] ?? bi['totalLiveChildren'];
+            int tl = 0;
+            if (tlRaw is int) {
+              tl = tlRaw;
+            } else {
+              tl = int.tryParse(tlRaw?.toString() ?? '') ?? 0;
+            }
+            totalExpectedChildren += tl;
+            final pname = (bi['headName'] ?? bi['name'] ?? bi['memberName'] ?? bi['member_name'] ?? '')
+                .toString()
+                .trim()
+                .toLowerCase();
+            if (pname.isNotEmpty) {
+              parentNames.add(pname);
+            }
+          }
         }
-      }
+
+        int recordedChildren = 0;
+        for (final b in membersForHousehold) {
+          final rawInfo = b['beneficiary_info'];
+          Map<String, dynamic> bi;
+          if (rawInfo is Map) {
+            bi = Map<String, dynamic>.from(rawInfo);
+          } else if (rawInfo is String && rawInfo.isNotEmpty) {
+            bi = Map<String, dynamic>.from(jsonDecode(rawInfo));
+          } else {
+            bi = <String, dynamic>{};
+          }
+
+          final fatherName = (bi['fatherName'] ?? bi['father_name'] ?? '')
+              .toString()
+              .trim()
+              .toLowerCase();
+          final motherName = (bi['motherName'] ?? bi['mother_name'] ?? '')
+              .toString()
+              .trim()
+              .toLowerCase();
+
+          if (fatherName.isEmpty && motherName.isEmpty) {
+            continue;
+          }
+
+          final matchesFather = fatherName.isNotEmpty && parentNames.contains(fatherName);
+          final matchesMother = motherName.isNotEmpty && parentNames.contains(motherName);
+          if (matchesFather || matchesMother) {
+            recordedChildren += 1;
+          }
+        }
+
+        final remainingChildren = totalExpectedChildren - recordedChildren;
+        final hasChildrenTarget = totalExpectedChildren > 0;
+
+        final uniqueKey = (r['unique_key'] ?? '').toString();
+        final headId = uniqueKey.length > 11
+            ? uniqueKey.substring(uniqueKey.length - 11)
+            : uniqueKey;
+
+        return {
+          'name':
+          (info['headName'] ?? info['memberName'] ?? info['name'] ?? '')
+              .toString(),
+          'mobile': (info['mobileNo'] ?? '').toString(),
+          'hhId': headId,
+          'houseNo': info['houseNo'] ?? 0,
+          'totalMembers': membersForHousehold.length,
+          'elderly': elderlyCountMap[householdRefKey] ?? 0,
+          'pregnantWomen': pregnantCountMap[householdRefKey] ?? 0,
+          'child0to1': child0to1Map[householdRefKey] ?? 0,
+          'child1to2': child1to2Map[householdRefKey] ?? 0,
+          'child2to5': child2to5Map[householdRefKey] ?? 0,
+          'hasChildrenTarget': hasChildrenTarget,
+          'remainingChildren': remainingChildren < 0 ? 0 : remainingChildren,
+          '_raw': r,
+        };
+      }).toList();
+
+      /// --------- SORT ----------
+      mapped.sort((a, b) {
+        final ra = a['_raw'] as Map<String, dynamic>;
+        final rb = b['_raw'] as Map<String, dynamic>;
+
+        final ca = DateTime.tryParse(ra['created_date_time']?.toString() ?? '');
+        final cb = DateTime.tryParse(rb['created_date_time']?.toString() ?? '');
+
+        if (ca != null && cb != null) return cb.compareTo(ca);
+        return 0;
+      });
 
       if (mounted) {
         setState(() {
-          _filtered = heads;
+          _items = mapped;
+          _filtered = List<Map<String, dynamic>>.from(mapped);
+          _isLoading = false;
         });
       }
     } catch (e) {
-      print('Error loading beneficiaries: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
 
 
   @override
@@ -149,42 +338,89 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         showBack: true,
       ),
       drawer: const CustomDrawer(),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Column(
+              children: [
+                // Search
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    decoration: InputDecoration(
+                      hintText: l10n?.searchHousehold ?? 'Household search',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: AppColors.outlineVariant),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: _filtered.isEmpty
+                      ? Center(
+                          child: Text(
+                            (l10n?.noDataFound ?? 'No data found'),
+                            style: const TextStyle(
+                              color: Colors.black54,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                          itemCount: _filtered.length,
+                          itemBuilder: (context, index) {
+                            final data = _filtered[index];
+                            return _householdCard(context, data);
+                          },
+                        ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
-    final l = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
+    
     return InkWell(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => HouseHold_BeneficiaryScreen(
-              houseNo: data['hhId']!.toString().length > 11
-                  ? data['hhId'].toString().substring(data['hhId'].toString().length - 11)
-                  : data['hhId']?.toString(),
-              hhId: data['hhId'],
+              houseNo: data['houseNo']?.toString(),
+              hhId: data['_raw']['household_ref_key']?.toString() ?? '',
             ),
           ),
         );
+
+        if (mounted) {
+          _loadData();
+        }
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
+        margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
@@ -206,15 +442,34 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
               ),
               padding: const EdgeInsets.all(6),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Icon(Icons.home, color: Colors.black54, size: 18),
-                  const SizedBox(width: 6),
-                  Expanded(
+                  Row(
+                    children: [
+                      const Icon(Icons.home, color: Colors.black54, size: 18),
+                      const SizedBox(width: 6),
+                      Text(
+                        (data['_raw']['household_ref_key']?.toString().length ?? 0) > 11 ? data['_raw']['household_ref_key'].toString().substring(data['_raw']['household_ref_key'].toString().length - 11) : (data['_raw']['household_ref_key']?.toString() ?? ''),
+                        style: TextStyle(
+                          color: primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     child: Text(
-                      (data['hhId']?.toString().length ?? 0) > 11 ? data['hhId'].toString().substring(data['hhId'].toString().length - 11) : (data['hhId'] ?? ''),
-                      style: TextStyle(
-                        color: primary,
-                        fontWeight: FontWeight.w600,
+                      l10n?.familyUpdate ?? 'Family Update',
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12.5,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -222,7 +477,6 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                 ],
               ),
             ),
-
             Container(
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.95),
@@ -233,35 +487,32 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    data['name'] ?? 'Not Available',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.sp,
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            data['name'] ?? '',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14.sp,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: _infoRow("${l!.mobileNumber} :", data['mobile']?.isNotEmpty == true ? data['mobile'] : 'N/A'),
-                      ),
-                      const SizedBox(width: 13),
-                      Expanded(
-                        child: _infoRow(
-                          "${l.mohalla} :",
-                          data['mohalla']?.isNotEmpty == true ? data['mohalla'] : 'N/A',
-                          isWrappable: true,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 4),
+                  _infoRow(
+                    '',
+                    data['mobile']?.toString() ?? 'N/A',
+                    isWrappable: true,
                   ),
                 ],
-              )
-
-
+              ),
             ),
           ],
         ),
@@ -269,7 +520,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
     );
   }
 
-  Widget _infoRow(String? title, String value,{bool isWrappable = false, bool isBold = false}) {
+  Widget _infoRow(String? title, String value,{bool isWrappable = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -284,10 +535,10 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           ),
           Expanded(
             child: Text(
-              value.isEmpty ? 'Not Available' : value,
+              value.isEmpty ? 'N/A' : value,
               style:  TextStyle(
                 color: Colors.white,
-                fontWeight: isBold ? FontWeight.bold : FontWeight.w400,
+                fontWeight: FontWeight.w400,
                 fontSize: 13.sp,
               ),
               overflow: TextOverflow.ellipsis,
