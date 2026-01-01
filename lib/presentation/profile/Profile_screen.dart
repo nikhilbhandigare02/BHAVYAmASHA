@@ -1198,7 +1198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       builder: (context, state) {
                         return CustomTextField(
                           key: ValueKey('cho_mobile_field_${state.choMobile}'),
-                          labelText: l10n.choMobileLabel,
+                           labelText: l10n.choMobileLabel,
                           hintText: l10n.choMobileHint,
                           initialValue: state.choMobile,
                           keyboardType: TextInputType.phone,

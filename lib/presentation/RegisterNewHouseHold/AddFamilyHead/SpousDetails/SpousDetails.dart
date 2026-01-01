@@ -567,6 +567,10 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
       child: BlocBuilder<SpousBloc, SpousState>(
         builder: (context, state) {
           final spBloc = context.read<SpousBloc>();
+          
+          // Debug logging for LMP state
+          print('🔄 [SpousDetails] BlocBuilder called - LMP: ${state.lmp}, EDD: ${state.edd}, isPregnant: ${state.isPregnant}');
+          
           return SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
             child: Column(
@@ -1648,9 +1652,11 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       key: const ValueKey('lmp_date'),
                       labelText: '${l.lmpDateLabel}',
                       hintText: l.dateHint,
+                      initialDate: state.lmp, // Add initial date from state
                        firstDate: DateTime.now().subtract(const Duration(days: 276)),
                       lastDate: DateTime.now().subtract(const Duration(days: 31)),
                       onDateChanged: (d) {
+                        print('📅 [SpousDetails] LMP date changed to: $d');
                         final bloc = context.read<SpousBloc>();
                         bloc.add(SpLMPChange(d));
                         if (d != null) {

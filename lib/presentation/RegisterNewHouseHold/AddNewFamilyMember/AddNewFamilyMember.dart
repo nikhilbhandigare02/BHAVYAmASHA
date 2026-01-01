@@ -817,16 +817,44 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         b.add(AnmUpdateAgeAtMarriage(ageAtMarriage));
 
       // Prefill spouse LMP/EDD in member spouse form
-      final spLmpIso = (data['spouseLmp'] ?? '') as String;
+      final spLmpIso = (data['lmp'] ?? '') as String;
+      print('📅 [AddNewMember] EDIT - Spouse LMP data received: "$spLmpIso"');
       if (spLmpIso.isNotEmpty) {
         final spLmp = DateTime.tryParse(spLmpIso);
-        if (spLmp != null) _spousBloc.add(SpLMPChange(spLmp));
+        if (spLmp != null) {
+          print('✅ [AddNewMember] EDIT - Setting spouse LMP: $spLmp');
+          // Use post frame callback to ensure the widget is fully initialized
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _spousBloc.add(SpLMPChange(spLmp));
+              print('🔄 [AddNewMember] EDIT - Spouse LMP change event sent after frame callback');
+            }
+          });
+        } else {
+          print('❌ [AddNewMember] EDIT - Failed to parse spouse LMP: "$spLmpIso"');
+        }
+      } else {
+        print('❌ [AddNewMember] EDIT - No spouse LMP data found');
       }
 
-      final spEddIso = (data['spouseEdd'] ?? '') as String;
+      final spEddIso = (data['edd'] ?? '') as String;
+      print('📅 [AddNewMember] EDIT - Spouse EDD data received: "$spEddIso"');
       if (spEddIso.isNotEmpty) {
         final spEdd = DateTime.tryParse(spEddIso);
-        if (spEdd != null) _spousBloc.add(SpEDDChange(spEdd));
+        if (spEdd != null) {
+          print('✅ [AddNewMember] EDIT - Setting spouse EDD: $spEdd');
+          // Use post frame callback to ensure the widget is fully initialized
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _spousBloc.add(SpEDDChange(spEdd));
+              print('🔄 [AddNewMember] EDIT - Spouse EDD change event sent after frame callback');
+            }
+          });
+        } else {
+          print('❌ [AddNewMember] EDIT - Failed to parse spouse EDD: "$spEddIso"');
+        }
+      } else {
+        print('❌ [AddNewMember] EDIT - No spouse EDD data found');
       }
 
       // Hydrate spouse details bloc from any saved spousedetails map so that
@@ -1105,7 +1133,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                     listener: (context, state) {
                       if (state.postApiStatus == PostApiStatus.success) {
                         // Only navigate back after successful save
-                        Navigator.of(context).pop(true);
+                        final Map<String, dynamic> result = state.toJson();
+                        Navigator.of(context).pop(result);
                       } else if (state.postApiStatus == PostApiStatus.error) {
                         // Show error message if save fails
                         if (state.errorMessage != null &&
@@ -2155,7 +2184,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               hintText: l.select,
                                               items: fatherItems,
                                               getLabel: (s) => s,
-                                              value: _fatherOption,
+                                              value: (_fatherOption == null ||
+                                                  _fatherOption.isEmpty ||
+                                                  _fatherOption == l.select)
+                                                  ? null
+                                                  : _fatherOption,
                                               validator: (value) {
                                                 if (!_isEdit) {
                                                   if (_fatherOption == l.select ||
@@ -2263,7 +2296,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               hintText: l.select,
                                               items: motherItems,
                                               getLabel: (s) => s,
-                                              value: _motherOption,
+                                              value: (_motherOption == null ||
+                                                  _motherOption.isEmpty ||
+                                                  _motherOption == 'Select')
+                                                  ? null
+                                                  : _motherOption,
                                               validator: (value) {
                                                 if (!_isEdit) {
                                                   if (_motherOption == 'Select' ||
@@ -2370,7 +2407,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               hintText: l.select,
                                               items: fatherItems,
                                               getLabel: (s) => s,
-                                              value: _fatherOption,
+                                              value: (_fatherOption == null ||
+                                                  _fatherOption.isEmpty ||
+                                                  _fatherOption == 'Select')
+                                                  ? null
+                                                  : _fatherOption,
                                               validator: (value) {
                                                 if (_fatherOption == 'Select' ||
                                                     _fatherOption.isEmpty) {
@@ -2468,7 +2509,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     hintText: l.select,
                                                     items: motherItems,
                                                     getLabel: (s) => s,
-                                                    value: _motherOption,
+                                                    value: (_motherOption == null ||
+                                                        _motherOption.isEmpty ||
+                                                        _motherOption == 'Select')
+                                                        ? null
+                                                        : _motherOption,
                                                     validator: (value) {
                                                       if (_motherOption ==
                                                           'Select' ||
@@ -4984,66 +5029,92 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 'married' &&
                                                 state.spouseName != null &&
                                                 state.spouseName!.isNotEmpty) {
-                                              memberData['spousedetails'] = {
+                                              print('👫 [AddNewMember] Adding spouse details - spouse name: ${state.spouseName}');
+                                              // Get spouse data from SpousBloc
+                                              final spouseState = _spousBloc.state;
+                                              print('💑 [AddNewMember] Spouse state - useDob: ${spouseState.useDob}, dob: ${spouseState.dob}, approxAge: ${spouseState.approxAge}');
+                                              
+                                              // Calculate spouse age
+                                              String calculatedSpouseAge = '';
+                                              if (spouseState.useDob == true && spouseState.dob != null) {
+                                                try {
+                                                  final now = DateTime.now();
+                                                  final dob = spouseState.dob!;
+                                                  int years = now.year - dob.year;
+                                                  if (now.month < dob.month ||
+                                                      (now.month == dob.month && now.day < dob.day)) {
+                                                    years--;
+                                                  }
+                                                  calculatedSpouseAge = years.toString();
+                                                  print('🎂 [AddNewMember] Spouse age calculated from DOB: $calculatedSpouseAge (DOB: $dob)');
+                                                } catch (_) {
+                                                  calculatedSpouseAge = spouseState.approxAge ?? '';
+                                                  print('❌ [AddNewMember] Error calculating spouse age from DOB, using approx: $calculatedSpouseAge');
+                                                }
+                                              } else {
+                                                calculatedSpouseAge = spouseState.approxAge ?? '';
+                                                print('📅 [AddNewMember] Spouse age from approximate: $calculatedSpouseAge');
+                                              }
+                                              
+                                              final spouseDetailsData = {
                                                 'relation':
-                                                state.relation ?? 'spouse',
-                                                'memberName': state.spouseName,
+                                                spouseState.relation ?? 'spouse',
+                                                'memberName': spouseState.memberName,
                                                 'ageAtMarriage':
-                                                state.ageAtMarriage,
+                                                spouseState.ageAtMarriage,
                                                 'RichIDChanged':
-                                                state.RichIDChanged,
-                                                'spouseName': state
-                                                    .name, // Original member's name
-                                                'fatherName': state.fatherName,
-                                                'useDob': state.useDob,
-                                                'dob': state.dob
+                                                spouseState.RichIDChanged,
+                                                'spouseName': spouseState
+                                                    .spouseName ?? state.name, // Original member's name
+                                                'fatherName': spouseState.fatherName,
+                                                'useDob': spouseState.useDob,
+                                                'dob': spouseState.dob
                                                     ?.toIso8601String(),
-                                                'edd': state.edd
+                                                'edd': spouseState.edd
                                                     ?.toIso8601String(),
-                                                'lmp': state.lmp
+                                                'lmp': spouseState.lmp
                                                     ?.toIso8601String(),
-                                                'approxAge': state.approxAge,
-                                                'gender': _oppositeGender(
-                                                  state.gender,
-                                                ),
-                                                'occupation': state.occupation,
-                                                'education': state.education,
-                                                'religion': state.religion,
-                                                'category': state.category,
+                                                'approxAge': spouseState.approxAge,
+                                                'age': calculatedSpouseAge, // Add calculated age
+                                                'gender': spouseState.gender,
+                                                'occupation': spouseState.occupation,
+                                                'education': spouseState.education,
+                                                'religion': spouseState.religion,
+                                                'category': spouseState.category,
                                                 'abhaAddress':
-                                                state.abhaAddress,
+                                                spouseState.abhaAddress,
                                                 'mobileOwner':
-                                                state.mobileOwner,
-                                                'mobileNo': state.mobileNo,
-                                                'bankAcc': state.bankAcc,
-                                                'ifsc': state.ifsc,
-                                                'voterId': state.voterId,
-                                                'rationId': state.rationId,
-                                                'phId': state.phId,
+                                                spouseState.mobileOwner,
+                                                'mobileNo': spouseState.mobileNo,
+                                                'bankAcc': spouseState.bankAcc,
+                                                'ifsc': spouseState.ifsc,
+                                                'voterId': spouseState.voterId,
+                                                'rationId': spouseState.rationId,
+                                                'phId': spouseState.phId,
                                                 'beneficiaryType':
-                                                state.beneficiaryType,
-                                                'isPregnant': state.isPregnant,
+                                                spouseState.beneficiaryType,
+                                                'isPregnant': spouseState.isPregnant,
                                                 'familyPlanningCounseling':
-                                                state.isFamilyPlanning,
+                                                spouseState.familyPlanningCounseling,
                                                 'is_family_planning':
-                                                (state.isFamilyPlanning
+                                                (spouseState.familyPlanningCounseling
                                                     ?.toLowerCase() ==
                                                     'yes')
                                                     ? 1
                                                     : 0,
-                                                'fpMethod': state.fpMethod,
-                                                'removalDate': state.removalDate
+                                                'fpMethod': spouseState.fpMethod,
+                                                'removalDate': spouseState.removalDate
                                                     ?.toIso8601String(),
                                                 'removalReason':
-                                                state.removalReason,
+                                                spouseState.removalReason,
                                                 'condomQuantity':
-                                                state.condomQuantity,
+                                                spouseState.condomQuantity,
                                                 'malaQuantity':
-                                                state.malaQuantity,
+                                                spouseState.malaQuantity,
                                                 'chhayaQuantity':
-                                                state.chhayaQuantity,
+                                                spouseState.chhayaQuantity,
                                                 'ecpQuantity':
-                                                state.ecpQuantity,
+                                                spouseState.ecpQuantity,
                                                 'maritalStatus': 'Married',
                                                 'relation_to_head':
                                                 state.relation,
@@ -5051,10 +5122,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 'isFamilyheadWife': false,
                                                 'createdAt': DateTime.now()
                                                     .toIso8601String(),
-                                                'updatedAt': DateTime.now()
-                                                    .toIso8601String(),
                                                 'isSynced': false,
                                               };
+                                              print('💾 [AddNewMember] Final spousedetails data: $spouseDetailsData');
+                                              memberData['spousedetails'] = spouseDetailsData;
+                                            } else {
+                                              print('❌ [AddNewMember] Not married or no spouse name - maritalStatus: ${state.maritalStatus}, spouseName: ${state.spouseName}');
                                             }
 
                                             try {
