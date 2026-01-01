@@ -288,7 +288,7 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 50.0, horizontal: 20.0),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,  // Add this
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 l10n?.noRecordFound ?? 'No Record Found', 
