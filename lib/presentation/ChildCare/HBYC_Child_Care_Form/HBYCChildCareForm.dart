@@ -71,6 +71,46 @@ class _HbycFormViewState extends State<_HbycFormView> {
   final _referralDetailsController = TextEditingController();
   final _developmentDelaysDetailsController = TextEditingController();
 
+  void _scrollToFirstError() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final errorField = _findFirstErrorField();
+      if (errorField != null && errorField.context != null) {
+        Scrollable.ensureVisible(
+          errorField.context!,
+          alignment: 0.1,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  FormFieldState<dynamic>? _findFirstErrorField() {
+    FormFieldState<dynamic>? firstErrorField;
+    BuildContext? formContext = _formKey.currentContext;
+
+    if (formContext == null) return null;
+
+    void visitElement(Element element) {
+      if (firstErrorField != null) return;
+
+      if (element.widget is FormField) {
+        final formField = element as StatefulElement;
+        final field = formField.state as FormFieldState<dynamic>?;
+
+        if (field != null && field.hasError) {
+          firstErrorField = field;
+          return;
+        }
+      }
+
+      element.visitChildren(visitElement);
+    }
+
+    formContext.visitChildElements(visitElement);
+    return firstErrorField;
+  }
+
   @override
   void dispose() {
     _additionalInfoController.dispose();
@@ -1577,6 +1617,12 @@ class _HbycFormViewState extends State<_HbycFormView> {
                                           : null,
                                     ),
                                   );
+                                } else {
+                                  showAppSnackBar(
+                                    context,
+                                    'Please correct the highlighted errors before continuing.',
+                                  );
+                                  _scrollToFirstError();
                                 }
                               },
                             ),

@@ -567,12 +567,13 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
       child: BlocBuilder<SpousBloc, SpousState>(
         builder: (context, state) {
           final spBloc = context.read<SpousBloc>();
-          return ListView(
+          return SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
-            children: [
-              _section(
-                IgnorePointer(
-                  ignoring: widget.isEdit,
+            child: Column(
+              children: [
+                _section(
+                  IgnorePointer(
+                    ignoring: widget.isEdit,
                   child: ApiDropdown<String>(
                   key: const ValueKey('relation_with_head'),
                   labelText: '${l.relationWithFamilyHead} *',
@@ -660,7 +661,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   },
 
                   value: widget.isMemberDetails
-                      ? state.relation // Use the existing relation or default to first item
+                      ? state.relation
                       : (state.relation == 'Spouse'
                       ? (state.gender == 'Female' ? 'Husband' : 'Wife')
                       : (state.relation ?? (state.gender == 'Female' ? 'Husband' : 'Wife'))),
@@ -689,7 +690,10 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                     }
                     return null;
                   },
+
                 ),
+
+
               ),
 
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -1840,7 +1844,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                 ]
               ],
             ],
-          );
+          ));
         },
       ),
     );

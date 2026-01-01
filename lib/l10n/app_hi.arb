@@ -2363,7 +2363,16 @@
   "nextVisit": "अगली HBNC विज़िट की नियत तिथि",
   "enterMobileToSearchAbha": "ABHA खोजने के लिए मोबाइल नंबर दर्ज करें",
   "invalidMobileNumber": "अमान्य मोबाइल नंबर",
-  "enterValidIndianMobile": "मान्य भारतीय मोबाइल नंबर दर्ज करें"
+  "enterValidIndianMobile": "मान्य भारतीय मोबाइल नंबर दर्ज करें",
+  "enterValid10DigitMobile": "मान्य 10 अंकों का मोबाइल नंबर दर्ज करें",
+  "selectToProceed": "आगे बढ़ने के लिए चयन करें",
+  "selectAbhaNumber": "ABHA नंबर चुनें",
+  "pleaseEnterAadhaar": "कृपया आधार नंबर दर्ज करें",
+  "enterValid12DigitAadhaar": "मान्य 12 अंकों का आधार नंबर दर्ज करें",
+  "pleaseEnterAbhaId": "कृपया ABHA ID दर्ज करें",
+  "abhaAddressLinked": "ABHA पता लिंक हो गया है!",
+  "selectAbhaId": "ABHA ID चुनें",
+  "mobileNumberMismatch": "मोबाइल नंबर मेल नहीं खा रहा है"
 }
 
 

@@ -931,6 +931,209 @@ class LocalStorageDao {
     return count ?? 0;
   }
 
+  Future<List<Map<String, dynamic>>> getUpdatedEligibleCouples() async {
+    print('🔍 Starting to fetch updated eligible couples...');
+    
+    try {
+      final db = await _db;
+      
+      // Get current user data
+      final currentUser = await SecureStorageService.getCurrentUserData();
+      final ashaUniqueKey = currentUser?['unique_key']?.toString() ?? '';
+      
+      String whereClause = 'eligible_couple_state = ? AND (is_deleted IS NULL OR is_deleted = 0)';
+      List<dynamic> whereArgs = ['tracking_due'];
+      
+      // If ASHA unique key is available, filter by it
+      if (ashaUniqueKey.isNotEmpty) {
+        whereClause += ' AND current_user_key = ?';
+        whereArgs.add(ashaUniqueKey);
+        print('🔑 Filtering by ASHA unique key: $ashaUniqueKey');
+      }
+      
+      final trackingDueRows = await db.query(
+        'eligible_couple_activities',
+        columns: ['beneficiary_ref_key', 'current_user_key'],
+        where: whereClause,
+        whereArgs: whereArgs,
+      );
+      
+      final trackingDueBeneficiaryKeys = trackingDueRows
+          .map((row) => row['beneficiary_ref_key']?.toString())
+          .whereType<String>()
+          .toSet();
+          
+      print('🔑 Tracking due beneficiaries count: ${trackingDueBeneficiaryKeys.length}');
+          
+      if (trackingDueBeneficiaryKeys.isEmpty) {
+        return [];
+      }
+      
+      final placeholders = List.filled(trackingDueBeneficiaryKeys.length, '?').join(',');
+      final rows = await db.query(
+        'beneficiaries_new',
+        where: 'unique_key IN ($placeholders) AND (is_deleted IS NULL OR is_deleted = 0) AND (is_migrated IS NULL OR is_migrated = 0)',
+        whereArgs: trackingDueBeneficiaryKeys.toList(),
+      );
+      
+      print('📊 Found ${rows.length} beneficiaries matching tracking_due status');
+      
+      final couples = <Map<String, dynamic>>[];
+      final households = <String, List<Map<String, dynamic>>>{};
+      
+      for (final row in rows) {
+        final hhKey = row['household_ref_key']?.toString() ?? '';
+        households.putIfAbsent(hhKey, () => []).add(row);
+      }
+      print('🏠 Households found: ${households.length}');
+
+      for (final household in households.values) {
+        Map<String, dynamic>? head;
+        Map<String, dynamic>? spouse;
+        
+        for (final member in household) {
+          try {
+            final dynamic infoRaw = member['beneficiary_info'];
+            final Map<String, dynamic> info = infoRaw is String
+                ? jsonDecode(infoRaw)
+                : Map<String, dynamic>.from(infoRaw ?? {});
+                
+            // Check if this is the head or spouse
+            final relation = (info['relation_to_head'] ?? info['relation'] ?? '').toString().toLowerCase();
+            if (relation.contains('head') || relation == 'self') {
+              head = info;
+              head!['_row'] = member;
+            } else if (relation == 'spouse' || relation == 'wife' || relation == 'husband') {
+              spouse = info;
+              spouse!['_row'] = member;
+            }
+          } catch (e) {
+            print('❌ Error processing household member: $e');
+          }
+        }
+
+        for (final member in household) {
+          try {
+            final dynamic infoRaw = member['beneficiary_info'];
+            final Map<String, dynamic> info = infoRaw is String
+                ? jsonDecode(infoRaw)
+                : Map<String, dynamic>.from(infoRaw ?? {});
+
+            final isFp = member['is_family_planning'] == true ||
+                member['is_family_planning'] == 1 ||
+                member['is_family_planning']?.toString().toLowerCase() == 'yes';
+
+            // Determine if this is the head or spouse to pass the correct counterpart
+            final bool isHead = info == head;
+            final bool isSpouse = info == spouse;
+            final Map<String, dynamic> counterpart = isHead && spouse != null 
+                ? spouse 
+                : isSpouse && head != null 
+                    ? head 
+                    : <String, dynamic>{};
+                    
+            final coupleData = _formatEligibleCoupleData(
+              Map<String, dynamic>.from(member),
+              info,
+              counterpart,
+              isFamilyPlanning: isFp,
+            );
+
+            couples.add(coupleData);
+          } catch (e) {
+            print('❌ Error processing EC member: $e');
+          }
+        }
+      }
+      
+      print('🏁 Finished processing. Found ${couples.length} eligible couples');
+      return couples;
+      
+    } catch (e) {
+      print('❌ Error in getUpdatedEligibleCouples: $e');
+      return [];
+    }
+  }
+
+  Map<String, dynamic> _formatEligibleCoupleData(
+    Map<String, dynamic> row,
+    Map<String, dynamic> female,
+    Map<String, dynamic> spouse, {
+    bool isFamilyPlanning = false,
+  }) {
+    final hhId = (row['household_ref_key']?.toString() ?? '');
+    final beneficiary_ref = (row['unique_key']?.toString() ?? '');
+    final uniqueKey = (row['unique_key']?.toString() ?? '');
+    final createdDate = row['created_date_time']?.toString() ?? '';
+
+    // Extract member info
+    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
+    final dob = female['dob']?.toString() ?? '';
+    final age = _calculateAge(dob);
+    final gender = (female['gender']?.toString().toLowerCase() ?? 'female');
+    final mobile = female['mobileNo']?.toString() ?? 'Not Available';
+    final richId = female['RichID']?.toString() ?? '';
+
+    // Get spouse's name with fallback logic
+    final spouseName = spouse.isNotEmpty
+        ? (spouse['memberName'] ?? spouse['headName'] ?? spouse['spouseName'] ?? '').toString()
+        : (female['spouseName']?.toString() ?? '');
+
+    String last11(String s) => s.length > 11 ? s.substring(s.length - 11) : s;
+
+    return {
+      'hhId': last11(hhId),
+      'beneficiary_ref': beneficiary_ref,
+      'RegistrationDate': _formatDate(createdDate),
+      'RegistrationType': 'General',
+      'BeneficiaryID': last11(uniqueKey),
+      'Name': name,
+      'age': age > 0 ? '$age Y | Female' : 'N/A',
+      'gender': gender,
+      'RichID': richId,
+      'mobileno': mobile,
+      'HusbandName': spouseName.isNotEmpty ? spouseName : 'Not Available',
+      'spouseName': spouseName,
+      'partnerName': spouseName,  // For backward compatibility
+      'dob': dob,
+      'status': isFamilyPlanning
+          ? 'Protected'
+          : 'Unprotected',
+      'is_family_planning': isFamilyPlanning,
+    };
+  }
+
+  int _calculateAge(String? dobString) {
+    if (dobString == null || dobString.isEmpty) return 0;
+    try {
+      final dob = DateTime.tryParse(dobString);
+      if (dob == null) return 0;
+      
+      final now = DateTime.now();
+      int age = now.year - dob.year;
+      
+      if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+        age--;
+      }
+      
+      return age > 0 ? age : 0;
+    } catch (e) {
+      print('Error calculating age: $e');
+      return 0;
+    }
+  }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    try {
+      final dt = DateTime.tryParse(dateStr);
+      if (dt == null) return '';
+      return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
+    } catch (_) {
+      return '';
+    }
+  }
+
   Future<int> insertMotherCareActivity(Map<String, dynamic> data) async {
     final db = await _db;
     final row = <String, dynamic>{

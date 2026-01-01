@@ -421,6 +421,10 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                 onChanged: null, // Readonly
                                 hintText: t?.select ?? 'Select',
                               ),
+                            ),Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
                             ),
 
 
@@ -475,6 +479,11 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                   .read<EligibleCouleUpdateBloc>()
                                   .add(CategoryChanged(value)),
                               readOnly: true,
+                            ),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 0,
                             ),
 
                             if (state.category == 'Other')
@@ -661,32 +670,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                   thickness: 0.5,
                                   height: 8,
                                 ),
-                                Expanded(
-                                  child: ApiDropdown<String>(
-                                    key: const ValueKey('youngestChildAgeUnit'),
-                                    labelText: '',
-                                    items: const ['Years', 'Months', 'Days'],
-                                    value: state.youngestChildAgeUnit.isEmpty
-                                        ? null
-                                        : state.youngestChildAgeUnit,
-                                    getLabel: (s) {
-                                      switch (s) {
-                                        case 'Years':
-                                          return t!.years;
-                                        case 'Months':
-                                          return t!.months;
-                                        case 'Days':
-                                          return t!.days;
-                                        default:
-                                          return s;
-                                      }
-                                    },
-                                    onChanged: (v) => context.read<EligibleCouleUpdateBloc>().add(
-                                      YoungestChildAgeUnitChanged(v ?? ''),
-                                    ),
-                                    hintText: t?.select ?? 'Select',
-                                  ),
-                                )
+
 
                                 /* Expanded(
                                   child: ApiDropdown<String>(
@@ -706,6 +690,35 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                   ),
                                 ),*/
                               ],
+                            ),
+                            Divider(
+                              color: AppColors.divider,
+                              thickness: 0.5,
+                              height: 8,
+                            ),
+                            ApiDropdown<String>(
+                              key: const ValueKey('youngestChildAgeUnit'),
+                              labelText: t.youngestChildAgeLabel,
+                              items: const ['Years', 'Months', 'Days'],
+                              value: state.youngestChildAgeUnit.isEmpty
+                                  ? null
+                                  : state.youngestChildAgeUnit,
+                              getLabel: (s) {
+                                switch (s) {
+                                  case 'Years':
+                                    return t!.years;
+                                  case 'Months':
+                                    return t!.months;
+                                  case 'Days':
+                                    return t!.days;
+                                  default:
+                                    return s;
+                                }
+                              },
+                              onChanged: (v) => context.read<EligibleCouleUpdateBloc>().add(
+                                YoungestChildAgeUnitChanged(v ?? ''),
+                              ),
+                              hintText: t?.select ?? 'Select',
                             ),
                             if (youngestAgeInlineError != null)
                               Padding(

@@ -45,10 +45,12 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     }
     try {
       final counts = await _localStorageDao.getEligibleCoupleCounts();
+      final updatedCouples = await _localStorageDao.getUpdatedEligibleCouples();
+      
       if (mounted) {
         setState(() {
           eligibleCouplesCount = counts['total'] ?? 0;
-          updatedEligibleCouplesCount = counts['tracking_due'] ?? 0;
+          updatedEligibleCouplesCount = updatedCouples.length;
         });
       }
     } catch (e) {
