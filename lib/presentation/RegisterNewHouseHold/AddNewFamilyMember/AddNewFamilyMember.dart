@@ -639,6 +639,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
       final maritalStatus = (data['maritalStatus'] ?? '') as String;
       if (maritalStatus.isNotEmpty)
         b.add(AnmUpdateMaritalStatus(maritalStatus));
+      // Ensure marital status is 'Married' when editing spouse cards
+      else if (widget.initialStep == 1)
+        b.add(AnmUpdateMaritalStatus('Married'));
 
       final hasChildren = (data['hasChildren'] ?? '') as String;
       if (hasChildren.isNotEmpty) b.add(AnmUpdateHasChildren(hasChildren));
@@ -964,7 +967,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     if (!widget.inlineEdit) {
       _isEdit = _isEdit || widget.isEdit;
     }
-    final bool hideFamilyTabs = _isEdit;
+    // Allow spouse tab when editing spouse cards (initialStep == 1)
+    final bool hideFamilyTabs = _isEdit && widget.initialStep != 1;
     final int tabCount = hideFamilyTabs ? 1 : 3;
     // Ensure currentStep is always within valid range of available tabs.
     _currentStep = _currentStep.clamp(0, tabCount - 1);
@@ -1172,9 +1176,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                           >(
                             builder: (ctx2, st) {
                               final bool spouseAllowed =
-                                  !hideFamilyTabs &&
+                                  (!hideFamilyTabs &&
                                       st.memberType != 'Child' &&
-                                      st.maritalStatus == 'Married';
+                                      st.maritalStatus == 'Married') ||
+                                  // Allow spouse tab when explicitly editing spouse cards
+                                  widget.initialStep == 1;
                               final bool childrenAllowed =
                                   !hideFamilyTabs &&
                                       spouseAllowed &&
