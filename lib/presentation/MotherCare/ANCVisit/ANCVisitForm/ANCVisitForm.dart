@@ -1377,8 +1377,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   l10n?.td1DateLabel ??
                                   'Date of T.D(Tetanus and adult diphtheria) 1',
                               hintText:
-                                  l10n?.td1DateLabel ??
-                                  'Date of T.D(Tetanus and adult diphtheria) 1',
+                                  'dd-mm-yyyy',
                               initialDate: state.td1Date,
                               readOnly: (() {
                                 final prev = _prevLmpFromEc;
@@ -1401,8 +1400,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   l10n?.td2DateLabel ??
                                   'Date of T.D(Tetanus and adult diphtheria) 2',
                               hintText:
-                                  l10n?.td2DateLabel ??
-                                  'Date of T.D(Tetanus and adult diphtheria) 2',
+                              'dd-mm-yyyy',
                               initialDate: state.td2Date,
                               readOnly: (() {
                                 final inspect =
@@ -1426,8 +1424,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   l10n?.tdBoosterDateLabel ??
                                   'Date of T.D(Tetanus and adult diphtheria) booster',
                               hintText:
-                                  l10n?.tdBoosterDateLabel ??
-                                  'Date of T.D(Tetanus and adult diphtheria) booster',
+                              'dd-mm-yyyy',
                               initialDate: state.tdBoosterDate,
                               readOnly: (() {
                                 bool td2Eligible = false;
@@ -1559,6 +1556,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   l10n?.preExistingDiseaseLabel ??
                                   'Pre - Existing disease',
                               hintText: l10n?.select ?? 'Select',
+
                               onSelectionChanged: (values) {
                                 final selected = List<String>.from(values);
                                 bloc.add(PreExistingDiseasesChanged(selected));

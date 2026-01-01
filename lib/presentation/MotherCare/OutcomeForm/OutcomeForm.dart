@@ -168,10 +168,10 @@ class _OutcomeFormView extends StatelessWidget {
                       }
                       if (formJsonRaw.isEmpty) return;
                       final decoded = jsonDecode(formJsonRaw);
-                      
+
                       // Handle both JSON formats
                       Map<String, dynamic> formData = {};
-                      
+
                       // Format 1: {"form_type":"mother_care","form_name":"mother_care","form_data":{...}}
                       if (decoded is Map && decoded['form_data'] is Map) {
                         formData = Map<String, dynamic>.from(decoded['form_data'] as Map);
@@ -180,7 +180,7 @@ class _OutcomeFormView extends StatelessWidget {
                       else if (decoded is Map && decoded['anc_form'] is Map) {
                         formData = Map<String, dynamic>.from(decoded['anc_form'] as Map);
                       }
-                      
+
                       if (formData.isNotEmpty) {
                         // Map fields from both formats to common variables
                         final flag = _getBirthFlag(formData);
@@ -189,14 +189,14 @@ class _OutcomeFormView extends StatelessWidget {
                             'ANC record with gives_birth_to_baby YES: ${results.first}',
                           );
                         }
-                        
+
                         final weeks = _getWeeksOfPregnancy(formData);
                         if (weeks.isNotEmpty) {
                           context.read<OutcomeFormBloc>().add(
                             GestationWeeksChanged(weeks),
                           );
                         }
-                        
+
                         // Derive children count from children_arr array or other fields
                         final childCount = _getChildCount(formData);
                         if (childCount.isNotEmpty && childCount != '0') {
@@ -417,7 +417,6 @@ class _OutcomeFormFields extends StatelessWidget {
             labelText:
                 l10n?.institutionPlaceOfDelivery ??
                 'Institution place of delivery',
-            hintText: l10n?.select ?? 'Select',
           ),
 
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -623,7 +622,7 @@ class _OutcomeFormFields extends StatelessWidget {
                     'TBA (Non-Skilled birth attendant)',
                     'Other',
                   ].contains(state.conductedBy))
-              ? l10n.select
+              ? null
               : state.conductedBy!,
           onChanged: (v) => bloc.add(ConductedByChanged(v ?? '')),
           labelText: l10n.whoConductedDelivery,
@@ -656,7 +655,7 @@ class _OutcomeFormFields extends StatelessWidget {
                     l10n.assistedDelivery,
                     l10n.normalDelivery,
                   ].contains(state.deliveryType)
-              ? l10n.select
+              ? null
               : state.deliveryType,
           onChanged: (v) => bloc.add(DeliveryTypeChanged(v ?? '')),
           hintText: l10n.selectOption,
@@ -670,7 +669,7 @@ class _OutcomeFormFields extends StatelessWidget {
           value:
               state.complications.isEmpty ||
                   ![l10n.yes, l10n.no].contains(state.complications)
-              ? l10n.select
+              ? null
               : state.complications,
           onChanged: (v) => bloc.add(ComplicationsChanged(v ?? '')),
           hintText: l10n.enterComplicationDuringDelivery,
@@ -733,7 +732,7 @@ class _OutcomeFormFields extends StatelessWidget {
                       'PPH',
                       'Any other',
                     ].contains(state.complicationType))
-                ? l10n.select
+                ? null
                 : state.complicationType!,
             onChanged: (v) => bloc.add(ComplicationTypeChanged(v ?? '')),
             labelText: l10n.complication,
@@ -908,10 +907,9 @@ class _OutcomeFormFields extends StatelessWidget {
             }
           },
           value: state.familyPlanningCounseling.isEmpty
-              ? l10n.select
+              ? null
               : state.familyPlanningCounseling,
           onChanged: (v) => bloc.add(FamilyPlanningCounselingChanged(v ?? '')),
-          hintText: l10n.selectOption,
           labelText:"${ l10n.familyPlanningCounseling} *",
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -930,9 +928,8 @@ class _OutcomeFormFields extends StatelessWidget {
                   return s;
               }
             },
-            value: state.adaptFpMethod ?? l10n.select,
+            value: state.adaptFpMethod ?? null,
             onChanged: (v) => bloc.add(AdaptFpMethodChanged(v ?? '')),
-            hintText: l10n.selectOption,
           ),
 
           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -975,7 +972,7 @@ class _OutcomeFormFields extends StatelessWidget {
                     return s;
                 }
               },
-              value: state.fpMethod ?? l10n.select,
+              value: state.fpMethod ?? null,
               onChanged: (value) {
                 if (value != null) {
                   context.read<OutcomeFormBloc>().add(FpMethodChanged(value));
@@ -1116,7 +1113,7 @@ class _OutcomeFormFields extends StatelessWidget {
                                 ?.child
                             as _OutcomeFormView)
                         .beneficiaryData;
-                
+
                 // Pass localized messages to the BLoC
                 bloc.add(
                   OutcomeFormSubmitted(
@@ -1171,7 +1168,7 @@ String _getBirthFlag(Map<String, dynamic> formData) {
   final format1Flag = formData['gives_birth_to_baby']?.toString() ?? '';
   // Format 2: has_pw_given_birth
   final format2Flag = formData['has_pw_given_birth']?.toString() ?? '';
-  
+
   return (format1Flag.isNotEmpty ? format1Flag : format2Flag).toLowerCase();
 }
 
@@ -1180,7 +1177,7 @@ String _getWeeksOfPregnancy(Map<String, dynamic> formData) {
   final format1Weeks = formData['weeks_of_pregnancy']?.toString() ?? '';
   // Format 2: week_of_pregnancy
   final format2Weeks = formData['week_of_pregnancy']?.toString() ?? '';
-  
+
   return format1Weeks.isNotEmpty ? format1Weeks : format2Weeks;
 }
 
@@ -1188,11 +1185,11 @@ String _getChildCount(Map<String, dynamic> formData) {
   // Format 2: Derive from children_arr array
   final childrenArr = formData['children_arr'] as List?;
   final childCount = childrenArr?.length.toString() ?? '';
-  
+
   if (childCount.isNotEmpty && childCount != '0') {
     return childCount;
   }
-  
+
   // Format 1: Check for other possible indicators of child count
   // Look for any field that might indicate number of children
   final possibleFields = [
@@ -1201,14 +1198,14 @@ String _getChildCount(Map<String, dynamic> formData) {
     'live_birth',
     'child_count'
   ];
-  
+
   for (final field in possibleFields) {
     final value = formData[field]?.toString() ?? '';
     if (value.isNotEmpty && value != '0' && value != 'null') {
       return value;
     }
   }
-  
+
   // If no direct child count found, return empty
   return '';
 }
@@ -1223,6 +1220,6 @@ String _getPlaceOfAnc(Map<String, dynamic> formData) {
   final format1Place = formData['place_of_anc']?.toString() ?? '';
   // Format 2: place_of_anc (same field name)
   final format2Place = formData['place_of_anc']?.toString() ?? '';
-  
+
   return format1Place.isNotEmpty ? format1Place : format2Place;
 }

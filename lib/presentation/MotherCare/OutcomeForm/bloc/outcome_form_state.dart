@@ -91,7 +91,7 @@ class OutcomeFormState extends Equatable {
     deliveryType: '',
     complications: '',
     outcomeCount: '',
-    familyPlanningCounseling: 'No',
+    familyPlanningCounseling: '',
     adaptFpMethod: null,
     submitting: false,
     submitted: false,

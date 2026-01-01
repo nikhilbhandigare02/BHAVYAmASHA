@@ -557,7 +557,6 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       ),
                       const Divider(thickness: 1, color: Colors.grey),
                     ],
-
                   ],
                 );
               },

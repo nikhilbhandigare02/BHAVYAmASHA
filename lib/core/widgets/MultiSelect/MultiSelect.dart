@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
+import 'package:medixcel_new/core/utils/responsive_font.dart';
 import 'package:sizer/sizer.dart';
 
 class MultiSelect<T> extends StatefulWidget {
@@ -71,7 +72,7 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                     Text(
                       widget.labelText,
                       style: TextStyle(
-                        fontSize: 15.sp,
+                        fontSize: ResponsiveFont.getLabelFontSize(context),
                         fontWeight: FontWeight.w500,
                         color: AppColors.onSurfaceVariant,
                       ),
@@ -90,7 +91,7 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                       return CheckboxListTile(
                         title: Text(
                           item.label,
-                          style: TextStyle(fontSize: 15.sp),
+                          style: TextStyle(fontSize: ResponsiveFont.getLabelFontSize(context)),
                         ),
                         value: selected,
                         onChanged: (bool? value) {
@@ -126,7 +127,7 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                       child: Text(
                         'CANCEL',
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: ResponsiveFont.getLabelFontSize(context),
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).primaryColor,
                         ),
@@ -142,7 +143,7 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                       child: Text(
                         'OK',
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: ResponsiveFont.getLabelFontSize(context),
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).primaryColor,
                         ),
@@ -175,7 +176,7 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
             text: TextSpan(
               text: widget.labelText,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 13.7.sp,
+                fontSize: ResponsiveFont.getLabelFontSize(context),
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).colorScheme.onSurface.withOpacity(0.87),
               ),
@@ -218,9 +219,9 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                         .join(', '),
                     style: TextStyle(
                       color: _selectedItems.isEmpty
-                          ? Theme.of(context).hintColor
-                          : Theme.of(context).textTheme.bodyMedium?.color,
-                      fontSize: 14.sp,
+                          ? AppColors.grey
+                          : AppColors.onSurface,
+                      fontSize: ResponsiveFont.getHintFontSize(context),
                     ),
                   ),
                 ),
