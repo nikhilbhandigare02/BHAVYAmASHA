@@ -60,10 +60,11 @@ class _AbhalinkscreenState extends State<Abhalinkscreen> {
   AbhaFetchModes? abhaFetchModes;
   Future<void> callFetchModesAPI() async {
     final healthInput = _addressController.text.trim();
+    final t = AppLocalizations.of(context);
     print("➡ ABHA Address: $healthInput");
     if (healthInput.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(content: Text("Please enter ABHA address")),
+         SnackBar(content: Text(t!.pleaseEnterAbhaAddress)),
       );
       return;
     }
@@ -586,7 +587,7 @@ class _AbhaInput extends StatelessWidget {
               controller: controller,
               style: const TextStyle(fontSize: 12),
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context)!.abhaAddressLabel,
+                hintText: AppLocalizations.of(context)!.abhaAddressLabel,
                 border: InputBorder.none,
               ),
             ),

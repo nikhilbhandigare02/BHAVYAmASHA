@@ -1201,8 +1201,6 @@ class _PartBTab extends StatelessWidget {
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
-      physics: const ClampingScrollPhysics(),
-      controller: ScrollController(keepScrollOffset: true),
       children: [
         chip(l10n.cbacPartB1),
         ...qRow("${l10n.cbacB_b1_breath}", 'partB.b1.breath'),

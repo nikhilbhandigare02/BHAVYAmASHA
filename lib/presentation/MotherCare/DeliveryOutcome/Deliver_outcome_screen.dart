@@ -88,7 +88,7 @@ WITH LatestMCA AS (
     ) AS rn
   FROM ${MotherCareActivitiesTable.table} mca
   WHERE mca.is_deleted = 0
-    AND mca.current_user_key = ?          -- ✅ ASHA filter
+    AND mca.current_user_key = ?          
 ),
 
 DeliveryOutcomeOnly AS (

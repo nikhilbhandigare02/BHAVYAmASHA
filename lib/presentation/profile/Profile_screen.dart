@@ -599,7 +599,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (state.success) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Form Submitted Successfully")),
+                    SnackBar(content: Text(l10n.formSubmittedSuccessfully)),
                   );
 
                   Navigator.pushNamedAndRemoveUntil(

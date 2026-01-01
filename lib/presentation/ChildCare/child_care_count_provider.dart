@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
+import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:developer' as developer;
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
@@ -13,6 +14,8 @@ class ChildCareCountProvider {
   static final ChildCareCountProvider _instance = ChildCareCountProvider._internal();
   factory ChildCareCountProvider() => _instance;
   ChildCareCountProvider._internal();
+
+  final LocalStorageDao _storageDao = LocalStorageDao();
 
   // Get count of all registered child beneficiaries
   // Future<int> getRegisteredChildCount() async {
@@ -1330,35 +1333,12 @@ class ChildCareCountProvider {
   Future<int> getDeceasedCount() async {
     try {
       developer.log('Getting deceased count...', name: 'ChildCareCountProvider');
-      final db = await DatabaseProvider.instance.database;
-
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
-      // Use the EXACT same query logic as _loadDeceasedList
-      final List<Map<String, dynamic>> deceasedBeneficiaries = await db.rawQuery(
-        '''
-      SELECT 
-        b.*,
-        h.household_info AS household_data,
-        h.created_date_time AS household_created_date,
-        h.household_info AS hh_info
-      FROM ${BeneficiariesTable.table} b
-      LEFT JOIN households h 
-        ON b.household_ref_key = h.unique_key
-      WHERE b.is_death = 1
-        AND b.is_deleted = 0
-        AND b.is_migrated = 0
-        ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
-      ''',
-        ashaUniqueKey != null && ashaUniqueKey.isNotEmpty
-            ? [ashaUniqueKey]
-            : [],
-      );
-
+      
+      final deceasedBeneficiaries = await _storageDao.loadDeceasedList();
+      
       int deceasedCount = deceasedBeneficiaries.length;
-
-      developer.log('Found $deceasedCount deceased beneficiaries', name: 'ChildCareCountProvider');
+      
+      developer.log('Found $deceasedCount deceased beneficiaries using LocalStorageDao.loadDeceasedList', name: 'ChildCareCountProvider');
       return deceasedCount;
 
     } catch (e, stackTrace) {
