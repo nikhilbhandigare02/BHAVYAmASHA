@@ -284,9 +284,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                               key: const ValueKey('addressField'),
                               labelText: t?.addressLabel ?? 'Address',
                               hintText: t?.addressLabel ?? 'Address',
-                              controller: TextEditingController(
-                                text: state.address,
-                              ),
+                              initialValue: state.address,
                               maxLines: 2,
                               onChanged: (v) => context
                                   .read<EligibleCouleUpdateBloc>()
@@ -421,14 +419,15 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                 onChanged: null, // Readonly
                                 hintText: t?.select ?? 'Select',
                               ),
-                            ),Divider(
+                            ),
+                            Divider(
                               color: AppColors.divider,
                               thickness: 0.5,
                               height: 0,
                             ),
 
-
-                            if (state.religion == 'Other')
+                            if (state.religion == 'Other' &&
+                                state.otherReligion.trim().isNotEmpty) ...[
                               Divider(
                                 color: AppColors.divider,
                                 thickness: 0.5,
@@ -440,30 +439,9 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                 initialValue: state.otherReligion,
                                 readOnly: true,
                               ),
+                            ],
 
-                            /* IgnorePointer(
-                              child: ApiDropdown<String>(
-                                key: const ValueKey('religionField'),
-                                labelText: t?.religionLabel ?? 'Religion',
-                                items: const [
-                                  'Do not want to disclose',
-                                  'Hindu',
-                                  'Muslim',
-                                  'Christian',
-                                  'Sikh',
-                                  'Buddhism',
-                                  'Jainism',
-                                  'Parsi',
-                                  'Other',
-                                ],
-                                getLabel: (s) => s,
-                                value: state.religion.isEmpty
-                                    ? null
-                                    : state.religion,
-                                onChanged: null, // Readonly
-                                hintText: t?.select ?? 'Select',
-                              ),
-                            ),*/
+                           
                             Divider(
                               color: AppColors.divider,
                               thickness: 0.5,
@@ -486,18 +464,20 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                               height: 0,
                             ),
 
-                            if (state.category == 'Other')
+                            if (state.category == 'Other' &&
+                                state.otherCategory.trim().isNotEmpty) ...[
                               Divider(
                                 color: AppColors.divider,
                                 thickness: 0.5,
                                 height: 0,
                               ),
                               CustomTextField(
-                                labelText: t.enterCategory,
-                                hintText:t.enterCategory,
+                                labelText: t?.enterCategory,
+                                hintText: t?.enterCategory,
                                 initialValue: state.otherCategory,
                                 readOnly: true,
                               ),
+                            ],
 
                             Divider(
                               color: AppColors.divider,
@@ -698,7 +678,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                             ),
                             ApiDropdown<String>(
                               key: const ValueKey('youngestChildAgeUnit'),
-                              labelText: t.youngestChildAgeLabel,
+                              labelText: t?.youngestChildAgeLabel,
                               items: const ['Years', 'Months', 'Days'],
                               value: state.youngestChildAgeUnit.isEmpty
                                   ? null

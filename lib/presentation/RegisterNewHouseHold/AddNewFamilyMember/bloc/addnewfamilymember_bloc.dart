@@ -552,7 +552,6 @@ class AddnewfamilymemberBloc
       final yearStr = e.value;
       final monthStr = state.updateMonth ?? '0';
       final dayStr = state.updateDay ?? '0';
-
       final years = int.tryParse(yearStr.isEmpty ? '0' : yearStr) ?? 0;
       final months = int.tryParse(monthStr.isEmpty ? '0' : monthStr) ?? 0;
       final days = int.tryParse(dayStr.isEmpty ? '0' : dayStr) ?? 0;
