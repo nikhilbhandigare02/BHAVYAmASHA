@@ -632,8 +632,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   if (isEnableSearch) {
                     if (mobileController.text.isEmpty) {
                       Utils.showToastMessage(localText.pleaseEnterMobileNumber);
-                      Utils.showToastMessage(
-                          'Enter valid 10-digit mobile number');
+                      Utils.showToastMessage(localText.enterValid10DigitMobile);
                     } else {
                       setState(() {
                         refresh();
@@ -4354,7 +4353,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
   }
 
   static Future<bool?> showAadharAlert(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return showDialog<bool>(
       context: context,
       barrierDismissible: false, // forces user to choose Yes or No
