@@ -1045,6 +1045,32 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               // so that the spouse tab becomes accessible
               if (isSpouseRow) {
                 initialMember['maritalStatus'] = 'Married';
+                
+                // Extract spouse data from spousedetails and merge with initial data
+                try {
+                  final spRaw = _memberForms[idx]['spousedetails'];
+                  Map<String, dynamic>? spMap;
+                  if (spRaw is Map) {
+                    spMap = Map<String, dynamic>.from(spRaw);
+                  } else if (spRaw is String && spRaw.isNotEmpty) {
+                    spMap = Map<String, dynamic>.from(jsonDecode(spRaw));
+                  }
+                  
+                  if (spMap != null) {
+                    // Merge spouse details into initial member data for prefilling
+                    spMap.forEach((key, value) {
+                      if (value != null && value.toString().isNotEmpty) {
+                        initialMember[key] = value.toString();
+                      }
+                    });
+                    
+                    // Ensure pregnancy field is properly handled
+                    final spPregnant = spMap['isPregnant'];
+                    if (spPregnant != null && spPregnant.toString().isNotEmpty) {
+                      initialMember['isPregnant'] = spPregnant.toString();
+                    }
+                  }
+                } catch (_) {}
               }
               
               final result = await Navigator.of(context).push<Map<String, dynamic>>(

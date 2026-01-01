@@ -1105,7 +1105,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                     listener: (context, state) {
                       if (state.postApiStatus == PostApiStatus.success) {
                         // Only navigate back after successful save
-                        Navigator.of(context).pop(true);
+                        final Map<String, dynamic> result = state.toJson();
+                        Navigator.of(context).pop(result);
                       } else if (state.postApiStatus == PostApiStatus.error) {
                         // Show error message if save fails
                         if (state.errorMessage != null &&
