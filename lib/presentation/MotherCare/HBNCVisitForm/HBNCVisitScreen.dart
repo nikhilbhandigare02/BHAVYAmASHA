@@ -49,7 +49,6 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
     super.dispose();
   }
 
-  // Enhanced scroll to first error with GlobalKey support
   void _scrollToFirstError() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // First try using the form field approach
@@ -64,7 +63,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
         return;
       }
 
-      // If form field approach doesn't work, try using GlobalKeys from tabs
+
       _scrollToFirstErrorUsingKeys();
     });
   }

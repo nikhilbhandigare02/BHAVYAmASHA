@@ -110,7 +110,8 @@ class RegisterChildDueListFormScreen extends StatefulWidget {
   });
 
   @override
-  State<RegisterChildDueListFormScreen> createState() => _RegisterChildDueListFormScreen();
+  State<RegisterChildDueListFormScreen> createState() =>
+      _RegisterChildDueListFormScreen();
 
   static Route<dynamic> route(RouteSettings settings) {
     return MaterialPageRoute(
@@ -122,21 +123,41 @@ class RegisterChildDueListFormScreen extends StatefulWidget {
   }
 }
 
-class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScreen> {
+class _RegisterChildDueListFormScreen
+    extends State<RegisterChildDueListFormScreen> {
   bool _isLoading = true;
   BeneficiaryData? _beneficiaryData;
   final _formKey = GlobalKey<FormState>();
+  final ScrollController _scrollController = ScrollController();
 
-  static String? _firstError;
+  // --- Global Keys for Scrolling ---
+  final GlobalKey _keyRchId = GlobalKey();
+  final GlobalKey _keyDob = GlobalKey();
+  final GlobalKey _keyDor = GlobalKey();
+  final GlobalKey _keyChildName = GlobalKey();
+  final GlobalKey _keyGender = GlobalKey();
+  final GlobalKey _keyMotherName = GlobalKey();
+  final GlobalKey _keyAddress = GlobalKey();
+  final GlobalKey _keyWhoseMobile = GlobalKey();
+  final GlobalKey _keyMobile = GlobalKey();
+  final GlobalKey _keyMotherRch = GlobalKey();
+  final GlobalKey _keyWeight = GlobalKey();
+  final GlobalKey _keyBirthWeight = GlobalKey();
+  final GlobalKey _keyReligion = GlobalKey();
+  final GlobalKey _keyCategory = GlobalKey();
 
-  static void _clearFirstError() {
+  String? _firstError;
+  GlobalKey? _firstErrorKey;
+
+  void _clearFirstError() {
     _firstError = null;
+    _firstErrorKey = null;
   }
 
-
-  static String? _captureError(String? message) {
+  String? _captureError(String? message, GlobalKey key) {
     if (message != null && _firstError == null) {
       _firstError = message;
+      _firstErrorKey = key;
     }
     return message;
   }
@@ -144,7 +165,6 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
   @override
   void initState() {
     super.initState();
-    // Remove the WidgetsBinding callback - call directly
     _loadBeneficiaryData();
   }
 
@@ -160,7 +180,8 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
       final hhId = widget.arguments?['hhId']?.toString();
       final name = widget.arguments?['name']?.toString();
 
-      final beneficiaryRefKey = widget.arguments?['beneficiary_ref_key']?.toString();
+      final beneficiaryRefKey =
+      widget.arguments?['beneficiary_ref_key']?.toString();
       if (beneficiaryRefKey != null && beneficiaryRefKey.isNotEmpty) {
         final db = await DatabaseProvider.instance.database;
         final rows = await db.query(
@@ -184,7 +205,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
             name: (info['memberName']?.toString() ?? info['name']?.toString()),
             gender: info['gender']?.toString(),
             mobile: info['mobileNo']?.toString(),
-            rchId: (info['rchId']?.toString() ?? info['RichID']?.toString() ?? info['RichIDChanged']?.toString()),
+            rchId: (info['rchId']?.toString() ??
+                info['RichID']?.toString() ??
+                info['RichIDChanged']?.toString()),
             fatherName: info['fatherName']?.toString(),
             motherName: info['motherName']?.toString(),
             dateOfBirth: info['dob']?.toString(),
@@ -195,11 +218,20 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
             weightGrams: (info['weight']?.toString()),
             birthWeightGrams: (info['birthWeight']?.toString()),
             birthCertificate: info['birthCertificate']?.toString(),
-            village: ((passedVillage?.trim().isNotEmpty ?? false) ? passedVillage : (info['village']?.toString() ?? headDetails['village']?.toString())),
-            mobileOwner: (info['mobileOwner']?.toString() ?? headDetails['mobileOwner']?.toString()),
-            otherReligion: (info['other_religion']?.toString() ?? headDetails['other_religion']?.toString() ?? info['otherReligion']?.toString() ?? headDetails['otherReligion']?.toString()),
-            otherCategory: (info['other_category']?.toString() ?? headDetails['other_category']?.toString() ?? info['otherCategory']?.toString() ?? headDetails['otherCategory']?.toString()),
-
+            village: ((passedVillage?.trim().isNotEmpty ?? false)
+                ? passedVillage
+                : (info['village']?.toString() ??
+                headDetails['village']?.toString())),
+            mobileOwner: (info['mobileOwner']?.toString() ??
+                headDetails['mobileOwner']?.toString()),
+            otherReligion: (info['other_religion']?.toString() ??
+                headDetails['other_religion']?.toString() ??
+                info['otherReligion']?.toString() ??
+                headDetails['otherReligion']?.toString()),
+            otherCategory: (info['other_category']?.toString() ??
+                headDetails['other_category']?.toString() ??
+                info['otherCategory']?.toString() ??
+                headDetails['otherCategory']?.toString()),
           );
 
           setState(() {
@@ -248,14 +280,16 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
           final beneficiaryInfo = jsonDecode(beneficiaryInfoStr);
           final headDetails = beneficiaryInfo['head_details'] ?? {};
-          final memberDetails = beneficiaryInfo['member_details'] as List<dynamic>? ?? [];
+          final memberDetails =
+              beneficiaryInfo['member_details'] as List<dynamic>? ?? [];
 
           debugPrint('\n=== House Details for HHID: ${row['id']} ===');
           debugPrint('Head Name: ${headDetails['headName']}');
           debugPrint('House No: ${headDetails['houseNo']}');
 
           // Check if the head matches the name
-          final headName = headDetails['headName']?.toString().toLowerCase() ?? '';
+          final headName =
+              headDetails['headName']?.toString().toLowerCase() ?? '';
           if (headName == name.toLowerCase()) {
             beneficiaryData = BeneficiaryData(
               name: headDetails['headName']?.toString(),
@@ -266,10 +300,15 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
               religion: headDetails['religion']?.toString(),
               socialClass: headDetails['category']?.toString(),
               uniqueKey: row['unique_key']?.toString(),
-              village: ((passedVillage?.trim().isNotEmpty ?? false) ? passedVillage : (beneficiaryInfo['village']?.toString() ?? headDetails['village']?.toString())),
+              village: ((passedVillage?.trim().isNotEmpty ?? false)
+                  ? passedVillage
+                  : (beneficiaryInfo['village']?.toString() ??
+                  headDetails['village']?.toString())),
               mobileOwner: headDetails['mobileOwner']?.toString(),
-              otherReligion: (headDetails['other_religion']?.toString() ?? headDetails['otherReligion']?.toString()),
-              otherCategory: (headDetails['other_category']?.toString() ?? headDetails['otherCategory']?.toString()),
+              otherReligion: (headDetails['other_religion']?.toString() ??
+                  headDetails['otherReligion']?.toString()),
+              otherCategory: (headDetails['other_category']?.toString() ??
+                  headDetails['otherCategory']?.toString()),
             );
             break;
           }
@@ -280,7 +319,8 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
             debugPrint('Total members: ${memberDetails.length}');
 
             for (var member in memberDetails) {
-              final memberName = member['memberName']?.toString().toLowerCase() ?? '';
+              final memberName =
+                  member['memberName']?.toString().toLowerCase() ?? '';
               debugPrint('Checking member: $memberName');
 
               if (memberName == name.toLowerCase()) {
@@ -297,10 +337,13 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                   religion: member['religion']?.toString(),
                   socialClass: member['category']?.toString(),
                   uniqueKey: member['unique_key']?.toString(),
-                  village: (beneficiaryInfo['village']?.toString() ?? headDetails['village']?.toString()),
+                  village: (beneficiaryInfo['village']?.toString() ??
+                      headDetails['village']?.toString()),
                   mobileOwner: member['mobileOwner']?.toString(),
-                  otherReligion: (member['other_religion']?.toString() ?? member['otherReligion']?.toString()),
-                  otherCategory: (member['other_category']?.toString() ?? member['otherCategory']?.toString()),
+                  otherReligion: (member['other_religion']?.toString() ??
+                      member['otherReligion']?.toString()),
+                  otherCategory: (member['other_category']?.toString() ??
+                      member['otherCategory']?.toString()),
                 );
                 break;
               }
@@ -313,7 +356,10 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
         }
       }
 
-      if ((passedVillage?.trim().isEmpty ?? true) && (beneficiaryData == null || (beneficiaryData.village == null || (beneficiaryData.village?.trim().isEmpty ?? true)))) {
+      if ((passedVillage?.trim().isEmpty ?? true) &&
+          (beneficiaryData == null ||
+              (beneficiaryData.village == null ||
+                  (beneficiaryData.village?.trim().isEmpty ?? true)))) {
         if (hhId != null && hhId.isNotEmpty) {
           String? villageNameFromBeneficiaries;
           final rowsByHh = await db.query(
@@ -325,13 +371,19 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
           for (final r in rowsByHh) {
             final infoStr = r['beneficiary_info']?.toString() ?? '{}';
             Map<String, dynamic> info = {};
-            try { info = Map<String, dynamic>.from(jsonDecode(infoStr)); } catch (_) {}
+            try {
+              info = Map<String, dynamic>.from(jsonDecode(infoStr));
+            } catch (_) {}
             final v1 = info['village_name']?.toString();
             final v2 = info['village']?.toString();
             final v = ((v1 ?? '').trim().isNotEmpty) ? v1 : v2;
-            if ((v ?? '').trim().isNotEmpty) { villageNameFromBeneficiaries = v; break; }
+            if ((v ?? '').trim().isNotEmpty) {
+              villageNameFromBeneficiaries = v;
+              break;
+            }
           }
-          if (villageNameFromBeneficiaries != null && villageNameFromBeneficiaries.trim().isNotEmpty) {
+          if (villageNameFromBeneficiaries != null &&
+              villageNameFromBeneficiaries.trim().isNotEmpty) {
             beneficiaryData = BeneficiaryData(
               name: beneficiaryData?.name,
               gender: beneficiaryData?.gender,
@@ -356,7 +408,10 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
         }
       }
 
-      if ((passedVillage?.trim().isEmpty ?? true) && (beneficiaryData == null || (beneficiaryData.village == null || (beneficiaryData.village?.trim().isEmpty ?? true)))) {
+      if ((passedVillage?.trim().isEmpty ?? true) &&
+          (beneficiaryData == null ||
+              (beneficiaryData.village == null ||
+                  (beneficiaryData.village?.trim().isEmpty ?? true)))) {
         String? villageName;
         final hhRows = await db.query(
           'households',
@@ -374,7 +429,8 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
               limit: 1,
             );
             if (headRows.isNotEmpty) {
-              final infoStr2 = headRows.first['beneficiary_info']?.toString() ?? '{}';
+              final infoStr2 =
+                  headRows.first['beneficiary_info']?.toString() ?? '{}';
               Map<String, dynamic> info2 = {};
               try {
                 info2 = Map<String, dynamic>.from(jsonDecode(infoStr2));
@@ -382,7 +438,8 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
               final head2 = (info2['head_details'] is Map)
                   ? Map<String, dynamic>.from(info2['head_details'])
                   : <String, dynamic>{};
-              villageName = (info2['village']?.toString() ?? head2['village']?.toString());
+              villageName = (info2['village']?.toString() ??
+                  head2['village']?.toString());
             }
           }
         }
@@ -418,7 +475,8 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
           debugPrint('Successfully loaded beneficiary data:');
           debugPrint(beneficiaryData.toString());
         } else {
-          debugPrint('No matching beneficiary found for hhId: $hhId and name: $name');
+          debugPrint(
+              'No matching beneficiary found for hhId: $hhId and name: $name');
         }
       }
     } catch (e) {
@@ -443,7 +501,8 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
     final hhId = args['hhId']?.toString();
 
     final bloc = RegisterChildFormBloc(
-      beneficiaryId: (args['beneficiary_ref_key']?.toString() ?? args['beneficiaryId']?.toString()),
+      beneficiaryId: (args['beneficiary_ref_key']?.toString() ??
+          args['beneficiaryId']?.toString()),
       householdId: hhId,
     );
 
@@ -481,8 +540,12 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
       if (ownerLabel != null && ownerLabel.isNotEmpty) {
         bloc.add(WhoseMobileNumberChanged(ownerLabel));
       }
-      if (data.fatherName != null) bloc.add(FatherNameChanged(data.fatherName!));
-      if (data.motherName != null) bloc.add(MotherNameChanged(data.motherName!));
+      if (data.fatherName != null) {
+        bloc.add(FatherNameChanged(data.fatherName!));
+      }
+      if (data.motherName != null) {
+        bloc.add(MotherNameChanged(data.motherName!));
+      }
       if (data.rchId != null) bloc.add(RchIdChildChanged(data.rchId!));
       if (data.religion != null) bloc.add(ReligionChanged(data.religion!));
       if (data.religion != null && data.religion == 'Other') {
@@ -526,12 +589,23 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
         bloc.add(AddressChanged(data.village!.trim()));
       }
     } else if (args.isNotEmpty) {
-      if (args['name'] != null) bloc.add(ChildNameChanged(args['name'].toString()));
-      if (args['gender'] != null) bloc.add(GenderChanged(args['gender'].toString()));
-      if (args['mobile'] != null) bloc.add(MobileNumberChanged(args['mobile'].toString()));
-      if (args['fatherName'] != null) bloc.add(FatherNameChanged(args['fatherName'].toString()));
-      if (args['rchId'] != null) bloc.add(RchIdChildChanged(args['rchId'].toString()));
-      if (args['village'] != null && args['village'].toString().trim().isNotEmpty) {
+      if (args['name'] != null) {
+        bloc.add(ChildNameChanged(args['name'].toString()));
+      }
+      if (args['gender'] != null) {
+        bloc.add(GenderChanged(args['gender'].toString()));
+      }
+      if (args['mobile'] != null) {
+        bloc.add(MobileNumberChanged(args['mobile'].toString()));
+      }
+      if (args['fatherName'] != null) {
+        bloc.add(FatherNameChanged(args['fatherName'].toString()));
+      }
+      if (args['rchId'] != null) {
+        bloc.add(RchIdChildChanged(args['rchId'].toString()));
+      }
+      if (args['village'] != null &&
+          args['village'].toString().trim().isNotEmpty) {
         bloc.add(AddressChanged(args['village'].toString().trim()));
       }
     }
@@ -621,7 +695,8 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                 showAppSnackBar(context, state.error!);
               }
               if (state.isSuccess) {
-                showAppSnackBar(context, l10n?.saveSuccess ?? 'Saved successfully');
+                showAppSnackBar(
+                    context, l10n?.saveSuccess ?? 'Saved successfully');
                 Future.delayed(const Duration(milliseconds: 500), () {
                   if (mounted) {
                     Navigator.pop(context, {
@@ -640,7 +715,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                 children: [
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      controller: _scrollController,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       child: Form(
                         key: _formKey,
                         child: Column(
@@ -648,169 +725,252 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                           children: [
                             const SizedBox(height: 5),
 
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: CustomTextField(
-                                    labelText: l10n?.rchIdChildLabel ?? 'RCH ID (Child)',
-                                    hintText: l10n?.rchChildSerialHint ?? 'Enter RCH ID of the child',
-                                    initialValue: state.rchIdChild,
-                                    maxLength: 12,
-                                    keyboardType: TextInputType.number,
-                                    onChanged: (v) => bloc.add(RchIdChildChanged(v)),
-                                    validator: (value) {
-                                      final text = value?.trim() ?? '';
-                                      if (text.isNotEmpty) {
-                                        final regex = RegExp(r'^\d{12}$');
-                                        if (!regex.hasMatch(text)) {
-                                          return _captureError(l10n?.rch_id_must_be_12_digits);
+                            Container(
+                              key: _keyRchId,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: CustomTextField(
+                                      labelText: l10n?.rchIdChildLabel ??
+                                          'RCH ID (Child)',
+                                      hintText: l10n?.rchChildSerialHint ??
+                                          'Enter RCH ID of the child',
+                                      initialValue: state.rchIdChild,
+                                      maxLength: 12,
+                                      keyboardType: TextInputType.number,
+                                      onChanged: (v) =>
+                                          bloc.add(RchIdChildChanged(v)),
+                                      validator: (value) {
+                                        final text = value?.trim() ?? '';
+                                        if (text.isNotEmpty) {
+                                          final regex = RegExp(r'^\d{12}$');
+                                          if (!regex.hasMatch(text)) {
+                                            return _captureError(
+                                                l10n?.rch_id_must_be_12_digits,
+                                                _keyRchId);
+                                          }
                                         }
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                SizedBox(
-                                  height: 50,
-                                  width: 80,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(top: 20),
-                                    child: state.isSubmitting
-                                        ? const Center(
-                                      child: SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(strokeWidth: 3),
-                                      ),
-                                    )
-                                        : RoundButton(
-                                      title: l10n!.verify,
-                                      borderRadius: 8,
-                                      fontSize: 12,
-                                      onPress: () {
-                                        // Add verification logic here
+                                        return null;
                                       },
                                     ),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 10),
+                                  SizedBox(
+                                    height: 50,
+                                    width: 80,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 20),
+                                      child: state.isSubmitting
+                                          ? const Center(
+                                        child: SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 3),
+                                        ),
+                                      )
+                                          : RoundButton(
+                                        title: l10n!.verify,
+                                        borderRadius: 8,
+                                        fontSize: 12,
+                                        onPress: () {
+                                          // Add verification logic here
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                             const SizedBox(height: 5),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
 
                             CustomTextField(
-                              labelText: l10n?.rchChildSerialHint ?? 'Register Serial Number',
+                              labelText: l10n?.rchChildSerialHint ??
+                                  'Register Serial Number',
                               hintText: l10n?.enterSerialNumber,
                               initialValue: state.registerSerialNumber,
-                              onChanged: (v) => bloc.add(SerialNumberOFRegister(v)),
+                              onChanged: (v) =>
+                                  bloc.add(SerialNumberOFRegister(v)),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
 
-                            CustomDatePicker(
-                              labelText: l10n?.dateOfBirthLabel ?? 'Date of Birth *',
-                              initialDate: state.dateOfBirth,
-                              onDateChanged: (d) => bloc.add(DateOfBirthChanged(d)),
-                              validator: (date) {
-                                if (date == null) {
-                                  return _captureError(l10n?.pleaseEnterDob);
-                                }
-                                return null;
-                              },
-                            ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                            CustomDatePicker(
-                              labelText: l10n?.registrationDateLabel ?? 'Date of Registration *',
-                              initialDate: state.dateOfRegistration,
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(DateTime.now().year, DateTime.now().month + 1, 0), // End of current month
-                              onDateChanged: (d) => bloc.add(DateOfRegistrationChanged(d)),
-                              validator: (date) {
-                                if (date == null) {
-                                  return _captureError(l10n?.pleaseEnterDor);
-
-                                }
-                                return null;
-                              },
-                            ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                            CustomTextField(
-                              labelText: l10n?.childNameLabel ?? "Child's name *",
-                              hintText: l10n?.enterFullNameChild,
-                              initialValue: state.childName,
-                              onChanged: (v) => bloc.add(ChildNameChanged(v)),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return _captureError(l10n!.enterFullNameChild);
-                                }
-                                return null;
-                              },
-                            ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
-
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                              child: ApiDropdown<String>(
-                                labelText: "${l10n?.genderLabel} *" ?? 'gender',
-                                items: [l10n?.male ?? 'Male', l10n?.female ?? 'Female', l10n?.other ?? 'Other'],
-                                value: state.gender.isEmpty ? null : state.gender,
-                                getLabel: (s) => s,
-                                onChanged: (v) => bloc.add(GenderChanged(v ?? '')),
-                                hintText: l10n?.select ?? 'Select',
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return _captureError(l10n?.pleaseEnterGender);
+                            Container(
+                              key: _keyDob,
+                              child: CustomDatePicker(
+                                labelText: l10n?.dateOfBirthLabel ??
+                                    'Date of Birth *',
+                                initialDate: state.dateOfBirth,
+                                onDateChanged: (d) =>
+                                    bloc.add(DateOfBirthChanged(d)),
+                                validator: (date) {
+                                  if (date == null) {
+                                    return _captureError(
+                                        l10n?.pleaseEnterDob, _keyDob);
                                   }
                                   return null;
                                 },
                               ),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
 
-                            CustomTextField(
-                              labelText: "${l10n?.motherNameLabel} *" ?? "Mother's name*",
-                              hintText: l10n?.enterMothersName,
-                              initialValue: state.motherName,
-                              onChanged: (v) => bloc.add(MotherNameChanged(v)),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return _captureError(l10n?.pleaseEnterMothersName);
-                                }
-                                return null;
-                              },
+                            Container(
+                              key: _keyDor,
+                              child: CustomDatePicker(
+                                labelText: l10n?.registrationDateLabel ??
+                                    'Date of Registration *',
+                                initialDate: state.dateOfRegistration,
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(DateTime.now().year,
+                                    DateTime.now().month + 1, 0),
+                                onDateChanged: (d) =>
+                                    bloc.add(DateOfRegistrationChanged(d)),
+                                validator: (date) {
+                                  if (date == null) {
+                                    return _captureError(
+                                        l10n?.pleaseEnterDor, _keyDor);
+                                  }
+                                  return null;
+                                },
+                              ),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
+
+                            Container(
+                              key: _keyChildName,
+                              child: CustomTextField(
+                                labelText:
+                                l10n?.childNameLabel ?? "Child's name *",
+                                hintText: l10n?.enterFullNameChild,
+                                initialValue: state.childName,
+                                onChanged: (v) => bloc.add(ChildNameChanged(v)),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return _captureError(
+                                        l10n!.enterFullNameChild,
+                                        _keyChildName);
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
+
+                            Container(
+                              key: _keyGender,
+                              padding:
+                              const EdgeInsets.symmetric(horizontal: 4.0),
+                              child: ApiDropdown<String>(
+                                labelText:
+                                "${l10n?.genderLabel} *" ?? 'gender',
+                                items: [
+                                  l10n?.male ?? 'Male',
+                                  l10n?.female ?? 'Female',
+                                  l10n?.other ?? 'Other'
+                                ],
+                                value: state.gender.isEmpty
+                                    ? null
+                                    : state.gender,
+                                getLabel: (s) => s,
+                                onChanged: (v) =>
+                                    bloc.add(GenderChanged(v ?? '')),
+                                hintText: l10n?.select ?? 'Select',
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return _captureError(
+                                        l10n?.pleaseEnterGender, _keyGender);
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
+
+                            Container(
+                              key: _keyMotherName,
+                              child: CustomTextField(
+                                labelText: "${l10n?.motherNameLabel} *" ??
+                                    "Mother's name*",
+                                hintText: l10n?.enterMothersName,
+                                initialValue: state.motherName,
+                                onChanged: (v) =>
+                                    bloc.add(MotherNameChanged(v)),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return _captureError(
+                                        l10n?.pleaseEnterMothersName,
+                                        _keyMotherName);
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
 
                             CustomTextField(
-                              labelText: l10n?.fatherNameLabel ?? "Father's name",
+                              labelText:
+                              l10n?.fatherNameLabel ?? "Father's name",
                               hintText: l10n?.fatherNameHint,
                               initialValue: state.fatherName,
                               onChanged: (v) => bloc.add(FatherNameChanged(v)),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
 
-                            CustomTextField(
-                              labelText: "${l10n?.addressLabel} *" ?? 'Address',
-                              hintText:l10n?.enterAddress,
-                              initialValue: state.address,
-                              onChanged: (v) => bloc.add(AddressChanged(v)),
-                              maxLines: 2,
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return _captureError(l10n?.pleaseEnterAddress);
-                                }
-                                return null;
-                              },
+                            Container(
+                              key: _keyAddress,
+                              child: CustomTextField(
+                                labelText:
+                                "${l10n?.addressLabel} *" ?? 'Address',
+                                hintText: l10n?.enterAddress,
+                                initialValue: state.address,
+                                onChanged: (v) => bloc.add(AddressChanged(v)),
+                                maxLines: 2,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return _captureError(
+                                        l10n?.pleaseEnterAddress, _keyAddress);
+                                  }
+                                  return null;
+                                },
+                              ),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
 
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                            Container(
+                              key: _keyWhoseMobile,
+                              padding:
+                              const EdgeInsets.symmetric(horizontal: 3.0),
                               child: ApiDropdown<String>(
-                                labelText: "${l10n?.whoseMobileLabel} *" ?? 'Whose mobile number is this',
+                                labelText: "${l10n?.whoseMobileLabel} *" ??
+                                    'Whose mobile number is this',
                                 items: _getMobileOwnerList(state.gender ?? ''),
                                 getLabel: (s) {
                                   switch (s) {
@@ -854,169 +1014,215 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                       return s;
                                   }
                                 },
-                                value: state.whoseMobileNumber.isEmpty ? null : state.whoseMobileNumber,
-
-                                onChanged: (v) => bloc.add(WhoseMobileNumberChanged(v ?? '')),
+                                value: state.whoseMobileNumber.isEmpty
+                                    ? null
+                                    : state.whoseMobileNumber,
+                                onChanged: (v) => bloc
+                                    .add(WhoseMobileNumberChanged(v ?? '')),
                                 hintText: l10n!.select ?? 'Select',
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return _captureError(l10n?.pleaseEnterWhoseMobileNumber);
+                                    return _captureError(
+                                        l10n?.pleaseEnterWhoseMobileNumber,
+                                        _keyWhoseMobile);
                                   }
                                   return null;
                                 },
                               ),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
 
-                            CustomTextField(
-                              labelText: "${l10n?.mobileNumberLabel} *" ?? 'Mobile number *',
-                              hintText: l10n?.enter10DigitMobileNumber,
-                              initialValue: state.mobileNumber,
-                              keyboardType: TextInputType.phone,
-                              onChanged: (v) => bloc.add(MobileNumberChanged(v)),
-                              validator: (value) {
-                                final text = value?.trim() ?? '';
-                                if (text.isEmpty) {
-                                  return _captureError(l10n?.pleaseEnterMobileNumber);
-                                }
-                                final regex = RegExp(r'^[6-9]\d{9}$');
-                                if (!regex.hasMatch(text)) {
-                                  return _captureError(l10n?.mobileMustBe10DigitsAndStartWith);
-                                }
-                                return null;
-                              },
+                            Container(
+                              key: _keyMobile,
+                              child: CustomTextField(
+                                labelText: "${l10n?.mobileNumberLabel} *" ??
+                                    'Mobile number *',
+                                hintText: l10n?.enter10DigitMobileNumber,
+                                initialValue: state.mobileNumber,
+                                keyboardType: TextInputType.phone,
+                                onChanged: (v) =>
+                                    bloc.add(MobileNumberChanged(v)),
+                                validator: (value) {
+                                  final text = value?.trim() ?? '';
+                                  if (text.isEmpty) {
+                                    return _captureError(
+                                        l10n?.pleaseEnterMobileNumber,
+                                        _keyMobile);
+                                  }
+                                  final regex = RegExp(r'^[6-9]\d{9}$');
+                                  if (!regex.hasMatch(text)) {
+                                    return _captureError(
+                                        l10n?.mobileMustBe10DigitsAndStartWith,
+                                        _keyMobile);
+                                  }
+                                  return null;
+                                },
+                              ),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Expanded(
-                                  child: CustomTextField(
-                                    labelText: l10n?.mothersRchIdLabel ?? "Mother's RCH ID number",
-                                    hintText: l10n?.mothersRchIdLabel,
-                                    initialValue: state.mothersRchIdNumber,
-                                    maxLength: 12,
-                                    keyboardType: TextInputType.number,
-                                    onChanged: (v) => bloc.add(MothersRchIdNumberChanged(v)),
-                                    validator: (value) {
-                                      final text = value?.trim() ?? '';
-                                      if (text.isNotEmpty) {
-                                        final regex = RegExp(r'^\d{12}$');
-                                        if (!regex.hasMatch(text)) {
-                                          return _captureError(l10n.motherRchIdError);
+                                  child: Container(
+                                    key: _keyMotherRch,
+                                    child: CustomTextField(
+                                      labelText: l10n?.mothersRchIdLabel ??
+                                          "Mother's RCH ID number",
+                                      hintText: l10n?.mothersRchIdLabel,
+                                      initialValue: state.mothersRchIdNumber,
+                                      maxLength: 12,
+                                      keyboardType: TextInputType.number,
+                                      onChanged: (v) => bloc
+                                          .add(MothersRchIdNumberChanged(v)),
+                                      validator: (value) {
+                                        final text = value?.trim() ?? '';
+                                        if (text.isNotEmpty) {
+                                          final regex = RegExp(r'^\d{12}$');
+                                          if (!regex.hasMatch(text)) {
+                                            return _captureError(
+                                                l10n.motherRchIdError,
+                                                _keyMotherRch);
+                                          }
                                         }
-                                      }
-                                      return null;
-                                    },
+                                        return null;
+                                      },
+                                    ),
                                   ),
                                 ),
-                                // const SizedBox(width: 10),
-                                // SizedBox(
-                                //   height: 50,
-                                //   width: 80,
-                                //   child: Padding(
-                                //     padding: const EdgeInsets.only(top: 20),
-                                //     child: state.isSubmitting
-                                //         ? const Center(
-                                //       child: SizedBox(
-                                //         width: 24,
-                                //         height: 24,
-                                //         child: CircularProgressIndicator(strokeWidth: 3),
-                                //       ),
-                                //     )
-                                //         : RoundButton(
-                                //       title: l10n!.verify,
-                                //       borderRadius: 8,
-                                //       fontSize: 12,
-                                //       onPress: () {
-                                //         // Add verification logic here
-                                //       },
-                                //     ),
-                                //   ),
-                                // ),
                               ],
                             ),
                             const SizedBox(height: 5),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
 
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              padding:
+                              const EdgeInsets.symmetric(horizontal: 4.0),
                               child: ApiDropdown<String>(
-                                labelText: l10n?.birthCertificateIssuedLabel ?? 'Has the birth certificate been issued?',
-                                items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
-                                value: _beneficiaryData?.birthCertificate?.isNotEmpty == true
+                                labelText:
+                                l10n?.birthCertificateIssuedLabel ??
+                                    'Has the birth certificate been issued?',
+                                items: [
+                                  l10n?.yes ?? 'Yes',
+                                  l10n?.no ?? 'No'
+                                ],
+                                value: _beneficiaryData
+                                    ?.birthCertificate?.isNotEmpty ==
+                                    true
                                     ? _beneficiaryData?.birthCertificate
-                                    : (state.birthCertificateIssued.isEmpty ? null : state.birthCertificateIssued),
+                                    : (state.birthCertificateIssued.isEmpty
+                                    ? null
+                                    : state.birthCertificateIssued),
                                 getLabel: (s) => s,
-                                onChanged: (v) => bloc.add(BirthCertificateIssuedChanged(v ?? '')),
+                                onChanged: (v) => bloc.add(
+                                    BirthCertificateIssuedChanged(v ?? '')),
                                 hintText: l10n?.select ?? 'choose',
                               ),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
 
                             CustomTextField(
-                              labelText: l10n?.birthCertificateNumberLabel ?? 'Birth Certificate Number',
+                              labelText:
+                              l10n?.birthCertificateNumberLabel ??
+                                  'Birth Certificate Number',
                               hintText: l10n?.enterBirthCertificateNumber,
                               initialValue: state.birthCertificateNumber,
-                              onChanged: (v) => bloc.add(BirthCertificateNumberChanged(v)),
+                              onChanged: (v) =>
+                                  bloc.add(BirthCertificateNumberChanged(v)),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
 
-                            CustomTextField(
-                              labelText:l10n?.child_weight,
-                              hintText: l10n?.child_weight,
-                              initialValue: state.weightGrams,
-                              keyboardType: TextInputType.number,
-                              onChanged: (v) => bloc.add(WeightGramsChanged(v)),
-                              validator: (value) {
-                                final text = value?.trim() ?? '';
-                                if (text.isEmpty) {
+                            Container(
+                              key: _keyWeight,
+                              child: CustomTextField(
+                                labelText: l10n?.child_weight,
+                                hintText: l10n?.child_weight,
+                                initialValue: state.weightGrams,
+                                keyboardType: TextInputType.number,
+                                onChanged: (v) =>
+                                    bloc.add(WeightGramsChanged(v)),
+                                validator: (value) {
+                                  final text = value?.trim() ?? '';
+                                  if (text.isEmpty) {
+                                    return null;
+                                  }
+
+                                  final parsed = int.tryParse(text);
+                                  if (parsed == null) {
+                                    return _captureError(
+                                        l10n?.enterValidWeight, _keyWeight);
+                                  }
+
+                                  if (parsed < 500 || parsed > 12500) {
+                                    return _captureError(
+                                        l10n?.weightRangeError, _keyWeight);
+                                  }
+
                                   return null;
-                                }
-
-                                final parsed = int.tryParse(text);
-                                if (parsed == null) {
-                                  return _captureError(l10n?.enterValidWeight);
-                                }
-
-                                if (parsed < 500 || parsed > 12500) {
-                                  return _captureError(l10n?.weightRangeError);
-                                }
-
-                                return null;
-                              },
+                                },
+                              ),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
 
-                            CustomTextField(
-                              labelText:l10n?.birthWeightRange,
-                              hintText:l10n?.enterBirthWeight,
-                              initialValue: state.birthWeightGrams,
-                              keyboardType: TextInputType.number,
-                              onChanged: (v) => bloc.add(BirthWeightGramsChanged(v)),
-                              validator: (value) {
-                                final text = value?.trim() ?? '';
-                                if (text.isEmpty) {
+                            Container(
+                              key: _keyBirthWeight,
+                              child: CustomTextField(
+                                labelText: l10n?.birthWeightRange,
+                                hintText: l10n?.enterBirthWeight,
+                                initialValue: state.birthWeightGrams,
+                                keyboardType: TextInputType.number,
+                                onChanged: (v) =>
+                                    bloc.add(BirthWeightGramsChanged(v)),
+                                validator: (value) {
+                                  final text = value?.trim() ?? '';
+                                  if (text.isEmpty) {
+                                    return null;
+                                  }
+
+                                  final parsed = int.tryParse(text);
+                                  if (parsed == null) {
+                                    return _captureError(
+                                        l10n?.enterValidBirthWeight,
+                                        _keyBirthWeight);
+                                  }
+
+                                  if (parsed < 1200 || parsed > 4000) {
+                                    return _captureError(
+                                        l10n?.enterValidBirthWeight,
+                                        _keyBirthWeight);
+                                  }
+
                                   return null;
-                                }
-
-                                final parsed = int.tryParse(text);
-                                if (parsed == null) {
-                                  return _captureError(l10n?.enterValidBirthWeight);
-                                }
-
-                                if (parsed < 1200 || parsed > 4000) {
-                                  return _captureError(l10n?.enterValidBirthWeight);
-                                }
-
-                                return null;
-                              },
+                                },
+                              ),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
 
-
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            Container(
+                              key: _keyReligion,
+                              padding:
+                              const EdgeInsets.symmetric(horizontal: 4.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -1028,12 +1234,15 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                       l10n?.religionChristian ?? 'Christian',
                                       l10n?.religionSikh ?? 'Sikh',
                                       l10n?.religionBuddhism ?? 'Buddism',
-                                     l10n?.religionJainism ?? 'Jainism',
+                                      l10n?.religionJainism ?? 'Jainism',
                                       l10n?.religionParsi ?? 'Parsi',
-                                      l10n?.religionNotDisclosed ?? 'Do not want to disclose',
+                                      l10n?.religionNotDisclosed ??
+                                          'Do not want to disclose',
                                       l10n?.other ?? 'Other',
                                     ],
-                                    value: state.religion.isEmpty ? null : state.religion,
+                                    value: state.religion.isEmpty
+                                        ? null
+                                        : state.religion,
                                     getLabel: (s) => s,
                                     onChanged: (v) {
                                       bloc.add(ReligionChanged(v ?? ''));
@@ -1044,18 +1253,27 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                     },
                                     hintText: l10n?.select ?? 'choose',
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                      color: AppColors.divider,
+                                      thickness: 0.5,
+                                      height: 0),
                                   if (state.religion == 'Other')
                                     Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
+                                      padding:
+                                      const EdgeInsets.only(top: 8.0),
                                       child: CustomTextField(
                                         labelText: l10n?.specifyReligionLabel,
                                         hintText: l10n?.enterReligion,
                                         initialValue: state.customReligion,
-                                        onChanged: (v) => bloc.add(CustomReligionChanged(v)),
+                                        onChanged: (v) =>
+                                            bloc.add(CustomReligionChanged(v)),
                                         validator: (value) {
-                                          if (state.religion == 'Other' && (value == null || value.trim().isEmpty)) {
-                                            return l10n?.pleaseSpecifyReligion;
+                                          if (state.religion == 'Other' &&
+                                              (value == null ||
+                                                  value.trim().isEmpty)) {
+                                            return _captureError(
+                                                l10n?.pleaseSpecifyReligion,
+                                                _keyReligion);
                                           }
                                           return null;
                                         },
@@ -1064,11 +1282,16 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                 ],
                               ),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
 
                             // Caste Dropdown with Other Option
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            Container(
+                              key: _keyCategory,
+                              padding:
+                              const EdgeInsets.symmetric(horizontal: 4.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -1112,8 +1335,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                           return s;
                                       }
                                     },
-                                    value: state.caste.isEmpty ? null : state.caste,
-
+                                    value: state.caste.isEmpty
+                                        ? null
+                                        : state.caste,
                                     onChanged: (v) {
                                       bloc.add(CasteChanged(v ?? ''));
                                       // Clear custom caste when changing from 'Other' to something else
@@ -1123,18 +1347,27 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                     },
                                     hintText: l10n!.select ?? 'choose',
                                   ),
-                                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                                  Divider(
+                                      color: AppColors.divider,
+                                      thickness: 0.5,
+                                      height: 0),
                                   if (state.caste == 'Other')
                                     Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
+                                      padding:
+                                      const EdgeInsets.only(top: 8.0),
                                       child: CustomTextField(
                                         labelText: l10n.specifyCategoryShort,
                                         hintText: l10n.enter_category,
                                         initialValue: state.customCaste,
-                                        onChanged: (v) => bloc.add(CustomCasteChanged(v)),
+                                        onChanged: (v) =>
+                                            bloc.add(CustomCasteChanged(v)),
                                         validator: (value) {
-                                          if (state.caste == 'Other' && (value == null || value.trim().isEmpty)) {
-                                            return l10n.specifyCategory;
+                                          if (state.caste == 'Other' &&
+                                              (value == null ||
+                                                  value.trim().isEmpty)) {
+                                            return _captureError(
+                                                l10n.specifyCategory,
+                                                _keyCategory);
                                           }
                                           return null;
                                         },
@@ -1143,7 +1376,10 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                                 ],
                               ),
                             ),
-                            Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                            Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                                height: 0),
                           ],
                         ),
                       ),
@@ -1167,7 +1403,9 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                         child: SizedBox(
                           height: 34,
                           child: RoundButton(
-                            title: state.isSubmitting ? (l10n?.savingButton ?? 'SAVING...') : (l10n?.saveButton ?? 'SAVE'),
+                            title: state.isSubmitting
+                                ? (l10n?.savingButton ?? 'SAVING...')
+                                : (l10n?.saveButton ?? 'SAVE'),
                             color: AppColors.primary,
                             borderRadius: 4,
                             onPress: () {
@@ -1177,8 +1415,22 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
                               final isValid = form.validate();
                               if (!isValid) {
-                                final msg = _firstError ?? l10n.correctHighlightedFields;
+                                final msg = _firstError ??
+                                    l10n.correctHighlightedFields;
                                 showAppSnackBar(context, msg);
+
+                                // SCROLL TO FIRST ERROR
+                                if (_firstErrorKey != null &&
+                                    _firstErrorKey!.currentContext != null) {
+                                  Scrollable.ensureVisible(
+                                    _firstErrorKey!.currentContext!,
+                                    duration:
+                                    const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                    alignment:
+                                    0.1, // 0.1 adds top padding so field isn't hidden under appbar
+                                  );
+                                }
                                 return;
                               }
 
@@ -1201,6 +1453,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
 
   @override
   void dispose() {
+    _scrollController.dispose();
     super.dispose();
   }
 }

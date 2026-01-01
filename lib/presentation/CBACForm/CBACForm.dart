@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
@@ -32,7 +33,6 @@ class Cbacform extends StatefulWidget {
 }
 
 class _CbacformState extends State<Cbacform> {
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -41,9 +41,9 @@ class _CbacformState extends State<Cbacform> {
     final hhid = widget.hhid ?? args?['hhid']?.toString();
 
     print('🚀 Initializing CBAC Form with - beneficiaryId: $beneficiaryId, hhid: $hhid');
-    
+
     return BlocProvider(
-      create: (_) => CbacFormBloc( 
+      create: (_) => CbacFormBloc(
         beneficiaryId: beneficiaryId,
         householdId: hhid,
       )..add(CbacOpened(
@@ -58,23 +58,21 @@ class _CbacformState extends State<Cbacform> {
         body: SafeArea(
           child: BlocConsumer<CbacFormBloc, CbacFormState>(
             listenWhen: (p, c) =>
-                p.consentDialogShown != c.consentDialogShown ||
+            p.consentDialogShown != c.consentDialogShown ||
                 p.consentAgreed != c.consentAgreed ||
                 p.errorMessage != c.errorMessage ||
                 p.missingKeys != c.missingKeys ||
                 p.isSuccess != c.isSuccess,
             listener: (context, state) async {
               final l10n = AppLocalizations.of(context);
-              
-              // Handle form submission success
+
               if (state.isSuccess) {
                 showAppSnackBar(context, 'form submitted successfully');
-                
                 Future.delayed(const Duration(milliseconds: 500), () {
                   Navigator.of(context).pop();
                 });
               }
-              
+
               if (state.consentDialogShown && !state.consentAgreed) {
                 await showDialog(
                   context: context,
@@ -83,10 +81,14 @@ class _CbacformState extends State<Cbacform> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    title: Text(l10n?.cbacConsentTitle ?? 'Consent Form', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),),
+                    title: Text(
+                      l10n?.cbacConsentTitle ?? 'Consent Form',
+                      style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),
+                    ),
                     content: Text(
-                      l10n?.cbacConsentBody ?? 'I have been explained by the ASHA, the purpose for which the information and measurement findings is being collected from me, in a language I understand and I give my consent to collect the information and measurement findings on my personal health profile.',
-                      style:  TextStyle(fontSize: 15.sp),
+                      l10n?.cbacConsentBody ??
+                          'I have been explained by the ASHA, the purpose for which the information and measurement findings is being collected from me, in a language I understand and I give my consent to collect the information and measurement findings on my personal health profile.',
+                      style: TextStyle(fontSize: 15.sp),
                     ),
                     actions: [
                       TextButton(
@@ -108,6 +110,7 @@ class _CbacformState extends State<Cbacform> {
                   ),
                 );
               }
+
               if (state.missingKeys.isNotEmpty && l10n != null) {
                 String labelForKey(String k) {
                   switch (k) {
@@ -143,11 +146,39 @@ class _CbacformState extends State<Cbacform> {
                   return k;
                 }
 
-                // Show only the first missing field label in SnackBar
                 final firstKey = state.missingKeys.first;
                 final firstLabel = labelForKey(firstKey);
                 final msg = '${l10n.cbacPleaseFill}: $firstLabel';
                 showAppSnackBar(context, msg);
+
+                // 🔥 SCROLL TO THE FIRST MISSING FIELD
+                // Add a small delay to ensure the UI is ready
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  // Add a small delay to ensure the UI is ready
+                  Future.delayed(const Duration(milliseconds: 300), () {
+                    // Check which tab the error is on and scroll accordingly
+                    void attemptScroll(int attempt) {
+                      bool didScroll = false;
+                      if (firstKey.startsWith('partA.')) {
+                        didScroll = _PartATab.scrollToField(firstKey);
+                      } else if (firstKey.startsWith('partB.')) {
+                        didScroll = _PartBTab.scrollToField(firstKey);
+                      }
+
+                      debugPrint('CBAC scroll attempt=$attempt key=$firstKey didScroll=$didScroll');
+
+                      if (!didScroll && attempt < 3) {
+                        Future.delayed(const Duration(milliseconds: 250), () {
+                          attemptScroll(attempt + 1);
+                        });
+                      }
+                    }
+
+                    attemptScroll(1);
+                    // Add similar logic for other tabs (_PartATab, _PartCTab, etc.)
+                    // You'll need to implement similar scroll methods in those classes
+                  });
+                });
 
               } else if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
                 showAppSnackBar(context, state.errorMessage!);
@@ -187,12 +218,16 @@ class _CbacformState extends State<Cbacform> {
                           isScrollable: true,
                           indicatorColor: Theme.of(context).colorScheme.onPrimary,
                           labelColor: Theme.of(context).colorScheme.onPrimary,
-                          unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                          unselectedLabelColor: Theme.of(context)
+                              .colorScheme
+                              .onPrimary
+                              .withOpacity(0.7),
                           indicatorWeight: 3.0,
                           tabs: tabs,
-                          onTap: (_) {}, // navigation is controlled by buttons
+                          onTap: (_) {},
+                        ),
                       ),
-                    ),),
+                    ),
                     Expanded(
                       child: TabBarView(
                         physics: const NeverScrollableScrollPhysics(),
@@ -207,7 +242,7 @@ class _CbacformState extends State<Cbacform> {
                             color: Colors.black.withOpacity(0.15),
                             blurRadius: 4,
                             spreadRadius: 2,
-                            offset: const Offset(0, 0), // TOP shadow
+                            offset: const Offset(0, 0),
                           ),
                         ],
                       ),
@@ -216,7 +251,6 @@ class _CbacformState extends State<Cbacform> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // 👇 Keep layout stable — use SizedBox(width: 120) when hidden
                             if (state.activeTab != 0)
                               SizedBox(
                                 height: 34,
@@ -231,8 +265,9 @@ class _CbacformState extends State<Cbacform> {
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                     ),
-                                    onPressed: () =>
-                                        context.read<CbacFormBloc>().add(const CbacPrevTab()),
+                                    onPressed: () => context
+                                        .read<CbacFormBloc>()
+                                        .add(const CbacPrevTab()),
                                     child: Text(
                                       l10n?.previousButton ?? 'PREVIOUS',
                                       style: const TextStyle(color: Colors.white),
@@ -242,7 +277,6 @@ class _CbacformState extends State<Cbacform> {
                               )
                             else
                               const SizedBox(width: 120),
-
                             SizedBox(
                               height: 34,
                               child: RoundButton(
@@ -254,9 +288,13 @@ class _CbacformState extends State<Cbacform> {
                                 isLoading: state.submitting,
                                 onPress: () {
                                   if (state.activeTab == tabs.length - 1) {
-                                    context.read<CbacFormBloc>().add(const CbacSubmitted());
+                                    context
+                                        .read<CbacFormBloc>()
+                                        .add(const CbacSubmitted());
                                   } else {
-                                    context.read<CbacFormBloc>().add(const CbacNextTab());
+                                    context
+                                        .read<CbacFormBloc>()
+                                        .add(const CbacNextTab());
                                   }
                                 },
                               ),
@@ -265,7 +303,6 @@ class _CbacformState extends State<Cbacform> {
                         ),
                       ),
                     ),
-
                   ],
                 ),
               );
@@ -418,7 +455,6 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
       String district = districtMatch?.group(1)?.trim() ?? '';
       String block = blockMatch?.group(1)?.trim() ?? '';
 
-      // Clean up the values (remove trailing commas, etc.)
       firstName = firstName.replaceAll(RegExp(r'[,\s]*$'), '');
       lastName = lastName.replaceAll(RegExp(r'[,\s]*$'), '');
       hscName = hscName.replaceAll(RegExp(r'[,\s]*$'), '');
@@ -834,6 +870,47 @@ class _PersonalInfoTab extends StatelessWidget {
 }
 
 class _PartATab extends StatelessWidget {
+
+  static final Map<String, GlobalKey> _fieldKeys = {};
+  static final ScrollController _scrollController = ScrollController();
+
+  static GlobalKey _getKeyForField(String keyPath) {
+    if (!_fieldKeys.containsKey(keyPath)) {
+      _fieldKeys[keyPath] = GlobalKey();
+    }
+    return _fieldKeys[keyPath]!;
+  }
+
+  static bool scrollToField(String keyPath) {
+    final key = _fieldKeys[keyPath];
+    if (key?.currentContext != null) {
+      final ctx = key!.currentContext!;
+      if (_scrollController.hasClients) {
+        final renderObject = ctx.findRenderObject();
+        if (renderObject != null) {
+          final viewport = RenderAbstractViewport.of(renderObject);
+          final target = viewport.getOffsetToReveal(renderObject, 0.0).offset;
+          _scrollController.animateTo(
+            target,
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeInOut,
+          );
+          return true;
+        }
+      }
+
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+        alignment: 0.0,
+      );
+      return true;
+    }
+    debugPrint('CBAC PartA scrollToField context null for $keyPath');
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CbacFormBloc, CbacFormState>(
@@ -906,6 +983,7 @@ class _PartATab extends StatelessWidget {
 
         Widget qRow({
           required String question,
+          required String keyPath,
           required List<String> items,
           required String? value,
           required void Function(String?) onChanged,
@@ -914,25 +992,28 @@ class _PartATab extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-              //  crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 325,
-                    child: ApiDropdown<String>(
-                      labelText: question,
-                      hintText: l10n.select,
-                      labelFontSize: 15.sp,
-                      items: items,
-                      getLabel: (s) => s,
-                      value: value,
-                      onChanged: onChanged,
-                      isExpanded: true,
+              Container(
+                key: _getKeyForField(keyPath),
+                child: Row(
+                //  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 325,
+                      child: ApiDropdown<String>(
+                        labelText: question,
+                        hintText: l10n.select,
+                        labelFontSize: 15.sp,
+                        items: items,
+                        getLabel: (s) => s,
+                        value: value,
+                        onChanged: onChanged,
+                        isExpanded: true,
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  rowScore(score),
-                ],
+                    const Spacer(),
+                    rowScore(score),
+                  ],
+                ),
               ),
               // const SizedBox(height: 6),
               const Divider(height: 0.5),
@@ -1035,6 +1116,7 @@ class _PartATab extends StatelessWidget {
         final total = scoreAge + scoreTobacco + scoreAlcohol + scoreActivity + scoreWaist + scoreFamily;
 
         return ListView(
+          controller: _scrollController,
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
           children: [
             header(),
@@ -1043,6 +1125,7 @@ class _PartATab extends StatelessWidget {
             qRow(
               question: l10n.cbacA_ageQ,
 
+              keyPath: 'partA.age',
               items: itemsAge,
               value: age,
               onChanged: (v) {
@@ -1057,6 +1140,7 @@ class _PartATab extends StatelessWidget {
 
             qRow(
               question: l10n.cbacA_tobaccoQ,
+              keyPath: 'partA.tobacco',
               items: itemsTobacco,
               value: tobacco,
               onChanged: (v) {
@@ -1071,6 +1155,7 @@ class _PartATab extends StatelessWidget {
  
             qRow(
               question: l10n.cbacA_alcoholQ,
+              keyPath: 'partA.alcohol',
               items: itemsYesNo,
               value: alcohol,
               onChanged: (v) {
@@ -1085,6 +1170,7 @@ class _PartATab extends StatelessWidget {
 
             qRow(
               question: l10n.cbacA_waistQ,
+              keyPath: 'partA.waist',
               items: itemsWaist,
               value: waist,
               onChanged: (v) {
@@ -1099,6 +1185,7 @@ class _PartATab extends StatelessWidget {
 
             qRow(
               question: l10n.cbacA_activityQ,
+              keyPath: 'partA.activity',
               items: itemsActivity,
               value: activity,
               onChanged: (v) {
@@ -1113,6 +1200,7 @@ class _PartATab extends StatelessWidget {
            
             qRow(
               question: l10n.cbacA_familyQ,
+              keyPath: 'partA.familyHistory',
               items: itemsYesNo,
               value: familyHx,
               onChanged: (v) {
@@ -1149,60 +1237,77 @@ class _PartATab extends StatelessWidget {
 }
 
 class _PartBTab extends StatelessWidget {
+
+  static final Map<String, GlobalKey> _fieldKeys = {};
+  static final ScrollController _scrollController = ScrollController();
+
+  static GlobalKey _getKeyForField(String keyPath) {
+    if (!_fieldKeys.containsKey(keyPath)) {
+      _fieldKeys[keyPath] = GlobalKey();
+    }
+    return _fieldKeys[keyPath]!;
+  }
+
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<CbacFormBloc>();
     final l10n = AppLocalizations.of(context)!;
 
     Widget chip(String text) => Container(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(6),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                offset: const Offset(0, 2),
-                blurRadius: 4,
-              )
-            ],
-          ),
-          child: Center(
-            child: Text(
-              text,
-              style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
-            ),
-          ),
-        );
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 4,
+          )
+        ],
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+        ),
+      ),
+    );
 
     List<Widget> qRow(String question, String keyPath) => [
-          Row(
-            children: [
-              Expanded(
-                child: BlocBuilder<CbacFormBloc, CbacFormState>(
-                  buildWhen: (previous, current) => previous.data[keyPath] != current.data[keyPath],
-                  builder: (context, state) {
-                    return ApiDropdown<String>(
-                      labelText: question,
-                      hintText: l10n.select,
-                      labelFontSize: 15.sp,
-                      items: [l10n.yes, l10n.no],
-                      getLabel: (s) => s,
-                      value: state.data[keyPath],
-                      onChanged: (v) => bloc.add(CbacFieldChanged(keyPath, v)),
-                      isExpanded: true,
-                    );
-                  },
-                ),
+
+      Container(
+        key: _getKeyForField(keyPath),
+        child: Row(
+          children: [
+            Expanded(
+              child: BlocBuilder<CbacFormBloc, CbacFormState>(
+                buildWhen: (previous, current) =>
+                previous.data[keyPath] != current.data[keyPath],
+                builder: (context, state) {
+                  return ApiDropdown<String>(
+                    labelText: question,
+                    hintText: l10n.select,
+                    labelFontSize: 15.sp,
+                    items: [l10n.yes, l10n.no],
+                    getLabel: (s) => s,
+                    value: state.data[keyPath],
+                    onChanged: (v) => bloc.add(CbacFieldChanged(keyPath, v)),
+                    isExpanded: true,
+                  );
+                },
               ),
-              const SizedBox(width: 12),
-            ],
-          ),
-          const Divider(height: 0.5),
-        ];
+            ),
+            const SizedBox(width: 12),
+          ],
+        ),
+      ),
+      const Divider(height: 0.5),
+    ];
 
     return ListView(
+      controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
       children: [
         chip(l10n.cbacPartB1),
@@ -1223,8 +1328,6 @@ class _PartBTab extends StatelessWidget {
         ...qRow("${l10n.cbacB_b1_history} **", 'partB.b1.history'),
         ...qRow(l10n.cbacB_b1_palmsSores, 'partB.b1.palms'),
         ...qRow(l10n.cbacB_b1_tingling, 'partB.b1.tingling'),
-
-        // Additional Part B1 (as per image)
         ...qRow(l10n.cbacB_b1_visionBlurred, 'partB.b1.visionBlurred'),
         ...qRow(l10n.cbacB_b1_readingDifficulty, 'partB.b1.readingDifficulty'),
         ...qRow(l10n.cbacB_b1_eyePain, 'partB.b1.eyePain'),
@@ -1241,25 +1344,24 @@ class _PartBTab extends StatelessWidget {
         ...qRow(l10n.cbacB_b1_holdingDifficulty, 'partB.b1.holdingDifficulty'),
         ...qRow(l10n.cbacB_b1_legWeaknessWalk, 'partB.b1.legWeaknessWalk'),
 
-        // Female-specific questions - only show if gender is female
         BlocBuilder<CbacFormBloc, CbacFormState>(
-          buildWhen: (previous, current) => previous.data['personal.gender'] != current.data['personal.gender'],
+          buildWhen: (previous, current) =>
+          previous.data['personal.gender'] != current.data['personal.gender'] ||
+              previous.data['personal.gender_code'] != current.data['personal.gender_code'],
           builder: (context, state) {
-            final isFemale = state.data['personal.gender_code'] == 'F' || 
-                       state.data['personal.gender'] == 'Female';
+            final isFemale = state.data['personal.gender_code'] == 'F' ||
+                state.data['personal.gender'] == 'Female';
             if (!isFemale) return const SizedBox.shrink();
-            
+
             return Column(
               children: [
                 chip(l10n.cbacPartB2),
                 ...qRow(l10n.cbacB_b2_breastLump, 'partB.b2.breastLump'),
                 ...qRow(l10n.cbacB_b2_nippleBleed, 'partB.b2.nippleBleed'),
                 ...qRow(l10n.cbacB_b2_breastShapeDiff, 'partB.b2.breastShapeDiff'),
-                ...qRow(
-                   " ${l10n.cbacB_b2_excessBleeding}***", 'partB.b2.excessBleeding'),
+                ...qRow(" ${l10n.cbacB_b2_excessBleeding}***", 'partB.b2.excessBleeding'),
                 ...qRow("${l10n.cbacB_b2_depression}***", 'partB.b2.depression'),
-                ...qRow(
-                    "${l10n.cbacB_b2_uterusProlapse}***", 'partB.b2.uterusProlapse'),
+                ...qRow("${l10n.cbacB_b2_uterusProlapse}***", 'partB.b2.uterusProlapse'),
                 ...qRow(l10n.cbacB_b2_postMenopauseBleed, 'partB.b2.postMenopauseBleed'),
                 ...qRow(l10n.cbacB_b2_postIntercourseBleed, 'partB.b2.postIntercourseBleed'),
                 ...qRow(l10n.cbacB_b2_smellyDischarge, 'partB.b2.smellyDischarge'),
@@ -1271,6 +1373,37 @@ class _PartBTab extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  // Static method to scroll to a specific field
+  static bool scrollToField(String keyPath) {
+    final key = _fieldKeys[keyPath];
+    if (key?.currentContext != null) {
+      final ctx = key!.currentContext!;
+      if (_scrollController.hasClients) {
+        final renderObject = ctx.findRenderObject();
+        if (renderObject != null) {
+          final viewport = RenderAbstractViewport.of(renderObject);
+          final target = viewport.getOffsetToReveal(renderObject, 0.0).offset;
+          _scrollController.animateTo(
+            target,
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeInOut,
+          );
+          return true;
+        }
+      }
+
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+        alignment: 0.0,
+      );
+      return true;
+    }
+    debugPrint('CBAC PartB scrollToField context null for $keyPath');
+    return false;
   }
 }
 

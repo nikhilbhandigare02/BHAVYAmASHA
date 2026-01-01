@@ -22,6 +22,27 @@ class ChildDetailsTab extends StatefulWidget {
   final int childIndex;
   const ChildDetailsTab({super.key, required this.beneficiaryId, this.childTabCount = 1, this.childIndex = 1});
 
+  // Create keys for fields that have validation
+  static final Map<String, GlobalKey> fieldKeys = {
+    'babyCondition': GlobalKey(),
+    'babyName': GlobalKey(),
+    'gender': GlobalKey(),
+    'weightAtBirth': GlobalKey(),
+    'temperature': GlobalKey(),
+    'temperatureUnit': GlobalKey(),
+    'breathingRate': GlobalKey(),
+    'breastfeeding': GlobalKey(),
+    'skinToSkin': GlobalKey(),
+    'bcgGiven': GlobalKey(),
+    'opv0Given': GlobalKey(),
+    'hepatitisB0Given': GlobalKey(),
+    'vitaminKGiven': GlobalKey(),
+    'eyeOintmentGiven': GlobalKey(),
+    'referralNeeded': GlobalKey(),
+    'referralPlace': GlobalKey(),
+    'referralReason': GlobalKey(),
+  };
+
   @override
   State<ChildDetailsTab> createState() => _ChildDetailsTabState();
 }
@@ -104,11 +125,11 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
             if (decoded is Map && decoded['anc_form'] is Map) {
               final fd = Map<String, dynamic>.from(decoded['anc_form'] as Map);
               final outcome = fd['delivery_outcome']?.toString();
-              
+
               // Check for children_arr first (new structure)
               final childrenArr = fd['children_arr'] as List?;
               String? babyName, babyGender, babyWeight;
-              
+
               if (childrenArr != null && childrenArr.isNotEmpty) {
                 final childIndex = widget.childIndex - 1; // Convert to 0-based index
                 if (childIndex < childrenArr.length) {
@@ -129,7 +150,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                 babyWeight = fd['baby${sfx}_weight']?.toString();
                 print('👶 Loaded child data from old fields for child ${widget.childIndex}: name=$babyName, gender=$babyGender, weight=$babyWeight');
               }
-              
+
               if (mounted && (outcome == 'Live birth' || outcome == 'live_birth')) {
                 final bloc = context.read<HbncVisitBloc>();
                 bloc.add(NewbornDetailsChanged(field: 'babyCondition', value: 'alive', childIndex: widget.childIndex));
@@ -177,16 +198,24 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
         }
         final t = AppLocalizations.of(context)!;
 
-        return ListView(
-          padding: const EdgeInsets.all(8),
-          children: [
-            SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+        return BlocConsumer<HbncVisitBloc, HbncVisitState>(
+          listenWhen: (previous, current) =>
+          previous.newbornDetailsList != current.newbornDetailsList,
+          listener: (context, state) {
+            print('ChildDetails (from state): ${state.newbornDetailsList}');
+          },
+          builder: (context, state) {
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   ApiDropdown<String>(
+                    key: ChildDetailsTab.fieldKeys['babyCondition'],
                     labelText: "${t.babyConditionLabel} *",
                     items:  ['alive', 'death'],
+                    validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
                     getLabel: (e) => e == 'alive' ? t.alive : t.dead,
                     value: s(c['babyCondition']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
@@ -196,8 +225,10 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   CustomTextField(
+                    key: ChildDetailsTab.fieldKeys['babyName'],
                     labelText: "${t.babyNameLabel} *",
                     hintText: t.babyNameLabel,
+                    validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
                     initialValue: s(c['babyName']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'babyName', value: val, childIndex: widget.childIndex),
@@ -206,8 +237,10 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   ApiDropdown<String>(
+                    key: ChildDetailsTab.fieldKeys['gender'],
                     labelText: "${t.babyGenderLabel} *",
                     hintText: t.babyGenderLabel,
+                    validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
                     items: const ['Male', 'Female', 'Transgender'],
                     getLabel: (s) {
                       switch (s) {
@@ -234,9 +267,11 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   CustomTextField(
+                    key: ChildDetailsTab.fieldKeys['weightAtBirth'],
                     labelText: "${t.newbornWeightGramLabel} *",
                     hintText: t.newbornWeightGramLabel,
                     keyboardType: TextInputType.number,
+                    validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
                     initialValue: s(c['weightAtBirth']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'weightAtBirth', value: val, childIndex: widget.childIndex),
@@ -245,9 +280,11 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                   CustomTextField(
+                    key: ChildDetailsTab.fieldKeys['temperature'],
                     labelText: "${t.newbornTemperatureLabel} *",
                     hintText: t.hintTemp,
                     keyboardType: TextInputType.number,
+                    validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
                     initialValue: s(c['temperature']),
                     onChanged: (val) {
                       context.read<HbncVisitBloc>().add(
@@ -919,7 +956,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   ),
                   const Divider(height: 0,),
 
-                  if (c['birthDoseVaccination'] == 'Yes') ...[ 
+                  if (c['birthDoseVaccination'] == 'Yes') ...[
                     VaccineTable(),
                     Divider(height: 0,),
                     SizedBox(height: 5,)
@@ -981,9 +1018,10 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   const Divider(height: 0,),
 
                 ],
+                ),
               ),
-            ),
-          ],
+            );
+          },
         );
       },
 
@@ -1092,7 +1130,7 @@ class _VaccineTableState extends State<VaccineTable> {
   }
 }
 
-/// ---------- Cells ----------
+/// ---------- Cells ----------///
 
 class _HeaderCell extends StatelessWidget {
   final String text;
