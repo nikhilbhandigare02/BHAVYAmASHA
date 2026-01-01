@@ -168,7 +168,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
-
+    final l = AppLocalizations.of(context);
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -246,13 +246,13 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: _infoRow('Mobile No:', data['mobile']?.isNotEmpty == true ? data['mobile'] : 'Not Available'),
+                        child: _infoRow("${l!.mobileNumber} :", data['mobile']?.isNotEmpty == true ? data['mobile'] : 'N/A'),
                       ),
                       const SizedBox(width: 13),
                       Expanded(
                         child: _infoRow(
-                          'Mohalla',
-                          data['mohalla']?.isNotEmpty == true ? data['mohalla'] : 'Not Available',
+                          "${l.mohalla} :",
+                          data['mohalla']?.isNotEmpty == true ? data['mohalla'] : 'N/A',
                           isWrappable: true,
                         ),
                       ),

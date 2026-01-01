@@ -39,28 +39,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
   void _onSearchChanged() {
 
   }
-
-  Future<int> _getVisitCount(String beneficiaryId) async {
-    try {
-      if (beneficiaryId.isEmpty) return 0;
-
-      final db = await DatabaseProvider.instance.database;
-      final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
-
-      final List<Map<String, dynamic>> results = await db.query(
-        FollowupFormDataTable.table,
-        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
-        whereArgs: [beneficiaryId, hbncVisitKey],
-        columns: ['id'],
-      );
-
-      return results.length;
-    } catch (e) {
-      print('Error in _getVisitCount: $e');
-      return 0;
-    }
-  }
-
+ 
   Future<List<Map<String, dynamic>>> _getDeliveryOutcomeData() async {
     try {
       final db = await DatabaseProvider.instance.database;
@@ -89,6 +68,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
       WHERE forms_ref_key = ? 
       AND current_user_key = ?
       AND beneficiary_ref_key IN ($placeholders)
+      AND (is_deleted IS NULL OR is_deleted = 0)
       ORDER BY created_date_time DESC
     ''';
 
@@ -162,7 +142,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
           final db = await DatabaseProvider.instance.database;
           final beneficiaryResults = await db.query(
             'beneficiaries_new',
-            where: 'unique_key = ? AND is_deleted = 0',
+            where: 'unique_key = ?',
             whereArgs: [beneficiaryRefKey],
           );
 
@@ -226,15 +206,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
           _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _filtered.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          'No HBNC beneficiaries found',
-                          style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-                        ),
-                      ),
-                    )
+                  ? _buildNoRecordCard(context)
                   : Expanded(
                       child: ListView.builder(
                         padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
@@ -253,6 +225,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
+    final l10n = AppLocalizations.of(context);
 
     return InkWell(
       onTap: () {
@@ -304,7 +277,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      data['status'] ?? '',
+                      l10n?.badgePNC ?? 'PNC',
                       style: const TextStyle(
                         color: Colors.green, // ✅ Text color
                         fontWeight: FontWeight.bold,
@@ -361,6 +334,37 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNoRecordCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Card(
+        color: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 50.0, horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                l10n?.noRecordFound ?? 'No Record Found',
+                style: TextStyle(
+                  fontSize: 17.sp,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

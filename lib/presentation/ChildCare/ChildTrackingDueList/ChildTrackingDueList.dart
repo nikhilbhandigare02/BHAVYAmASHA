@@ -579,7 +579,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: 'Search by name, ID, or mobile...',
+                hintText: l10n!.childTrackingDueSearch,
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
@@ -787,7 +787,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.nameLabelSimple ?? 'Name', data['Name'] ?? 'N/A')),
+                      Expanded(child: _rowText("${l10n?.nameLabel}" , data['Name'] ?? 'N/A')),
                       const SizedBox(width: 8),
                       Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? 'N/A')),
                       const SizedBox(width: 8),
@@ -806,7 +806,14 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                           data['Mobileno.']?.isNotEmpty == true ? data['Mobileno.'] : 'N/A',
                         ),
                       ),
-                      const SizedBox(width: 130),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _rowText(
+                          '',
+                          '',
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: _rowText(
                           l10n?.fatherNameLabel ?? 'Father\'s Name',

@@ -127,7 +127,7 @@ class BeneficiaryRepository {
           'mother_key': rec['mother_key']?.toString(),
           'father_key': rec['father_key']?.toString(),
           'is_family_planning': _toInt(rec['is_family_planning']),
-          'is_adult': _toInt(rec['is_adult']),
+          'is_adult': (info['memberType']?.toString() == 'adult') ? 1 : 0,
           'is_guest': _toInt(rec['is_guest']),
           'is_death': _toInt(rec['is_death']),
           'death_details': rec['death_details'] ?? {},

@@ -288,6 +288,23 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     }
   }
 
+  String _getLocalizedBadge(String badge, AppLocalizations l10n) {
+    switch (badge) {
+      case 'Family':
+        return l10n.badgeFamily;
+      case 'EligibleCouple':
+        return l10n.badgeEligibleCouple;
+      case 'ANC':
+        return l10n.anc;
+      case 'HBNC':
+        return l10n.hbnc;
+      case 'RI':
+        return l10n.categoryRI;
+      default:
+        return badge;
+    }
+  }
+
   Future<void> _loadCompletedVisitsCount() async {
     try {
       // First try to load from SecureStorage
@@ -2247,7 +2264,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             ),
           );
         } else if (badge == 'EligibleCouple') {
-          // Align with UpdatedEligibleCoupleListScreen: pass short ID + full ref key
           final displayId = item['id']?.toString() ?? '';
           final beneficiaryRefKey = item['BeneficiaryID']?.toString() ?? item['unique_key']?.toString() ?? '';
           if (displayId.isEmpty || beneficiaryRefKey.isEmpty) return;
@@ -2263,7 +2279,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           if (result == true && mounted) {
             setState(() {
               _completedVisitsCount++;
-              // Remove the item from the eligible couple items list
               _eligibleCoupleItems.removeWhere(
                 (element) =>
                     element['id'] == item['id'] &&
@@ -2273,7 +2288,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             _saveTodayWorkCountsToStorage();
           }
         } else if (badge == 'ANC') {
-          // Navigate to ANC Visit Form with full beneficiary data
+
           final hhId =
               item['hhId']?.toString() ??
               item['household_ref_key']?.toString() ??
@@ -2444,7 +2459,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         borderRadius: BorderRadius.circular(18),
                       ),
                       child: Text(
-                        badge,
+                        _getLocalizedBadge(badge, l10n!),
                         style: const TextStyle(
                           color: Color(0xFF0E7C3A),
                           fontWeight: FontWeight.w700,

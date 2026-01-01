@@ -469,16 +469,15 @@ LEFT JOIN LatestANC a
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) return 0;
-
       const deliveryOutcomeKey = '4r7twnycml3ej1vg';
 
       final validBeneficiaries = await db.rawQuery('''
-        SELECT DISTINCT mca.beneficiary_ref_key 
-        FROM mother_care_activities mca
-        WHERE mca.mother_care_state = 'pnc_mother'
-          AND mca.is_deleted = 0
-          AND mca.current_user_key = ?
-      ''', [ashaUniqueKey]);
+      SELECT DISTINCT mca.beneficiary_ref_key 
+      FROM mother_care_activities mca
+      WHERE mca.mother_care_state IN ('pnc_mother', 'pnc_mother')
+      AND mca.is_deleted = 0
+      AND mca.current_user_key = ?
+    ''', [ashaUniqueKey]);
 
       if (validBeneficiaries.isEmpty) return 0;
 
@@ -489,26 +488,25 @@ LEFT JOIN LatestANC a
           .toList();
 
       final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
-      final query = '''
-        SELECT beneficiary_ref_key FROM followup_form_data
-        WHERE forms_ref_key = ?
-          AND current_user_key = ?
-          AND beneficiary_ref_key IN ($placeholders)
-          AND (is_deleted IS NULL OR is_deleted = 0)
-      ''';
+      final dbOutcomes = await db.rawQuery('''
+  SELECT DISTINCT ffd.beneficiary_ref_key
+  FROM followup_form_data ffd
+  INNER JOIN beneficiaries_new bn
+      ON bn.unique_key = ffd.beneficiary_ref_key
+  WHERE ffd.forms_ref_key = ?
+    AND ffd.current_user_key = ?
+    AND bn.current_user_key = ?
+    AND bn.is_deleted = 0
+    AND ffd.beneficiary_ref_key IN ($placeholders)
+''', [
+        deliveryOutcomeKey,
+        ashaUniqueKey,
+        ashaUniqueKey,
+        ...beneficiaryKeys
+      ]);
 
-      final results = await db.rawQuery(
-        query,
-        [deliveryOutcomeKey, ashaUniqueKey, ...beneficiaryKeys],
-      );
-
-      final unique = results
-          .map((e) => e['beneficiary_ref_key']?.toString())
-          .where((id) => id != null && id!.isNotEmpty)
-          .cast<String>()
-          .toSet();
-
-      return unique.length;
+      final count = dbOutcomes.length;
+      return count;
     } catch (e) {
       return 0;
     }

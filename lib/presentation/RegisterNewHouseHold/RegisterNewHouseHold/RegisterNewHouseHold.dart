@@ -658,7 +658,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               'Age': spouseAge,
               'Gender': spouseGender,
               'Relation': 'Wife',
-              'Father': '',
+              'Father': (_headForm?['sp_fatherName'] ?? '').toString(),
               'Spouse': name,
               'Total Children': totalChildren,
             });
@@ -823,6 +823,19 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             } else {
               spouseAge = _extractYearsFromApprox(result['spouseApproxAge']);
             }
+            String spouseFather = '';
+            try {
+              final spRaw = result['spousedetails'];
+              Map<String, dynamic>? spMap;
+              if (spRaw is Map) {
+                spMap = Map<String, dynamic>.from(spRaw);
+              } else if (spRaw is String && spRaw.isNotEmpty) {
+                spMap = Map<String, dynamic>.from(jsonDecode(spRaw));
+              }
+              if (spMap != null) {
+                spouseFather = (spMap['fatherName'] ?? '').toString();
+              }
+            } catch (_) {}
             _members.add({
               '#': '${_members.length + 1}',
               'Type': 'Adult',
@@ -830,7 +843,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               'Age': spouseAge,
               'Gender': spouseGender,
               'Relation': 'Spouse',
-              'Father': '',
+              'Father': spouseFather,
               'Spouse': name,
               'Total Children': totalChildren,
               'formIndex': formIndex.toString(),
@@ -1027,6 +1040,13 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               final initialMember = Map<String, dynamic>.from(_memberForms[idx]);
               final isSpouseRow = (m['isSpouseRow'] ?? '0').toString() == '1';
               final int initialStep = isSpouseRow ? 1 : 0;
+              
+              // Ensure marital status is set to 'Married' when opening spouse cards
+              // so that the spouse tab becomes accessible
+              if (isSpouseRow) {
+                initialMember['maritalStatus'] = 'Married';
+              }
+              
               final result = await Navigator.of(context).push<Map<String, dynamic>>(
                 MaterialPageRoute(
                   builder: (_) => AddNewFamilyMemberScreen(
@@ -1113,6 +1133,19 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                       spouseRow['Spouse'] = name;
                       spouseRow['Total Children'] = totalChildren;
                     } else {
+                      String spouseFather = '';
+                      try {
+                        final spRaw = result['spousedetails'];
+                        Map<String, dynamic>? spMap;
+                        if (spRaw is Map) {
+                          spMap = Map<String, dynamic>.from(spRaw);
+                        } else if (spRaw is String && spRaw.isNotEmpty) {
+                          spMap = Map<String, dynamic>.from(jsonDecode(spRaw));
+                        }
+                        if (spMap != null) {
+                          spouseFather = (spMap['fatherName'] ?? '').toString();
+                        }
+                      } catch (_) {}
                       _members.add({
                         '#': '${_members.length + 1}',
                         'Type': 'Adult',
@@ -1120,7 +1153,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                         'Age': spouseAge,
                         'Gender': spouseGender,
                         'Relation': 'Spouse',
-                        'Father': '',
+                        'Father': spouseFather,
                         'Spouse': name,
                         'Total Children': totalChildren,
                         'formIndex': formIndexKey,
@@ -1254,7 +1287,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                         'Age': spouseAge,
                         'Gender': spouseGender,
                         'Relation': _members[spouseIndex]['Relation'] ?? 'Wife',
-                        'Father': '',
+                        'Father': (_headForm?['sp_fatherName'] ?? '').toString(),
                         'Spouse': name,
                         'Total Children': totalChildren,
                       };

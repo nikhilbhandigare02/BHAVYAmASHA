@@ -618,7 +618,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: l10n?.searchHintRegisterChildDueList ?? 'Search...',
+                hintText: l10n?.childRegisteredDueListSearch ?? 'Search...',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
@@ -909,7 +909,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                     children: [
                       Expanded(
                         child: _rowText(
-                          l10n?.nameLabelSimple ?? 'Name',
+                          l10n?.nameLabel ?? 'Name',
                           data['Name'] ?? 'N/A',
                         ),
                       ),

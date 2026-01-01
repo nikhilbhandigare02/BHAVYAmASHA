@@ -122,16 +122,6 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
       return;
     }
 
-    if (state.reEnterPassword.trim().isEmpty) {
-      emit(
-        state.copyWith(
-          postApiStatus: PostApiStatus.error,
-          error: l10n?.validateEmptyRRP ?? 'Please re-enter the new password',
-        ),
-      );
-      return;
-    }
-
     if (state.currentPassword.trim() == state.newPasswordPassword.trim()) {
       emit(
         state.copyWith(
@@ -139,6 +129,16 @@ class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
           error:
               l10n?.cpAndNPNotSame ??
               'The Current password and the new password can not be same.',
+        ),
+      );
+      return;
+    }
+
+    if (state.reEnterPassword.trim().isEmpty) {
+      emit(
+        state.copyWith(
+          postApiStatus: PostApiStatus.error,
+          error: l10n?.validateEmptyRRP ?? 'Please re-enter the new password',
         ),
       );
       return;

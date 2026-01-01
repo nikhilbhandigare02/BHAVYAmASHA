@@ -245,25 +245,15 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
 
       final List<Map<String, dynamic>> rows = await db.rawQuery('''
   SELECT 
-    B.*, 
-    B.is_death,
-    C.child_care_state
+    B.*
   FROM beneficiaries_new B
-  INNER JOIN (
-    SELECT beneficiary_ref_key, child_care_state
-    FROM child_care_activities
-    WHERE current_user_key = ?
-    GROUP BY beneficiary_ref_key
-  ) C
-    ON B.unique_key = C.beneficiary_ref_key
   WHERE 
     B.is_deleted = 0
     AND B.is_adult = 0
     AND B.is_migrated = 0
     AND B.current_user_key = ?
-    AND C.child_care_state IN ('registration_due', 'tracking_due')
   ORDER BY B.created_date_time DESC
-''', [ashaUniqueKey, ashaUniqueKey]);
+''', [ashaUniqueKey]);
 
 
       print('📊 Found ${rows.length} total beneficiaries');
@@ -284,7 +274,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
           final relation = info['relation']?.toString().toLowerCase() ?? '';
 
           if (memberType == 'child' || relation == 'child' ||
-              relation == 'son' || relation == 'daughter') {
+              memberType == 'Child' || relation == 'daughter') {
 
             final name = info['name']?.toString() ??
                 info['memberName']?.toString() ??
@@ -350,7 +340,6 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
           debugPrint('✅ Loaded ${_childBeneficiaries.length} child beneficiaries');
           debugPrint('✅ Filtered list contains ${_filtered.length} records');
 
-          // Log first few records for verification
           final count = _childBeneficiaries.length > 5 ? 5 : _childBeneficiaries.length;
           for (int i = 0; i < count; i++) {
             debugPrint('Record $i: ${_childBeneficiaries[i]['Name']} (ID: ${_childBeneficiaries[i]['BeneficiaryID']})');
@@ -491,7 +480,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: l10n?.searchHint ?? 'Search All Beneficiary',
+                hintText: l10n?.childRegisteredBeneficiaryListSearch ?? 'Search All Beneficiary',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppColors.background,
@@ -700,7 +689,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.nameLabelSimple ?? 'Name', data['Name'] ?? 'N/A')),
+                      Expanded(child: _rowText(l10n?.nameLabel ?? 'Name', data['Name'] ?? 'N/A')),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? 'N/A')),
                       const SizedBox(width: 12),

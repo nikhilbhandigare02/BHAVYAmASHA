@@ -21,6 +21,7 @@ class Childrendetaills extends StatefulWidget {
 
 class _ChildrendetaillsState extends State<Childrendetaills> {
   String? _youngestAgeError;
+  String? _youngestGenderError;
 
   Widget _section(Widget child) => child;
 
@@ -260,12 +261,30 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                     },
                     value: state.youngestGender,
                     onChanged: (v) {
+                      String? err;
+                      if (v == 'Male' && state.totalMale == 0) {
+                        err = l.invalidGenderMaleZero;
+                      } else if (v == 'Female' && state.totalFemale == 0) {
+                        err = l.invalidGenderFemaleZero;
+                      }
                       context.read<ChildrenBloc>().add(ChUpdateYoungestGender(v));
-                      // Trigger validation when gender changes
                       setState(() {
+                        _youngestGenderError = err;
                         _youngestAgeError = _validateYoungestAge(state.youngestAge ?? '');
                       });
                     },
+                  ),
+                ),
+              if (_youngestGenderError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0, left: 4.0),
+                  child: Text(
+                    _youngestGenderError!,
+                    style: TextStyle(
+                      color: Colors.red.shade700,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),

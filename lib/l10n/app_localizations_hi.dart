@@ -863,13 +863,25 @@ class AppLocalizationsHi extends AppLocalizations {
   String get childRegisteredBeneficiaryListTitle => 'पंजीकृत बालक\nलाभार्थी सूची';
 
   @override
+  String get childRegisteredBeneficiaryListSearch => 'पंजीकृत बाल लाभार्थी खोंजे';
+
+  @override
   String get childRegisteredDueListTitle => 'बाल पंजीकरण\nदेय सूची';
+
+  @override
+  String get childRegisteredDueListSearch => 'पंजीकृत बच्चे को खोंजे';
 
   @override
   String get childTrackingDueListTitle => 'बाल ट्रैकिंग\nदेय सूची';
 
   @override
+  String get childTrackingDueSearch => 'लंबीत ट्रेकिंग वाले बच्चे को खोंजे ';
+
+  @override
   String get searchHintchildTrackingDueListTitle => 'बाल ट्रैकिंग देय खोजें';
+
+  @override
+  String get trainingSuccess => 'प्रशिक्षण सफलतापूर्वक निर्धारित किया गया है';
 
   @override
   String get children0to1 => '0-1 वर्ष के बच्चे';
@@ -5020,10 +5032,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get categoryANC => 'एएनसी';
 
   @override
-  String get categoryPNC => 'पीएनसी';
+  String get categoryPNC => 'पीएनसी देय';
 
   @override
-  String get categoryRI => 'आरआई';
+  String get categoryRI => 'चाइल्ड ट्रैकिंग';
 
   @override
   String get enter10DigitNumber => '10 अंकों का नंबर दर्ज करें';
@@ -5353,7 +5365,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get reasonForRemoval => 'निकासी का कारण';
 
   @override
-  String get anc => 'एएनसी';
+  String get anc => 'एएनसी देय';
 
   @override
   String get pmsma => 'पी.एम.एस.एम.ए';
@@ -6472,6 +6484,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get child_deseased_list => 'मृत बच्चे की सूची';
 
   @override
+  String get child_deseased_search => 'मृत बच्चे खोजें';
+
+  @override
   String get searchByNameIdMobile => 'नाम, आईडी या मोबाइल से खोजें';
 
   @override
@@ -6562,7 +6577,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get no_ChildrenFound => 'कोई बच्चा नहीं मिला';
 
   @override
-  String get caseClosureRecorded => 'केस बंद करने का रिकॉर्ड किया गया। बच्चे को ट्रैकिंग सूची से हटा दिया गया।';
+  String get caseClosureRecorded => 'केस समापन दर्ज किया गया। बच्चे को ट्रैकिंग सूची से हटाया गया है।';
 
   @override
   String get childRegistration => 'शिशु पंजीकरण';
@@ -6703,6 +6718,45 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hbyc => 'एच.बी.वाई.सी';
 
   @override
+  String get badgeFamily => 'परिवार';
+
+  @override
+  String get badgeEligibleCouple => 'योग्य दंपत्ति';
+
+  @override
+  String get badgeHRP => 'उच्च जोखिम';
+
+  @override
+  String get badgeAdult => 'वयस्क';
+
+  @override
+  String get badgeChild => 'बच्चा';
+
+  @override
+  String get badgeInfant => 'शिशु';
+
+  @override
+  String get badgeGuest => 'अतिथि';
+
+  @override
+  String get badgePNC => 'पीएनसी';
+
+  @override
+  String get badgeLBW => 'एल-बी-डब्ल्यू रेफर';
+
+  @override
+  String get badgeMigrated => 'माइग्रेटेड आउट';
+
+  @override
+  String get badgePregnant => 'गर्भवती';
+
+  @override
+  String get trainingTypeReceiving => 'प्राप्त हो रहा है';
+
+  @override
+  String get trainingTypeProviding => 'प्रदान हो रहा है';
+
+  @override
   String get ashaFacilitatorTraining => 'आशा फैसिलिटेटर प्रशिक्षण';
 
   @override
@@ -6716,6 +6770,21 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get otherTraining => 'अन्य प्रशिक्षण';
+
+  @override
+  String get trainingNameAshaModule1 => 'आशा मॉड्यूल 1';
+
+  @override
+  String get trainingNameAshaModule2 => 'आशा मॉड्यूल 2';
+
+  @override
+  String get trainingNameAshaModule3 => 'आशा मॉड्यूल 3';
+
+  @override
+  String get trainingNameAshaModule4 => 'आशा मॉड्यूल 4';
+
+  @override
+  String get trainingNameAshaModule567 => 'आशा मॉड्यूल 5,6 और 7';
 
   @override
   String get receiving => 'प्राप्त हो रहा है';
@@ -6860,6 +6929,15 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get pleaseEnterValidPassword => 'कृपया वैध पासवर्ड दर्ज करें';
+
+  @override
+  String get pleaseEnterCorrectCurrentPassword => 'कृपया सही वर्तमान पासवर्ड दर्ज करें';
+
+  @override
+  String get invalidGenderMaleZero => 'कृपया सही लिंग चुनें क्योंकि कुल पुरुष बच्चों की संख्या 0 है';
+
+  @override
+  String get invalidGenderFemaleZero => 'कृपया सही लिंग चुनें क्योंकि कुल महिला बच्चों की संख्या 0 है';
 
   @override
   String get enterValidNumber => 'कृपया वैध संख्या दर्ज करें';
@@ -7103,4 +7181,13 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get nextVisit => 'अगली HBNC विज़िट की नियत तिथि';
+
+  @override
+  String get enterMobileToSearchAbha => 'ABHA खोजने के लिए मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get invalidMobileNumber => 'अमान्य मोबाइल नंबर';
+
+  @override
+  String get enterValidIndianMobile => 'मान्य भारतीय मोबाइल नंबर दर्ज करें';
 }

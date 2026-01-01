@@ -427,12 +427,12 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     
                     return Container(
                       width: double.infinity,
-                      height: buttonHeight.clamp(44.0, 60.0), // Reasonable min/max
+                      height: buttonHeight.clamp(44.0, 60.0),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).colorScheme.primary,
                           elevation: 0,
-                          padding: EdgeInsets.symmetric(vertical: buttonHeight * 0.2), // Responsive padding
+                          padding: EdgeInsets.symmetric(vertical: buttonHeight * 0.2),
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(0),
@@ -492,7 +492,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
       contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.5.h),
       dense: true,
       visualDensity: VisualDensity(vertical: -2),
-      minLeadingWidth: iconSize + 8, // Add some padding
+      minLeadingWidth: iconSize + 8,
       leading: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: iconSize,

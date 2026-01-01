@@ -305,7 +305,6 @@ class SecureStorageService {
     await _storage.write(key: _keyIsLoggedIn, value: value.toString());
   }
 
-  // Get login flag
   static Future<int> getLoginFlag() async {
     final value = await _storage.read(key: _keyIsLoggedIn);
     return int.tryParse(value ?? '0') ?? 0;
