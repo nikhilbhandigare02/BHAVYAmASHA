@@ -97,7 +97,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
         final t = AppLocalizations.of(context);
         return Scaffold(
           appBar: AppHeader(
-            screenTitle: t?.eligibleCoupleUpdateTitle ?? 'Eligible Couple',
+            screenTitle: t?.gridEligibleCoupleASHA ?? 'Eligible Couple',
             showBack: true,
           ),
           body: SafeArea(

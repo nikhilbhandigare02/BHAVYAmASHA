@@ -892,7 +892,7 @@ class _RegisterChildDueListFormScreen extends State<RegisterChildDueListFormScre
                               children: [
                                 Expanded(
                                   child: CustomTextField(
-                                    labelText: l10n?.mothersRchIdLabel ?? "Mother's RCH ID number",
+                                    labelText: l10n?.mothersRchIdLabel ?? "RCH ID no.of mother",
                                     hintText: l10n?.mothersRchIdLabel,
                                     initialValue: state.mothersRchIdNumber,
                                     maxLength: 12,
