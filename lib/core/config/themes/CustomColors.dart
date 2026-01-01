@@ -8,6 +8,7 @@ class AppColors {
 
   // Brand / Primary
   static const Color primary = Color(0xFF428BCA);
+  static const Color grey = Colors.grey;
   static const Color onPrimary = Colors.white;
   static const Color primaryContainer = Color(0xFFEADDFF);
   static const Color onPrimaryContainer = Color(0xFF21005D);

@@ -1083,11 +1083,11 @@
   "ifscCode": "IFSC Code",
   "ifscCodeHint": "Enter 11-digit IFSC code",
   "voterId": "Voter ID",
-  "voterIdHint": "Enter Voter ID",
+  "voterIdHint": "Voter ID",
   "rationCardId": "Ration Card ID",
-  "rationCardIdHint": "Enter Ration Card ID",
+  "rationCardIdHint": " Ration Card ID",
   "personalHealthId": "Personal Health ID (ABHA ID)",
-  "personalHealthIdHint": "Enter 14-digit Personal Health ID",
+  "personalHealthIdHint": "Personal Health ID",
   "confirmAttentionTitle": "Confirm Action",
   "confirmYesExit": "Yes, Exit",
   "confirmNo": "No, Stay",
@@ -1462,7 +1462,7 @@
   "update": "Update",
   "searchPatientName": "Search Patient Name",
   "addNew": "+ Add New",
-  "genderLabel": "Gender: ",
+  "genderLabel": "Gender ",
   "abhaIdLabel": "ABHA Id: ",
   "availableSlots": "Available Slots",
   "morning": "Morning",
@@ -1765,7 +1765,7 @@
   "isSchoolGoingChild": "Is He/She school going child?",
   "saving": "Saving...",
   "correctHighlightedErrors": "Please correct the highlighted errors before continuing.",
-  "selectOptionLabel": "Select Option",
+  "selectOptionLabel": "Select",
   "screeningDate": "Screening Date",
   "enterCategory": "Enter category",
   "youngestChildDetail": "Youngest Child Detail",
@@ -2490,7 +2490,10 @@
   "loadDataComplete": "Data fetching completed ",
   "dataNotFound": "User data not available ",
   "motherRchIdError": "Mother's RCH ID must be exactly 12 digits",
-  "nextVisit": "Next HBNC visit due date"
+  "nextVisit": "Next HBNC visit due date",
+  "enterMobileToSearchAbha": "Enter mobile number to search ABHA",
+  "invalidMobileNumber": "Invalid mobile number",
+  "enterValidIndianMobile": "Enter a valid Indian mobile number"
 
 
 
