@@ -393,7 +393,7 @@ class MotherDetailsTab extends StatelessWidget {
                         const Divider(height: 0),
                         ApiDropdown<String>(
                           key: fieldKeys['foulDischargeHighFever'],
-                          labelText: "${t.foulDischargeHighFeverLabel} *",
+                          labelText: "${t.foulDischargeHighFeverLabel}",
                           validator: (v) => (v == null || v.isEmpty)
                               ? t.requiredField
                               : null,
@@ -444,7 +444,7 @@ class MotherDetailsTab extends StatelessWidget {
                         if (m['milkNotProducingOrLess'] == 'Yes') ...[
                           ApiDropdown<String>(
                             key: fieldKeys['milkCounselingAdvice'],
-                            labelText: "${t.counselingAdviceLabel} *",
+                            labelText: "${t.counselingAdviceLabel}",
                             validator: (v) => (v == null || v.isEmpty)
                                 ? t.requiredField
                                 : null,
@@ -476,7 +476,7 @@ class MotherDetailsTab extends StatelessWidget {
 
                         ApiDropdown<String>(
                           key: fieldKeys['referHospital'],
-                          labelText: "${t.refer_to_hospital} *",
+                          labelText: "${t.refer_to_hospital}",
                           validator: (v) => (v == null || v.isEmpty)
                               ? t.requiredField
                               : null,
@@ -495,7 +495,7 @@ class MotherDetailsTab extends StatelessWidget {
                         if (m['referHospital'] == 'Yes') ...[
                           ApiDropdown<String>(
                             key: fieldKeys['referTo'],
-                            labelText: "${t.referToLabel} *",
+                            labelText: "${t.referToLabel}",
                             validator: (v) => (v == null || v.isEmpty)
                                 ? t.requiredField
                                 : null,

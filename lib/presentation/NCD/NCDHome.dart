@@ -10,6 +10,7 @@ import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart'
 as ffd;
 import 'package:sizer/sizer.dart';
 
+import '../../data/SecureStorage/SecureStorage.dart';
 import 'NCDList.dart';
 import 'NCDNonEligibleList.dart';
 import 'NCDPriorityList.dart';
@@ -35,13 +36,29 @@ class _NCDHomeState extends State<NCDHome> {
   Future<void> _loadCBACFormsCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
+
+      // 1. Fetch current user data to get the ASHA key
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      // 2. Mandatory Validation: If key is null/empty, stop and set count to 0
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+        debugPrint('Error: ASHA Unique Key is missing. Cannot load CBAC forms count.');
+        if (mounted) {
+          setState(() {
+            _cbacFormsCount = 0;
+          });
+        }
+        return;
+      }
+
       final List<Map<String, dynamic>> result = await db.query(
         ffd.FollowupFormDataTable.table,
-        where: 'forms_ref_key = ?',
+        // 3. Add mandatory current_user_key condition
+        where: 'forms_ref_key = ? AND current_user_key = ?',
         whereArgs: [
-          ffd.FollowupFormDataTable.formUniqueKeys[ffd
-              .FollowupFormDataTable
-              .cbac],
+          ffd.FollowupFormDataTable.formUniqueKeys[ffd.FollowupFormDataTable.cbac],
+          ashaUniqueKey, // Pass the valid key here
         ],
       );
 
@@ -58,10 +75,16 @@ class _NCDHomeState extends State<NCDHome> {
   Future<void> _loadCBACFormsData() async {
     try {
       final db = await DatabaseProvider.instance.database;
+
+      // 1. Fetch current user data to get the ASHA key
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
       final List<Map<String, dynamic>> result = await db.query(
         ffd.FollowupFormDataTable.table,
-        where: 'forms_ref_key = ?',
-        whereArgs: ['vl7o6r9b6v3fbesk'],
+        // 2. Add current_user_key condition
+        where: 'forms_ref_key = ? AND current_user_key = ?',
+        whereArgs: ['vl7o6r9b6v3fbesk', ashaUniqueKey],
       );
 
       debugPrint('CBAC Forms Data (${result.length} records):');

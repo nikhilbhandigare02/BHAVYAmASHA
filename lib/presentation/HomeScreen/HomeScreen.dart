@@ -470,12 +470,29 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   Future<void> _loadNcdCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
+
+      // 1. Fetch current user data to get the ASHA key
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      // 2. Mandatory Validation: If key is null/empty, stop and set count to 0
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+        debugPrint('Error: ASHA Unique Key is missing. Cannot load NCD forms count.');
+        if (mounted) {
+          setState(() {
+            ncdCount = 0;
+          });
+        }
+        return;
+      }
+
       final List<Map<String, dynamic>> result = await db.query(
         ffd.FollowupFormDataTable.table,
-        where: 'forms_ref_key = ?',
+        // 3. Add mandatory current_user_key condition
+        where: 'forms_ref_key = ? AND current_user_key = ?',
         whereArgs: [
-          ffd.FollowupFormDataTable
-              .formUniqueKeys[ffd.FollowupFormDataTable.cbac],
+          ffd.FollowupFormDataTable.formUniqueKeys[ffd.FollowupFormDataTable.cbac],
+          ashaUniqueKey, // Pass the valid key here
         ],
       );
 

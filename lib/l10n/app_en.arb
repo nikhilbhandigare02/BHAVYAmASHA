@@ -909,7 +909,8 @@
   "mealsPerDayLabel": "No. of times mother takes full meal in 24 hours?",
   "padsPerDayLabel": "How many pads have been changed in a day for bleeding? *",
   "mothersTemperatureLabel": "Temperature of mother",
-  "foulDischargeHighFeverLabel": "Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C) *",  "abnormalSpeechOrSeizureLabel": "Is the mother speaking abnormally or having fits?",
+  "foulDischargeHighFeverLabel": "Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C)",
+  "abnormalSpeechOrSeizureLabel": "Is the mother speaking abnormally or having fits?",
   "counselingAdviceLabel": "Counseling / Advise *",
 
   "outcomeFormTitle": "Delivery Outcome",
@@ -2024,7 +2025,7 @@
   "temp_upto_102": "Temperature upto 102°F (38.9°C)",
   "temp_more_than_102": "Temperature more than 102°F (38.9°C)",
   "paracetamolGivenLabel": "Paracetamol tablet given (Temperature up to 102°F / 38.9°C)",
-  "refer_to_hospital": "Refer to Hospital",
+  "refer_to_hospital": "Refer to Hospital *",
   "please_add_family_head_details": "Please add family head details",
   "totalBeneficiaryAdded": "Total beneficiary added",
   "enterTypeOfFuelForCooking": "Enter type of fuel for cooking",

@@ -5923,7 +5923,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paracetamolGivenLabel => 'Paracetamol tablet given (Temperature up to 102°F / 38.9°C)';
 
   @override
-  String get refer_to_hospital => 'Refer to Hospital';
+  String get refer_to_hospital => 'Refer to Hospital*';
 
   @override
   String get please_add_family_head_details => 'Please add family head details';
