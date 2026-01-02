@@ -1064,7 +1064,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get eddDateLabel => 'प्रसव की संभावित तिथि';
 
   @override
-  String get edit => 'संपादित करें';
+  String get edit => 'सुधारें';
 
   @override
   String get educationGraduate => 'स्नातक';
@@ -1393,7 +1393,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get healthWorkerLabel => 'स्वास्थ्य कार्यकर्ता';
 
   @override
-  String get help => 'सहायता नियम';
+  String get help => 'सहायता';
 
   @override
   String get helpInstructions => 'किसी भी तरह की मदद और सहायता के लिए नीचे हेल्प नंबरों पर कॉल करें।';
@@ -3267,7 +3267,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get confirmNo => 'नहीं, यहीं रहें';
 
   @override
-  String get memberRemainsToAdd => 'जोड़ने के लिए बचे हुए सदस्यों की संख्या';
+  String get memberRemainsToAdd => 'सदस्यों की संख्या जोडी जानी बाकी है. ';
 
   @override
   String get cbac => 'सीबीएसी फ़ॉर्म';
@@ -5923,7 +5923,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get paracetamolGivenLabel => 'पैरासिटामोल टैबलेट दी गई (तापमान 102°F / 38.9°C तक)';
 
   @override
-  String get refer_to_hospital => 'अस्पताल रेफर किया गया';
+  String get refer_to_hospital => 'अस्पताल रेफर किया गया*';
 
   @override
   String get please_add_family_head_details => 'कृपया परिवार के मुखिया का विवरण जोड़ें';
