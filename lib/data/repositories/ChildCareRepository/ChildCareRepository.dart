@@ -13,31 +13,58 @@ class ChildCareRepository {
   Timer? _ccSyncTimer;
 
   Future<dynamic> submitChildCareActivities(List<dynamic> payload) async {
-    final currentUser = await UserInfo.getCurrentUser();
-    final userDetails = currentUser?['details'] is String
-        ? jsonDecode(currentUser?['details'] ?? '{}')
-        : currentUser?['details'] ?? {};
+    try {
+      final currentUser = await UserInfo.getCurrentUser();
+      if (currentUser == null) {
+        throw Exception('No current user found');
+      }
 
-    String? token = await SecureStorageService.getToken();
-    if ((token == null || token.isEmpty) && userDetails is Map) {
-      try {
-        token = userDetails['token']?.toString();
-      } catch (_) {}
+      final userDetails = currentUser['details'] is String
+          ? jsonDecode(currentUser['details'] as String)
+          : currentUser['details'] ?? {};
+
+      String? token = await SecureStorageService.getToken();
+      if ((token == null || token.isEmpty) && userDetails is Map) {
+        try {
+          token = userDetails['token']?.toString();
+        } catch (e) {
+          print('CC: Error getting token from user details: $e');
+        }
+      }
+
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+      };
+
+      print('CC: Sending request to ${Endpoints.addChildCareActivity}');
+      print('CC: Headers: $headers');
+      print('CC: Payload: $payload');
+
+      final response = await _api.postApi(
+        Endpoints.addChildCareActivity,
+        payload,
+        headers: headers,
+      );
+
+      print('CC: Response received: $response');
+
+      // If the response is a string, try to parse it as JSON
+      if (response is String) {
+        try {
+          return jsonDecode(response);
+        } catch (e) {
+          return {'success': false, 'msg': 'Invalid response format', 'raw': response};
+        }
+      }
+
+      return response;
+    } catch (e, stackTrace) {
+      print('CC: Error in submitChildCareActivities: $e');
+      print('CC: Stack trace: $stackTrace');
+      rethrow;
     }
-
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
-    };
-
-    final response = await _api.postApi(
-      Endpoints.addChildCareActivity,
-      payload,
-      headers: headers,
-    );
-
-    return response is String ? jsonDecode(response) : response;
   }
 
   Future<Map<String, dynamic>> fetchAndStoreChildCareActivities({
