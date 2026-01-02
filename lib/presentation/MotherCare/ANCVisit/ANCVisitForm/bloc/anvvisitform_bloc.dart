@@ -358,7 +358,6 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
               'is_synced': 0,
               'is_deleted': 0,
             };
-
             print('Inserting mother care activity for pregnant head: ${jsonEncode(motherCareActivityData)}');
             await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
             print('✅ Successfully inserted mother care activity');
