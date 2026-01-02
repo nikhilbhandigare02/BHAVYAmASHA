@@ -14,6 +14,7 @@ import '../../core/widgets/RoundButton/RoundButton.dart';
 import '../../data/Database/database_provider.dart';
 import '../../data/Database/local_storage_dao.dart';
 import '../../data/Database/tables/followup_form_data_table.dart' as ffd;
+import '../../data/SecureStorage/SecureStorage.dart';
 import '../HomeScreen/HomeScreen.dart';
 import 'NCD_CBAC_DETAIL.dart';
 
@@ -42,10 +43,15 @@ class _NCDHomeState extends State<Ncdlist> {
   Future<void> _loadCBACFormsData() async {
     try {
       final db = await DatabaseProvider.instance.database;
+
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
       final List<Map<String, dynamic>> result = await db.query(
         ffd.FollowupFormDataTable.table,
-        where: 'forms_ref_key = ?',
-        whereArgs: ['vl7o6r9b6v3fbesk'],
+
+        where: 'forms_ref_key = ? AND current_user_key = ?',
+        whereArgs: ['vl7o6r9b6v3fbesk', ashaUniqueKey],
       );
 
       debugPrint('CBAC Forms Data (${result.length} records):');

@@ -285,7 +285,6 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         }
       };
 
-
       final currentUser = await UserInfo.getCurrentUser();
       final userDetails = currentUser?['details'] is String
           ? jsonDecode(currentUser?['details'] ?? '{}')

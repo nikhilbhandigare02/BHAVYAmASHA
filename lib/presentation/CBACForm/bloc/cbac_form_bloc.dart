@@ -492,6 +492,9 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
           userDetails['facility'] ??
           0;
 
+
+      final ashaUniqueKey = userDetails['unique_key'] ?? {};
+
       print('Using Facility ID: $facilityId');
 
       final formDataForDb = {
@@ -514,7 +517,7 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
           'package_name': deviceInfo.packageName,
         }),
         'parent_user': '',
-        'current_user_key': '',
+        'current_user_key': ashaUniqueKey,
         'facility_id': facilityId,
         'form_json': formJson,
         'created_date_time': now,
