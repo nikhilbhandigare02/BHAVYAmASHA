@@ -10,6 +10,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/local_storage_dao.dart';
 import '../../../data/Database/tables/followup_form_data_table.dart';
+import '../../../data/SecureStorage/SecureStorage.dart';
 
 class Lbwrefered extends StatefulWidget {
   const Lbwrefered({super.key});
@@ -32,12 +33,17 @@ class _Lbwrefered extends State<Lbwrefered> {
   Future<void> _loadLbwChildren() async {
     final db = await DatabaseProvider.instance.database;
 
+    final currentUserData = await SecureStorageService.getCurrentUserData();
+    String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
     try {
       print('🔍 Loading LBW children from beneficiaries table (flexible thresholds)');
 
+      // 2. Updated query with current_user_key condition
       final rows = await db.query(
         'beneficiaries_new',
-        where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL)',
+        where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL) AND current_user_key = ?',
+        whereArgs: [ashaUniqueKey], // Pass the key as an argument
       );
 
       print('🔎 Beneficiaries fetched: ${rows.length}');

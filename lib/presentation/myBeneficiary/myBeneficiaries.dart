@@ -366,9 +366,16 @@ LEFT JOIN LatestANC a
   Future<int> _getLBWReferredCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
+
+
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
       final rows = await db.query(
         BeneficiariesTable.table,
-        where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL)',
+        // 2. Add current_user_key condition
+        where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL) AND current_user_key = ?',
+        whereArgs: [ashaUniqueKey],
       );
 
       int count = 0;
