@@ -377,6 +377,14 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
                         'beneficiary_info': info,
                       });
                     }
+                    try {
+                      final deletedCount = await LocalStorageDao.instance
+                          .markEligibleCoupleActivitiesDeletedByBeneficiary(bKey);
+                      print('Marked ' + deletedCount.toString() +
+                          ' eligible_couple_activities rows as deleted for beneficiary ' + bKey);
+                    } catch (e) {
+                      print('Error marking eligible couple activities deleted for ' + bKey + ': ' + e.toString());
+                    }
                   }
                 }
               } catch (e) {

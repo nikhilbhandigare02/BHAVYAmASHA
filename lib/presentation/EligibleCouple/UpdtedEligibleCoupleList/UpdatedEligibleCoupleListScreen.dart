@@ -51,7 +51,6 @@ class _UpdatedEligibleCoupleListScreenState
       _search.text = _initialData!['searchTerm'].toString();
     }
 
-    // If you need to select a specific tab based on the data
     if (_initialData?['status'] == 'Protected') {
       _tab = 1;
     } else if (_initialData?['status'] == 'Unprotected') {

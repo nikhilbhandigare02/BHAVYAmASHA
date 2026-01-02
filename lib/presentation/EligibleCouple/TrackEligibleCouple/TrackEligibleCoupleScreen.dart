@@ -133,15 +133,14 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                  DateTime? parseFinancialYear(String? yearStr) {
                   if (yearStr == null || yearStr.isEmpty) return null;
                   try {
-                    // Handle both YYYY and YYYY-YY formats
-                    final year = yearStr.split('-').first;
+                     final year = yearStr.split('-').first;
                     return DateTime(int.parse(year));
                   } catch (e) {
                     return null;
                   }
                 }
 
-                // Helper function to format year for display
+
                 String formatFinancialYear(DateTime date) {
                   final year = date.year;
                   return '$year-${(year + 1).toString().substring(2)}';

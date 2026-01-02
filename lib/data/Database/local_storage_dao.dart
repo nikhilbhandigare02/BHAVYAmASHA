@@ -931,6 +931,26 @@ class LocalStorageDao {
     return count ?? 0;
   }
 
+  Future<int> markEligibleCoupleActivitiesDeletedByBeneficiary(String beneficiaryRefKey) async {
+    try {
+      final db = await _db;
+      final values = <String, Object?>{
+        'is_deleted': 1,
+        'modified_date_time': DateTime.now().toIso8601String(),
+      };
+      final changes = await db.update(
+        'eligible_couple_activities',
+        values,
+        where: 'beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        whereArgs: [beneficiaryRefKey],
+      );
+      return changes;
+    } catch (e) {
+      print('Error marking eligible couple activities deleted for $beneficiaryRefKey: $e');
+      rethrow;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> loadDeceasedList() async {
     try {
       final db = await _db;
@@ -1044,7 +1064,7 @@ class LocalStorageDao {
       String whereClause = 'eligible_couple_state = ? AND (is_deleted IS NULL OR is_deleted = 0)';
       List<dynamic> whereArgs = ['tracking_due'];
       
-      // If ASHA unique key is available, filter by it
+
       if (ashaUniqueKey.isNotEmpty) {
         whereClause += ' AND current_user_key = ?';
         whereArgs.add(ashaUniqueKey);
