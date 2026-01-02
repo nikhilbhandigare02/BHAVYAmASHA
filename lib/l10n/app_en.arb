@@ -1077,7 +1077,6 @@
   "youngestChildAge": "Age of youngest child",
   "ageUnitOfYoungest": "Age unit of youngest child",
   "genderOfYoungest": "Gender of youngest child",
-
   "bankAccountNumber": "Bank Account Number",
   "bankAccountNumberHint": "Enter bank account number",
   "ifscCode": "IFSC Code",
