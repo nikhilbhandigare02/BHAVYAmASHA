@@ -236,7 +236,7 @@ class _GuestbeneficiariesState extends State<Guestbeneficiaries> {
       child: TextField(
         controller: _searchCtrl,
         decoration: InputDecoration(
-          hintText: 'Guest Beneficiaries Search',
+          hintText: l10n?.guestSearchTitle,
           hintStyle: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.black54,

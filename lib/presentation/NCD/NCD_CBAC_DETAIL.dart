@@ -148,7 +148,7 @@ class _CBACDetailScreenState extends State<CBACDetailScreen> {
                   _buildInfoRow(context,l10n?.registrationDate ?? 'Registration Date', _registrationDate),
                   _buildInfoRow(context,l10n?.householdId ?? 'Household ID', _householdId),
                   _buildInfoRow(context,l10n?.beneficiaryId ?? 'Beneficiary ID', _beneficiaryId),
-                  _buildInfoRow(context,l10n?.name ?? 'Name', _getValue(_formData['name'])),
+                  _buildInfoRow(context,l10n?.nameLabel ?? 'Name', _getValue(_formData['name'])),
                   _buildInfoRow(context,l10n?.fathersName ??'Father\'s Name', _getValue(_formData['father'])),
                   _buildInfoRow(context,l10n?.age ?? 'Age', _getValue(_formData['age'])),
                   _buildInfoRow(context,l10n?.gender ?? 'Gender', _getValue(_formData['gender'])),

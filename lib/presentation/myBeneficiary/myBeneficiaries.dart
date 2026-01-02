@@ -517,7 +517,7 @@ LEFT JOIN LatestANC a
         count: isLoading ? 0 : pregnancyOutcomeCount,
       ),
       _BeneficiaryTileData(
-        title: l10n.hbcnList,
+        title: l10n.hbncListTitle,
         asset: 'assets/images/pnc-mother.png',
         count: isLoading ? 0 : hbcnCount,
       ),
