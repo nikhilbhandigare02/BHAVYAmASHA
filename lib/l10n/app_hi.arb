@@ -1759,7 +1759,7 @@
   "hintTemp":"तापमान",
   "temp_more_than_102": "102°F (38.9°C) से अधिक तापमान",
   "paracetamolGivenLabel": "पैरासिटामोल टैबलेट दी गई (तापमान 102°F / 38.9°C तक)",
-  "refer_to_hospital": "अस्पताल रेफर किया गया",
+  "refer_to_hospital": "अस्पताल रेफर किया गया*",
   "please_add_family_head_details": "कृपया परिवार के मुखिया का विवरण जोड़ें",
   "totalBeneficiaryAdded": "कुल लाभार्थी जोड़े गए",
   "enterTypeOfFuelForCooking": "खाना बनाने के लिए ईंधन का प्रकार दर्ज करें",
