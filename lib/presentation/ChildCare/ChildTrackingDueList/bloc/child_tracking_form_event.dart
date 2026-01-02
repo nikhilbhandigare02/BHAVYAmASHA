@@ -26,6 +26,15 @@ class WeightChanged extends ChildTrackingFormEvent {
   List<Object?> get props => [weightKg];
 }
 
+class BirthWeightChanged extends ChildTrackingFormEvent {
+  final String birthWeightKg;
+
+  const BirthWeightChanged(this.birthWeightKg);
+
+  @override
+  List<Object?> get props => [birthWeightKg];
+}
+
 class TabChanged extends ChildTrackingFormEvent {
   final int tabIndex;
 

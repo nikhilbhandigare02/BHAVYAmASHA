@@ -458,6 +458,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                   const SizedBox(height: 8),
                   CustomTextField(
                     labelText: l.weightLabel,
+                    hintText: l.weightLabel,
                     initialValue: _formData['weight_grams'] != null
                         ? '${(int.tryParse(_formData['weight_grams'].toString()) ?? 0) / 1000}'
                         : null,
@@ -469,8 +470,20 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                     },
                   ),
                   const Divider(),
-                  const SizedBox(height: 8),
-
+                  CustomTextField(
+                    labelText: l.birthWeightRange,
+                    hintText: l.birthWeightRange,
+                    initialValue: _formData['weight_grams'] != null
+                        ? '${(int.tryParse(_formData['weight_grams'].toString()) ?? 0) / 1000}'
+                        : null,
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      // Convert kg to grams and update form data
+                      final grams = (double.tryParse(value) ?? 0) * 1000;
+                      _formData['weight_grams'] = grams.round();
+                    },
+                  ),
+                  const Divider(),
                   const SizedBox(height: 16),
                   _buildDoseTable(),
                   const SizedBox(height: 16),
