@@ -223,7 +223,7 @@ class ApiDropdown<T> extends StatelessWidget {
                   (labelText ?? 'Select Option').replaceAll('', ''),
                   style: TextStyle(
                     fontSize: labelFontSize ?? 15.sp,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.bold,
                     color: AppColors.onSurfaceVariant,
                   ),
                 ),
