@@ -170,7 +170,7 @@ class _AbortionlistState extends State<Abortionlist> {
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle:l10n!.guestBeneficiaryList,
+        screenTitle:l10n!.abortionList,
         showBack: true,
       ),
       drawer: const CustomDrawer(),

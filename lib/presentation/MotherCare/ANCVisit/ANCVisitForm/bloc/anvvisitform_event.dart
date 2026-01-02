@@ -115,6 +115,14 @@ class FolicAcidTabletsChanged extends AnvvisitformEvent {
   List<Object?> get props => [value];
 }
 
+class IronFolicAcidTabletsChanged extends AnvvisitformEvent {
+  final String value;
+  const IronFolicAcidTabletsChanged(this.value);
+  
+  @override
+  List<Object?> get props => [value];
+}
+
 class CalciumVitaminD3TabletsChanged extends AnvvisitformEvent {
   final String value;
   const CalciumVitaminD3TabletsChanged(this.value);

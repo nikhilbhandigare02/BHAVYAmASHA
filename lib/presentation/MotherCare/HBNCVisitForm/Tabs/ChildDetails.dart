@@ -988,7 +988,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
                   // Refer to hospital field
                   ApiDropdown<String>(
-                    labelText: "${t.refer_to_hospital}",
+                    labelText: "${t.refer_to_hospital} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['referToHospital']),
@@ -999,7 +999,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   if (c['referToHospital'] == 'Yes') ...[
                     const Divider(height: 0,),
                     ApiDropdown<String>(
-                      labelText: "${t.referToLabel}",
+                      labelText: "${t.referToLabel} *",
                       items:  [
                         t.visitTypePhc,
                         t.chc,
