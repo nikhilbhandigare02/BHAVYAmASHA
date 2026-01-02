@@ -1338,11 +1338,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   l10n?.weeksOfPregnancyLabel ??
                                   'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
-<<<<<<< HEAD
-                              // readOnly: true,
-=======
-                             readOnly: true,
->>>>>>> 12abfbb8f528c142d8d4b229c716f421a930717c
+                               readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) =>
                                   bloc.add(WeeksOfPregnancyChanged(v)),
