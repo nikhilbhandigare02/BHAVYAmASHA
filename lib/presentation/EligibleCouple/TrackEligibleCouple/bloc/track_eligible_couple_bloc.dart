@@ -407,8 +407,8 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
               where:
               'beneficiary_ref_key = ?  AND is_deleted = 0',              whereArgs: [
                 state.beneficiaryRefKey ?? state.beneficiaryId,
-
-              ],            );
+              ],
+            );
             print('Updated tracking_due state to is_deleted=1 in eligible_couple_activities table');
           } catch (e) {
             print('Error updating eligible_couple_activities table: $e');
@@ -486,14 +486,6 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
                 } catch (_) {}
 
                 final working = userDetails['working_location'] ?? {};
-                final userId = (working['asha_id'] ?? userDetails['unique_key'] ?? '').toString();
-                final facility = (working['asha_associated_with_facility_id'] ?? working['hsc_id'] ?? userDetails['facility_id'] ?? userDetails['hsc_id'] ?? '').toString();
-                final appRoleId = (userDetails['app_role_id'] ?? '').toString();
-                String _uniq(String suffix) => '${deviceInfo.deviceId}_${suffix}${DateFormat('yyyyMMddHHmmss').format(DateTime.now())}';
-                final householdRefKey = beneficiary['household_ref_key'] as String? ?? '';
-                final motherKey = beneficiary['mother_key'] as String? ?? '';
-                final fatherKey = beneficiary['father_key'] as String? ?? '';
-
               }
             } catch (e) {
               print('Error reading saved followup_form_data to build EC payload: $e');

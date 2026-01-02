@@ -149,6 +149,17 @@ class _AncvisitformState extends State<Ancvisitform> {
   }
 
   void _updateFormWithData(Map<String, dynamic> formData) {
+    print('🔍 _updateFormWithData called with keys: ${formData.keys.toList()}');
+    print('🔍 Folic acid data: ${formData['folic_acid_tablets']}');
+    print('🔍 Folic acid tab quantity data: ${formData['folic_acid_tab_quantity']}');
+    print('🔍 Iron+folic acid data: ${formData['iron_folic_acid_tablets']}');
+    print('🔍 Iron+folic acid legacy data: ${formData['iron_and_folic_acid_tab_quantity']}');
+    print('🔍 Calcium vitamin data: ${formData['calcium_vitamin_tablets']}');
+    print('🔍 Calcium vitamin tab quantity data: ${formData['calcium_and_vit_d_tab_quantity']}');
+    print('🔍 Pre-existing disease data: ${formData['pre_existing_disease']}');
+    print('🔍 Pre-existing diseases data: ${formData['pre_existing_diseases']}');
+    print('🔍 Pre-exist desease data: ${formData['pre_exist_desease']}');
+    
     // Basic information
     // _bloc.add(VisitTypeChanged(formData['visit_type'] ?? '')); // Don't auto-fill visit type
     _bloc.add(
@@ -207,18 +218,62 @@ class _AncvisitformState extends State<Ancvisitform> {
     _bloc.add(TdBoosterDateChanged(_parseDate(formData['td_booster_date'])));
 
     // Other fields
-    _bloc.add(FolicAcidTabletsChanged(formData['folic_acid_tablets'] ?? ''));
-    _bloc.add(
-      CalciumVitaminD3TabletsChanged(formData['calcium_vitamin_tablets'] ?? ''),
-    );
+    print('🔍 Loading tablet fields...');
+    // Try both possible field names for folic acid
+    final folicAcidValue = formData['folic_acid_tablets'] ?? 
+                          formData['folic_acid_tab_quantity'] ?? '';
+    _bloc.add(FolicAcidTabletsChanged(folicAcidValue));
+    print('🔍 Set folic acid to: $folicAcidValue');
+    
+    // Handle backward compatibility for iron+folic acid field
+    // Try new field first, then fall back to old field names
+    final ironFolicValue = formData['iron_folic_acid_tablets'] ?? 
+                          formData['iron_and_folic_acid_tab_quantity'] ?? '';
+    _bloc.add(IronFolicAcidTabletsChanged(ironFolicValue));
+    print('🔍 Set iron+folic acid to: $ironFolicValue');
+    
+    // Handle calcium vitamin field with multiple possible field names
+    final calciumVitaminValue = formData['calcium_vitamin_tablets'] ?? 
+                              formData['calcium_and_vit_d_tab_quantity'] ?? '';
+    _bloc.add(CalciumVitaminD3TabletsChanged(calciumVitaminValue));
+    print('🔍 Set calcium vitamin to: $calciumVitaminValue');
 
+    // Handle pre-existing diseases with multiple possible field names and formats
+    print('🔍 Loading pre-existing diseases...');
+    List<String> diseases = [];
+    
+    // Try to load as array first (new format)
     if (formData['pre_existing_diseases'] != null) {
-      final diseases = List<String>.from(formData['pre_existing_diseases']);
-      _bloc.add(PreExistingDiseasesChanged(diseases));
-
-      if (formData['other_disease'] != null) {
-        _bloc.add(OtherDiseaseChanged(formData['other_disease']));
+      try {
+        if (formData['pre_existing_diseases'] is List) {
+          diseases = List<String>.from(formData['pre_existing_diseases']);
+          print('🔍 Loaded pre-existing diseases as array: $diseases');
+        }
+      } catch (e) {
+        print('⚠️ Error loading pre_existing_diseases as array: $e');
       }
+    }
+    
+    // Try to load as string from other field names (legacy format)
+    if (diseases.isEmpty) {
+      final diseaseString = formData['pre_existing_disease']?.toString() ?? 
+                           formData['pre_exist_desease']?.toString() ?? '';
+      if (diseaseString.isNotEmpty) {
+        diseases = diseaseString.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+        print('🔍 Loaded pre-existing diseases from string: $diseases');
+      }
+    }
+    
+    if (diseases.isNotEmpty) {
+      _bloc.add(PreExistingDiseasesChanged(diseases));
+    }
+
+    // Handle other disease field
+    final otherDiseaseValue = formData['other_disease']?.toString() ?? 
+                            formData['other_pre_exist_desease']?.toString() ?? '';
+    if (otherDiseaseValue.isNotEmpty) {
+      _bloc.add(OtherDiseaseChanged(otherDiseaseValue));
+      print('🔍 Set other disease to: $otherDiseaseValue');
     }
   }
 
@@ -1283,7 +1338,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   l10n?.weeksOfPregnancyLabel ??
                                   'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
-                             readOnly: true,
+                                readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) =>
                                   bloc.add(WeeksOfPregnancyChanged(v)),
@@ -1462,20 +1517,47 @@ class _AncvisitformState extends State<Ancvisitform> {
                                       state.weeksOfPregnancy ?? '0',
                                     ) ??
                                     0;
-                                final isAfter12Weeks = weeks > 12;
-                                final label = isAfter12Weeks
-                                    ? 'Number of Iron & Folic Acid tablets given'
-                                    : (l10n?.folicAcidTabletsLabel ??
-                                          'Number of Folic Acid tablets given');
-                                return CustomTextField(
-                                  labelText: label,
-                                  hintText: label,
-                                  initialValue: state.folicAcidTablets,
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (v) =>
-                                      bloc.add(FolicAcidTabletsChanged(v)),
-                                  validator: validateTabletCount,
-                                );
+                                
+                                // Show Folic Acid field only when weeks < 12
+                                if (weeks < 12) {
+                                  return Column(
+                                    children: [
+                                      // Folic Acid Tablets Field
+                                      CustomTextField(
+                                        labelText: l10n?.folicAcidTabletsLabel ??
+                                            'Number of Folic Acid tablets given',
+                                        hintText: l10n?.folicAcidTabletsLabel ??
+                                            'Enter number of Folic Acid tablets',
+                                        initialValue: state.folicAcidTablets,
+                                        keyboardType: TextInputType.number,
+                                        onChanged: (v) =>
+                                            bloc.add(FolicAcidTabletsChanged(v)),
+                                        validator: validateTabletCount,
+                                      ),
+                                    ],
+                                  );
+                                }
+                                
+                                // Show Iron & Folic Acid field only when weeks > 12
+                                if (weeks > 12) {
+                                  return Column(
+                                    children: [
+                                      // Iron & Folic Acid Tablets Field  
+                                      CustomTextField(
+                                        labelText: 'Number of Iron & Folic Acid tablets given',
+                                        hintText: 'Enter number of Iron & Folic Acid tablets',
+                                        initialValue: state.ironFolicAcidTablets,
+                                        keyboardType: TextInputType.number,
+                                        onChanged: (v) =>
+                                            bloc.add(IronFolicAcidTabletsChanged(v)),
+                                        validator: validateTabletCount,
+                                      ),
+                                    ],
+                                  );
+                                }
+                                
+                                // Show nothing when weeks == 12 or invalid
+                                return const SizedBox.shrink();
                               },
                             ),
 
