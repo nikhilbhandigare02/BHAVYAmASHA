@@ -739,8 +739,11 @@ class _RegisterChildDueListFormScreen
                                       initialValue: state.rchIdChild,
                                       maxLength: 12,
                                       keyboardType: TextInputType.number,
-                                      onChanged: (v) =>
-                                          bloc.add(RchIdChildChanged(v)),
+                                      onChanged: (v) {
+                                        // Filter out non-digit characters (for copy-paste scenarios)
+                                        final filteredValue = v.replaceAll(RegExp(r'[^0-9]'), '');
+                                        bloc.add(RchIdChildChanged(filteredValue));
+                                      },
                                       validator: (value) {
                                         final text = value?.trim() ?? '';
                                         if (text.isNotEmpty) {
@@ -774,6 +777,7 @@ class _RegisterChildDueListFormScreen
                                         title: l10n!.verify,
                                         borderRadius: 8,
                                         fontSize: 12,
+                                        disabled: !state.isRchIdButtonEnabled,
                                         onPress: () {
                                           // Add verification logic here
                                         },

@@ -864,7 +864,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
                         onChanged: (v) {
                           ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                          final value = v.trim();
+                          
+                          // Filter out non-digit characters (for copy-paste scenarios)
+                          final filteredValue = v.replaceAll(RegExp(r'[^0-9]'), '');
+                          final value = filteredValue.trim();
+                          
                           context.read<AddFamilyHeadBloc>().add(
                             AfhRichIdChange(value),
                           );
@@ -877,8 +881,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                   l.rch_id_must_be_12_digits,
                                 );
                               }
-                            }
-                            );
+                            });
                           }
                         },
                         validator: (value) {
@@ -901,6 +904,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                         width: 40.w,
                         borderRadius: 1.h,
                         fontSize: 14.sp,
+                        disabled: !state.isRchIdButtonEnabled,
                         onPress: () async {
                           // Remove previous
                           ScaffoldMessenger.of(context).removeCurrentSnackBar();

@@ -6,6 +6,7 @@ class SpousState extends Equatable {
     this.memberName,
     this.ageAtMarriage,
     this.RichIDChanged,
+    this.isRchIdButtonEnabled = false,
     this.spouseName,
     this.UpdateYears,
     this.UpdateMonths,
@@ -51,6 +52,7 @@ class SpousState extends Equatable {
   final String? memberName;
   final String? ageAtMarriage;
   final String? RichIDChanged;
+  final bool isRchIdButtonEnabled;
   final String? spouseName;
   final String? UpdateYears;
   final String? UpdateMonths;
@@ -101,6 +103,7 @@ class SpousState extends Equatable {
     String? UpdateMonths,
     String? UpdateDays,
     String? RichIDChanged,
+    bool? isRchIdButtonEnabled,
     bool? useDob,
     DateTime? dob,
     DateTime? edd,
@@ -146,6 +149,7 @@ class SpousState extends Equatable {
       fatherName: fatherName ?? this.fatherName,
       useDob: useDob ?? this.useDob,
       RichIDChanged: RichIDChanged ?? this.RichIDChanged,
+      isRchIdButtonEnabled: isRchIdButtonEnabled ?? this.isRchIdButtonEnabled,
       dob: dob ?? this.dob,
       edd: edd ?? this.edd,
       antraDate: antraDate ?? this.antraDate,
@@ -209,6 +213,7 @@ class SpousState extends Equatable {
         otherCategory,
         mobileOwnerOtherRelation,
         RichIDChanged,
+        isRchIdButtonEnabled,
         mobileNo,
         bankAcc,
         ifsc,
@@ -233,6 +238,7 @@ class SpousState extends Equatable {
       'memberName': memberName,
       'ageAtMarriage': ageAtMarriage,
       'RichIDChanged': RichIDChanged,
+      'isRchIdButtonEnabled': isRchIdButtonEnabled,
       'spouseName': spouseName,
       'fatherName': fatherName,
       'useDob': useDob,

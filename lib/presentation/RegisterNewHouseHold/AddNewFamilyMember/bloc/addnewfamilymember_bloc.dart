@@ -574,7 +574,14 @@ class AddnewfamilymemberBloc
     on<AnmUpdateGender>((e, emit) => emit(state.copyWith(gender: e.value)));
     on<AnmUpdateBankAcc>((e, emit) => emit(state.copyWith(bankAcc: e.value)));
     on<RichIDChanged>(
-          (e, emit) => emit(state.copyWith(RichIDChanged: e.value)),
+          (e, emit) {
+            final value = e.value;
+            final isButtonEnabled = value.length == 12;
+            emit(state.copyWith(
+              RichIDChanged: value,
+              isRchIdButtonEnabled: isButtonEnabled,
+            ));
+          },
     );
     on<AnmUpdateIfsc>((e, emit) => emit(state.copyWith(ifsc: e.value)));
     on<AnmUpdateOccupation>(

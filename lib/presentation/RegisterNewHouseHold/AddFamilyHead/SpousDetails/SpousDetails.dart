@@ -1176,6 +1176,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
 
               if (!widget.isEdit && state.gender == 'Female') ...[
+                Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+
                 _section(
                   Row(
                     children: [
@@ -1193,7 +1195,10 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                               // Clear previous snackbar
                               ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
-                              final value = v.trim();
+                              // Filter out non-digit characters (for copy-paste scenarios)
+                              final filteredValue = v.replaceAll(RegExp(r'[^0-9]'), '');
+                              final value = filteredValue.trim();
+                              
                               context.read<SpousBloc>().add(RchIDChanged(value));
 
                               // Show error if not empty and not exactly 12 digits
@@ -1225,6 +1230,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                           width: 160,
                           borderRadius: 8,
                           fontSize: 12,
+                          disabled: !state.isRchIdButtonEnabled,
                           onPress: () async {
                             final rchIdText = state.RichIDChanged?.trim() ?? '';
                             if (rchIdText.isEmpty) {

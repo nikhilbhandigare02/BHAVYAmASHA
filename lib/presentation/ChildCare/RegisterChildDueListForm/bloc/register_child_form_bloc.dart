@@ -26,7 +26,15 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
     this.beneficiaryId,
     this.householdId,
   }) : super(RegisterChildFormState.initial()) {
-    on<RchIdChildChanged>((e, emit) => emit(state.copyWith(rchIdChild: e.value, clearError: true)));
+    on<RchIdChildChanged>((e, emit) {
+      final value = e.value;
+      final isButtonEnabled = value.length == 12;
+      emit(state.copyWith(
+        rchIdChild: value,
+        isRchIdButtonEnabled: isButtonEnabled,
+        clearError: true,
+      ));
+    });
     on<SerialNumberChanged>((e, emit) => emit(state.copyWith(serialNumber: e.value, clearError: true)));
     on<DateOfBirthChanged>((e, emit) => emit(state.copyWith(dateOfBirth: e.value, clearError: true)));
     on<DateOfRegistrationChanged>((e, emit) => emit(state.copyWith(dateOfRegistration: e.value, clearError: true)));
