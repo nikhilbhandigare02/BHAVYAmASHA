@@ -393,22 +393,6 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
               }
             }
 
-            if ( state.fpMethod == 'Male Sterilization' || state.fpMethod == 'Female Sterilization') {
-              try {
-                final db = await DatabaseProvider.instance.database;
-                await db.update(
-                  'eligible_couple_activities',
-                  {'is_deleted': 1},
-                  where: 'beneficiary_ref_key = ? AND eligible_couple_state = ? AND is_deleted = 0',
-                  whereArgs: [state.beneficiaryRefKey ?? state.beneficiaryId, 'tracking_due'],
-                );
-                print('Updated tracking_due state to is_deleted=1 in eligible_couple_activities table');
-              } catch (e) {
-                print('Error updating eligible_couple_activities table: $e');
-                // Don't fail the operation if this update fails
-              }
-            }
-
           } catch (e) {
             print('Error inserting mother care activity: $e');
           }
