@@ -63,6 +63,11 @@ class AshaDashboardSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final iconSize = getIconSize(context);
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = screenSize.width > screenSize.height;
+    
+    final mainGridAspectRatio = isLandscape ? 2.0 : 1.2;
+    final bottomGridAspectRatio = isLandscape ? 2.0 : 1.2;
 
     final List<Map<String, dynamic>> mainGridItems = [
       {"image": 'assets/images/plus.png', "label": l10n.gridRegisterNewHousehold},
@@ -119,7 +124,7 @@ class AshaDashboardSection extends StatelessWidget {
                     crossAxisCount: 3,
                     mainAxisSpacing: 0.4.h,
                     crossAxisSpacing: 0.4.w,
-                    childAspectRatio: 1.2,
+                    childAspectRatio: mainGridAspectRatio,
                   ),
                   itemBuilder: (context, index) {
                     final item = mainGridItems[index];
@@ -252,7 +257,7 @@ class AshaDashboardSection extends StatelessWidget {
                     crossAxisCount: 3,
                     mainAxisSpacing: 0.4.h,
                     crossAxisSpacing: 0.4.w,
-                    childAspectRatio: 1.2,
+                    childAspectRatio: bottomGridAspectRatio,
                   ),
                   itemBuilder: (context, index) {
                     final item = bottomGridItems[index];

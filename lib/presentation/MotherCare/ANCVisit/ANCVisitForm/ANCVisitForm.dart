@@ -168,8 +168,8 @@ class _AncvisitformState extends State<Ancvisitform> {
     _bloc.add(
       DateOfInspectionChanged(_parseDate(formData['date_of_inspection'])),
     );
-    _bloc.add(HouseNumberChanged(formData['house_number'] ?? ''));
-    _bloc.add(WomanNameChanged(formData['woman_name'] ?? ''));
+    _bloc.add(HouseNumberChanged(formData['house_no'] ?? formData['house_number'] ?? ''));
+    _bloc.add(WomanNameChanged(formData['pw_name'] ?? formData['woman_name'] ?? ''));
     _bloc.add(HusbandNameChanged(formData['husband_name'] ?? ''));
     _bloc.add(RchNumberChanged(formData['rch_number'] ?? ''));
 
@@ -1337,8 +1337,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               hintText:
                                   l10n?.weeksOfPregnancyLabel ??
                                   'No. of weeks of pregnancy',
-                              initialValue: state.weeksOfPregnancy,
-                                readOnly: true,
+                              readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) =>
                                   bloc.add(WeeksOfPregnancyChanged(v)),
