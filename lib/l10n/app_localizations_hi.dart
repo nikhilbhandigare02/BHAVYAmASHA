@@ -908,7 +908,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get choNameLabel => 'सी.एच.ओ. का नाम';
 
   @override
-  String get completedVisits => 'पूर्ण कार्य';
+  String get completedVisits => 'पूर्ण दौरे';
 
   @override
   String get contactLabel => 'संपर्क';
@@ -1617,7 +1617,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get listHBNC => 'एचबीएनसी जाँच';
 
   @override
-  String get listRoutineImmunization => 'नियमित टीकाकरण (आरआय)';
+  String get listRoutineImmunization => 'नियमित टीकाकरण (आरआई)';
 
   @override
   String get lmpDateLabel => 'एलएमपी की तिथि';
@@ -2283,7 +2283,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get thirdAncLabel => 'तीसरी एएनसी';
 
   @override
-  String get toDoVisits => 'निर्धारित कार्य';
+  String get toDoVisits => 'दौरा करना';
 
   @override
   String get todayWorkCompleted => 'Completed visits :';
