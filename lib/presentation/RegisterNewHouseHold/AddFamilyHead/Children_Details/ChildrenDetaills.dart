@@ -145,14 +145,6 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                   onPlus: () => context.read<ChildrenBloc>().add(ChIncrementFemale()),
                 ),
               ),
-              if (state.totalLive > 0 && (state.totalMale + state.totalFemale) != state.totalLive)
-                Padding(
-                  padding: const EdgeInsets.only(left: 0, top: 4, bottom: 8),
-                  child: Text(
-                    l.malePlusFemaleError,
-                    style: TextStyle(color: Colors.red.shade700, fontSize: 14.sp, fontWeight: FontWeight.w600),
-                  ),
-                ),
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
               _section(
@@ -209,18 +201,6 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                   ],
                 ),
               ),
-              if (_youngestAgeError != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4.0, left: 4.0),
-                  child: Text(
-                    _youngestAgeError!,
-                    style: TextStyle(
-                      color: Colors.red.shade700,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
 
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
@@ -273,18 +253,6 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                         _youngestAgeError = _validateYoungestAge(state.youngestAge ?? '');
                       });
                     },
-                  ),
-                ),
-              if (_youngestGenderError != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4.0, left: 4.0),
-                  child: Text(
-                    _youngestGenderError!,
-                    style: TextStyle(
-                      color: Colors.red.shade700,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
                   ),
                 ),
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),

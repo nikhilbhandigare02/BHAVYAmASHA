@@ -495,7 +495,7 @@ class MotherDetailsTab extends StatelessWidget {
                         if (m['referHospital'] == 'Yes') ...[
                           ApiDropdown<String>(
                             key: fieldKeys['referTo'],
-                            labelText: "${t.referToLabel}",
+                            labelText: "${t.referToLabel} *",
                             validator: (v) => (v == null || v.isEmpty)
                                 ? t.requiredField
                                 : null,
