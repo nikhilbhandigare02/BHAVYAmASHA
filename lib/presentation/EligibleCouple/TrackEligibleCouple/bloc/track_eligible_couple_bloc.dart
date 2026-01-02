@@ -377,7 +377,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
               motherCareActivityData,
             );
             
-            if (state.isPregnant == true || state.fpMethod == 'Male Sterilization' || state.fpMethod == 'Female Sterilization') {
+            if (state.isPregnant == true || state.fpMethod?.toLowerCase() == 'male sterilization' || state.fpMethod?.toLowerCase() == 'female sterilization') {
               try {
                 final db = await DatabaseProvider.instance.database;
                 await db.update(
@@ -395,6 +395,24 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
 
           } catch (e) {
             print('Error inserting mother care activity: $e');
+          }
+        }
+
+        if ( state.fpMethod?.toLowerCase() == 'male sterilization' || state.fpMethod?.toLowerCase() == 'female sterilization') {
+          try {
+            final db = await DatabaseProvider.instance.database;
+            await db.update(
+              'eligible_couple_activities',
+              {'is_deleted': 1},
+              where:
+              'beneficiary_ref_key = ?  AND is_deleted = 0',              whereArgs: [
+                state.beneficiaryRefKey ?? state.beneficiaryId,
+
+              ],            );
+            print('Updated tracking_due state to is_deleted=1 in eligible_couple_activities table');
+          } catch (e) {
+            print('Error updating eligible_couple_activities table: $e');
+            // Don't fail the operation if this update fails
           }
         }
 
