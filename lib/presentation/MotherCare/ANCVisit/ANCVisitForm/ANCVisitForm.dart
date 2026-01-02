@@ -168,8 +168,8 @@ class _AncvisitformState extends State<Ancvisitform> {
     _bloc.add(
       DateOfInspectionChanged(_parseDate(formData['date_of_inspection'])),
     );
-    _bloc.add(HouseNumberChanged(formData['house_number'] ?? ''));
-    _bloc.add(WomanNameChanged(formData['woman_name'] ?? ''));
+    _bloc.add(HouseNumberChanged(formData['house_no'] ?? formData['house_number'] ?? ''));
+    _bloc.add(WomanNameChanged(formData['pw_name'] ?? formData['woman_name'] ?? ''));
     _bloc.add(HusbandNameChanged(formData['husband_name'] ?? ''));
     _bloc.add(RchNumberChanged(formData['rch_number'] ?? ''));
 
