@@ -103,7 +103,8 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         } catch (_) {}
       }
 
-      /// --------- ELIGIBLE COUPLE COUNTS ----------
+      /// --------- ELIGIBLE COUPLE COUNTS (DISTINCT BENEFICIARIES) ----------
+      final Set<String> _distinctEcKeys = <String>{};
       for (final ec in ecActivities) {
         try {
           final hhKey = (ec['household_ref_key'] ?? '').toString();
@@ -111,6 +112,14 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
           final state = (ec['eligible_couple_state'] ?? '').toString();
           if (state != 'tracking_due') continue;
+
+          final beneficiaryKey = (ec['beneficiary_ref_key'] ?? '').toString();
+          if (beneficiaryKey.isEmpty) continue;
+
+          // Use beneficiary_ref_key to ensure distinct counting per beneficiary
+          final uniqueKey = '$hhKey::$beneficiaryKey';
+          if (_distinctEcKeys.contains(uniqueKey)) continue;
+          _distinctEcKeys.add(uniqueKey);
 
           eligibleCoupleTrackingDueCountMap[hhKey] =
               (eligibleCoupleTrackingDueCountMap[hhKey] ?? 0) + 1;
