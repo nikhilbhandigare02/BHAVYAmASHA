@@ -196,7 +196,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle:l10n!.hbcnList,
+        screenTitle:l10n!.hbncListTitle,
         showBack: true,
       ),
       drawer: const CustomDrawer(),

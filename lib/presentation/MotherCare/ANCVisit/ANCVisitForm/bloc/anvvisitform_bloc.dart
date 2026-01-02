@@ -58,7 +58,16 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
   }) : super(const AnvvisitformInitial()) {
     on<VisitTypeChanged>((e, emit) => emit(state.copyWith(visitType: e.value)));
     on<PlaceOfAncChanged>((e, emit) => emit(state.copyWith(placeOfAnc: e.value)));
-    on<DateOfInspectionChanged>((e, emit) => emit(state.copyWith(dateOfInspection: e.value)));
+    on<DateOfInspectionChanged>((e, emit) {
+      // Recalculate weeks of pregnancy if LMP date is available
+      String weeksOfPregnancy = state.weeksOfPregnancy;
+      if (state.lmpDate != null && e.value != null) {
+        final difference = e.value!.difference(state.lmpDate!).inDays;
+        final calculatedWeeks = (difference / 7).floor() + 1;
+        weeksOfPregnancy = calculatedWeeks.toString();
+      }
+      emit(state.copyWith(dateOfInspection: e.value, weeksOfPregnancy: weeksOfPregnancy));
+    });
     on<HouseNumberChanged>((e, emit) => emit(state.copyWith(houseNumber: e.value)));
     on<WomanNameChanged>((e, emit) => emit(state.copyWith(womanName: e.value)));
     on<HusbandNameChanged>((e, emit) => emit(state.copyWith(husbandName: e.value)));
@@ -66,12 +75,22 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
 
     on<LmpDateChanged>((e, emit) {
       if (e.value == null) {
-        emit(state.copyWith(lmpDate: null, eddDate: null));
+        emit(state.copyWith(lmpDate: null, eddDate: null, weeksOfPregnancy: ''));
         return;
       }
       // EDD = LMP + 8 months and 10 days (same as TrackEligibleCouple)
       final edd = _calculateEddFromLmp(e.value!);
-      emit(state.copyWith(lmpDate: e.value, eddDate: edd));
+      
+      // Calculate weeks of pregnancy
+      final base = state.dateOfInspection ?? DateTime.now();
+      final difference = base.difference(e.value!).inDays;
+      final weeksOfPregnancy = (difference / 7).floor() + 1;
+      
+      emit(state.copyWith(
+        lmpDate: e.value, 
+        eddDate: edd, 
+        weeksOfPregnancy: weeksOfPregnancy.toString()
+      ));
     });
     on<EddDateChanged>((e, emit) => emit(state.copyWith(eddDate: e.value)));
     on<WeeksOfPregnancyChanged>((e, emit) => emit(state.copyWith(weeksOfPregnancy: e.value)));

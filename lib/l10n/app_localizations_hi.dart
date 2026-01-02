@@ -4633,7 +4633,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get basicInformation => 'मूल जानकारी';
 
   @override
-  String get cbacFormDetails => 'CBAC फ़ॉर्म विवरण';
+  String get cbacFormDetails => 'सीबीएसी फ़ॉर्म विवरण';
 
   @override
   String get anmName => 'ए.एन.एम. का नाम';
