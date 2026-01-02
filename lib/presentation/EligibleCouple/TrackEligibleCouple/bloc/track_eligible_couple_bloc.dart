@@ -377,7 +377,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
               motherCareActivityData,
             );
             
-            if (state.isPregnant == true) {
+            if (state.isPregnant == true || state.fpMethod == 'Male Sterilization' || state.fpMethod == 'Female Sterilization') {
               try {
                 final db = await DatabaseProvider.instance.database;
                 await db.update(
@@ -392,6 +392,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
                 // Don't fail the operation if this update fails
               }
             }
+
           } catch (e) {
             print('Error inserting mother care activity: $e');
           }

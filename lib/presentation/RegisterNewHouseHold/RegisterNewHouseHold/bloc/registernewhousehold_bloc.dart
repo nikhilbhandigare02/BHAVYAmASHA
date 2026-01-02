@@ -666,14 +666,8 @@ class RegisterNewHouseholdBloc
                         );
                       }
                     }
-
                   }
 
-                  final bool isSterilized =
-                      spouseInfo['fpMethod']?.toString().toLowerCase() == 'male sterilization' ||
-                          spouseInfo['fpMethod']?.toString().toLowerCase() == 'female sterilization' ||
-                          headInfo['fpMethod']?.toString().toLowerCase() == 'male sterilization' ||
-                          headInfo['fpMethod']?.toString().toLowerCase() == 'female sterilization';
 
 
                   final bool isFemale =
@@ -683,6 +677,12 @@ class RegisterNewHouseholdBloc
                   final bool isMarried =
                       spouseInfo['maritalStatus']?.toString() == 'Married' ||
                           headInfo['maritalStatus']?.toString() == 'Married';
+
+                  final bool isSterilized =
+                      spouseInfo['fpMethod']?.toString().toLowerCase() == 'male sterilization' ||
+                          spouseInfo['fpMethod']?.toString().toLowerCase() == 'female sterilization' ||
+                          headInfo['fpMethod']?.toString().toLowerCase() == 'male sterilization' ||
+                          headInfo['fpMethod']?.toString().toLowerCase() == 'female sterilization';
 
                   final bool isFemaleMarried =
                       isFemale &&
@@ -698,42 +698,21 @@ class RegisterNewHouseholdBloc
                     try {
                       final db = await DatabaseProvider.instance.database;
 
-                      await db.insert(
+                      // Check if eligible_couple record already exists
+                      final existingEC = await db.query(
                         'eligible_couple_activities',
-                        {
-                          'server_id': '',
-                          'household_ref_key': uniqueKey,
-                          'beneficiary_ref_key': spouseKey,
-                          'eligible_couple_state': 'eligible_couple',
-                          'device_details': jsonEncode({
-                            'id': deviceInfo.deviceId,
-                            'platform': deviceInfo.platform,
-                            'version': deviceInfo.osVersion,
-                          }),
-                          'app_details': jsonEncode({
-                            'app_version': deviceInfo.appVersion.split('+').first,
-                          }),
-                          'parent_user': '',
-                          'current_user_key': ashaUniqueKey,
-                          'facility_id': facilityId,
-                          'created_date_time': ts,
-                          'modified_date_time': ts,
-                          'is_synced': 0,
-                          'is_deleted': 0,
-                        },
-                        conflictAlgorithm: ConflictAlgorithm.ignore,
+                        where: 'beneficiary_ref_key = ? AND eligible_couple_state = ?',
+                        whereArgs: [spouseKey, 'eligible_couple'],
                       );
 
-                      print('Inserted eligible_couple');
-
-                      if (!isPregnant) {
+                      if (existingEC.isEmpty) {
                         await db.insert(
                           'eligible_couple_activities',
                           {
                             'server_id': '',
                             'household_ref_key': uniqueKey,
                             'beneficiary_ref_key': spouseKey,
-                            'eligible_couple_state': 'tracking_due',
+                            'eligible_couple_state': 'eligible_couple',
                             'device_details': jsonEncode({
                               'id': deviceInfo.deviceId,
                               'platform': deviceInfo.platform,
@@ -753,7 +732,50 @@ class RegisterNewHouseholdBloc
                           conflictAlgorithm: ConflictAlgorithm.ignore,
                         );
 
-                        print('Inserted tracking_due (Non-pregnant)');
+                        print('Inserted eligible_couple');
+                      } else {
+                        print('eligible_couple record already exists, skipping insert');
+                      }
+
+                      if (!isPregnant) {
+                        // Check if tracking_due record already exists
+                        final existingTD = await db.query(
+                          'eligible_couple_activities',
+                          where: 'beneficiary_ref_key = ? AND eligible_couple_state = ?',
+                          whereArgs: [spouseKey, 'tracking_due'],
+                        );
+
+                        if (existingTD.isEmpty) {
+                          await db.insert(
+                            'eligible_couple_activities',
+                            {
+                              'server_id': '',
+                              'household_ref_key': uniqueKey,
+                              'beneficiary_ref_key': spouseKey,
+                              'eligible_couple_state': 'tracking_due',
+                              'device_details': jsonEncode({
+                                'id': deviceInfo.deviceId,
+                                'platform': deviceInfo.platform,
+                                'version': deviceInfo.osVersion,
+                              }),
+                              'app_details': jsonEncode({
+                                'app_version': deviceInfo.appVersion.split('+').first,
+                              }),
+                              'parent_user': '',
+                              'current_user_key': ashaUniqueKey,
+                              'facility_id': facilityId,
+                              'created_date_time': ts,
+                              'modified_date_time': ts,
+                              'is_synced': 0,
+                              'is_deleted': 0,
+                            },
+                            conflictAlgorithm: ConflictAlgorithm.ignore,
+                          );
+
+                          print('Inserted tracking_due (Non-pregnant)');
+                        } else {
+                          print('tracking_due record already exists, skipping insert');
+                        }
                       }
                     } catch (e) {
                       print('Error inserting eligible couple activity: $e');
@@ -1480,42 +1502,21 @@ class RegisterNewHouseholdBloc
                           try {
                             final db = await DatabaseProvider.instance.database;
 
-                            await db.insert(
+                            // Check if eligible_couple record already exists
+                            final existingEC = await db.query(
                               'eligible_couple_activities',
-                              {
-                                'server_id': '',
-                                'household_ref_key': uniqueKey,
-                                'beneficiary_ref_key': memberSpouseKey,
-                                'eligible_couple_state': 'eligible_couple',
-                                'device_details': jsonEncode({
-                                  'id': deviceInfo.deviceId,
-                                  'platform': deviceInfo.platform,
-                                  'version': deviceInfo.osVersion,
-                                }),
-                                'app_details': jsonEncode({
-                                  'app_version': deviceInfo.appVersion.split('+').first,
-                                }),
-                                'parent_user': '',
-                                'current_user_key': ashaUniqueKey,
-                                'facility_id': facilityId,
-                                'created_date_time': ts,
-                                'modified_date_time': ts,
-                                'is_synced': 0,
-                                'is_deleted': 0,
-                              },
-                              conflictAlgorithm: ConflictAlgorithm.ignore,
+                              where: 'beneficiary_ref_key = ? AND eligible_couple_state = ?',
+                              whereArgs: [memberSpouseKey, 'eligible_couple'],
                             );
 
-                            print('Inserted eligible_couple');
-
-                            if (!isPregnant) {
+                            if (existingEC.isEmpty) {
                               await db.insert(
                                 'eligible_couple_activities',
                                 {
                                   'server_id': '',
                                   'household_ref_key': uniqueKey,
                                   'beneficiary_ref_key': memberSpouseKey,
-                                  'eligible_couple_state': 'tracking_due',
+                                  'eligible_couple_state': 'eligible_couple',
                                   'device_details': jsonEncode({
                                     'id': deviceInfo.deviceId,
                                     'platform': deviceInfo.platform,
@@ -1535,7 +1536,50 @@ class RegisterNewHouseholdBloc
                                 conflictAlgorithm: ConflictAlgorithm.ignore,
                               );
 
-                              print('Inserted tracking_due (Non-pregnant)');
+                              print('Inserted eligible_couple');
+                            } else {
+                              print('eligible_couple record already exists, skipping insert');
+                            }
+
+                            if (!isPregnant) {
+                              // Check if tracking_due record already exists
+                              final existingTD = await db.query(
+                                'eligible_couple_activities',
+                                where: 'beneficiary_ref_key = ? AND eligible_couple_state = ?',
+                                whereArgs: [memberSpouseKey, 'tracking_due'],
+                              );
+
+                              if (existingTD.isEmpty) {
+                                await db.insert(
+                                  'eligible_couple_activities',
+                                  {
+                                    'server_id': '',
+                                    'household_ref_key': uniqueKey,
+                                    'beneficiary_ref_key': memberSpouseKey,
+                                    'eligible_couple_state': 'tracking_due',
+                                    'device_details': jsonEncode({
+                                      'id': deviceInfo.deviceId,
+                                      'platform': deviceInfo.platform,
+                                      'version': deviceInfo.osVersion,
+                                    }),
+                                    'app_details': jsonEncode({
+                                      'app_version': deviceInfo.appVersion.split('+').first,
+                                    }),
+                                    'parent_user': '',
+                                    'current_user_key': ashaUniqueKey,
+                                    'facility_id': facilityId,
+                                    'created_date_time': ts,
+                                    'modified_date_time': ts,
+                                    'is_synced': 0,
+                                    'is_deleted': 0,
+                                  },
+                                  conflictAlgorithm: ConflictAlgorithm.ignore,
+                                );
+
+                                print('Inserted tracking_due (Non-pregnant)');
+                              } else {
+                                print('tracking_due record already exists, skipping insert');
+                              }
                             }
                           } catch (e) {
                             print('Error inserting eligible couple activity: $e');
