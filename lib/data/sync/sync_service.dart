@@ -6,6 +6,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 import 'package:medixcel_new/data/repositories/AddBeneficiary/AddBeneficiaryRepository.dart';
 import 'package:medixcel_new/data/repositories/AddBeneficiary/AddBeneficiaryApiHelper.dart';
+import 'package:medixcel_new/data/repositories/ChildCareRepository/ChildCareApiHelper.dart';
 import 'package:medixcel_new/data/repositories/HousholdRepository/household_repository.dart';
 import 'package:medixcel_new/data/repositories/AddBeneficiary/BeneficiaryRepository.dart';
 
@@ -35,6 +36,7 @@ class SyncService {
   final _notificationRepo = NotificationRepository();
   final _eligibleCoupleApiHelper = EligibleCoupleApiHelper();
   final _motherCareApiHelper = MotherCareApiHelper();
+  final _childCareApiHelper = ChildCareApiHelper();
 
   Timer? _timer;
   bool _running = false;
@@ -145,75 +147,6 @@ class SyncService {
     }
   }
 
-  Future<void> syncUnsyncedChildCareActivities() async {
-    try {
-      final ids = await _getUserWorkingIds();
-      if (ids['facilityId']!.isEmpty || ids['ashaId']!.isEmpty) return;
-      final list = await _dao.getUnsyncedChildCareActivities();
-      if (list.isEmpty) {
-        print('ChildCare Push: No unsynced activities');
-        return;
-      }
-      print('ChildCare Push: Found ${list.length} unsynced activity(ies)');
-      final payload = list.map((r) => {
-        'facility_id': r['facility_id'],
-        'asha_id': ids['ashaId'],
-        'unique_key': r['household_ref_key'],
-        'beneficiaries_registration_ref_key': r['beneficiary_ref_key'],
-        'mother_key': r['mother_key'],
-        'father_key': r['father_key'],
-        'child_care_type': r['child_care_state'],
-        'device_details': r['device_details'] ?? {},
-        'app_details': r['app_details'] ?? {},
-        'parent_user': r['parent_user'] ?? {},
-        'created_date_time': r['created_date_time'],
-        'modified_date_time': r['modified_date_time'],
-      }).toList();
-      final resp = await _ccRepo.submitChildCareActivities(payload);
-      final success = resp is Map && resp['success'] == true;
-      if (success) {
-        // Extract server IDs from API response and update local records
-        if (resp['data'] is List) {
-          final responseData = resp['data'] as List;
-          for (final apiItem in responseData) {
-            if (apiItem is! Map) continue;
-            
-            final apiUniqueKey = apiItem['unique_key']?.toString();
-            final apiBeneficiaryRefKey = apiItem['beneficiaries_registration_ref_key']?.toString();
-            final apiChildCareType = apiItem['child_care_type']?.toString();
-            final serverId = apiItem['_id']?.toString();
-            
-            // Find matching local record
-            final matchingLocalRecord = list.firstWhere(
-              (localRecord) => 
-                localRecord['household_ref_key']?.toString() == apiUniqueKey &&
-                localRecord['beneficiary_ref_key']?.toString() == apiBeneficiaryRefKey &&
-                localRecord['child_care_state']?.toString() == apiChildCareType,
-              orElse: () => {},
-            );
-            
-            if (matchingLocalRecord.isNotEmpty) {
-              await _dao.markChildCareActivitySyncedById(
-                matchingLocalRecord['id'] as int? ?? 0,
-                serverId: serverId,
-              );
-              print('ChildCare Push: Updated record ${matchingLocalRecord['id']} with server_id=$serverId');
-            }
-          }
-        } else {
-          // Fallback if response structure is different
-          for (final r in list) {
-            await _dao.markChildCareActivitySyncedById(r['id'] as int? ?? 0);
-          }
-        }
-        print('ChildCare Push: Marked ${list.length} activity(ies) as synced');
-      } else {
-        print('ChildCare Push: API not successful, will retry later');
-      }
-    } catch (e) {
-      print('ChildCare Push: error -> $e');
-    }
-  }
 
   // Future<void> syncUnsyncedMotherCareAncActivities() async {
   //   try {
@@ -349,6 +282,14 @@ class SyncService {
       print('SyncService: Error syncing mother care activities: $e');
     }
   }
+  Future<void> syncUnsyncedChildCareActivities() async {
+    try {
+      await _childCareApiHelper.syncChildCareActivities();
+    } catch (e) {
+      print('SyncService: Error syncing mother care activities: $e');
+    }
+  }
+
 
   Future<void> syncUnsyncedFollowupForms() async {
     try {

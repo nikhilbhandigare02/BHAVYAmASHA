@@ -3,9 +3,12 @@ import 'dart:convert';
 import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
 import 'package:medixcel_new/data/repositories/ChildCareRepository/ChildCareRepository.dart';
+import 'package:medixcel_new/data/Database/User_Info.dart';
+import '../../Database/local_storage_dao.dart';
 
 class ChildCareApiHelper {
   final ChildCareRepository _repo = ChildCareRepository();
+  final LocalStorageDao _dao = LocalStorageDao.instance;
 
   Future<void> syncRegistrationDueByFollowupFormId(int formId) async {
     final db = await DatabaseProvider.instance.database;
@@ -134,6 +137,152 @@ class ChildCareApiHelper {
       }
     } catch (e) {
       print('ChildCareApiHelper: Child Care API call failed: $e');
+    }
+  }
+
+  Future<void> syncChildCareActivities() async {
+    try {
+      // Get current user info
+      final currentUser = await UserInfo.getCurrentUser();
+      if (currentUser == null) {
+        print('CC Sync: No current user found');
+        return;
+      }
+
+      // Get user details
+      final userDetails = currentUser['details'] is String
+          ? jsonDecode(currentUser['details'] as String)
+          : currentUser['details'] ?? {};
+
+      final userId = userDetails['unique_key']?.toString() ?? '';
+      final facilityId = userDetails['working_location']?['asha_associated_with_facility_id']?.toString() ??
+          userDetails['facility_id']?.toString() ?? '';
+      final appRoleId = int.tryParse(userDetails['app_role_id']?.toString() ?? '1') ?? 1;
+
+      if (userId.isEmpty || facilityId.isEmpty) {
+        print('CC Sync: Missing required user details (user_id or facility_id)');
+        return;
+      }
+
+      final unsyncedActivities = await _dao.getUnsyncedChildCareActivities();
+      if (unsyncedActivities.isEmpty) {
+        print('CC Sync: No unsynced activities found');
+        return;
+      }
+
+      print('CC Sync: Found ${unsyncedActivities.length} unsynced activities');
+
+      // Build array of payloads for batch processing
+      List<Map<String, dynamic>> payloadArray = [];
+      List<int> activityIds = [];
+
+      // Format date time properly
+      String formatDateTime(dynamic dateTime) {
+        if (dateTime == null) {
+          final now = DateTime.now();
+          return '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+        }
+        
+        if (dateTime is String) {
+          // Try to parse and reformat to ensure consistency
+          try {
+            final parsed = DateTime.parse(dateTime);
+            return '${parsed.year.toString().padLeft(4, '0')}-${parsed.month.toString().padLeft(2, '0')}-${parsed.day.toString().padLeft(2, '0')} ${parsed.hour.toString().padLeft(2, '0')}:${parsed.minute.toString().padLeft(2, '0')}:${parsed.second.toString().padLeft(2, '0')}';
+          } catch (_) {
+            return dateTime; // Return original if parsing fails
+          }
+        }
+        
+        return dateTime.toString();
+      }
+
+      // Process each activity and build payload array
+      for (final activity in unsyncedActivities) {
+        try {
+          final deviceDetails = activity['device_details'] is String
+              ? jsonDecode(activity['device_details'] as String)
+              : activity['device_details'] ?? {};
+
+          final appDetails = activity['app_details'] is String
+              ? jsonDecode(activity['app_details'] as String)
+              : activity['app_details'] ?? {};
+
+          final geoLocation = activity['geo_location'] is Map
+              ? Map<String, dynamic>.from(activity['geo_location'] as Map)
+              : <String, dynamic>{};
+
+          // Build payload according to the provided structure
+          final payload = {
+            "unique_key": activity['household_ref_key'] ?? '',
+            "beneficiaries_registration_ref_key": activity['beneficiary_ref_key'] ?? '',
+            "child_care_type": activity['child_care_state'] ?? 'registration_due',
+            "user_id": activity['current_user_key'],
+            "facility_id": activity['facility_id'].toString(),
+            "is_deleted": 0,
+            "created_by": activity['current_user_key'],
+            "created_date_time": formatDateTime(activity['created_date_time']),
+            "modified_by": activity['current_user_key'],
+            "modified_date_time": formatDateTime(activity['modified_date_time']),
+            "parent_added_by": activity['current_user_key'],
+            "parent_facility_id": int.tryParse(activity['facility_id']?.toString() ?? '0') ?? 0,
+            "app_role_id": appRoleId,
+            "is_guest": 0,
+            "device_details": {
+              'device_id': deviceDetails['deviceId'] ?? deviceDetails['device_id'] ?? '',
+              'device_plateform': deviceDetails['platform'] ?? deviceDetails['device_plateform'] ?? 'Android',
+              'device_plateform_version': deviceDetails['version'] ?? deviceDetails['device_plateform_version'] ?? '',
+            },
+            "app_details": {
+              "app_version": appDetails['app_version'] ?? '1.0.0',
+              "app_name": appDetails['app_name'] ?? 'BHAVYA mASHA Training',
+            },
+            'geolocation_details': {
+              'latitude': (geoLocation['latitude'] ?? '').toString(),
+              'longitude': (geoLocation['longitude'] ?? '').toString(),
+            },
+          };
+
+          payloadArray.add(payload);
+          activityIds.add(activity['id'] as int? ?? 0);
+
+        } catch (e, stackTrace) {
+          print('CC Sync: Error building payload for activity ${activity['id']}: $e');
+          print('Stack trace: $stackTrace');
+        }
+      }
+
+      if (payloadArray.isEmpty) {
+        print('CC Sync: No valid payloads to send');
+        return;
+      }
+
+      // Send batch request with array of payloads
+      print('CC Sync: Sending batch payload with ${payloadArray.length} activities');
+      print('CC Sync: Payload: ${jsonEncode(payloadArray)}');
+      
+      final response = await _repo.submitChildCareActivities(payloadArray);
+
+      if (response is Map && response['success'] == true) {
+        // Mark all activities as synced
+        for (final id in activityIds) {
+          if (id > 0) {
+            try {
+              await _dao.markChildCareActivitySyncedById(id);
+              print('CC Sync: Successfully synced activity $id');
+            } catch (e) {
+              print('CC Sync: Error marking activity $id as synced: $e');
+            }
+          }
+        }
+        print('CC Sync: Successfully synced ${activityIds.where((id) => id > 0).length} activities');
+      } else {
+        print('CC Sync: API call failed for batch request: $response');
+      }
+
+    } catch (e, stackTrace) {
+      print('CC Sync: Error in syncChildCareActivities: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
     }
   }
 }
