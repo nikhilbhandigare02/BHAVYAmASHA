@@ -2179,7 +2179,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               'Other',
                                             ];
                                             return ApiDropdown<String>(
-                                              labelText: '${l.fatherGuardianNameLabel} *',
+                                              labelText:
+                                              '${l.fatherGuardianNameLabel} *',
                                               hintText: l.select,
                                               items: fatherItems,
                                               getLabel: (s) => s,
@@ -2241,8 +2242,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           CustomTextField(
                                             labelText:
                                             '${l.fatherGuardianNameLabel} *',
-                                            initialValue: state.fatherName ?? '',
-                                            hintText: l.select,
+                                            hintText: l.fatherGuardianNameLabel,
+                                             initialValue:
+                                            state.fatherName ?? '',
                                             onChanged: (v) {
                                               final name = v.trim();
                                               context
@@ -2289,7 +2291,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               'Other',
                                             ];
                                             return ApiDropdown<String>(
-                                              labelText: "${l.motherNameLabel} *",
+                                              labelText:
+                                              "${l.motherNameLabel} *",
                                               hintText: l.select,
                                               items: motherItems,
                                               getLabel: (s) => s,

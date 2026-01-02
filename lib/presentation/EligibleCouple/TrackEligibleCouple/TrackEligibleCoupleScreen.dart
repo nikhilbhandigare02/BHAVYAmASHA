@@ -130,8 +130,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
               buildWhen: (previous, current) =>
               previous.financialYear != current.financialYear,
               builder: (context, state) {
-                // Helper function to parse financial year string to DateTime
-                DateTime? parseFinancialYear(String? yearStr) {
+                 DateTime? parseFinancialYear(String? yearStr) {
                   if (yearStr == null || yearStr.isEmpty) return null;
                   try {
                     // Handle both YYYY and YYYY-YY formats
