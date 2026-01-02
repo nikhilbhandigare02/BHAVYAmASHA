@@ -1728,6 +1728,11 @@
   "dhLabel": "डी.एच.",
   "babyWeightRecordedInMPC": "क्या नवजात शिशु का वजन मदर प्रोटेक्शन कार्ड में दर्ज है?",
   "referToHospital": "अस्पताल भेजें?",
+  "categoryANCsearch": "प्रसवपूर्व देखभाल",
+  "categoryRIsearch": "आरआई",
+  "categoryPNCsearch": "प्रसवोत्तर देखभाल",
+
+
   "referToLabel": "कहाँ रेफर करें",
   "mchLabel": "एम.सी.एच.",
   "date_of_death": "मृत्यु कि तिथि *",

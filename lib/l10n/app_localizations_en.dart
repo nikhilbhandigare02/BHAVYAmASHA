@@ -5032,10 +5032,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryANC => 'ANC DUE';
 
   @override
+  String get categoryANCsearch => 'ANC';
+
+  @override
   String get categoryPNC => 'PNC';
 
   @override
+  String get categoryPNCsearch => 'PNC';
+
+  @override
   String get categoryRI => 'Child Tracking';
+
+  @override
+  String get categoryRIsearch => 'RI';
 
   @override
   String get enter10DigitNumber => 'Enter 10 digit number';

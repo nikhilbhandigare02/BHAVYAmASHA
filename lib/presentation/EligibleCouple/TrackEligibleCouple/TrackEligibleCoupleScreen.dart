@@ -243,19 +243,30 @@ class _TrackEligibleCoupleView extends StatelessWidget {
             // Is Pregnant
             BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
               builder: (context, state) {
-                return ApiDropdown<bool>(
-                  labelText: t?.isPregnantLabel ?? 'क्या महिला गर्भवती है?',
-                  items: [true, false],
-                  getLabel: (value) =>
-                      value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
-                  value: state.isPregnant,
-                  readOnly: false,
-                  onChanged: (value) {
-                    if (value != null) {
-                      context
-                          .read<TrackEligibleCoupleBloc>()
-                          .add(IsPregnantChanged(value));
-                    }
+                final beneficiaryKey = state.beneficiaryRefKey ?? state.beneficiaryId;
+
+                return FutureBuilder<bool>(
+                  future: _hasActiveMotherCare(beneficiaryKey),
+                  builder: (context, snapshot) {
+                    final hasActiveMotherCare = snapshot.data == true;
+
+                    return ApiDropdown<bool>(
+                      labelText: t?.isPregnantLabel ?? 'क्या महिला गर्भवती है?',
+                      items: [true, false],
+                      getLabel: (value) =>
+                          value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
+                      value: state.isPregnant,
+                      readOnly: hasActiveMotherCare,
+                      onChanged: hasActiveMotherCare
+                          ? null
+                          : (value) {
+                              if (value != null) {
+                                context
+                                    .read<TrackEligibleCoupleBloc>()
+                                    .add(IsPregnantChanged(value));
+                              }
+                            },
+                    );
                   },
                 );
               },

@@ -1053,54 +1053,61 @@ class LocalStorageDao {
 
   Future<List<Map<String, dynamic>>> getUpdatedEligibleCouples() async {
     print('🔍 Starting to fetch updated eligible couples...');
-    
+
     try {
       final db = await _db;
-      
+
       // Get current user data
       final currentUser = await SecureStorageService.getCurrentUserData();
       final ashaUniqueKey = currentUser?['unique_key']?.toString() ?? '';
-      
+
       String whereClause = 'eligible_couple_state = ? AND (is_deleted IS NULL OR is_deleted = 0)';
       List<dynamic> whereArgs = ['tracking_due'];
-      
 
       if (ashaUniqueKey.isNotEmpty) {
         whereClause += ' AND current_user_key = ?';
         whereArgs.add(ashaUniqueKey);
         print('🔑 Filtering by ASHA unique key: $ashaUniqueKey');
       }
-      
+
+      // 1. Fetch the keys first
       final trackingDueRows = await db.query(
         'eligible_couple_activities',
         columns: ['beneficiary_ref_key', 'current_user_key'],
         where: whereClause,
         whereArgs: whereArgs,
+        // Optional: Sort activities by most recent if you have a date column here too
+        // orderBy: 'activity_date DESC',
       );
-      
+
       final trackingDueBeneficiaryKeys = trackingDueRows
           .map((row) => row['beneficiary_ref_key']?.toString())
           .whereType<String>()
           .toSet();
-          
+
       print('🔑 Tracking due beneficiaries count: ${trackingDueBeneficiaryKeys.length}');
-          
+
       if (trackingDueBeneficiaryKeys.isEmpty) {
         return [];
       }
-      
+
       final placeholders = List.filled(trackingDueBeneficiaryKeys.length, '?').join(',');
+
+      // 2. Fetch the beneficiaries with ORDER BY (DESC)
+      // MAKE SURE TO CHECK YOUR COLUMN NAME: 'created_date', 'server_updated_date', or 'id'
       final rows = await db.query(
         'beneficiaries_new',
         where: 'unique_key IN ($placeholders) AND (is_deleted IS NULL OR is_deleted = 0) AND (is_migrated IS NULL OR is_migrated = 0)',
         whereArgs: trackingDueBeneficiaryKeys.toList(),
+        orderBy: 'created_date DESC', // <--- THIS LINE SORTS NEW DATA FIRST
       );
-      
+
       print('📊 Found ${rows.length} beneficiaries matching tracking_due status');
-      
+
       final couples = <Map<String, dynamic>>[];
+      // LinkedHashMap preserves insertion order, so the sort order from SQL is kept
       final households = <String, List<Map<String, dynamic>>>{};
-      
+
       for (final row in rows) {
         final hhKey = row['household_ref_key']?.toString() ?? '';
         households.putIfAbsent(hhKey, () => []).add(row);
@@ -1110,14 +1117,14 @@ class LocalStorageDao {
       for (final household in households.values) {
         Map<String, dynamic>? head;
         Map<String, dynamic>? spouse;
-        
+
         for (final member in household) {
           try {
             final dynamic infoRaw = member['beneficiary_info'];
             final Map<String, dynamic> info = infoRaw is String
                 ? jsonDecode(infoRaw)
                 : Map<String, dynamic>.from(infoRaw ?? {});
-                
+
             // Check if this is the head or spouse
             final relation = (info['relation_to_head'] ?? info['relation'] ?? '').toString().toLowerCase();
             if (relation.contains('head') || relation == 'self') {
@@ -1146,12 +1153,12 @@ class LocalStorageDao {
             // Determine if this is the head or spouse to pass the correct counterpart
             final bool isHead = info == head;
             final bool isSpouse = info == spouse;
-            final Map<String, dynamic> counterpart = isHead && spouse != null 
-                ? spouse 
-                : isSpouse && head != null 
-                    ? head 
-                    : <String, dynamic>{};
-                    
+            final Map<String, dynamic> counterpart = isHead && spouse != null
+                ? spouse
+                : isSpouse && head != null
+                ? head
+                : <String, dynamic>{};
+
             final coupleData = _formatEligibleCoupleData(
               Map<String, dynamic>.from(member),
               info,
@@ -1165,10 +1172,10 @@ class LocalStorageDao {
           }
         }
       }
-      
+
       print('🏁 Finished processing. Found ${couples.length} eligible couples');
       return couples;
-      
+
     } catch (e) {
       print('❌ Error in getUpdatedEligibleCouples: $e');
       return [];

@@ -5032,10 +5032,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get categoryANC => 'एएनसी';
 
   @override
+  String get categoryANCsearch => 'प्रसवपूर्व देखभाल';
+
+  @override
   String get categoryPNC => 'पीएनसी देय';
 
   @override
+  String get categoryPNCsearch => 'प्रसवोत्तर देखभाल';
+
+  @override
   String get categoryRI => 'चाइल्ड ट्रैकिंग';
+
+  @override
+  String get categoryRIsearch => 'आरआई';
 
   @override
   String get enter10DigitNumber => '10 अंकों का नंबर दर्ज करें';

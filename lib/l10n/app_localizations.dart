@@ -10109,17 +10109,35 @@ abstract class AppLocalizations {
   /// **'ANC DUE'**
   String get categoryANC;
 
+  /// No description provided for @categoryANCsearch.
+  ///
+  /// In en, this message translates to:
+  /// **'ANC'**
+  String get categoryANCsearch;
+
   /// No description provided for @categoryPNC.
   ///
   /// In en, this message translates to:
   /// **'PNC'**
   String get categoryPNC;
 
+  /// No description provided for @categoryPNCsearch.
+  ///
+  /// In en, this message translates to:
+  /// **'PNC'**
+  String get categoryPNCsearch;
+
   /// No description provided for @categoryRI.
   ///
   /// In en, this message translates to:
   /// **'Child Tracking'**
   String get categoryRI;
+
+  /// No description provided for @categoryRIsearch.
+  ///
+  /// In en, this message translates to:
+  /// **'RI'**
+  String get categoryRIsearch;
 
   /// No description provided for @enter10DigitNumber.
   ///
