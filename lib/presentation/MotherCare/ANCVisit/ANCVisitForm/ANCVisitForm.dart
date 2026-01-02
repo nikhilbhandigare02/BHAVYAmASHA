@@ -1337,6 +1337,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               hintText:
                                   l10n?.weeksOfPregnancyLabel ??
                                   'No. of weeks of pregnancy',
+                              initialValue: state.weeksOfPregnancy,
                               readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) =>
