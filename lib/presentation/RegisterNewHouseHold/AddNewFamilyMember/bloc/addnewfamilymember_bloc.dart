@@ -1228,10 +1228,10 @@ class AddnewfamilymemberBloc
 
 
             final bool isSterilized =
-                spousState.fpMethod== 'male sterilization' ||
-                    spousState.fpMethod == 'female sterilization' ||
-                    spousState.fpMethod == 'male sterilization' ||
-                    spousState.fpMethod == 'female sterilization';
+                spousState.fpMethod?.toLowerCase() == 'male sterilization' ||
+                    spousState.fpMethod?.toLowerCase() == 'female sterilization' ||
+                    state.fpMethod?.toLowerCase() == 'male sterilization' ||
+                    state.fpMethod?.toLowerCase() == 'female sterilization';
 
             final bool isFemale =
                 spousState.gender == 'female' ||
@@ -1254,42 +1254,21 @@ class AddnewfamilymemberBloc
               try {
                 final db = await DatabaseProvider.instance.database;
 
-                await db.insert(
+                // Check if eligible_couple record already exists
+                final existingEC = await db.query(
                   'eligible_couple_activities',
-                  {
-                    'server_id': '',
-                    'household_ref_key': householdRefKey,
-                    'beneficiary_ref_key': spousKey,
-                    'eligible_couple_state': 'eligible_couple',
-                    'device_details': jsonEncode({
-                      'id': deviceInfo.deviceId,
-                      'platform': deviceInfo.platform,
-                      'version': deviceInfo.osVersion,
-                    }),
-                    'app_details': jsonEncode({
-                      'app_version': deviceInfo.appVersion.split('+').first,
-                    }),
-                    'parent_user': '',
-                    'current_user_key': ashaUniqueKey,
-                    'facility_id': facilityId,
-                    'created_date_time': ts,
-                    'modified_date_time': ts,
-                    'is_synced': 0,
-                    'is_deleted': 0,
-                  },
-                  conflictAlgorithm: ConflictAlgorithm.ignore,
+                  where: 'beneficiary_ref_key = ? AND eligible_couple_state = ?',
+                  whereArgs: [spousKey, 'eligible_couple'],
                 );
 
-                print('Inserted eligible_couple');
-
-                if (!isPregnant) {
+                if (existingEC.isEmpty) {
                   await db.insert(
                     'eligible_couple_activities',
                     {
                       'server_id': '',
                       'household_ref_key': householdRefKey,
                       'beneficiary_ref_key': spousKey,
-                      'eligible_couple_state': 'tracking_due',
+                      'eligible_couple_state': 'eligible_couple',
                       'device_details': jsonEncode({
                         'id': deviceInfo.deviceId,
                         'platform': deviceInfo.platform,
@@ -1309,7 +1288,50 @@ class AddnewfamilymemberBloc
                     conflictAlgorithm: ConflictAlgorithm.ignore,
                   );
 
-                  print('Inserted tracking_due (Non-pregnant)');
+                  print('Inserted eligible_couple');
+                } else {
+                  print('eligible_couple record already exists, skipping insert');
+                }
+
+                if (!isPregnant) {
+                  // Check if tracking_due record already exists
+                  final existingTD = await db.query(
+                    'eligible_couple_activities',
+                    where: 'beneficiary_ref_key = ? AND eligible_couple_state = ?',
+                    whereArgs: [spousKey, 'tracking_due'],
+                  );
+
+                  if (existingTD.isEmpty) {
+                    await db.insert(
+                      'eligible_couple_activities',
+                      {
+                        'server_id': '',
+                        'household_ref_key': householdRefKey,
+                        'beneficiary_ref_key': spousKey,
+                        'eligible_couple_state': 'tracking_due',
+                        'device_details': jsonEncode({
+                          'id': deviceInfo.deviceId,
+                          'platform': deviceInfo.platform,
+                          'version': deviceInfo.osVersion,
+                        }),
+                        'app_details': jsonEncode({
+                          'app_version': deviceInfo.appVersion.split('+').first,
+                        }),
+                        'parent_user': '',
+                        'current_user_key': ashaUniqueKey,
+                        'facility_id': facilityId,
+                        'created_date_time': ts,
+                        'modified_date_time': ts,
+                        'is_synced': 0,
+                        'is_deleted': 0,
+                      },
+                      conflictAlgorithm: ConflictAlgorithm.ignore,
+                    );
+
+                    print('Inserted tracking_due (Non-pregnant)');
+                  } else {
+                    print('tracking_due record already exists, skipping insert');
+                  }
                 }
               } catch (e) {
                 print('Error inserting eligible couple activity: $e');
