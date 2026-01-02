@@ -2243,7 +2243,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             labelText:
                                             '${l.fatherGuardianNameLabel} *',
                                             hintText: l.fatherGuardianNameLabel,
-                                            initialValue:
+                                             initialValue:
                                             state.fatherName ?? '',
                                             onChanged: (v) {
                                               final name = v.trim();
