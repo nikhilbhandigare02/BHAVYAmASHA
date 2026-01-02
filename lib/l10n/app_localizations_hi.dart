@@ -5164,7 +5164,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get correctHighlightedErrors => 'जारी रखने से पहले कृपया हाइलाइट किए गए त्रुटियों को सुधारें।';
 
   @override
-  String get selectOptionLabel => 'विकल्प चुनें';
+  String get selectOptionLabel => 'चुनें';
 
   @override
   String get screeningDate => 'स्क्रीनिंग तिथि';

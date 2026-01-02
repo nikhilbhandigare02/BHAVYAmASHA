@@ -5,6 +5,10 @@ import 'package:meta/meta.dart';
 import 'package:medixcel_new/core/extensions/string_extensions.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
 
+import '../../../../data/Database/User_Info.dart';
+import '../../../../data/SecureStorage/SecureStorage.dart';
+
+
 part 'eligible_coule_update_event.dart';
 part 'eligible_coule_update_state.dart';
 
@@ -35,10 +39,66 @@ class EligibleCouleUpdateBloc
     on<SubmitPressed>(_onSubmit);
   }
 
+  Future<String?> _getVillageFromUserDetails() async {
+    try {
+      // 1) Try secure storage current-user data (same as AddNewFamilyHead)
+      Map<String, dynamic>? user = await SecureStorageService.getCurrentUserData();
+
+      // Fallback to legacy stored user JSON if needed
+      if (user == null || user.isEmpty) {
+        try {
+          final legacyRaw = await SecureStorageService.getUserData();
+          if (legacyRaw != null && legacyRaw.isNotEmpty) {
+            final parsed = jsonDecode(legacyRaw);
+            if (parsed is Map<String, dynamic>) {
+              user = parsed;
+            }
+          }
+        } catch (_) {}
+      }
+
+      // Try working_location from secure storage payload
+      try {
+        final working = user?['working_location'];
+        if (working is Map) {
+          final village = (working['village'] ?? '').toString();
+          if (village.isNotEmpty) {
+            return village;
+          }
+        }
+      } catch (_) {}
+
+      // 2) Fallback to DB user details when secure storage lacks data
+      final dbUser = await UserInfo.getCurrentUser();
+      final details = dbUser?['details'];
+      if (details is Map<String, dynamic>) {
+        final data = details['data'];
+        if (data is Map<String, dynamic>) {
+          final working2 = data['working_location'];
+          if (working2 is Map<String, dynamic>) {
+            final village2 = (working2['village'] ?? '').toString();
+            if (village2.isNotEmpty) {
+              return village2;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('⚠️ Error fetching village from user details: $e');
+    }
+    return null;
+  }
+
   Future<void> _onInitializeForm(InitializeForm event, Emitter<EligibleCouleUpdateState> emit) async {
     final data = event.initialData;
     print('\n🚀 ====== INITIALIZING FORM ======');
     print('📋 Received data: $data');
+    
+    // Get village from user details
+    final village = await _getVillageFromUserDetails();
+    if (village != null) {
+      print('🌍 Fetched village: $village');
+    }
 
     try {
       // Extract data directly from the passed arguments
@@ -115,12 +175,16 @@ class EligibleCouleUpdateBloc
 
       if (rows.isEmpty) {
         print('⚠️ No beneficiary found in database, using only passed data');
-        // Use only the data passed from previous screen
+
+        // Build a minimal address from the fetched village (same source as AddNewFamilyHead)
+        final addressFromVillage = (village ?? '').trim();
+
         emit(state.copyWith(
           rchId: rchId,
           womanName: name,
           currentAge: currentAge,
           mobileNo: mobile,
+          address: addressFromVillage,
           totalChildrenBorn: totalBorn,
           totalLiveChildren: totalLive,
           totalMaleChildren: totalMale,
@@ -169,10 +233,13 @@ class EligibleCouleUpdateBloc
       final womanDetails = isHead ? headDetails : spouseDetails;
 
       // Get address components
-      final village = headDetails['village']?.toString() ?? '';
+      final villageFromHead = headDetails['village']?.toString() ?? '';
       final mohalla = headDetails['mohalla']?.toString() ?? headDetails['tola']?.toString() ?? '';
       final ward = headDetails['ward']?.toString() ?? '';
-      final address = [village, mohalla, ward].where((e) => e.isNotEmpty).join(', ');
+
+      // Use the village from user details if available, otherwise fall back to head details
+      final effectiveVillage = village ?? villageFromHead;
+      final address = [effectiveVillage, mohalla, ward].where((e) => e.isNotEmpty).join(', ');
 
       // Try to extract children data from beneficiary info
       if (beneficiaryInfoJson.isNotEmpty) {
@@ -194,7 +261,7 @@ class EligibleCouleUpdateBloc
             womanName: info['memberName']?.toString() ?? name,
             currentAge: info['age']?.toString() ?? currentAge,
             mobileNo: info['mobileNo']?.toString() ?? mobile,
-            address: info['address']?.toString() ?? '',
+            address: info['address']?.toString() ?? address,
             religion: info['religion']?.toString() ?? state.religion,
             category: info['category']?.toString() ?? state.category,
             otherReligion: (info['other_religion']?.toString() ?? headDetails['other_religion']?.toString() ?? info['otherReligion']?.toString() ?? headDetails['otherReligion']?.toString() ?? ''),
