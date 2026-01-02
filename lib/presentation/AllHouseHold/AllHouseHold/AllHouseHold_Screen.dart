@@ -83,12 +83,14 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       final households = await LocalStorageDao.instance.getAllHouseholds();
+      final ecActivities = await LocalStorageDao.instance.getEligibleCoupleActivities();
 
       final pregnantCountMap = <String, int>{};
       final elderlyCountMap = <String, int>{};
       final child0to1Map = <String, int>{};
       final child1to2Map = <String, int>{};
       final child2to5Map = <String, int>{};
+      final eligibleCoupleTrackingDueCountMap = <String, int>{};
 
       /// Household -> configured head map
       final headKeyByHousehold = <String, String>{};
@@ -98,6 +100,20 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           final headId = (hh['head_id'] ?? '').toString();
           if (hhRefKey.isEmpty || headId.isEmpty) continue;
           headKeyByHousehold[hhRefKey] = headId;
+        } catch (_) {}
+      }
+
+      /// --------- ELIGIBLE COUPLE COUNTS ----------
+      for (final ec in ecActivities) {
+        try {
+          final hhKey = (ec['household_ref_key'] ?? '').toString();
+          if (hhKey.isEmpty) continue;
+
+          final state = (ec['eligible_couple_state'] ?? '').toString();
+          if (state != 'tracking_due') continue;
+
+          eligibleCoupleTrackingDueCountMap[hhKey] =
+              (eligibleCoupleTrackingDueCountMap[hhKey] ?? 0) + 1;
         } catch (_) {}
       }
 
@@ -293,6 +309,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           'totalMembers': membersForHousehold.length,
           'elderly': elderlyCountMap[householdRefKey] ?? 0,
           'pregnantWomen': pregnantCountMap[householdRefKey] ?? 0,
+          'eligibleCouples': eligibleCoupleTrackingDueCountMap[householdRefKey] ?? 0,
           'child0to1': child0to1Map[householdRefKey] ?? 0,
           'child1to2': child1to2Map[householdRefKey] ?? 0,
           'child2to5': child2to5Map[householdRefKey] ?? 0,
@@ -662,9 +679,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                       Expanded(
                           child:
                           _rowText(l10n?.thName ?? 'Name', data['name'])),
-                      const SizedBox(width: 8),
-                      Expanded(
-                          child: _rowText(
+                               const SizedBox(width: 8),
+                               Expanded(
+                                 child: _rowText(
                               l10n?.mobileLabelSimple ?? 'Mobile no.',
                               data['mobile'])),
                       const SizedBox(width: 8),
@@ -682,9 +699,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                           child: _rowText(
                               l10n?.eligibleCouples ?? 'Eligible couples',
                               data['eligibleCouples'].toString())),
-                      const SizedBox(width: 8),
-                      Expanded(
-                          child: _rowText(
+                              const SizedBox(width: 8),
+                           Expanded(
+                           child: _rowText(
                               l10n?.pregnantWomen ?? 'Pregnant women',
                               data['pregnantWomen'].toString())),
                       const SizedBox(width: 8),

@@ -11714,7 +11714,7 @@ abstract class AppLocalizations {
   /// No description provided for @referToLabel.
   ///
   /// In en, this message translates to:
-  /// **'Refer to *'**
+  /// **'Refer to'**
   String get referToLabel;
 
   /// No description provided for @mchLabel.
@@ -11894,7 +11894,7 @@ abstract class AppLocalizations {
   /// No description provided for @refer_to_hospital.
   ///
   /// In en, this message translates to:
-  /// **'Refer to Hospital*'**
+  /// **'Refer to Hospital'**
   String get refer_to_hospital;
 
   /// No description provided for @please_add_family_head_details.
