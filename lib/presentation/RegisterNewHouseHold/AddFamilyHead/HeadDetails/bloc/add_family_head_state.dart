@@ -47,6 +47,7 @@ class AddFamilyHeadState extends Equatable {
   final String? ageAtMarriage;
   final String? spouseName;
   final String? AfhRichIdChange;
+  final bool isRchIdButtonEnabled;
   final String? hasChildren; // Yes/No
   final String? isPregnant; // Yes/No
   // Verification status fields
@@ -128,6 +129,7 @@ class AddFamilyHeadState extends Equatable {
     this.ageAtMarriage,
     this.spouseName,
     this.AfhRichIdChange,
+    this.isRchIdButtonEnabled = false,
     this.hasChildren,
     this.isPregnant,
     this.abhaVerified = false,
@@ -204,6 +206,7 @@ class AddFamilyHeadState extends Equatable {
     String? ageAtMarriage,
     String? spouseName,
     String? AfhRichIdChange,
+    bool? isRchIdButtonEnabled,
     String? hasChildren,
     String? isPregnant,
     bool? abhaVerified,
@@ -282,6 +285,7 @@ class AddFamilyHeadState extends Equatable {
       spouseName: spouseName ?? this.spouseName,
       hasChildren: hasChildren ?? this.hasChildren,
       AfhRichIdChange: AfhRichIdChange ?? this.AfhRichIdChange,
+      isRchIdButtonEnabled: isRchIdButtonEnabled ?? this.isRchIdButtonEnabled,
       isPregnant: isPregnant ?? this.isPregnant,
       abhaVerified: abhaVerified ?? this.abhaVerified,
       voterIdVerified: voterIdVerified ?? this.voterIdVerified,
@@ -317,6 +321,7 @@ class AddFamilyHeadState extends Equatable {
     houseNo,
     AfhABHAChange,
     AfhRichIdChange,
+    isRchIdButtonEnabled,
     lmp,
     edd,
     headName,
@@ -436,6 +441,7 @@ class AddFamilyHeadState extends Equatable {
       'ageAtMarriage': ageAtMarriage,
       'spouseName': spouseName,
       'AfhRichIdChange': AfhRichIdChange,
+      'isRchIdButtonEnabled': isRchIdButtonEnabled,
       'hasChildren': hasChildren,
       'isPregnant': isPregnant,
       'abhaVerified': abhaVerified,

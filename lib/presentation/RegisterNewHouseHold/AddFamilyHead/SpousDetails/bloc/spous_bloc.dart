@@ -189,6 +189,14 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
     on<SpUpdatePhId>((event, emit) => emit(state.copyWith(phId: event.value)));
     on<SpUpdateBeneficiaryType>((event, emit) => emit(state.copyWith(beneficiaryType: event.value)));
 
+    on<RchIDChanged>((event, emit) {
+      final value = event.value;
+      final isButtonEnabled = value.length == 12;
+      emit(state.copyWith(
+        RichIDChanged: value,
+        isRchIdButtonEnabled: isButtonEnabled,
+      ));
+    });
     on<SpUpdateIsPregnant>((event, emit) => emit(state.copyWith(isPregnant: event.value)));
 
     on<SpLMPChange>((event, emit) {

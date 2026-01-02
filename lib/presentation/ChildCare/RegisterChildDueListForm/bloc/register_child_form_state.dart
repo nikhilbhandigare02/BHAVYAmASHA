@@ -2,6 +2,7 @@ part of 'register_child_form_bloc.dart';
 
 class RegisterChildFormState extends Equatable {
   final String rchIdChild;
+  final bool isRchIdButtonEnabled;
   final String serialNumber;
   final DateTime? dateOfBirth;
   final DateTime? dateOfRegistration;
@@ -29,6 +30,7 @@ class RegisterChildFormState extends Equatable {
 
   const RegisterChildFormState({
     this.rchIdChild = '',
+    this.isRchIdButtonEnabled = false,
     this.serialNumber = '',
     this.registerSerialNumber = '',
     this.dateOfBirth,
@@ -58,6 +60,7 @@ class RegisterChildFormState extends Equatable {
 
   RegisterChildFormState copyWith({
     String? rchIdChild,
+    bool? isRchIdButtonEnabled,
     String? serialNumber,
     DateTime? dateOfBirth,
     DateTime? dateOfRegistration,
@@ -85,6 +88,7 @@ class RegisterChildFormState extends Equatable {
   }) {
     return RegisterChildFormState(
       rchIdChild: rchIdChild ?? this.rchIdChild,
+      isRchIdButtonEnabled: isRchIdButtonEnabled ?? this.isRchIdButtonEnabled,
       serialNumber: serialNumber ?? this.serialNumber,
       registerSerialNumber: registerSerialNumber ?? this.registerSerialNumber,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
@@ -114,6 +118,7 @@ class RegisterChildFormState extends Equatable {
   @override
   List<Object?> get props => [
         rchIdChild,
+        isRchIdButtonEnabled,
         serialNumber,
         dateOfBirth,
         dateOfRegistration,

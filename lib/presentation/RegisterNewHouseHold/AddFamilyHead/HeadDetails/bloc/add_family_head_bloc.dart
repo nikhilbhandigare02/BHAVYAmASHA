@@ -167,7 +167,14 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
           (event, emit) => emit(state.copyWith(otherOccupation: event.value)),
     );
     on<AfhRichIdChange>(
-          (event, emit) => emit(state.copyWith(AfhRichIdChange: event.value)),
+          (event, emit) {
+            final value = event.value;
+            final isButtonEnabled = value.length == 12;
+            emit(state.copyWith(
+              AfhRichIdChange: value,
+              isRchIdButtonEnabled: isButtonEnabled,
+            ));
+          },
     );
     on<AfhUpdateEducation>(
           (event, emit) => emit(state.copyWith(education: event.value)),

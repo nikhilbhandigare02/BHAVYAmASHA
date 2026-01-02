@@ -1714,7 +1714,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     ScaffoldMessenger.of(
                                                       context,
                                                     ).removeCurrentSnackBar();
-                                                    final value = v?.trim() ?? '';
+                                                    
+                                                    // Filter out non-digit characters (for copy-paste scenarios)
+                                                    final filteredValue = v?.replaceAll(RegExp(r'[^0-9]'), '') ?? '';
+                                                    final value = filteredValue.trim();
+                                                    
                                                     context
                                                         .read<
                                                         AddnewfamilymemberBloc
@@ -1760,6 +1764,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   borderRadius: 8,
                                                   fontSize: 12,
                                                   isLoading: _isLoading,
+                                                  disabled: !state.isRchIdButtonEnabled,
                                                   onPress: () async {
                                                     final rchIdStr =
                                                         state
