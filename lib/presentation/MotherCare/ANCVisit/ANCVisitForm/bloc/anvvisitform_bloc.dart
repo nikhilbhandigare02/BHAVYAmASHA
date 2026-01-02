@@ -85,6 +85,10 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
       emit(state.copyWith(folicAcidTablets: event.value));
     });
 
+    on<IronFolicAcidTabletsChanged>((event, emit) {
+      emit(state.copyWith(ironFolicAcidTablets: event.value));
+    });
+
     on<CalciumVitaminD3TabletsChanged>((event, emit) {
       emit(state.copyWith(calciumVitaminD3Tablets: event.value));
     });
@@ -226,7 +230,8 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
               : '',
 
           'folic_acid_tab_quantity': state.folicAcidTablets ?? '',
-          'iron_and_folic_acid_tab_quantity': '',
+          'iron_and_folic_acid_tab_quantity': state.ironFolicAcidTablets ?? '',
+          'iron_folic_acid_tablets': state.ironFolicAcidTablets ?? '',
           'calcium_and_vit_d_tab_quantity': state.calciumVitaminD3Tablets ?? '',
           'has_albendazole_tab_given': '',
 
@@ -455,6 +460,8 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             'td2_date': state.td2Date?.toIso8601String(),
             'td_booster_date': state.tdBoosterDate?.toIso8601String(),
             'folic_acid_tablets': state.folicAcidTablets,
+            'iron_folic_acid_tablets': state.ironFolicAcidTablets,
+            'iron_and_folic_acid_tablets': state.ironFolicAcidTablets,
             'calcium_vitamin_tablets': state.calciumVitaminD3Tablets,
             'selected_risks': state.selectedRisks,
             'has_abortion_complication': state.hasAbortionComplication,

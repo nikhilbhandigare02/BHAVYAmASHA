@@ -180,15 +180,7 @@ class _DeseasedListState extends State<DeseasedList> {
     }
   }
 
-  String? _formatDate(String? dateString) {
-    if (dateString == null) return null;
-    try {
-      final date = DateTime.parse(dateString);
-      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
-    } catch (e) {
-      return dateString;
-    }
-  }
+
 
   @override
   void dispose() {
