@@ -98,12 +98,22 @@ class AddnewfamilymemberBloc
   // Keep track of the beneficiary being edited (for update flow)
   String? _editingBeneficiaryKey;
   int? _editingBeneficiaryRowId;
+  bool _dataClearedByTypeChange = false;
 
   Future<void> _onLoadBeneficiaryData(
       LoadBeneficiaryData event,
       Emitter<AddnewfamilymemberState> emit,
       ) async {
     try {
+      print('📥 [Bloc] Loading beneficiary data: ${event.beneficiaryId}');
+      print('📥 [Bloc] Data cleared flag: $_dataClearedByTypeChange');
+      
+      // If data was cleared by type change, don't reload beneficiary data
+      if (_dataClearedByTypeChange) {
+        print('📥 [Bloc] Skipping beneficiary data load due to type change clear');
+        return;
+      }
+      
       // Get the complete beneficiary record
       final db = await DatabaseProvider.instance.database;
       final List<Map<String, dynamic>> results = await db.query(
@@ -459,6 +469,16 @@ class AddnewfamilymemberBloc
     on<LoadBeneficiaryData>(_onLoadBeneficiaryData);
     on<AddnewfamilymemberEvent>((event, emit) {
       // TODO: implement event handler
+    });
+    on<AnmClearAllData>((e, emit) {
+      print('🧹 [Bloc] ClearAllData event received - resetting state to default');
+      _dataClearedByTypeChange = true; // Set flag to prevent data reloading
+      emit(const AddnewfamilymemberState());
+      print('🧹 [Bloc] State cleared - MemberType: ${state.memberType}, Name: ${state.name}');
+    });
+    on<AnmResetDataClearedFlag>((e, emit) {
+      print('🔄 [Bloc] Resetting data cleared flag');
+      _dataClearedByTypeChange = false;
     });
     on<AnmUpdateMemberType>(
           (e, emit) => emit(state.copyWith(memberType: e.value)),

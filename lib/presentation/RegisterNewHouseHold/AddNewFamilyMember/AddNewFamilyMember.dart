@@ -79,6 +79,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   bool _tabListenerAttached = false;
   bool _syncingGender = false;
   bool _syncingSpouseName = false;
+  bool _dataClearedByTypeChange = false;
 
   static String? _anmLastFormError;
 
@@ -591,7 +592,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     final adultMinDate = DateTime(now.year - 110, now.month, now.day);
     final adultMaxDate = DateTime(now.year - 15, now.month, now.day);
 
-    if (widget.inlineEdit && !_initialApplied && widget.initial != null) {
+    if (widget.inlineEdit && !_initialApplied && widget.initial != null && !_dataClearedByTypeChange) {
       final data = widget.initial!;
       final b = _bloc;
 
@@ -1371,17 +1372,44 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     onChanged: (v) {
                                       final bloc = context
                                           .read<AddnewfamilymemberBloc>();
-                                      bloc.add(AnmUpdateMemberType(v ?? ''));
-                                      // Clear marital status when changing to Child
+                                      
+                                      // Store the current member type before updating
+                                      final currentMemberType = state.memberType;
+                                      
+                                      print('🔄 [MemberType] Changing from: $currentMemberType to: $v');
+                                      print('🔄 [MemberType] Current state - Name: ${state.name}, Mobile: ${state.mobileNo}');
+                                      print('🔄 [MemberType] Data cleared flag: $_dataClearedByTypeChange');
+                                      
+                                      // Clear all data when switching between adult and child (works in both edit and add mode)
+                                      // This triggers on the first change from the original value
+                                      if ((currentMemberType == 'Adult' && v == 'Child') ||
+                                          (currentMemberType == 'Child' && v == 'Adult')) {
+                                        print('🧹 [MemberType] Clearing all data due to member type change');
+                                        setState(() {
+                                          _dataClearedByTypeChange = true;
+                                        });
+                                        
+                                        bloc.add( AnmClearAllData());
+                                        
+                                        Future.microtask(() {
+                                          bloc.add(AnmUpdateMemberType(v ?? ''));
+                                          bloc.add( AnmResetDataClearedFlag());
+                                          print('🔄 [MemberType] Set new member type after clearing: $v');
+                                        });
+                                      } else {
+                                        bloc.add(AnmUpdateMemberType(v ?? ''));
+                                      }
+                                      
                                       if (v == 'Child') {
                                         bloc.add(
                                           const AnmUpdateMaritalStatus(''),
                                         );
-                                        // Clear relation if it's 'Spouse' (not valid for children)
                                         if (state.relation == 'Spouse') {
                                           bloc.add(AnmUpdateRelation(''));
                                         }
                                       }
+                                      
+                                      print('🔄 [MemberType] After change - MemberType: ${state.memberType}, Name: ${state.name}');
                                     },
                                     validator: (value) => _captureAnmError(
                                       Validations.validateMemberType(l, value),
@@ -2185,7 +2213,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             ];
                                             return ApiDropdown<String>(
                                               labelText:
-                                              '${l.fatherGuardianNameLabel} *',
+                                              _isEdit ? l.fatherGuardianNameLabel : '${l.fatherGuardianNameLabel} *',
                                               hintText: l.select,
                                               items: fatherItems,
                                               getLabel: (s) => s,
@@ -2246,7 +2274,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         if (_fatherOption == 'Other')
                                           CustomTextField(
                                             labelText:
-                                            '${l.fatherGuardianNameLabel} *',
+                                            _isEdit ? l.fatherGuardianNameLabel : '${l.fatherGuardianNameLabel} *',
                                             hintText: l.fatherGuardianNameLabel,
                                              initialValue:
                                             state.fatherName ?? '',
@@ -2266,9 +2294,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               }
                                             },
                                             validator: (value) {
-                                              if (value == null ||
-                                                  value.trim().isEmpty) {
-                                                return '${l.fatherGuardianNameRequired.toLowerCase()}';
+                                              if (!_isEdit) {
+                                                if (value == null ||
+                                                    value.trim().isEmpty) {
+                                                  return '${l.fatherGuardianNameRequired.toLowerCase()}';
+                                                }
                                               }
                                               return null;
                                             },
@@ -2297,7 +2327,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             ];
                                             return ApiDropdown<String>(
                                               labelText:
-                                              "${l.motherNameLabel} *",
+                                              _isEdit ? l.motherNameLabel : "${l.motherNameLabel} *",
                                               hintText: l.select,
                                               items: motherItems,
                                               getLabel: (s) => s,
@@ -2360,7 +2390,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           ),
                                         if (_motherOption == 'Other') ...[
                                           CustomTextField(
-                                            labelText: "${l.motherNameLabel} *",
+                                            labelText: _isEdit ? l.motherNameLabel : "${l.motherNameLabel} *",
                                             hintText: l.motherNameLabel,
                                             initialValue:
                                             state.motherName ?? '',
@@ -2370,9 +2400,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               AnmUpdateMotherName(v.trim()),
                                             ),
                                             validator: (value) {
-                                              if (value == null ||
-                                                  value.trim().isEmpty) {
-                                                return ' ${l.motherGuardianNameRequired.toLowerCase()}';
+                                              if (!_isEdit) {
+                                                if (value == null ||
+                                                    value.trim().isEmpty) {
+                                                  return ' ${l.motherGuardianNameRequired.toLowerCase()}';
+                                                }
                                               }
                                               return null;
                                             },
@@ -2408,7 +2440,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             ];
                                             return ApiDropdown<String>(
                                               labelText:
-                                              '${l.fatherGuardianNameLabel} *',
+                                              _isEdit ? l.fatherGuardianNameLabel : '${l.fatherGuardianNameLabel} *',
                                               hintText: l.select,
                                               items: fatherItems,
                                               getLabel: (s) => s,
@@ -2418,9 +2450,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   ? null
                                                   : _fatherOption,
                                               validator: (value) {
-                                                if (_fatherOption == 'Select' ||
-                                                    _fatherOption.isEmpty) {
-                                                  return 'Please select or enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                                if (!_isEdit) {
+                                                  if (_fatherOption == 'Select' ||
+                                                      _fatherOption.isEmpty) {
+                                                    return 'Please select or enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                                  }
                                                 }
                                                 return null;
                                               },
@@ -2465,7 +2499,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         if (_fatherOption == 'Other')
                                           CustomTextField(
                                             labelText:
-                                            '${l.fatherGuardianNameLabel} *',
+                                            _isEdit ? l.fatherGuardianNameLabel : '${l.fatherGuardianNameLabel} *',
                                             hintText: l.fatherGuardianNameLabel,
                                             initialValue:
                                             state.fatherName ?? '',
@@ -2485,9 +2519,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               }
                                             },
                                             validator: (value) {
-                                              if (value == null ||
-                                                  value.trim().isEmpty) {
-                                                return 'Please enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                              if (!_isEdit) {
+                                                if (value == null ||
+                                                    value.trim().isEmpty) {
+                                                  return 'Please enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                                }
                                               }
                                               return null;
                                             },
@@ -2510,7 +2546,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   ];
                                                   return ApiDropdown<String>(
                                                     labelText:
-                                                    "${l.motherNameLabel} *",
+                                                    _isEdit ? l.motherNameLabel : "${l.motherNameLabel} *",
                                                     hintText: l.select,
                                                     items: motherItems,
                                                     getLabel: (s) => s,
@@ -2520,11 +2556,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                         ? null
                                                         : _motherOption,
                                                     validator: (value) {
-                                                      if (_motherOption ==
-                                                          'Select' ||
-                                                          _motherOption
-                                                              .isEmpty) {
-                                                        return 'Please select or enter ${l.motherNameLabel.toLowerCase()}';
+                                                      if (!_isEdit) {
+                                                        if (_motherOption ==
+                                                            'Select' ||
+                                                            _motherOption
+                                                                .isEmpty) {
+                                                          return 'Please select or enter ${l.motherNameLabel.toLowerCase()}';
+                                                        }
                                                       }
                                                       return null;
                                                     },
@@ -2579,7 +2617,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               if (_motherOption == 'Other') ...[
                                                 CustomTextField(
                                                   labelText:
-                                                  "${l.motherNameLabel} *",
+                                                  _isEdit ? l.motherNameLabel : "${l.motherNameLabel} *",
                                                   hintText: l.motherNameLabel,
                                                   initialValue:
                                                   state.motherName ?? '',
@@ -2601,13 +2639,15 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     }
                                                   },
                                                   validator: (value) {
-                                                    if (_motherOption ==
-                                                        'Other' &&
-                                                        (value == null ||
-                                                            value
-                                                                .trim()
-                                                                .isEmpty)) {
-                                                      return 'Please enter ${l.motherNameLabel.toLowerCase()}';
+                                                    if (!_isEdit) {
+                                                      if (_motherOption ==
+                                                          'Other' &&
+                                                          (value == null ||
+                                                              value
+                                                                  .trim()
+                                                                  .isEmpty)) {
+                                                        return 'Please enter ${l.motherNameLabel.toLowerCase()}';
+                                                      }
                                                     }
                                                     return null;
                                                   },

@@ -437,6 +437,10 @@ final class UpdateOtherReasonOfDeath extends AddnewfamilymemberEvent{
   List<Object> get props => [value];
 }
 
+final class AnmClearAllData extends AddnewfamilymemberEvent {}
+
+final class AnmResetDataClearedFlag extends AddnewfamilymemberEvent {}
+
 final class AnmUpdateSubmit extends AddnewfamilymemberEvent {
   final String hhid;
   const AnmUpdateSubmit({required this.hhid});
