@@ -2117,12 +2117,12 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   hintText: localText.pleaseEnterOtp,
                   keyboardType: TextInputType.number,
                   maxLength: 6,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return localText.otpIsRequired;
-                    }
-                    return null;
-                  },
+                  // validator: (value) {
+                  //   if (value == null || value.isEmpty) {
+                  //     return localText.otpIsRequired;
+                  //   }
+                  //   return null;
+                  // },
                 ),
                 Divider(color: AppColors.divider, thickness: 1, height: 0),
                 Padding(
