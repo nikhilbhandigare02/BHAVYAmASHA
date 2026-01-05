@@ -52,6 +52,9 @@ class _ABHAScreenState extends State<ABHAScreen> {
   TextEditingController otpController = new TextEditingController();
   TextEditingController aadhaarController = new TextEditingController();
   bool isAadhaarValid = false;
+  late final ScrollController _scrollController;
+
+
 
   bool verifyAbhaFlag = false;
   bool searchFlag = false;
@@ -60,6 +63,51 @@ class _ABHAScreenState extends State<ABHAScreen> {
   double? latitude;
   double? longitude;
   bool isEnableSearch = true;
+  String? validateMobile(String value) {
+    if (value.isEmpty) {
+      return "Please enter mobile number";
+    }
+
+    // Must be exactly 10 digits
+    if (value.length != 10) {
+      return "Please enter a valid 10-digit mobile number";
+    }
+
+    // Must start with 6, 7, 8 or 9 (Indian mobile)
+    if (!RegExp(r'^[6-9]').hasMatch(value)) {
+      return "Please enter a valid 10-digit mobile number";
+    }
+
+    // Reject same digit repeated (1111111111, 9999999999)
+    if (RegExp(r'^(\d)\1{9}$').hasMatch(value)) {
+      return "Mobile number cannot contain all same digits";
+    }
+
+    // Reject obvious sequential numbers
+    const invalidSequences = [
+      '0123456789',
+      '1234567890',
+      '2345678901',
+      '3456789012',
+      '4567890123',
+      '5678901234',
+      '6789012345',
+      '7890123456',
+      '8901234567',
+      '9012345678',
+    ];
+
+    if (invalidSequences.contains(value)) {
+      return "Sequential mobile numbers are not allowed";
+    }
+
+    // Reject common fake patterns
+    if (RegExp(r'(0123|1234|2345|3456|4567|5678|6789)').hasMatch(value)) {
+      return "Please enter a valid mobile number";
+    }
+
+    return null; // ✅ valid
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,6 +174,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
   @override
   void initState() {
+    _scrollController = ScrollController();
     _loadUserName();
     abhaIdController.addListener(_filterAbhaId);
 
@@ -152,7 +201,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
       }
     });
   }
-
 
   void _filterAbhaId() {
     if (abhaIdController.text.isNotEmpty) {
@@ -360,6 +408,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
   void dispose() {
     timer?.cancel();
     super.dispose();
+    _scrollController.dispose();
   }
 
   String formatTime(int seconds) {
@@ -629,19 +678,25 @@ class _ABHAScreenState extends State<ABHAScreen> {
               // if(checkavailableAbha)
               InkWell(
                 onTap: () {
-                  if (isEnableSearch) {
-                    if (mobileController.text.isEmpty) {
-                      Utils.showToastMessage(localText.pleaseEnterMobileNumber);
-                      Utils.showToastMessage(localText.enterValid10DigitMobile);
-                    } else {
-                      setState(() {
-                        refresh();
-                        refreshLinkABha();
-                      });
-                      _searchAvailability(mobileController.text);
-                    }
+                  if (!isEnableSearch) return;
+
+                  final mobile = mobileController.text.trim();
+                  final errorMessage = validateMobile(mobile);
+
+                  if (errorMessage != null) {
+                    Utils.showToastMessage(errorMessage);
+                    return; // ❌ stop execution
                   }
+
+                  // ✅ valid mobile number
+                  setState(() {
+                    refresh();
+                    refreshLinkABha();
+                  });
+
+                  _searchAvailability(mobile);
                 },
+
                 child: Container(
                   width: 60.w,
                   height: 35.h,
@@ -2362,11 +2417,11 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   if (listABHAID.length > 0)
                     ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxHeight: 200, // your max height
+                        // maxHeight: 200, // your max height
                       ), // set your max height here
 
                       child: Scrollbar(
-                        //controller: _scrollController,
+                        controller: _scrollController,
                         thumbVisibility: true, // always show scrollbar
                         thickness: 6,
                         radius: Radius.circular(10),
@@ -2374,13 +2429,13 @@ class _ABHAScreenState extends State<ABHAScreen> {
                         child: ListView.builder(
                             primary: false,
                             shrinkWrap: true,
+                            controller: _scrollController,
                             itemCount: listABHAID.length ?? 0,
                             itemBuilder: (BuildContext context, int index) {
                               return Card(
                                 color: Colors.white,
                                 child: Padding(
                                   padding: EdgeInsets.all(10),
-                                  child: Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -2399,7 +2454,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                       _rowText('Abha No', verifyOtpAadhaar?.aBHAProfile?.aBHANumber??''),
                                     ],
                                   ),
-                                                                ),
                                 ),)
 
 
@@ -4126,12 +4180,17 @@ class _ABHAScreenState extends State<ABHAScreen> {
       //Aadhaar
       if (dropdownvalue == 'Aadhaar') {
         if (clickVal == sendOTP) {
-          jsonData = {
-            "aadhaar": aadhaarController.text,
-            "entity_type": "patient",
-            "entity_id": "0" //patient id for existing patient
-          };
-          methodName = AbhaController.aadharSendOTP;
+          if (updateMobile) {
+            _updateCommunication();
+          }
+          else {
+            jsonData = {
+              "aadhaar": aadhaarController.text,
+              "entity_type": "patient",
+              "entity_id": "0"
+            };
+            methodName = AbhaController.aadharSendOTP;
+          }
         } else if (clickVal == verifyOTP) {
           if (updateMobile) {
             jsonData = {
@@ -4968,110 +5027,6 @@ class _ABHAScreenState extends State<ABHAScreen> {
   List<String> listMobileAbhaSuggestion = [];
   var _valueSelectedSuggestId;
 
-  Future<void> _submitDetailsMobile(StateSetter setStateDialog) async {
-    if (firstNameController.text.isEmpty) {
-      Utils.showToastMessage('Enter First Name');
-    } else if (lastNameController.text.isEmpty) {
-      Utils.showToastMessage('Enter Last Name');
-    } else if (gender_dropdownvalue == null || gender_dropdownvalue == '') {
-      Utils.showToastMessage('Select Gender');
-    } else if (dobController.text.isEmpty) {
-      Utils.showToastMessage('Select Date of Birth');
-    } else if (patientEmailController.text.isEmpty) {
-      Utils.showToastMessage('Enter Email ID');
-    } else if (mobileCreateController.text.isEmpty) {
-      Utils.showToastMessage('Enter Mobile Number');
-    } else if (patientAddressController.text.isEmpty) {
-      Utils.showToastMessage('Enter Address');
-    } else if (patientPinCodeController.text.isEmpty) {
-      Utils.showToastMessage('Enter Pincode');
-    } else {
-      if (await Utils.isConnected()) {
-        bool _isLoading = true;
-        Utils.onLoading(context);
-
-        var name =
-            '${firstNameController.text} ${firstMiddleController.text} ${lastNameController.text}';
-
-        var gender = '';
-        if (gender_dropdownvalue == 'Male') {
-          gender = 'M';
-        } else if (gender_dropdownvalue == 'Female') {
-          gender = 'F';
-        } else if (gender_dropdownvalue == 'Other') {
-          gender = 'O';
-        }
-
-        DateFormat dateFormat = DateFormat('dd/mm/yyyy');
-
-        // Parse the dateString to DateTime
-        DateTime birthDate = dateFormat.parse(dobController.text);
-        var selectedDate = DateFormat('yyyy-mm-dd').format(birthDate);
-
-        /* Map<String, dynamic> data = {
-          "sessionId" : aadhaarSendOtp?.sData?.sessionId??'',
-          "name" : name,
-          "dateOfBirth" : selectedDate, // Format yyyy-mm-dd
-          "gender" : gender, // M for male, F for femal, O for others
-          "stateCode" : selectedState.stateCode,
-          "districtCode" : selectedDistrict.code,
-          "email" : patientEmailController.text,
-          "mobile" : mobileCreateController.text,
-          "pinCode" : patientPinCodeController.text,
-          "address" : patientAddressController.text
-        };*/
-        Map<String, dynamic> data = {
-          "txnId": verifyOtpMobile?.txnId ?? '',
-          "firstName": firstNameController.text,
-          "lastName": lastNameController.text,
-          "dateOfBirth": selectedDate
-        };
-
-        listMobileAbhaSuggestion = [];
-        _valueSelectedSuggestId = '';
-        AbhaController controller = AbhaController();
-        var methodName = AbhaController.mobileSubmitDetails;
-        try {
-          final response =
-              await controller.aadhaarCreateABHA(methodName, data, clinicToken);
-
-          if (response != null) {
-            AbhaSuggestionModel abhaSuggestionModel =
-                AbhaSuggestionModel.fromJson(response.data);
-
-            if (abhaSuggestionModel.sCode == 200) {
-              _isLoading = false;
-              Navigator.pop(context);
-
-              if (abhaSuggestionModel?.sData?.abhaAddressList != null) {
-                listMobileAbhaSuggestion =
-                    abhaSuggestionModel!.sData!.abhaAddressList!;
-              }
-
-              setStateDialog(() {
-                createMobileAadhharView = false;
-              });
-            }
-
-            Utils.showToastMessage('${abhaSuggestionModel.sMessage}');
-          } else {
-            Utils.showToastMessage('Something went wrong!');
-            print(response);
-          }
-        } catch (e) {
-          Utils.showToastMessage('Something went wrong!');
-          print(e);
-        } finally {
-          if (_isLoading) {
-            Navigator.pop(context);
-          }
-        }
-      } else {
-        Utils.showToastMessage(Constant.internetConMsg);
-      }
-    }
-  }
-
   Future<void> _mobileCreateABHA() async {
     if (firstNameController.text.isEmpty) {
       Utils.showToastMessage('Enter First Name');
@@ -5224,6 +5179,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
     return visible;
   }
+
 }
 
 class ABHAID {
