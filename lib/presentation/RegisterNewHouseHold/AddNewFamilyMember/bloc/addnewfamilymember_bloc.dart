@@ -332,13 +332,19 @@ class AddnewfamilymemberBloc
         // print('Occupation: $occupationValue, Other: $otherOccupationValue');
         // print('Relation: $mobileOwnerRelationValue, Other: $otherRelationValue');
         
+        // Normalize member type to camelCase
+        String normalizedMemberType = allData['memberType'] as String? ?? 'Adult';
+        if (normalizedMemberType.isNotEmpty) {
+          normalizedMemberType = normalizedMemberType[0].toUpperCase() + normalizedMemberType.substring(1).toLowerCase();
+        }
+        
         // Update the state with all the data
         emit(state.copyWith(
           // Map all the fields to the state
           name: primaryName,
           fatherName: allData['fatherName'] as String?,
           motherName: allData['motherName'] as String?,
-          memberType: allData['memberType'] as String? ?? 'Adult',
+          memberType: normalizedMemberType,
           relation: primaryRelation,
           otherRelation: otherRelationValue,
           useDob: allData['useDob'] as bool? ?? true,
@@ -480,9 +486,14 @@ class AddnewfamilymemberBloc
       print('🔄 [Bloc] Resetting data cleared flag');
       _dataClearedByTypeChange = false;
     });
-    on<AnmUpdateMemberType>(
-          (e, emit) => emit(state.copyWith(memberType: e.value)),
-    );
+    on<AnmUpdateMemberType>((e, emit) {
+      // Normalize member type to camelCase
+      String normalizedValue = e.value;
+      if (normalizedValue.isNotEmpty) {
+        normalizedValue = normalizedValue[0].toUpperCase() + normalizedValue.substring(1).toLowerCase();
+      }
+      emit(state.copyWith(memberType: normalizedValue));
+    });
     on<AnmUpdateRelation>((e, emit) => emit(state.copyWith(relation: e.value)));
     on<AnmUpdateOtherRelation>((e, emit) => emit(state.copyWith(otherRelation: e.value)));
     on<AnmUpdateName>((e, emit) => emit(state.copyWith(name: e.value)));

@@ -1373,15 +1373,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       final bloc = context
                                           .read<AddnewfamilymemberBloc>();
                                       
-                                      // Store the current member type before updating
                                       final currentMemberType = state.memberType;
                                       
                                       print('🔄 [MemberType] Changing from: $currentMemberType to: $v');
                                       print('🔄 [MemberType] Current state - Name: ${state.name}, Mobile: ${state.mobileNo}');
                                       print('🔄 [MemberType] Data cleared flag: $_dataClearedByTypeChange');
                                       
-                                      // Clear all data when switching between adult and child (works in both edit and add mode)
-                                      // This triggers on the first change from the original value
+
                                       if ((currentMemberType == 'Adult' && v == 'Child') ||
                                           (currentMemberType == 'Child' && v == 'Adult')) {
                                         print('🧹 [MemberType] Clearing all data due to member type change');
@@ -1408,6 +1406,15 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           bloc.add(AnmUpdateRelation(''));
                                         }
                                       }
+                                      
+                                      // Clear father name and mother name fields when member type changes
+                                      bloc.add(const AnmUpdateFatherName(''));
+                                      bloc.add(const AnmUpdateMotherName(''));
+                                      bloc.add(const UpdateIsMemberStatus(''));
+                                      setState(() {
+                                        _fatherOption = l.select;
+                                        _motherOption = l.select;
+                                      });
                                       
                                       print('🔄 [MemberType] After change - MemberType: ${state.memberType}, Name: ${state.name}');
                                     },
@@ -1438,17 +1445,17 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   _section(
                                     ApiDropdown<String>(
                                       labelText: l
-                                          .member_status_label, // Localized label
+                                          .member_status_label,
                                       items: const [
                                         'Alive',
                                         'Death',
-                                      ], // Values remain English
+                                      ],
                                       getLabel: (s) {
                                         switch (s) {
                                           case 'Alive':
-                                            return l.alive; // Localized text
+                                            return l.alive;
                                           case 'Death':
-                                            return l.death; // Localized text
+                                            return l.death;
                                           default:
                                             return s;
                                         }
@@ -3199,48 +3206,51 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   height: 0,
                                 ),
 
-                                _section(
-                                  ApiDropdown<String>(
-                                    labelText: l.birthOrderLabel,
-                                    items: const [
-                                      '1',
-                                      '2',
-                                      '3',
-                                      '4',
-                                      '5',
-                                      '6',
-                                      '7',
-                                      '8',
-                                      '9',
-                                      '10',
-                                    ],
-                                    getLabel: (s) {
-                                      switch (s) {
-                                        case '1':
-                                          return l.birthOrder1;
-                                        case '2':
-                                          return l.birthOrder2;
-                                        case '3':
-                                          return l.birthOrder3;
-                                        case '4':
-                                          return l.birthOrder4;
-                                        case '5+':
-                                          return l.birthOrder5Plus;
-                                        default:
-                                          return s;
-                                      }
-                                    },
-                                    value: state.birthOrder,
-                                    onChanged: (v) => context
-                                        .read<AddnewfamilymemberBloc>()
-                                        .add(AnmUpdateBirthOrder(v ?? '')),
+                                // Birth order field - only show in edit mode for children
+                                if (_isEdit && (state.memberType ?? '').toLowerCase() == 'child') ...[
+                                  _section(
+                                    ApiDropdown<String>(
+                                      labelText: l.birthOrderLabel,
+                                      items: const [
+                                        '1',
+                                        '2',
+                                        '3',
+                                        '4',
+                                        '5',
+                                        '6',
+                                        '7',
+                                        '8',
+                                        '9',
+                                        '10',
+                                      ],
+                                      getLabel: (s) {
+                                        switch (s) {
+                                          case '1':
+                                            return l.birthOrder1;
+                                          case '2':
+                                            return l.birthOrder2;
+                                          case '3':
+                                            return l.birthOrder3;
+                                          case '4':
+                                            return l.birthOrder4;
+                                          case '5+':
+                                            return l.birthOrder5Plus;
+                                          default:
+                                            return s;
+                                        }
+                                      },
+                                      value: state.birthOrder,
+                                      onChanged: (v) => context
+                                          .read<AddnewfamilymemberBloc>()
+                                          .add(AnmUpdateBirthOrder(v ?? '')),
+                                    ),
                                   ),
-                                ),
-                                Divider(
-                                  color: AppColors.divider,
-                                  thickness: 0.5,
-                                  height: 0,
-                                ),
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
+                                ],
 
                                 if ((state.memberType ?? '').toLowerCase() ==
                                     'adult') ...[
@@ -4223,7 +4233,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         context
                                             .read<AddnewfamilymemberBloc>()
                                             .add(AnmUpdateMaritalStatus(v!));
-                                        // Reset step when marital status changes
                                         setState(() {
                                           _currentStep = 0;
                                         });
@@ -4233,7 +4242,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         ctrl?.animateTo(0);
                                       },
                                       validator: (value) {
-                                        // Skip validation for children
                                         if (state.memberType == 'Child')
                                           return null;
                                         return _captureAnmError(
@@ -4252,48 +4260,52 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     height: 0,
                                   ),
 
-                                // Spouse/Children conditional sections
                                 if (state.maritalStatus == 'Married') ...[
-                                  _section(
-                                    CustomTextField(
-                                      labelText: l.ageAtMarriageLabel,
-                                      hintText: l.ageAtMarriageHint,
-                                      keyboardType: TextInputType.number,
-                                      initialValue: state.ageAtMarriage,
-                                      onChanged: (v) => context
-                                          .read<AddnewfamilymemberBloc>()
-                                          .add(AnmUpdateAgeAtMarriage(v)),
+                                  if (!_isEdit) ...[
+                                    _section(
+                                      CustomTextField(
+                                        labelText: l.ageAtMarriageLabel,
+                                        hintText: l.ageAtMarriageHint,
+                                        keyboardType: TextInputType.number,
+                                        initialValue: state.ageAtMarriage,
+                                        onChanged: (v) => context
+                                            .read<AddnewfamilymemberBloc>()
+                                            .add(AnmUpdateAgeAtMarriage(v)),
 
 
+                                      ),
                                     ),
-                                  ),
-                                  Divider(
-                                    color: AppColors.divider,
-                                    thickness: 0.5,
-                                    height: 0,
-                                  ),
-
-                                  _section(
-                                    CustomTextField(
-                                      labelText: '${l.spouseNameLabel} *',
-                                      hintText: l.spouseNameHint,
-                                      initialValue: state.spouseName,
-                                      onChanged: (v) => context
-                                          .read<AddnewfamilymemberBloc>()
-                                          .add(AnmUpdateSpouseName(v.trim())),
-                                      validator: (value) {
-                                        if (state.maritalStatus == 'Married') {
-                                          return _captureAnmError(Validations.validateSpousName(l, value));
-                                        }
-                                        return null;
-                                      },
+                                    Divider(
+                                      color: AppColors.divider,
+                                      thickness: 0.5,
+                                      height: 0,
                                     ),
-                                  ),
-                                  Divider(
-                                    color: AppColors.divider,
-                                    thickness: 0.5,
-                                    height: 0,
-                                  ),
+                                  ],
+
+                                  // Spouse name field - hide in edit mode
+                                  if (!_isEdit) ...[
+                                    _section(
+                                      CustomTextField(
+                                        labelText: '${l.spouseNameLabel} *',
+                                        hintText: l.spouseNameHint,
+                                        initialValue: state.spouseName,
+                                        onChanged: (v) => context
+                                            .read<AddnewfamilymemberBloc>()
+                                            .add(AnmUpdateSpouseName(v.trim())),
+                                        validator: (value) {
+                                          if (state.maritalStatus == 'Married') {
+                                            return _captureAnmError(Validations.validateSpousName(l, value));
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                    Divider(
+                                      color: AppColors.divider,
+                                      thickness: 0.5,
+                                      height: 0,
+                                    ),
+                                  ],
 
                                   if (!_isEdit) ...[
                                       _section(
@@ -4347,48 +4359,47 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   ),
                                 ],
 
-                                // Replace the existing code with this:
                                 if (state.memberType == 'Adult' &&
                                     state.maritalStatus == 'Married' &&
                                     state.gender == 'Female') ...[
-                                  // Is Woman Pregnant?
-                                  _section(
-                                    ApiDropdown<String>(
-                                      key: ValueKey(
-                                        'is_pregnant_${state.gender}_${state.isPregnant ?? ''}',
+                                  if(_isEdit) ... [
+                                    _section(
+                                      ApiDropdown<String>(
+                                        key: ValueKey(
+                                          'is_pregnant_${state.gender}_${state.isPregnant ?? ''}',
+                                        ),
+                                        labelText:
+                                        '${l.isWomanPregnantQuestion} *',
+                                        items: const ['Yes', 'No'],
+                                        getLabel: (s) =>
+                                        s == 'Yes' ? l.yes : l.no,
+                                        value: state.isPregnant,
+                                        onChanged: (v) {
+                                          final bloc = context
+                                              .read<AddnewfamilymemberBloc>();
+                                          bloc.add(AnmUpdateIsPregnant(v!));
+                                          if (v == 'No') {
+                                            bloc.add(const AnmLMPChange(null));
+                                            bloc.add(const AnmEDDChange(null));
+                                          }
+                                        },
+                                        validator: (value) {
+                                          if (state.gender == 'Female') {
+                                            return Validations.validateIsPregnant(
+                                              l,
+                                              value,
+                                            );
+                                          }
+                                          return null;
+                                        },
                                       ),
-                                      labelText:
-                                      '${l.isWomanPregnantQuestion} *',
-                                      items: const ['Yes', 'No'],
-                                      getLabel: (s) =>
-                                      s == 'Yes' ? l.yes : l.no,
-                                      value: state.isPregnant,
-                                      onChanged: (v) {
-                                        final bloc = context
-                                            .read<AddnewfamilymemberBloc>();
-                                        bloc.add(AnmUpdateIsPregnant(v!));
-                                        if (v == 'No') {
-                                          bloc.add(const AnmLMPChange(null));
-                                          bloc.add(const AnmEDDChange(null));
-                                        }
-                                      },
-                                      validator: (value) {
-                                        if (state.gender == 'Female') {
-                                          return Validations.validateIsPregnant(
-                                            l,
-                                            value,
-                                          );
-                                        }
-                                        return null;
-                                      },
                                     ),
-                                  ),
+                                  ],
                                   const Divider(
                                     color: AppColors.divider,
                                     thickness: 0.5,
                                     height: 0,
                                   ),
-
                                   if (state.isPregnant == 'Yes') ...[
                                     _section(
                                       CustomDatePicker(
@@ -4401,7 +4412,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               .read<AddnewfamilymemberBloc>();
                                           bloc.add(AnmLMPChange(d));
                                           if (d != null) {
-                                            // Calculate EDD: LMP + 277 days
                                             final edd = d.add(const Duration(days: 277));
                                             bloc.add(AnmEDDChange(edd));
                                           } else {
@@ -4933,6 +4943,20 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
                                           if (!_isEdit &&
                                               _currentStep < lastStep) {
+                                            // Validate current form before moving to next step
+                                            final formState = _formKey.currentState;
+                                            if (formState == null) return;
+                                            
+                                            final isValid = formState.validate();
+                                            if (!isValid) {
+                                              final msg =
+                                                  _anmLastFormError ??
+                                                      l?.pleaseCorrectErrors ?? 'Please correct the highlighted errors before continuing.';
+                                              showAppSnackBar(context, msg);
+                                              _scrollToFirstError();
+                                              return;
+                                            }
+                                            
                                             final newStep = _currentStep + 1;
                                             setState(() {
                                               _currentStep = newStep;
