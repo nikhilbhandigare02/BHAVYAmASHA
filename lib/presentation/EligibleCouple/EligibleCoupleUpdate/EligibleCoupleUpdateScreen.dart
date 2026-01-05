@@ -611,14 +611,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                 ],
                               ),
                             ),
-                            if (showMaleFemaleError)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 0, top: 4, bottom: 8),
-                                child: Text(
-                                  (t?.malePlusFemaleError ?? 'Some of total male and female must equal total live children'),
-                                  style: TextStyle(color: Colors.red.shade700, fontSize: 14.sp, fontWeight: FontWeight.w600),
-                                ),
-                              ),
+
                             Divider(
                               color: AppColors.divider,
                               thickness: 0.5,
@@ -700,18 +693,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                               ),
                               hintText: t?.select ?? 'Select',
                             ),
-                            if (youngestAgeInlineError != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4.0, left: 4.0),
-                                child: Text(
-                                  youngestAgeInlineError!,
-                                  style: TextStyle(
-                                    color: Colors.red.shade700,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
+
                             Divider(
                               color: AppColors.divider,
                               thickness: 0.5,
@@ -773,16 +755,66 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                               isLoading: state.isSubmitting,
                               onPress: () {
                                 if (state.isSubmitting) return;
-                              final live = int.tryParse(state.totalLiveChildren) ?? 0;
-                              final male = int.tryParse(state.totalMaleChildren) ?? 0;
-                              final female = int.tryParse(state.totalFemaleChildren) ?? 0;
-                              if (live > 0 && (male + female) != live) {
-                                showAppSnackBar(
-                                  context,
-                                  (t?.malePlusFemaleError ?? 'Some of total male and female must equal total live children'),
-                                );
-                                return;
-                              }
+
+                                // Children count validations (same as AddNewFamilyHead)
+                                final born = int.tryParse(state.totalChildrenBorn) ?? 0;
+                                final live = int.tryParse(state.totalLiveChildren) ?? 0;
+                                final male = int.tryParse(state.totalMaleChildren) ?? 0;
+                                final female = int.tryParse(state.totalFemaleChildren) ?? 0;
+
+                                // 1) total live children must not be greater than total born children
+                                if (live > born) {
+                                  showAppSnackBar(
+                                    context,
+                                    t?.totalLiveChildrenval ?? 'Total live children can\'t be more than total born children',
+                                  );
+                                  return;
+                                }
+
+                                // 2) total male children must not be greater than total live children
+                                if (male > live) {
+                                  showAppSnackBar(
+                                    context,
+                                    t?.totalMaleChildrenval ?? 'Total male children can\'t be more than total live children',
+                                  );
+                                  return;
+                                }
+
+                                // 3) total female children must not be greater than total live children
+                                if (female > live) {
+                                  showAppSnackBar(
+                                    context,
+                                    t?.totalFemaleChildrenval ?? 'Total female children can\'t be more than total live children',
+                                  );
+                                  return;
+                                }
+
+                                // 4) sum of male and female children must be equal to total live children
+                                if (live > 0 && (male + female) != live) {
+                                  showAppSnackBar(
+                                    context,
+                                    t?.malePlusFemaleError ?? 'Some of total male and female must equal total live children',
+                                  );
+                                  return;
+                                }
+
+                                // Youngest child gender vs counts validation (same logic as _validateYoungestGender)
+                                final youngestGender = state.youngestChildGender;
+                                if (youngestGender == 'Male' && male == 0) {
+                                  showAppSnackBar(
+                                    context,
+                                    t?.invalidGenderMaleZero ?? 'Selected youngest child gender is Male but total male children is 0',
+                                  );
+                                  return;
+                                }
+                                if (youngestGender == 'Female' && female == 0) {
+                                  showAppSnackBar(
+                                    context,
+                                    t?.invalidGenderFemaleZero ?? 'Selected youngest child gender is Female but total female children is 0',
+                                  );
+                                  return;
+                                }
+
                               final unit = state.youngestChildAgeUnit;
                               final ageStr = state.youngestChildAge;
                               if (ageStr.trim().isNotEmpty && unit.isEmpty) {

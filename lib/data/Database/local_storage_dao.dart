@@ -2239,13 +2239,19 @@ class LocalStorageDao {
       print('🔍 [getDeathRecords] Querying death records...');
       final db = await _db;
 
-      // First, run debug query
-      final debugInfo = await debugDeathRecords();
-      print('🔍 [getDeathRecords] Debug Info: $debugInfo');
+      final currentUser = await _getCurrentUserData();
+      final ashaUniqueKey = currentUser?['unique_key']?.toString() ?? '';
+
+      if (ashaUniqueKey.isEmpty) return [];
 
       final rows = await db.query(
         BeneficiariesTable.table,
-        where: 'is_death = 1 AND is_deleted = 0',
+        where: '''
+        is_death = 1
+        AND is_deleted = 0
+        AND current_user_key = ?
+      ''',
+        whereArgs: [ashaUniqueKey],
         orderBy: 'created_date_time DESC',
       );
 
@@ -2254,26 +2260,31 @@ class LocalStorageDao {
       return rows.map((row) {
         try {
           final mapped = Map<String, dynamic>.from(row);
-          // Parse JSON fields
-          mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
-          mapped['death_details'] = safeJsonDecode(mapped['death_details']);
-          mapped['device_details'] = safeJsonDecode(mapped['device_details']);
-          mapped['app_details'] = safeJsonDecode(mapped['app_details']);
-          mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+
+          mapped['beneficiary_info'] =
+              safeJsonDecode(mapped['beneficiary_info']);
+          mapped['death_details'] =
+              safeJsonDecode(mapped['death_details']);
+          mapped['device_details'] =
+              safeJsonDecode(mapped['device_details']);
+          mapped['app_details'] =
+              safeJsonDecode(mapped['app_details']);
+          mapped['parent_user'] =
+              safeJsonDecode(mapped['parent_user']);
+
           return mapped;
         } catch (e) {
           print('❌ Error parsing record $row: $e');
-          return <String, dynamic>{}; // Return empty map on parse error
+          return <String, dynamic>{};
         }
-      }).where((map) => map.isNotEmpty).toList(); // Filter out any empty maps from failed parses
+      }).where((map) => map.isNotEmpty).toList();
     } catch (e, stackTrace) {
       print('❌ [getDeathRecords] Error: $e');
       print('Stack trace: $stackTrace');
       rethrow;
     }
-
-
   }
+
 
 
   Future<String?> getHeadMobileNumber(String householdRefKey) async {
