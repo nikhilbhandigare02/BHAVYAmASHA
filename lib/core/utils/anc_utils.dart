@@ -299,7 +299,6 @@ class ANCUtils {
       final householdRefKey = row['household_ref_key']?.toString() ?? '';
       final uniqueKey = row['unique_key']?.toString() ?? '';
 
-      // Get TRIMMED versions for display only
       final householdRefKeyDisplay = _getLast11Chars(householdRefKey);
       final uniqueKeyDisplay = _getLast11Chars(uniqueKey);
 
@@ -307,12 +306,10 @@ class ANCUtils {
 
       if (!isPregnant) return null;
 
-      // Format registration date if available
       String formattedDate = 'N/A';
       if (registrationDate.isNotEmpty) {
         try {
           final dateTime = DateTime.parse(registrationDate);
-          // Format day and month to always show two digits
           final day = dateTime.day.toString().padLeft(2, '0');
           final month = dateTime.month.toString().padLeft(2, '0');
           formattedDate = '$day-$month-${dateTime.year}';

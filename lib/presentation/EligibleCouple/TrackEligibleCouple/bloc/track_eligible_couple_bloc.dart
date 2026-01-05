@@ -237,8 +237,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
               'antra_injection_date': state.antraInjectionDateChanged?.toIso8601String(),
               'removal_date': state.removalDate?.toIso8601String(),
           },
-          'created_at': nowIso,
-          'updated_at': nowIso,
+
         };
 
         List<Map<String, dynamic>> beneficiaryMaps = await db.query(
@@ -266,10 +265,8 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
 
         final formJson = jsonEncode(formData);
 
-        // Update is_pregnant in beneficiaries table if isPregnant is true
         if (state.isPregnant == true) {
           try {
-            // Get the beneficiary record
             final beneficiaryMaps = await db.query(
               'beneficiaries_new',
               where: 'unique_key = ?',
@@ -280,10 +277,8 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
               final beneficiary = Map<String, dynamic>.from(beneficiaryMaps.first);
               final beneficiaryInfo = jsonDecode(beneficiary['beneficiary_info'] ?? '{}');
               
-              // Update the pregnancy related fields in beneficiary_info
               beneficiaryInfo['isPregnant'] = 'YES';
               
-              // Add LMP and EDD dates if available
               if (state.lmpDate != null) {
                 beneficiaryInfo['lmp'] = state.lmpDate?.toIso8601String();
               }
@@ -291,7 +286,6 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
                 beneficiaryInfo['edd'] = state.eddDate?.toIso8601String();
               }
               
-              // Update the record in the database
               await db.update(
                 'beneficiaries_new',
                 {
@@ -344,12 +338,30 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         final ashaUniqueKey = userDetails['unique_key'] ?? {};
 
         if (state.isPregnant == true) {
+          // Only handle eligible couple activities for pregnant beneficiaries
+          if (state.isPregnant == true || state.fpMethod?.toLowerCase() == 'male sterilization' || state.fpMethod?.toLowerCase() == 'female sterilization') {
+            try {
+              final db = await DatabaseProvider.instance.database;
+              await db.update(
+                'eligible_couple_activities',
+                {'is_deleted': 1},
+                where: 'beneficiary_ref_key = ? AND eligible_couple_state = ? AND is_deleted = 0',
+                whereArgs: [state.beneficiaryRefKey ?? state.beneficiaryId, 'tracking_due'],
+              );
+              print('Updated tracking_due state to is_deleted=1 in eligible_couple_activities table');
+            } catch (e) {
+              print('Error updating eligible_couple_activities table: $e');
+              // Don't fail the operation if this update fails
+            }
+          }
+        } else {
+          // isPregnant == false - update eligible_couple_activities tracking_due state
           try {
-            final motherCareActivityData = {
-              'server_id': null,
-              'household_ref_key': householdRefKey,
-              'beneficiary_ref_key': state.beneficiaryRefKey ?? state.beneficiaryId,
-              'mother_care_state': 'anc_due',
+            // Check if eligible couple activity already exists for this beneficiary
+            final existingEligibleActivity = await LocalStorageDao.instance.getEligibleCoupleActivityByBeneficiary(state.beneficiaryRefKey ?? state.beneficiaryId);
+            
+            final eligibleCoupleActivityData = {
+              'eligible_couple_state': 'tracking_due',
               'device_details': jsonEncode({
                 'id': deviceInfo.deviceId,
                 'platform': deviceInfo.platform,
@@ -364,37 +376,40 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
               'parent_user': jsonEncode({}),
               'current_user_key': ashaUniqueKey,
               'facility_id': facilityId,
-              'created_date_time': nowIso,
               'modified_date_time': nowIso,
-              'is_synced': 0,
-              'is_deleted': 0,
             };
 
-            print(
-              'Inserting mother care activity for pregnant beneficiary: ${jsonEncode(motherCareActivityData)}',
-            );
-            await LocalStorageDao.instance.insertMotherCareActivity(
-              motherCareActivityData,
-            );
-            
-            if (state.isPregnant == true || state.fpMethod?.toLowerCase() == 'male sterilization' || state.fpMethod?.toLowerCase() == 'female sterilization') {
-              try {
-                final db = await DatabaseProvider.instance.database;
-                await db.update(
-                  'eligible_couple_activities',
-                  {'is_deleted': 1},
-                  where: 'beneficiary_ref_key = ? AND eligible_couple_state = ? AND is_deleted = 0',
-                  whereArgs: [state.beneficiaryRefKey ?? state.beneficiaryId, 'tracking_due'],
-                );
-                print('Updated tracking_due state to is_deleted=1 in eligible_couple_activities table');
-              } catch (e) {
-                print('Error updating eligible_couple_activities table: $e');
-                // Don't fail the operation if this update fails
-              }
+            if (existingEligibleActivity != null) {
+              // Update existing record
+              print('Updating existing eligible couple activity for non-pregnant beneficiary: ${state.beneficiaryRefKey ?? state.beneficiaryId}');
+              final db = await DatabaseProvider.instance.database;
+              await db.update(
+                'eligible_couple_activities',
+                {
+                  ...eligibleCoupleActivityData,
+                  'is_synced': 0, // Reset sync status when updated
+                },
+                where: 'beneficiary_ref_key = ? AND is_deleted = 0',
+                whereArgs: [state.beneficiaryRefKey ?? state.beneficiaryId],
+              );
+              print('✅ Successfully updated eligible couple activity');
+            } else {
+              // Insert new record
+              final newEligibleActivityData = {
+                'server_id': null,
+                'household_ref_key': householdRefKey,
+                'beneficiary_ref_key': state.beneficiaryRefKey ?? state.beneficiaryId,
+                'created_date_time': nowIso,
+                ...eligibleCoupleActivityData,
+                'is_synced': 0,
+                'is_deleted': 0,
+              };
+              print('Inserting tracking_due state in eligible_couple_activities table');
+              await LocalStorageDao.instance.insertEligibleCoupleActivity(newEligibleActivityData);
+              print('✅ Successfully inserted tracking_due state in eligible_couple_activities table');
             }
-
           } catch (e) {
-            print('Error inserting mother care activity: $e');
+            print('Error handling eligible couple activity: $e');
           }
         }
 
@@ -440,7 +455,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           'facility_id': facilityId,
           'form_json': formJson,
           'created_date_time': nowIso,
-          'modified_date_time': nowIso,
+          'modified_date_time': '',
           'is_synced': 0,
           'is_deleted': 0,
         };
