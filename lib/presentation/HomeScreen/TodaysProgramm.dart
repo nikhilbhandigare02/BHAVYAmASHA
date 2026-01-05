@@ -1427,6 +1427,19 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             formData['delivery_date']?.toString(),
           );
 
+          // Check if visit count will change between current date and next HBNC visit date
+          final shouldRemoveFromList = await _shouldRemoveHbncRecordDueToCountChange(
+            beneficiaryRefKey,
+            formData['delivery_date']?.toString(),
+            visitCount,
+          );
+
+          // If count will change, skip adding this record to the list
+          if (shouldRemoveFromList) {
+            debugPrint('🗑️ Removing HBNC record for $beneficiaryRefKey - visit count will change before next visit');
+            continue;
+          }
+
           // Format the data for display
           // In the _loadHbncItems method, update the formattedData map to include the 'badge' field
           final formattedData = {
@@ -1646,7 +1659,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           latestRecord['form_json'] as String? ?? '{}',
         );
         final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
-
+ 
         if (formData.containsKey('visitDetails')) {
           final visitDetails =
               formData['visitDetails'] as Map<String, dynamic>? ?? {};
@@ -1654,7 +1667,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           return visitNumber;
         }
       } catch (_) {}
-
       return results.length;
     } catch (_) {
       return 0;
@@ -1671,8 +1683,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       final d = DateTime.tryParse(deliveryDate);
       if (d == null) return null;
 
-      // Visit count represents the last completed HBNC step.
-      // Schedule in days after delivery: 1,3,7,14,21,28,42
+
       final schedule = <int>[1, 3, 7, 14, 21, 28, 42];
       final visitCount = await _getHbncVisitCount(beneficiaryId);
 
@@ -1705,10 +1716,37 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     String? deliveryDate,
   ) async {
     try {
-      // Use the scheduled HBNC visits (1,3,7,14,21,28,42 days after
-      // delivery) to determine the next visit date, then format it for
-      // display.
+      // First try to get next visit date from the latest HBNC form data
       final db = await DatabaseProvider.instance.database;
+      final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+      
+      if (hbncVisitKey != null && hbncVisitKey.isNotEmpty) {
+        final results = await db.query(
+          FollowupFormDataTable.table,
+          where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0',
+          whereArgs: [beneficiaryId, hbncVisitKey],
+          orderBy: 'created_date_time DESC',
+          limit: 1,
+        );
+
+        if (results.isNotEmpty) {
+          final latestRecord = results.first;
+          final formJson = jsonDecode(latestRecord['form_json'] as String? ?? '{}');
+          final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
+          
+          if (formData.containsKey('visitDetails')) {
+            final visitDetails = formData['visitDetails'] as Map<String, dynamic>? ?? {};
+            final nextVisitDate = visitDetails['nextVisitDate']?.toString();
+            
+            // If nextVisitDate is null, assume current date as next visit date
+            if (nextVisitDate != null && nextVisitDate.isNotEmpty) {
+              return _formatHbncDate(nextVisitDate);
+            }
+          }
+        }
+      }
+
+      // Fallback to calculated next visit date if nextVisitDate is null or not found
       final nextRaw = await _getNextHbncVisitDate(
         db,
         beneficiaryId,
@@ -1721,6 +1759,87 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       return _formatHbncDate(nextRaw);
     } catch (_) {}
     return null;
+  }
+
+  /// Check if HBNC record should be removed due to visit count changes
+  /// between current date and next HBNC visit date
+  Future<bool> _shouldRemoveHbncRecordDueToCountChange(
+    String beneficiaryId,
+    String? deliveryDate,
+    int currentVisitCount,
+  ) async {
+    try {
+      if (deliveryDate == null || deliveryDate.isEmpty) return false;
+      
+      final db = await DatabaseProvider.instance.database;
+      final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+      if (hbncVisitKey == null || hbncVisitKey.isEmpty) return false;
+
+      // Parse delivery date
+      final deliveryDt = DateTime.tryParse(deliveryDate);
+      if (deliveryDt == null) return false;
+
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      final schedule = <int>[1, 3, 7, 14, 21, 28, 42];
+      final futureVisitDates = <DateTime>[];
+      
+      for (final day in schedule) {
+        final visitDate = deliveryDt.add(Duration(days: day));
+        if (visitDate.isAfter(today) || visitDate.isAtSameMomentAs(today)) {
+          futureVisitDates.add(visitDate);
+        }
+      }
+
+      if (futureVisitDates.isEmpty) return false;
+
+      // Get all existing HBNC visit records for this beneficiary
+      final existingVisits = await db.query(
+        FollowupFormDataTable.table,
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        whereArgs: [beneficiaryId, hbncVisitKey],
+        orderBy: 'created_date_time ASC',
+      );
+
+      // Check each future visit date to see if count will change
+      for (final futureVisitDate in futureVisitDates) {
+        // Count visits that would exist by this future date
+        int visitsByFutureDate = 0;
+        
+        for (final visit in existingVisits) {
+          final visitCreatedDate = DateTime.tryParse(visit['created_date_time']?.toString() ?? '');
+          if (visitCreatedDate != null) {
+            final visitDateOnly = DateTime(visitCreatedDate.year, visitCreatedDate.month, visitCreatedDate.day);
+            if (visitDateOnly.isBefore(futureVisitDate) || visitDateOnly.isAtSameMomentAs(futureVisitDate)) {
+              visitsByFutureDate++;
+            }
+          }
+        }
+
+        // Calculate expected visit count based on schedule
+        int expectedCount = 0;
+        for (int i = 0; i < schedule.length; i++) {
+          final scheduledDate = deliveryDt.add(Duration(days: schedule[i]));
+          if (scheduledDate.isBefore(futureVisitDate) || scheduledDate.isAtSameMomentAs(futureVisitDate)) {
+            expectedCount = i + 1;
+          } else {
+            break;
+          }
+        }
+
+        // If counts don't match, the record should be removed
+        if (visitsByFutureDate != expectedCount) {
+          debugPrint('📊 Count mismatch for $beneficiaryId by ${_formatHbncDate(futureVisitDate.toIso8601String())}: expected=$expectedCount, actual=$visitsByFutureDate');
+          return true;
+        }
+      }
+
+      return false;
+    } catch (e) {
+      debugPrint('❌ Error checking HBNC count change: $e');
+      return false;
+    }
   }
 
   Map<String, DateTime> _calculateAncDateRangesForToday(DateTime lmp) {
