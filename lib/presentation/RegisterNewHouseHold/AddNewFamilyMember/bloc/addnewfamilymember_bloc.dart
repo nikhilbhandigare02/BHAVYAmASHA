@@ -1249,21 +1249,28 @@ class AddnewfamilymemberBloc
 
             await LocalStorageDao.instance.insertBeneficiary(spousePayload);
 
+            // Calculate spouse age using the same logic as RegisterNewHouseHold uses for head
             int age = 0;
             if (spousState.dob != null) {
               try {
-                final now = DateTime.now();
                 final dob = spousState.dob!;
+                final now = DateTime.now();
                 age = now.year - dob.year;
                 if (now.month < dob.month ||
                     (now.month == dob.month && now.day < dob.day)) {
                   age--;
                 }
               } catch (e) {
-                print('Error calculating age from DOB: $e');
+                print('Error calculating spouse age from DOB: $e');
               }
+            } else if (spousState.UpdateYears != null && spousState.UpdateYears!.isNotEmpty) {
+              // Parse approximate age from years field (same as RegisterNewHouseHold)
+              age = int.tryParse(spousState.UpdateYears!) ?? 0;
             }
 
+
+            // Determine spouse gender properly - use the same logic as in payload
+            final spouseGender = spousState.gender ?? (state.gender == 'Male' ? 'Female' : 'Male');
 
             final bool isSterilized =
                 spousState.fpMethod?.toLowerCase() == 'male sterilization' ||
@@ -1271,12 +1278,12 @@ class AddnewfamilymemberBloc
                     state.fpMethod?.toLowerCase() == 'male sterilization' ||
                     state.fpMethod?.toLowerCase() == 'female sterilization';
 
+            // Use the same logic as RegisterNewHouseHold for gender and marital status
             final bool isFemale =
-                spousState.gender == 'female' ||
-                    state.gender == 'female';
+                spouseGender.toLowerCase() == 'female'; // Only check spouse gender for spouse record
 
             final bool isMarried =
-                state.maritalStatus == 'Married';
+                state.maritalStatus == 'Married'; // Check main member's marital status
 
             final bool isFemaleMarried =
                 isFemale &&
@@ -1287,6 +1294,7 @@ class AddnewfamilymemberBloc
 
 
             if (isFemaleMarried) {
+              // Use the same logic as RegisterNewHouseHold for pregnancy status
               final bool isPregnant = spousState.isPregnant == 'Yes' || state.isPregnant == 'Yes';
 
               try {

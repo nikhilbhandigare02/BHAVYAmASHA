@@ -915,6 +915,23 @@ class LocalStorageDao {
     return db.insert('eligible_couple_activities', row);
   }
 
+  Future<Map<String, dynamic>?> getEligibleCoupleActivityByBeneficiary(String beneficiaryRefKey) async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'eligible_couple_activities',
+        where: 'beneficiary_ref_key = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryRefKey],
+        limit: 1,
+        orderBy: 'created_date_time DESC',
+      );
+      return rows.isNotEmpty ? Map<String, dynamic>.from(rows.first) : null;
+    } catch (e) {
+      print('Error getting eligible couple activity by beneficiary: $e');
+      return null;
+    }
+  }
+
   Future<int> getEligibleCoupleTotalCountLocal() async {
     final db = await _db;
     final count = Sqflite.firstIntValue(await db.rawQuery(
@@ -1064,20 +1081,18 @@ class LocalStorageDao {
       String whereClause = 'eligible_couple_state = ? AND (is_deleted IS NULL OR is_deleted = 0)';
       List<dynamic> whereArgs = ['tracking_due'];
 
+      // If ASHA unique key is available, filter by it
       if (ashaUniqueKey.isNotEmpty) {
         whereClause += ' AND current_user_key = ?';
         whereArgs.add(ashaUniqueKey);
         print('🔑 Filtering by ASHA unique key: $ashaUniqueKey');
       }
 
-      // 1. Fetch the keys first
       final trackingDueRows = await db.query(
         'eligible_couple_activities',
         columns: ['beneficiary_ref_key', 'current_user_key'],
         where: whereClause,
         whereArgs: whereArgs,
-        // Optional: Sort activities by most recent if you have a date column here too
-        // orderBy: 'activity_date DESC',
       );
 
       final trackingDueBeneficiaryKeys = trackingDueRows
@@ -1092,20 +1107,15 @@ class LocalStorageDao {
       }
 
       final placeholders = List.filled(trackingDueBeneficiaryKeys.length, '?').join(',');
-
-      // 2. Fetch the beneficiaries with ORDER BY (DESC)
-      // MAKE SURE TO CHECK YOUR COLUMN NAME: 'created_date', 'server_updated_date', or 'id'
       final rows = await db.query(
         'beneficiaries_new',
         where: 'unique_key IN ($placeholders) AND (is_deleted IS NULL OR is_deleted = 0) AND (is_migrated IS NULL OR is_migrated = 0)',
         whereArgs: trackingDueBeneficiaryKeys.toList(),
-        orderBy: 'created_date DESC', // <--- THIS LINE SORTS NEW DATA FIRST
       );
 
       print('📊 Found ${rows.length} beneficiaries matching tracking_due status');
 
       final couples = <Map<String, dynamic>>[];
-      // LinkedHashMap preserves insertion order, so the sort order from SQL is kept
       final households = <String, List<Map<String, dynamic>>>{};
 
       for (final row in rows) {
@@ -1181,7 +1191,6 @@ class LocalStorageDao {
       return [];
     }
   }
-
   Map<String, dynamic> _formatEligibleCoupleData(
     Map<String, dynamic> row,
     Map<String, dynamic> female,
@@ -1193,7 +1202,6 @@ class LocalStorageDao {
     final uniqueKey = (row['unique_key']?.toString() ?? '');
     final createdDate = row['created_date_time']?.toString() ?? '';
 
-    // Extract member info
     final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
     final dob = female['dob']?.toString() ?? '';
     final age = _calculateAge(dob);
@@ -1201,7 +1209,6 @@ class LocalStorageDao {
     final mobile = female['mobileNo']?.toString() ?? 'Not Available';
     final richId = female['RichID']?.toString() ?? '';
 
-    // Get spouse's name with fallback logic
     final spouseName = spouse.isNotEmpty
         ? (spouse['memberName'] ?? spouse['headName'] ?? spouse['spouseName'] ?? '').toString()
         : (female['spouseName']?.toString() ?? '');
@@ -1235,14 +1242,14 @@ class LocalStorageDao {
     try {
       final dob = DateTime.tryParse(dobString);
       if (dob == null) return 0;
-      
+
       final now = DateTime.now();
       int age = now.year - dob.year;
-      
+
       if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
         age--;
       }
-      
+
       return age > 0 ? age : 0;
     } catch (e) {
       print('Error calculating age: $e');
@@ -1279,6 +1286,31 @@ class LocalStorageDao {
       'is_deleted': data['is_deleted'] ?? 0,
     };
     return db.insert('mother_care_activities', row);
+  }
+
+  Future<int> updateMotherCareActivity(String beneficiaryRefKey, Map<String, dynamic> data) async {
+    final db = await _db;
+    final row = <String, dynamic>{
+      'mother_care_state': data['mother_care_state'],
+      'device_details': _encodeIfObject(data['device_details']),
+      'app_details': _encodeIfObject(data['app_details']),
+      'parent_user': _encodeIfObject(data['parent_user']),
+      'current_user_key': data['current_user_key'],
+      'facility_id': data['facility_id'],
+      'modified_date_time': data['modified_date_time'],
+      'is_synced': 0, // Reset sync status when updated
+    };
+    
+    if (data['server_id'] != null) {
+      row['server_id'] = data['server_id'];
+    }
+    
+    return db.update(
+      'mother_care_activities',
+      row,
+      where: 'beneficiary_ref_key = ? AND is_deleted = 0',
+      whereArgs: [beneficiaryRefKey],
+    );
   }
 
 
@@ -1340,6 +1372,48 @@ class LocalStorageDao {
       'is_deleted': data['is_deleted'] ?? 0,
     };
     return db.insert('child_care_activities', row);
+  }
+
+  Future<Map<String, dynamic>?> getChildCareActivityByBeneficiary(String beneficiaryRefKey) async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'child_care_activities',
+        where: 'beneficiary_ref_key = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryRefKey],
+        limit: 1,
+        orderBy: 'created_date_time DESC',
+      );
+      return rows.isNotEmpty ? Map<String, dynamic>.from(rows.first) : null;
+    } catch (e) {
+      print('Error getting child care activity by beneficiary: $e');
+      return null;
+    }
+  }
+
+  Future<int> updateChildCareActivity(String beneficiaryRefKey, Map<String, dynamic> data) async {
+    final db = await _db;
+    final row = <String, dynamic>{
+      'child_care_state': data['child_care_state'],
+      'device_details': _encodeIfObject(data['device_details']),
+      'app_details': _encodeIfObject(data['app_details']),
+      'parent_user': _encodeIfObject(data['parent_user']),
+      'current_user_key': data['current_user_key'],
+      'facility_id': data['facility_id'],
+      'modified_date_time': data['modified_date_time'],
+      'is_synced': 0, // Reset sync status when updated
+    };
+    
+    if (data['server_id'] != null) {
+      row['server_id'] = data['server_id'];
+    }
+    
+    return db.update(
+      'child_care_activities',
+      row,
+      where: 'beneficiary_ref_key = ? AND is_deleted = 0',
+      whereArgs: [beneficiaryRefKey],
+    );
   }
 
   Future<int> getChildCareTotalCountLocal() async {

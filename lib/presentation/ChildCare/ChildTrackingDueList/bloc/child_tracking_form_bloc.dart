@@ -176,7 +176,6 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
       final formName = FollowupFormDataTable.formDisplayNames[formType] ?? 'Child Tracking Due';
       final formsRefKey = FollowupFormDataTable.formUniqueKeys[formType] ?? '30bycxe4gv7fqnt6';
 
-
       final caseClosureData = state.tabCaseClosureData[currentTabIndex] ?? const CaseClosureData();
 
       final formData = {
@@ -195,12 +194,10 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
         'updated_at': now,
       };
 
-
       String householdRefKey = state.formData['household_ref_key']?.toString() ?? '';
       String motherKey = state.formData['mother_key']?.toString() ?? '';
       String fatherKey = state.formData['father_key']?.toString() ?? '';
       String beneficiaryRefKey = state.formData['beneficiary_ref_key']?.toString() ?? '';
-
 
       if (beneficiaryRefKey.isEmpty && state.formData['beneficiary_id'] != null) {
         beneficiaryRefKey = state.formData['beneficiary_id'].toString();
@@ -233,6 +230,20 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
         }
       }
 
+      // Check if child care activity already exists for this beneficiary
+      final existingChildCareActivity = await LocalStorageDao.instance.getChildCareActivityByBeneficiary(beneficiaryRefKey);
+      
+      if (existingChildCareActivity != null) {
+        // Update existing record to is_deleted = 1
+        print('Updating existing child care activity to is_deleted=1 for beneficiary: $beneficiaryRefKey');
+        await LocalStorageDao.instance.updateChildCareActivity(beneficiaryRefKey, {
+          'is_deleted': 1,
+          'modified_date_time': now,
+        });
+        print('✅ Successfully updated existing child care activity to is_deleted=1');
+      }
+
+      // Insert new record with current date time
       final formJson = jsonEncode(formData);
       print('💾 Child Tracking Form JSON to be saved: $formJson');
 

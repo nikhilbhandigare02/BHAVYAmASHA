@@ -357,10 +357,11 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           try {
             final deviceInfo = await DeviceInfo.getDeviceInfo();
             final ts = DateTime.now().toIso8601String();
+            
+            // Check if mother care activity already exists for this beneficiary
+            final existingActivity = await LocalStorageDao.instance.getMotherCareActivityByBeneficiary(beneficiaryId);
+            
             final motherCareActivityData = {
-              'server_id': null,
-              'household_ref_key': householdRefKey,
-              'beneficiary_ref_key': beneficiaryId,
               'mother_care_state': 'delivery_outcome',
               'device_details': jsonEncode({
                 'id': deviceInfo.deviceId,
@@ -376,20 +377,34 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
               'parent_user': jsonEncode({}),
               'current_user_key': ashaUniqueKey,
               'facility_id': facilityId,
-              'created_date_time': ts,
               'modified_date_time': ts,
-              'is_synced': 0,
-              'is_deleted': 0,
             };
-            print('Inserting mother care activity for pregnant head: ${jsonEncode(motherCareActivityData)}');
-            await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
-            print('✅ Successfully inserted mother care activity');
 
-            try {
-              final eligibleCoupleActivityData = {
+            if (existingActivity != null) {
+              // Update existing record
+              print('Updating existing mother care activity for beneficiary: $beneficiaryId');
+              await LocalStorageDao.instance.updateMotherCareActivity(beneficiaryId, motherCareActivityData);
+              print('✅ Successfully updated mother care activity');
+            } else {
+              // Insert new record
+              final newActivityData = {
                 'server_id': null,
                 'household_ref_key': householdRefKey,
                 'beneficiary_ref_key': beneficiaryId,
+                'created_date_time': ts,
+                ...motherCareActivityData,
+                'is_synced': 0,
+                'is_deleted': 0,
+              };
+              print('Inserting new mother care activity for pregnant head: ${jsonEncode(newActivityData)}');
+              await LocalStorageDao.instance.insertMotherCareActivity(newActivityData);
+              print('✅ Successfully inserted mother care activity');
+            }
+
+            try {
+              final existingEligibleActivity = await LocalStorageDao.instance.getEligibleCoupleActivityByBeneficiary(beneficiaryId);
+              
+              final eligibleCoupleActivityData = {
                 'eligible_couple_state': 'tracking_due',
                 'device_details': jsonEncode({
                   'id': deviceInfo.deviceId,
@@ -405,18 +420,39 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
                 'parent_user': jsonEncode({}),
                 'current_user_key': ashaUniqueKey,
                 'facility_id': facilityId,
-                'created_date_time': ts,
                 'modified_date_time': ts,
-                'is_synced': 0,
-                'is_deleted': 0,
               };
 
-              print('Inserting tracking_due state in eligible_couple_activities table');
-              await LocalStorageDao.instance.insertEligibleCoupleActivity(eligibleCoupleActivityData);
+              if (existingEligibleActivity != null) {
 
-              print('✅ Successfully inserted tracking_due state in eligible_couple_activities table');
+                print('Updating existing eligible couple activity for beneficiary: $beneficiaryId');
+                final db = await _databaseProvider.database;
+                await db.update(
+                  'eligible_couple_activities',
+                  {
+                    ...eligibleCoupleActivityData,
+                    'is_synced': 0,
+                  },
+                  where: 'beneficiary_ref_key = ? AND is_deleted = 0',
+                  whereArgs: [beneficiaryId],
+                );
+                print('✅ Successfully updated eligible couple activity');
+              } else {
+                final newEligibleActivityData = {
+                  'server_id': null,
+                  'household_ref_key': householdRefKey,
+                  'beneficiary_ref_key': beneficiaryId,
+                  'created_date_time': ts,
+                  ...eligibleCoupleActivityData,
+                  'is_synced': 0,
+                  'is_deleted': 0,
+                };
+                print('Inserting tracking_due state in eligible_couple_activities table');
+                await LocalStorageDao.instance.insertEligibleCoupleActivity(newEligibleActivityData);
+                print('✅ Successfully inserted tracking_due state in eligible_couple_activities table');
+              }
             } catch (e) {
-              print('❌ Error inserting tracking_due state in eligible_couple_activities table: $e');
+              print('❌ Error handling eligible couple activity: $e');
             }
 
             final db = await _databaseProvider.database;

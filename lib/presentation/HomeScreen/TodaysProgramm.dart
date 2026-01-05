@@ -329,34 +329,61 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
        try {
         final db = await DatabaseProvider.instance.database;
 
-
         final ancFormKey =
             FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
                 .ancDueRegistration] ??
                 '';
 
-        final formKeys = <String>[];
-        //if (ecFormKey.isNotEmpty) formKeys.add(ecFormKey);
-        if (ancFormKey.isNotEmpty) formKeys.add(ancFormKey);
+        if (ancFormKey.isEmpty) return;
 
-        if (formKeys.isEmpty) return;
-
-        final placeholders = List.filled(formKeys.length, '?').join(',');
         final now = DateTime.now();
         final todayStr =
             '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
-
         try {
+          // 1. First get beneficiaries with ANC-related states from mother_care_activities that were modified today
+          String motherCareWhereClause = '(mother_care_state = ? OR mother_care_state = ? OR mother_care_state = ?) AND (is_deleted IS NULL OR is_deleted = 0) AND DATE(modified_date_time) = DATE(?)';
+          List<dynamic> motherCareWhereArgs = ['anc_due', 'anc_visit', 'delivery_outcome', todayStr];
+
+          if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+            motherCareWhereClause += ' AND current_user_key = ?';
+            motherCareWhereArgs.add(ashaUniqueKey);
+          }
+
+          final motherCareRows = await db.query(
+            'mother_care_activities',
+            columns: ['beneficiary_ref_key', 'mother_care_state', 'modified_date_time'],
+            where: motherCareWhereClause,
+            whereArgs: motherCareWhereArgs,
+          );
+
+          final ancBeneficiaryKeys = motherCareRows
+              .map((row) => row['beneficiary_ref_key']?.toString())
+              .whereType<String>()
+              .toSet();
+
+          if (ancBeneficiaryKeys.isEmpty) {
+            print('No ANC beneficiaries found with today\'s modified activities');
+            return;
+          }
+
+          print('Found ${ancBeneficiaryKeys.length} ANC beneficiaries with today\'s activities');
+
+          // 2. Now get followup_form_data records for these beneficiaries that were created today
+          final placeholders = List.filled(ancBeneficiaryKeys.length, '?').join(',');
+          
           String query = 'SELECT * FROM ${FollowupFormDataTable.table} '
-              'WHERE forms_ref_key IN ($placeholders) '
+              'WHERE forms_ref_key = ? '
+              'AND beneficiary_ref_key IN ($placeholders) '
               'AND (is_deleted IS NULL OR is_deleted = 0) '
               'AND DATE(created_date_time) = DATE(?) '
-              'AND current_user_key = ?';  // Added here
+              'AND current_user_key = ?';
 
-          List<dynamic> args = [...formKeys, todayStr, ashaUniqueKey ?? ''];
+          List<dynamic> args = [ancFormKey, ...ancBeneficiaryKeys, todayStr, ashaUniqueKey ?? ''];
 
           final rows = await db.rawQuery(query, args);
+
+          print('Found ${rows.length} ANC followup forms for today');
 
           for (final row in rows) {
             final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
@@ -399,24 +426,77 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         }
 
         try {
+          // 1. First get beneficiaries with 'tracking_due' state from eligible_couple_activities that were modified today
+          String whereClause = 'eligible_couple_state = ? AND (is_deleted IS NULL OR is_deleted = 0) AND DATE(modified_date_time) = DATE(?)';
+          List<dynamic> whereArgs = ['tracking_due', todayStr];
+
+          if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+            whereClause += ' AND current_user_key = ?';
+            whereArgs.add(ashaUniqueKey);
+          }
+
+          final trackingDueRows = await db.query(
+            'eligible_couple_activities',
+            columns: ['beneficiary_ref_key', 'modified_date_time'],
+            where: whereClause,
+            whereArgs: whereArgs,
+          );
+
+          // Additional filter: check if modified_date_time contains today's date
+          final trackingDueBeneficiaryKeys = trackingDueRows
+              .where((row) {
+                final modifiedDateTime = row['modified_date_time']?.toString() ?? '';
+                return modifiedDateTime.contains(todayStr);
+              })
+              .map((row) => row['beneficiary_ref_key']?.toString())
+              .whereType<String>()
+              .toSet();
+
+          if (trackingDueBeneficiaryKeys.isEmpty) {
+            print('No eligible couple beneficiaries found with today\'s modified tracking_due activities');
+            _eligibleCompletedCoupleItems = [];
+            return;
+          }
+
+          // 2. Check if these beneficiaries exist in mother_care_activities and are not deleted
+          final motherCareRows = await db.query(
+            'mother_care_activities',
+            columns: ['beneficiary_ref_key'],
+            where: 'beneficiary_ref_key IN (${List.filled(trackingDueBeneficiaryKeys.length, '?').join(',')}) AND (is_deleted IS NULL OR is_deleted = 0)',
+            whereArgs: trackingDueBeneficiaryKeys.toList(),
+          );
+
+          final validBeneficiaryKeys = motherCareRows
+              .map((row) => row['beneficiary_ref_key']?.toString())
+              .whereType<String>()
+              .toSet()
+              .intersection(trackingDueBeneficiaryKeys); // Only keep beneficiaries that exist in both tables
+
+          if (validBeneficiaryKeys.isEmpty) {
+            print('No valid eligible couple beneficiaries found (mother care check)');
+            _eligibleCompletedCoupleItems = [];
+            return;
+          }
+
+          print('Found ${validBeneficiaryKeys.length} valid eligible couple beneficiaries with today\'s tracking_due activities');
+
+          // 3. Now check which of these have completed forms today in followup_form_data
           final ecFormKey = FollowupFormDataTable.formUniqueKeys[
           FollowupFormDataTable.eligibleCoupleTrackingDue
           ] ?? '';
 
-          final formKeysEC = <String>[];
-          if (ecFormKey.isNotEmpty) formKeysEC.add(ecFormKey);
+          if (ecFormKey.isEmpty) return;
 
-          if (formKeysEC.isEmpty) return;
-
-          final placeholdersEC = List.filled(formKeysEC.length, '?').join(',');
+          final placeholders = List.filled(validBeneficiaryKeys.length, '?').join(',');
 
           String queryEC = 'SELECT * FROM ${FollowupFormDataTable.table} '
-              'WHERE forms_ref_key IN ($placeholdersEC) '
+              'WHERE forms_ref_key = ? '
+              'AND beneficiary_ref_key IN ($placeholders) '
               'AND (is_deleted IS NULL OR is_deleted = 0) '
               'AND DATE(created_date_time) = DATE(?) '
-              'AND current_user_key = ?';  // Added here
+              'AND current_user_key = ?';
 
-          List<dynamic> argsEC = [...formKeysEC, todayStr, ashaUniqueKey ?? ''];
+          List<dynamic> argsEC = [ecFormKey, ...validBeneficiaryKeys, todayStr, ashaUniqueKey ?? ''];
 
           final rowsEC = await db.rawQuery(queryEC, argsEC);
 
@@ -735,7 +815,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         return;
       }
 
-      // 3. Load beneficiary details for keysToShow
       final placeholdersShow = List.filled(keysToShow.length, '?').join(',');
       final rows = await db.query(
         'beneficiaries_new',
@@ -2243,13 +2322,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 }
               } catch (_) {}
 
-              // Ensure some core fields are present/fallbacks from card item
               map['headName'] ??= item['name']?.toString() ?? '';
               map['mobileNo'] ??= item['mobile']?.toString() ?? '';
               initial = map;
             }
           } catch (_) {
-            // If anything fails, fall back to minimal initial data
             initial = {
               'headName': item['name']?.toString() ?? '',
               'mobileNo': item['mobile']?.toString() ?? '',
@@ -2386,7 +2463,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           if (result == true && mounted) {
             setState(() {
               _completedVisitsCount++;
-              // Remove the item from the RI items list
               _riItems.removeWhere(
                 (element) =>
                     element['id'] == item['id'] &&
