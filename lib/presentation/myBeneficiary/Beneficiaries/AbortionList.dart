@@ -37,22 +37,43 @@ class _AbortionlistState extends State<Abortionlist> {
         _isLoading = true;
         _error = '';
       });
-      
+
       // Get all ANC visits
       final dbForms = await LocalStorageDao.instance.getHighRiskANCVisits();
 
+      print('Total records fetched: ${dbForms.length}'); // Debug log
+
       final List<ANCVisitModel> abortionVisits = [];
 
-      for (final row in dbForms) {
+      for (final row in dbForms)
+
+      {
         try {
           final formData = Map<String, dynamic>.from(row['form_data'] as Map);
-          
-          // Skip if not an abortion complication case
-          if (formData['has_abortion_complication']?.toString().toLowerCase() != 'yes') {
+
+
+          // Fixed condition - check for multiple possible values
+          final abortionValue = formData['is_abortion'];
+          bool hasAbortion = false;
+
+          if (abortionValue != null) {
+            if (abortionValue is bool) {
+              hasAbortion = abortionValue;
+            } else if (abortionValue is String) {
+              final lowerValue = abortionValue.toLowerCase().trim();
+              hasAbortion = lowerValue == 'yes' || lowerValue == 'true' || lowerValue == '1';
+            } else if (abortionValue is int) {
+              hasAbortion = abortionValue == 1;
+            }
+          }
+
+          if (!hasAbortion) {
+            print('Skipping record - no abortion complication'); // Debug log
             continue;
           }
 
-          // Fetch beneficiary to get DOB
+          print('Processing abortion case'); // Debug log
+
           final String beneficiaryKey = row['beneficiary_ref_key']?.toString() ?? '';
           String? dobStr;
           if (beneficiaryKey.isNotEmpty) {
@@ -77,9 +98,10 @@ class _AbortionlistState extends State<Abortionlist> {
 
           final visitData = {
             'id': beneficiaryKey,
-            'hhId': row['household_ref_key']?.toString(),
+            'hhId': row['beneficiary_data']?['household_ref_key']?.toString(),
+
             'house_number': formData['house_number'],
-            'woman_name': formData['woman_name'],
+            'woman_name': formData['pw_name'],
             'husband_name': formData['husband_name'],
             'rch_number': formData['rch_number'],
             'visit_type': formData['visit_type'],
@@ -99,10 +121,13 @@ class _AbortionlistState extends State<Abortionlist> {
           };
 
           abortionVisits.add(ANCVisitModel.fromJson(visitData));
+          print('Added abortion visit for: ${formData['woman_name']}'); // Debug log
         } catch (e) {
           print('Error mapping high-risk ANC DB row: $e');
         }
       }
+
+      print('Total abortion visits found: ${abortionVisits.length}'); // Debug log
 
       if (abortionVisits.isEmpty) {
         setState(() {
@@ -113,7 +138,6 @@ class _AbortionlistState extends State<Abortionlist> {
         });
         return;
       }
-
 
       abortionVisits.sort((a, b) {
         if (a.abortionDate == null) return 1;

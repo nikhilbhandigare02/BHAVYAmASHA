@@ -435,7 +435,7 @@ LEFT JOIN LatestANC a
       for (final row in forms) {
         try {
           final fd = Map<String, dynamic>.from(row['form_data'] as Map);
-          final v = fd['has_abortion_complication'];
+          final v = fd['is_abortion'];
           final s = v?.toString().toLowerCase() ?? '';
           if (s == 'yes') c++;
         } catch (_) {}

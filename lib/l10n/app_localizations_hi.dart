@@ -3210,13 +3210,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get totalLiveChildren => 'जीवित बच्चों की कुल संख्या';
 
   @override
+  String get totalLiveChildrenval => 'कुल जीवित बच्चे कुल जन्मे बच्चों से अधिक नहीं हो सकते';
+
+  @override
   String get totalMaleChildren => 'कुल बच्चों (लड़कों) की संख्याा';
+
+  @override
+  String get totalMaleChildrenval => 'कुल पुरुष बच्चे कुल जीवित बच्चों से अधिक नहीं हो सकते';
 
   @override
   String get totalFemaleChildren => 'कुल बच्चियों की संख्या';
 
   @override
-  String get malePlusFemaleError => 'पुरुष + महिला बच्चों की कुल संख्या जीवित बच्चों की कुल संख्या के बराबर होनी चाहिए';
+  String get totalFemaleChildrenval => 'महिला बच्चों की कुल संख्या, कुल जीवित बच्चों से अधिक नहीं हो सकती';
+
+  @override
+  String get malePlusFemaleError => 'पुरुष और महिला जीवित बच्चों की संख्या, कुल जीवित बच्चों के बराबर होनी चाहिए।';
 
   @override
   String get youngestChildAge => 'सबसे छोटे बच्चे की आयु';

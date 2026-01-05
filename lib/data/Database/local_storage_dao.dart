@@ -10,6 +10,7 @@ import 'package:medixcel_new/data/Database/tables/notification_table.dart';
 import 'package:medixcel_new/data/Database/tables/training_data_table.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
+import 'package:medixcel_new/data/Database/User_Info.dart';
 
 import '../models/guest_beneficiary/guest_beneficiary_model.dart';
 import 'database_provider.dart';
@@ -2200,15 +2201,12 @@ class LocalStorageDao {
 
   }
 
-  // In local_storage_dao.dart, add this method
 
-  // In local_storage_dao.dart, update getHeadMobileNumber:
   Future<String?> getHeadMobileNumber(String householdRefKey) async {
     print('🔍 [getHeadMobileNumber] Fetching head mobile for household: $householdRefKey');
     try {
       final db = await _db;
 
-      // 1. Get all beneficiaries for the household
       final beneficiaries = await db.query(
         'beneficiaries_new',
         where: 'household_ref_key = ? AND is_deleted = 0',
@@ -2458,8 +2456,21 @@ class LocalStorageDao {
       final db = await _db;
       final Map<String, dynamic> beneficiaryMap = beneficiary.toMap();
 
-      if (!beneficiaryMap.containsKey('current_user_key') || (beneficiaryMap['current_user_key'] == null)) {
-        beneficiaryMap['current_user_key'] = '';
+      String ashaUniqueKey = '';
+      try {
+        final currentUser = await UserInfo.getCurrentUser();
+        final userDetails = currentUser?['details'] is String
+            ? jsonDecode(currentUser?['details'] ?? '{}')
+            : currentUser?['details'] ?? {};
+        ashaUniqueKey = userDetails['unique_key']?.toString() ?? '';
+      } catch (e) {
+        print('⚠️ Unable to fetch ASHA unique key in saveGuestBeneficiary: $e');
+      }
+
+      if (!beneficiaryMap.containsKey('current_user_key') ||
+          beneficiaryMap['current_user_key'] == null ||
+          beneficiaryMap['current_user_key'].toString().trim().isEmpty) {
+        beneficiaryMap['current_user_key'] = ashaUniqueKey;
       }
       if (!beneficiaryMap.containsKey('facility_id') || (beneficiaryMap['facility_id'] == null)) {
         beneficiaryMap['facility_id'] = 0;

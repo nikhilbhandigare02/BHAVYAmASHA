@@ -2538,17 +2538,42 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                                   >()
                                                                   .state;
 
-                                                              if (ch.totalLive >
-                                                                      0 &&
-                                                                  (ch.totalMale +
-                                                                          ch.totalFemale) !=
-                                                                      ch.totalLive) {
+                                                              // 1) total live children must not be greater than total born children
+                                                              if (ch.totalLive > ch.totalBorn) {
+                                                                showAppSnackBar(
+                                                                  context,
+                                                                 l.totalLiveChildrenval,
+                                                                );
+                                                                return;
+                                                              }
+
+                                                              // 2) total male children must not be greater than total live children
+                                                              if (ch.totalMale > ch.totalLive) {
+                                                                showAppSnackBar(
+                                                                  context,
+                                                                  l.totalMaleChildrenval,
+                                                                );
+                                                                return;
+                                                              }
+
+                                                              // 3) total female children must not be greater than total live children
+                                                              if (ch.totalFemale > ch.totalLive) {
+                                                                showAppSnackBar(
+                                                                  context,
+                                                                  l.totalFemaleChildrenval,
+                                                                );
+                                                                return;
+                                                              }
+
+                                                              // 4) sum of male and female children must not be greater than total live children
+                                                              if ((ch.totalMale + ch.totalFemale) != ch.totalLive) {
                                                                 showAppSnackBar(
                                                                   context,
                                                                   l.malePlusFemaleError,
                                                                 );
                                                                 return;
                                                               }
+
                                                               final youngestGenderErr = _validateYoungestGender(ch, l);
                                                               if (youngestGenderErr != null) {
                                                                 showAppSnackBar(

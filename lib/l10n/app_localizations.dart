@@ -6473,11 +6473,23 @@ abstract class AppLocalizations {
   /// **'Total number of live children'**
   String get totalLiveChildren;
 
+  /// No description provided for @totalLiveChildrenval.
+  ///
+  /// In en, this message translates to:
+  /// **'Total live children can\'t be more than total born children'**
+  String get totalLiveChildrenval;
+
   /// No description provided for @totalMaleChildren.
   ///
   /// In en, this message translates to:
   /// **'Total number of male children'**
   String get totalMaleChildren;
+
+  /// No description provided for @totalMaleChildrenval.
+  ///
+  /// In en, this message translates to:
+  /// **'Total male children can\'t be more than total live children'**
+  String get totalMaleChildrenval;
 
   /// No description provided for @totalFemaleChildren.
   ///
@@ -6485,10 +6497,16 @@ abstract class AppLocalizations {
   /// **'Total number of female children'**
   String get totalFemaleChildren;
 
+  /// No description provided for @totalFemaleChildrenval.
+  ///
+  /// In en, this message translates to:
+  /// **'Total female children can\'t be more than total live children'**
+  String get totalFemaleChildrenval;
+
   /// No description provided for @malePlusFemaleError.
   ///
   /// In en, this message translates to:
-  /// **'Male + Female must equal Total number of live children'**
+  /// **'Number of male and female live children must be equal to total live children'**
   String get malePlusFemaleError;
 
   /// No description provided for @youngestChildAge.

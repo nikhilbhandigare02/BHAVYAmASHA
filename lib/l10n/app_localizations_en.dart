@@ -3210,13 +3210,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalLiveChildren => 'Total number of live children';
 
   @override
+  String get totalLiveChildrenval => 'Total live children can\'t be more than total born children';
+
+  @override
   String get totalMaleChildren => 'Total number of male children';
+
+  @override
+  String get totalMaleChildrenval => 'Total male children can\'t be more than total live children';
 
   @override
   String get totalFemaleChildren => 'Total number of female children';
 
   @override
-  String get malePlusFemaleError => 'Male + Female must equal Total number of live children';
+  String get totalFemaleChildrenval => 'Total female children can\'t be more than total live children';
+
+  @override
+  String get malePlusFemaleError => 'Number of male and female live children must be equal to total live children';
 
   @override
   String get youngestChildAge => 'Age of youngest child';
