@@ -718,7 +718,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                               : (l10n?.na ?? 'N/A'),
                         ),
                         _rowText(
-                          l10n?.tolaMohalla ?? 'Tola/Mohalla',
+                          l10n?.mohallaTolaName ?? 'Tola/Mohalla',
                           data['Tola/Mohalla']?.toString().isNotEmpty == true
                               ? data['Tola/Mohalla']
                               : (l10n?.na ?? 'N/A'),

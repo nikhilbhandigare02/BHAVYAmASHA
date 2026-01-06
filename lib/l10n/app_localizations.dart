@@ -3722,7 +3722,7 @@ abstract class AppLocalizations {
   /// No description provided for @ownershipTypeLabel.
   ///
   /// In en, this message translates to:
-  /// **'Type of ownership'**
+  /// **'House ownership type'**
   String get ownershipTypeLabel;
 
   /// No description provided for @panchayatHint.
@@ -5912,7 +5912,7 @@ abstract class AppLocalizations {
   /// No description provided for @err_visit_date_required.
   ///
   /// In en, this message translates to:
-  /// **'Date of home visit is required.'**
+  /// **'Please Date of home visit is required.'**
   String get err_visit_date_required;
 
   /// No description provided for @err_mother_status_required.
@@ -6692,7 +6692,7 @@ abstract class AppLocalizations {
   /// No description provided for @confirmNo.
   ///
   /// In en, this message translates to:
-  /// **'No, Stay'**
+  /// **'No'**
   String get confirmNo;
 
   /// No description provided for @memberRemainsToAdd.
@@ -7262,7 +7262,7 @@ abstract class AppLocalizations {
   /// No description provided for @ok.
   ///
   /// In en, this message translates to:
-  /// **'OK'**
+  /// **'OKAY'**
   String get ok;
 
   /// No description provided for @home.
@@ -7570,6 +7570,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mobile Number'**
   String get mobileNumber;
+
+  /// No description provided for @mobileNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile No'**
+  String get mobileNo;
 
   /// No description provided for @enterMobileNumber.
   ///
@@ -10216,6 +10222,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'ANC DUE'**
   String get categoryANC;
+
+  /// No description provided for @categoryANCbadge.
+  ///
+  /// In en, this message translates to:
+  /// **'ANC DUE'**
+  String get categoryANCbadge;
 
   /// No description provided for @categoryANCsearch.
   ///
@@ -13658,7 +13670,7 @@ abstract class AppLocalizations {
   /// No description provided for @badgeLBW.
   ///
   /// In en, this message translates to:
-  /// **'LBW'**
+  /// **'LBW referred'**
   String get badgeLBW;
 
   /// No description provided for @badgeMigrated.
@@ -14608,6 +14620,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mobile number mismatch'**
   String get mobileNumberMismatch;
+
+  /// No description provided for @mohallaTolaName.
+  ///
+  /// In en, this message translates to:
+  /// **'Tola/Mohalla'**
+  String get mohallaTolaName;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

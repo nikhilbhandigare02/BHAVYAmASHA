@@ -605,7 +605,7 @@
   "or": "OR",
   "orderOfPregnancyLabel": "Order of Pregnancy(Gravida)",
   "otpGeneratedSuccess": "OTP generated successfully",
-  "ownershipTypeLabel": "Type of ownership",
+  "ownershipTypeLabel": "House ownership type",
   "panchayatHint": "Panchayat",
   "panchayatLabel": "Panchayat",
   "passwordComplexity": "Password must contain letters, numbers, and special characters",
@@ -1107,7 +1107,7 @@
   "personalHealthIdHint": "Personal Health ID",
   "confirmAttentionTitle": "Confirm Action",
   "confirmYesExit": "Yes, Exit",
-  "confirmNo": "No, Stay",
+  "confirmNo": "No",
   "memberRemainsToAdd": "No. of members remains to be added",
   "cbac": "CBAC",
   "videoTutorialList": "Video Tutorial List",
@@ -1208,7 +1208,7 @@
   "cancel": "Cancel",
   "success": "Success",
   "error": "Error",
-  "ok": "OK",
+  "ok": "OKAY",
 
   "home": "Home",
   "patients": "Patients",
@@ -1268,6 +1268,8 @@
   "enterDob": "Please enter the date of birth",
   "enterAge": "Please enter the age",
   "mobileNumber": "Mobile Number",
+  "mobileNo": "Mobile No",
+
   "enterMobileNumber": "Please enter the mobile number",
   "enterValidMobileNumber": "Please enter a valid mobile number",
   "male": "Male",
@@ -1738,6 +1740,7 @@
   "districtPatna": "Patna",
   "districtManer": "Maner",
   "categoryANC": "ANC DUE",
+  "categoryANCbadge": "ANC DUE",
   "categoryANCsearch": "ANC",
    "categoryPNC": "PNC",
    "categoryPNCsearch": "PNC",
@@ -2321,7 +2324,7 @@
   "badgeInfant": "Infant",
   "badgeGuest": "Guest",
   "badgePNC": "PNC",
-  "badgeLBW": "LBW",
+  "badgeLBW": "LBW referred",
   "badgeMigrated": "Migrated",
   "badgePregnant": "Pregnant",
   "trainingTypeReceiving": "Receiving",
@@ -2523,8 +2526,7 @@
   "pleaseEnterAbhaId": "Please enter ABHA ID",
   "abhaAddressLinked": "ABHA Address Linked!",
   "selectAbhaId": "Select ABHA ID",
-  "mobileNumberMismatch": "Mobile number mismatch"
-
-
-
+  "mobileNumberMismatch": "Mobile number mismatch",
+  "mohallaTolaName": "Tola/Mohalla",
+  "categoryANCbadge": "ANC DUE"
 }

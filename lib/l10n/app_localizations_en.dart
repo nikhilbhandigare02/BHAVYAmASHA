@@ -1833,7 +1833,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otpGeneratedSuccess => 'OTP generated successfully';
 
   @override
-  String get ownershipTypeLabel => 'Type of ownership';
+  String get ownershipTypeLabel => 'House ownership type';
 
   @override
   String get panchayatHint => 'Panchayat';
@@ -2928,7 +2928,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get err_visit_day_required => 'Home Visit Day is required.';
 
   @override
-  String get err_visit_date_required => 'Date of home visit is required.';
+  String get err_visit_date_required => 'Please Date of home visit is required.';
 
   @override
   String get err_mother_status_required => 'Mother\'s status is required.';
@@ -3318,7 +3318,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmYesExit => 'Yes, Exit';
 
   @override
-  String get confirmNo => 'No, Stay';
+  String get confirmNo => 'No';
 
   @override
   String get memberRemainsToAdd => 'No. of members remains to be added';
@@ -3603,7 +3603,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get error => 'Error';
 
   @override
-  String get ok => 'OK';
+  String get ok => 'OKAY';
 
   @override
   String get home => 'Home';
@@ -3757,6 +3757,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mobileNumber => 'Mobile Number';
+
+  @override
+  String get mobileNo => 'Mobile No';
 
   @override
   String get enterMobileNumber => 'Please enter the mobile number';
@@ -5084,6 +5087,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categoryANC => 'ANC DUE';
+
+  @override
+  String get categoryANCbadge => 'ANC DUE';
 
   @override
   String get categoryANCsearch => 'ANC';
@@ -6805,7 +6811,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get badgePNC => 'PNC';
 
   @override
-  String get badgeLBW => 'LBW';
+  String get badgeLBW => 'LBW referred';
 
   @override
   String get badgeMigrated => 'Migrated';
@@ -7280,4 +7286,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mobileNumberMismatch => 'Mobile number mismatch';
+
+  @override
+  String get mohallaTolaName => 'Tola/Mohalla';
 }

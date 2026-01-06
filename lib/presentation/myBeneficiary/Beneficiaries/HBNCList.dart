@@ -92,7 +92,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
       final now = DateTime.now();
       int years = now.year - birthDate.year;
       int months = now.month - birthDate.month;
-      
+
       if (now.day < birthDate.day) {
         months--;
       }
@@ -100,11 +100,12 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
         years--;
         months += 12;
       }
-      
+
+      // 🔹 Changed labels to 'Y' and 'M' here
       if (years > 0) {
-        return '$years ${years == 1 ? 'year' : 'years'}';
+        return '$years Y';
       } else {
-        return '$months ${months == 1 ? 'month' : 'months'}';
+        return '$months M';
       }
     } catch (e) {
       return 'N/A';
@@ -258,7 +259,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.home, color: Colors.black54, size: 18),
+                      const Icon(Icons.home, color:AppColors.primary, size: 18),
                       const SizedBox(width: 6),
                       Text(
                         data['hhId'] ?? '',
