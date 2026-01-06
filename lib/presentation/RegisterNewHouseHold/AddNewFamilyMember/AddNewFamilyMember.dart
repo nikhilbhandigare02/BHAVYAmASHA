@@ -4454,89 +4454,90 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     ),
                                   ],
 
-                                  if (state.isPregnant == 'No') ...[
-                                    _section(
-                                      ApiDropdown<String>(
-                                        key: const ValueKey('family_planning'),
-                                        labelText:
-                                        '${l?.fpAdoptingLabel ?? "Are you/your partner adopting family planning?"} *',
-                                        items: const ['Yes', 'No'],
-                                        getLabel: (s) =>
-                                        s == 'Yes' ? l.yes : l.no,
-                                        value: state.isFamilyPlanning,
-                                        onChanged: (v) => context
-                                            .read<AddnewfamilymemberBloc>()
-                                            .add(
-                                          AnmUpdateFamilyPlanning(v ?? ''),
-                                        ),
-                                        validator: (value) {
-                                          if (value == null ||
-                                              value == l.select) {
-                                            return l?.please_select_family_planning_status ??'Please select family planning status';
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                    const Divider(
-                                      color: AppColors.divider,
-                                      thickness: 0.5,
-                                      height: 0,
-                                    ),
-
-                                    if (state.isFamilyPlanning == 'Yes') ...[
+                                  if(_isEdit)... [
+                                    if (state.isPregnant == 'No') ...[
                                       _section(
                                         ApiDropdown<String>(
-                                          labelText: '${l.methodOfContra} *',
-                                          items: const [
-                                            'Condom',
-                                            'Mala -N (Daily Contraceptive pill)',
-                                            'Antra injection',
-                                            'Copper -T (IUCD)',
-                                            'Chhaya (Weekly Contraceptive pill)',
-                                            'ECP (Emergency Contraceptive pill)',
-                                            'Male Sterilization',
-                                            'Female Sterilization',
-                                            'Any Other Specify',
-                                          ],
-                                          getLabel: (value) {
-                                            switch (value) {
-
-                                              case 'Condom':
-                                                return l.condom;
-                                              case 'Mala -N (Daily Contraceptive pill)':
-                                                return l.malaN;
-                                              case 'Antra injection':
-                                                return l.antraInjection;
-                                              case 'Copper -T (IUCD)':
-                                                return l.copperT;
-                                              case 'Chhaya (Weekly Contraceptive pill)':
-                                                return l.chhaya;
-                                              case 'ECP (Emergency Contraceptive pill)':
-                                                return l.ecp;
-                                              case 'Male Sterilization':
-                                                return l.maleSterilization;
-                                              case 'Female Sterilization':
-                                                return l.femaleSterilization;
-                                              case 'Any Other Specify':
-                                                return l.anyOtherSpecify;
-                                              default:
-                                                return value;
+                                          key: const ValueKey('family_planning'),
+                                          labelText:
+                                          '${l?.fpAdoptingLabel ?? "Are you/your partner adopting family planning?"} *',
+                                          items: const ['Yes', 'No'],
+                                          getLabel: (s) =>
+                                          s == 'Yes' ? l.yes : l.no,
+                                          value: state.isFamilyPlanning,
+                                          onChanged: (v) => context
+                                              .read<AddnewfamilymemberBloc>()
+                                              .add(
+                                            AnmUpdateFamilyPlanning(v ?? ''),
+                                          ),
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value == l.select) {
+                                              return l?.please_select_family_planning_status ??'Please select family planning status';
                                             }
+                                            return null;
                                           },
-                                          value: state.fpMethod ?? 'Select',
-                                          onChanged: (value) {
-                                            if (value != null) {
-                                              context
-                                                  .read<AddnewfamilymemberBloc>()
-                                                  .add(AnmFpMethodChanged(value));
-                                            }
-                                          },
-                                          validator: (value) =>
-                                              _captureAnmError(Validations.validateAntra(l, value)),
                                         ),
+                                      ),
+                                      const Divider(
+                                        color: AppColors.divider,
+                                        thickness: 0.5,
+                                        height: 0,
+                                      ),
 
-                                        /* ApiDropdown<String>(
+                                      if (state.isFamilyPlanning == 'Yes') ...[
+                                        _section(
+                                          ApiDropdown<String>(
+                                            labelText: '${l.methodOfContra} *',
+                                            items: const [
+                                              'Condom',
+                                              'Mala -N (Daily Contraceptive pill)',
+                                              'Antra injection',
+                                              'Copper -T (IUCD)',
+                                              'Chhaya (Weekly Contraceptive pill)',
+                                              'ECP (Emergency Contraceptive pill)',
+                                              'Male Sterilization',
+                                              'Female Sterilization',
+                                              'Any Other Specify',
+                                            ],
+                                            getLabel: (value) {
+                                              switch (value) {
+
+                                                case 'Condom':
+                                                  return l.condom;
+                                                case 'Mala -N (Daily Contraceptive pill)':
+                                                  return l.malaN;
+                                                case 'Antra injection':
+                                                  return l.antraInjection;
+                                                case 'Copper -T (IUCD)':
+                                                  return l.copperT;
+                                                case 'Chhaya (Weekly Contraceptive pill)':
+                                                  return l.chhaya;
+                                                case 'ECP (Emergency Contraceptive pill)':
+                                                  return l.ecp;
+                                                case 'Male Sterilization':
+                                                  return l.maleSterilization;
+                                                case 'Female Sterilization':
+                                                  return l.femaleSterilization;
+                                                case 'Any Other Specify':
+                                                  return l.anyOtherSpecify;
+                                                default:
+                                                  return value;
+                                              }
+                                            },
+                                            value: state.fpMethod ?? 'Select',
+                                            onChanged: (value) {
+                                              if (value != null) {
+                                                context
+                                                    .read<AddnewfamilymemberBloc>()
+                                                    .add(AnmFpMethodChanged(value));
+                                              }
+                                            },
+                                            validator: (value) =>
+                                                _captureAnmError(Validations.validateAntra(l, value)),
+                                          ),
+
+                                          /* ApiDropdown<String>(
                                           labelText: '${l.methodOfContra} *',
                                           items: const [
                                             'Select',
@@ -4571,213 +4572,214 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 ),
                                               ),
                                         ),*/
-                                      ),
-                                      Divider(
-                                        color: AppColors.divider,
-                                        thickness: 0.5,
-                                        height: 0,
-                                      ),
+                                        ),
+                                        Divider(
+                                          color: AppColors.divider,
+                                          thickness: 0.5,
+                                          height: 0,
+                                        ),
 
-                                      if (state.fpMethod ==
-                                          'Antra injection') ...[
-                                        _section(
-                                          CustomDatePicker(
-                                            labelText: l?.dateOfAntra ?? 'Date of Antra',
-                                            initialDate:
-                                            state.antraDate ??
-                                                DateTime.now(),
-                                            firstDate: DateTime(1900),
-                                            lastDate: DateTime(2100),
-                                            onDateChanged: (date) {
-                                              if (date != null) {
+                                        if (state.fpMethod ==
+                                            'Antra injection') ...[
+                                          _section(
+                                            CustomDatePicker(
+                                              labelText: l?.dateOfAntra ?? 'Date of Antra',
+                                              initialDate:
+                                              state.antraDate ??
+                                                  DateTime.now(),
+                                              firstDate: DateTime(1900),
+                                              lastDate: DateTime(2100),
+                                              onDateChanged: (date) {
+                                                if (date != null) {
+                                                  context
+                                                      .read<
+                                                      AddnewfamilymemberBloc
+                                                  >()
+                                                      .add(
+                                                    AnmFpDateOfAntraChanged(
+                                                      date,
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                        ],
+
+                                        if (state.fpMethod ==
+                                            'Copper -T (IUCD)') ...[
+                                          _section(
+                                            CustomDatePicker(
+                                              labelText: l?.removalDate ?? 'Removal Date',
+                                              initialDate:
+                                              state.removalDate ??
+                                                  DateTime.now(),
+                                              firstDate: DateTime(1900),
+                                              lastDate: DateTime(2100),
+                                              onDateChanged: (date) {
+                                                if (date != null) {
+                                                  context
+                                                      .read<
+                                                      AddnewfamilymemberBloc
+                                                  >()
+                                                      .add(
+                                                    AnmFpRemovalDateChanged(
+                                                      date,
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
+                                          ),
+                                          _section(
+                                            CustomTextField(
+                                              labelText:l?.reasonLabel ?? 'Reason',
+                                              hintText:l?.reasonLabel ?? 'reason ',
+                                              initialValue: state.removalReason,
+                                              onChanged: (value) {
                                                 context
                                                     .read<
                                                     AddnewfamilymemberBloc
                                                 >()
                                                     .add(
-                                                  AnmFpDateOfAntraChanged(
-                                                    date,
+                                                  AnmFpRemovalReasonChanged(
+                                                    value ?? '',
                                                   ),
                                                 );
-                                              }
-                                            },
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
+                                          ),
+                                        ],
 
-                                      if (state.fpMethod ==
-                                          'Copper -T (IUCD)') ...[
-                                        _section(
-                                          CustomDatePicker(
-                                            labelText: l?.removalDate ?? 'Removal Date',
-                                            initialDate:
-                                            state.removalDate ??
-                                                DateTime.now(),
-                                            firstDate: DateTime(1900),
-                                            lastDate: DateTime(2100),
-                                            onDateChanged: (date) {
-                                              if (date != null) {
+                                        if (state.fpMethod == 'Condom') ...[
+                                          _section(
+                                            CustomTextField(
+                                              labelText:l?.quantityOfCondoms ?? 'Quantity of Condoms',
+                                              hintText:l?.quantityOfCondoms ?? 'Quantity of Condoms',
+                                              keyboardType: TextInputType.number,
+                                              initialValue: state.condomQuantity,
+                                              onChanged: (value) {
                                                 context
                                                     .read<
                                                     AddnewfamilymemberBloc
                                                 >()
                                                     .add(
-                                                  AnmFpRemovalDateChanged(
-                                                    date,
+                                                  AnmFpCondomQuantityChanged(
+                                                    value ?? '',
                                                   ),
                                                 );
-                                              }
-                                            },
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
-                                        _section(
-                                          CustomTextField(
-                                            labelText:l?.reasonLabel ?? 'Reason',
-                                            hintText:l?.reasonLabel ?? 'reason ',
-                                            initialValue: state.removalReason,
-                                            onChanged: (value) {
-                                              context
-                                                  .read<
-                                                  AddnewfamilymemberBloc
-                                              >()
-                                                  .add(
-                                                AnmFpRemovalReasonChanged(
-                                                  value ?? '',
-                                                ),
-                                              );
-                                            },
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
                                           ),
-                                        ),
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
-                                      ],
+                                        ],
 
-                                      if (state.fpMethod == 'Condom') ...[
-                                        _section(
-                                          CustomTextField(
-                                            labelText:l?.quantityOfCondoms ?? 'Quantity of Condoms',
-                                            hintText:l?.quantityOfCondoms ?? 'Quantity of Condoms',
-                                            keyboardType: TextInputType.number,
-                                            initialValue: state.condomQuantity,
-                                            onChanged: (value) {
-                                              context
-                                                  .read<
-                                                  AddnewfamilymemberBloc
-                                              >()
-                                                  .add(
-                                                AnmFpCondomQuantityChanged(
-                                                  value ?? '',
-                                                ),
-                                              );
-                                            },
+                                        if (state.fpMethod ==
+                                            'Mala -N (Daily Contraceptive pill)') ...[
+                                          _section(
+                                            CustomTextField(
+                                              labelText:l?.quantityOfMalaN ??
+                                                  'Quantity of Mala -N (Daily Contraceptive pill)',
+                                              hintText:l?.quantityOfMalaN ??
+                                                  'Quantity of Mala -N (Daily Contraceptive pill)',
+                                              keyboardType: TextInputType.number,
+                                              initialValue: state.malaQuantity,
+                                              onChanged: (value) {
+                                                context
+                                                    .read<
+                                                    AddnewfamilymemberBloc
+                                                >()
+                                                    .add(
+                                                  AnmFpMalaQuantityChanged(
+                                                    value ?? '',
+                                                  ),
+                                                );
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
-                                      ],
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
+                                          ),
+                                        ],
 
-                                      if (state.fpMethod ==
-                                          'Mala -N (Daily Contraceptive pill)') ...[
-                                        _section(
-                                          CustomTextField(
-                                            labelText:l?.quantityOfMalaN ??
-                                                'Quantity of Mala -N (Daily Contraceptive pill)',
-                                            hintText:l?.quantityOfMalaN ??
-                                                'Quantity of Mala -N (Daily Contraceptive pill)',
-                                            keyboardType: TextInputType.number,
-                                            initialValue: state.malaQuantity,
-                                            onChanged: (value) {
-                                              context
-                                                  .read<
-                                                  AddnewfamilymemberBloc
-                                              >()
-                                                  .add(
-                                                AnmFpMalaQuantityChanged(
-                                                  value ?? '',
-                                                ),
-                                              );
-                                            },
+                                        if (state.fpMethod ==
+                                            'Chhaya (Weekly Contraceptive pill)') ...[
+                                          _section(
+                                            CustomTextField(
+                                              labelText:l?.quantityOfChhaya ??
+                                                  'Quantity of Chhaya (Weekly Contraceptive pill)',
+                                              hintText: l?.quantityOfChhaya ??
+                                                  'Quantity of Chhaya (Weekly Contraceptive pill)',
+                                              keyboardType: TextInputType.number,
+                                              initialValue: state.chhayaQuantity,
+                                              onChanged: (value) {
+                                                context
+                                                    .read<
+                                                    AddnewfamilymemberBloc
+                                                >()
+                                                    .add(
+                                                  AnmFpChhayaQuantityChanged(
+                                                    value ?? '',
+                                                  ),
+                                                );
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
-                                      ],
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
+                                          ),
+                                        ],
 
-                                      if (state.fpMethod ==
-                                          'Chhaya (Weekly Contraceptive pill)') ...[
-                                        _section(
-                                          CustomTextField(
-                                            labelText:l?.quantityOfChhaya ??
-                                                'Quantity of Chhaya (Weekly Contraceptive pill)',
-                                            hintText: l?.quantityOfChhaya ??
-                                                'Quantity of Chhaya (Weekly Contraceptive pill)',
-                                            keyboardType: TextInputType.number,
-                                            initialValue: state.chhayaQuantity,
-                                            onChanged: (value) {
-                                              context
-                                                  .read<
-                                                  AddnewfamilymemberBloc
-                                              >()
-                                                  .add(
-                                                AnmFpChhayaQuantityChanged(
-                                                  value ?? '',
-                                                ),
-                                              );
-                                            },
+                                        if (state.fpMethod ==
+                                            'ECP (Emergency Contraceptive pill)') ...[
+                                          _section(
+                                            CustomTextField(
+                                              labelText:l?.quantityOfECP ??
+                                                  'Quantity of ECP (Emergency Contraceptive pill)',
+                                              hintText:l?.quantityOfECP ??
+                                                  'Quantity of ECP (Emergency Contraceptive pill)',
+                                              keyboardType: TextInputType.number,
+                                              initialValue: state.ecpQuantity,
+                                              onChanged: (value) {
+                                                context
+                                                    .read<
+                                                    AddnewfamilymemberBloc
+                                                >()
+                                                    .add(
+                                                  AnmFpEcpQuantityChanged(
+                                                    value ?? '',
+                                                  ),
+                                                );
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
-                                      ],
-
-                                      if (state.fpMethod ==
-                                          'ECP (Emergency Contraceptive pill)') ...[
-                                        _section(
-                                          CustomTextField(
-                                            labelText:l?.quantityOfECP ??
-                                                'Quantity of ECP (Emergency Contraceptive pill)',
-                                            hintText:l?.quantityOfECP ??
-                                                'Quantity of ECP (Emergency Contraceptive pill)',
-                                            keyboardType: TextInputType.number,
-                                            initialValue: state.ecpQuantity,
-                                            onChanged: (value) {
-                                              context
-                                                  .read<
-                                                  AddnewfamilymemberBloc
-                                              >()
-                                                  .add(
-                                                AnmFpEcpQuantityChanged(
-                                                  value ?? '',
-                                                ),
-                                              );
-                                            },
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
                                           ),
-                                        ),
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
+                                        ],
                                       ],
                                     ],
-                                  ],
+                                  ]
                                 ],
                               ],
                             ));
