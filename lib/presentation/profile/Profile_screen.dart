@@ -888,7 +888,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
-
                     Divider(color: AppColors.divider, thickness: 0.5),
                     BlocBuilder<ProfileBloc, ProfileState>(
                       buildWhen: (previous, current) =>
