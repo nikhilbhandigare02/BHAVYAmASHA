@@ -114,11 +114,37 @@ class NetworkServiceApi extends BaseApiServices{
         case 400:
           throw BadRequestException('Bad Request: ${response.body}');
         case 401:
-          throw UnAuthorizedException('Unauthorized: ${response.body}');
+          // Check if there's a valid JSON response with error message
+          print('🔍 Processing 401 response: ${response.body}');
+          try {
+            final data = jsonDecode(response.body);
+            if (data is Map<String, dynamic> && data.containsKey('msg')) {
+              print('✅ Found JSON with msg field, returning data: $data');
+              // Return the JSON response so the error message can be handled properly
+              return data;
+            } else {
+              print('❌ No msg field found in JSON, throwing exception');
+              throw UnAuthorizedException('Unauthorized: ${response.body}');
+            }
+          } catch (e) {
+            print('❌ Error parsing 401 response: $e');
+            throw UnAuthorizedException('Unauthorized: ${response.body}');
+          }
         case 403:
           throw UnAuthorizedException('Forbidden: ${response.body}');
         case 404:
-          throw FetchDataException('Not Found: $url');
+          // Check if there's a valid JSON response with error message
+          try {
+            final data = jsonDecode(response.body);
+            if (data is Map<String, dynamic> && data.containsKey('msg')) {
+              // Return the JSON response so the error message can be handled properly
+              return data;
+            } else {
+              throw FetchDataException('Not Found: $url');
+            }
+          } catch (_) {
+            throw FetchDataException('Not Found: $url');
+          }
         case 500:
         case 501:
         default:

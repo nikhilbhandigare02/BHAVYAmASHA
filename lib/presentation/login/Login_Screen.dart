@@ -358,40 +358,74 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         } else if (state.postApiStatus == PostApiStatus.error) {
                                           String errorMessage;
 
-                                          // Try to extract message from JSON format first
-                                          if (state.error.contains('"msg":')) {
+                                          // Check for no internet/connectivity issues first
+                                          if (state.error.toLowerCase().contains("no internet") ||
+                                              state.error.toLowerCase().contains("connection") ||
+                                              state.error.toLowerCase().contains("network") ||
+                                              state.error.toLowerCase().contains("offline") ||
+                                              state.error.toLowerCase().contains("unreachable") ||
+                                              state.error.toLowerCase().contains("socket") ||
+                                              state.error.toLowerCase().contains("timeout")) {
+                                            errorMessage = "No internet";
+                                          }
+                                          // Skip API endpoint errors (404, server communication errors)
+                                          else if (state.error.toLowerCase().contains("not found") ||
+                                                   state.error.toLowerCase().contains("error during communication") ||
+                                                   state.error.toLowerCase().contains("unexpected error occurred") ||
+                                                   state.error.toLowerCase().contains("fetch data exception")) {
+                                            // Don't show these errors - just return without showing anything
+                                            return;
+                                          }
+                                          // Handle plain text API messages (highest priority)
+                                          else if (state.error.isNotEmpty && 
+                                                   !state.error.toLowerCase().contains("no internet") &&
+                                                   !state.error.toLowerCase().contains("not found") &&
+                                                   !state.error.toLowerCase().contains("error during communication") &&
+                                                   !state.error.toLowerCase().contains("unexpected error occurred") &&
+                                                   !state.error.toLowerCase().contains("fetch data exception")) {
+                                            // Show the API message directly
+                                            errorMessage = state.error;
+                                          }
+                                          // Try to extract message from JSON format API responses
+                                          else if (state.error.contains('"msg":')) {
                                             try {
                                               final startIndex = state.error.indexOf('"msg":"') + 7;
                                               final endIndex = state.error.indexOf('"', startIndex);
                                               if (startIndex != -1 && endIndex != -1) {
                                                 final apiMessage = state.error.substring(startIndex, endIndex);
                                                 
-                                                // Translate common API messages based on language
-                                                if (apiMessage.toLowerCase().contains("please enter valid user credentials")) {
-                                                  errorMessage = l10n.invalidCredentials;
-                                                } else if (apiMessage.toLowerCase().contains("authentication") || 
-                                                         apiMessage.toLowerCase().contains("unauthorized")) {
-                                                  errorMessage = l10n.authenticationFailed;
-                                                } else {
-                                                  // Show the original API message if no specific translation found
-                                                  errorMessage = apiMessage;
-                                                }
+                                                // Show the original API message directly
+                                                errorMessage = apiMessage;
                                               } else {
                                                 errorMessage = l10n.authenticationFailed;
                                               }
                                             } catch (e) {
                                               errorMessage = l10n.authenticationFailed;
                                             }
-                                          } else if (state.error.contains("invalid") ||
-                                              state.error.contains("not match") ||
-                                              state.error.contains("not exist")) {
+                                          }
+                                          // Handle API credential errors
+                                          else if (state.error.toLowerCase().contains("invalid") ||
+                                              state.error.toLowerCase().contains("not match") ||
+                                              state.error.toLowerCase().contains("not exist") ||
+                                              state.error.toLowerCase().contains("credentials")) {
                                             errorMessage = l10n.invalidCredentials;
-                                          } else if (state.error.contains("timeout") ||
-                                              state.error.contains("no response") ||
-                                              state.error.isEmpty) {
-                                            errorMessage = l10n.errorMsg;
-                                          } else {
-                                            errorMessage = state.error;
+                                          }
+                                          // Handle API authentication errors
+                                          else if (state.error.toLowerCase().contains("authentication") || 
+                                                   state.error.toLowerCase().contains("unauthorized")) {
+                                            errorMessage = l10n.authenticationFailed;
+                                          }
+                                          // For all other errors, don't show detailed communication errors
+                                          else {
+                                            // Only show API-related errors, skip communication errors
+                                            if (state.error.toLowerCase().contains("api") ||
+                                                state.error.toLowerCase().contains("server") ||
+                                                state.error.toLowerCase().contains("status")) {
+                                              errorMessage = state.error;
+                                            } else {
+                                              // Skip showing other communication errors
+                                              return;
+                                            }
                                           }
 
                                           _showSnackBar(context, errorMessage);
