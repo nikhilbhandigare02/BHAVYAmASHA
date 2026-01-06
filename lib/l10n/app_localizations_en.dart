@@ -2925,193 +2925,193 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bloatedStomachOrFrequentVomitingLabel => 'Bloated stomach or mother tells that the child vomits again an again';
 
   @override
-  String get err_visit_day_required => 'Home Visit Day is required.';
+  String get err_visit_day_required => 'Please enter home visit day.';
 
   @override
-  String get err_visit_date_required => 'Please Date of home visit is required.';
+  String get err_visit_date_required => 'Please enter date of home visit.';
 
   @override
-  String get err_mother_status_required => 'Mother\'s status is required.';
+  String get err_mother_status_required => 'Please select mother\'s status.';
 
   @override
-  String get err_mcp_mother_required => 'MCP card availability is required (Mother).';
+  String get err_mcp_mother_required => 'Please select MCP card availability (Mother).';
 
   @override
-  String get err_post_delivery_problems_required => 'Post-delivery problems selection is required.';
+  String get err_post_delivery_problems_required => 'Please select post-delivery problems.';
 
   @override
-  String get err_breastfeeding_problems_required => 'Breastfeeding problems selection is required.';
+  String get err_breastfeeding_problems_required => 'Please select breastfeeding problems.';
 
   @override
-  String get err_mcp_mother_filled_required => 'MCP card filled status is required.';
+  String get err_mcp_mother_filled_required => 'Please select MCP card filled status.';
 
   @override
-  String get err_excessive_bleeding_required => 'Excessive bleeding selection is required.';
+  String get err_excessive_bleeding_required => 'Please select excessive bleeding.';
 
   @override
-  String get err_unconscious_fits_required => 'Unconscious/fits selection is required.';
+  String get err_unconscious_fits_required => 'Please select unconscious/fits.';
 
   @override
-  String get err_breastfeeding_problem_description_required => 'Breastfeeding problem description is required.';
+  String get err_breastfeeding_problem_description_required => 'Please enter breastfeeding problem description.';
 
   @override
-  String get err_breastfeeding_help_required => 'Breastfeeding help/action description is required.';
+  String get err_breastfeeding_help_required => 'Please enter breastfeeding help or action taken.';
 
   @override
-  String get err_pads_per_day_required => 'Pads changed per day is required.';
+  String get err_pads_per_day_required => 'Please enter number of pads changed per day.';
 
   @override
-  String get err_meals_per_day_required => 'Number of full meals per day is required.';
+  String get err_meals_per_day_required => 'Please enter number of full meals per day.';
 
   @override
-  String get err_mothers_temperature_required => 'Mother\'s temperature is required.';
+  String get err_mothers_temperature_required => 'Please enter mother\'s temperature.';
 
   @override
-  String get err_paracetamol_given_required => 'Paracetamol tablet given selection is required.';
+  String get err_paracetamol_given_required => 'Please select paracetamol tablet given.';
 
   @override
-  String get err_foul_discharge_high_fever_required => 'Foul discharge/high fever selection is required.';
+  String get err_foul_discharge_high_fever_required => 'Please select foul discharge or high fever.';
 
   @override
-  String get err_abnormal_speech_or_seizure_required => 'Abnormal speech or seizures selection is required.';
+  String get err_abnormal_speech_or_seizure_required => 'Please select abnormal speech or seizures.';
 
   @override
-  String get err_counseling_advice_required => 'Counseling / Advice is required.';
+  String get err_counseling_advice_required => 'Please enter counseling or advice.';
 
   @override
-  String get err_milk_not_producing_or_less_required => 'Milk not producing/less selection is required.';
+  String get err_milk_not_producing_or_less_required => 'Please select milk not producing or less.';
 
   @override
-  String get err_nipple_cracks_pain_or_engorged_required => 'Nipple cracks/pain or engorged breasts selection is required.';
+  String get err_nipple_cracks_pain_or_engorged_required => 'Please select nipple cracks, pain, or engorged breasts.';
 
   @override
-  String get err_milk_counseling_advice_required => 'Counseling/advice for milk problem is required.';
+  String get err_milk_counseling_advice_required => 'Please enter counseling or advice for milk problem.';
 
   @override
-  String get err_refer_hospital_required => 'Refer to hospital selection is required.';
+  String get err_refer_hospital_required => 'Please select refer to hospital.';
 
   @override
-  String get err_refer_to_required => 'Referral facility selection is required.';
+  String get err_refer_to_required => 'Please select referral facility.';
 
   @override
-  String get err_baby_condition_required => 'Baby\'s condition is required.';
+  String get err_baby_condition_required => 'Please select baby\'s condition.';
 
   @override
-  String get err_baby_name_required => 'Baby\'s name is required.';
+  String get err_baby_name_required => 'Please enter baby\'s name.';
 
   @override
-  String get err_baby_gender_required => 'Baby\'s gender is required.';
+  String get err_baby_gender_required => 'Please select baby\'s gender.';
 
   @override
-  String get err_baby_weight_required => 'Baby\'s weight is required.';
+  String get err_baby_weight_required => 'Please enter baby\'s weight.';
 
   @override
-  String get err_newborn_temperature_required => 'Temperature is required.';
+  String get err_newborn_temperature_required => 'Please enter temperature.';
 
   @override
-  String get err_infant_temp_unit_required => 'Infant\'s temperature unit is required.';
+  String get err_infant_temp_unit_required => 'Please select infant temperature unit.';
 
   @override
-  String get err_weight_color_match_required => 'Weight color match is required.';
+  String get err_weight_color_match_required => 'Please select weight color match.';
 
   @override
-  String get err_weighing_scale_color_required => 'Weighing scale color is required.';
+  String get err_weighing_scale_color_required => 'Please select weighing scale color.';
 
   @override
-  String get err_mother_reports_temp_or_chest_indrawing_required => 'Mother reports temp/chest indrawing selection is required.';
+  String get err_mother_reports_temp_or_chest_indrawing_required => 'Please select mother reports temperature or chest indrawing.';
 
   @override
-  String get err_bleeding_umbilical_cord_required => 'Bleeding from umbilical cord selection is required.';
+  String get err_bleeding_umbilical_cord_required => 'Please select bleeding from umbilical cord.';
 
   @override
-  String get err_pus_in_navel_required => 'Pus in navel selection is required.';
+  String get err_pus_in_navel_required => 'Please select pus in navel.';
 
   @override
-  String get err_routine_care_done_required => 'Routine newborn care selection is required.';
+  String get err_routine_care_done_required => 'Please select routine newborn care done.';
 
   @override
-  String get err_breathing_rapid_required => 'Rapid breathing selection is required.';
+  String get err_breathing_rapid_required => 'Please select rapid breathing.';
 
   @override
-  String get err_congenital_abnormalities_required => 'Congenital abnormalities selection is required.';
+  String get err_congenital_abnormalities_required => 'Please select congenital abnormalities.';
 
   @override
-  String get err_eyes_normal_required => 'Eyes: Normal selection is required.';
+  String get err_eyes_normal_required => 'Please select eyes normal.';
 
   @override
-  String get err_eyes_swollen_or_pus_required => 'Eyes swollen/pus selection is required.';
+  String get err_eyes_swollen_or_pus_required => 'Please select eyes swollen or pus.';
 
   @override
-  String get err_skin_fold_redness_required => 'Skin fold crack/redness selection is required.';
+  String get err_skin_fold_redness_required => 'Please select skin fold crack or redness.';
 
   @override
-  String get err_newborn_jaundice_required => 'Jaundice selection is required.';
+  String get err_newborn_jaundice_required => 'Please select jaundice.';
 
   @override
-  String get err_pus_bumps_or_boil_required => 'Pus-filled bumps/boil selection is required.';
+  String get err_pus_bumps_or_boil_required => 'Please select pus-filled bumps or boil.';
 
   @override
-  String get err_newborn_seizures_required => 'Seizures selection is required.';
+  String get err_newborn_seizures_required => 'Please select seizures.';
 
   @override
-  String get err_crying_constant_or_less_urine_required => 'Crying constantly/less urine selection is required.';
+  String get err_crying_constant_or_less_urine_required => 'Please select crying constantly or less urine.';
 
   @override
-  String get err_crying_softly_required => 'Crying softly selection is required.';
+  String get err_crying_softly_required => 'Please select crying softly.';
 
   @override
-  String get err_stopped_crying_required => 'Stopped crying selection is required.';
+  String get err_stopped_crying_required => 'Please select stopped crying.';
 
   @override
-  String get err_referred_by_asha_required => 'Referred by ASHA selection is required.';
+  String get err_referred_by_asha_required => 'Please select referred by ASHA.';
 
   @override
-  String get err_birth_registered_required => 'Birth registration selection is required.';
+  String get err_birth_registered_required => 'Please select birth registered.';
 
   @override
-  String get err_birth_certificate_issued_required => 'Birth certificate issued selection is required.';
+  String get err_birth_certificate_issued_required => 'Please select birth certificate issued.';
 
   @override
-  String get err_birth_dose_vaccination_required => 'Birth dose vaccination selection is required.';
+  String get err_birth_dose_vaccination_required => 'Please select birth dose vaccination.';
 
   @override
-  String get err_mcp_child_required => 'MCP card availability is required (Child).';
+  String get err_mcp_child_required => 'Please select MCP card availability (Child).';
 
   @override
-  String get err_exclusive_breastfeeding_started_required => 'Exclusive breastfeeding started selection is required.';
+  String get err_exclusive_breastfeeding_started_required => 'Please select exclusive breastfeeding started.';
 
   @override
-  String get err_first_breastfeed_timing_required => 'First breastfeed timing selection is required.';
+  String get err_first_breastfeed_timing_required => 'Please select first breastfeed timing.';
 
   @override
-  String get err_how_was_breastfed_required => 'How was breastfed selection is required.';
+  String get err_how_was_breastfed_required => 'Please select how baby was breastfed.';
 
   @override
-  String get err_first_feed_given_after_birth_required => 'First feed after birth selection is required.';
+  String get err_first_feed_given_after_birth_required => 'Please select first feed given after birth.';
 
   @override
-  String get err_adequately_fed_seven_eight_required => 'Adequate feeding (7–8 times) selection is required.';
+  String get err_adequately_fed_seven_eight_required => 'Please select adequate feeding (7–8 times).';
 
   @override
-  String get err_baby_drinking_less_milk_required => 'Baby drinking less milk selection is required.';
+  String get err_baby_drinking_less_milk_required => 'Please select baby drinking less milk.';
 
   @override
-  String get err_breastfeeding_stopped_required => 'Breastfeeding stopped selection is required.';
+  String get err_breastfeeding_stopped_required => 'Please select breastfeeding stopped.';
 
   @override
-  String get err_bloated_or_frequent_vomit_required => 'Bloated stomach/frequent vomiting selection is required.';
+  String get err_bloated_or_frequent_vomit_required => 'Please select bloated stomach or frequent vomiting.';
 
   @override
-  String get err_date_of_death_required => 'Date of death is required.';
+  String get err_date_of_death_required => 'Please enter date of death.';
 
   @override
-  String get err_death_place_required => 'Place of death selection is required.';
+  String get err_death_place_required => 'Please select place of death.';
 
   @override
-  String get err_reason_of_death_required => 'Reason of death selection is required.';
+  String get err_reason_of_death_required => 'Please select reason of death.';
 
   @override
-  String get err_other_reason_of_death_required => 'Other reason of death description is required.';
+  String get err_other_reason_of_death_required => 'Please enter other reason of death.';
 
   @override
   String get previousVisits => 'Previous Visits';

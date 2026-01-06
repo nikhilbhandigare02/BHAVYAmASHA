@@ -52,7 +52,7 @@ class CustomTextField extends StatefulWidget {
   final FocusNode? focusNode;
   final TextInputAction? textInputAction;
   final bool autofocus;
-  final bool enableTitleCase;
+  final bool enableTitleCase; // New parameter to enable/disable title case
   final String? suffixText;
   final String? unitLetterSuffix;
   final AutovalidateMode? autovalidateMode;
