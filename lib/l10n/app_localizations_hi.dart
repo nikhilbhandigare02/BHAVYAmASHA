@@ -3759,6 +3759,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get mobileNumber => 'मोबाइल नंबर';
 
   @override
+  String get mobileNo => 'Mobile No';
+
+  @override
   String get enterMobileNumber => 'कृपया मोबाइल नंबर दर्ज करें';
 
   @override
@@ -5084,6 +5087,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get categoryANC => 'एएनसी';
+
+  @override
+  String get categoryANCbadge => 'एएनसी देय';
 
   @override
   String get categoryANCsearch => 'प्रसवपूर्व देखभाल';

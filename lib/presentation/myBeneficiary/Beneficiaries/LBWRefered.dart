@@ -39,7 +39,6 @@ class _Lbwrefered extends State<Lbwrefered> {
     try {
       print('🔍 Loading LBW children from beneficiaries table (flexible thresholds)');
 
-      // 2. Updated query with current_user_key condition
       final rows = await db.query(
         'beneficiaries_new',
         where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL) AND current_user_key = ?',
@@ -87,11 +86,24 @@ class _Lbwrefered extends State<Lbwrefered> {
           final dobRaw = info['dob'] ?? info['dateOfBirth'];
 
           final ageGender = _formatAgeGender(dobRaw, genderRaw);
+          int toGrams(dynamic value) {
+            if (value == null) return 0;
+
+            final w = double.tryParse(value.toString()) ?? 0;
+
+            // If value looks like kg (e.g. 2.5), convert to grams
+            return w < 20 ? (w * 1000).round() : w.round();
+          }
+
+          final weightDisplay =
+              '${toGrams(weight ?? birthWeight)} gms';
+
 
           lbwChildren.add({
             'hhId': hhId,
             'name': name.isEmpty ? 'Unknown' : name,
             'age_gender': ageGender,
+            'weight_display': weightDisplay,
             'status': 'LBW',
             '_raw': row,
           });
@@ -165,6 +177,18 @@ class _Lbwrefered extends State<Lbwrefered> {
     final i = int.tryParse(s);
     if (i != null) return i;
     return null;
+  }
+
+  String _formatWeight(double? weight, double? birthWeight) {
+    if (weight != null) {
+      // Show current weight in kg with one decimal place
+      return '${weight.toStringAsFixed(1)} kg';
+    }
+    if (birthWeight != null) {
+      // Show birth weight in grams, rounded to nearest gram
+      return '${birthWeight.round()} g';
+    }
+    return 'N/A';
   }
 
   @override
@@ -254,13 +278,13 @@ class _Lbwrefered extends State<Lbwrefered> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.15),
+                      color: Colors.red.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       l10n?.badgeLBW ?? 'LBW',
                       style: const TextStyle(
-                        color: Colors.green,
+                        color: Colors.red,
                         fontWeight: FontWeight.bold,
                         fontSize: 12.5,
                       ),
@@ -292,7 +316,7 @@ class _Lbwrefered extends State<Lbwrefered> {
                             data['name'] ?? '',
                             style: TextStyle(
                               color: Colors.white,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.bold,
                               fontSize: 14.sp,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -302,11 +326,15 @@ class _Lbwrefered extends State<Lbwrefered> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  _infoRow(
-                    '',
-                    data['age_gender'] ?? '',
-                    isWrappable: true,
-                  ),
+      _infoRow(
+        '',
+        data['age_gender'] ?? '',
+        // 🔹 Updated Line: Checks if data exists, then adds label
+        trailing: (data['weight_display'] != null && data['weight_display'].toString().isNotEmpty)
+            ? '${'Weight'}: ${data['weight_display']}'
+            : '',
+        isWrappable: true,
+      ),
                 ],
               ),
             ),
@@ -316,7 +344,7 @@ class _Lbwrefered extends State<Lbwrefered> {
     );
   }
 
-  Widget _infoRow(String? title, String value,{bool isWrappable = false}) {
+  Widget _infoRow(String? title, String value,{String? trailing, bool isWrappable = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -340,6 +368,18 @@ class _Lbwrefered extends State<Lbwrefered> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          if (trailing != null && trailing.isNotEmpty) ...[
+            const SizedBox(width: 8),
+            Text(
+              trailing,
+              style:  TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 13.sp,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ],
       ),
     );

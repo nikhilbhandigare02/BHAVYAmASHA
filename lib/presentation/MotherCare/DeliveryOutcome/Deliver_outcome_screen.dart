@@ -102,6 +102,7 @@ LatestANC AS (
   SELECT
     f.beneficiary_ref_key,
     f.form_json,
+    f.created_date_time,
     ROW_NUMBER() OVER (
       PARTITION BY f.beneficiary_ref_key
       ORDER BY f.created_date_time DESC, f.id DESC
@@ -109,19 +110,24 @@ LatestANC AS (
   FROM ${FollowupFormDataTable.table} f
   WHERE f.forms_ref_key = ?
     AND f.is_deleted = 0
-    AND f.current_user_key = ?            -- ✅ ASHA filter
+    AND f.current_user_key = ?           
 )
 
 SELECT
   d.beneficiary_ref_key,
-  d.household_ref_key,
+  COALESCE(b.household_ref_key, d.household_ref_key) AS household_ref_key,
   d.created_date_time,
   d.id AS form_id,
-  COALESCE(a.form_json, '{}') AS form_json
+  COALESCE(a.form_json, '{}') AS form_json,
+  a.created_date_time AS followup_created_date,
+  b.created_date_time AS beneficiary_created_date
 FROM DeliveryOutcomeOnly d
 LEFT JOIN LatestANC a
   ON a.beneficiary_ref_key = d.beneficiary_ref_key
  AND a.rn = 1
+LEFT JOIN ${BeneficiariesTable.table} b
+  ON b.unique_key = d.beneficiary_ref_key
+  AND (b.is_deleted IS NULL OR b.is_deleted = 0)
 ORDER BY d.created_date_time DESC
 ''',
         [
@@ -314,12 +320,12 @@ ORDER BY d.created_date_time DESC
       final lmpDate = (formData['lmp_date'] ?? '').toString();
       final eddDate = (formData['edd_date'] ?? '').toString();
       final weeksOfPregnancy = (formData['weeks_of_pregnancy'] ?? '').toString();
-      final createdAt = (formData['created_at'] ?? row['created_date_time'] ?? '').toString();
+      final createdAt = (row['beneficiary_created_date'] ?? formData['created_at'] ?? row['created_date_time'] ?? '').toString();
       final mobileNo = (formData['mobile_no'] ?? formData['phone'] ?? '').toString();
       final houseNumber = (formData['house_number'] ?? '').toString();
 
-      // Get household and beneficiary info
-      final hhRefKey = (formData['household_ref_key'] ?? row['household_ref_key'] ?? '').toString();
+      // Get household and beneficiary info - prioritize beneficiaries table over form data
+      final hhRefKey = (row['household_ref_key'] ?? formData['household_ref_key'] ?? '').toString();
       final beneficiaryRefKey = (formData['beneficiary_ref_key'] ?? row['beneficiary_ref_key'] ?? '').toString();
 
       // Keep full household ID for data passing, will be truncated for display only
@@ -351,7 +357,20 @@ ORDER BY d.created_date_time DESC
       String gender = '';
       String ageYearsDisplay = '';
 
-      if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
+      // Check if delivery outcome is live_birth and use followup form date if available
+      final deliveryOutcome = formData['anc_form']?['delivery_outcome']?.toString().toLowerCase() ?? 
+                              formData['delivery_outcome']?.toString().toLowerCase() ?? '';
+      if (deliveryOutcome == 'live_birth' && row['followup_created_date'] != null) {
+        final followupDate = row['followup_created_date'].toString();
+        if (followupDate.isNotEmpty) {
+          registrationDateDisplay = _formatDate(followupDate);
+        }
+      } else if (row['beneficiary_created_date'] != null) {
+        final dbCreatedDate = row['beneficiary_created_date'].toString();
+        if (dbCreatedDate.isNotEmpty) {
+          registrationDateDisplay = _formatDate(dbCreatedDate);
+        }
+      } else if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
         try {
           final createdDt = beneficiaryRow['created_date_time']?.toString() ?? '';
           if (createdDt.isNotEmpty) {
@@ -606,7 +625,7 @@ ORDER BY d.created_date_time DESC
                 builder: (context) => OutcomeFormPage(
                   beneficiaryData: {
                     ...beneficiaryData,
-                    'householdId': data['household_id'] ?? data['_rawRow']?['household_ref_key'] ?? '',
+                    'householdId': data['household_id'] ?? data['_rawRow']?['household_ref_key'] ?? data['hhId'] ?? '',
                     'beneficiaryId': beneficiaryData['BeneficiaryID'],
                   },
                 ),

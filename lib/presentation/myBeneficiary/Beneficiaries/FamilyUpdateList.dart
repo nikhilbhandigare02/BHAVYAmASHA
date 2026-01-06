@@ -346,36 +346,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
             )
           : Column(
               children: [
-                // Search
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  child: TextField(
-                    controller: _searchCtrl,
-                    decoration: InputDecoration(
-                      hintText: l10n?.searchHousehold ?? 'Household search',
-                      prefixIcon: const Icon(Icons.search),
-                      filled: true,
-                      fillColor: AppColors.background,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 12,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: AppColors.outlineVariant),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+
                 Expanded(
                   child: _filtered.isEmpty
                       ? Center(
@@ -460,22 +431,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                       ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      l10n?.familyUpdate ?? 'Family Update',
-                      style: const TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12.5,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+
                 ],
               ),
             ),
@@ -498,7 +454,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                             data['name'] ?? '',
                             style: TextStyle(
                               color: Colors.white,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.bold,
                               fontSize: 14.sp,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -512,12 +468,12 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                     children: [
                       Expanded(
                         child: _infoRow(
-                          "${l10n?.mobileNumber} : ",
+                          "${l10n?.mobileNo} : ",
                           data['mobile']?.toString() ?? 'N/A',
                           isWrappable: true,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: _infoRow(
                           "${l10n?.mohalla} : ",

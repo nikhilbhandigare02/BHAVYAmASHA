@@ -3759,6 +3759,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mobileNumber => 'Mobile Number';
 
   @override
+  String get mobileNo => 'Mobile No';
+
+  @override
   String get enterMobileNumber => 'Please enter the mobile number';
 
   @override
@@ -5084,6 +5087,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categoryANC => 'ANC DUE';
+
+  @override
+  String get categoryANCbadge => 'ANC DUE';
 
   @override
   String get categoryANCsearch => 'ANC';
@@ -6805,7 +6811,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get badgePNC => 'PNC';
 
   @override
-  String get badgeLBW => 'LBW';
+  String get badgeLBW => 'LBW referred';
 
   @override
   String get badgeMigrated => 'Migrated';

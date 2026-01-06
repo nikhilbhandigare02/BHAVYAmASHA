@@ -7571,6 +7571,12 @@ abstract class AppLocalizations {
   /// **'Mobile Number'**
   String get mobileNumber;
 
+  /// No description provided for @mobileNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile No'**
+  String get mobileNo;
+
   /// No description provided for @enterMobileNumber.
   ///
   /// In en, this message translates to:
@@ -10216,6 +10222,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'ANC DUE'**
   String get categoryANC;
+
+  /// No description provided for @categoryANCbadge.
+  ///
+  /// In en, this message translates to:
+  /// **'ANC DUE'**
+  String get categoryANCbadge;
 
   /// No description provided for @categoryANCsearch.
   ///
@@ -13658,7 +13670,7 @@ abstract class AppLocalizations {
   /// No description provided for @badgeLBW.
   ///
   /// In en, this message translates to:
-  /// **'LBW'**
+  /// **'LBW referred'**
   String get badgeLBW;
 
   /// No description provided for @badgeMigrated.

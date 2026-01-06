@@ -385,7 +385,7 @@ ORDER BY d.created_date_time DESC
   Widget _pregnancyCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
     final l10n = AppLocalizations.of(context);
-    final hhId = data['hhId']?.toString() ?? '';
+    final hhId = data['beneficiaryId']?.toString() ?? '';
     final displayHhId = hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId;
     final name = data['name'] ?? 'N/A';
     final ageGender = data['age'] ?? 'N/A';
@@ -418,7 +418,7 @@ ORDER BY d.created_date_time DESC
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.home, color: Colors.black54, size: 18),
+                    const Icon(Icons.home, color: AppColors.primary, size: 18),
                     const SizedBox(width: 6),
                     Text(
                       displayHhId,
@@ -431,6 +431,7 @@ ORDER BY d.created_date_time DESC
                     ),
                   ],
                 ),
+
               ],
             ),
           ),
