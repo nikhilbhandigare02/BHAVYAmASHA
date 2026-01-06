@@ -1420,6 +1420,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   'dd-mm-yyyy',
                               initialDate: state.td1Date,
                               readOnly: (() {
+                                // If booster date is already selected, disable TD1 field
+                                if (state.tdBoosterDate != null) {
+                                  return true;
+                                }
                                 final prev = _prevLmpFromEc;
                                 final curr = state.lmpDate;
                                 if (prev != null && curr != null) {
@@ -1467,6 +1471,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                               'dd-mm-yyyy',
                               initialDate: state.tdBoosterDate,
                               readOnly: (() {
+                                // If TD1 date is already selected in this visit, disable booster field
+                                if (state.td1Date != null) {
+                                  return true;
+                                }
                                 bool td2Eligible = false;
                                 final inspect =
                                     state.dateOfInspection ?? DateTime.now();
