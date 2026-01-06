@@ -4214,7 +4214,7 @@ abstract class AppLocalizations {
   /// No description provided for @richIdLabel.
   ///
   /// In en, this message translates to:
-  /// **'Rich ID'**
+  /// **'Rch ID'**
   String get richIdLabel;
 
   /// No description provided for @rnhAddHeadFirstTabs.
@@ -11930,7 +11930,7 @@ abstract class AppLocalizations {
   /// No description provided for @totalBeneficiaryAdded.
   ///
   /// In en, this message translates to:
-  /// **'Total beneficiary added'**
+  /// **'Total beneficiaries added'**
   String get totalBeneficiaryAdded;
 
   /// No description provided for @enterTypeOfFuelForCooking.

@@ -2079,7 +2079,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rhSdhDhLabel => 'RH/SDH/DH/SADAR Hospital';
 
   @override
-  String get richIdLabel => 'Rich ID';
+  String get richIdLabel => 'Rch ID';
 
   @override
   String get rnhAddHeadFirstTabs => 'Please add a family head before accessing other sections.';
@@ -5941,7 +5941,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get please_add_family_head_details => 'Please add family head details';
 
   @override
-  String get totalBeneficiaryAdded => 'Total beneficiary added';
+  String get totalBeneficiaryAdded => 'Total beneficiaries added';
 
   @override
   String get enterTypeOfFuelForCooking => 'Enter type of fuel for cooking';

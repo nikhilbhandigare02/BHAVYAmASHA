@@ -271,6 +271,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           : 0;
 
       // Save to secure storage
+      print('=== TodaysProgramm Saving to Storage ===');
+      print('To-Do Count: $toDoCount');
+      print('Completed Count: $completedCount');
+      print('====================================');
+      
       await SecureStorageService.saveTodayWorkCounts(
         toDo: toDoCount,
         completed: completedCount,
@@ -283,6 +288,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           _completedVisitsCount = completedCount;
           _toDoVisitsCount = toDoCount;
         });
+        print('=== TodaysProgramm After setState ===');
+        print('State - To-Do: $_toDoVisitsCount, Completed: $_completedVisitsCount');
+        print('==================================');
       }
     } catch (e) {
       // Log error if needed

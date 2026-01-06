@@ -34,10 +34,30 @@ class _TodayworkState extends State<Todaywork> {
   List<Map<String, dynamic>> _eligibleCompletedCoupleItems = [];
   List<Map<String, dynamic>> _hbncCompletedItems = [];
   int _completedVisitsCount = 0;
+  int _toDoVisitsCount = 0;
   @override
   void initState() {
     _loadData();
-
+    
+    // Reload counts from storage after a delay to ensure TodaysProgramm has saved them
+    Future.delayed(Duration(seconds: 2), () async {
+      if (mounted) {
+        await _reloadCountsFromStorage();
+      }
+    });
+    
+    // Add additional reload attempts
+    Future.delayed(Duration(seconds: 5), () async {
+      if (mounted) {
+        await _reloadCountsFromStorage();
+      }
+    });
+    
+    Future.delayed(Duration(seconds: 10), () async {
+      if (mounted) {
+        await _reloadCountsFromStorage();
+      }
+    });
   }
   Future<void> _loadData() async {
     if (!mounted) return;
@@ -62,10 +82,11 @@ class _TodayworkState extends State<Todaywork> {
       // Finally, load the completed visits count
       await _loadCompletedVisitsCount();
 
-      // Save the counts to storage
+      // Don't save counts here as it will override the correct values from storage
+      // The _loadCompletedVisitsCount() method already handles saving correctly
+      
+      // Trigger a rebuild to ensure UI is updated
       if (mounted) {
-        await _saveTodayWorkCountsToStorage();
-        // Trigger a rebuild to ensure UI is updated
         setState(() {});
       }
     } catch (e) {
@@ -883,13 +904,26 @@ class _TodayworkState extends State<Todaywork> {
   }
   Future<void> _loadCompletedVisitsCount() async {
     try {
-      // First try to load from SecureStorage
+      // Load counts from SecureStorage (both to-do and completed)
       final counts = await SecureStorageService.getTodayWorkCounts();
+      
+      print('=== WorkProgress Initial Storage Load ===');
+      print('Raw storage data: $counts');
+      print('To-Do from storage: ${counts['toDo']}');
+      print('Completed from storage: ${counts['completed']}');
+      print('=====================================');
+
       if (mounted) {
         setState(() {
           _completedVisitsCount = counts['completed'] ?? 0;
+          // Use stored to-do count instead of recalculating
+          _toDoVisitsCount = counts['toDo'] ?? 0;
         });
       }
+
+      print('=== WorkProgress After setState ===');
+      print('State - To-Do: $_toDoVisitsCount, Completed: $_completedVisitsCount');
+      print('===============================');
 
       // Initialize completed items lists
       _eligibleCompletedCoupleItems = [];
@@ -975,7 +1009,8 @@ class _TodayworkState extends State<Todaywork> {
           setState(() {
             _completedVisitsCount = totalCount;
           });
-          await _saveTodayWorkCountsToStorage();
+          // Don't save here as it will reset to-do count to 0
+          // The to-do count should remain what was loaded from storage
         }
       } catch (e) {
       }
@@ -983,6 +1018,7 @@ class _TodayworkState extends State<Todaywork> {
       if (mounted) {
         setState(() {
           _completedVisitsCount = 0;
+          _toDoVisitsCount = 0;
         });
       }
     }
@@ -992,43 +1028,52 @@ class _TodayworkState extends State<Todaywork> {
     try {
       if (!mounted) return;
 
-      final familyCount = _familySurveyItems.length;
-      final eligibleCoupleCount = _eligibleCoupleItems.length;
-      final ancCount = _ancItems.length;
-      final hbncCount = _hbncItems.length;
-      final riCount = _riItems.length;
-
-      final totalToDoCount =
-          familyCount + eligibleCoupleCount + ancCount + hbncCount + riCount;
-
-      print('=== WorkProgress To-Do Items Debug ===');
-      print('Family Survey: $familyCount');
-      print('Eligible Couple: $eligibleCoupleCount');
-      print('ANC: $ancCount');
-      print('HBNC: $hbncCount');
-      print('RI: $riCount');
-      print('Total To-Do: $totalToDoCount');
-      print('==================================');
-
-      final toDoCount = totalToDoCount >= 0 ? totalToDoCount : 0;
+      final currentStorage = await SecureStorageService.getTodayWorkCounts();
+      final currentToDoCount = currentStorage['toDo'] ?? 0;
       final completedCount = _completedVisitsCount >= 0 ? _completedVisitsCount : 0;
 
+      print('=== WorkProgress Saving to Storage ===');
+      print('Current To-Do from storage: $currentToDoCount');
+      print('Completed Count (calculated): $completedCount');
+      print('==================================');
+
       await SecureStorageService.saveTodayWorkCounts(
-        toDo: toDoCount,
+        toDo: currentToDoCount,
         completed: completedCount,
       );
 
       if (mounted) {
         _refreshData();
-        setState(() {
-          _completedVisitsCount = completedCount;
-        });
       }
     } catch (e) {
-      // Log error if needed
       debugPrint('Error saving today\'s work counts: $e');
     }
   }
+
+
+  Future<void> _reloadCountsFromStorage() async {
+    try {
+      final counts = await SecureStorageService.getTodayWorkCounts();
+      
+      print('=== WorkProgress Delayed Reload ===');
+      print('Raw storage data: $counts');
+      print('To-Do from storage: ${counts['toDo']}');
+      print('Completed from storage: ${counts['completed']}');
+      print('==============================');
+      
+      if (mounted) {
+        setState(() {
+          _toDoVisitsCount = counts['toDo'] ?? 0;
+          _completedVisitsCount = counts['completed'] ?? 0;
+        });
+
+        _loadCountsFromStorage(_bloc);
+      }
+    } catch (e) {
+      print('Error reloading counts: $e');
+    }
+  }
+
   String _last11(String? input) {
     if (input == null || input.isEmpty) return '-';
     return input.length <= 11 ? input : input.substring(input.length - 11);

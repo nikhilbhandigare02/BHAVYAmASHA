@@ -9,7 +9,7 @@ class TodaysWorkState extends Equatable {
   final int toDo;
   final int completed;
 
-  int get pending => (toDo - completed).clamp(0, 1 << 31);
+  int get pending => toDo; // Show to-do count directly as pending visits
   double get progress => toDo == 0 ? 0.0 : (completed / toDo).clamp(0.0, 1.0);
 
   TodaysWorkState copyWith({int? toDo, int? completed}) {
