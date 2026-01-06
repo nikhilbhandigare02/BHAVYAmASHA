@@ -1412,14 +1412,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                               thickness: 0.5,
                               height: 0,
                             ),
-                            CustomDatePicker(
-                              labelText:
-                                  l10n?.td1DateLabel ??
-                                  'Date of T.D(Tetanus and adult diphtheria) 1',
-                              hintText:
-                                  'dd-mm-yyyy',
-                              initialDate: state.td1Date,
-                              readOnly: (() {
+                            Opacity(
+                              opacity: (() {
                                 // If booster date is already selected, disable TD1 field
                                 if (state.tdBoosterDate != null) {
                                   return true;
@@ -1431,22 +1425,39 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   return years < 3; // disable if gap < 3 years
                                 }
                                 return false;
-                              })(),
-                              onDateChanged: (d) => bloc.add(Td1DateChanged(d)),
+                              })()
+                                  ? 0.5
+                                  : 1.0,
+                              child: CustomDatePicker(
+                                labelText:
+                                    l10n?.td1DateLabel ??
+                                    'Date of T.D(Tetanus and adult diphtheria) 1',
+                                hintText:
+                                    'dd-mm-yyyy',
+                                initialDate: state.td1Date,
+                                readOnly: (() {
+                                  // If booster date is already selected, disable TD1 field
+                                  if (state.tdBoosterDate != null) {
+                                    return true;
+                                  }
+                                  final prev = _prevLmpFromEc;
+                                  final curr = state.lmpDate;
+                                  if (prev != null && curr != null) {
+                                    final years = _fullYearsBetween(prev, curr);
+                                    return years < 3; // disable if gap < 3 years
+                                  }
+                                  return false;
+                                })(),
+                                onDateChanged: (d) => bloc.add(Td1DateChanged(d)),
+                              ),
                             ),
                             Divider(
                               color: AppColors.divider,
                               thickness: 0.5,
                               height: 0,
                             ),
-                            CustomDatePicker(
-                              labelText:
-                                  l10n?.td2DateLabel ??
-                                  'Date of T.D(Tetanus and adult diphtheria) 2',
-                              hintText:
-                              'dd-mm-yyyy',
-                              initialDate: state.td2Date,
-                              readOnly: (() {
+                            Opacity(
+                              opacity: (() {
                                 final inspect =
                                     state.dateOfInspection ?? DateTime.now();
                                 final td1 = state.td1Date ?? _lastTd1DateFromDb;
@@ -1455,22 +1466,36 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 }
                                 final days = inspect.difference(td1).inDays;
                                 return days < 28;
-                              })(),
-                              onDateChanged: (d) => bloc.add(Td2DateChanged(d)),
+                              })()
+                                  ? 0.5
+                                  : 1.0,
+                              child: CustomDatePicker(
+                                labelText:
+                                    l10n?.td2DateLabel ??
+                                    'Date of T.D(Tetanus and adult diphtheria) 2',
+                                hintText:
+                                'dd-mm-yyyy',
+                                initialDate: state.td2Date,
+                                readOnly: (() {
+                                  final inspect =
+                                      state.dateOfInspection ?? DateTime.now();
+                                  final td1 = state.td1Date ?? _lastTd1DateFromDb;
+                                  if (td1 == null) {
+                                    return true;
+                                  }
+                                  final days = inspect.difference(td1).inDays;
+                                  return days < 28;
+                                })(),
+                                onDateChanged: (d) => bloc.add(Td2DateChanged(d)),
+                              ),
                             ),
                             Divider(
                               color: AppColors.divider,
                               thickness: 0.5,
                               height: 0,
                             ),
-                            CustomDatePicker(
-                              labelText:
-                                  l10n?.tdBoosterDateLabel ??
-                                  'Date of T.D(Tetanus and adult diphtheria) booster',
-                              hintText:
-                              'dd-mm-yyyy',
-                              initialDate: state.tdBoosterDate,
-                              readOnly: (() {
+                            Opacity(
+                              opacity: (() {
                                 // If TD1 date is already selected in this visit, disable booster field
                                 if (state.td1Date != null) {
                                   return true;
@@ -1493,9 +1518,43 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   return years > 3;
                                 }
                                 return state.gravida < 2;
-                              })(),
-                              onDateChanged: (d) =>
-                                  bloc.add(TdBoosterDateChanged(d)),
+                              })()
+                                  ? 0.5
+                                  : 1.0,
+                              child: CustomDatePicker(
+                                labelText:
+                                    l10n?.tdBoosterDateLabel ??
+                                    'Date of T.D(Tetanus and adult diphtheria) booster',
+                                hintText:
+                                'dd-mm-yyyy',
+                                initialDate: state.tdBoosterDate,
+                                readOnly: (() {
+                                  // If TD1 date is already selected in this visit, disable booster field
+                                  if (state.td1Date != null) {
+                                    return true;
+                                  }
+                                  bool td2Eligible = false;
+                                  final inspect =
+                                      state.dateOfInspection ?? DateTime.now();
+                                  final td1 = state.td1Date ?? _lastTd1DateFromDb;
+                                  if (inspect != null && td1 != null) {
+                                    final days = inspect.difference(td1).inDays;
+                                    td2Eligible = days >= 28;
+                                  }
+                                  if (td2Eligible) {
+                                    return true;
+                                  }
+                                  final p = _prevLmpFromEc;
+                                  final c = state.lmpDate;
+                                  if (p != null && c != null) {
+                                    final years = _fullYearsBetween(p, c);
+                                    return years > 3;
+                                  }
+                                  return state.gravida < 2;
+                                })(),
+                                onDateChanged: (d) =>
+                                    bloc.add(TdBoosterDateChanged(d)),
+                              ),
                             ),
 
                             Divider(
