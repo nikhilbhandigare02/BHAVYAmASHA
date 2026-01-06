@@ -287,6 +287,8 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           'mobile': (info['mobileNo'] ?? '').toString(),
           'hhId': headId,
           'houseNo': info['houseNo'] ?? 0,
+          'mohalla': (info['mohalla'] ?? '').toString(),
+          'mohallaTola': (info['mohallaTola'] ?? info['tola'] ?? '').toString(),
           'totalMembers': membersForHousehold.length,
           'elderly': elderlyCountMap[householdRefKey] ?? 0,
           'pregnantWomen': pregnantCountMap[householdRefKey] ?? 0,
@@ -506,11 +508,25 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  _infoRow(
-                    '',
-                    data['mobile']?.toString() ?? 'N/A',
-                    isWrappable: true,
-                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _infoRow(
+                          "${l10n?.mobileNumber} : ",
+                          data['mobile']?.toString() ?? 'N/A',
+                          isWrappable: true,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _infoRow(
+                          "${l10n?.mohalla} : ",
+                          data['mohalla']?.toString() ?? data['mohallaTola']?.toString() ?? 'N/A',
+                          isWrappable: true,
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
