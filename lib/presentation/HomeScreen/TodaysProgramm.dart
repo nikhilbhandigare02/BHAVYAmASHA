@@ -47,6 +47,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   List<Map<String, dynamic>> _riItems = [];
   List<Map<String, dynamic>> _riCompletedItems = [];
   int _completedVisitsCount = 0;
+  int _toDoVisitsCount = 0;
   bool todayVisitClick = true;
   String? ashaUniqueKey;
 
@@ -280,6 +281,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         setState(() {
           // Ensure the UI reflects the same values we saved
           _completedVisitsCount = completedCount;
+          _toDoVisitsCount = toDoCount;
         });
       }
     } catch (e) {
@@ -311,6 +313,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       if (mounted) {
         setState(() {
           _completedVisitsCount = counts['completed'] ?? 0;
+          _toDoVisitsCount = counts['toDo'] ?? 0;
         });
       }
 
@@ -2313,15 +2316,20 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     final hbncCount = _hbncCompletedItems.length;
     final ecCount = _eligibleCompletedCoupleItems.length;
     final riCount = _riCompletedItems.length;
+    final totalCount = ancCount + hbncCount + ecCount + riCount;
     
     print('=== Completed Items Count ===');
     print('ANC Completed Items: $ancCount');
     print('HBNC Completed Items: $hbncCount');
     print('Eligible Couple Completed Items: $ecCount');
     print('RI Completed Items: $riCount');
-    print('Total Completed Items: ${ancCount + hbncCount + ecCount + riCount}');
+    print('Total Completed Items: $totalCount');
+    print('_completedVisitsCount (State): $_completedVisitsCount');
+    print('_toDoVisitsCount (from Storage): $_toDoVisitsCount');
     print('============================');
   }
+
+  int get _totalCount => _ancCompletedItems.length + _hbncCompletedItems.length + _eligibleCompletedCoupleItems.length + _riCompletedItems.length;
 
 
   Widget _routineCard(Map<String, dynamic> item, BuildContext context) {
@@ -2782,7 +2790,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     );
   }
 
-  // Helper method to get translated title for expansion tiles
   String _getTranslatedTitle(String key, AppLocalizations l10n) {
     // Map English keys to translation keys
     switch (key) {
@@ -2998,7 +3005,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                               ),
 
                               Text(
-                                "$_completedVisitsCount",
+                                "$_totalCount",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: (!todayVisitClick)
