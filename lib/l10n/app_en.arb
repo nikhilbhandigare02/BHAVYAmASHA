@@ -359,7 +359,7 @@
   "elderlyAbove65": "Elderly (>65 Y)",
   "elecGenerator": "Generator",
   "householdSavedSuccessfully": "Total beneficiaries: {count}",
-  "dataSavedSuccessfully": "New house has been added successfully",
+  "dataSavedSuccessfullyFamily": "New house has been added successfully",
   "closeButton": "CLOSE",
   "elecKeroseneLamp": "Kerosene Lamp",
   "elecOther": "Other",

@@ -4040,6 +4040,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     labelText: l.ifscLabel,
                                     hintText: l.ifscLabel,
                                     initialValue: state.ifsc,
+                                    maxLength: 11,
                                     onChanged: (v) {
                                       final value = v.trim().toUpperCase();
                                       // Clear previous snackbar

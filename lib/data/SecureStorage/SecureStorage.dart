@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 
@@ -306,8 +307,15 @@ class SecureStorageService {
   }
 
   static Future<int> getLoginFlag() async {
-    final value = await _storage.read(key: _keyIsLoggedIn);
-    return int.tryParse(value ?? '0') ?? 0;
+    try {
+      final value = await _storage.read(key: _keyIsLoggedIn);
+      return int.tryParse(value ?? '0') ?? 0;
+    } on PlatformException catch (e) {
+      await _storage.deleteAll();
+      return 0;
+    } catch (_) {
+      return 0;
+    }
   }
 
   static Future<bool> isAbhaFetched() async {
@@ -326,10 +334,8 @@ class SecureStorageService {
       final userDataString = jsonEncode(userData);
       print('Saving user data with key: $userDataKey');
       print('User data to save: $userDataString');
-      
       await _storage.write(key: userDataKey, value: userDataString);
       await _storage.write(key: _keyCurrentUser, value: uniqueKey);
-      
 
       final savedData = await _storage.read(key: userDataKey);
       print('Data saved successfully. Verification: ${savedData != null}');
@@ -364,7 +370,6 @@ class SecureStorageService {
           print('Falling back to legacy user data format');
           return jsonDecode(legacyUserData) as Map<String, dynamic>;
         }
-        
         return null;
       }
       
@@ -381,7 +386,6 @@ class SecureStorageService {
       return null;
     }
   }
-
 
   static Future<String?> getCurrentUserKey() async {
     return await _storage.read(key: _keyCurrentUser);

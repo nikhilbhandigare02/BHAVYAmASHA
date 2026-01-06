@@ -1082,6 +1082,7 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                 CustomTextField(
                                   labelText: l.ifscLabel,
                                   hintText: l.ifscLabel,
+                                  maxLength: 11,
                                   initialValue: state.ifsc,
                                   onChanged: (v) => context
                                       .read<UpdateMemberDetailBloc>()
