@@ -358,7 +358,6 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             final deviceInfo = await DeviceInfo.getDeviceInfo();
             final ts = DateTime.now().toIso8601String();
             
-            // Check if mother care activity already exists for this beneficiary
             final existingActivity = await LocalStorageDao.instance.getMotherCareActivityByBeneficiary(beneficiaryId);
             
             final motherCareActivityData = {
