@@ -605,7 +605,7 @@
   "or": "OR",
   "orderOfPregnancyLabel": "Order of Pregnancy(Gravida)",
   "otpGeneratedSuccess": "OTP generated successfully",
-  "ownershipTypeLabel": "Type of ownership",
+  "ownershipTypeLabel": "House ownership type",
   "panchayatHint": "Panchayat",
   "panchayatLabel": "Panchayat",
   "passwordComplexity": "Password must contain letters, numbers, and special characters",
@@ -1208,7 +1208,7 @@
   "cancel": "Cancel",
   "success": "Success",
   "error": "Error",
-  "ok": "OK",
+  "ok": "OKAY",
 
   "home": "Home",
   "patients": "Patients",
@@ -2523,8 +2523,6 @@
   "pleaseEnterAbhaId": "Please enter ABHA ID",
   "abhaAddressLinked": "ABHA Address Linked!",
   "selectAbhaId": "Select ABHA ID",
-  "mobileNumberMismatch": "Mobile number mismatch"
-
-
-
+  "mobileNumberMismatch": "Mobile number mismatch",
+  "mohallaTolaName": "Tola/Mohalla"
 }

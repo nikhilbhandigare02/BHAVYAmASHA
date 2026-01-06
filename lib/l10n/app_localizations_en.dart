@@ -1833,7 +1833,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otpGeneratedSuccess => 'OTP generated successfully';
 
   @override
-  String get ownershipTypeLabel => 'Type of ownership';
+  String get ownershipTypeLabel => 'House ownership type';
 
   @override
   String get panchayatHint => 'Panchayat';
@@ -2928,7 +2928,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get err_visit_day_required => 'Home Visit Day is required.';
 
   @override
-  String get err_visit_date_required => 'Date of home visit is required.';
+  String get err_visit_date_required => 'Please Date of home visit is required.';
 
   @override
   String get err_mother_status_required => 'Mother\'s status is required.';
@@ -3603,7 +3603,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get error => 'Error';
 
   @override
-  String get ok => 'OK';
+  String get ok => 'OKAY';
 
   @override
   String get home => 'Home';
@@ -7280,4 +7280,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mobileNumberMismatch => 'Mobile number mismatch';
+
+  @override
+  String get mohallaTolaName => 'Tola/Mohalla';
 }

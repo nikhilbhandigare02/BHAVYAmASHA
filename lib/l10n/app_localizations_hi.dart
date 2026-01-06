@@ -66,10 +66,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get aboutUsP4 => 'ऐप आशा कार्यकर्ताओं को उनकी को उनकी देय सूची, आज के कार्यक्रम और आगामी पीएनसी मां और शिशु विवरण की एक सूची बनाए रखने की सुविधा देता है ।';
 
   @override
-  String get accountNumberHint => 'खाता संख्या';
+  String get accountNumberHint => 'बैंक खाता संख्या';
 
   @override
-  String get accountNumberLabel => 'खाता संख्या';
+  String get accountNumberLabel => 'बैंक खाता संख्या';
 
   @override
   String get addButton => 'जोड़ें';
@@ -1674,7 +1674,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get mobileTelephoneLabel => 'मोबाइल/टेलीफोन नंबर';
 
   @override
-  String get mohallaTolaNameLabel => 'टोला/मोहल्ला';
+  String get mohallaTolaNameLabel => 'मोहल्ला/टोला का नाम';
 
   @override
   String get monthApril => 'अप्रैल';
@@ -1740,7 +1740,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get motherInLaw => 'सास';
 
   @override
-  String get motherNameLabel => 'माँ  का नाम';
+  String get motherNameLabel => 'माता का नाम';
 
   @override
   String get mukhiyaMobileHint => 'मुखिया का मोबाइल नंबर';
@@ -2037,7 +2037,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get relationDaughterInLaw => 'बहू';
 
   @override
-  String get relationWithHeadLabel => 'परिवार के मुखिया से संबंध';
+  String get relationWithHeadLabel => 'परिवार के मुखिया के साथ संबंध';
 
   @override
   String get relative => 'रिश्तेदार';
@@ -2154,7 +2154,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get eligibleCoupleListTitle => 'योग्य दम्पत्ति सूची';
 
   @override
-  String get eligibleCoupleStatus => 'योग्य दंपति';
+  String get eligibleCoupleStatus => 'योग्य दम्पत्ति';
 
   @override
   String get deathRegisterTitle => 'मृत्यु रजिस्टर';
@@ -2175,7 +2175,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get selectArea => 'क्षेत्र चुनें';
 
   @override
-  String get self => 'स्व';
+  String get self => 'स्वयं';
 
   @override
   String get separated => 'अलग रह रहे';
@@ -2358,7 +2358,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get unmarried => 'अविवाहित';
 
   @override
-  String get updateButton => 'अपडेट';
+  String get updateButton => 'अपडेट करें';
 
   @override
   String get updatedEligibleCoupleListSubtitle => 'योग्य दम्पत्ति सूची';
@@ -2505,13 +2505,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get yearsSuffix => 'Years';
 
   @override
-  String get nextButton => 'अगला';
+  String get nextButton => 'आगे जाएँ';
 
   @override
-  String get previousButton => 'पीछे जाए';
+  String get previousButton => 'पीछे जाएँ';
 
   @override
-  String get youngestChildAgeLabel => 'सबसे छोटे बच्चे की आयु';
+  String get youngestChildAgeLabel => 'सबसे छोटे बच्चे की उम्र';
 
   @override
   String get familySurvey => 'Family Survey';
@@ -2532,7 +2532,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get training => 'Training';
 
   @override
-  String get youngestChildAgeUnitLabel => 'सबसे छोटे बच्चे की आयु की इकाई';
+  String get youngestChildAgeUnitLabel => 'सबसे छोटे बच्चे की उम्र की यूनिट';
 
   @override
   String get youngestChildGenderLabel => 'सबसे छोटे बच्चे का लिंग';
@@ -3129,7 +3129,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get confirmBackLoseDetailsMsg => 'If you go back, details will be lost. Do you want to go back?';
 
   @override
-  String get confirmCloseFormMsg => 'यदि आप वापस जाते हैं, तो विवरण खो जाएगा| तो क्या आप वापस जाना चाहते हैं ?';
+  String get confirmCloseFormMsg => 'क्या आप इस फॉर्म को बंद करना चाहते हैं?';
 
   @override
   String get confirmYes => 'Yes';
@@ -3276,7 +3276,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get youngestChildAge => 'सबसे छोटे बच्चे की आयु';
 
   @override
-  String get ageUnitOfYoungest => 'सबसे छोटे बच्चे की आयु की इकाई';
+  String get ageUnitOfYoungest => 'सबसे छोटे बच्चे की उम्र की यूनिट';
 
   @override
   String get genderOfYoungest => 'सबसे छोटे बच्चे का लिंग';
@@ -3318,7 +3318,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get confirmYesExit => 'हां, बाहर निकलें';
 
   @override
-  String get confirmNo => 'नहीं, यहीं रहें';
+  String get confirmNo => 'नहीं';
 
   @override
   String get memberRemainsToAdd => 'सदस्यों की संख्या जोडी जानी बाकी है. ';
@@ -4324,7 +4324,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get pleaseEnterGuardianFullName => 'कृपया अभिभावक का पूरा नाम दर्ज करें';
 
   @override
-  String get update => 'अपडेट';
+  String get update => 'अपडेट करें';
 
   @override
   String get searchPatientName => 'रोगी का नाम खोजें';
@@ -5038,7 +5038,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get immunization => 'टीकाकरण';
 
   @override
-  String get pregnantWomen => 'गर्भवती महिलाएं';
+  String get pregnantWomen => 'गर्भवती महिलाएँ';
 
   @override
   String get deliveries => 'प्रसव';
@@ -6538,7 +6538,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get familyPlanningCounselling => 'परिवार नियोजन पर परामर्श?';
 
   @override
-  String get previous => 'पीछे जाए';
+  String get previous => 'पीछे जाएँ';
 
   @override
   String get saveForm => 'फ़ॉर्म सहेजें';
@@ -6784,7 +6784,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get badgeFamily => 'परिवार';
 
   @override
-  String get badgeEligibleCouple => 'योग्य दंपत्ति';
+  String get badgeEligibleCouple => 'योग्य दम्पत्ति';
 
   @override
   String get badgeHRP => 'उच्च जोखिम';
@@ -7280,4 +7280,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get mobileNumberMismatch => 'मोबाइल नंबर मेल नहीं खा रहा है';
+
+  @override
+  String get mohallaTolaName => 'टोला/मोहल्ला';
 }

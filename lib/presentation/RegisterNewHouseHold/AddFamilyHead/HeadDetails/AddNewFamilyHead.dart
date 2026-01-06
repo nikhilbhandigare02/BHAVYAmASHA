@@ -336,7 +336,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           children: [
             _Section(
               child: CustomTextField(
-                labelText: '${l.houseNoLabel} *',
+                labelText: '${l.houseNoHint} *',
               hintText: l.houseNoHint,
               initialValue: state.houseNo,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(

@@ -1634,7 +1634,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                         );
                       },
                       child: Text(
-                        l10n?.ok ??'OK',
+                        l10n?.ok ??'OKAY',
                         style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
