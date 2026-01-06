@@ -379,30 +379,66 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
 
                                     SizedBox(
                                       width: double.infinity,
-                                      child:
-                                          state.status == GbsStatus.submitting
+                                      child: state.status == GbsStatus.submitting
                                           ? const Center(
-                                              child:
-                                                  CircularProgressIndicator(),
-                                            )
-                                          : RoundButton(
-                                              title: l10n.search,
-                                              height: 35,
-                                              color: AppColors.primary,
-                                              onPress: () {
-                                                FocusScope.of(
-                                                  context,
-                                                ).unfocus();
-                                                context
-                                                    .read<
-                                                      GuestBeneficiarySearchBloc
-                                                    >()
-                                                    .add(
-                                                      const GbsSubmitSearch(),
-                                                    );
-                                              },
-                                              icon: Icons.search,
+                                        child: CircularProgressIndicator(),
+                                      )
+                                          : Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          onTap: () {
+                                            FocusScope.of(context).unfocus();
+                                            context
+                                                .read<GuestBeneficiarySearchBloc>()
+                                                .add(const GbsSubmitSearch());
+                                          },
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Ink(
+                                            height: 33,
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [
+                                                  AppColors.primary,
+                                                  AppColors.primary.withOpacity(0.8),
+                                                ],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                              ),
+                                              borderRadius: BorderRadius.circular(5),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: AppColors.primary.withOpacity(0.3),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 4),
+                                                ),
+                                              ],
                                             ),
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(
+                                                    Icons.search,
+                                                    color: AppColors.onPrimary,
+                                                    size: 19,
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Text(
+                                                    l10n.search,
+                                                    style: TextStyle(
+                                                      color: AppColors.onPrimary,
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w600,
+                                                      letterSpacing: 0.5,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                     ),
 
                                     const SizedBox(height: 16),

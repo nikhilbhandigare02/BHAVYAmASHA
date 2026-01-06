@@ -10,6 +10,7 @@ import 'package:medixcel_new/data/Database/tables/notification_table.dart';
 import 'package:medixcel_new/data/Database/tables/training_data_table.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
+import 'package:medixcel_new/data/Database/User_Info.dart';
 
 import '../models/guest_beneficiary/guest_beneficiary_model.dart';
 import 'database_provider.dart';
@@ -2238,13 +2239,19 @@ class LocalStorageDao {
       print('🔍 [getDeathRecords] Querying death records...');
       final db = await _db;
 
-      // First, run debug query
-      final debugInfo = await debugDeathRecords();
-      print('🔍 [getDeathRecords] Debug Info: $debugInfo');
+      final currentUser = await _getCurrentUserData();
+      final ashaUniqueKey = currentUser?['unique_key']?.toString() ?? '';
+
+      if (ashaUniqueKey.isEmpty) return [];
 
       final rows = await db.query(
         BeneficiariesTable.table,
-        where: 'is_death = 1 AND is_deleted = 0',
+        where: '''
+        is_death = 1
+        AND is_deleted = 0
+        AND current_user_key = ?
+      ''',
+        whereArgs: [ashaUniqueKey],
         orderBy: 'created_date_time DESC',
       );
 
@@ -2253,36 +2260,38 @@ class LocalStorageDao {
       return rows.map((row) {
         try {
           final mapped = Map<String, dynamic>.from(row);
-          // Parse JSON fields
-          mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
-          mapped['death_details'] = safeJsonDecode(mapped['death_details']);
-          mapped['device_details'] = safeJsonDecode(mapped['device_details']);
-          mapped['app_details'] = safeJsonDecode(mapped['app_details']);
-          mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+
+          mapped['beneficiary_info'] =
+              safeJsonDecode(mapped['beneficiary_info']);
+          mapped['death_details'] =
+              safeJsonDecode(mapped['death_details']);
+          mapped['device_details'] =
+              safeJsonDecode(mapped['device_details']);
+          mapped['app_details'] =
+              safeJsonDecode(mapped['app_details']);
+          mapped['parent_user'] =
+              safeJsonDecode(mapped['parent_user']);
+
           return mapped;
         } catch (e) {
           print('❌ Error parsing record $row: $e');
-          return <String, dynamic>{}; // Return empty map on parse error
+          return <String, dynamic>{};
         }
-      }).where((map) => map.isNotEmpty).toList(); // Filter out any empty maps from failed parses
+      }).where((map) => map.isNotEmpty).toList();
     } catch (e, stackTrace) {
       print('❌ [getDeathRecords] Error: $e');
       print('Stack trace: $stackTrace');
       rethrow;
     }
-
-
   }
 
-  // In local_storage_dao.dart, add this method
 
-  // In local_storage_dao.dart, update getHeadMobileNumber:
+
   Future<String?> getHeadMobileNumber(String householdRefKey) async {
     print('🔍 [getHeadMobileNumber] Fetching head mobile for household: $householdRefKey');
     try {
       final db = await _db;
 
-      // 1. Get all beneficiaries for the household
       final beneficiaries = await db.query(
         'beneficiaries_new',
         where: 'household_ref_key = ? AND is_deleted = 0',
@@ -2532,8 +2541,21 @@ class LocalStorageDao {
       final db = await _db;
       final Map<String, dynamic> beneficiaryMap = beneficiary.toMap();
 
-      if (!beneficiaryMap.containsKey('current_user_key') || (beneficiaryMap['current_user_key'] == null)) {
-        beneficiaryMap['current_user_key'] = '';
+      String ashaUniqueKey = '';
+      try {
+        final currentUser = await UserInfo.getCurrentUser();
+        final userDetails = currentUser?['details'] is String
+            ? jsonDecode(currentUser?['details'] ?? '{}')
+            : currentUser?['details'] ?? {};
+        ashaUniqueKey = userDetails['unique_key']?.toString() ?? '';
+      } catch (e) {
+        print('⚠️ Unable to fetch ASHA unique key in saveGuestBeneficiary: $e');
+      }
+
+      if (!beneficiaryMap.containsKey('current_user_key') ||
+          beneficiaryMap['current_user_key'] == null ||
+          beneficiaryMap['current_user_key'].toString().trim().isEmpty) {
+        beneficiaryMap['current_user_key'] = ashaUniqueKey;
       }
       if (!beneficiaryMap.containsKey('facility_id') || (beneficiaryMap['facility_id'] == null)) {
         beneficiaryMap['facility_id'] = 0;

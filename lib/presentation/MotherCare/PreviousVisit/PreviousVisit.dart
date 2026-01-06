@@ -1,21 +1,88 @@
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
+import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
 class PreviousVisitScreen extends StatefulWidget {
-  const PreviousVisitScreen({super.key});
+  final String beneficiaryId;
+
+  const PreviousVisitScreen({super.key, required this.beneficiaryId});
 
   @override
   State<PreviousVisitScreen> createState() => _PreviousVisitScreenState();
 }
 
 class _PreviousVisitScreenState extends State<PreviousVisitScreen> {
-  // Minimal PNC-style data matching the screenshot
-  final List<Map<String, dynamic>> _pncVisits = const [
-    { 'date': '12-01-2024', 'day': 1 },
-    // Add more rows if needed
-  ];
+  List<Map<String, String>> _pncVisits = [];
+  bool _isLoading = true;
+  String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVisits();
+  }
+
+  Future<void> _loadVisits() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+
+      // Fetch PNC Mother follow-up forms for this beneficiary
+      final rows = await db.query(
+        FollowupFormDataTable.table,
+        where:
+            'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        whereArgs: [
+          widget.beneficiaryId,
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother],
+        ],
+        orderBy: 'datetime(created_date_time) ASC',
+      );
+
+      const visitDays = [1, 3, 7, 14, 21, 28, 42];
+      final List<Map<String, String>> visits = [];
+
+      for (var i = 0; i < rows.length; i++) {
+        final row = rows[i];
+        final rawDate = row['created_date_time']?.toString() ?? '';
+
+        String formattedDate = rawDate;
+        if (rawDate.isNotEmpty) {
+          try {
+            final dt = DateTime.parse(rawDate);
+            final d = dt.day.toString().padLeft(2, '0');
+            final m = dt.month.toString().padLeft(2, '0');
+            final y = dt.year.toString();
+            formattedDate = '$d-$m-$y';
+          } catch (_) {}
+        }
+
+        final dayNumber =
+            i < visitDays.length ? visitDays[i].toString() : (i + 1).toString();
+
+        visits.add({
+          'date': formattedDate.isEmpty ? '-' : formattedDate,
+          'day': dayNumber,
+        });
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _pncVisits = visits;
+        _isLoading = false;
+        _errorMessage = '';
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Failed to load previous visits';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,19 +93,37 @@ class _PreviousVisitScreenState extends State<PreviousVisitScreen> {
         screenTitle: t.previousVisits,
         showBack: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _TableHeader(t: t),
-            const SizedBox(height: 8),
-            ..._pncVisits.asMap().entries.map((e) => _TableRowItem(
-                  index: e.key + 1,
-                  date: e.value['date'].toString(),
-                  day: e.value['day'].toString(),
-                )),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _errorMessage.isNotEmpty
+                    ? Center(child: Text(_errorMessage))
+                    : _pncVisits.isEmpty
+                        ? Center(
+                            child: Text(
+                              t.noPreviousVisits,
+                              textAlign: TextAlign.center,
+                            ),
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _TableHeader(t: t),
+                              const SizedBox(height: 8),
+                              ..._pncVisits.asMap().entries.map(
+                                    (e) => _TableRowItem(
+                                      index: e.key + 1,
+                                      date: e.value['date'] ?? '-',
+                                      day: e.value['day'] ?? '-',
+                                    ),
+                                  ),
+                            ],
+                          ),
+          ),
         ),
       ),
     );

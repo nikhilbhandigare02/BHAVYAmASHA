@@ -125,21 +125,15 @@ class GeneralDetailsTab extends StatelessWidget {
       if (data != null && context.mounted) {
         print('🎯 Updating UI with loaded data');
         final bloc = context.read<HbncVisitBloc>();
-        // Update mother details if they exist
-        if (data['motherDetails'] != null) {
-          final motherDetails = Map<String, dynamic>.from(data['motherDetails'] as Map);
-          // Update each field individually
-          motherDetails.forEach((field, value) {
-            if (value != null) {
-              bloc.add(MotherDetailsChanged(field: field, value: value));
-            }
-          });
-        }
-        // Update visit details if they exist
+        // NOTE: Intentionally do NOT auto-fill motherDetails to keep MotherDetails tab blank
+        // Update visit details if they exist (except visitDate, which should default to current date)
         if (data['visitDetails'] != null) {
           final visitDetails = Map<String, dynamic>.from(data['visitDetails'] as Map);
-          // Update each field individually
+          // Update each field individually, skipping visitDate
           visitDetails.forEach((field, value) {
+            if (field == 'visitDate') {
+              return;
+            }
             if (value != null) {
               bloc.add(VisitDetailsChanged(field: field, value: value));
             }

@@ -3,13 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
+import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_bloc.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_event.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_state.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
+import 'dart:convert';
 
-class MotherDetailsTab extends StatelessWidget {
-  const MotherDetailsTab({super.key});
+class MotherDetailsTab extends StatefulWidget {
+  final String beneficiaryId;
+
+  const MotherDetailsTab({super.key, required this.beneficiaryId});
 
   // Create keys for fields that have validation
   static final Map<String, GlobalKey> fieldKeys = {
@@ -34,10 +39,91 @@ class MotherDetailsTab extends StatelessWidget {
   };
 
   @override
+  State<MotherDetailsTab> createState() => _MotherDetailsTabState();
+}
+
+class _MotherDetailsTabState extends State<MotherDetailsTab> {
+  bool _isMotherStatusLocked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastMotherStatus();
+  }
+
+  Future<void> _loadLastMotherStatus() async {
+    try {
+      if (widget.beneficiaryId.isEmpty) return;
+
+      final db = await DatabaseProvider.instance.database;
+      final pncKey =
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother] ?? '';
+      if (pncKey.isEmpty) return;
+
+      final rows = await db.query(
+        FollowupFormDataTable.table,
+        where:
+            'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        whereArgs: [pncKey, widget.beneficiaryId],
+        orderBy: 'datetime(created_date_time) DESC',
+        limit: 1,
+      );
+
+      if (rows.isEmpty) return;
+
+      final rawJson = rows.first['form_json'] as String?;
+      if (rawJson == null || rawJson.isEmpty) return;
+
+      String? motherStatus;
+
+      try {
+        final decoded = jsonDecode(rawJson);
+        if (decoded is Map<String, dynamic>) {
+          // Normalized structure: form_data.motherDetails.motherStatus
+          if (decoded['form_data'] is Map &&
+              (decoded['form_data']['motherDetails'] is Map)) {
+            final md = decoded['form_data']['motherDetails'] as Map;
+            motherStatus = md['motherStatus']?.toString();
+          }
+
+          // Local HBNC save structure: hbyc_form.motherDetails.motherStatus
+          if (motherStatus == null && decoded['hbyc_form'] is Map) {
+            final h = decoded['hbyc_form'] as Map<String, dynamic>;
+            if (h['motherDetails'] is Map) {
+              final md = h['motherDetails'] as Map;
+              motherStatus = md['motherStatus']?.toString();
+            }
+          }
+
+          // Fallback: top-level motherDetails
+          if (motherStatus == null && decoded['motherDetails'] is Map) {
+            final md = decoded['motherDetails'] as Map;
+            motherStatus = md['motherStatus']?.toString();
+          }
+        }
+      } catch (e) {
+        print('Error parsing last HBNC motherStatus: $e');
+      }
+
+      if (!mounted) return;
+
+      if (motherStatus == 'death') {
+        final bloc = context.read<HbncVisitBloc>();
+        bloc.add(const MotherDetailsChanged(field: 'motherStatus', value: 'death'));
+        setState(() {
+          _isMotherStatusLocked = true;
+        });
+      }
+    } catch (e) {
+      print('Error loading last HBNC motherStatus: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocConsumer<HbncVisitBloc, HbncVisitState>(
       listenWhen: (previous, current) =>
-      previous.motherDetails != current.motherDetails,
+          previous.motherDetails != current.motherDetails,
       listener: (context, state) {
         print('MotherDetails (from state): ${state.motherDetails}');
       },
@@ -58,7 +144,7 @@ class MotherDetailsTab extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       ApiDropdown<String>(
-                        key: fieldKeys['motherStatus'],
+                        key: MotherDetailsTab.fieldKeys['motherStatus'],
                         labelText: t.motherStatusLabel,
                         validator: (v) => (v == null || v.isEmpty)
                             ? t.requiredField
@@ -66,14 +152,20 @@ class MotherDetailsTab extends StatelessWidget {
                         items: const ['alive', 'death'],
                         getLabel: (e) => e == 'alive' ? t.alive : t.dead,
                         value: _asString(m['motherStatus']),
-                        onChanged: (val) => context.read<HbncVisitBloc>().add(
-                          MotherDetailsChanged(field: 'motherStatus', value: val),
-                        ),
+                        readOnly: _isMotherStatusLocked,
+                        onChanged: _isMotherStatusLocked
+                            ? null
+                            : (val) => context.read<HbncVisitBloc>().add(
+                                  MotherDetailsChanged(
+                                    field: 'motherStatus',
+                                    value: val,
+                                  ),
+                                ),
                       ),
                       const Divider(height: 0),
                       if (m['motherStatus'] == 'death') ...[
                         CustomDatePicker(
-                          key: fieldKeys['dateOfDeath'],
+                          key: MotherDetailsTab.fieldKeys['dateOfDeath'],
                           labelText: t.date_of_death,
                           validator: (v) => v == null ? t.requiredField : null,
                           initialDate: m['dateOfDeath'] is DateTime
@@ -85,7 +177,7 @@ class MotherDetailsTab extends StatelessWidget {
                         ),
                         const Divider(),
                         ApiDropdown<String>(
-                          key: fieldKeys['deathPlace'],
+                          key: MotherDetailsTab.fieldKeys['deathPlace'],
                           labelText: t.place_of_death,
                           validator: (v) => (v == null || v.isEmpty)
                               ? t.requiredField
@@ -145,7 +237,7 @@ class MotherDetailsTab extends StatelessWidget {
                         ],
                       ] else ...[
                         ApiDropdown<String>(
-                          key: fieldKeys['mcpCardAvailable'],
+                          key: MotherDetailsTab.fieldKeys['mcpCardAvailable'],
                           labelText: t.mcpCardAvailableLabelMother,
                           validator: (v) => (v == null || v.isEmpty)
                               ? t.requiredField
@@ -164,7 +256,7 @@ class MotherDetailsTab extends StatelessWidget {
 
                         if (m['mcpCardAvailable'] == 'Yes') ...[
                           ApiDropdown<String>(
-                            key: fieldKeys['mcpCardFilled'],
+                            key: MotherDetailsTab.fieldKeys['mcpCardFilled'],
                             labelText: t.has_mcp_card_filled,
                             validator: (v) => (v == null || v.isEmpty)
                                 ? t.requiredField
@@ -183,7 +275,7 @@ class MotherDetailsTab extends StatelessWidget {
                         ],
 
                         ApiDropdown<String>(
-                          key: fieldKeys['postDeliveryProblems'],
+                          key: MotherDetailsTab.fieldKeys['postDeliveryProblems'],
                           labelText: t.postDeliveryProblemsLabel,
                           validator: (v) => (v == null || v.isEmpty)
                               ? t.requiredField
@@ -202,7 +294,7 @@ class MotherDetailsTab extends StatelessWidget {
 
                         if (m['postDeliveryProblems'] == 'Yes') ...[
                           ApiDropdown<String>(
-                            key: fieldKeys['excessiveBleeding'],
+                            key: MotherDetailsTab.fieldKeys['excessiveBleeding'],
                             labelText: t.excessive_bleeding,
                             validator: (v) => (v == null || v.isEmpty)
                                 ? t.requiredField
@@ -234,7 +326,7 @@ class MotherDetailsTab extends StatelessWidget {
                         ],
 
                         ApiDropdown<String>(
-                          key: fieldKeys['breastfeedingProblems'],
+                          key: MotherDetailsTab.fieldKeys['breastfeedingProblems'],
                           labelText: t.breastfeedingProblemsLabel,
                           validator: (v) => (v == null || v.isEmpty)
                               ? t.requiredField
@@ -267,7 +359,7 @@ class MotherDetailsTab extends StatelessWidget {
                           ),
                           const Divider(),
                           CustomTextField(
-                            key: fieldKeys['breastfeedingHelpGiven'],
+                            key: MotherDetailsTab.fieldKeys['breastfeedingHelpGiven'],
                             labelText: t.breastfeeding_problem_help,
                             validator: (v) => (v == null || v.isEmpty)
                                 ? t.requiredField
@@ -285,7 +377,7 @@ class MotherDetailsTab extends StatelessWidget {
                         ],
 
                         ApiDropdown<int>(
-                          key: fieldKeys['mealsPerDay'],
+                          key: MotherDetailsTab.fieldKeys['mealsPerDay'],
                           labelText: "${t.mealsPerDayLabel} *",
                           items: const [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                           getLabel: (e) => e.toString(),
@@ -313,7 +405,7 @@ class MotherDetailsTab extends StatelessWidget {
                         const Divider(),
 
                         ApiDropdown<int>(
-                          key: fieldKeys['padsPerDay'],
+                          key: MotherDetailsTab.fieldKeys['padsPerDay'],
                           labelText: t.padsPerDayLabel,
                           validator: (v) => (v == null)
                               ? t.requiredField
@@ -330,7 +422,7 @@ class MotherDetailsTab extends StatelessWidget {
                         const Divider(),
 
                         ApiDropdown<String>(
-                          key: fieldKeys['temperature'],
+                          key: MotherDetailsTab.fieldKeys['temperature'],
                           labelText: "${t.mothersTemperatureLabel} *",
                           validator: (v) => (v == null || v.isEmpty)
                               ? t.requiredField
@@ -368,7 +460,7 @@ class MotherDetailsTab extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   ApiDropdown<String>(
-                                    key: fieldKeys['paracetamolGiven'],
+                                    key: MotherDetailsTab.fieldKeys['paracetamolGiven'],
                                     labelText: "${t.paracetamolGivenLabel} *",
                                     validator: (v) => (v == null || v.isEmpty)
                                         ? t.requiredField
@@ -392,7 +484,7 @@ class MotherDetailsTab extends StatelessWidget {
                         ),
                         const Divider(height: 0),
                         ApiDropdown<String>(
-                          key: fieldKeys['foulDischargeHighFever'],
+                          key: MotherDetailsTab.fieldKeys['foulDischargeHighFever'],
                           labelText: "${t.foulDischargeHighFeverLabel}",
                           validator: (v) => (v == null || v.isEmpty)
                               ? t.requiredField
@@ -424,7 +516,7 @@ class MotherDetailsTab extends StatelessWidget {
                         const Divider(height: 0),
 
                         ApiDropdown<String>(
-                          key: fieldKeys['milkNotProducingOrLess'],
+                          key: MotherDetailsTab.fieldKeys['milkNotProducingOrLess'],
                           labelText: "${t.milkNotProducingOrLessLabel} *",
                           validator: (v) => (v == null || v.isEmpty)
                               ? t.requiredField
@@ -443,7 +535,7 @@ class MotherDetailsTab extends StatelessWidget {
 
                         if (m['milkNotProducingOrLess'] == 'Yes') ...[
                           ApiDropdown<String>(
-                            key: fieldKeys['milkCounselingAdvice'],
+                            key: MotherDetailsTab.fieldKeys['milkCounselingAdvice'],
                             labelText: "${t.counselingAdviceLabel}",
                             validator: (v) => (v == null || v.isEmpty)
                                 ? t.requiredField
@@ -475,8 +567,8 @@ class MotherDetailsTab extends StatelessWidget {
                         const Divider(height: 0),
 
                         ApiDropdown<String>(
-                          key: fieldKeys['referHospital'],
-                          labelText: "${t.refer_to_hospital}",
+                          key: MotherDetailsTab.fieldKeys['referHospital'],
+                          labelText: "${t.refer_to_hospital} *",
                           validator: (v) => (v == null || v.isEmpty)
                               ? t.requiredField
                               : null,
@@ -494,7 +586,7 @@ class MotherDetailsTab extends StatelessWidget {
 
                         if (m['referHospital'] == 'Yes') ...[
                           ApiDropdown<String>(
-                            key: fieldKeys['referTo'],
+                            key: MotherDetailsTab.fieldKeys['referTo'],
                             labelText: "${t.referToLabel} *",
                             validator: (v) => (v == null || v.isEmpty)
                                 ? t.requiredField

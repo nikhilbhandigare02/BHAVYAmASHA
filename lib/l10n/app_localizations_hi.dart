@@ -2943,10 +2943,31 @@ class AppLocalizationsHi extends AppLocalizations {
   String get err_breastfeeding_problems_required => 'स्तनपान संबंधी समस्या का चयन अनिवार्य है।';
 
   @override
+  String get err_mcp_mother_filled_required => 'MCP card filled status is required.';
+
+  @override
+  String get err_excessive_bleeding_required => 'Excessive bleeding selection is required.';
+
+  @override
+  String get err_unconscious_fits_required => 'Unconscious/fits selection is required.';
+
+  @override
+  String get err_breastfeeding_problem_description_required => 'Breastfeeding problem description is required.';
+
+  @override
+  String get err_breastfeeding_help_required => 'Breastfeeding help/action description is required.';
+
+  @override
   String get err_pads_per_day_required => 'प्रतिदिन बदले जाने वाले पैड की संख्या अनिवार्य है।';
 
   @override
+  String get err_meals_per_day_required => 'Number of full meals per day is required.';
+
+  @override
   String get err_mothers_temperature_required => 'माता का तापमान अनिवार्य है।';
+
+  @override
+  String get err_paracetamol_given_required => 'Paracetamol tablet given selection is required.';
 
   @override
   String get err_foul_discharge_high_fever_required => 'दुर्गंधयुक्त स्राव/तेज बुखार का चयन अनिवार्य है।';
@@ -2962,6 +2983,15 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get err_nipple_cracks_pain_or_engorged_required => 'निप्पल में दरार/दर्द/कड़े स्तन का चयन अनिवार्य है।';
+
+  @override
+  String get err_milk_counseling_advice_required => 'Counseling/advice for milk problem is required.';
+
+  @override
+  String get err_refer_hospital_required => 'Refer to hospital selection is required.';
+
+  @override
+  String get err_refer_to_required => 'Referral facility selection is required.';
 
   @override
   String get err_baby_condition_required => 'शिशु की स्थिति अनिवार्य है।';
@@ -3070,6 +3100,18 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get err_bloated_or_frequent_vomit_required => 'फूला हुआ पेट/बार-बार उल्टी का चयन अनिवार्य है।';
+
+  @override
+  String get err_date_of_death_required => 'Date of death is required.';
+
+  @override
+  String get err_death_place_required => 'Place of death selection is required.';
+
+  @override
+  String get err_reason_of_death_required => 'Reason of death selection is required.';
+
+  @override
+  String get err_other_reason_of_death_required => 'Other reason of death description is required.';
 
   @override
   String get previousVisits => 'पिछले दौरे';
@@ -3213,13 +3255,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get totalLiveChildren => 'जीवित बच्चों की कुल संख्या';
 
   @override
+  String get totalLiveChildrenval => 'कुल जीवित बच्चे कुल जन्मे बच्चों से अधिक नहीं हो सकते';
+
+  @override
   String get totalMaleChildren => 'कुल बच्चों (लड़कों) की संख्याा';
+
+  @override
+  String get totalMaleChildrenval => 'कुल पुरुष बच्चे कुल जीवित बच्चों से अधिक नहीं हो सकते';
 
   @override
   String get totalFemaleChildren => 'कुल बच्चियों की संख्या';
 
   @override
-  String get malePlusFemaleError => 'पुरुष + महिला बच्चों की कुल संख्या जीवित बच्चों की कुल संख्या के बराबर होनी चाहिए';
+  String get totalFemaleChildrenval => 'महिला बच्चों की कुल संख्या, कुल जीवित बच्चों से अधिक नहीं हो सकती';
+
+  @override
+  String get malePlusFemaleError => 'पुरुष और महिला जीवित बच्चों की संख्या, कुल जीवित बच्चों के बराबर होनी चाहिए।';
 
   @override
   String get youngestChildAge => 'सबसे छोटे बच्चे की आयु';
