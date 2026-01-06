@@ -1477,6 +1477,18 @@ class LocalStorageDao {
     return rows.map((row) => Map<String, dynamic>.from(row)).toList();
   }
 
+  Future<List<Map<String, dynamic>>> getMotherCareActivitiesWithAncDueByHousehold(String householdRefKey) async {
+    final db = await _db;
+    final rows = await db.query(
+      'mother_care_activities',
+      where: 'household_ref_key = ? AND mother_care_state = ? AND is_deleted = 0',
+      whereArgs: [householdRefKey, 'anc_due'],
+      columns: ['beneficiary_ref_key'],
+      distinct: true,
+    );
+    return rows.map((row) => Map<String, dynamic>.from(row)).toList();
+  }
+
   // Future<int> markMotherCareActivitySyncedById(int id) async {
   //   final db = await _db;
   //   return db.update(
