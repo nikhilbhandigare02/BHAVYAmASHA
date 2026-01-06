@@ -2524,5 +2524,6 @@
   "abhaAddressLinked": "ABHA Address Linked!",
   "selectAbhaId": "Select ABHA ID",
   "mobileNumberMismatch": "Mobile number mismatch",
-  "mohallaTolaName": "Tola/Mohalla"
+  "mohallaTolaName": "Tola/Mohalla",
+  "categoryANCbadge": "ANC DUE"
 }
