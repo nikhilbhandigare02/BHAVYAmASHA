@@ -203,7 +203,20 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         print('  - Created: ${savedData.first['created_date_time']}');
 
         final visitNumber = state.visitDetails['visitNumber'] as int?;
-        if ((visitNumber ?? 0) == 42 && beneficiaryId.isNotEmpty) {
+
+        // Also close the mother care activity if both mother and baby are recorded as death
+        final motherStatus = state.motherDetails['motherStatus']?.toString();
+        String? babyCondition;
+        if (state.newbornDetailsList.isNotEmpty) {
+          final firstBaby = state.newbornDetailsList.first;
+          babyCondition = firstBaby['babyCondition']?.toString();
+        }
+
+        final shouldCompleteMotherCare =
+            ((visitNumber ?? 0) == 42) ||
+            (motherStatus == 'death' && babyCondition == 'death');
+
+        if (beneficiaryId.isNotEmpty && shouldCompleteMotherCare) {
           try {
             final updated = await db.update(
               MotherCareActivitiesTable.table,

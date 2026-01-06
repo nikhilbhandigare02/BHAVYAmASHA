@@ -297,143 +297,85 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                                     SizedBox(height: 1.5.h),
 
-                                    BlocListener<LoginBloc, LoginState>(
-                                      listener: (context, state) {
-                                        if (state.postApiStatus == PostApiStatus.success) {
-                                          String message;
-                                          
-                                          if (state.error.isNotEmpty) {
-                                            final apiMessage = state.error;
-                                            
-                                            // Translate common API success messages based on language
-                                            if (apiMessage.toLowerCase().contains("login") && 
-                                                (apiMessage.toLowerCase().contains("success") || 
-                                                 apiMessage.toLowerCase().contains("successful"))) {
-                                              message = l10n.loginSuccess;
-                                            } else if (apiMessage.toLowerCase().contains("welcome")) {
-                                              message = l10n.welcome;
-                                            } else if (apiMessage.toLowerCase().contains("authenticated") ||
-                                                       apiMessage.toLowerCase().contains("verification")) {
-                                              message = l10n.loginSuccess;
-                                            } else {
-                                              // Show original API message if no specific translation found
-                                              message = apiMessage;
-                                            }
-                                          } else {
-                                            message = l10n.loginSuccess;
-                                          }
-                                              
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                               message,
-                                                style: const TextStyle(color: Colors.white),
-                                              ),
-                                              backgroundColor: Colors.black,
-                                              duration: const Duration(seconds: 3),
-                                            ),
+                                BlocListener<LoginBloc, LoginState>(
+                                  listenWhen: (previous, current) =>
+                                  previous.postApiStatus != current.postApiStatus,
+                                  listener: (context, state) {
+                                    // ✅ ONLY SUCCESS (200)
+                                    if (state.postApiStatus == PostApiStatus.success) {
+                                      final message = state.error.isNotEmpty
+                                          ? state.error
+                                          : l10n.loginSuccess;
+
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            message,
+                                            style: const TextStyle(color: Colors.white),
+                                          ),
+                                          backgroundColor: Colors.black,
+                                          duration: const Duration(seconds: 3),
+                                        ),
+                                      );
+
+                                      // Navigation after success
+                                      Future.delayed(const Duration(milliseconds: 500), () {
+                                        if (!context.mounted) return;
+
+                                        if (state.isNewUser) {
+                                          Navigator.pushNamedAndRemoveUntil(
+                                            context,
+                                            Route_Names.profileScreen,
+                                                (route) => false,
                                           );
-                                          
-                                          Future.delayed(const Duration(milliseconds: 500), () async {
-                                            if (state.isNewUser) {
-                                              Navigator.pushNamedAndRemoveUntil(
-                                                context,
-                                                Route_Names.profileScreen,
+                                        } else {
+                                          Navigator.pushNamedAndRemoveUntil(
+                                            context,
+                                            Route_Names.homeScreen,
                                                 (route) => false,
-                                              );
-
-                                            } else {
-                                              try {
-                                                //await SyncService.instance.runFullSyncOnce();
-                                              } catch (_) {}
-                                              if (!mounted) return;
-
-                                              Navigator.pushNamedAndRemoveUntil(
-                                                context,
-                                                Route_Names.homeScreen,
-                                                (route) => false,
-                                              );
-                                            }
-                                          });
-                                        } else if (state.postApiStatus == PostApiStatus.error) {
-                                          String errorMessage;
-
-                                          // Try to extract message from JSON format first
-                                          if (state.error.contains('"msg":')) {
-                                            try {
-                                              final startIndex = state.error.indexOf('"msg":"') + 7;
-                                              final endIndex = state.error.indexOf('"', startIndex);
-                                              if (startIndex != -1 && endIndex != -1) {
-                                                final apiMessage = state.error.substring(startIndex, endIndex);
-                                                
-                                                // Translate common API messages based on language
-                                                if (apiMessage.toLowerCase().contains("please enter valid user credentials")) {
-                                                  errorMessage = l10n.invalidCredentials;
-                                                } else if (apiMessage.toLowerCase().contains("authentication") || 
-                                                         apiMessage.toLowerCase().contains("unauthorized")) {
-                                                  errorMessage = l10n.authenticationFailed;
-                                                } else {
-                                                  // Show the original API message if no specific translation found
-                                                  errorMessage = apiMessage;
-                                                }
-                                              } else {
-                                                errorMessage = l10n.authenticationFailed;
-                                              }
-                                            } catch (e) {
-                                              errorMessage = l10n.authenticationFailed;
-                                            }
-                                          } else if (state.error.contains("invalid") ||
-                                              state.error.contains("not match") ||
-                                              state.error.contains("not exist")) {
-                                            errorMessage = l10n.invalidCredentials;
-                                          } else if (state.error.contains("timeout") ||
-                                              state.error.contains("no response") ||
-                                              state.error.isEmpty) {
-                                            errorMessage = l10n.errorMsg;
-                                          } else {
-                                            errorMessage = state.error;
-                                          }
-
-                                          _showSnackBar(context, errorMessage);
+                                          );
                                         }
+                                      });
+                                    }
 
-                                      },
-                                      child: BlocBuilder<LoginBloc, LoginState>(
-                                        buildWhen: (current, previous) => false,
-                                        builder: (context, state) {
-                                          return SizedBox(
-                                            width: double.infinity,
-                                            height: 5.h,
-                                            child: RoundButton(
-                                              title: l10n.loginButton,
-                                              color: AppColors.primary,
-                                              isLoading: state.postApiStatus == PostApiStatus.loading,
-                                                onPress: () {
-                                                  context.read<LoginBloc>().add(ShowValidationErrors());
+                                    // ❌ NO error handling here
+                                    // ❌ No snackbar for error
+                                  },
+                                  child: BlocBuilder<LoginBloc, LoginState>(
+                                    buildWhen: (previous, current) => false,
+                                    builder: (context, state) {
+                                      return SizedBox(
+                                        width: double.infinity,
+                                        height: 5.h,
+                                        child: RoundButton(
+                                          title: l10n.loginButton,
+                                          color: AppColors.primary,
+                                          isLoading: state.postApiStatus == PostApiStatus.loading,
+                                          onPress: () {
+                                            context.read<LoginBloc>().add(ShowValidationErrors());
 
-                                                  final username = context.read<LoginBloc>().state.username;
-                                                  final password = context.read<LoginBloc>().state.password;
+                                            final username = context.read<LoginBloc>().state.username;
+                                            final password = context.read<LoginBloc>().state.password;
 
-                                                  if (username.isEmpty && password.isEmpty) {
-                                                    _showSnackBar(context, l10n.pleaseEnterValidUsername);
-                                                    return;
-                                                  }
+                                            if (username.isEmpty && password.isEmpty) {
+                                              _showSnackBar(context, l10n.pleaseEnterValidUsername);
+                                              return;
+                                            }
 
-                                                  if (username.isNotEmpty && password.isEmpty) {
-                                                    _showSnackBar(context, l10n.pleaseEnterValidPassword);
-                                                    return;
-                                                  }
+                                            if (username.isNotEmpty && password.isEmpty) {
+                                              _showSnackBar(context, l10n.pleaseEnterValidPassword);
+                                              return;
+                                            }
 
-                                                  if (_formKey.currentState!.validate()) {
-                                                    context.read<LoginBloc>().add(LoginButton());
-                                                  }
-                                                }
-
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
+                                            if (_formKey.currentState!.validate()) {
+                                              context.read<LoginBloc>().add(LoginButton());
+                                            }
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
                                   ],
                                 ),
                               ),

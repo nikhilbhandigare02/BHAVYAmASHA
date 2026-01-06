@@ -867,6 +867,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           key: ValueKey('ifsc_field_${state.ifsc}'),
                           labelText: l10n.ifscLabel,
                           hintText: l10n.ifscHint,
+                          maxLength: 11,
                           initialValue: state.ifsc,
                           onChanged: (v) => bloc.add(IfscChanged(v)),
                           readOnly: true,
@@ -887,7 +888,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
-
                     Divider(color: AppColors.divider, thickness: 0.5),
                     BlocBuilder<ProfileBloc, ProfileState>(
                       buildWhen: (previous, current) =>
@@ -917,11 +917,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
-
                     Divider(color: AppColors.divider, thickness: 0.5),
-
-
-
                     BlocBuilder<ProfileBloc, ProfileState>(
                       buildWhen: (previous, current) =>
                       previous.block != current.block,

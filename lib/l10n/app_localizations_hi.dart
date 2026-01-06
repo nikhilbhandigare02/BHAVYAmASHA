@@ -1093,7 +1093,7 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get dataSavedSuccessfully => 'डेटा सफलतापूर्वक सहेजा गया!';
+  String get dataSavedSuccessfullyFamily => 'नया घर सफलतापूर्वक जोड़ दिया गया है';
 
   @override
   String get closeButton => 'CLOSE';
@@ -3163,6 +3163,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get abpmjayQuestion1 => 'AB-PMJAY अंतर्गत आशा द्वारा सरकारी अस्पतालों में इलाज हेतु लाये गये मरीजो (जो अस्पताल में भर्ती होकर चिकित्सा लाभ लेंगे) के लिए';
+
+  @override
+  String get dataSavedSuccessfully => 'डेटा सफलतापूर्वक सहेजा गया!';
 
   @override
   String get abpmjayDataSaved => 'आयुष्मान भारत-पीएमजेएवाई डेटा सफलतापूर्वक सहेजा गया!';

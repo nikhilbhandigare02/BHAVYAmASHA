@@ -77,14 +77,16 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title:  Text(
+
+          surfaceTintColor: Colors.white, // Add this line to remove the tint
+          title: Text(
             l10n?.attention ?? 'Attention!',
             style: TextStyle(
               color: Colors.red,
               fontWeight: FontWeight.bold,
             ),
           ),
-          content:  Text(
+          content: Text(
             l10n?.hospitalReferMsg ?? 'Please refer the child to nearby hospital.',
             style: TextStyle(
               color: Colors.red,
@@ -93,7 +95,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child:  Text(
+              child: Text(
                 l10n?.okayLabel ?? 'OKAY',
                 style: TextStyle(color: Colors.red),
               ),
@@ -900,8 +902,6 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ),
                   ),
                   const Divider(height: 0,),
-
-
                   ApiDropdown<String>(
                     labelText: "${t.newbornSeizuresLabel} *",
                     items: const ['Yes', 'No'],
@@ -912,8 +912,6 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ),
                   ),
                   const Divider(height: 0,),
-
-
                   ApiDropdown<String>(
                     labelText: "${t.cryingConstantlyOrLessUrineLabel} *",
                     labelMaxLines: 3,
@@ -924,6 +922,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'cryingConstantlyOrLessUrine', value: val, childIndex: widget.childIndex),
                     ),
                   ),
+                    const Divider(height: 0,),
                   if (c['cryingConstantlyOrLessUrine'] == 'Yes')
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
@@ -1229,7 +1228,7 @@ class _TextCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(4), // 👈 reduced
+        padding: const EdgeInsets.all(4),
         child: Text(
           text,
           textAlign: TextAlign.center,

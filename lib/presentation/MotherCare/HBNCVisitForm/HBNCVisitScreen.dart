@@ -289,7 +289,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                           controller: _tabController,
                           children: [
                             GeneralDetailsTab(beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? ''),
-                            const MotherDetailsTab(),
+                            MotherDetailsTab(beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? ''),
                             ...List.generate(_childCount, (i) => ChildDetailsTab(
                               beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? '',
                               childTabCount: (beneficiaryData?['child_tab_count'] as int?) ?? 1,

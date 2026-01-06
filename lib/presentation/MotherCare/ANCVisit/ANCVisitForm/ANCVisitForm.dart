@@ -96,7 +96,6 @@ class _AncvisitformState extends State<Ancvisitform> {
     super.dispose();
   }
 
-  // Helper to find and scroll to the first error field
   void _scrollToFirstError() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final errorField = _findFirstErrorField();
@@ -111,7 +110,6 @@ class _AncvisitformState extends State<Ancvisitform> {
     });
   }
 
-  // Helper method to find the first field with an error
   FormFieldState<dynamic>? _findFirstErrorField() {
     FormFieldState<dynamic>? firstErrorField;
     final formContext = _formKey.currentContext;
@@ -168,21 +166,16 @@ class _AncvisitformState extends State<Ancvisitform> {
     _bloc.add(
       DateOfInspectionChanged(_parseDate(formData['date_of_inspection'])),
     );
-    _bloc.add(HouseNumberChanged(formData['house_no'] ?? formData['house_number'] ?? ''));
+    _bloc.add(HouseNumberChanged(formData['house_no'] ?? formData['house_number'] ?? formData['houseNo'] ??  ''));
     _bloc.add(WomanNameChanged(formData['pw_name'] ?? formData['woman_name'] ?? ''));
     _bloc.add(HusbandNameChanged(formData['husband_name'] ?? ''));
-    _bloc.add(RchNumberChanged(formData['rch_number'] ?? ''));
+    _bloc.add(RchNumberChanged(formData['rch_reg_no_of_pw'] ?? ''));
 
-    // Pregnancy information
-    // Intentionally not auto-filling LMP/EDD/weeks from previous forms
-
-    // Medical information
     _bloc.add(WeightChanged(formData['weight']?.toString() ?? ''));
-    _bloc.add(SystolicChanged(formData['systolic']?.toString() ?? ''));
-    _bloc.add(DiastolicChanged(formData['diastolic']?.toString() ?? ''));
+    _bloc.add(SystolicChanged(formData['bp_of_pw_systolic']?.toString() ?? ''));
+    _bloc.add(DiastolicChanged(formData['bp_of_pw_diastolic']?.toString() ?? ''));
     _bloc.add(HemoglobinChanged(formData['hemoglobin']?.toString() ?? ''));
 
-    // Checkbox and boolean fields - convert to Yes/No strings
     if (formData['is_breast_feeding'] != null) {
       final isBreastFeeding =
           formData['is_breast_feeding'] == true ||
@@ -190,8 +183,8 @@ class _AncvisitformState extends State<Ancvisitform> {
       _bloc.add(IsBreastFeedingChanged(isBreastFeeding ? 'Yes' : 'No'));
     }
 
-    if (formData['high_risk'] != null) {
-      final v = formData['high_risk'];
+    if (formData['is_high_risk'] != null ) {
+      final v = formData['is_high_risk'];
       final s = v.toString().toLowerCase();
       final yesNo = (v == true || s == 'yes' || s == 'true' || s == '1')
           ? 'Yes'
@@ -199,11 +192,11 @@ class _AncvisitformState extends State<Ancvisitform> {
       _bloc.add(HighRiskChanged(yesNo));
     }
 
-    if (formData['selected_risks'] is List) {
+    if (formData['high_risk_details'] is List) {
       final risks = List<String>.from(
-        (formData['selected_risks'] as List).map((e) => e.toString()),
+        (formData['high_risk_details'] as List).map((e) => e.toString()),
       );
-      final hr = formData['high_risk'];
+      final hr = formData['is_high_risk'];
       final hrStr = (hr?.toString() ?? '').toLowerCase();
       final isHigh =
           hr == true || hrStr == 'yes' || hrStr == 'true' || hrStr == '1';
@@ -212,15 +205,12 @@ class _AncvisitformState extends State<Ancvisitform> {
       }
     }
 
-    // TD Vaccination dates
-    _bloc.add(Td1DateChanged(_parseDate(formData['td1_date'])));
-    _bloc.add(Td2DateChanged(_parseDate(formData['td2_date'])));
-    _bloc.add(TdBoosterDateChanged(_parseDate(formData['td_booster_date'])));
+    _bloc.add(Td1DateChanged(_parseDate(formData['date_of_td1'])));
+    _bloc.add(Td2DateChanged(_parseDate(formData['date_of_td2'])));
+    _bloc.add(TdBoosterDateChanged(_parseDate(formData['date_of_td_booster'])));
 
-    // Other fields
     print('🔍 Loading tablet fields...');
-    // Try both possible field names for folic acid
-    final folicAcidValue = formData['folic_acid_tablets'] ?? 
+    final folicAcidValue = formData['folic_acid_tablets'] ??
                           formData['folic_acid_tab_quantity'] ?? '';
     _bloc.add(FolicAcidTabletsChanged(folicAcidValue));
     print('🔍 Set folic acid to: $folicAcidValue');
@@ -416,7 +406,6 @@ class _AncvisitformState extends State<Ancvisitform> {
       print('⚠️ Error processing beneficiary data: $e');
     }
 
-    // Set visit number
     try {
       final dynamic rawVisitCountEarly = data?['visitCount'];
       int visitCountEarly = 0;
@@ -431,9 +420,7 @@ class _AncvisitformState extends State<Ancvisitform> {
       print('⚠️ Early visit number setup failed: $e');
     }
 
-    // Set beneficiary ID in the bloc if available
     if (data != null) {
-      // Log the raw data to verify it's coming through correctly
       print('🔍 RAW BENEFICIARY DATA:');
       data.forEach((key, value) {
         print('  $key: $value (${value.runtimeType})');
@@ -450,7 +437,6 @@ class _AncvisitformState extends State<Ancvisitform> {
         }
       }
 
-      // If we still don't have the husband's name, try to get it from other fields
       if (_bloc.state.husbandName == null || _bloc.state.husbandName!.isEmpty) {
         final spouseName =
             data['spouseName']?.toString() ??
@@ -466,7 +452,6 @@ class _AncvisitformState extends State<Ancvisitform> {
       final uniqueKey = data['unique_key']?.toString() ?? '';
       final hhId = data['hhId']?.toString() ?? '';
 
-      // Try to load existing form data
       try {
         final localStorageDao = LocalStorageDao();
         final existingForms = await localStorageDao
