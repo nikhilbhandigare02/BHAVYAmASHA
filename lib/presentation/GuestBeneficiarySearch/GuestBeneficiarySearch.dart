@@ -421,7 +421,7 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
                                                   Icon(
                                                     Icons.search,
                                                     color: AppColors.onPrimary,
-                                                    size: 18,
+                                                    size: 19,
                                                   ),
                                                   const SizedBox(width: 10),
                                                   Text(
