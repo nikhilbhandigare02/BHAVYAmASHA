@@ -406,7 +406,6 @@ class _AncvisitformState extends State<Ancvisitform> {
       print('⚠️ Error processing beneficiary data: $e');
     }
 
-    // Set visit number
     try {
       final dynamic rawVisitCountEarly = data?['visitCount'];
       int visitCountEarly = 0;
@@ -421,9 +420,7 @@ class _AncvisitformState extends State<Ancvisitform> {
       print('⚠️ Early visit number setup failed: $e');
     }
 
-    // Set beneficiary ID in the bloc if available
     if (data != null) {
-      // Log the raw data to verify it's coming through correctly
       print('🔍 RAW BENEFICIARY DATA:');
       data.forEach((key, value) {
         print('  $key: $value (${value.runtimeType})');
@@ -440,7 +437,6 @@ class _AncvisitformState extends State<Ancvisitform> {
         }
       }
 
-      // If we still don't have the husband's name, try to get it from other fields
       if (_bloc.state.husbandName == null || _bloc.state.husbandName!.isEmpty) {
         final spouseName =
             data['spouseName']?.toString() ??
@@ -456,7 +452,6 @@ class _AncvisitformState extends State<Ancvisitform> {
       final uniqueKey = data['unique_key']?.toString() ?? '';
       final hhId = data['hhId']?.toString() ?? '';
 
-      // Try to load existing form data
       try {
         final localStorageDao = LocalStorageDao();
         final existingForms = await localStorageDao
