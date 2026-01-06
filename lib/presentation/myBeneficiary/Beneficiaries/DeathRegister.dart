@@ -351,29 +351,27 @@ class _DeathRegisterState extends State<DeathRegister> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Flexible(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          const Text(
-                            'Place: ',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w400,
-                              fontSize: 13,
-                            ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Text(
+                          'Place: ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 13,
                           ),
-                          Text(
-                            deathPlace ?? "N/A",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w400,
-                              fontSize: 13,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          deathPlace ?? " ",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 13,
                           ),
-                        ],
-                      ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ],
                 ),

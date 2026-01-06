@@ -242,6 +242,41 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       final currentUserData = await SecureStorageService.getCurrentUserData();
           String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
+      final registrationDates = <String, String>{};
+      // Get first entry for each beneficiary from child_care_activities table
+      final childCareRecords = await db.rawQuery('''
+        SELECT 
+          beneficiary_ref_key, 
+          created_date_time,
+          child_care_state
+        FROM child_care_activities 
+        ORDER BY created_date_time ASC
+      ''');
+
+      print('🔍 Child care records query: Getting first entry for each beneficiary');
+      print('📊 Found ${childCareRecords.length} total child care records');
+      
+      final Map<String, Map<String, dynamic>> firstRecordsByBeneficiary = {};
+      for (var record in childCareRecords) {
+        final beneficiaryKey = record['beneficiary_ref_key']?.toString();
+        if (beneficiaryKey != null && !firstRecordsByBeneficiary.containsKey(beneficiaryKey)) {
+          firstRecordsByBeneficiary[beneficiaryKey] = record;
+        }
+      }
+      
+      // Extract dates from first records
+      for (var entry in firstRecordsByBeneficiary.entries) {
+        final beneficiaryKey = entry.key;
+        final record = entry.value;
+        final createdDate = record['created_date_time']?.toString();
+        final careState = record['child_care_state']?.toString();
+        print('📋 First child care record for beneficiary=$beneficiaryKey, state=$careState, date=$createdDate');
+        if (createdDate != null) {
+          registrationDates[beneficiaryKey] = createdDate;
+        }
+      }
+
+      print('📊 Found ${registrationDates.length} registration dates from child_care_activities');
 
       final List<Map<String, dynamic>> rows = await db.rawQuery('''
   SELECT 
@@ -289,6 +324,9 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
             final motherName = info['motherName']?.toString() ??
                 info['mother_name']?.toString() ?? '';
 
+            final spouseName = info['spouseName']?.toString() ??
+                info['spouse_name']?.toString() ?? '';
+
             final mobileNo = info['mobileNo']?.toString() ??
                 info['mobile']?.toString() ??
                 info['mobile_number']?.toString() ?? '';
@@ -307,9 +345,22 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
               print('ℹ️ Marking as deceased - ID: $beneficiaryId, Name: $name');
             }
 
+            // Get registration date: prioritize child_care_activities table, then fall back to beneficiaries_new table
+            String registrationDate;
+            print('🔍 Checking beneficiary ID: $beneficiaryId against ${registrationDates.length} registration dates');
+            print('📋 Available registration keys: ${registrationDates.keys.toList()}');
+            
+            if (registrationDates.containsKey(beneficiaryId)) {
+              registrationDate = _formatDate(registrationDates[beneficiaryId]);
+              print('📅 ✅ Using registration date from child_care_activities for $beneficiaryId: $registrationDate');
+            } else {
+              registrationDate = _formatDate(row['created_date_time']?.toString());
+              print('📅 ❌ Using registration date from beneficiaries_new for $beneficiaryId: $registrationDate');
+            }
+
             final card = <String, dynamic>{
               'hhId': rowHhId,
-              'RegitrationDate': _formatDate(row['created_date_time']?.toString()),
+              'RegitrationDate': registrationDate,
               'RegitrationType': 'Child',
               'BeneficiaryID': beneficiaryId,
               'RchID': richId,
@@ -318,6 +369,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
               'Mobileno.': mobileNo,
               'FatherName': fatherName,
               'MotherName': motherName,
+              'SpouseName': spouseName,
               'is_deceased': isDeceased,
               'is_death': row['is_death'] ?? 0,
               '_raw': row,
@@ -704,7 +756,18 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                       const SizedBox(width: 12),
                       Expanded(child: _rowText('', '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText(l10n?.fatherNameLabel ?? 'RCH ID', data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A',)),
+                      Expanded(child: _rowText(
+                        data['FatherName']?.toString().isNotEmpty == true
+                            ? (l10n?.fatherNameLabel ?? 'Father Name')
+                            : (data['SpouseName']?.toString().isNotEmpty == true
+                                ? (l10n?.husbandName ?? 'Husband Name')
+                                : (l10n?.fatherNameLabel ?? 'Father Name')),
+                        data['FatherName']?.toString().isNotEmpty == true
+                            ? data['FatherName']
+                            : (data['SpouseName']?.toString().isNotEmpty == true
+                                ? data['SpouseName']
+                                : 'N/A'),
+                      )),
                     ],
                   ),
 
