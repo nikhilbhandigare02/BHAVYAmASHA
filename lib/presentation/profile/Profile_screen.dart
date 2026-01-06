@@ -867,6 +867,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           key: ValueKey('ifsc_field_${state.ifsc}'),
                           labelText: l10n.ifscLabel,
                           hintText: l10n.ifscHint,
+                          maxLength: 11,
                           initialValue: state.ifsc,
                           onChanged: (v) => bloc.add(IfscChanged(v)),
                           readOnly: true,

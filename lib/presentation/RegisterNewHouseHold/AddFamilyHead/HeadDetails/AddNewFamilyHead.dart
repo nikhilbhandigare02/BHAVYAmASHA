@@ -1169,6 +1169,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             child: CustomTextField(
               labelText: l.ifscLabel,
               hintText: l.ifscLabel,
+              maxLength: 11,
               initialValue: state.ifsc,
               onChanged: (v) {
                 final value = v.trim().toUpperCase();

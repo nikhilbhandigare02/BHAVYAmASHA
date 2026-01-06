@@ -1520,6 +1520,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   hintText: l.ifscHint,
                   keyboardType: TextInputType.text,
                   initialValue: state.ifsc,
+                  maxLength: 11,
                   onChanged: (v) {
                     final value = v.trim();
                     context.read<SpousBloc>().add(SpUpdateIfsc(value));
