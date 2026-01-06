@@ -5912,7 +5912,7 @@ abstract class AppLocalizations {
   /// No description provided for @err_visit_date_required.
   ///
   /// In en, this message translates to:
-  /// **'Date of home visit is required.'**
+  /// **'Please Date of home visit is required.'**
   String get err_visit_date_required;
 
   /// No description provided for @err_mother_status_required.
@@ -10217,6 +10217,12 @@ abstract class AppLocalizations {
   /// **'ANC DUE'**
   String get categoryANC;
 
+  /// No description provided for @categoryANCbadge.
+  ///
+  /// In en, this message translates to:
+  /// **'ANC DUE'**
+  String get categoryANCbadge;
+
   /// No description provided for @categoryANCsearch.
   ///
   /// In en, this message translates to:
@@ -12032,7 +12038,7 @@ abstract class AppLocalizations {
   /// No description provided for @totalBeneficiaryAdded.
   ///
   /// In en, this message translates to:
-  /// **'Total beneficiary added'**
+  /// **'Total beneficiaries added'**
   String get totalBeneficiaryAdded;
 
   /// No description provided for @enterTypeOfFuelForCooking.

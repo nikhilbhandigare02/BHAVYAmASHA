@@ -200,7 +200,7 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
         'hhId': row['household_ref_key']?.toString() ?? '',
         'name': name,
         'age_gender': '${age > 0 ? '$age Y' : 'N/A'} | $displayGender',
-        'status': 'Pregnant',
+        'status': ' ANC DUE',
       };
     } catch (e) {
       print('Error formatting card data: $e');
@@ -228,8 +228,7 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
     switch (badge) {
       case 'ANC DUE':
         return l10n?.categoryANC ?? 'ANC DUE';
-      case 'Pregnant':
-        return l10n?.badgePregnant ?? 'Pregnant';
+
       default:
         return badge;
     }
@@ -313,7 +312,7 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.home, color: Colors.black54, size: 18),
+                      const Icon(Icons.home, color: AppColors.primary, size: 18),
                       const SizedBox(width: 6),
                       Text(
                         (data['hhId']?.toString().length ?? 0) > 11 ? data['hhId'].toString().substring(data['hhId'].toString().length - 11) : (data['hhId'] ?? ''),
@@ -332,7 +331,8 @@ class _PregnantWomenListState extends State<PregnantWomenList> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      _getLocalizedBadge(data['status'] ?? '', l10n),
+                          l10n!.categoryANCbadge,
+
                       style: const TextStyle(
                         color: Colors.green,
                         fontWeight: FontWeight.bold,

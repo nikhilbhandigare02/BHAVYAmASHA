@@ -258,7 +258,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.home, color: Colors.black54, size: 18),
+                      const Icon(Icons.home, color:AppColors.primary, size: 18),
                       const SizedBox(width: 6),
                       Text(
                         data['hhId'] ?? '',

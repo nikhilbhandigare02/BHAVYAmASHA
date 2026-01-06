@@ -219,7 +219,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.home, color: Colors.black54, size: 18),
+                      const Icon(Icons.home, color: AppColors.primary, size: 18),
                       const SizedBox(width: 6),
                       Text(
                         (data['hhId']?.toString().length ?? 0) > 11 ? data['hhId'].toString().substring(data['hhId'].toString().length - 11) : (data['hhId'] ?? ''),
@@ -269,7 +269,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
                             data['name'] ?? '',
                             style: TextStyle(
                               color: Colors.white,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.bold,
                               fontSize: 14.sp,
                             ),
                             overflow: TextOverflow.ellipsis,

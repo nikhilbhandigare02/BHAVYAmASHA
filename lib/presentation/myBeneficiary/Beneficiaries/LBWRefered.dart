@@ -254,13 +254,13 @@ class _Lbwrefered extends State<Lbwrefered> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.15),
+                      color: Colors.red.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       l10n?.badgeLBW ?? 'LBW',
                       style: const TextStyle(
-                        color: Colors.green,
+                        color: Colors.red,
                         fontWeight: FontWeight.bold,
                         fontSize: 12.5,
                       ),
@@ -292,7 +292,7 @@ class _Lbwrefered extends State<Lbwrefered> {
                             data['name'] ?? '',
                             style: TextStyle(
                               color: Colors.white,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.bold,
                               fontSize: 14.sp,
                             ),
                             overflow: TextOverflow.ellipsis,

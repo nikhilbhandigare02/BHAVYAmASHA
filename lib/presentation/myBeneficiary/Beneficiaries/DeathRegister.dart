@@ -120,36 +120,7 @@ class _DeathRegisterState extends State<DeathRegister> {
       drawer: const CustomDrawer(),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: TextField(
-              controller: _searchCtrl,
-              decoration: InputDecoration(
-                hintText: l10n?.searchHint ?? 'Search by ID/Name/Contact',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding:
-                const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.outlineVariant),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                ),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: _loadDeathRecords,
-                  tooltip: 'Refresh data',
-                ),
-              ),
-            ),
-          ),
+
 
           _isLoading
               ? const Expanded(child: Center(child: CircularProgressIndicator()))

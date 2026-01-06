@@ -5086,6 +5086,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get categoryANC => 'एएनसी';
 
   @override
+  String get categoryANCbadge => 'एएनसी देय';
+
+  @override
   String get categoryANCsearch => 'प्रसवपूर्व देखभाल';
 
   @override
@@ -6784,7 +6787,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get badgeFamily => 'परिवार';
 
   @override
-  String get badgeEligibleCouple => 'योग्य दंपत्ति';
+  String get badgeEligibleCouple => 'योग्य दम्पति';
 
   @override
   String get badgeHRP => 'उच्च जोखिम';
@@ -6805,7 +6808,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get badgePNC => 'पीएनसी';
 
   @override
-  String get badgeLBW => 'एल-बी-डब्ल्यू रेफर';
+  String get badgeLBW => 'एलबीडब्ल्यू रेफर';
 
   @override
   String get badgeMigrated => 'माइग्रेटेड आउट';
