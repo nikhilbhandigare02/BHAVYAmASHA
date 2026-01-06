@@ -75,6 +75,22 @@ class _Migratedout extends State<Migratedout> {
     _searchCtrl.dispose();
     super.dispose();
   }
+  String _formatDateOnly(dynamic dateString) {
+    if (dateString == null || dateString.toString().isEmpty) return '';
+    try {
+      // 1. Parse the database string (assumes YYYY-MM-DD HH:MM:SS format)
+      final DateTime date = DateTime.parse(dateString.toString());
+
+      // 2. Format manually to dd-MM-yyyy
+      final String formatted =
+          '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+
+      return formatted;
+    } catch (e) {
+      // If parsing fails, return the original string or handle error
+      return dateString.toString();
+    }
+  }
 
   Future<void> _loadMigrated() async {
     try {
@@ -99,6 +115,7 @@ class _Migratedout extends State<Migratedout> {
           'name': name,
           'age_gender': ageGender,
           'status': 'Migrated',
+          'modified_date_time': r['modified_date_time']?.toString() ?? '',
         };
       }).toList();
 
@@ -230,11 +247,23 @@ class _Migratedout extends State<Migratedout> {
                             data['name'] ?? '',
                             style: TextStyle(
                               color: Colors.white,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.bold,
                               fontSize: 14.sp,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
+                        ),
+                        const SizedBox(width: 8),
+
+                        Text(
+                          // 🔹 CALL THE HELPER FUNCTION HERE
+                          'Date: ${_formatDateOnly(data['modified_date_time'])}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w400,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
