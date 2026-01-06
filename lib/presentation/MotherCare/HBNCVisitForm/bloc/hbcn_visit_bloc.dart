@@ -370,7 +370,55 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
     final updatedVisitDetails = Map<String, dynamic>.from(state.visitDetails)
       ..[event.field] = value;
 
+    // Auto-calculate next visit date when visit number changes
+    if (event.field == 'visitNumber' && event.value != null) {
+      final visitNumber = int.tryParse(event.value.toString()) ?? 0;
+      final nextVisitDate = _calculateNextHbncVisitDate(visitNumber);
+      
+      if (nextVisitDate != null) {
+        updatedVisitDetails['nextVisitDate'] = nextVisitDate;
+        print('🗓️ Auto-calculated next visit date for visit $visitNumber: $nextVisitDate');
+      }
+    }
+
     emit(state.copyWith(visitDetails: updatedVisitDetails));
+  }
+
+  /// Calculate next HBNC visit date based on visit number (weeks after delivery)
+  String? _calculateNextHbncVisitDate(int visitNumber) {
+    try {
+      final now = DateTime.now();
+      final schedule = <int>[1, 3, 7, 14, 21, 28, 42]; // weeks after delivery
+      
+      // For initial visit (no previous visits), next visit is 1 week after
+      if (visitNumber <= 0) {
+        final nextVisitDate = now.add(Duration(days: 7)); // 1 week
+        return '${nextVisitDate.year.toString().padLeft(4, '0')}-${nextVisitDate.month.toString().padLeft(2, '0')}-${nextVisitDate.day.toString().padLeft(2, '0')}';
+      }
+      
+      // Find the next visit number in the schedule
+      int? nextVisitWeeks;
+      for (int i = 0; i < schedule.length; i++) {
+        if (schedule[i] == visitNumber && i < schedule.length - 1) {
+          nextVisitWeeks = schedule[i + 1];
+          break;
+        }
+      }
+
+      if (nextVisitWeeks == null) {
+        // Either visitNumber is 42 (last visit) or not in schedule
+        return null;
+      }
+
+      // Calculate next visit date as current date + weeks until next visit
+      final weeksToAdd = nextVisitWeeks - visitNumber;
+      final nextVisitDate = now.add(Duration(days: weeksToAdd * 7));
+      
+      return '${nextVisitDate.year.toString().padLeft(4, '0')}-${nextVisitDate.month.toString().padLeft(2, '0')}-${nextVisitDate.day.toString().padLeft(2, '0')}';
+    } catch (e) {
+      print('❌ Error calculating next HBNC visit date: $e');
+      return null;
+    }
   }
 
   Future<void> _onSubmitHbncVisit(
