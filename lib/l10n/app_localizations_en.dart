@@ -3318,7 +3318,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmYesExit => 'Yes, Exit';
 
   @override
-  String get confirmNo => 'No, Stay';
+  String get confirmNo => 'No';
 
   @override
   String get memberRemainsToAdd => 'No. of members remains to be added';

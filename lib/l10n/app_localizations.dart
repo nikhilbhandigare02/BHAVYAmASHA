@@ -6692,7 +6692,7 @@ abstract class AppLocalizations {
   /// No description provided for @confirmNo.
   ///
   /// In en, this message translates to:
-  /// **'No, Stay'**
+  /// **'No'**
   String get confirmNo;
 
   /// No description provided for @memberRemainsToAdd.

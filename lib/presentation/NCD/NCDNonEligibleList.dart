@@ -291,7 +291,7 @@ class _NCDHomeState extends State<Ncdnoneligiblelist> {
                       ),
                       _rowText(
                         context,
-                        l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla',
+                        l10n?.mohallaTolaName ?? 'Tola/Mohalla',
                         data[l10n?.tolaMohalla ?? 'Tola/Mohalla'],
                       ),
                       _rowText(

@@ -218,7 +218,7 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get ageGenderLabel => 'आयु | लिंग';
+  String get ageGenderLabel => 'उम्र | लिंग';
 
   @override
   String get ageLabel => 'उम्र: ';
@@ -5134,7 +5134,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get noDataFound => 'कोई डेटा नहीं मिला';
 
   @override
-  String get newHouseholdRegistration => 'नया परिवार का पंजीकरण';
+  String get newHouseholdRegistration => 'नया पंजीकरण';
 
   @override
   String get noMatchingBeneficiariesFound => 'कोई मिलते-जुलते लाभार्थी नहीं मिले।';

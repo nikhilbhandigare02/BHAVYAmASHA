@@ -1031,7 +1031,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                   context: context,
                   title: l.confirmAttentionTitle,
                   message: l.confirmCloseFormMsg,
-                  yesText: l.confirmYes,
+                  yesText: l.yes,
                   noText: l.confirmNo,
                 );
                 if (shouldExit ?? false) {
