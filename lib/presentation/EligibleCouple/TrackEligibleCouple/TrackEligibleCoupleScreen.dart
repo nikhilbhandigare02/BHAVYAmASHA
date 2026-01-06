@@ -614,10 +614,10 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                         minimumSize:  Size.fromHeight(4.5.h),
                       ),
                       child: Text(
-                        t?.previousVisits ?? 'पिछला पेज',
+                        t?.previousVisitsButton ?? 'पिछला पेज',
                         style: TextStyle(
                           color: AppColors.background,
-                          fontSize: 15.sp,
+                          fontSize: 14.sp,
                         ),
                       ),
                     ),
@@ -652,7 +652,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                         t?.saveButton ?? 'संरक्षित करें',
                         style: TextStyle(
                           color: AppColors.background,
-                          fontSize: 15.sp,
+                          fontSize: 14.sp,
                         ),
                       ),
                     ),

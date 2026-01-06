@@ -418,7 +418,7 @@ class _UpdatedEligibleCoupleListScreenState
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(child: _rowText(t?.nameOfMemberLabel ?? 'Name', data['Name']?.toString() ?? '')),
+                      Expanded(child: _rowText(t?.name ?? 'Name', data['Name']?.toString() ?? '')),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText(t?.ageLabelSimple ?? 'Age', data['age']?.toString() ?? '')),
                       const SizedBox(width: 12),

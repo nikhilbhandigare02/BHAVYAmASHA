@@ -3218,7 +3218,7 @@ abstract class AppLocalizations {
   /// No description provided for @isPregnantLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is woman pregnant?'**
+  /// **'Woman is pregnant?'**
   String get isPregnantLabel;
 
   /// No description provided for @isWomanBreastfeedingLabel.
@@ -3230,7 +3230,7 @@ abstract class AppLocalizations {
   /// No description provided for @isWomanPregnantQuestion.
   ///
   /// In en, this message translates to:
-  /// **'Is Woman Pregnant?'**
+  /// **'Woman is Pregnant?'**
   String get isWomanPregnantQuestion;
 
   /// No description provided for @kitchenInsideLabel.
@@ -4214,7 +4214,7 @@ abstract class AppLocalizations {
   /// No description provided for @richIdLabel.
   ///
   /// In en, this message translates to:
-  /// **'Rch ID'**
+  /// **'RCH ID'**
   String get richIdLabel;
 
   /// No description provided for @rnhAddHeadFirstTabs.
@@ -5042,7 +5042,7 @@ abstract class AppLocalizations {
   /// No description provided for @whoseMobileLabel.
   ///
   /// In en, this message translates to:
-  /// **'Whose mobile no.?'**
+  /// **'Whose mobile no.'**
   String get whoseMobileLabel;
 
   /// No description provided for @widowed.
@@ -5900,7 +5900,7 @@ abstract class AppLocalizations {
   /// No description provided for @bloatedStomachOrFrequentVomitingLabel.
   ///
   /// In en, this message translates to:
-  /// **'Bloated stomach or mother tells that the child vomits again and again'**
+  /// **'Bloated stomach or mother tells that the child vomits again an again'**
   String get bloatedStomachOrFrequentVomitingLabel;
 
   /// No description provided for @err_visit_day_required.
@@ -7244,7 +7244,7 @@ abstract class AppLocalizations {
   /// No description provided for @cancel.
   ///
   /// In en, this message translates to:
-  /// **'Cancel'**
+  /// **'CANCEL'**
   String get cancel;
 
   /// No description provided for @success.
@@ -7262,7 +7262,7 @@ abstract class AppLocalizations {
   /// No description provided for @ok.
   ///
   /// In en, this message translates to:
-  /// **'OKAY'**
+  /// **'OK'**
   String get ok;
 
   /// No description provided for @home.
@@ -8510,7 +8510,7 @@ abstract class AppLocalizations {
   /// No description provided for @na.
   ///
   /// In en, this message translates to:
-  /// **'N/A'**
+  /// **'Not Available'**
   String get na;
 
   /// No description provided for @dosageFrequency.
@@ -10616,7 +10616,7 @@ abstract class AppLocalizations {
   /// No description provided for @lethargicLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the baby Lethargic? '**
+  /// **'Is the baby Lathargic? '**
   String get lethargicLabel;
 
   /// No description provided for @congenitalAbnormalitiesLabel.
@@ -10640,7 +10640,7 @@ abstract class AppLocalizations {
   /// No description provided for @skinFoldRednessLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is there any cracks/redness in the skin fold? (thigh/ Axilla / Buttock)'**
+  /// **'Are there any cracks/redness in the skin fold? (thigh/ Axilla / Buttock)'**
   String get skinFoldRednessLabel;
 
   /// No description provided for @newbornJaundiceLabel.
@@ -10670,7 +10670,7 @@ abstract class AppLocalizations {
   /// No description provided for @cryingConstantlyOrLessUrineLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the baby crying continuously or passing usrine less than 6 times a day?'**
+  /// **'Is the baby crying continuously or passing urine less than 6 times a day?'**
   String get cryingConstantlyOrLessUrineLabel;
 
   /// No description provided for @cryingSoftlyLabel.
@@ -11276,7 +11276,7 @@ abstract class AppLocalizations {
   /// No description provided for @reasonForAbsence.
   ///
   /// In en, this message translates to:
-  /// **'Reason for Absence'**
+  /// **'Reason for Absent'**
   String get reasonForAbsence;
 
   /// No description provided for @enterReasonForAbsence.
@@ -14614,6 +14614,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tola/Mohalla'**
   String get mohallaTolaName;
+
+  /// No description provided for @categoryANCbadge.
+  ///
+  /// In en, this message translates to:
+  /// **'ANC DUE'**
+  String get categoryANCbadge;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

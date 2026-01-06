@@ -1581,13 +1581,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get isPregnantLabel => 'Is woman pregnant?';
+  String get isPregnantLabel => 'Woman is pregnant?';
 
   @override
   String get isWomanBreastfeedingLabel => 'Is woman breastfeeding?';
 
   @override
-  String get isWomanPregnantQuestion => 'Is Woman Pregnant?';
+  String get isWomanPregnantQuestion => 'Woman is Pregnant?';
 
   @override
   String get kitchenInsideLabel => 'Is the kitchen inside the house';
@@ -2079,7 +2079,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rhSdhDhLabel => 'RH/SDH/DH/SADAR Hospital';
 
   @override
-  String get richIdLabel => 'Rch ID';
+  String get richIdLabel => 'RCH ID';
 
   @override
   String get rnhAddHeadFirstTabs => 'Please add a family head before accessing other sections.';
@@ -2493,7 +2493,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightKgLabel => 'Weight (Kg)';
 
   @override
-  String get whoseMobileLabel => 'Whose mobile no.?';
+  String get whoseMobileLabel => 'Whose mobile no.';
 
   @override
   String get widowed => 'Widowed';
@@ -2922,7 +2922,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get breastfeedingStoppedLabel => 'Has the child stopped feeding?';
 
   @override
-  String get bloatedStomachOrFrequentVomitingLabel => 'Bloated stomach or mother tells that the child vomits again and again';
+  String get bloatedStomachOrFrequentVomitingLabel => 'Bloated stomach or mother tells that the child vomits again an again';
 
   @override
   String get err_visit_day_required => 'Home Visit Day is required.';
@@ -3594,7 +3594,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logout => 'Logout';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => 'CANCEL';
 
   @override
   String get success => 'Success';
@@ -3603,7 +3603,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get error => 'Error';
 
   @override
-  String get ok => 'OKAY';
+  String get ok => 'OK';
 
   @override
   String get home => 'Home';
@@ -4231,7 +4231,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unknownComplaint => 'Unknown Complaint';
 
   @override
-  String get na => 'N/A';
+  String get na => 'Not Available';
 
   @override
   String get dosageFrequency => 'Dosage | Frequency';
@@ -5284,7 +5284,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get breathingRapidLabel => 'Is the breath of the baby going fast (60 or more per minute)';
 
   @override
-  String get lethargicLabel => 'Is the baby Lethargic? ';
+  String get lethargicLabel => 'Is the baby Lathargic? ';
 
   @override
   String get congenitalAbnormalitiesLabel => 'Is the baby having any congenital physical abnormality';
@@ -5296,7 +5296,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eyesSwollenOrPusLabel => 'Are the eyes swollen? Is there pus coming out of the eyes?';
 
   @override
-  String get skinFoldRednessLabel => 'Is there any cracks/redness in the skin fold? (thigh/ Axilla / Buttock)';
+  String get skinFoldRednessLabel => 'Are there any cracks/redness in the skin fold? (thigh/ Axilla / Buttock)';
 
   @override
   String get newbornJaundiceLabel => 'Yellowness in skin/ palm/ sole/eyes: Jaudice';
@@ -5311,7 +5311,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineCareDoneLabel => 'Whether the Routine Newborn care tasks was performed?';
 
   @override
-  String get cryingConstantlyOrLessUrineLabel => 'Is the baby crying continuously or passing usrine less than 6 times a day?';
+  String get cryingConstantlyOrLessUrineLabel => 'Is the baby crying continuously or passing urine less than 6 times a day?';
 
   @override
   String get cryingSoftlyLabel => 'Is the child crying weak?';
@@ -5614,7 +5614,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterThirdBabyWeight => 'Enter Third Baby Weight';
 
   @override
-  String get reasonForAbsence => 'Reason for Absence';
+  String get reasonForAbsence => 'Reason for Absent';
 
   @override
   String get enterReasonForAbsence => 'Enter the reason for absence';
@@ -7283,4 +7283,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mohallaTolaName => 'Tola/Mohalla';
+
+  @override
+  String get categoryANCbadge => 'ANC DUE';
 }
