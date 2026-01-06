@@ -14626,12 +14626,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tola/Mohalla'**
   String get mohallaTolaName;
-
-  /// No description provided for @categoryANCbadge.
-  ///
-  /// In en, this message translates to:
-  /// **'ANC DUE'**
-  String get categoryANCbadge;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

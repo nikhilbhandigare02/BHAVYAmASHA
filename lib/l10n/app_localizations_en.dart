@@ -7289,7 +7289,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mohallaTolaName => 'Tola/Mohalla';
-
-  @override
-  String get categoryANCbadge => 'ANC DUE';
 }

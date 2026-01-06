@@ -412,7 +412,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
   }
 
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
-    String age = 'N/A';
+    String age = 'Not Available';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
 
     if (dobRaw != null && dobRaw.toString().isNotEmpty) {
@@ -435,12 +435,29 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         if (dob != null) {
           final now = DateTime.now();
           int years = now.year - dob.year;
+          int months = now.month - dob.month;
+          int days = now.day - dob.day;
 
-          if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
+          if (days < 0) {
+            final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+            final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+            final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
+            days += daysInLastMonth;
+            months--;
+          }
+
+          if (months < 0) {
+            months += 12;
             years--;
           }
 
-          age = years >= 0 ? years.toString() : '0';
+          if (years > 0) {
+            age = '$years Y';
+          } else if (months > 0) {
+            age = '$months M';
+          } else {
+            age = '$days D';
+          }
         }
       } catch (e) {
         debugPrint('Error parsing date of birth: $e');
@@ -461,7 +478,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         displayGender = 'Other';
     }
 
-    return '$age Y | $displayGender';
+    return '$age | $displayGender';
   }
   Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
     try {
