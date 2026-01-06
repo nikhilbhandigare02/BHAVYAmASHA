@@ -2243,11 +2243,11 @@ abstract class AppLocalizations {
   /// **'Total beneficiaries: {count}'**
   String householdSavedSuccessfully(Object count);
 
-  /// No description provided for @dataSavedSuccessfully.
+  /// No description provided for @dataSavedSuccessfullyFamily.
   ///
   /// In en, this message translates to:
-  /// **'Data saved successfully!'**
-  String get dataSavedSuccessfully;
+  /// **'New house has been added successfully'**
+  String get dataSavedSuccessfullyFamily;
 
   /// No description provided for @closeButton.
   ///
@@ -6298,6 +6298,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Under AB-PMJAY, for patients brought by Asha for treatment in government hospitals (who will get medical benefits after getting admitted in the hospital)'**
   String get abpmjayQuestion1;
+
+  /// No description provided for @dataSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Data saved successfully!'**
+  String get dataSavedSuccessfully;
 
   /// No description provided for @abpmjayDataSaved.
   ///
