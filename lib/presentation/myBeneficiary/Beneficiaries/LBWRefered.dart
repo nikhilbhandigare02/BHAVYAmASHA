@@ -53,6 +53,7 @@ class _Lbwrefered extends State<Lbwrefered> {
       for (final row in rows) {
         try {
           final hhId = row['household_ref_key']?.toString() ?? '';
+          final beneficiaryKey = row['unique_key']?.toString() ?? '';
           if (hhId.isEmpty) continue;
 
           final infoStr = row['beneficiary_info']?.toString();
@@ -101,6 +102,7 @@ class _Lbwrefered extends State<Lbwrefered> {
 
           lbwChildren.add({
             'hhId': hhId,
+            'beneficiaryKey': beneficiaryKey,
             'name': name.isEmpty ? 'Unknown' : name,
             'age_gender': ageGender,
             'weight_display': weightDisplay,
@@ -266,7 +268,7 @@ class _Lbwrefered extends State<Lbwrefered> {
                       const Icon(Icons.home, color: Colors.black54, size: 18),
                       const SizedBox(width: 6),
                       Text(
-                        (data['hhId']?.toString().length ?? 0) > 11 ? data['hhId'].toString().substring(data['hhId'].toString().length - 11) : (data['hhId'] ?? ''),
+                        (data['beneficiaryKey']?.toString().length ?? 0) > 11 ? data['beneficiaryKey'].toString().substring(data['beneficiaryKey'].toString().length - 11) : (data['beneficiaryKey'] ?? ''),
                         style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w600,
