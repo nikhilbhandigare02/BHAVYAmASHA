@@ -86,7 +86,18 @@ class _Lbwrefered extends State<Lbwrefered> {
           final dobRaw = info['dob'] ?? info['dateOfBirth'];
 
           final ageGender = _formatAgeGender(dobRaw, genderRaw);
-          final weightDisplay = _formatWeight(weight, birthWeight);
+          int toGrams(dynamic value) {
+            if (value == null) return 0;
+
+            final w = double.tryParse(value.toString()) ?? 0;
+
+            // If value looks like kg (e.g. 2.5), convert to grams
+            return w < 20 ? (w * 1000).round() : w.round();
+          }
+
+          final weightDisplay =
+              '${toGrams(weight ?? birthWeight)} gms';
+
 
           lbwChildren.add({
             'hhId': hhId,
@@ -315,12 +326,15 @@ class _Lbwrefered extends State<Lbwrefered> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  _infoRow(
-                    '',
-                    data['age_gender'] ?? '',
-                    trailing: data['weight_display'] ?? '',
-                    isWrappable: true,
-                  ),
+      _infoRow(
+        '',
+        data['age_gender'] ?? '',
+        // 🔹 Updated Line: Checks if data exists, then adds label
+        trailing: (data['weight_display'] != null && data['weight_display'].toString().isNotEmpty)
+            ? '${'Weight'}: ${data['weight_display']}'
+            : '',
+        isWrappable: true,
+      ),
                 ],
               ),
             ),
