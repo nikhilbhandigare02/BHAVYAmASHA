@@ -1794,7 +1794,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
       if (futureVisitDates.isEmpty) return false;
 
-      // Get all existing HBNC visit records for this beneficiary
       final existingVisits = await db.query(
         FollowupFormDataTable.table,
         where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
@@ -1802,9 +1801,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         orderBy: 'created_date_time ASC',
       );
 
-      // Check each future visit date to see if count will change
       for (final futureVisitDate in futureVisitDates) {
-        // Count visits that would exist by this future date
         int visitsByFutureDate = 0;
         
         for (final visit in existingVisits) {
