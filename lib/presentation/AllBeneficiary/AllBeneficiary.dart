@@ -94,6 +94,10 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           info = <String, dynamic>{};
         }
 
+        // Debug: Print all available keys in beneficiary info
+        print('🔍 Available keys in beneficiary info: ${info.keys.toList()}');
+        print('👤 Full beneficiary info: $info');
+
         final String hhId = row['household_ref_key']?.toString() ?? '';
         final String createdDate =
             row['created_date_time']?.toString() ?? '';
@@ -147,15 +151,22 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
             info['gender'],
           ),
           'Mobileno.': info['mobileNo']?.toString() ?? '',
-          'FatherName': info['fatherName']?.toString() ?? '',
-          'WifeName': '',
-          'HusbandName': '',
-          'SpouseName': '',
-          'SpouseGender': '',
+          'FatherName': info['fatherName']?.toString() ?? info['father_name']?.toString() ?? info['father']?.toString() ?? '',
+          'MotherName': info['motherName']?.toString() ?? info['mother_name']?.toString() ?? info['mother']?.toString() ?? '',
+          'WifeName': info['wifeName']?.toString() ?? info['wife_name']?.toString() ?? info['wife']?.toString() ?? info['spouse_name']?.toString() ?? '',
+          'HusbandName': info['husbandName']?.toString() ?? info['husband_name']?.toString() ?? info['husband']?.toString() ?? info['spouse_name']?.toString() ?? '',
+          'SpouseName': info['spouseName']?.toString() ?? info['spouse_name']?.toString() ?? info['spouse']?.toString() ?? '',
+          'SpouseGender': info['spouseGender']?.toString() ?? info['spouse_gender']?.toString() ?? info['gender']?.toString() ?? '',
           'Relation': relation,
           'is_synced': row['is_synced'] ?? 0,
           'is_death': row['is_death'] ?? 0,
         });
+
+        // Debug: Print extracted spouse names
+        print('💑 Extracted spouse names:');
+        print('  - WifeName: ${info['wifeName'] ?? info['wife_name'] ?? info['wife'] ?? info['spouse_name'] ?? 'NOT FOUND'}');
+        print('  - HusbandName: ${info['husbandName'] ?? info['husband_name'] ?? info['husband'] ?? info['spouse_name'] ?? 'NOT FOUND'}');
+        print('  - SpouseName: ${info['spouseName'] ?? info['spouse_name'] ?? info['spouse'] ?? 'NOT FOUND'}');
       }
     } catch (e) {
       print('❌ Error loading data: $e');
@@ -395,6 +406,21 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         ? completeBeneficiaryId.substring(completeBeneficiaryId.length - 11)
         : completeBeneficiaryId;
 
+    final String relation =
+        data['Relation']?.toString().toLowerCase() ?? '';
+
+    final bool isUnmarried =
+        relation.isEmpty ||
+            relation == 'son' ||
+            relation == 'daughter' ||
+            relation == 'brother' ||
+            relation == 'sister' ||
+            relation == 'grandson' ||
+            relation == 'granddaughter' ||
+            relation == 'nephew' ||
+            relation == 'niece';
+
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -548,7 +574,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                       ]),
                       const SizedBox(height: 8),
 
-                      // Second row: Name, Age|Gender, Mobile
+                      // Second row: Name, Age|Gender (for all records)
                       _buildRow([
                         _rowText(
                           l10n?.nameLabel ?? 'Name',
@@ -562,59 +588,126 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                               ? data['Age|Gender']
                               : (l10n?.na ?? 'N/A'),
                         ),
-                        _rowText(
-                          l10n?.mobileLabelSimple ?? 'Mobile No.',
-                          data['Mobileno.']?.toString().isNotEmpty == true
-                              ? data['Mobileno.']
-                              : (l10n?.na ?? 'N/A'),
-                        ),
+                        if (isFemale) ...[
+                          // For Female records (children and adults): RCH ID
+                          _rowText(
+                            l10n?.rchIdLabel ?? 'RCH ID',
+                            data['RichID']?.toString().trim().isNotEmpty == true
+                                ? data['RichID'].toString()
+                                : (l10n?.notAvailable ?? 'Not Available'),
+                          ),
+                        ] else ...[
+                          // For Male records: Mobile No.
+                          _rowText(
+                            l10n?.mobileLabelSimple ?? 'Mobile No.',
+                            data['Mobileno.']?.toString().isNotEmpty == true
+                                ? data['Mobileno.']
+                                : (l10n?.na ?? 'N/A'),
+                          ),
+                        ],
                       ]),
                       const SizedBox(height: 8),
 
                       if (isChild) ...[
-                        // For Child records
                         _buildRow([
-                          _rowText(
-                            l10n?.rchIdLabel ?? 'RCH ID',
-                            isFemale
-                                ? (data['RichID']?.toString().isNotEmpty == true
-                                ? data['RichID']
-                                : (l10n?.notAvailable ?? 'Not Available'))
-                                : (l10n?.na ?? 'N/A'),
-                          ),
                           _rowText(
                             l10n?.fatherName ?? 'Father Name',
                             data['FatherName']?.toString().isNotEmpty == true
                                 ? data['FatherName']
                                 : (l10n?.notAvailable ?? 'Not Available'),
                           ),
+                          _rowText(
+                            l10n?.mobileLabelSimple ?? 'Mobile No.',
+                            data['Mobileno.']?.toString().isNotEmpty == true
+                                ? data['Mobileno.']
+                                : (l10n?.na ?? 'N/A'),
+                          ),
+                          _rowText(
+                            l10n?.userVillageLabel ?? 'Village',
+                            data['village']?.toString().isNotEmpty == true
+                                ? data['village']
+                                : (l10n?.na ?? 'N/A'),
+                          ),
+                        ]),
+
+                        SizedBox(height: 8,),
+                        _buildRow([
+                          _rowText(
+                            l10n?.tolaMohalla ?? 'Tola/Mohalla',
+                            data['Tola/Mohalla']?.toString().isNotEmpty == true
+                                ? data['Tola/Mohalla']
+                                : (l10n?.na ?? 'N/A'),
+                          ),
+                          _rowText('', ''), // Empty cell for layout
                           _rowText('', ''), // Empty cell for layout
                         ]),
                       ] else ...[
-                        // For General records (Head/Spouse/Other)
-                        if (data['SpouseName']?.toString().isNotEmpty == true)
+                        if (data['FatherName']?.toString().isNotEmpty == true && isUnmarried)
                           _buildRow([
                             _rowText(
-                              data['SpouseGender'] == 'female'
-                                  ? (l10n?.wifeName ?? 'Wife Name')
-                                  : (l10n?.husbandName ?? 'Husband Name'),
-                              data['SpouseName'],
+                              l10n?.fatherName ?? 'Father Name',
+                              data['fatherName'],
                             ),
                             _rowText('', ''), // Empty cell for layout
                             _rowText('', ''), // Empty cell for layout
-                          ])
-                        else
+                          ]),
+                        
+                        if (data['MotherName']?.toString().isNotEmpty == true)
                           _buildRow([
                             _rowText(
-                              l10n?.thRelation ?? 'Relation',
-                              data['Relation']?.toString().isNotEmpty == true
-                                  ? data['Relation']
-                                  : (l10n?.na ?? 'N/A'),
+                              l10n?.motherNameLabel ?? 'Mother Name',
+                              data['MotherName'],
+                            ),
+                            _rowText('', ''), // Empty cell for layout
+                            _rowText('', ''), // Empty cell for layout
+                          ]),
+                        
+                        if (isFemale && data['HusbandName']?.toString().isNotEmpty == true)
+                          _buildRow([
+                            _rowText(
+                              l10n?.husbandName ?? 'Husband Name',
+                              data['HusbandName'],
                             ),
                             _rowText('', ''),
                             _rowText('', ''),
                           ]),
-                      ],
+                        
+                        if (!isFemale && data['WifeName']?.toString().isNotEmpty == true)
+                          _buildRow([
+                            _rowText(
+                              l10n?.wifeName ?? 'Wife Name',
+                              data['WifeName'],
+                            ),
+                            _rowText('', ''), // Empty cell for layout
+                            _rowText('', ''), // Empty cell for layout
+                          ]),
+                        
+                        // Show Spouse Name if available (fallback when specific husband/wife names are not available)
+                        if (data['SpouseName']?.toString().isNotEmpty == true && 
+                            data['HusbandName']?.toString().isEmpty == true && 
+                            data['WifeName']?.toString().isEmpty == true)
+                          _buildRow([
+                            _rowText(
+                              isFemale
+                                  ? (l10n?.husbandName ?? 'Husband Name')
+                                  : (l10n?.wifeName ?? 'Wife Name'),
+                              data['SpouseName'],
+                            ),
+                            _rowText('', ''), // Empty cell for layout
+                            _rowText('', ''), // Empty cell for layout
+                          ]),
+                        
+                        // _buildRow([
+                        //   _rowText(
+                        //     l10n?.thRelation ?? 'Relation',
+                        //     data['Relation']?.toString().isNotEmpty == true
+                        //         ? data['Relation']
+                        //         : (l10n?.na ?? 'N/A'),
+                        //   ),
+                        //   _rowText('', ''),
+                        //   _rowText('', ''),
+                        // ]),
+
                       const SizedBox(height: 8),
 
                       _buildRow([
@@ -633,7 +726,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                         _rowText('', ''), // Empty cell for layout
                       ]),
                     ],
-                  ),
+                  ]),
                 ),
               ],
             ),
