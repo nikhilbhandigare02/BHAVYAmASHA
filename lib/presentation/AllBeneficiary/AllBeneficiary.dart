@@ -74,13 +74,11 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
       for (final row in rows) {
 
-        // 🚫 Skip migrated beneficiaries
         final int isMigrated = row['is_migrated'] ?? 0;
         if (isMigrated == 1) {
           continue;
         }
 
-        // Parse beneficiary info safely
         Map<String, dynamic> info;
         try {
           if (row['beneficiary_info'] is String) {

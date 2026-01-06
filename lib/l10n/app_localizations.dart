@@ -5876,7 +5876,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstFeedGivenAfterBirthLabel.
   ///
   /// In en, this message translates to:
-  /// **'What was given as the baby first feed to baby after birth? *'**
+  /// **'What was given as the baby first feed to baby after birth?'**
   String get firstFeedGivenAfterBirthLabel;
 
   /// No description provided for @adequatelyFedSevenToEightTimesLabel.
@@ -5939,17 +5939,59 @@ abstract class AppLocalizations {
   /// **'Breastfeeding problems selection is required.'**
   String get err_breastfeeding_problems_required;
 
+  /// No description provided for @err_mcp_mother_filled_required.
+  ///
+  /// In en, this message translates to:
+  /// **'MCP card filled status is required.'**
+  String get err_mcp_mother_filled_required;
+
+  /// No description provided for @err_excessive_bleeding_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Excessive bleeding selection is required.'**
+  String get err_excessive_bleeding_required;
+
+  /// No description provided for @err_unconscious_fits_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Unconscious/fits selection is required.'**
+  String get err_unconscious_fits_required;
+
+  /// No description provided for @err_breastfeeding_problem_description_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Breastfeeding problem description is required.'**
+  String get err_breastfeeding_problem_description_required;
+
+  /// No description provided for @err_breastfeeding_help_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Breastfeeding help/action description is required.'**
+  String get err_breastfeeding_help_required;
+
   /// No description provided for @err_pads_per_day_required.
   ///
   /// In en, this message translates to:
   /// **'Pads changed per day is required.'**
   String get err_pads_per_day_required;
 
+  /// No description provided for @err_meals_per_day_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of full meals per day is required.'**
+  String get err_meals_per_day_required;
+
   /// No description provided for @err_mothers_temperature_required.
   ///
   /// In en, this message translates to:
   /// **'Mother\'s temperature is required.'**
   String get err_mothers_temperature_required;
+
+  /// No description provided for @err_paracetamol_given_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Paracetamol tablet given selection is required.'**
+  String get err_paracetamol_given_required;
 
   /// No description provided for @err_foul_discharge_high_fever_required.
   ///
@@ -5980,6 +6022,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nipple cracks/pain or engorged breasts selection is required.'**
   String get err_nipple_cracks_pain_or_engorged_required;
+
+  /// No description provided for @err_milk_counseling_advice_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Counseling/advice for milk problem is required.'**
+  String get err_milk_counseling_advice_required;
+
+  /// No description provided for @err_refer_hospital_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Refer to hospital selection is required.'**
+  String get err_refer_hospital_required;
+
+  /// No description provided for @err_refer_to_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Referral facility selection is required.'**
+  String get err_refer_to_required;
 
   /// No description provided for @err_baby_condition_required.
   ///
@@ -6196,6 +6256,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bloated stomach/frequent vomiting selection is required.'**
   String get err_bloated_or_frequent_vomit_required;
+
+  /// No description provided for @err_date_of_death_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of death is required.'**
+  String get err_date_of_death_required;
+
+  /// No description provided for @err_death_place_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Place of death selection is required.'**
+  String get err_death_place_required;
+
+  /// No description provided for @err_reason_of_death_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason of death selection is required.'**
+  String get err_reason_of_death_required;
+
+  /// No description provided for @err_other_reason_of_death_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Other reason of death description is required.'**
+  String get err_other_reason_of_death_required;
 
   /// No description provided for @previousVisits.
   ///
@@ -6479,11 +6563,23 @@ abstract class AppLocalizations {
   /// **'Total number of live children'**
   String get totalLiveChildren;
 
+  /// No description provided for @totalLiveChildrenval.
+  ///
+  /// In en, this message translates to:
+  /// **'Total live children can\'t be more than total born children'**
+  String get totalLiveChildrenval;
+
   /// No description provided for @totalMaleChildren.
   ///
   /// In en, this message translates to:
   /// **'Total number of male children'**
   String get totalMaleChildren;
+
+  /// No description provided for @totalMaleChildrenval.
+  ///
+  /// In en, this message translates to:
+  /// **'Total male children can\'t be more than total live children'**
+  String get totalMaleChildrenval;
 
   /// No description provided for @totalFemaleChildren.
   ///
@@ -6491,10 +6587,16 @@ abstract class AppLocalizations {
   /// **'Total number of female children'**
   String get totalFemaleChildren;
 
+  /// No description provided for @totalFemaleChildrenval.
+  ///
+  /// In en, this message translates to:
+  /// **'Total female children can\'t be more than total live children'**
+  String get totalFemaleChildrenval;
+
   /// No description provided for @malePlusFemaleError.
   ///
   /// In en, this message translates to:
-  /// **'Male + Female must equal Total number of live children'**
+  /// **'Number of male and female live children must be equal to total live children'**
   String get malePlusFemaleError;
 
   /// No description provided for @youngestChildAge.
@@ -11726,7 +11828,7 @@ abstract class AppLocalizations {
   /// No description provided for @babyWeightRecordedInMPC.
   ///
   /// In en, this message translates to:
-  /// **'Is the weight of the newborn baby recorded in the Mother Protection Card? *'**
+  /// **'Is the weight of the newborn baby recorded in the Mother Protection Card? '**
   String get babyWeightRecordedInMPC;
 
   /// No description provided for @referToHospital.

@@ -4,10 +4,12 @@ import 'package:medixcel_new/data/NetworkAPIServices/api_services/network_servic
 import 'package:medixcel_new/data/models/guest_beneficiary/search_beneficiary_request.dart';
 import 'package:medixcel_new/data/models/guest_beneficiary/search_beneficiary_response.dart';
 import 'package:medixcel_new/data/Database/local_storage_dao.dart';
+import 'package:medixcel_new/data/Database/User_Info.dart';
 
 class GuestBeneficiaryRepository {
   final NetworkServiceApi _api;
   GuestBeneficiaryRepository({NetworkServiceApi? api}) : _api = api ?? NetworkServiceApi();
+  
 
   Future<SearchBeneficiaryResponse> searchBeneficiary(String beneficiaryNumber) async {
     try {
@@ -86,6 +88,17 @@ class GuestBeneficiaryRepository {
     int hhInserted = 0;
     int hhSkipped = 0;
 
+    String ashaUniqueKey = '';
+    try {
+      final currentUser = await UserInfo.getCurrentUser();
+      final userDetails = currentUser?['details'] is String
+          ? jsonDecode(currentUser?['details'] ?? '{}')
+          : currentUser?['details'] ?? {};
+      ashaUniqueKey = userDetails['unique_key']?.toString() ?? '';
+    } catch (e) {
+      print('⚠️ Unable to fetch ASHA unique key for guest search persistence: $e');
+    }
+
     for (final rec in dataList) {
       try {
         final serverId = (rec['_id'] ?? rec['id'])?.toString();
@@ -98,6 +111,7 @@ class GuestBeneficiaryRepository {
                 : null;
 
         final householdUniqueKey = householdDetails?['unique_key']?.toString();
+
 
         final benRow = <String, dynamic>{
           'server_id': serverId,
@@ -126,7 +140,9 @@ class GuestBeneficiaryRepository {
             'asha_name': householdDetails?['asha_name'],
             'ashwin_id': householdDetails?['ashwin_id'],
           },
-          'current_user_key': rec['current_user_key']?.toString(),
+          'current_user_key': ashaUniqueKey.isNotEmpty
+              ? ashaUniqueKey
+              : rec['current_user_key']?.toString(),
           'facility_id': rec['facility_id'],
           'created_date_time': rec['created_date_time']?.toString() ?? DateTime.now().toIso8601String(),
           'modified_date_time': rec['modified_date_time']?.toString() ?? DateTime.now().toIso8601String(),
@@ -248,7 +264,9 @@ class GuestBeneficiaryRepository {
             'device_details': deviceDetails ?? householdDetails['device_details'] ?? {},
             'app_details': rec['app_details'] ?? {},
             'parent_user': rec['parent_user'] ?? {},
-            'current_user_key': rec['current_user_key']?.toString(),
+            'current_user_key': ashaUniqueKey.isNotEmpty
+                ? ashaUniqueKey
+                : rec['current_user_key']?.toString(),
             'facility_id': rec['facility_id'],
             'created_date_time': rec['created_date_time']?.toString() ?? householdDetails['created_date_time']?.toString(),
             'modified_date_time': rec['modified_date_time']?.toString() ?? householdDetails['modified_date_time']?.toString(),

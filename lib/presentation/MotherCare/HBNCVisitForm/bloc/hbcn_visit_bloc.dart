@@ -203,7 +203,20 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         print('  - Created: ${savedData.first['created_date_time']}');
 
         final visitNumber = state.visitDetails['visitNumber'] as int?;
-        if ((visitNumber ?? 0) == 42 && beneficiaryId.isNotEmpty) {
+
+        // Also close the mother care activity if both mother and baby are recorded as death
+        final motherStatus = state.motherDetails['motherStatus']?.toString();
+        String? babyCondition;
+        if (state.newbornDetailsList.isNotEmpty) {
+          final firstBaby = state.newbornDetailsList.first;
+          babyCondition = firstBaby['babyCondition']?.toString();
+        }
+
+        final shouldCompleteMotherCare =
+            ((visitNumber ?? 0) == 42) ||
+            (motherStatus == 'death' && babyCondition == 'death');
+
+        if (beneficiaryId.isNotEmpty && shouldCompleteMotherCare) {
           try {
             final updated = await db.update(
               MotherCareActivitiesTable.table,
@@ -480,30 +493,30 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
       }
       req('motherStatus', 'err_mother_status_required');
       req('mcpCardAvailable', 'err_mcp_mother_required');
-      reqIf(m['mcpCardAvailable'] == 'Yes', 'mcpCardFilled', 'Please select whether MCP card is filled');
+      reqIf(m['mcpCardAvailable'] == 'Yes', 'mcpCardFilled', 'err_mcp_mother_filled_required');
       req('postDeliveryProblems', 'err_post_delivery_problems_required');
       final hasPostDeliveryProblem =
           m['postDeliveryProblems'] != null && m['postDeliveryProblems'] != 'None';
-      reqIf(hasPostDeliveryProblem, 'excessiveBleeding', 'Please answer Excessive bleeding');
-      reqIf(hasPostDeliveryProblem, 'unconsciousFits', 'Please answer Unconscious / fits');
+      reqIf(hasPostDeliveryProblem, 'excessiveBleeding', 'err_excessive_bleeding_required');
+      reqIf(hasPostDeliveryProblem, 'unconsciousFits', 'err_unconscious_fits_required');
       req('breastfeedingProblems', 'err_breastfeeding_problems_required');
-      reqIf(m['breastfeedingProblems'] == 'Yes', 'breastfeedingProblemDescription', 'Please enter breastfeeding problem');
-      reqIf(m['breastfeedingProblems'] == 'Yes', 'breastfeedingHelpGiven', 'Please answer breastfeeding help question');
-      req('padsPerDay', 'Please select pads changed per day');
-      req('mealsPerDay', 'Please select number of full meals per day');
-      req('temperature', 'Please select mother\'s temperature');
+      reqIf(m['breastfeedingProblems'] == 'Yes', 'breastfeedingProblemDescription', 'err_breastfeeding_problem_description_required');
+      reqIf(m['breastfeedingProblems'] == 'Yes', 'breastfeedingHelpGiven', 'err_breastfeeding_help_required');
+      req('padsPerDay', 'err_pads_per_day_required');
+      req('mealsPerDay', 'err_meals_per_day_required');
+      req('temperature', 'err_mothers_temperature_required');
       final _tempStr = (m['temperature'] ?? '').toString();
       final _isUpto102 = _tempStr == 'Temperature upto 102 degree F(38.9 degree C)';
-      reqIf(_isUpto102, 'paracetamolGiven', 'Please answer Paracetamol tablet given');
+      reqIf(_isUpto102, 'paracetamolGiven', 'err_paracetamol_given_required');
       req('foulDischargeHighFever', 'err_foul_discharge_high_fever_required');
       req('abnormalSpeechOrSeizure', 'err_abnormal_speech_or_seizure_required');
       // Newly added starred fields
-      req('counselingAdvice', 'Please select Counseling/Advise');
-      req('milkNotProducingOrLess', 'Please answer milk production question');
-      reqIf(m['milkNotProducingOrLess'] == 'Yes', 'milkCounselingAdvice', 'Please select Counseling/Advise for milk problem');
-      req('nippleCracksPainOrEngorged', 'Please answer cracked/painful/engorged breast question');
-      req('referHospital', 'Please answer Refer to Hospital');
-      reqIf(m['referHospital'] == 'Yes', 'referTo', 'Please select Refer to');
+      req('counselingAdvice', 'err_counseling_advice_required');
+      req('milkNotProducingOrLess', 'err_milk_not_producing_or_less_required');
+      reqIf(m['milkNotProducingOrLess'] == 'Yes', 'milkCounselingAdvice', 'err_milk_counseling_advice_required');
+      req('nippleCracksPainOrEngorged', 'err_nipple_cracks_pain_or_engorged_required');
+      req('referHospital', 'err_refer_hospital_required');
+      reqIf(m['referHospital'] == 'Yes', 'referTo', 'err_refer_to_required');
       if (m['motherStatus'] == 'death') {
         errors.clear();
         void reqDeath(String key, String code) {
@@ -512,11 +525,11 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
             errors.add(code);
           }
         }
-        reqDeath('dateOfDeath', 'Please enter date of death');
-        reqDeath('deathPlace', 'Please select place of death');
-        reqDeath('reasonOfDeath', 'Please select reason of death');
+        reqDeath('dateOfDeath', 'err_date_of_death_required');
+        reqDeath('deathPlace', 'err_death_place_required');
+        reqDeath('reasonOfDeath', 'err_reason_of_death_required');
         if (m['reasonOfDeath'] == 'Other (Specify)') {
-          reqDeath('reasonOfDeathOther', 'Please specify other reason of death');
+          reqDeath('reasonOfDeathOther', 'err_other_reason_of_death_required');
         }
       }
     } else if (idx >= 2) {

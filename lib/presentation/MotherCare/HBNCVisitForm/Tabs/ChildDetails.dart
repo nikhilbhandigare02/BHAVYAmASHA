@@ -77,14 +77,16 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title:  Text(
+
+          surfaceTintColor: Colors.white, // Add this line to remove the tint
+          title: Text(
             l10n?.attention ?? 'Attention!',
             style: TextStyle(
               color: Colors.red,
               fontWeight: FontWeight.bold,
             ),
           ),
-          content:  Text(
+          content: Text(
             l10n?.hospitalReferMsg ?? 'Please refer the child to nearby hospital.',
             style: TextStyle(
               color: Colors.red,
@@ -93,7 +95,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child:  Text(
+              child: Text(
                 l10n?.okayLabel ?? 'OKAY',
                 style: TextStyle(color: Colors.red),
               ),
@@ -205,24 +207,47 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
             print('ChildDetails (from state): ${state.newbornDetailsList}');
           },
           builder: (context, state) {
+            final condition = s(c['babyCondition']);
+
+            final baseChildren = <Widget>[
+              ApiDropdown<String>(
+                key: ChildDetailsTab.fieldKeys['babyCondition'],
+                labelText: "${t.babyConditionLabel} *",
+                items: ['alive', 'death'],
+                validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
+                getLabel: (e) => e == 'alive' ? t.alive : t.dead,
+                value: condition,
+                onChanged: (val) => context.read<HbncVisitBloc>().add(
+                  NewbornDetailsChanged(
+                    field: 'babyCondition',
+                    value: val,
+                    childIndex: widget.childIndex,
+                  ),
+                ),
+              ),
+              const Divider(height: 0),
+            ];
+
+            // If baby is marked as death, show only the babyCondition field
+            if (condition == 'death') {
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: baseChildren,
+                  ),
+                ),
+              );
+            }
+
             return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  ApiDropdown<String>(
-                    key: ChildDetailsTab.fieldKeys['babyCondition'],
-                    labelText: "${t.babyConditionLabel} *",
-                    items:  ['alive', 'death'],
-                    validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
-                    getLabel: (e) => e == 'alive' ? t.alive : t.dead,
-                    value: s(c['babyCondition']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'babyCondition', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
+                  children: [
+                    ...baseChildren,
 
                   CustomTextField(
                     key: ChildDetailsTab.fieldKeys['babyName'],
@@ -437,6 +462,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
                   ApiDropdown<String>(
                     labelText: "${t.firstBreastfeedTimingLabel} *",
+                    hintText: t.selectOption,
                     items: const [
                       'Within 30 minutes of birth',
                       'Within 1 hour of birth',
@@ -463,7 +489,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                           return s;
                       }
                     },
-                    value: c['firstBreastfeedTiming'] ?? '',
+                    value: c['firstBreastfeedTiming'],
                     onChanged: (val) {
                       context.read<HbncVisitBloc>().add(
                         NewbornDetailsChanged(
@@ -472,7 +498,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                           childIndex: widget.childIndex,
                         ),
                       );
-                      // If not "Other", clear the custom time
+
                       if (val != 'Other') {
                         context.read<HbncVisitBloc>().add(
                           NewbornDetailsChanged(
@@ -499,6 +525,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   if (c['firstBreastfeedTiming'] != 'Not breastfed')
                     ApiDropdown<String>(
                       labelText: "${t.howWasBreastfedLabel} *",
+                      hintText: t.selectOption,
                       items: const [
                         'Normal',
                         'Forcefully',
@@ -522,7 +549,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                             return s;
                         }
                       },
-                      value: c['howWasBreastfed'] ?? '',
+                      value: c['howWasBreastfed'],
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
                         NewbornDetailsChanged(
                           field: 'howWasBreastfed',
@@ -535,6 +562,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
                   ApiDropdown<String>(
                     labelText: "${t.firstFeedGivenAfterBirthLabel} *",
+                    hintText: t.selectOption,
                     items: const ['First Breastfeeding','Water','Honey','Mishri Water / Sugar Syrup', 'Goat Milk','Cow Milk', 'Other' ],
                     getLabel: (s) {
                       switch (s) {
@@ -561,15 +589,13 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'firstFeedGivenAfterBirth', value: val, childIndex: widget.childIndex),
                     ),
                   ),
+                    const Divider(height: 0,),
                   if (c['firstFeedGivenAfterBirth'] == 'Other')
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: CustomTextField(
-                        labelText: "${t.enter_other_feeding_option} *",
-                        initialValue: c['firstFeedOther'] ?? '',
-                        onChanged: (val) => context.read<HbncVisitBloc>().add(
-                          NewbornDetailsChanged(field: 'firstFeedOther', value: val, childIndex: widget.childIndex),
-                        ),
+                    CustomTextField(
+                      labelText: "${t.enter_other_feeding_option} *",
+                      initialValue: c['firstFeedOther'] ?? '',
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'firstFeedOther', value: val, childIndex: widget.childIndex),
                       ),
                     ),
                   const Divider(height: 0,),
@@ -583,17 +609,15 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'adequatelyFedSevenToEightTimes', value: val, childIndex: widget.childIndex),
                     ),
                   ),
+                    const Divider(height: 0,),
                   if (c['adequatelyFedSevenToEightTimes'] == 'No')
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: ApiDropdown<String>(
-                        labelText: "${t.counsellingAdviceNeeded} *",
-                        items: const ['Yes', 'No'],
-                        getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                        value: yn(c['adequatelyFedCounseling']),
-                        onChanged: (val) => context.read<HbncVisitBloc>().add(
-                          NewbornDetailsChanged(field: 'adequatelyFedCounseling', value: val, childIndex: widget.childIndex),
-                        ),
+                    ApiDropdown<String>(
+                      labelText: "${t.counsellingAdviceNeeded} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['adequatelyFedCounseling']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'adequatelyFedCounseling', value: val, childIndex: widget.childIndex),
                       ),
                     ),
                   const Divider(height: 0,),
@@ -757,6 +781,52 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   ),
                   const Divider(height: 0,),
 
+                  if (c['congenitalAbnormalities'] == 'Yes') ...[
+                    ApiDropdown<String>(
+                      labelText: "Select abnormality *",
+                      hintText: t.selectOption,
+                      items: const ['Curved limbs', 'Clift lip / palate', 'Other'],
+                      getLabel: (e) => e,
+                      value: c['congenitalAbnormalityType'],
+                      onChanged: (val) {
+                        context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(
+                            field: 'congenitalAbnormalityType',
+                            value: val,
+                            childIndex: widget.childIndex,
+                          ),
+                        );
+
+                        if (val != 'Other') {
+
+                          context.read<HbncVisitBloc>().add(
+                            NewbornDetailsChanged(
+                              field: 'congenitalAbnormalityOther',
+                              value: '',
+                              childIndex: widget.childIndex,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                   const Divider(height: 0,),
+                  if (c['congenitalAbnormalityType'] == 'Other')
+                    CustomTextField(
+                      labelText: "Please enter abnormality",
+                      hintText: "Please enter abnormality",
+                      initialValue: c['congenitalAbnormalityOther'] ?? '',
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(
+                          field: 'congenitalAbnormalityOther',
+                          value: val,
+                          childIndex: widget.childIndex,
+                        ),
+                      ),
+                    ),
+                  if (c['congenitalAbnormalities'] == 'Yes')
+                    const Divider(height: 0,),
+
 
                   ApiDropdown<String>(
                     labelText: "${t.eyesNormalLabel} *",
@@ -832,8 +902,6 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ),
                   ),
                   const Divider(height: 0,),
-
-
                   ApiDropdown<String>(
                     labelText: "${t.newbornSeizuresLabel} *",
                     items: const ['Yes', 'No'],
@@ -844,8 +912,6 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     ),
                   ),
                   const Divider(height: 0,),
-
-
                   ApiDropdown<String>(
                     labelText: "${t.cryingConstantlyOrLessUrineLabel} *",
                     labelMaxLines: 3,
@@ -856,6 +922,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       NewbornDetailsChanged(field: 'cryingConstantlyOrLessUrine', value: val, childIndex: widget.childIndex),
                     ),
                   ),
+                    const Divider(height: 0,),
                   if (c['cryingConstantlyOrLessUrine'] == 'Yes')
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
@@ -1161,7 +1228,7 @@ class _TextCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(4), // 👈 reduced
+        padding: const EdgeInsets.all(4),
         child: Text(
           text,
           textAlign: TextAlign.center,

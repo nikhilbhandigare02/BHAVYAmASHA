@@ -337,7 +337,7 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
                 'ecp_quantity': state.ecpQuantity,
                 'created_at': now,
                 'updated_at': now,
-                'isSubmit': true,  // Set isSubmit to true when form is submitted
+                'isSubmit': true,
                 'form_data': formDataForDb,
               };
 

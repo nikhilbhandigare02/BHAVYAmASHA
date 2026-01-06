@@ -243,7 +243,11 @@ class Routes{
       case Route_Names.RegisterChildDueListFormScreen:
         return MaterialPageRoute(builder: (context) => const RegisterChildDueListFormScreen(),);
       case Route_Names.previousVisit:
-        return MaterialPageRoute(builder: (context) => const PreviousVisitScreen(),);
+        final args = setting.arguments as Map<String, dynamic>?;
+        final beneficiaryId = args?['beneficiaryId']?.toString() ?? '';
+        return MaterialPageRoute(
+          builder: (context) => PreviousVisitScreen(beneficiaryId: beneficiaryId),
+        );
       
       case Route_Names.FamliyUpdate:
         return MaterialPageRoute(builder: (context) => const FamliyUpdate(),);

@@ -58,14 +58,7 @@ class _UpdatedEligibleCoupleListScreenState
     }
   }
 
-  Future<Map<String, dynamic>?> _getCurrentUserData() async {
-    try {
-      return await SecureStorageService.getCurrentUserData();
-    } catch (e) {
-      print('Error getting current user data: $e');
-      return null;
-    }
-  }
+
 
   Future<void> _loadCouples() async {
     setState(() { _isLoading = true; });
