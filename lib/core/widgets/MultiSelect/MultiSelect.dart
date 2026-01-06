@@ -72,8 +72,9 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                     Text(
                       widget.labelText,
                       style: TextStyle(
-                        fontSize: ResponsiveFont.getLabelFontSize(context),
-                        fontWeight: FontWeight.w500,
+                        fontSize:
+                        ResponsiveFont.getLabelFontSize(context) + 2,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.onSurfaceVariant,
                       ),
                     ),
@@ -87,26 +88,35 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: widget.items.map((item) {
-                      final selected = localSelectedItems.contains(item.value);
+                      final selected =
+                      localSelectedItems.contains(item.value);
+
                       return CheckboxListTile(
                         title: Text(
                           item.label,
-                          style: TextStyle(fontSize: ResponsiveFont.getLabelFontSize(context)),
+                          style: TextStyle(
+                            fontSize:
+                            ResponsiveFont.getLabelFontSize(context) + 3,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         value: selected,
                         onChanged: (bool? value) {
                           setDialogState(() {
-                            if ((value ?? false)) {
+                            if (value == true) {
                               localSelectedItems.add(item.value);
                             } else {
                               localSelectedItems.remove(item.value);
                             }
                           });
                         },
-                        controlAffinity: ListTileControlAffinity.leading,
-                        contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
-                        dense: true,
-                        visualDensity: const VisualDensity(vertical: -4),
+                        controlAffinity:
+                        ListTileControlAffinity.leading,
+                        contentPadding:
+                        EdgeInsets.symmetric(vertical: 0.1.h),
+                        dense: false,
+                        visualDensity:
+                        const VisualDensity(vertical: -2),
                       );
                     }).toList(),
                   ),
@@ -120,14 +130,13 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                     TextButton(
                       onPressed: () {
                         FocusManager.instance.primaryFocus?.unfocus();
-                        FocusScope.of(context).unfocus();
-                        FocusScope.of(context).requestFocus(FocusNode());
                         Navigator.pop(context);
                       },
                       child: Text(
                         'CANCEL',
                         style: TextStyle(
-                          fontSize: ResponsiveFont.getLabelFontSize(context),
+                          fontSize:
+                          ResponsiveFont.getLabelFontSize(context) + 1,
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).primaryColor,
                         ),
@@ -136,14 +145,13 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                     TextButton(
                       onPressed: () {
                         FocusManager.instance.primaryFocus?.unfocus();
-                        FocusScope.of(context).unfocus();
-                        FocusScope.of(context).requestFocus(FocusNode());
                         Navigator.pop(context, localSelectedItems);
                       },
                       child: Text(
                         'OK',
                         style: TextStyle(
-                          fontSize: ResponsiveFont.getLabelFontSize(context),
+                          fontSize:
+                          ResponsiveFont.getLabelFontSize(context) + 1,
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).primaryColor,
                         ),
@@ -176,16 +184,20 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
             text: TextSpan(
               text: widget.labelText,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: ResponsiveFont.getLabelFontSize(context),
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.87),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withOpacity(0.87),
               ),
               children: widget.isRequired
                   ? [
                 TextSpan(
                   text: ' *',
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
+                    color:
+                    Theme.of(context).colorScheme.error,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -197,13 +209,13 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
         InkWell(
           onTap: _showMultiSelect,
           child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 1.0,
-              vertical: 2.0,
-            ),
+            padding:
+            const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             decoration: BoxDecoration(
               color: widget.isDisabled
-                  ? Theme.of(context).disabledColor.withOpacity(0.04)
+                  ? Theme.of(context)
+                  .disabledColor
+                  .withOpacity(0.04)
                   : null,
             ),
             child: Row(
@@ -214,21 +226,21 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                         ? widget.hintText
                         : _selectedItems
                         .map((item) => widget.items
-                        .firstWhere((element) => element.value == item)
+                        .firstWhere(
+                            (e) => e.value == item)
                         .label)
                         .join(', '),
                     style: TextStyle(
                       color: _selectedItems.isEmpty
                           ? AppColors.grey
                           : AppColors.onSurface,
-                      fontSize: ResponsiveFont.getHintFontSize(context),
+                      fontSize:
+                      ResponsiveFont.getHintFontSize(context),
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.arrow_drop_down,
-                  color: Colors.grey,
-                ),
+                const Icon(Icons.arrow_drop_down,
+                    color: Colors.grey),
               ],
             ),
           ),
@@ -236,14 +248,21 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
         if (widget.validator != null)
           Builder(
             builder: (context) {
-              final errorText = widget.validator?.call(_selectedItems);
-              if (errorText == null) return SizedBox.shrink();
+              final errorText =
+              widget.validator?.call(_selectedItems);
+              if (errorText == null) return const SizedBox.shrink();
               return Padding(
-                padding: const EdgeInsets.only(top: 4.0, left: 12.0),
+                padding:
+                const EdgeInsets.only(top: 4.0, left: 12.0),
                 child: Text(
                   errorText,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .error,
                   ),
                 ),
               );
