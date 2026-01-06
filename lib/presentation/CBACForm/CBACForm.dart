@@ -898,18 +898,11 @@ class _PersonalInfoTab extends StatelessWidget {
                 const Divider(height: 0.5),
                 if (selected.isNotEmpty) ...[
                   CustomTextField(
-                    hintText:
-                        'Details (if any selected from above list, give details)',
-                    labelText:
-                        'Details (if any selected from above list, give details)',
-                    initialValue:
-                        state.data['personal.disabilityDetails']?.toString() ??
-                        '',
-                    onChanged: (v) => bloc.add(
-                      CbacFieldChanged('personal.disabilityDetails', v.trim()),
-                    ),
+                    hintText: 'Details (if any selected from above list, give details)',
+                    labelText: 'Details (if any selected from above list, give details)',
+                    initialValue: state.data['personal.disabilityDetails']?.toString() ?? '',
+                    onChanged: (v) => bloc.add(CbacFieldChanged('personal.disabilityDetails', v.trim()),),
                   ),
-
                   const Divider(height: 0.5),
                 ],
               ],
