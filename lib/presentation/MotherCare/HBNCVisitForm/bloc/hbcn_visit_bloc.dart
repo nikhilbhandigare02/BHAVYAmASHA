@@ -491,46 +491,41 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
           errors.add(code);
         }
       }
+      // Always validate motherStatus itself
       req('motherStatus', 'err_mother_status_required');
-      req('mcpCardAvailable', 'err_mcp_mother_required');
-      reqIf(m['mcpCardAvailable'] == 'Yes', 'mcpCardFilled', 'err_mcp_mother_filled_required');
-      req('postDeliveryProblems', 'err_post_delivery_problems_required');
-      final hasPostDeliveryProblem =
-          m['postDeliveryProblems'] != null && m['postDeliveryProblems'] != 'None';
-      reqIf(hasPostDeliveryProblem, 'excessiveBleeding', 'err_excessive_bleeding_required');
-      reqIf(hasPostDeliveryProblem, 'unconsciousFits', 'err_unconscious_fits_required');
-      req('breastfeedingProblems', 'err_breastfeeding_problems_required');
-      reqIf(m['breastfeedingProblems'] == 'Yes', 'breastfeedingProblemDescription', 'err_breastfeeding_problem_description_required');
-      reqIf(m['breastfeedingProblems'] == 'Yes', 'breastfeedingHelpGiven', 'err_breastfeeding_help_required');
-      req('padsPerDay', 'err_pads_per_day_required');
-      req('mealsPerDay', 'err_meals_per_day_required');
-      req('temperature', 'err_mothers_temperature_required');
-      final _tempStr = (m['temperature'] ?? '').toString();
-      final _isUpto102 = _tempStr == 'Temperature upto 102 degree F(38.9 degree C)';
-      reqIf(_isUpto102, 'paracetamolGiven', 'err_paracetamol_given_required');
-      req('foulDischargeHighFever', 'err_foul_discharge_high_fever_required');
-      req('abnormalSpeechOrSeizure', 'err_abnormal_speech_or_seizure_required');
-      // Newly added starred fields
-      req('counselingAdvice', 'err_counseling_advice_required');
-      req('milkNotProducingOrLess', 'err_milk_not_producing_or_less_required');
-      reqIf(m['milkNotProducingOrLess'] == 'Yes', 'milkCounselingAdvice', 'err_milk_counseling_advice_required');
-      req('nippleCracksPainOrEngorged', 'err_nipple_cracks_pain_or_engorged_required');
-      req('referHospital', 'err_refer_hospital_required');
-      reqIf(m['referHospital'] == 'Yes', 'referTo', 'err_refer_to_required');
-      if (m['motherStatus'] == 'death') {
-        errors.clear();
-        void reqDeath(String key, String code) {
-          final val = m[key];
-          if (val == null || (val is String && val.trim().isEmpty)) {
-            errors.add(code);
-          }
-        }
-        reqDeath('dateOfDeath', 'err_date_of_death_required');
-        reqDeath('deathPlace', 'err_death_place_required');
-        reqDeath('reasonOfDeath', 'err_reason_of_death_required');
-        if (m['reasonOfDeath'] == 'Other (Specify)') {
-          reqDeath('reasonOfDeathOther', 'err_other_reason_of_death_required');
-        }
+
+      final bool isDeath = m['motherStatus'] == 'death';
+
+      // If mother is marked as death, do NOT validate fields that are
+      // hidden in the UI (MCP card, post-delivery problems, etc.).
+      // This ensures we only show validation for fields actually
+      // visible on screen.
+      if (!isDeath) {
+        req('mcpCardAvailable', 'err_mcp_mother_required');
+        reqIf(m['mcpCardAvailable'] == 'Yes', 'mcpCardFilled', 'err_mcp_mother_filled_required');
+        req('postDeliveryProblems', 'err_post_delivery_problems_required');
+        final hasPostDeliveryProblem =
+            m['postDeliveryProblems'] != null && m['postDeliveryProblems'] != 'None';
+        reqIf(hasPostDeliveryProblem, 'excessiveBleeding', 'err_excessive_bleeding_required');
+        reqIf(hasPostDeliveryProblem, 'unconsciousFits', 'err_unconscious_fits_required');
+        req('breastfeedingProblems', 'err_breastfeeding_problems_required');
+        reqIf(m['breastfeedingProblems'] == 'Yes', 'breastfeedingProblemDescription', 'err_breastfeeding_problem_description_required');
+        reqIf(m['breastfeedingProblems'] == 'Yes', 'breastfeedingHelpGiven', 'err_breastfeeding_help_required');
+        req('padsPerDay', 'err_pads_per_day_required');
+        req('mealsPerDay', 'err_meals_per_day_required');
+        req('temperature', 'err_mothers_temperature_required');
+        final _tempStr = (m['temperature'] ?? '').toString();
+        final _isUpto102 = _tempStr == 'Temperature upto 102 degree F(38.9 degree C)';
+        reqIf(_isUpto102, 'paracetamolGiven', 'err_paracetamol_given_required');
+        req('foulDischargeHighFever', 'err_foul_discharge_high_fever_required');
+        req('abnormalSpeechOrSeizure', 'err_abnormal_speech_or_seizure_required');
+        // Newly added starred fields
+        req('counselingAdvice', 'err_counseling_advice_required');
+        req('milkNotProducingOrLess', 'err_milk_not_producing_or_less_required');
+        reqIf(m['milkNotProducingOrLess'] == 'Yes', 'milkCounselingAdvice', 'err_milk_counseling_advice_required');
+        req('nippleCracksPainOrEngorged', 'err_nipple_cracks_pain_or_engorged_required');
+        req('referHospital', 'err_refer_hospital_required');
+        reqIf(m['referHospital'] == 'Yes', 'referTo', 'err_refer_to_required');
       }
     } else if (idx >= 2) {
       final ci = idx - 2;

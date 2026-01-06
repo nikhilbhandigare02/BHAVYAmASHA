@@ -282,8 +282,7 @@ class EligibleCouleUpdateBloc
         }
       }
 
-      // Prepare the state update with database values, but prioritize passed values for basic fields
-      final newState = state.copyWith(
+       final newState = state.copyWith(
         // Use passed data for basic fields (this is what user expects to see)
         rchId: rchId.isNotEmpty ? rchId : (womanDetails['RichIDChanged']?.toString() ??
             womanDetails['richIdChanged']?.toString() ??

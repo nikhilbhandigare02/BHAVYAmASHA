@@ -97,10 +97,12 @@ class Routes{
         case Route_Names.Ncdlist:
         return MaterialPageRoute(builder: (context) => Ncdlist(),);
       case Route_Names.profileScreen:
+        final args = setting.arguments as Map<String, dynamic>?;
+        final fromLogin = args?['fromLogin'] as bool? ?? false;
         return MaterialPageRoute(
           builder: (context) => BlocProvider(
             create: (context) => ProfileBloc(),
-            child: ProfileScreen(),
+            child: ProfileScreen(fromLogin: fromLogin),
           ),
         );
       case Route_Names.MISScreen:

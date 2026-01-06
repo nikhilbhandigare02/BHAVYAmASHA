@@ -958,78 +958,34 @@ class _PartATab extends StatelessWidget {
         final waist = state.data['partA.waist'] as String?;
         final familyHx = state.data['partA.familyHistory'] as String?;
         final l10n = AppLocalizations.of(context)!;
-        final scoreColWidth = 36.0;
-        final scoreColRightPadding = 16.0;
-
-        Widget header() => Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              l10n.cbacQuestions,
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
-            ),
-
-            Padding(
-              padding: EdgeInsets.only(right: scoreColRightPadding),
-              child: SizedBox(
-                width: scoreColWidth,
-                child: Center(
-                  child: Text(
-                    l10n.cbacScore,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14.sp,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-        Widget rowScore(int score) => Padding(
-          padding: EdgeInsets.only(right: scoreColRightPadding),
-          child: SizedBox(
-            width: scoreColWidth,
-            child: Center(
-              child: Text(
-                '$score',
-                style: TextStyle(color: Colors.black87, fontSize: 15.sp),
-              ),
-            ),
-          ),
-        );
-
-        Widget qRow({
+        TableRow buildQRow({
           required String question,
           required List<String> items,
           required String? value,
           required void Function(String?) onChanged,
           required int score,
         }) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          return TableRow(
             children: [
-              Row(
-                children: [
-                  SizedBox(
-                    width: 325,
-                    child: ApiDropdown<String>(
-                      labelText: question,
-                      hintText: l10n.select,
-                      labelFontSize: 15.sp,
-                      items: items,
-                      getLabel: (s) => s,
-                      value: value,
-                      onChanged: onChanged,
-                      isExpanded: true,
-                    ),
-                  ),
-                  const Spacer(),
-                  rowScore(score),
-                ],
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: ApiDropdown<String>(
+                  labelText: question,
+                  hintText: l10n.select,
+                  labelFontSize: 15.sp,
+                  items: items,
+                  getLabel: (s) => s,
+                  value: value,
+                  onChanged: onChanged,
+                  isExpanded: true,
+                ),
               ),
-              // const SizedBox(height: 6),
-              const Divider(height: 0.5),
+              Center(
+                child: Text(
+                  '$score',
+                  style: TextStyle(color: Colors.black87, fontSize: 15.sp),
+                ),
+              ),
             ],
           );
         }
@@ -1158,120 +1114,143 @@ class _PartATab extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
           children: [
-            header(),
-            const SizedBox(height: 8),
-
-            qRow(
-              question: l10n.cbacA_ageQ,
-
-              items: itemsAge,
-              value: age,
-              onChanged: (v) {
-                bloc.add(CbacFieldChanged('partA.age', v));
-                final idx = v == null ? -1 : itemsAge.indexOf(v);
-                if (idx >= 0) {
-                  bloc.add(CbacFieldChanged('partA.age_code', codeAge[idx]));
-                }
+            Table(
+              columnWidths: const {
+                0: FlexColumnWidth(),
+                1: IntrinsicColumnWidth(),
               },
-              score: scoreAge,
-            ),
-
-            qRow(
-              question: l10n.cbacA_tobaccoQ,
-              items: itemsTobacco,
-              value: tobacco,
-              onChanged: (v) {
-                bloc.add(CbacFieldChanged('partA.tobacco', v));
-                final idx = v == null ? -1 : itemsTobacco.indexOf(v);
-                if (idx >= 0) {
-                  bloc.add(
-                    CbacFieldChanged('partA.tobacco_code', codeTob[idx]),
-                  );
-                }
-              },
-              score: scoreTobacco,
-            ),
-
-            qRow(
-              question: l10n.cbacA_alcoholQ,
-              items: itemsYesNo,
-              value: alcohol,
-              onChanged: (v) {
-                bloc.add(CbacFieldChanged('partA.alcohol', v));
-                final idx = v == null ? -1 : itemsYesNo.indexOf(v);
-                if (idx >= 0) {
-                  bloc.add(
-                    CbacFieldChanged('partA.alcohol_code', codeYesNo[idx]),
-                  );
-                }
-              },
-              score: scoreAlcohol,
-            ),
-
-            qRow(
-              question: l10n.cbacA_waistQ,
-              items: itemsWaist,
-              value: waist,
-              onChanged: (v) {
-                bloc.add(CbacFieldChanged('partA.waist', v));
-                final idx = v == null ? -1 : itemsWaist.indexOf(v);
-                if (idx >= 0) {
-                  bloc.add(
-                    CbacFieldChanged('partA.waist_code', codeWaist[idx]),
-                  );
-                }
-              },
-              score: scoreWaist,
-            ),
-
-            qRow(
-              question: l10n.cbacA_activityQ,
-              items: itemsActivity,
-              value: activity,
-              onChanged: (v) {
-                bloc.add(CbacFieldChanged('partA.activity', v));
-                final idx = v == null ? -1 : itemsActivity.indexOf(v);
-                if (idx >= 0) {
-                  bloc.add(
-                    CbacFieldChanged('partA.activity_code', codeActivity[idx]),
-                  );
-                }
-              },
-              score: scoreActivity,
-            ),
-
-            qRow(
-              question: l10n.cbacA_familyQ,
-              items: itemsYesNo,
-              value: familyHx,
-              onChanged: (v) {
-                bloc.add(CbacFieldChanged('partA.familyHistory', v));
-                final idx = v == null ? -1 : itemsYesNo.indexOf(v);
-                if (idx >= 0) {
-                  bloc.add(
-                    CbacFieldChanged(
-                      'partA.familyHistory_code',
-                      codeYesNo[idx],
-                    ),
-                  );
-                }
-              },
-              score: scoreFamily,
-            ),
-
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.cbacTotalScorePartA(''),
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              border: TableBorder(
+                horizontalInside: BorderSide(
+                  width: 0.5,
+                  color: Colors.black12,
                 ),
-                Padding(
-                  padding: EdgeInsets.only(right: scoreColRightPadding),
-                  child: SizedBox(
-                    width: scoreColWidth,
-                    child: Center(
+              ),
+              children: [
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        l10n.cbacQuestions,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                    Center(
+                      child: Text(
+                        l10n.cbacScore,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                buildQRow(
+                  question: l10n.cbacA_ageQ,
+                  items: itemsAge,
+                  value: age,
+                  onChanged: (v) {
+                    bloc.add(CbacFieldChanged('partA.age', v));
+                    final idx = v == null ? -1 : itemsAge.indexOf(v);
+                    if (idx >= 0) {
+                      bloc.add(CbacFieldChanged('partA.age_code', codeAge[idx]));
+                    }
+                  },
+                  score: scoreAge,
+                ),
+                buildQRow(
+                  question: l10n.cbacA_tobaccoQ,
+                  items: itemsTobacco,
+                  value: tobacco,
+                  onChanged: (v) {
+                    bloc.add(CbacFieldChanged('partA.tobacco', v));
+                    final idx = v == null ? -1 : itemsTobacco.indexOf(v);
+                    if (idx >= 0) {
+                      bloc.add(
+                        CbacFieldChanged('partA.tobacco_code', codeTob[idx]),
+                      );
+                    }
+                  },
+                  score: scoreTobacco,
+                ),
+                buildQRow(
+                  question: l10n.cbacA_alcoholQ,
+                  items: itemsYesNo,
+                  value: alcohol,
+                  onChanged: (v) {
+                    bloc.add(CbacFieldChanged('partA.alcohol', v));
+                    final idx = v == null ? -1 : itemsYesNo.indexOf(v);
+                    if (idx >= 0) {
+                      bloc.add(
+                        CbacFieldChanged('partA.alcohol_code', codeYesNo[idx]),
+                      );
+                    }
+                  },
+                  score: scoreAlcohol,
+                ),
+                buildQRow(
+                  question: l10n.cbacA_waistQ,
+                  items: itemsWaist,
+                  value: waist,
+                  onChanged: (v) {
+                    bloc.add(CbacFieldChanged('partA.waist', v));
+                    final idx = v == null ? -1 : itemsWaist.indexOf(v);
+                    if (idx >= 0) {
+                      bloc.add(
+                        CbacFieldChanged('partA.waist_code', codeWaist[idx]),
+                      );
+                    }
+                  },
+                  score: scoreWaist,
+                ),
+                buildQRow(
+                  question: l10n.cbacA_activityQ,
+                  items: itemsActivity,
+                  value: activity,
+                  onChanged: (v) {
+                    bloc.add(CbacFieldChanged('partA.activity', v));
+                    final idx = v == null ? -1 : itemsActivity.indexOf(v);
+                    if (idx >= 0) {
+                      bloc.add(
+                        CbacFieldChanged('partA.activity_code', codeActivity[idx]),
+                      );
+                    }
+                  },
+                  score: scoreActivity,
+                ),
+                buildQRow(
+                  question: l10n.cbacA_familyQ,
+                  items: itemsYesNo,
+                  value: familyHx,
+                  onChanged: (v) {
+                    bloc.add(CbacFieldChanged('partA.familyHistory', v));
+                    final idx = v == null ? -1 : itemsYesNo.indexOf(v);
+                    if (idx >= 0) {
+                      bloc.add(
+                        CbacFieldChanged(
+                          'partA.familyHistory_code',
+                          codeYesNo[idx],
+                        ),
+                      );
+                    }
+                  },
+                  score: scoreFamily,
+                ),
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        l10n.cbacTotalScorePartA(''),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    Center(
                       child: Text(
                         '$total',
                         style: const TextStyle(
@@ -1280,7 +1259,7 @@ class _PartATab extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),

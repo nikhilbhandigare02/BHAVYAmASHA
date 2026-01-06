@@ -326,7 +326,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                           Navigator.pushNamedAndRemoveUntil(
                                             context,
                                             Route_Names.profileScreen,
-                                                (route) => false,
+                                            (route) => false,
+                                            arguments: {
+                                              'fromLogin': true,
+                                            },
                                           );
                                         } else {
                                           Navigator.pushNamedAndRemoveUntil(
