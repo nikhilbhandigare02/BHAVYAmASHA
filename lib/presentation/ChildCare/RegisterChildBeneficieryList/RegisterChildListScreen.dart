@@ -407,7 +407,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
   }
 
   String _formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return 'N/A';
+    if (dateStr == null || dateStr.isEmpty) return 'Not Available';
     try {
       final date = DateTime.parse(dateStr);
       return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
@@ -417,7 +417,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
   }
 
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
-    String age = 'N/A';
+    String age = 'Not Available';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
 
     if (dobRaw != null && dobRaw.toString().isNotEmpty) {
@@ -728,24 +728,24 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate'] ?? 'N/A')),
+                      Expanded(child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate'] ?? 'Not Available')),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType'] ?? 'Child')),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
                           (data['BeneficiaryID']?.toString().length ?? 0) > 11
                               ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11)
-                              : (data['BeneficiaryID']?.toString() ?? 'N/A'))),
+                              : (data['BeneficiaryID']?.toString() ?? 'Not Available'))),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.nameLabel ?? 'Name', data['Name'] ?? 'N/A')),
+                      Expanded(child: _rowText(l10n?.nameLabel ?? 'Name', data['Name'] ?? 'Not Available')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? 'N/A')),
+                      Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? 'Not Available')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RchID']?.isNotEmpty == true ? data['RchID'] : 'N/A')),
+                      Expanded(child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RchID']?.isNotEmpty == true ? data['RchID'] : 'Not Available')),
                     ],
                   ),
                   const SizedBox(height: 10),

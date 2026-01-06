@@ -908,7 +908,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get choNameLabel => 'सी.एच.ओ. का नाम';
 
   @override
-  String get completedVisits => 'पूर्ण दौरे';
+  String get completedVisits => 'पूर्ण कार्य';
 
   @override
   String get contactLabel => 'संपर्क';
@@ -2283,7 +2283,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get thirdAncLabel => 'तीसरी एएनसी';
 
   @override
-  String get toDoVisits => 'दौरा करना';
+  String get toDoVisits => 'निर्धारित कार्य';
 
   @override
   String get todayWorkCompleted => 'Completed visits :';
@@ -2313,13 +2313,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get totalChildrenBornLabel => 'पैदा हुए बच्चों की कुल संख्या';
 
   @override
-  String get totalFemaleChildrenLabel => 'कुल महिला बच्चों की संख्या';
+  String get totalFemaleChildrenLabel => 'पैदा हुए बच्चों की कुल संख्या (महिला)';
 
   @override
   String get totalLiveChildrenLabel => 'कुल जीवित बच्चों की संख्या';
 
   @override
-  String get totalMaleChildrenLabel => 'कुल पुरुष बच्चों की संख्या';
+  String get totalMaleChildrenLabel => 'पैदा हुए बच्चों की कुल संख्या (पुरुष)';
 
   @override
   String get trackEligibleCoupleTitle => 'योग्य दंपतियों की ट्रैकिंग';
@@ -4234,7 +4234,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get unknownComplaint => 'अज्ञात शिकायत';
 
   @override
-  String get na => 'प्र/ल';
+  String get na => 'उपलब्ध नहीं है';
 
   @override
   String get dosageFrequency => 'खुराक | आवृत्ति';
@@ -7289,4 +7289,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get mohallaTolaName => 'टोला/मोहल्ला';
+
+  @override
+  String get categoryANCbadge => 'एएनसी देय';
 }
