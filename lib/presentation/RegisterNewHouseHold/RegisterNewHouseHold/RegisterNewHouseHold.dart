@@ -268,7 +268,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               context: context,
               title: l10n?.confirmAttentionTitle ?? 'Attention!',
               message: l10n?.confirmBackLoseDetailsMsg ?? 'If you go back, details will be lost. Do you want to go back?',
-              yesText: l10n?.confirmYesExit ?? 'Yes, Exit',
+              yesText: l10n?.yes ?? '',
               noText: l10n?.confirmNo ?? 'No',
             );
             return shouldExit ?? false;
@@ -1634,7 +1634,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                         );
                       },
                       child: Text(
-                        l10n?.ok ??'OK',
+                        l10n?.ok ??'OKAY',
                         style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,

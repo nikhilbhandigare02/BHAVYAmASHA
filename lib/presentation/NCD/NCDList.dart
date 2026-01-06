@@ -327,7 +327,7 @@ class _NCDHomeState extends State<Ncdlist> {
                           data['village']?.toString() ?? 'N/A'
                       ),
                       _rowText(
-                          l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla',
+                          l10n?.mohallaTolaName ?? 'Tola/Mohalla',
                           data['Tola/Mohalla']?.toString() ?? 'N/A'  // FIXED: Use actual key
                       ),
                       _rowText(

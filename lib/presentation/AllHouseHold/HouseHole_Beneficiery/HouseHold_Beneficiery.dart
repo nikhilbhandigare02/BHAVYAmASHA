@@ -381,7 +381,7 @@ class _HouseHold_BeneficiaryScreenState
                         : (l10n?.notAvailable ?? 'Not Available')),
                   ),
                   _infoColumn(
-                    l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla',
+                    l10n?.mohallaTolaName ?? 'Tola/Mohalla',
                     ((_mohalla != null && _mohalla!.trim().isNotEmpty)
                         ? _mohalla!
                         : (l10n?.notAvailable ?? 'Not Available')),
@@ -761,7 +761,7 @@ class _HouseHold_BeneficiaryScreenState
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _rowText(l10n?.bcmMobileHint ?? 'Mobile no.', data['Mobileno.'] ?? ''),
+                        child: _rowText(l10n?.mobileLabel ?? 'Mobile no.', data['Mobileno.'] ?? ''),
                       ),
                     ],
                   ),

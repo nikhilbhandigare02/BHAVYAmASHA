@@ -581,6 +581,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                   child: ApiDropdown<String>(
                   key: const ValueKey('relation_with_head'),
                   labelText: '${l.relationWithFamilyHead} *',
+                  readOnly: true,
                   items: widget.isMemberDetails
                       ? [
                     'Self',
@@ -706,7 +707,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
               _section(
                 CustomTextField(
                   labelText: l.ageAtMarriage,
-                  hintText: l.ageAtMarriageHint,
+                  hintText: l.ageAtMarriage,
                   keyboardType: TextInputType.number,
                   initialValue: state.ageAtMarriage,
                   onChanged: (v) => context.read<SpousBloc>().add(SpUpdateAgeAtMarriage(v.trim())),
@@ -1184,7 +1185,7 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
                       Expanded(
                         child: CustomTextField(
                             labelText: l.rchIdLabel,
-                            hintText: l.enter_12_digit_rch_id,
+                            hintText: l.rchIdLabel,
                             keyboardType: TextInputType.number,
                             initialValue: state.RichIDChanged,
                             inputFormatters: [
@@ -1560,8 +1561,8 @@ class _SpousdetailsState extends State<Spousdetails> with AutomaticKeepAliveClie
 
               _section(
                 CustomTextField(
-                  labelText: l.voterId,
-                  hintText: l.voterIdHint,
+                  labelText: l.voterIdLabel,
+                  hintText: l.voterIdLabel,
                   initialValue: state.voterId,
                   onChanged: (v) => context.read<SpousBloc>().add(SpUpdateVoterId(v.trim())),
                 ),

@@ -1833,7 +1833,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otpGeneratedSuccess => 'OTP generated successfully';
 
   @override
-  String get ownershipTypeLabel => 'Type of ownership';
+  String get ownershipTypeLabel => 'House ownership type';
 
   @override
   String get panchayatHint => 'Panchayat';
@@ -3318,7 +3318,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmYesExit => 'Yes, Exit';
 
   @override
-  String get confirmNo => 'No, Stay';
+  String get confirmNo => 'No';
 
   @override
   String get memberRemainsToAdd => 'No. of members remains to be added';
@@ -3603,7 +3603,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get error => 'Error';
 
   @override
-  String get ok => 'OK';
+  String get ok => 'OKAY';
 
   @override
   String get home => 'Home';
@@ -7286,4 +7286,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mobileNumberMismatch => 'Mobile number mismatch';
+
+  @override
+  String get mohallaTolaName => 'Tola/Mohalla';
 }

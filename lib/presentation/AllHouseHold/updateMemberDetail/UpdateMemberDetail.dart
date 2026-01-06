@@ -146,7 +146,7 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                   context: context,
                   title: l.confirmAttentionTitle,
                   message: l.confirmCloseFormMsg,
-                  yesText: l.confirmYes,
+                  yesText: l.yes,
                   noText: l.confirmNo,
                 );
                 if (shouldExit ?? false) {
@@ -1346,7 +1346,7 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                 _section(
                                   CustomTextField(
                                     labelText: l.ageAtMarriageLabel,
-                                    hintText: l.ageAtMarriageHint,
+                                    hintText: l.ageAtMarriageLabel,
                                     keyboardType: TextInputType.number,
                                     initialValue: state.ageAtMarriage,
                                     onChanged: (v) => context
