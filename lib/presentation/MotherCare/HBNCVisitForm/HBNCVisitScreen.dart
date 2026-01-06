@@ -29,9 +29,6 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
   late TabController _tabController;
   final _formKey = GlobalKey<FormState>();
   late int _childCount;
-  bool _saveTapLocked = false;
-  bool _saveRequested = false;
-  bool _saveInProgress = false;
   bool _navigationTriggered = false;
 
   @override
@@ -160,14 +157,6 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
 
                     // Scroll to first error when validation fails
                     _scrollToFirstError();
-
-                    if (_saveTapLocked) {
-                      setState(() {
-                        _saveTapLocked = false;
-                        _saveRequested = false;
-                        _saveInProgress = false;
-                      });
-                    }
                   }
 
                   if (state.saveSuccess && !state.isSaving) {
@@ -206,24 +195,10 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                           });
                         }
                       }
-                      if (_saveTapLocked) {
-                        setState(() {
-                          _saveTapLocked = false;
-                          _saveRequested = false;
-                          _saveInProgress = false;
-                        });
-                      }
                     }
                   }
 
                   if (!state.isSaving && !state.saveSuccess && state.errorMessage != null) {
-                    if (_saveTapLocked) {
-                      setState(() {
-                        _saveTapLocked = false;
-                        _saveRequested = false;
-                        _saveInProgress = false;
-                      });
-                    }
                   }
 
                   if (state.lastValidatedIndex == idx &&
@@ -236,17 +211,16 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                     }
                   }
 
-                  // Handle save after validation
+                  // Handle save after validation (only once per successful validation)
                   if (state.lastValidatedIndex == idx &&
                       state.lastValidationWasSave &&
-                      state.validationErrors.isEmpty) {
-                    if (_saveRequested && !_saveInProgress) {
-                      final beneficiaryData = (widget as dynamic).beneficiaryData;
-                      _saveInProgress = true;
-                      context.read<HbncVisitBloc>().add(
-                        SaveHbncVisit(beneficiaryData: beneficiaryData),
-                      );
-                    }
+                      state.validationErrors.isEmpty &&
+                      !state.isSaving &&
+                      !state.saveSuccess) {
+                    final beneficiaryData = (widget as dynamic).beneficiaryData;
+                    context.read<HbncVisitBloc>().add(
+                      SaveHbncVisit(beneficiaryData: beneficiaryData),
+                    );
                   }
                 },
                 child: Column(
@@ -274,7 +248,16 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                         ),
                       ),
                       onIcon1Tap: () {
-                        Navigator.pushNamed(context, Route_Names.previousVisit);
+                        final beneficiaryData = (widget as dynamic).beneficiaryData;
+                        final beneficiaryId =
+                            beneficiaryData?['unique_key']?.toString() ?? '';
+                        Navigator.pushNamed(
+                          context,
+                          Route_Names.previousVisit,
+                          arguments: {
+                            'beneficiaryId': beneficiaryId,
+                          },
+                        );
                       },
                     ),
                     Container(
@@ -364,29 +347,27 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                                         height: 34,
                                         title: t.saveButton,
                                         isLoading: state.isSaving,
-                                        disabled: state.isSaving || _saveTapLocked,
+                                        disabled: state.isSaving,
                                         onPress: () {
-                                          if (!state.isSaving && !_saveTapLocked) {
+                                          if (!state.isSaving) {
                                             setState(() {
-                                              _saveTapLocked = true;
-                                              _saveRequested = true;
                                               _navigationTriggered = false;
                                             });
-                                            if (_formKey.currentState?.validate() ?? true) {
-                                              context.read<HbncVisitBloc>().add(
-                                                ValidateSection(
-                                                  _tabController.index,
-                                                  isSave: true,
-                                                ),
-                                              );
-                                            } else {
-                                              showAppSnackBar(
-                                                context,
-                                                'Please fill all mandatory fields',
-                                              );
-                                              // Scroll to first error on save
+
+                                            final isValid = _formKey.currentState?.validate() ?? true;
+                                            if (!isValid) {
+                                              // Keep scroll-to-first-error behavior for inline validators
                                               _scrollToFirstError();
                                             }
+
+                                            // Always delegate actual validation & messages to the BLoC,
+                                            // so we get specific, per-question snackbars.
+                                            context.read<HbncVisitBloc>().add(
+                                              ValidateSection(
+                                                _tabController.index,
+                                                isSave: true,
+                                              ),
+                                            );
                                           }
                                         },
                                       );
@@ -396,18 +377,18 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                                     height: 34,
                                     title: t.nextButton,
                                     onPress: () {
-                                      if (_formKey.currentState?.validate() ?? true) {
-                                        context
-                                            .read<HbncVisitBloc>()
-                                            .add(ValidateSection(idx));
-                                      } else {
-                                        // Scroll to first error on next button
+                                      final isValid = _formKey.currentState?.validate() ?? true;
+
+                                      // Always run BLoC validation so we get
+                                      // specific, per-question snackbar messages.
+                                      if (!isValid) {
+                                        // Keep scroll-to-first-error behavior
                                         _scrollToFirstError();
-                                        showAppSnackBar(
-                                          context,
-                                          'Please fill all mandatory fields',
-                                        );
                                       }
+
+                                      context
+                                          .read<HbncVisitBloc>()
+                                          .add(ValidateSection(idx));
                                     },
                                   ),
                                 ),
@@ -440,6 +421,20 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
       'err_counseling_advice_required': t.err_counseling_advice_required,
       'err_milk_not_producing_or_less_required': t.err_milk_not_producing_or_less_required,
       'err_nipple_cracks_pain_or_engorged_required': t.err_nipple_cracks_pain_or_engorged_required,
+      'err_mcp_mother_filled_required': t.err_mcp_mother_filled_required,
+      'err_excessive_bleeding_required': t.err_excessive_bleeding_required,
+      'err_unconscious_fits_required': t.err_unconscious_fits_required,
+      'err_breastfeeding_problem_description_required': t.err_breastfeeding_problem_description_required,
+      'err_breastfeeding_help_required': t.err_breastfeeding_help_required,
+      'err_meals_per_day_required': t.err_meals_per_day_required,
+      'err_paracetamol_given_required': t.err_paracetamol_given_required,
+      'err_milk_counseling_advice_required': t.err_milk_counseling_advice_required,
+      'err_refer_hospital_required': t.err_refer_hospital_required,
+      'err_refer_to_required': t.err_refer_to_required,
+      'err_date_of_death_required': t.err_date_of_death_required,
+      'err_death_place_required': t.err_death_place_required,
+      'err_reason_of_death_required': t.err_reason_of_death_required,
+      'err_other_reason_of_death_required': t.err_other_reason_of_death_required,
       'err_baby_condition_required': t.err_baby_condition_required,
       'err_baby_name_required': t.err_baby_name_required,
       'err_baby_gender_required': t.err_baby_gender_required,

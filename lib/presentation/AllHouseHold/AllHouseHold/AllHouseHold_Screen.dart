@@ -111,12 +111,12 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           if (hhKey.isEmpty) continue;
 
           final state = (ec['eligible_couple_state'] ?? '').toString();
-          if (state != 'tracking_due') continue;
+          if (state != 'eligible_couple') continue;
 
           final beneficiaryKey = (ec['beneficiary_ref_key'] ?? '').toString();
           if (beneficiaryKey.isEmpty) continue;
 
-          // Use beneficiary_ref_key to ensure distinct counting per beneficiary
+
           final uniqueKey = '$hhKey::$beneficiaryKey';
           if (_distinctEcKeys.contains(uniqueKey)) continue;
           _distinctEcKeys.add(uniqueKey);
@@ -208,7 +208,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           final bool isHeadByRelation =
               relation == 'head' || relation == 'self';
 
-          // ✅ NEW CONDITION
+
           final bool isFamilyHead =
               info['isFamilyHead'] == true ||
                   info['isFamilyHead']?.toString().toLowerCase() == 'true';

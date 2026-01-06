@@ -2910,7 +2910,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get howWasBreastfedLabel => 'How did the baby breastfed?';
 
   @override
-  String get firstFeedGivenAfterBirthLabel => 'What was given as the baby first feed to baby after birth? *';
+  String get firstFeedGivenAfterBirthLabel => 'What was given as the baby first feed to baby after birth?';
 
   @override
   String get adequatelyFedSevenToEightTimesLabel => 'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)?';
@@ -2943,10 +2943,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get err_breastfeeding_problems_required => 'Breastfeeding problems selection is required.';
 
   @override
+  String get err_mcp_mother_filled_required => 'MCP card filled status is required.';
+
+  @override
+  String get err_excessive_bleeding_required => 'Excessive bleeding selection is required.';
+
+  @override
+  String get err_unconscious_fits_required => 'Unconscious/fits selection is required.';
+
+  @override
+  String get err_breastfeeding_problem_description_required => 'Breastfeeding problem description is required.';
+
+  @override
+  String get err_breastfeeding_help_required => 'Breastfeeding help/action description is required.';
+
+  @override
   String get err_pads_per_day_required => 'Pads changed per day is required.';
 
   @override
+  String get err_meals_per_day_required => 'Number of full meals per day is required.';
+
+  @override
   String get err_mothers_temperature_required => 'Mother\'s temperature is required.';
+
+  @override
+  String get err_paracetamol_given_required => 'Paracetamol tablet given selection is required.';
 
   @override
   String get err_foul_discharge_high_fever_required => 'Foul discharge/high fever selection is required.';
@@ -2962,6 +2983,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get err_nipple_cracks_pain_or_engorged_required => 'Nipple cracks/pain or engorged breasts selection is required.';
+
+  @override
+  String get err_milk_counseling_advice_required => 'Counseling/advice for milk problem is required.';
+
+  @override
+  String get err_refer_hospital_required => 'Refer to hospital selection is required.';
+
+  @override
+  String get err_refer_to_required => 'Referral facility selection is required.';
 
   @override
   String get err_baby_condition_required => 'Baby\'s condition is required.';
@@ -3070,6 +3100,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get err_bloated_or_frequent_vomit_required => 'Bloated stomach/frequent vomiting selection is required.';
+
+  @override
+  String get err_date_of_death_required => 'Date of death is required.';
+
+  @override
+  String get err_death_place_required => 'Place of death selection is required.';
+
+  @override
+  String get err_reason_of_death_required => 'Reason of death selection is required.';
+
+  @override
+  String get err_other_reason_of_death_required => 'Other reason of death description is required.';
 
   @override
   String get previousVisits => 'Previous Visits';
@@ -5845,7 +5887,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dhLabel => 'DH';
 
   @override
-  String get babyWeightRecordedInMPC => 'Is the weight of the newborn baby recorded in the Mother Protection Card? *';
+  String get babyWeightRecordedInMPC => 'Is the weight of the newborn baby recorded in the Mother Protection Card? ';
 
   @override
   String get referToHospital => 'Refer to hospital?';
