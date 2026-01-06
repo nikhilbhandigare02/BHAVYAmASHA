@@ -1082,7 +1082,6 @@ class LocalStorageDao {
       String whereClause = 'eligible_couple_state = ? AND (is_deleted IS NULL OR is_deleted = 0)';
       List<dynamic> whereArgs = ['tracking_due'];
 
-      // If ASHA unique key is available, filter by it
       if (ashaUniqueKey.isNotEmpty) {
         whereClause += ' AND current_user_key = ?';
         whereArgs.add(ashaUniqueKey);
@@ -1112,6 +1111,7 @@ class LocalStorageDao {
         'beneficiaries_new',
         where: 'unique_key IN ($placeholders) AND (is_deleted IS NULL OR is_deleted = 0) AND (is_migrated IS NULL OR is_migrated = 0)',
         whereArgs: trackingDueBeneficiaryKeys.toList(),
+        orderBy: 'created_date_time DESC',
       );
 
       print('📊 Found ${rows.length} beneficiaries matching tracking_due status');

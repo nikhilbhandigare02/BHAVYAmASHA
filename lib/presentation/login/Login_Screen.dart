@@ -353,7 +353,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                           isLoading: state.postApiStatus == PostApiStatus.loading,
                                           onPress: () {
                                             context.read<LoginBloc>().add(ShowValidationErrors());
-
                                             final username = context.read<LoginBloc>().state.username;
                                             final password = context.read<LoginBloc>().state.password;
 
@@ -382,8 +381,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             ),
 
                             const SizedBox(height: 40),
-
-
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.easeInOut,

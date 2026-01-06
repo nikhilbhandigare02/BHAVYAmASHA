@@ -119,7 +119,7 @@ class _Migratedout extends State<Migratedout> {
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n!.guestBeneficiaryList,
+        screenTitle: l10n!.migratedOut,
         showBack: true,
       ),
       drawer: const CustomDrawer(),

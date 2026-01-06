@@ -39,7 +39,6 @@ class _Lbwrefered extends State<Lbwrefered> {
     try {
       print('🔍 Loading LBW children from beneficiaries table (flexible thresholds)');
 
-      // 2. Updated query with current_user_key condition
       final rows = await db.query(
         'beneficiaries_new',
         where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL) AND current_user_key = ?',
@@ -87,11 +86,13 @@ class _Lbwrefered extends State<Lbwrefered> {
           final dobRaw = info['dob'] ?? info['dateOfBirth'];
 
           final ageGender = _formatAgeGender(dobRaw, genderRaw);
+          final weightDisplay = _formatWeight(weight, birthWeight);
 
           lbwChildren.add({
             'hhId': hhId,
             'name': name.isEmpty ? 'Unknown' : name,
             'age_gender': ageGender,
+            'weight_display': weightDisplay,
             'status': 'LBW',
             '_raw': row,
           });
@@ -165,6 +166,18 @@ class _Lbwrefered extends State<Lbwrefered> {
     final i = int.tryParse(s);
     if (i != null) return i;
     return null;
+  }
+
+  String _formatWeight(double? weight, double? birthWeight) {
+    if (weight != null) {
+      // Show current weight in kg with one decimal place
+      return '${weight.toStringAsFixed(1)} kg';
+    }
+    if (birthWeight != null) {
+      // Show birth weight in grams, rounded to nearest gram
+      return '${birthWeight.round()} g';
+    }
+    return 'N/A';
   }
 
   @override
@@ -305,6 +318,7 @@ class _Lbwrefered extends State<Lbwrefered> {
                   _infoRow(
                     '',
                     data['age_gender'] ?? '',
+                    trailing: data['weight_display'] ?? '',
                     isWrappable: true,
                   ),
                 ],
@@ -316,7 +330,7 @@ class _Lbwrefered extends State<Lbwrefered> {
     );
   }
 
-  Widget _infoRow(String? title, String value,{bool isWrappable = false}) {
+  Widget _infoRow(String? title, String value,{String? trailing, bool isWrappable = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -340,6 +354,18 @@ class _Lbwrefered extends State<Lbwrefered> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          if (trailing != null && trailing.isNotEmpty) ...[
+            const SizedBox(width: 8),
+            Text(
+              trailing,
+              style:  TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 13.sp,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ],
       ),
     );

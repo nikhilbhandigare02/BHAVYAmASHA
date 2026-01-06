@@ -4214,7 +4214,7 @@ abstract class AppLocalizations {
   /// No description provided for @richIdLabel.
   ///
   /// In en, this message translates to:
-  /// **'Rich ID'**
+  /// **'Rch ID'**
   String get richIdLabel;
 
   /// No description provided for @rnhAddHeadFirstTabs.
@@ -7570,6 +7570,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mobile Number'**
   String get mobileNumber;
+
+  /// No description provided for @mobileNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile No'**
+  String get mobileNo;
 
   /// No description provided for @enterMobileNumber.
   ///
@@ -13664,7 +13670,7 @@ abstract class AppLocalizations {
   /// No description provided for @badgeLBW.
   ///
   /// In en, this message translates to:
-  /// **'LBW'**
+  /// **'LBW referred'**
   String get badgeLBW;
 
   /// No description provided for @badgeMigrated.

@@ -2079,7 +2079,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rhSdhDhLabel => 'RH/SDH/DH/SADAR Hospital';
 
   @override
-  String get richIdLabel => 'Rich ID';
+  String get richIdLabel => 'Rch ID';
 
   @override
   String get rnhAddHeadFirstTabs => 'Please add a family head before accessing other sections.';
@@ -3757,6 +3757,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mobileNumber => 'Mobile Number';
+
+  @override
+  String get mobileNo => 'Mobile No';
 
   @override
   String get enterMobileNumber => 'Please enter the mobile number';
@@ -6808,7 +6811,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get badgePNC => 'PNC';
 
   @override
-  String get badgeLBW => 'LBW';
+  String get badgeLBW => 'LBW referred';
 
   @override
   String get badgeMigrated => 'Migrated';

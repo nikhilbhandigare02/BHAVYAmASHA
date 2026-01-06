@@ -211,7 +211,11 @@ class _DeathRegisterState extends State<DeathRegister> {
     final hhId = data['household_ref_key']?.toString() ?? 'N/A';
     final uniqueKey = data['unique_key']?.toString() ?? '';
 
-    final deathDate = deathDetails['date_of_death'] ?? deathDetails['deathDate'] ?? 'Not recorded';
+    final deathDate =
+        deathDetails['date_of_death'] ??
+            deathDetails['deathDate'] ??
+            deathDetails['dateOfDeath'] ??
+            'Not recorded';
     final deathPlace = deathDetails['death_place'] ?? deathDetails['deathPlace'] ?? 'Not specified';
 
     return Container(
@@ -262,13 +266,13 @@ class _DeathRegisterState extends State<DeathRegister> {
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.15),
+                        color: Colors.green.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         _getLocalizedMemberType(memberType, l10n),
                         style: const TextStyle(
-                          color: Colors.red,
+                          color: Colors.green,
                           fontWeight: FontWeight.bold,
                           fontSize: 12.5,
                         ),
@@ -310,6 +314,14 @@ class _DeathRegisterState extends State<DeathRegister> {
                       const SizedBox(width: 8),
                       Row(
                         children: [
+                          const Text(
+                            'Date: ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
                           Text(
                             _formatDate(deathDate),
                             style: const TextStyle(
@@ -340,15 +352,27 @@ class _DeathRegisterState extends State<DeathRegister> {
                     ),
                     const SizedBox(width: 8),
                     Flexible(
-                      child: Text(
-                        deathPlace ?? "N/A",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w400,
-                          fontSize: 13,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.right,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          const Text(
+                            'Place: ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 13,
+                            ),
+                          ),
+                          Text(
+                            deathPlace ?? "N/A",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 13,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -366,7 +390,7 @@ class _DeathRegisterState extends State<DeathRegister> {
     try {
       final date = DateTime.tryParse(dateString);
       if (date == null) return dateString;
-      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
     } catch (e) {
       return dateString;
     }

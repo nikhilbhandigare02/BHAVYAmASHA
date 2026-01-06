@@ -3759,6 +3759,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get mobileNumber => 'मोबाइल नंबर';
 
   @override
+  String get mobileNo => 'Mobile No';
+
+  @override
   String get enterMobileNumber => 'कृपया मोबाइल नंबर दर्ज करें';
 
   @override
