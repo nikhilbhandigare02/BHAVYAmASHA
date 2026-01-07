@@ -532,6 +532,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     // Fallback if gender is unknown
     return [
       'Self',
+      'Family Head',
       'Husband',
       'Wife',
       'Father',
@@ -760,10 +761,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
       final school = (data['school'] ?? '') as String;
       if (school.isNotEmpty) b.add(ChildSchoolChange(school));
 
-      // Hydrate ChildrenBloc from any saved childrendetails summary so that
-      // reopening a member via the children tab shows the same counters
-      // (totalBorn, totalLive, etc.) that were captured when the member
-      // was first added.
+
       try {
         final chRaw = data['childrendetails'];
         Map<String, dynamic>? chMap;
@@ -2784,7 +2782,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             return "${l.relative} ";
 
                                           case 'Other':
-                                            return '${l.other} ';
+                                            return '${l.otherDropdown} ';
 
                                           default:
                                             return s;
@@ -3836,7 +3834,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             return "${l.relative} ";
 
                                           case 'Other':
-                                            return '${l.other} ';
+                                            return '${l.otherDropdown} ';
 
                                           default:
                                             return s;

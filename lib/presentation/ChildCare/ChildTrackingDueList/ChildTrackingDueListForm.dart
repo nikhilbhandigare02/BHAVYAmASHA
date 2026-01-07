@@ -63,7 +63,6 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Initialize TabController only once when context is available
     if (!_formDataLoaded) {
       _tabController = TabController(length: getTabs(context).length, vsync: this);
       _tabController.addListener(() {
@@ -84,7 +83,6 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
     }
   }
 
-  // Calculate due date for each vaccination schedule
   String _calculateDueDate(int weeksAfterBirth) {
     final dueDate = _birthDate.add(Duration(days: weeksAfterBirth * 7));
     return '${dueDate.day.toString().padLeft(2, '0')}-${dueDate.month.toString().padLeft(2, '0')}-${dueDate.year}';
@@ -136,6 +134,16 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   Future<void> _saveForm() async {
     if (_isSaving) return;
 
+    // Validation for weight
+    final weightVal = _formData['weight_grams'];
+    if (weightVal != null && weightVal.toString().trim().isNotEmpty) {
+      final double? weight = double.tryParse(weightVal.toString().trim());
+      if (weight != null && (weight < 500 || weight > 12500)) {
+        showAppSnackBar(context, "Please enter weight between 500 to 12500 gms");
+        return;
+      }
+    }
+
     setState(() {
       _isSaving = true;
     });
@@ -173,6 +181,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           'current_tab': currentTabName,
           'current_tab_index': currentTabIndex,
           'weight_grams': _formData['weight_grams'],
+          'birth_weight_grams': _formData['birth_weight_grams'],
           'case_closure': caseClosureData,
           'visit_date': now,
           // Ensure household_id and beneficiary_id are saved (use ref_key if id not available)
@@ -328,6 +337,25 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
 
       if (formId > 0) {
+        
+        // --- CASE CLOSURE LOGIC START ---
+        if (_getIsCaseClosureChecked(currentTabIndex)) {
+           debugPrint('🔴 Case Closure Checked. Updating child_care_activities for beneficiary: $beneficiaryRefKey');
+           
+           try {
+             // Update child_care_activities table to mark records as deleted
+             final updateCount = await db.update(
+               'child_care_activities',
+               {'is_deleted': 1, 'modified_date_time': now},
+               where: 'beneficiary_ref_key = ?',
+               whereArgs: [beneficiaryRefKey],
+             );
+             debugPrint('✅ Updated $updateCount records in child_care_activities table (is_deleted = 1)');
+           } catch (e) {
+             debugPrint('❌ Error updating child_care_activities table: $e');
+           }
+        }
+        // --- CASE CLOSURE LOGIC END ---
 
         final l10n = AppLocalizations.of(context);
         final closureReason = _getSelectedClosureReason(currentTabIndex);
@@ -380,7 +408,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         }
 
         if (mounted) {
-          showAppSnackBar(context, l10n!.formSavedSuccessfully);
+          showAppSnackBar(context, "Form saved successfully");
 
           // Pop with result to refresh the list
           Navigator.pop(context, {
@@ -441,7 +469,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   }
 
   Widget _buildBirthDoseTab() {
-    final tabIndex = 0; // Birth Dose tab
+    final tabIndex = 0;
     _initializeTabState(tabIndex);
     final l = AppLocalizations.of(context);
     return SafeArea(
@@ -457,30 +485,34 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                   const Divider(),
                   const SizedBox(height: 8),
                   CustomTextField(
-                    labelText: l.weightLabel,
-                    hintText: l.weightLabel,
-                    initialValue: _formData['weight_grams'] != null
-                        ? '${(int.tryParse(_formData['weight_grams'].toString()) ?? 0) / 1000}'
+                    maxLength: 5,
+                    labelText: l.weightLabelTrackingDue,
+                    hintText: l.weightLabelTrackingDue,
+
+                    initialValue: (_formData['weight_grams'] != null &&
+                        _formData['weight_grams'].toString().isNotEmpty)
+                        ? _formData['weight_grams'].toString()
                         : null,
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
-                      // Convert kg to grams and update form data
-                      final grams = (double.tryParse(value) ?? 0) * 1000;
-                      _formData['weight_grams'] = grams.round();
+                      // Store value directly without conversion
+                      _formData['weight_grams'] = value;
                     },
                   ),
                   const Divider(),
                   CustomTextField(
+                    maxLength: 4,
                     labelText: l.birthWeightRange,
                     hintText: l.birthWeightRange,
-                    initialValue: _formData['weight_grams'] != null
-                        ? '${(int.tryParse(_formData['weight_grams'].toString()) ?? 0) / 1000}'
+                    // Show value exactly as stored (grams)
+                    initialValue: (_formData['birth_weight_grams'] != null &&
+                        _formData['birth_weight_grams'].toString().isNotEmpty)
+                        ? _formData['birth_weight_grams'].toString()
                         : null,
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
-                      // Convert kg to grams and update form data
-                      final grams = (double.tryParse(value) ?? 0) * 1000;
-                      _formData['weight_grams'] = grams.round();
+                      // Store value directly without conversion
+                      _formData['birth_weight_grams'] = value;
                     },
                   ),
                   const Divider(),

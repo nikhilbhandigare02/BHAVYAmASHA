@@ -207,7 +207,7 @@ class _DeathRegisterState extends State<DeathRegister> {
       age = '${beneficiaryInfo['age']} years';
     }
 
-    final gender = (beneficiaryInfo['gender'] ?? '').toString().toLowerCase() == 'm' ? 'M' : 'F';
+    final gender = (beneficiaryInfo['gender'] ?? '').toString().toLowerCase() == 'm' ? 'Male' : 'Female';
     final hhId = data['household_ref_key']?.toString() ?? 'N/A';
     final uniqueKey = data['unique_key']?.toString() ?? '';
 

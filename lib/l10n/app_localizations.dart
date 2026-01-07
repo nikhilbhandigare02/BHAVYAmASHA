@@ -2957,6 +2957,36 @@ abstract class AppLocalizations {
   /// **'Husband'**
   String get husbandLabel;
 
+  /// No description provided for @husband.
+  ///
+  /// In en, this message translates to:
+  /// **'Husband'**
+  String get husband;
+
+  /// No description provided for @firstAnc.
+  ///
+  /// In en, this message translates to:
+  /// **'First ANC'**
+  String get firstAnc;
+
+  /// No description provided for @secondAnc.
+  ///
+  /// In en, this message translates to:
+  /// **'Second ANC'**
+  String get secondAnc;
+
+  /// No description provided for @thirdAnc.
+  ///
+  /// In en, this message translates to:
+  /// **'Third ANC'**
+  String get thirdAnc;
+
+  /// No description provided for @fourthAnc.
+  ///
+  /// In en, this message translates to:
+  /// **'Fourth ANC'**
+  String get fourthAnc;
+
   /// No description provided for @husbandNameLabel.
   ///
   /// In en, this message translates to:
@@ -9035,12 +9065,6 @@ abstract class AppLocalizations {
   /// **'Create ABHA Address'**
   String get createAbhaAddress;
 
-  /// No description provided for @submit.
-  ///
-  /// In en, this message translates to:
-  /// **'Submit'**
-  String get submit;
-
   /// No description provided for @proceedwithkyc.
   ///
   /// In en, this message translates to:
@@ -12767,6 +12791,12 @@ abstract class AppLocalizations {
   /// **'Enter address'**
   String get enterAddress;
 
+  /// No description provided for @otherDropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get otherDropdown;
+
   /// No description provided for @pleaseEnterAddress.
   ///
   /// In en, this message translates to:
@@ -13136,7 +13166,7 @@ abstract class AppLocalizations {
   /// No description provided for @previous.
   ///
   /// In en, this message translates to:
-  /// **'Previous'**
+  /// **'PREVIOUS'**
   String get previous;
 
   /// No description provided for @saveForm.
@@ -13336,12 +13366,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No children found'**
   String get no_ChildrenFound;
-
-  /// No description provided for @caseClosureRecorded.
-  ///
-  /// In en, this message translates to:
-  /// **'Case closure recorded. Child removed from tracking list.'**
-  String get caseClosureRecorded;
 
   /// No description provided for @childRegistration.
   ///
@@ -13960,6 +13984,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter the username'**
   String get validateEmptyUsername;
+
+  /// No description provided for @submit.
+  ///
+  /// In en, this message translates to:
+  /// **'SUBMIT'**
+  String get submit;
+
+  /// No description provided for @weightLabelTrackingDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (500-12500)gms'**
+  String get weightLabelTrackingDue;
+
+  /// No description provided for @hscNameLabelCbac.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of Health Sub Center'**
+  String get hscNameLabelCbac;
+
+  /// No description provided for @caseClosureRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Form saved successfully'**
+  String get caseClosureRecorded;
 
   /// No description provided for @validateEmptyCP.
   ///

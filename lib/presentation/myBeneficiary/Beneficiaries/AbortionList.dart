@@ -115,7 +115,7 @@ class _AbortionlistState extends State<Abortionlist> {
             'mobileNumber': formData['mobile_number'] ?? formData['contact_number'],
             'age': '', // age will be derived from DOB
             'date_of_birth': dobStr,
-            'gender': formData['gender'] ?? 'F',
+            'gender': formData['gender'] ?? 'Female',
             'has_abortion_complication': formData['has_abortion_complication'],
             'abortion_date': formData['abortion_date'] ?? formData['date_of_abortion'],
           };
@@ -338,7 +338,7 @@ class _AbortionlistState extends State<Abortionlist> {
                         ),
                       if (visit.abortionDate != null)
                         Padding(
-                          padding: const EdgeInsets.only(left: 180.0),
+                          padding: const EdgeInsets.only(left: 150.0), 
                           child: Text(
                             'Abortion Date: ${_formatDate(visit.abortionDate!)}',
                             style: TextStyle(

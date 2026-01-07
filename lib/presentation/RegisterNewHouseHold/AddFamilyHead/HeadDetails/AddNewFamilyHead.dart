@@ -257,7 +257,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
       return [
         'Self',
         'Husband',
-
         'Father',
         'Mother',
         'Son',
@@ -289,7 +288,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     if (gender == 'transgender') {
       return [
         'Self',
-
         'Husband',
         'Wife',
         'Father',
@@ -997,7 +995,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       return "${l.relative} ";
 
                     case 'Other':
-                      return '${l.other} ';
+                      return '${l.otherDropdown} ';
 
                     default:
                       return s;

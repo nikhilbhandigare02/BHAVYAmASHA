@@ -10,6 +10,7 @@ import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
+import '../../../core/widgets/SuccessDialogbox/SuccessDialogbox.dart';
 import 'bloc/register_child_form_bloc.dart';
 
 class BeneficiaryData {
@@ -1012,7 +1013,7 @@ class _RegisterChildDueListFormScreen
                                       return "${l10n?.relative} ";
 
                                     case 'Other':
-                                      return '${l10n?.other} ';
+                                      return '${l10n?.otherDropdown} ';
 
                                     default:
                                       return s;
@@ -1271,16 +1272,6 @@ class _RegisterChildDueListFormScreen
                                         initialValue: state.customReligion,
                                         onChanged: (v) =>
                                             bloc.add(CustomReligionChanged(v)),
-                                        validator: (value) {
-                                          if (state.religion == 'Other' &&
-                                              (value == null ||
-                                                  value.trim().isEmpty)) {
-                                            return _captureError(
-                                                l10n?.pleaseSpecifyReligion,
-                                                _keyReligion);
-                                          }
-                                          return null;
-                                        },
                                       ),
                                     ),
                                 ],
@@ -1365,16 +1356,6 @@ class _RegisterChildDueListFormScreen
                                         initialValue: state.customCaste,
                                         onChanged: (v) =>
                                             bloc.add(CustomCasteChanged(v)),
-                                        validator: (value) {
-                                          if (state.caste == 'Other' &&
-                                              (value == null ||
-                                                  value.trim().isEmpty)) {
-                                            return _captureError(
-                                                l10n.specifyCategory,
-                                                _keyCategory);
-                                          }
-                                          return null;
-                                        },
                                       ),
                                     ),
                                 ],
@@ -1412,7 +1393,7 @@ class _RegisterChildDueListFormScreen
                                 : (l10n?.saveButton ?? 'SAVE'),
                             color: AppColors.primary,
                             borderRadius: 4,
-                            onPress: () {
+                            onPress: () async {
                               _clearFirstError();
                               final form = _formKey.currentState;
                               if (form == null) return;
@@ -1428,17 +1409,39 @@ class _RegisterChildDueListFormScreen
                                     _firstErrorKey!.currentContext != null) {
                                   Scrollable.ensureVisible(
                                     _firstErrorKey!.currentContext!,
-                                    duration:
-                                    const Duration(milliseconds: 300),
+                                    duration: const Duration(milliseconds: 300),
                                     curve: Curves.easeInOut,
-                                    alignment:
-                                    0.1, // 0.1 adds top padding so field isn't hidden under appbar
+                                    alignment: 0.1,
                                   );
                                 }
                                 return;
                               }
 
+                              // Show loading indicator
+                              final result = await showDialog<bool>(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+
+                              // Submit the form
                               bloc.add(const SubmitPressed());
+
+                              // Show success dialog
+                              if (result == true) {
+                                await showDialog(
+                                  context: context,
+                                  builder: (context) => CustomDialog(
+                                    title: 'Form has been saved successfully',
+                                    message: 'Registration completed',
+                                    onOkPressed: () {
+                                      Navigator.of(context).pop(true); // Return to previous screen
+                                    },
+                                  ),
+                                );
+                              }
                             },
                             disabled: state.isSubmitting,
                           ),

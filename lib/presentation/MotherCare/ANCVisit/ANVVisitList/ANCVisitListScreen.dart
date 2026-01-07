@@ -292,9 +292,9 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         'BeneficiaryID_display': uniqueKeyDisplay,
         'hhId_display': householdRefKeyDisplay,
         'Name': name,
-        'Age': age?.toString() ?? 'N/A',
+        'Age': age?.toString() ?? 'Not Available',
         'Gender': 'Female',
-        'RCH ID': person['RCH_ID'] ?? person['RichID'] ?? 'N/A',
+        'RCH ID': person['RCH_ID'] ?? person['RichID'] ?? 'Not Available',
         'Mobile No': person['mobileNo'] ?? '',
         'Husband': spouseName,
         'RegistrationDate': formattedDate,
@@ -446,7 +446,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
     final registrationDate = data['RegistrationDate'] is String && data['RegistrationDate'].isNotEmpty
         ? data['RegistrationDate']
-        : l10n?.notAvailable ?? 'N/A';
+        : l10n?.notAvailable ?? l10n!.na;
 
     final ageGender = '${data['Age']} Y';
 
@@ -460,7 +460,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
     final husbandName = data['Husband'] is String && data['Husband'].isNotEmpty
         ? data['Husband']
-        : l10n?.notAvailable ?? 'N/A';
+        : l10n?.notAvailable ?? l10n!.na;
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
@@ -544,7 +544,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       child: Text(
-                        hhIdDisplay.isNotEmpty ? hhIdDisplay : 'N/A',
+                        hhIdDisplay.isNotEmpty ? hhIdDisplay : l10n!.na,
                         style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w500,
@@ -664,27 +664,27 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                         width: MediaQuery.of(context).size.width / 4 - 15,
                         child: _rowText(
                           l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
-                          uniqueKeyDisplay.isNotEmpty ? uniqueKeyDisplay : 'N/A',
+                          uniqueKeyDisplay.isNotEmpty ? uniqueKeyDisplay : l10n!.na,
                         ),
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width / 4 - 55,
                         child: _rowText(
                           l10n?.nameLabel ?? 'Name',
-                          data['Name'] ?? 'N/A',
+                          data['Name'] ?? l10n!.na,
                         ),
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width / 4 - 50,
                         child: _rowText(
-                          l10n?.ageLabel ?? 'Age/Gender',
+                          l10n?.age ?? 'Age/Gender',
                           "${ageGender}",
                         ),
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width / 4 - 40,
                         child: _rowText(
-                          l10n?.husbandLabel ?? 'Husband',
+                          l10n?.husband ?? 'Husband',
                           husbandName,
                         ),
                       ),
@@ -699,7 +699,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                         width: MediaQuery.of(context).size.width / 7 - 13,
                         child: _rowText(
                           l10n?.rchIdLabel ?? 'RCH ID',
-                          data['RCH ID'] ?? 'N/A',
+                          data['RCH ID'] ?? l10n?.na,
                         ),
                       ),
                     ],
@@ -771,31 +771,29 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                         children: [
 
                           _ancDateBox(
-                            'First ANC',
-                            ancRanges['1st_anc_start']!,
+                            l10n!.firstAnc,                            ancRanges['1st_anc_start']!,
                             ancRanges['1st_anc_end']!,
                           ),
                           const SizedBox(width: 4),
                           _ancDateBox(
-                            'Second ANC',
-                            ancRanges['2nd_anc_start']!,
+                            l10n!.secondAnc,                            ancRanges['2nd_anc_start']!,
                             ancRanges['2nd_anc_end']!,
                           ),
                           const SizedBox(width: 4),
                           _ancDateBox(
-                            'Third ANC',
+                            l10n!.thirdAnc,
                             ancRanges['3rd_anc_start']!,
                             ancRanges['3rd_anc_end']!,
                           ),
                           const SizedBox(width: 4),
                           _ancDateBox(
-                            'Fourth ANC',
+                            l10n!.fourthAnc,
                             ancRanges['4th_anc_start']!,
                             ancRanges['4th_anc_end']!,
                           ),
                           const SizedBox(width: 4),
                           _ancDateBox(
-                            'PMSMA',
+                            l10n!.pmsma,
                             ancRanges['pmsma_start']!,
                             ancRanges['pmsma_end']!,
                           ),

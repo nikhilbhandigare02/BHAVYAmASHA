@@ -957,7 +957,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           } catch (_) {}
         }
 
-        // Process members to add to list
+
         for (final member in household) {
             final dynamic infoRaw = member['beneficiary_info'];
             if (infoRaw == null) continue;
@@ -967,6 +967,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 : Map<String, dynamic>.from(infoRaw ?? {});
 
             final uniqueKey = member['unique_key']?.toString() ?? '';
+            final  hhKey= member['household_ref_key']?.toString() ?? '';
             // Only show if this member is in our target list
             if (!keysToShow.contains(uniqueKey)) continue;
 
@@ -1012,8 +1013,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
             _eligibleCoupleItems.add({
               'id': member['id'] ?? '',
-              'household_ref_key': member['household_ref_key']?.toString() ?? '',
-              'hhId': member['household_ref_key']?.toString() ?? '',
+              'household_ref_key': hhKey,
+              'hhId': hhKey ,
               'unique_key': uniqueKey,
               'BeneficiaryID': uniqueKey,
               'name': name,

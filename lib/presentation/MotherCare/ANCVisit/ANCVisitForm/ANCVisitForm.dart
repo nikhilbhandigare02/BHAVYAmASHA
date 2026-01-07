@@ -1323,7 +1323,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   l10n?.weeksOfPregnancyLabel ??
                                   'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
-                              //readOnly: true,
+                              readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) =>
                                   bloc.add(WeeksOfPregnancyChanged(v)),
@@ -1435,6 +1435,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 hintText:
                                     'dd-mm-yyyy',
                                 initialDate: state.td1Date,
+                                firstDate: state.lmpDate ?? DateTime(1900),
+                                lastDate: DateTime.now(),
                                 readOnly: (() {
                                   // If booster date is already selected, disable TD1 field
                                   if (state.tdBoosterDate != null) {
@@ -1476,6 +1478,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 hintText:
                                 'dd-mm-yyyy',
                                 initialDate: state.td2Date,
+                                firstDate: (state.td1Date ?? _lastTd1DateFromDb) ?? DateTime(1900),
+                                lastDate: DateTime.now(),
                                 readOnly: (() {
                                   final inspect =
                                       state.dateOfInspection ?? DateTime.now();
@@ -1496,7 +1500,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
                             Opacity(
                               opacity: (() {
-                                // If TD1 date is already selected in this visit, disable booster field
+                                if (state.tdBoosterDate != null) {
+                                  return false;
+                                }
                                 if (state.td1Date != null) {
                                   return true;
                                 }
@@ -1529,7 +1535,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 'dd-mm-yyyy',
                                 initialDate: state.tdBoosterDate,
                                 readOnly: (() {
-                                  // If TD1 date is already selected in this visit, disable booster field
+                                  if (state.tdBoosterDate != null) {
+                                    return false;
+                                  }
                                   if (state.td1Date != null) {
                                     return true;
                                   }
@@ -1596,8 +1604,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     children: [
                                       // Iron & Folic Acid Tablets Field  
                                       CustomTextField(
-                                        labelText: 'Number of Iron & Folic Acid tablets given',
-                                        hintText: 'Enter number of Iron & Folic Acid tablets',
+                                        labelText: l10n?.folicAcidTabletsLabel ??
+                                        'Number of Folic Acid tablets given',
+                                        hintText: l10n?.folicAcidTabletsLabel ??
+                                            'Enter number of Folic Acid tablets',
                                         initialValue: state.ironFolicAcidTablets,
                                         keyboardType: TextInputType.number,
                                         onChanged: (v) =>
@@ -2422,7 +2432,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   height: 4.5.h,
                                   child: RoundButton(
                                     title:
-                                        l10n?.previousVisitsButton ??
+                                        l10n?.previous ??
                                         'PREVIOUS VISITS',
                                     color: AppColors.primary,
                                     borderRadius: 4,
