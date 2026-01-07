@@ -2379,7 +2379,9 @@
   "pleaseEnterAbhaId": "कृपया ABHA ID दर्ज करें",
   "abhaAddressLinked": "ABHA पता लिंक हो गया है!",
   "selectAbhaId": "ABHA ID चुनें",
-  "mobileNumberMismatch": "मोबाइल नंबर मेल नहीं खा रहा है"
+  "mobileNumberMismatch": "मोबाइल नंबर मेल नहीं खा रहा है",
+
+  "qq": "मोबाइल"
 }
 
 

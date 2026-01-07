@@ -2523,8 +2523,8 @@
   "pleaseEnterAbhaId": "Please enter ABHA ID",
   "abhaAddressLinked": "ABHA Address Linked!",
   "selectAbhaId": "Select ABHA ID",
-  "mobileNumberMismatch": "Mobile number mismatch"
+  "mobileNumberMismatch": "Mobile number mismatch",
 
 
-
+  "qq": "qq"
 }

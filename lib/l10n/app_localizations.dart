@@ -5912,7 +5912,7 @@ abstract class AppLocalizations {
   /// No description provided for @err_visit_date_required.
   ///
   /// In en, this message translates to:
-  /// **'Date of home visit is required.'**
+  /// **'Please Date of home visit is required.'**
   String get err_visit_date_required;
 
   /// No description provided for @err_mother_status_required.
@@ -12032,7 +12032,7 @@ abstract class AppLocalizations {
   /// No description provided for @totalBeneficiaryAdded.
   ///
   /// In en, this message translates to:
-  /// **'Total beneficiary added'**
+  /// **'Total beneficiaries added'**
   String get totalBeneficiaryAdded;
 
   /// No description provided for @enterTypeOfFuelForCooking.
@@ -14608,6 +14608,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mobile number mismatch'**
   String get mobileNumberMismatch;
+
+  /// No description provided for @qq.
+  ///
+  /// In en, this message translates to:
+  /// **'qq'**
+  String get qq;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

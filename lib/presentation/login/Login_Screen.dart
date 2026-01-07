@@ -408,7 +408,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           ],
                         ),
                       ),
-
                       BlocBuilder<LoginBloc, LoginState>(
                         builder: (context, state) {
                           if (state.postApiStatus == PostApiStatus.loading) {
