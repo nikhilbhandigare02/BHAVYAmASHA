@@ -811,7 +811,7 @@
   "visitTypePNC": "Post Natal Care",
   "visitTypePhc": "PHC",
   "visitTypeSubcenter": "Subcenter",
-  "visitsLabel": "Visits :",
+  "visitsLabel": "Visits",
   "voterIdLabel": "Voter Id",
   "wardNoLabel": "Ward no.",
   "waterHandpumpInside": "Hand pump within house",
@@ -2528,6 +2528,6 @@
   "pleaseEnterAbhaId": "Please enter ABHA ID",
   "abhaAddressLinked": "ABHA Address Linked!",
   "selectAbhaId": "Select ABHA ID",
-  "mobileNumberMismatch": "Mobile number mismatch"
-
+  "mobileNumberMismatch": "Mobile number mismatch",
+  "mohallaTolaName": "Tola/Mohalla"
 }

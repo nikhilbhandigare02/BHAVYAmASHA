@@ -198,6 +198,7 @@ List<String> _getMobileOwnerList(String gender) {
   if (gender == 'female') {
     return [
       'Self',
+      'Family Head',
       'Husband',
       'Father',
       'Mother',
@@ -215,6 +216,7 @@ List<String> _getMobileOwnerList(String gender) {
   if (gender == 'male') {
     return [
       'Self',
+      'Family Head',
       'Wife',
       'Father',
       'Mother',
@@ -232,6 +234,7 @@ List<String> _getMobileOwnerList(String gender) {
   if (gender == 'transgender') {
     return [
       'Self',
+      'Family Head',
       'Husband',
       'Wife',
       'Father',
