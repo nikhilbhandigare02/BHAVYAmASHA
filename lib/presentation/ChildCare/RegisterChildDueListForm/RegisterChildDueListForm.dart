@@ -691,23 +691,29 @@ class _RegisterChildDueListFormScreen
         ),
         body: SafeArea(
           child: BlocConsumer<RegisterChildFormBloc, RegisterChildFormState>(
-            listener: (context, state) {
+            listener: (context, state) async {
               if (state.error != null && state.error!.isNotEmpty) {
                 showAppSnackBar(context, state.error!);
               }
               if (state.isSuccess) {
                 showAppSnackBar(
                     context, l10n?.saveSuccess ?? 'Saved successfully');
-                Future.delayed(const Duration(milliseconds: 500), () {
-                  if (mounted) {
-                    Navigator.pop(context, {
-                      'saved': true,
-                      'beneficiaryId': _beneficiaryData?.uniqueKey ?? '',
-                      'name': _beneficiaryData?.name ?? '',
-                      'hhId': widget.arguments?['hhId']?.toString() ?? '',
-                    });
-                  }
-                });
+                await showDialog(
+                  context: context,
+                  builder: (context) => CustomDialog(
+                    title: 'Form has been saved successfully',
+                    message: 'Registration completed',
+                    onOkPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop({
+                        'saved': true,
+                        'beneficiaryId': _beneficiaryData?.uniqueKey ?? '',
+                        'name': _beneficiaryData?.name ?? '',
+                        'hhId': widget.arguments?['hhId']?.toString() ?? '',
+                      });
+                    },
+                  ),
+                );
               }
             },
             builder: (context, state) {
@@ -1232,7 +1238,7 @@ class _RegisterChildDueListFormScreen
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   ApiDropdown<String>(
-                                    labelText: l10n?.religionLabel ?? 'Religion',
+                                    labelText: (l10n?.religionLabel ?? 'Religion').replaceAll('*', '').trim(),
                                     items: [
                                       l10n?.religionHindu ?? 'Hindu',
                                       l10n?.religionMuslim ?? 'Muslim',
@@ -1291,7 +1297,7 @@ class _RegisterChildDueListFormScreen
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   ApiDropdown<String>(
-                                    labelText: l10n.categoryLabel,
+                                    labelText: (l10n?.categoryLabel ?? 'Category').replaceAll('*', '').trim(),
                                     items: const [
                                       'NotDisclosed',
                                       'General',
@@ -1393,7 +1399,7 @@ class _RegisterChildDueListFormScreen
                                 : (l10n?.saveButton ?? 'SAVE'),
                             color: AppColors.primary,
                             borderRadius: 4,
-                            onPress: () async {
+                            onPress: () {
                               _clearFirstError();
                               final form = _formKey.currentState;
                               if (form == null) return;
@@ -1417,31 +1423,8 @@ class _RegisterChildDueListFormScreen
                                 return;
                               }
 
-                              // Show loading indicator
-                              final result = await showDialog<bool>(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (context) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-
                               // Submit the form
                               bloc.add(const SubmitPressed());
-
-                              // Show success dialog
-                              if (result == true) {
-                                await showDialog(
-                                  context: context,
-                                  builder: (context) => CustomDialog(
-                                    title: 'Form has been saved successfully',
-                                    message: 'Registration completed',
-                                    onOkPressed: () {
-                                      Navigator.of(context).pop(true); // Return to previous screen
-                                    },
-                                  ),
-                                );
-                              }
                             },
                             disabled: state.isSubmitting,
                           ),
