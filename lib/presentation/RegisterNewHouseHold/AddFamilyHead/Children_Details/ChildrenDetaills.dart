@@ -153,7 +153,6 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                     Expanded(
                       child: CustomTextField(
                         labelText: l.youngestChildAge,
-                        hintText: l.youngestChildAge,
                         readOnly: true,
                         onChanged: (v) {
                           context.read<ChildrenBloc>().add(ChUpdateYoungestAge(v.trim()));

@@ -1031,7 +1031,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                   context: context,
                   title: l.confirmAttentionTitle,
                   message: l.confirmCloseFormMsg,
-                  yesText: l.confirmYes,
+                  yesText: l.yes,
                   noText: l.confirmNo,
                 );
                 if (shouldExit ?? false) {
@@ -2008,129 +2008,131 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     height: 0,
                                   ),
                                 ],
-
                                 _section(
-                                  ApiDropdown<String>(
-                                    labelText: '${l.relationWithHeadLabel} *',
-                                    items: state.memberType == 'Child'
-                                        ? const [
-                                      'Father',
-                                      'Mother',
-                                      'Brother',
-                                      'Sister',
-                                      'Grand Father',
-                                      'Grand Mother',
-                                      'Other',
-                                    ]
-                                        : const [
-                                      'Self',
+                                  IgnorePointer(
+                                    ignoring: widget.isEdit,
+                                    child: ApiDropdown<String>(
+                                      labelText: '${l.relationWithHeadLabel} *',
+                                      items: state.memberType == 'Child'
+                                          ? const [
+                                        'Father',
+                                        'Mother',
+                                        'Brother',
+                                        'Sister',
+                                        'Grand Father',
+                                        'Grand Mother',
+                                        'Other',
+                                      ]
+                                          : const [
+                                        'Self',
 
-                                      'Husband',
-                                      'Son',
-                                      'Daughter',
-                                      'Father',
-                                      'Mother',
-                                      'Brother',
-                                      'Sister',
-                                      'Wife',
-                                      'Nephew',
-                                      'Niece',
-                                      'Grand Father',
-                                      'Grand Mother',
-                                      'Father In Law',
-                                      'Mother In Low',
-                                      'Grand Son',
-                                      'Grand Daughter',
-                                      'Son In Law',
-                                      'Daughter In Law',
-                                      'Other',
-                                    ],
-                                    getLabel: (s) {
-                                      switch (s) {
-                                        case 'Self':
-                                          return l.self;
+                                        'Husband',
+                                        'Son',
+                                        'Daughter',
+                                        'Father',
+                                        'Mother',
+                                        'Brother',
+                                        'Sister',
+                                        'Wife',
+                                        'Nephew',
+                                        'Niece',
+                                        'Grand Father',
+                                        'Grand Mother',
+                                        'Father In Law',
+                                        'Mother In Low',
+                                        'Grand Son',
+                                        'Grand Daughter',
+                                        'Son In Law',
+                                        'Daughter In Law',
+                                        'Other',
+                                      ],
+                                      getLabel: (s) {
+                                        switch (s) {
+                                          case 'Self':
+                                            return l.self;
 
-                                        case 'Husband':
-                                          return l.husbandLabel;
-                                        case 'Wife':
-                                          return l.wife;
-                                        case 'Son':
-                                          return l.relationSon;
-                                        case 'Daughter':
-                                          return l.relationDaughter;
-                                        case 'Father':
-                                          return l.relationFather;
-                                        case 'Mother':
-                                          return l.mother;
-                                        case 'Brother':
-                                          return l.relationBrother;
-                                        case 'Sister':
-                                          return l.relationSister;
-                                        case 'Nephew':
-                                          return l.relationNephew;
-                                        case 'Niece':
-                                          return l.relationNiece;
-                                        case 'Grand Father':
-                                          return l.relationGrandFather;
-                                        case 'Grand Mother':
-                                          return l.relationGrandMother;
-                                        case 'Father In Law':
-                                          return l.relationFatherInLaw;
-                                        case 'Mother In Low': // check spelling Low → Law
-                                          return l.relationMotherInLaw;
-                                        case 'Grand Son':
-                                          return l.relationGrandSon;
-                                        case 'Grand Daughter':
-                                          return l.relationGrandDaughter;
-                                        case 'Son In Law':
-                                          return l.relationSonInLaw;
-                                        case 'Daughter In Law':
-                                          return l.relationDaughterInLaw;
-                                        case 'Other':
-                                          return l.relationOther;
-                                        default:
-                                          return s;
-                                      }
-                                    },
+                                          case 'Husband':
+                                            return l.husbandLabel;
+                                          case 'Wife':
+                                            return l.wife;
+                                          case 'Son':
+                                            return l.relationSon;
+                                          case 'Daughter':
+                                            return l.relationDaughter;
+                                          case 'Father':
+                                            return l.relationFather;
+                                          case 'Mother':
+                                            return l.mother;
+                                          case 'Brother':
+                                            return l.relationBrother;
+                                          case 'Sister':
+                                            return l.relationSister;
+                                          case 'Nephew':
+                                            return l.relationNephew;
+                                          case 'Niece':
+                                            return l.relationNiece;
+                                          case 'Grand Father':
+                                            return l.relationGrandFather;
+                                          case 'Grand Mother':
+                                            return l.relationGrandMother;
+                                          case 'Father In Law':
+                                            return l.relationFatherInLaw;
+                                          case 'Mother In Low': // check spelling Low → Law
+                                            return l.relationMotherInLaw;
+                                          case 'Grand Son':
+                                            return l.relationGrandSon;
+                                          case 'Grand Daughter':
+                                            return l.relationGrandDaughter;
+                                          case 'Son In Law':
+                                            return l.relationSonInLaw;
+                                          case 'Daughter In Law':
+                                            return l.relationDaughterInLaw;
+                                          case 'Other':
+                                            return l.relationOther;
+                                          default:
+                                            return s;
+                                        }
+                                      },
 
-                                    value: state.relation,
-                                    onChanged: (v) {
-                                      final relation = v ?? '';
-                                      context
-                                          .read<AddnewfamilymemberBloc>()
-                                          .add(AnmUpdateRelation(relation));
+                                      value: state.relation,
+                                      onChanged: (v) {
+                                        final relation = v ?? '';
+                                        context
+                                            .read<AddnewfamilymemberBloc>()
+                                            .add(AnmUpdateRelation(relation));
 
-                                      if (v == 'Father') {
-                                        try {
-                                          final match = _adultSummaries.firstWhere(
-                                              (m) => (m['Relation'] ?? '').toString() == 'Self' &&
-                                                      (m['Gender'] ?? '').toString().toLowerCase() == 'male');
-                                          final name = (match['Name'] ?? '').toString();
-                                          if (name.isNotEmpty) {
-                                            setState(() => _fatherOption = name);
-                                            context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(name));
-                                          }
-                                        } catch (_) {}
-                                      } else if (v == 'Mother') {
-                                        try {
-                                          final match = _adultSummaries.firstWhere(
-                                              (m) => (m['Relation'] ?? '').toString() == 'Self' &&
-                                                      (m['Gender'] ?? '').toString().toLowerCase() == 'female');
-                                          final name = (match['Name'] ?? '').toString();
-                                          if (name.isNotEmpty) {
-                                            setState(() => _motherOption = name);
-                                            context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(name));
-                                          }
-                                        } catch (_) {}
-                                      }
-                                    },
-                                    validator: (value) => _captureAnmError(
-                                      Validations.validateFamilyHeadRelation(
-                                        l,
-                                        value,
+                                        if (v == 'Father') {
+                                          try {
+                                            final match = _adultSummaries.firstWhere(
+                                                    (m) => (m['Relation'] ?? '').toString() == 'Self' &&
+                                                    (m['Gender'] ?? '').toString().toLowerCase() == 'male');
+                                            final name = (match['Name'] ?? '').toString();
+                                            if (name.isNotEmpty) {
+                                              setState(() => _fatherOption = name);
+                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(name));
+                                            }
+                                          } catch (_) {}
+                                        } else if (v == 'Mother') {
+                                          try {
+                                            final match = _adultSummaries.firstWhere(
+                                                    (m) => (m['Relation'] ?? '').toString() == 'Self' &&
+                                                    (m['Gender'] ?? '').toString().toLowerCase() == 'female');
+                                            final name = (match['Name'] ?? '').toString();
+                                            if (name.isNotEmpty) {
+                                              setState(() => _motherOption = name);
+                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(name));
+                                            }
+                                          } catch (_) {}
+                                        }
+                                      },
+                                      validator: (value) => _captureAnmError(
+                                        Validations.validateFamilyHeadRelation(
+                                          l,
+                                          value,
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                  )
                                 ),
                                 Divider(
                                   color: AppColors.divider,
@@ -4266,7 +4268,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     _section(
                                       CustomTextField(
                                         labelText: l.ageAtMarriageLabel,
-                                        hintText: l.ageAtMarriageHint,
+                                        hintText: l.ageAtMarriageLabel,
                                         keyboardType: TextInputType.number,
                                         initialValue: state.ageAtMarriage,
                                         onChanged: (v) => context
@@ -4454,89 +4456,90 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     ),
                                   ],
 
-                                  if (state.isPregnant == 'No') ...[
-                                    _section(
-                                      ApiDropdown<String>(
-                                        key: const ValueKey('family_planning'),
-                                        labelText:
-                                        '${l?.fpAdoptingLabel ?? "Are you/your partner adopting family planning?"} *',
-                                        items: const ['Yes', 'No'],
-                                        getLabel: (s) =>
-                                        s == 'Yes' ? l.yes : l.no,
-                                        value: state.isFamilyPlanning,
-                                        onChanged: (v) => context
-                                            .read<AddnewfamilymemberBloc>()
-                                            .add(
-                                          AnmUpdateFamilyPlanning(v ?? ''),
-                                        ),
-                                        validator: (value) {
-                                          if (value == null ||
-                                              value == l.select) {
-                                            return l?.please_select_family_planning_status ??'Please select family planning status';
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                    const Divider(
-                                      color: AppColors.divider,
-                                      thickness: 0.5,
-                                      height: 0,
-                                    ),
-
-                                    if (state.isFamilyPlanning == 'Yes') ...[
+                                  if(_isEdit)... [
+                                    if (state.isPregnant == 'No') ...[
                                       _section(
                                         ApiDropdown<String>(
-                                          labelText: '${l.methodOfContra} *',
-                                          items: const [
-                                            'Condom',
-                                            'Mala -N (Daily Contraceptive pill)',
-                                            'Antra injection',
-                                            'Copper -T (IUCD)',
-                                            'Chhaya (Weekly Contraceptive pill)',
-                                            'ECP (Emergency Contraceptive pill)',
-                                            'Male Sterilization',
-                                            'Female Sterilization',
-                                            'Any Other Specify',
-                                          ],
-                                          getLabel: (value) {
-                                            switch (value) {
-
-                                              case 'Condom':
-                                                return l.condom;
-                                              case 'Mala -N (Daily Contraceptive pill)':
-                                                return l.malaN;
-                                              case 'Antra injection':
-                                                return l.antraInjection;
-                                              case 'Copper -T (IUCD)':
-                                                return l.copperT;
-                                              case 'Chhaya (Weekly Contraceptive pill)':
-                                                return l.chhaya;
-                                              case 'ECP (Emergency Contraceptive pill)':
-                                                return l.ecp;
-                                              case 'Male Sterilization':
-                                                return l.maleSterilization;
-                                              case 'Female Sterilization':
-                                                return l.femaleSterilization;
-                                              case 'Any Other Specify':
-                                                return l.anyOtherSpecify;
-                                              default:
-                                                return value;
+                                          key: const ValueKey('family_planning'),
+                                          labelText:
+                                          '${l?.fpAdoptingLabel ?? "Are you/your partner adopting family planning?"} *',
+                                          items: const ['Yes', 'No'],
+                                          getLabel: (s) =>
+                                          s == 'Yes' ? l.yes : l.no,
+                                          value: state.isFamilyPlanning,
+                                          onChanged: (v) => context
+                                              .read<AddnewfamilymemberBloc>()
+                                              .add(
+                                            AnmUpdateFamilyPlanning(v ?? ''),
+                                          ),
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value == l.select) {
+                                              return l?.please_select_family_planning_status ??'Please select family planning status';
                                             }
+                                            return null;
                                           },
-                                          value: state.fpMethod ?? 'Select',
-                                          onChanged: (value) {
-                                            if (value != null) {
-                                              context
-                                                  .read<AddnewfamilymemberBloc>()
-                                                  .add(AnmFpMethodChanged(value));
-                                            }
-                                          },
-                                          validator: (value) =>
-                                              _captureAnmError(Validations.validateAntra(l, value)),
                                         ),
+                                      ),
+                                      const Divider(
+                                        color: AppColors.divider,
+                                        thickness: 0.5,
+                                        height: 0,
+                                      ),
 
-                                        /* ApiDropdown<String>(
+                                      if (state.isFamilyPlanning == 'Yes') ...[
+                                        _section(
+                                          ApiDropdown<String>(
+                                            labelText: '${l.methodOfContra} *',
+                                            items: const [
+                                              'Condom',
+                                              'Mala -N (Daily Contraceptive pill)',
+                                              'Antra injection',
+                                              'Copper -T (IUCD)',
+                                              'Chhaya (Weekly Contraceptive pill)',
+                                              'ECP (Emergency Contraceptive pill)',
+                                              'Male Sterilization',
+                                              'Female Sterilization',
+                                              'Any Other Specify',
+                                            ],
+                                            getLabel: (value) {
+                                              switch (value) {
+
+                                                case 'Condom':
+                                                  return l.condom;
+                                                case 'Mala -N (Daily Contraceptive pill)':
+                                                  return l.malaN;
+                                                case 'Antra injection':
+                                                  return l.antraInjection;
+                                                case 'Copper -T (IUCD)':
+                                                  return l.copperT;
+                                                case 'Chhaya (Weekly Contraceptive pill)':
+                                                  return l.chhaya;
+                                                case 'ECP (Emergency Contraceptive pill)':
+                                                  return l.ecp;
+                                                case 'Male Sterilization':
+                                                  return l.maleSterilization;
+                                                case 'Female Sterilization':
+                                                  return l.femaleSterilization;
+                                                case 'Any Other Specify':
+                                                  return l.anyOtherSpecify;
+                                                default:
+                                                  return value;
+                                              }
+                                            },
+                                            value: state.fpMethod ?? 'Select',
+                                            onChanged: (value) {
+                                              if (value != null) {
+                                                context
+                                                    .read<AddnewfamilymemberBloc>()
+                                                    .add(AnmFpMethodChanged(value));
+                                              }
+                                            },
+                                            validator: (value) =>
+                                                _captureAnmError(Validations.validateAntra(l, value)),
+                                          ),
+
+                                          /* ApiDropdown<String>(
                                           labelText: '${l.methodOfContra} *',
                                           items: const [
                                             'Select',
@@ -4571,213 +4574,214 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 ),
                                               ),
                                         ),*/
-                                      ),
-                                      Divider(
-                                        color: AppColors.divider,
-                                        thickness: 0.5,
-                                        height: 0,
-                                      ),
+                                        ),
+                                        Divider(
+                                          color: AppColors.divider,
+                                          thickness: 0.5,
+                                          height: 0,
+                                        ),
 
-                                      if (state.fpMethod ==
-                                          'Antra injection') ...[
-                                        _section(
-                                          CustomDatePicker(
-                                            labelText: l?.dateOfAntra ?? 'Date of Antra',
-                                            initialDate:
-                                            state.antraDate ??
-                                                DateTime.now(),
-                                            firstDate: DateTime(1900),
-                                            lastDate: DateTime(2100),
-                                            onDateChanged: (date) {
-                                              if (date != null) {
+                                        if (state.fpMethod ==
+                                            'Antra injection') ...[
+                                          _section(
+                                            CustomDatePicker(
+                                              labelText: l?.dateOfAntra ?? 'Date of Antra',
+                                              initialDate:
+                                              state.antraDate ??
+                                                  DateTime.now(),
+                                              firstDate: DateTime(1900),
+                                              lastDate: DateTime(2100),
+                                              onDateChanged: (date) {
+                                                if (date != null) {
+                                                  context
+                                                      .read<
+                                                      AddnewfamilymemberBloc
+                                                  >()
+                                                      .add(
+                                                    AnmFpDateOfAntraChanged(
+                                                      date,
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                        ],
+
+                                        if (state.fpMethod ==
+                                            'Copper -T (IUCD)') ...[
+                                          _section(
+                                            CustomDatePicker(
+                                              labelText: l?.removalDate ?? 'Removal Date',
+                                              initialDate:
+                                              state.removalDate ??
+                                                  DateTime.now(),
+                                              firstDate: DateTime(1900),
+                                              lastDate: DateTime(2100),
+                                              onDateChanged: (date) {
+                                                if (date != null) {
+                                                  context
+                                                      .read<
+                                                      AddnewfamilymemberBloc
+                                                  >()
+                                                      .add(
+                                                    AnmFpRemovalDateChanged(
+                                                      date,
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
+                                          ),
+                                          _section(
+                                            CustomTextField(
+                                              labelText:l?.reasonLabel ?? 'Reason',
+                                              hintText:l?.reasonLabel ?? 'reason ',
+                                              initialValue: state.removalReason,
+                                              onChanged: (value) {
                                                 context
                                                     .read<
                                                     AddnewfamilymemberBloc
                                                 >()
                                                     .add(
-                                                  AnmFpDateOfAntraChanged(
-                                                    date,
+                                                  AnmFpRemovalReasonChanged(
+                                                    value ?? '',
                                                   ),
                                                 );
-                                              }
-                                            },
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
+                                          ),
+                                        ],
 
-                                      if (state.fpMethod ==
-                                          'Copper -T (IUCD)') ...[
-                                        _section(
-                                          CustomDatePicker(
-                                            labelText: l?.removalDate ?? 'Removal Date',
-                                            initialDate:
-                                            state.removalDate ??
-                                                DateTime.now(),
-                                            firstDate: DateTime(1900),
-                                            lastDate: DateTime(2100),
-                                            onDateChanged: (date) {
-                                              if (date != null) {
+                                        if (state.fpMethod == 'Condom') ...[
+                                          _section(
+                                            CustomTextField(
+                                              labelText:l?.quantityOfCondoms ?? 'Quantity of Condoms',
+                                              hintText:l?.quantityOfCondoms ?? 'Quantity of Condoms',
+                                              keyboardType: TextInputType.number,
+                                              initialValue: state.condomQuantity,
+                                              onChanged: (value) {
                                                 context
                                                     .read<
                                                     AddnewfamilymemberBloc
                                                 >()
                                                     .add(
-                                                  AnmFpRemovalDateChanged(
-                                                    date,
+                                                  AnmFpCondomQuantityChanged(
+                                                    value ?? '',
                                                   ),
                                                 );
-                                              }
-                                            },
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
-                                        _section(
-                                          CustomTextField(
-                                            labelText:l?.reasonLabel ?? 'Reason',
-                                            hintText:l?.reasonLabel ?? 'reason ',
-                                            initialValue: state.removalReason,
-                                            onChanged: (value) {
-                                              context
-                                                  .read<
-                                                  AddnewfamilymemberBloc
-                                              >()
-                                                  .add(
-                                                AnmFpRemovalReasonChanged(
-                                                  value ?? '',
-                                                ),
-                                              );
-                                            },
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
                                           ),
-                                        ),
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
-                                      ],
+                                        ],
 
-                                      if (state.fpMethod == 'Condom') ...[
-                                        _section(
-                                          CustomTextField(
-                                            labelText:l?.quantityOfCondoms ?? 'Quantity of Condoms',
-                                            hintText:l?.quantityOfCondoms ?? 'Quantity of Condoms',
-                                            keyboardType: TextInputType.number,
-                                            initialValue: state.condomQuantity,
-                                            onChanged: (value) {
-                                              context
-                                                  .read<
-                                                  AddnewfamilymemberBloc
-                                              >()
-                                                  .add(
-                                                AnmFpCondomQuantityChanged(
-                                                  value ?? '',
-                                                ),
-                                              );
-                                            },
+                                        if (state.fpMethod ==
+                                            'Mala -N (Daily Contraceptive pill)') ...[
+                                          _section(
+                                            CustomTextField(
+                                              labelText:l?.quantityOfMalaN ??
+                                                  'Quantity of Mala -N (Daily Contraceptive pill)',
+                                              hintText:l?.quantityOfMalaN ??
+                                                  'Quantity of Mala -N (Daily Contraceptive pill)',
+                                              keyboardType: TextInputType.number,
+                                              initialValue: state.malaQuantity,
+                                              onChanged: (value) {
+                                                context
+                                                    .read<
+                                                    AddnewfamilymemberBloc
+                                                >()
+                                                    .add(
+                                                  AnmFpMalaQuantityChanged(
+                                                    value ?? '',
+                                                  ),
+                                                );
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
-                                      ],
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
+                                          ),
+                                        ],
 
-                                      if (state.fpMethod ==
-                                          'Mala -N (Daily Contraceptive pill)') ...[
-                                        _section(
-                                          CustomTextField(
-                                            labelText:l?.quantityOfMalaN ??
-                                                'Quantity of Mala -N (Daily Contraceptive pill)',
-                                            hintText:l?.quantityOfMalaN ??
-                                                'Quantity of Mala -N (Daily Contraceptive pill)',
-                                            keyboardType: TextInputType.number,
-                                            initialValue: state.malaQuantity,
-                                            onChanged: (value) {
-                                              context
-                                                  .read<
-                                                  AddnewfamilymemberBloc
-                                              >()
-                                                  .add(
-                                                AnmFpMalaQuantityChanged(
-                                                  value ?? '',
-                                                ),
-                                              );
-                                            },
+                                        if (state.fpMethod ==
+                                            'Chhaya (Weekly Contraceptive pill)') ...[
+                                          _section(
+                                            CustomTextField(
+                                              labelText:l?.quantityOfChhaya ??
+                                                  'Quantity of Chhaya (Weekly Contraceptive pill)',
+                                              hintText: l?.quantityOfChhaya ??
+                                                  'Quantity of Chhaya (Weekly Contraceptive pill)',
+                                              keyboardType: TextInputType.number,
+                                              initialValue: state.chhayaQuantity,
+                                              onChanged: (value) {
+                                                context
+                                                    .read<
+                                                    AddnewfamilymemberBloc
+                                                >()
+                                                    .add(
+                                                  AnmFpChhayaQuantityChanged(
+                                                    value ?? '',
+                                                  ),
+                                                );
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
-                                      ],
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
+                                          ),
+                                        ],
 
-                                      if (state.fpMethod ==
-                                          'Chhaya (Weekly Contraceptive pill)') ...[
-                                        _section(
-                                          CustomTextField(
-                                            labelText:l?.quantityOfChhaya ??
-                                                'Quantity of Chhaya (Weekly Contraceptive pill)',
-                                            hintText: l?.quantityOfChhaya ??
-                                                'Quantity of Chhaya (Weekly Contraceptive pill)',
-                                            keyboardType: TextInputType.number,
-                                            initialValue: state.chhayaQuantity,
-                                            onChanged: (value) {
-                                              context
-                                                  .read<
-                                                  AddnewfamilymemberBloc
-                                              >()
-                                                  .add(
-                                                AnmFpChhayaQuantityChanged(
-                                                  value ?? '',
-                                                ),
-                                              );
-                                            },
+                                        if (state.fpMethod ==
+                                            'ECP (Emergency Contraceptive pill)') ...[
+                                          _section(
+                                            CustomTextField(
+                                              labelText:l?.quantityOfECP ??
+                                                  'Quantity of ECP (Emergency Contraceptive pill)',
+                                              hintText:l?.quantityOfECP ??
+                                                  'Quantity of ECP (Emergency Contraceptive pill)',
+                                              keyboardType: TextInputType.number,
+                                              initialValue: state.ecpQuantity,
+                                              onChanged: (value) {
+                                                context
+                                                    .read<
+                                                    AddnewfamilymemberBloc
+                                                >()
+                                                    .add(
+                                                  AnmFpEcpQuantityChanged(
+                                                    value ?? '',
+                                                  ),
+                                                );
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
-                                      ],
-
-                                      if (state.fpMethod ==
-                                          'ECP (Emergency Contraceptive pill)') ...[
-                                        _section(
-                                          CustomTextField(
-                                            labelText:l?.quantityOfECP ??
-                                                'Quantity of ECP (Emergency Contraceptive pill)',
-                                            hintText:l?.quantityOfECP ??
-                                                'Quantity of ECP (Emergency Contraceptive pill)',
-                                            keyboardType: TextInputType.number,
-                                            initialValue: state.ecpQuantity,
-                                            onChanged: (value) {
-                                              context
-                                                  .read<
-                                                  AddnewfamilymemberBloc
-                                              >()
-                                                  .add(
-                                                AnmFpEcpQuantityChanged(
-                                                  value ?? '',
-                                                ),
-                                              );
-                                            },
+                                          Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0,
                                           ),
-                                        ),
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
+                                        ],
                                       ],
                                     ],
-                                  ],
+                                  ]
                                 ],
                               ],
                             ));

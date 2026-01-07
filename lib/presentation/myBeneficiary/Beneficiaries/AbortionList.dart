@@ -117,7 +117,7 @@ class _AbortionlistState extends State<Abortionlist> {
             'date_of_birth': dobStr,
             'gender': formData['gender'] ?? 'F',
             'has_abortion_complication': formData['has_abortion_complication'],
-            'abortion_date': formData['abortion_date'],
+            'abortion_date': formData['abortion_date'] ?? formData['date_of_abortion'],
           };
 
           abortionVisits.add(ANCVisitModel.fromJson(visitData));
@@ -280,7 +280,7 @@ class _AbortionlistState extends State<Abortionlist> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.home, color: Colors.black54, size: 14.sp),
+                      Icon(Icons.home, color: AppColors.primary, size: 14.sp),
                       const SizedBox(width: 6),
                       Text(
                         (visit.hhId != null && visit.hhId!.length > 11)
@@ -296,22 +296,7 @@ class _AbortionlistState extends State<Abortionlist> {
 
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      l10n?.badgeHRP ?? 'HRP',
-                      style: TextStyle(
-                        color: Colors.red[600],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.sp,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+
 
                 ],
               ),
@@ -332,7 +317,7 @@ class _AbortionlistState extends State<Abortionlist> {
                     '',
                     visit.womanName ?? 'No Name',
                     textStyle:  TextStyle(
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontSize: 14.sp,
                     ),
@@ -353,13 +338,13 @@ class _AbortionlistState extends State<Abortionlist> {
                         ),
                       if (visit.abortionDate != null)
                         Padding(
-                          padding: const EdgeInsets.only(left: 200.0),
+                          padding: const EdgeInsets.only(left: 180.0),
                           child: Text(
-                            'Abortion: ${_formatDate(visit.abortionDate!)}',
+                            'Abortion Date: ${_formatDate(visit.abortionDate!)}',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14.sp,
-                              fontStyle: FontStyle.italic,
+
                             ),
                           ),
                         ),

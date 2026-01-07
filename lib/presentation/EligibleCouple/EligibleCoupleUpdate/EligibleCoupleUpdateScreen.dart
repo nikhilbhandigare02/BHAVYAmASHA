@@ -300,7 +300,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                               child: ApiDropdown<String>(
                                 key: const ValueKey('whoseMobileField'),
                                 labelText:
-                                    "${t?.whoseMobileNumberLabel} *" ??
+                                    "${t?.whoseMobileLabel} *" ??
                                     'Whose mobile no.',
                                 items: const [
                                   'Self',
@@ -671,7 +671,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                             ),
                             ApiDropdown<String>(
                               key: const ValueKey('youngestChildAgeUnit'),
-                              labelText: t?.youngestChildAgeLabel,
+                              labelText: t?.youngestChildAgeUnitLabel,
                               items: const ['Years', 'Months', 'Days'],
                               value: state.youngestChildAgeUnit.isEmpty
                                   ? null

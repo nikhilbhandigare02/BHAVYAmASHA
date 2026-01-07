@@ -291,7 +291,7 @@ class _NCDHomeState extends State<Ncdprioritylist> {
                       ),
                       _rowText(
                         context,
-                        l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla',
+                        l10n?.mohallaTolaName ?? 'Tola/Mohalla',
                         data['Tola/Mohalla'],
                       ),
                       _rowText(

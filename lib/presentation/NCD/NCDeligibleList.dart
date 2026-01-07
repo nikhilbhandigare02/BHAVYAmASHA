@@ -243,7 +243,7 @@ class _AllBeneficiaryScreenState extends State<Ncdeligiblelist> {
                     const SizedBox(height: 8),
                     _buildRow([
                       _rowText(l10n?.villageLabel ?? 'Village', data['village']),
-                      _rowText(l10n?.mohallaTolaNameLabel ?? 'Tola/Mohalla', data['Tola/Mohalla']),
+                      _rowText(l10n?.mohallaTolaName ?? 'Tola/Mohalla', data['Tola/Mohalla']),
                       _rowText(l10n?.rchIdLabel??'RCH ID', data['RichID']),
                     ]),
                     const SizedBox(height: 8),

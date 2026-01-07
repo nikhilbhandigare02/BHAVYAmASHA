@@ -7280,7 +7280,4 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get mobileNumberMismatch => 'मोबाइल नंबर मेल नहीं खा रहा है';
-
-  @override
-  String get qq => 'मोबाइल';
 }

@@ -336,7 +336,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           children: [
             _Section(
               child: CustomTextField(
-                labelText: '${l.houseNoLabel} *',
+                labelText: '${l.houseNoHint} *',
               hintText: l.houseNoHint,
               initialValue: state.houseNo,
               onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
@@ -1309,7 +1309,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               _Section(
                 child: CustomTextField(
                   labelText: l.ageAtMarriageLabel,
-                  hintText: l.ageAtMarriageHint,
+                  hintText: l.ageAtMarriageLabel,
                   keyboardType: TextInputType.number,
                   initialValue: state.ageAtMarriage,
                   onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
@@ -1322,7 +1322,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               _Section(
                 child: CustomTextField(
                   labelText: '${l.spouseNameLabel} *',
-                  hintText: l.spouseNameHint,
+                  hintText: l.spouseNameLabel,
                   initialValue: state.spouseName,
                   onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
                     AfhUpdateSpouseName(v.trim()),
@@ -2058,7 +2058,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   context: context,
                   title: l.confirmAttentionTitle,
                   message: l.confirmCloseFormMsg,
-                  yesText: l.confirmYesExit,
+                  yesText: l.yes,
                   noText: l.confirmNo,
                 );
                 if (shouldExit ?? false) {
@@ -2071,7 +2071,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   context: context,
                   title: l.confirmAttentionTitle,
                   message: l.confirmCloseFormMsg,
-                  yesText: l.confirmYesExit,
+                  yesText: l.yes,
                   noText: l.confirmNo,
                 );
                 if (shouldExit ?? false) {

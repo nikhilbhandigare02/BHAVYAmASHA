@@ -202,7 +202,7 @@ Future<bool?> showConfirmationDialog({
             message ?? '',
             style: TextStyle(
               color: messageTextColor ?? AppColors.onSurface,
-              fontSize: 16.sp, // Assuming you are using screen_util or similar
+              fontSize: 19.sp, // Assuming you are using screen_util or similar
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -213,6 +213,21 @@ Future<bool?> showConfirmationDialog({
           if (hasTwoButtons)
             TextButton(
               onPressed: () {
+                Navigator.of(context).pop(true);
+                if (onYes != null) onYes();
+              },
+              child: Text(
+                yesText,
+                style: TextStyle(
+                  // ✅ LOGIC: If yesButtonColor is provided, use it.
+                  // Otherwise, fall back to AppColors.primary (or your preferred default).
+                  color: yesButtonColor ?? AppColors.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
                 Navigator.of(context).pop(false);
                 if (onNo != null) onNo();
               },
@@ -221,26 +236,11 @@ Future<bool?> showConfirmationDialog({
                 style: TextStyle(
                   // ✅ LOGIC: If noButtonColor is provided, use it.
                   // Otherwise, fall back to AppColors.error (or your preferred default).
-                  color: noButtonColor ?? AppColors.error,
+                  color: noButtonColor ?? AppColors.primary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(true);
-              if (onYes != null) onYes();
-            },
-            child: Text(
-              yesText,
-              style: TextStyle(
-                // ✅ LOGIC: If yesButtonColor is provided, use it.
-                // Otherwise, fall back to AppColors.primary (or your preferred default).
-                color: yesButtonColor ?? AppColors.primary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
         ],
       );
     },

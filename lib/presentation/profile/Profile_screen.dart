@@ -1442,7 +1442,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 24),
                     RoundButton(
-                      title: l10n.finishButton,
+                      title: widget.fromLogin
+                          ? l10n.finishButton
+                          : l10n.updateButton,
                       height: 34,
                       onPress: () => bloc.add(const SubmitProfile()),
                       isLoading: state.submitting,

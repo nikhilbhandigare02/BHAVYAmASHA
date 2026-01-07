@@ -78,7 +78,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
         context: context,
         builder: (_) => AlertDialog(
 
-          surfaceTintColor: Colors.white, // Add this line to remove the tint
+          surfaceTintColor: Colors.white,
           title: Text(
             l10n?.attention ?? 'Attention!',
             style: TextStyle(
@@ -593,7 +593,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   if (c['firstFeedGivenAfterBirth'] == 'Other')
                     CustomTextField(
                       labelText: "${t.enter_other_feeding_option} *",
-                      initialValue: c['firstFeedOther'] ?? '',
+                      initialValue: t.enter_other_feeding_option,
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
                         NewbornDetailsChanged(field: 'firstFeedOther', value: val, childIndex: widget.childIndex),
                       ),
