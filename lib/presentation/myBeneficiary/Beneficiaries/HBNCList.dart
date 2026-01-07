@@ -192,6 +192,12 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
 
       setState(() {
         _filtered = formattedData;
+        // Sort by modified_date_time in descending order to show latest entries first
+        _filtered.sort((a, b) {
+          final dateA = a['modified_date_time']?.toString() ?? '';
+          final dateB = b['modified_date_time']?.toString() ?? '';
+          return dateB.compareTo(dateA); // Descending order (latest first)
+        });
         _isLoading = false;
       });
     } catch (e) {

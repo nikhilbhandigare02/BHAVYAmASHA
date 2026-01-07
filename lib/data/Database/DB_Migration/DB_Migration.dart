@@ -106,11 +106,14 @@ class DbMigration {
 
     // 🔹 Banking
     "bankAccountNumber": "account_number",
+    "bankAcc": "account_number",
     "ifscCode": "ifsc_code",
+    "ifsc": "ifsc_code",
 
     // 🔹 Voter & Ration
     "voterId": "voter_id",
     "rationCardId": "ration_card_id",
+    "rationId": "ration_card_id",
 
     // 🔹 Status
     "memberStatus": "member_status",

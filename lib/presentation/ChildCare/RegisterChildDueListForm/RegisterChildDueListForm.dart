@@ -20,6 +20,7 @@ class BeneficiaryData {
   final String? rchId;
   final String? fatherName;
   final String? motherName;
+  final String? spouseName;
   final String? dateOfBirth;
   final String? religion;
   final String? socialClass;
@@ -40,6 +41,7 @@ class BeneficiaryData {
     this.rchId,
     this.fatherName,
     this.motherName,
+    this.spouseName,
     this.dateOfBirth,
     this.religion,
     this.socialClass,
@@ -62,6 +64,7 @@ class BeneficiaryData {
       rchId: json['rchId']?.toString(),
       fatherName: json['fatherName']?.toString(),
       motherName: json['motherName']?.toString(),
+      spouseName: json['spouseName']?.toString(),
       dateOfBirth: json['dateOfBirth']?.toString(),
       religion: json['religion']?.toString(),
       socialClass: json['socialClass']?.toString(),
@@ -84,6 +87,7 @@ class BeneficiaryData {
     'rchId': rchId,
     'fatherName': fatherName,
     'motherName': motherName,
+    'spouseName': spouseName,
     'dateOfBirth': dateOfBirth,
     'religion': religion,
     'socialClass': socialClass,
@@ -211,6 +215,12 @@ class _RegisterChildDueListFormScreen
                 info['RichIDChanged']?.toString()),
             fatherName: info['fatherName']?.toString(),
             motherName: info['motherName']?.toString(),
+            spouseName: (info['spouseName']?.toString() ??
+                headDetails['spouseName']?.toString() ??
+                info['husbandName']?.toString() ??
+                headDetails['husbandName']?.toString() ??
+                info['wifeName']?.toString() ??
+                headDetails['wifeName']?.toString()),
             dateOfBirth: info['dob']?.toString(),
             religion: info['religion']?.toString(),
             socialClass: info['category']?.toString(),
@@ -297,6 +307,9 @@ class _RegisterChildDueListFormScreen
               gender: headDetails['gender']?.toString(),
               mobile: headDetails['mobileNo']?.toString(),
               fatherName: headDetails['fatherName']?.toString(),
+              spouseName: (headDetails['spouseName']?.toString() ??
+                  headDetails['husbandName']?.toString() ??
+                  headDetails['wifeName']?.toString()),
               dateOfBirth: headDetails['dob']?.toString(),
               religion: headDetails['religion']?.toString(),
               socialClass: headDetails['category']?.toString(),
@@ -334,6 +347,9 @@ class _RegisterChildDueListFormScreen
                   rchId: member['richId']?.toString(),
                   fatherName: member['fatherName']?.toString(),
                   motherName: member['motherName']?.toString(),
+                  spouseName: (member['spouseName']?.toString() ??
+                      member['husbandName']?.toString() ??
+                      member['wifeName']?.toString()),
                   dateOfBirth: member['dob']?.toString(),
                   religion: member['religion']?.toString(),
                   socialClass: member['category']?.toString(),
@@ -392,6 +408,7 @@ class _RegisterChildDueListFormScreen
               rchId: beneficiaryData?.rchId,
               fatherName: beneficiaryData?.fatherName,
               motherName: beneficiaryData?.motherName,
+              spouseName: beneficiaryData?.spouseName,
               dateOfBirth: beneficiaryData?.dateOfBirth,
               religion: beneficiaryData?.religion,
               socialClass: beneficiaryData?.socialClass,
@@ -452,6 +469,7 @@ class _RegisterChildDueListFormScreen
             rchId: beneficiaryData?.rchId,
             fatherName: beneficiaryData?.fatherName,
             motherName: beneficiaryData?.motherName,
+            spouseName: beneficiaryData?.spouseName,
             dateOfBirth: beneficiaryData?.dateOfBirth,
             religion: beneficiaryData?.religion,
             socialClass: beneficiaryData?.socialClass,
@@ -543,6 +561,8 @@ class _RegisterChildDueListFormScreen
       }
       if (data.fatherName != null) {
         bloc.add(FatherNameChanged(data.fatherName!));
+      } else if (data.spouseName != null && data.spouseName!.isNotEmpty) {
+        bloc.add(FatherNameChanged(data.spouseName!));
       }
       if (data.motherName != null) {
         bloc.add(MotherNameChanged(data.motherName!));
@@ -601,6 +621,8 @@ class _RegisterChildDueListFormScreen
       }
       if (args['fatherName'] != null) {
         bloc.add(FatherNameChanged(args['fatherName'].toString()));
+      } else if (args['spouseName'] != null) {
+        bloc.add(FatherNameChanged(args['spouseName'].toString()));
       }
       if (args['rchId'] != null) {
         bloc.add(RchIdChildChanged(args['rchId'].toString()));

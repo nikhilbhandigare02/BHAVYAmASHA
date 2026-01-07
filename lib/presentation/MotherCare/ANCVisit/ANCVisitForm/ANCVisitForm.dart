@@ -176,6 +176,14 @@ class _AncvisitformState extends State<Ancvisitform> {
     _bloc.add(DiastolicChanged(formData['bp_of_pw_diastolic']?.toString() ?? ''));
     _bloc.add(HemoglobinChanged(formData['hemoglobin']?.toString() ?? ''));
 
+    final gravidaRaw = formData['order_of_pregnancy'] ?? formData['gravida'];
+    if (gravidaRaw != null) {
+      final gv = int.tryParse(gravidaRaw.toString());
+      if (gv != null) {
+        _bloc.add(GravidaChanged(gv));
+      }
+    }
+
     if (formData['is_breast_feeding'] != null) {
       final isBreastFeeding =
           formData['is_breast_feeding'] == true ||
