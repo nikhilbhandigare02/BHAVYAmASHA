@@ -2086,7 +2086,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                   : (sp.approxAge ?? ''))
                               .toString();
                       spouseFather = (sp.fatherName ?? '').toString();
-                    } catch (_) {}
+                    } catch (e) {
+                      debugPrint('Error fetching spouse details: $e');
+                    }
+
+                    final spouseRelation = (state.gender == 'Male')
+                        ? 'Wife'
+                        : 'Husband';
 
                     members.add({
                       '#': '2',
@@ -2094,7 +2100,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       'Name': state.spouseName!,
                       'Age': spouseAge,
                       'Gender': spouseGender,
-                      'Relation': 'Spouse',
+                      'Relation': spouseRelation,
                       'Father': spouseFather,
                       'Spouse': (state.headName ?? '').toString(),
                       'Total Children':

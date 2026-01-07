@@ -46,9 +46,9 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     try {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       
-      if (currentUserKey.isEmpty) {
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
         print('Error: Current user key not found');
         if (mounted) {
           setState(() {
@@ -59,8 +59,10 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         return;
       }
 
+      // Use same logic as myBeneficiaries.dart _getEligibleCoupleCount()
       final query = '''
-        SELECT COUNT(DISTINCT b.unique_key) as count
+        SELECT DISTINCT b.*, e.eligible_couple_state, 
+               e.created_date_time as registration_date
         FROM beneficiaries_new b
         INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
         WHERE b.is_deleted = 0 
@@ -70,8 +72,24 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
           AND e.current_user_key = ?
       ''';
 
-      final countResult = await db.rawQuery(query, [currentUserKey]);
-      final count = countResult.first['count'] as int? ?? 0;
+      final rows = await db.rawQuery(query, [ashaUniqueKey]);
+      
+      int count = 0;
+      for (final row in rows) {
+        try {
+          final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
+          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty 
+              ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfo))
+              : <String, dynamic>{};
+          
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          if (memberType != 'child') {
+            count++;
+          }
+        } catch (_) {
+          count++;
+        }
+      }
 
       final updatedCouples = await _localStorageDao.getUpdatedEligibleCouples();
       
