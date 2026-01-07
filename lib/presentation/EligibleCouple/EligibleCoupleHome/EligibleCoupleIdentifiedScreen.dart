@@ -126,11 +126,29 @@ class _EligibleCoupleIdentifiedScreenState
 
 
       final couples = <Map<String, dynamic>>[];
+      
+      // Track duplicates based on household_ref_key and name combination
+      final Map<String, int> recordCount = {};
+      final Map<String, int> processedRecords = {};
+
+      // First pass: count occurrences of each unique record
+      for (final member in filteredRows) {
+        final info = _toStringMap(member['beneficiary_info']);
+        final memberUniqueKey = member['unique_key']?.toString() ?? '';
+        final householdKey = member['household_ref_key']?.toString() ?? '';
+        final name = info['memberName']?.toString() ?? info['headName']?.toString() ?? '';
+        
+        // Create a unique key based on household and name combination
+        final uniqueKey = '$householdKey-$name';
+        recordCount[uniqueKey] = (recordCount[uniqueKey] ?? 0) + 1;
+      }
 
       // Process each eligible row
       for (final member in filteredRows) {
         final info = _toStringMap(member['beneficiary_info']);
         final memberUniqueKey = member['unique_key']?.toString() ?? '';
+        final householdKey = member['household_ref_key']?.toString() ?? '';
+        final name = info['memberName']?.toString() ?? info['headName']?.toString() ?? '';
         
         // Check memberType and skip if child
         final memberType = info['memberType']?.toString().toLowerCase() ?? '';
@@ -139,11 +157,20 @@ class _EligibleCoupleIdentifiedScreenState
           continue;
         }
 
+        // Create the same unique key for duplicate detection
+        final uniqueKey = '$householdKey-$name';
+        final isDuplicate = recordCount[uniqueKey]! > 1;
+        
+        // Mark this record as guest if it's a duplicate and hasn't been marked yet
+        final shouldShowGuestBadge = isDuplicate && (processedRecords[uniqueKey] ?? 0) == 0;
+        processedRecords[uniqueKey] = (processedRecords[uniqueKey] ?? 0) + 1;
+
         couples.add(_formatCoupleData(
           _toStringMap(member),
           info,
           <String, dynamic>{}, // Empty counterpart
           isHead: false,
+          shouldShowGuestBadge: shouldShowGuestBadge,
         ));
       }
 
@@ -162,7 +189,7 @@ class _EligibleCoupleIdentifiedScreenState
     }
   }
 
-  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead}) {
+  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead, bool shouldShowGuestBadge = false}) {
     final hhId = row['household_ref_key']?.toString() ?? '';
     final uniqueKey = row['unique_key']?.toString() ?? '';
     final createdDate = row['registration_date']?.toString() ?? '';
@@ -212,6 +239,7 @@ class _EligibleCoupleIdentifiedScreenState
       '_rawRow': row,
       'fullHhId': hhId,
       'fullBeneficiaryId': uniqueKey,
+      'shouldShowGuestBadge': shouldShowGuestBadge,
     };
   }
 
@@ -428,19 +456,19 @@ class _EligibleCoupleIdentifiedScreenState
                       ),
 
                       const SizedBox(width: 8),
-                      if (beneficiaryInfo['gender']?.toString().toLowerCase() == 'male')
+                      if (data['shouldShowGuestBadge'] == true || beneficiaryInfo['gender']?.toString().toLowerCase() == 'male')
                         Container(
                           margin: const EdgeInsets.only(left: 8),
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.grey,
+                            color: Colors.green.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             'Guest',
                             style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10.sp,
+                              color: Colors.green,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
