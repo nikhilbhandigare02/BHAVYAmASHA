@@ -6973,6 +6973,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submit => 'SUBMIT';
 
   @override
+  String get weightLabelTrackingDue => 'Weight (500-12500)gms';
+
+  @override
   String get hscNameLabelCbac => 'Name of Health Sub Center';
 
   @override

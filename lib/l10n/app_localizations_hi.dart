@@ -6973,10 +6973,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get submit => 'सबमिट करें';
 
   @override
+  String get weightLabelTrackingDue => 'वजन (500–12500 ग्राम)';
+
+  @override
   String get hscNameLabelCbac => 'Name of Health Sub Center';
 
   @override
-  String get caseClosureRecorded => 'फॉर्म सफलतापूर्वक सहेजा गया';
+  String get caseClosureRecorded => 'केस समापन दर्ज किया गया। बच्चे को ट्रैकिंग सूची से हटाया गया है।';
 
   @override
   String get validateEmptyCP => 'कृपया वर्तमान पासवर्ड दर्ज करें';

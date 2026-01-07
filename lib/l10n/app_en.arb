@@ -2390,6 +2390,7 @@
   "filariasisProgram": "Filaria Eradication Program",
   "validateEmptyUsername": "Please enter the username",
   "submit": "SUBMIT",
+  "weightLabelTrackingDue": "Weight (500-12500)gms",
   "hscNameLabelCbac": "Name of Health Sub Center",
   "caseClosureRecorded": "Form saved successfully",
   "validateEmptyCP": "Please enter the current password",

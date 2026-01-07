@@ -13991,6 +13991,12 @@ abstract class AppLocalizations {
   /// **'SUBMIT'**
   String get submit;
 
+  /// No description provided for @weightLabelTrackingDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (500-12500)gms'**
+  String get weightLabelTrackingDue;
+
   /// No description provided for @hscNameLabelCbac.
   ///
   /// In en, this message translates to:
