@@ -374,20 +374,19 @@ class _UpdatedEligibleCoupleListScreenState
                   ),
 
                   const SizedBox(width: 8),
-                  // Image.asset(
-                  //   'assets/images/sync.png',
-                  //   width: 24,
-                  //   height: 24,
-                  //   color: (data['is_synced'] == 1) ? null : Colors.grey,
-                  // ),
                   FutureBuilder<Map<String, dynamic>>(
                     future: _getSyncStatus(data['beneficiary_ref']!.toString()),
                     builder: (context, snapshot) {
                       final isSynced = snapshot.data?['is_synced'] == true;
-                      return Image.asset(
-                        'assets/images/sync.png',
-                        width: 25,
-                        color: isSynced ? null : Colors.grey[500],
+                      return Row(
+                        children: [
+                          Image.asset(
+                            'assets/images/sync.png',
+                            width: 25,
+                            color: isSynced ? null : Colors.grey[500],
+                          ),
+
+                        ],
                       );
                     },
                   )
@@ -418,7 +417,15 @@ class _UpdatedEligibleCoupleListScreenState
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(child: _rowText(t?.name ?? 'Name', data['Name']?.toString() ?? '')),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _rowText(t?.name ?? 'Name', data['Name']?.toString() ?? ''),
+                            ),
+                          ],
+                        ),
+                      ),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText(t?.ageLabelSimple ?? 'Age', data['age']?.toString() ?? '')),
                       const SizedBox(width: 12),

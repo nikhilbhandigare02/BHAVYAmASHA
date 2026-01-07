@@ -250,6 +250,9 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
               'partB.b1.fever2w',
               'partB.b1.weightLoss',
               'partB.b1.nightSweat',
+              'partB.b1.druggs',
+              'partB.b1.Tuberculosis',
+              'partB.b1.history',
             ];
             for (final k in reqB1) {
               if (!has(k)) missing.add(k);

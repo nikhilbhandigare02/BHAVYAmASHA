@@ -56,10 +56,8 @@ class _DeathRegisterState extends State<DeathRegister> {
         return l10n?.badgeAdult ?? 'Adult';
       case 'child':
         return l10n?.badgeChild ?? 'Child';
-      case 'infant':
-        return l10n?.badgeInfant ?? 'Infant';
       default:
-        return l10n?.badgeAdult ?? 'Adult';
+        return memberType; // Return the original value if no match
     }
   }
 
@@ -207,7 +205,12 @@ class _DeathRegisterState extends State<DeathRegister> {
       age = '${beneficiaryInfo['age']} years';
     }
 
-    final gender = (beneficiaryInfo['gender'] ?? '').toString().toLowerCase() == 'm' ? 'Male' : 'Female';
+    final genderRaw = (beneficiaryInfo['gender'] ?? '').toString().toLowerCase().trim();
+    final gender = genderRaw == 'm' || genderRaw == 'male'
+        ? 'Male'
+        : genderRaw == 'f' || genderRaw == 'female'
+            ? 'Female'
+            : 'Other';
     final hhId = data['household_ref_key']?.toString() ?? 'N/A';
     final uniqueKey = data['unique_key']?.toString() ?? '';
 

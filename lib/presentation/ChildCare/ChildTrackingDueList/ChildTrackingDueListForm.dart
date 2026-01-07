@@ -52,6 +52,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   late TabController _tabController;
   final Map<int, TextEditingController> _otherCauseControllers = {};
   final Map<int, TextEditingController> _otherReasonControllers = {};
+  final Map<int, TextEditingController> _reasonForAbsentControllers = {};
 
   @override
   void initState() {
@@ -80,6 +81,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         debugPrint('Beneficiary Ref Key: ${_formData['beneficiary_ref_key']}');
       }
       _formDataLoaded = true;
+      _prefillWeightsFromDb();
     }
   }
 
@@ -102,9 +104,11 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       'deathPlace': null,
       'reasonOfDeath': null,
       'showOtherCauseField': false,
+      'isBeneficiaryAbsent': null,
     };
     _otherCauseControllers[tabIndex] ??= TextEditingController();
     _otherReasonControllers[tabIndex] ??= TextEditingController();
+    _reasonForAbsentControllers[tabIndex] ??= TextEditingController();
   }
 
   bool _getIsCaseClosureChecked(int tabIndex) =>
@@ -129,6 +133,56 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       _initializeTabState(tabIndex);
       _tabCaseClosureState[tabIndex]![key] = value;
     });
+  }
+  Future<void> _prefillWeightsFromDb() async {
+    try {
+      final householdId = _formData['household_id']?.toString().trim().isNotEmpty == true
+          ? _formData['household_id'].toString()
+          : _formData['household_ref_key']?.toString() ?? '';
+      final beneficiaryId = _formData['beneficiary_id']?.toString().trim().isNotEmpty == true
+          ? _formData['beneficiary_id'].toString()
+          : _formData['beneficiary_ref_key']?.toString() ?? '';
+      if (householdId.isEmpty || beneficiaryId.isEmpty) {
+        return;
+      }
+      final rows = await LocalStorageDao.instance.getFollowupFormsByHouseholdAndBeneficiary(
+        formType: FollowupFormDataTable.childTrackingDue,
+        householdId: householdId,
+        beneficiaryId: beneficiaryId,
+      );
+      if (rows.isEmpty) {
+        return;
+      }
+      final latest = rows.first;
+      final formJsonStr = latest['form_json']?.toString() ?? '';
+      if (formJsonStr.isEmpty) {
+        return;
+      }
+      Map<String, dynamic>? formRoot;
+      try {
+        formRoot = jsonDecode(formJsonStr) as Map<String, dynamic>?;
+      } catch (_) {}
+      final formDataMap = formRoot?['form_data'] is Map<String, dynamic>
+          ? Map<String, dynamic>.from(formRoot!['form_data'] as Map)
+          : null;
+      if (formDataMap == null) {
+        return;
+      }
+      final latestWeight = formDataMap['weight_grams']?.toString() ?? '';
+      final latestBirthWeight = formDataMap['birth_weight_grams']?.toString() ?? '';
+      if (latestWeight.isNotEmpty || latestBirthWeight.isNotEmpty) {
+        setState(() {
+          if (latestWeight.isNotEmpty) {
+            _formData['weight_grams'] = latestWeight;
+          }
+          if (latestBirthWeight.isNotEmpty) {
+            _formData['birth_weight_grams'] = latestBirthWeight;
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Error pre-filling weights: $e');
+    }
   }
 
   Future<void> _saveForm() async {
@@ -184,6 +238,8 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           'birth_weight_grams': _formData['birth_weight_grams'],
           'case_closure': caseClosureData,
           'visit_date': now,
+          'is_beneficiary_absent': _tabCaseClosureState[currentTabIndex]?['isBeneficiaryAbsent'],
+          'reason_for_absent': _reasonForAbsentControllers[currentTabIndex]?.text,
           // Ensure household_id and beneficiary_id are saved (use ref_key if id not available)
           'household_id': _formData['household_id'] ?? _formData['household_ref_key'] ?? _formData['hhId'] ?? '',
           'beneficiary_id': _formData['beneficiary_id'] ?? _formData['beneficiary_ref_key'] ?? _formData['BeneficiaryID'] ?? '',
@@ -450,6 +506,9 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
     for (var c in _otherReasonControllers.values) {
       c.dispose();
     }
+    for (var c in _reasonForAbsentControllers.values) {
+      c.dispose();
+    }
     _tabController.dispose();
     super.dispose();
   }
@@ -624,7 +683,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       {'name': 'D.P.T. -1', 'due': sixWeekDueDate},
       {'name': 'Pentavelent 1', 'due': sixWeekDueDate},
       {'name': 'Rota-1', 'due': sixWeekDueDate},
-      {'name': 'I.P.V.-1', 'due': sixWeekDueDate},
+      {'name': 'IPV 1', 'due': sixWeekDueDate},
       {'name': 'P.C.V.-1', 'due': sixWeekDueDate},
     ];
 
@@ -791,7 +850,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
     final fourteenWeekDueDate = _calculateDueDate(14);
     final data = [
       {'name': 'O.P.V.-3', 'due': fourteenWeekDueDate},
-      {'name': 'Pentavalent-3', 'due': fourteenWeekDueDate},
+      {'name': 'Pentavalent 3', 'due': fourteenWeekDueDate},
       {'name': 'Rota 3', 'due': fourteenWeekDueDate},
       {'name': 'IPV 2', 'due': fourteenWeekDueDate},
       {'name': 'P.V.C. -2', 'due': fourteenWeekDueDate},
@@ -846,7 +905,6 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   Widget _buildFourteenWeekTab() {
     final tabIndex = 3; // 14 Week tab
     _initializeTabState(tabIndex);
-    String? isBeneficiaryAbsent;
     final List<String> absentOptions = ['No', 'Yes'];
 
     return StatefulBuilder(
@@ -865,11 +923,6 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-
-
-                          const SizedBox(height: 16),
-
-                          const SizedBox(height: 8),
 
                           // Case Closure Widget
                           CaseClosureWidget(
@@ -932,26 +985,29 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                               _updateTabState(tabIndex, 'showOtherCauseField', value);
                             },
                           ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Is Beneficiary Absent?',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+
 
                           ApiDropdown<String>(
-                            labelText: 'Select',
+                            labelText: 'Is Beneficiary Absent?',
                             items: absentOptions,
-                            value: isBeneficiaryAbsent,
+                            value: _tabCaseClosureState[tabIndex]?['isBeneficiaryAbsent'],
                             onChanged: (value) {
-                              setState(() {
-                                isBeneficiaryAbsent = value;
-                              });
+                              _updateTabState(tabIndex, 'isBeneficiaryAbsent', value);
+                              if (value != 'Yes') {
+                                _reasonForAbsentControllers[tabIndex]!.clear();
+                              }
                             },
                             getLabel: (value) => value,
                           ),
+                          Divider(height: 0,),
+                          if (_tabCaseClosureState[tabIndex]?['isBeneficiaryAbsent'] == 'Yes') ...[
+
+                            CustomTextField(
+                              labelText: 'Reason for Absent',
+                              hintText: 'Reason for Absent',
+                              controller: _reasonForAbsentControllers[tabIndex],
+                            ),
+                          ],
                           Divider(color: AppColors.divider, thickness: 0.5, height: 0),
                         ],
                       ),
@@ -959,17 +1015,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: RoundButton(
-                  title: 'SAVE',
-                  onPress: () {},
-                  height: 50,
-                  borderRadius: 8,
-                  fontSize: 16,
-                  spacing: 1.2,
-                ),
-              ),
+              _buildSaveButtonBar(),
             ],
           ),
         );
@@ -1060,17 +1106,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: RoundButton(
-              title: _isSaving ? 'SAVING...' : 'SAVE',
-              onPress: _isSaving ? () {} : _saveForm,
-              height: 50,
-              borderRadius: 8,
-              fontSize: 16,
-              spacing: 1.2,
-            ),
-          ),
+          _buildSaveButtonBar(),
         ],
       ),
     );
@@ -1159,17 +1195,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: RoundButton(
-              title: _isSaving ? 'SAVING...' : 'SAVE',
-              onPress: _isSaving ? () {} : _saveForm,
-              height: 50,
-              borderRadius: 8,
-              fontSize: 16,
-              spacing: 1.2,
-            ),
-          ),
+          _buildSaveButtonBar(),
         ],
       ),
     );
@@ -1185,14 +1211,41 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       ],
     );
   }
+  Widget _buildSaveButtonBar() {
+    final l = AppLocalizations.of(context)!;
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 4,
+            spreadRadius: 2,
+            offset: const Offset(0, 0),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: RoundButton(
+          title: _isSaving ? '' : l.saveButton,
+          onPress: _isSaving ? () {} : _saveForm,
+          height: 34,
+          borderRadius: 4,
+          fontSize: 15,
+          spacing: 1.2,
+        ),
+      ),
+    );
+  }
 
   Widget _buildNineMonthDoseTable() {
     final data = [
-      {'name': 'Measles -1', 'due': '14-07-2023'},
+      {'name': 'Measles 1', 'due': '14-07-2023'},
       {'name': 'M.R Dose -1', 'due': '14-07-2023'},
       {'name': 'Vitamin A Dose -1', 'due': '14-07-2023'},
       {'name': 'J.E Vaccine -1', 'due': '14-07-2023'},
-      {'name': 'P.V.C Booster', 'due': '14-07-2023'},
+      {'name': 'P.V.C -Booster', 'due': '14-07-2023'},
       {'name': 'F.I.P.V. -3', 'due': '14-07-2023'},
     ];
 
@@ -1329,17 +1382,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: RoundButton(
-              title: _isSaving ? 'SAVING...' : 'SAVE',
-              onPress: _isSaving ? () {} : _saveForm,
-              height: 50,
-              borderRadius: 8,
-              fontSize: 16,
-              spacing: 1.2,
-            ),
-          ),
+          _buildSaveButtonBar(),
         ],
       ),
     );
@@ -1348,10 +1391,11 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   Widget _buildSixteenToTwentyFourMonthDoseTable() {
     final sixteenToTwentyFourMonthDueDate = _calculateDueDate(20);
     final data = [
-      {'name': 'O.P.V. Booster-1', 'due': sixteenToTwentyFourMonthDueDate},
+      {'name': 'O.P.V. Booster', 'due': sixteenToTwentyFourMonthDueDate},
       {'name': 'D.P.T. Booster-1', 'due': sixteenToTwentyFourMonthDueDate},
+      {'name': 'Measles 2', 'due': sixteenToTwentyFourMonthDueDate},
 
-      {'name': 'J.E Vaccine 2', 'due': sixteenToTwentyFourMonthDueDate},
+      {'name': 'J.E Vaccine -2', 'due': sixteenToTwentyFourMonthDueDate},
       {'name': 'M.R dose -2', 'due': sixteenToTwentyFourMonthDueDate},
 
     ];
@@ -1485,17 +1529,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: RoundButton(
-              title: _isSaving ? 'SAVING...' : 'SAVE',
-              onPress: _isSaving ? () {} : _saveForm,
-              height: 50,
-              borderRadius: 8,
-              fontSize: 16,
-              spacing: 1.2,
-            ),
-          ),
+          _buildSaveButtonBar(),
         ],
       ),
     );
@@ -1636,17 +1670,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: RoundButton(
-              title: _isSaving ? 'SAVING...' : 'SAVE',
-              onPress: _isSaving ? () {} : _saveForm,
-              height: 50,
-              borderRadius: 8,
-              fontSize: 16,
-              spacing: 1.2,
-            ),
-          ),
+          _buildSaveButtonBar(),
         ],
       ),
     );
@@ -1787,17 +1811,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: RoundButton(
-              title: _isSaving ? 'SAVING...' : 'SAVE',
-              onPress: _isSaving ? () {} : _saveForm,
-              height: 50,
-              borderRadius: 8,
-              fontSize: 16,
-              spacing: 1.2,
-            ),
-          ),
+          _buildSaveButtonBar(),
         ],
       ),
     );
@@ -1938,17 +1952,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: RoundButton(
-              title: _isSaving ? 'SAVING...' : 'SAVE',
-              onPress: _isSaving ? () {} : _saveForm,
-              height: 50,
-              borderRadius: 8,
-              fontSize: 16,
-              spacing: 1.2,
-            ),
-          ),
+          _buildSaveButtonBar(),
         ],
       ),
     );

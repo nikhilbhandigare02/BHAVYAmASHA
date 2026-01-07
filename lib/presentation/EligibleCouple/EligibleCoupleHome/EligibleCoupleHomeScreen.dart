@@ -44,12 +44,40 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
       setState(() => isLoading = true);
     }
     try {
-      final counts = await _localStorageDao.getEligibleCoupleCounts();
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
+      
+      if (currentUserKey.isEmpty) {
+        print('Error: Current user key not found');
+        if (mounted) {
+          setState(() {
+            eligibleCouplesCount = 0;
+            updatedEligibleCouplesCount = 0;
+          });
+        }
+        return;
+      }
+
+      final query = '''
+        SELECT COUNT(DISTINCT b.unique_key) as count
+        FROM beneficiaries_new b
+        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+        WHERE b.is_deleted = 0 
+          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+          AND e.eligible_couple_state = 'eligible_couple'
+          AND e.is_deleted = 0
+          AND e.current_user_key = ?
+      ''';
+
+      final countResult = await db.rawQuery(query, [currentUserKey]);
+      final count = countResult.first['count'] as int? ?? 0;
+
       final updatedCouples = await _localStorageDao.getUpdatedEligibleCouples();
       
       if (mounted) {
         setState(() {
-          eligibleCouplesCount = counts['total'] ?? 0;
+          eligibleCouplesCount = count;
           updatedEligibleCouplesCount = updatedCouples.length;
         });
       }

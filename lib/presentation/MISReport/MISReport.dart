@@ -118,13 +118,13 @@ class _MisreportState extends State<Misreport> {
     try {
       print('🔍 [getCurrentMonthChildCareDueCounts] Querying child care due counts (state-wise total)...');
 
-      // 1. Get the current user key
+
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       final db = await DatabaseProvider.instance.database;
 
-      // 2. Prepare the WHERE clause parts
+
       String whereClause = '''
       is_deleted = 0
       AND beneficiary_ref_key IS NOT NULL
@@ -182,6 +182,7 @@ class _MisreportState extends State<Misreport> {
       rethrow;
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);

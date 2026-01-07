@@ -28,7 +28,6 @@ class _EligibleCoupleIdentifiedScreenState
 
   List<Map<String, dynamic>> _filtered = [];
   bool _isLoading = true;
-  List<Map<String, dynamic>> _allCouples = [];
 
   @override
   void initState() {
@@ -80,7 +79,8 @@ class _EligibleCoupleIdentifiedScreenState
       }
 
       final query = '''
-        SELECT DISTINCT b.*, e.eligible_couple_state 
+        SELECT DISTINCT b.*, e.eligible_couple_state, 
+               e.created_date_time as registration_date
         FROM beneficiaries_new b
         INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
         WHERE b.is_deleted = 0 
@@ -132,10 +132,10 @@ class _EligibleCoupleIdentifiedScreenState
         final info = _toStringMap(member['beneficiary_info']);
         final memberUniqueKey = member['unique_key']?.toString() ?? '';
         
-        // Check gender and skip if male
-        final gender = info['gender']?.toString().toLowerCase() ?? '';
-        if (gender == 'male') {
-          print('Skipping male record: $memberUniqueKey');
+        // Check memberType and skip if child
+        final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+        if (memberType == 'child') {
+          print('Skipping child record: $memberUniqueKey');
           continue;
         }
 
@@ -165,12 +165,12 @@ class _EligibleCoupleIdentifiedScreenState
   Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead}) {
     final hhId = row['household_ref_key']?.toString() ?? '';
     final uniqueKey = row['unique_key']?.toString() ?? '';
-    final createdDate = row['created_date_time']?.toString() ?? '';
+    final createdDate = row['registration_date']?.toString() ?? '';
     final info = _toStringMap(row['beneficiary_info']);
     final head = _toStringMap(info['head_details']);
     final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
     final gender = female['gender']?.toString().toLowerCase();
-    final displayGender = 'Female';
+    final displayGender = gender?.isNotEmpty == true ? gender![0].toUpperCase() + gender!.substring(1) : 'Not Available';
     final age = _calculateAge(female['dob']);
     final richId = female['RichID']?.toString() ?? '';
     final mobile = female['mobile_no']?.toString() ?? female['mobileNo']?.toString() ?? 'Not Available';
@@ -426,6 +426,25 @@ class _EligibleCoupleIdentifiedScreenState
                           style: TextStyle(color: primary, fontWeight: FontWeight.w600),
                         ),
                       ),
+
+                      const SizedBox(width: 8),
+                      if (beneficiaryInfo['gender']?.toString().toLowerCase() == 'male')
+                        Container(
+                          margin: const EdgeInsets.only(left: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Guest',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
                       const SizedBox(width: 8),
                       Image.asset(
                         'assets/images/sync.png',
@@ -459,7 +478,16 @@ class _EligibleCoupleIdentifiedScreenState
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          Expanded(child: _rowText(l10n?.nameLabel ??  'Name', data['Name'] ?? '')),
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: _rowText(l10n?.nameLabel ??  'Name', data['Name'] ?? ''),
+                                ),
+
+                              ],
+                            ),
+                          ),
                           const SizedBox(width: 12),
                           Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['age']?.toString() ?? '')),
                           const SizedBox(width: 12),
