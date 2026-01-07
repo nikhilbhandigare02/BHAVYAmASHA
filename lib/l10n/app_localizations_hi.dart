@@ -6970,13 +6970,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get validateEmptyUsername => 'कृपया उपयोगकर्ता का नाम दर्ज करें';
 
   @override
-  String get caseClosureRecorded => 'केस समापन दर्ज किया गया। बच्चे को ट्रैकिंग सूची से हटाया गया है।';
-
-  @override
   String get submit => 'सबमिट करें';
 
   @override
   String get hscNameLabelCbac => 'Name of Health Sub Center';
+
+  @override
+  String get caseClosureRecorded => 'फॉर्म सफलतापूर्वक सहेजा गया';
 
   @override
   String get validateEmptyCP => 'कृपया वर्तमान पासवर्ड दर्ज करें';

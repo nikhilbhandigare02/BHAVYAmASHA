@@ -6970,13 +6970,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get validateEmptyUsername => 'Please enter the username';
 
   @override
-  String get caseClosureRecorded => 'Form saved successfully';
-
-  @override
   String get submit => 'SUBMIT';
 
   @override
   String get hscNameLabelCbac => 'Name of Health Sub Center';
+
+  @override
+  String get caseClosureRecorded => 'Form saved successfully';
 
   @override
   String get validateEmptyCP => 'Please enter the current password';
