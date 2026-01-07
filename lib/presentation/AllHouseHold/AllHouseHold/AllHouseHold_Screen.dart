@@ -137,6 +137,12 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
           final householdRefKey = (row['household_ref_key'] ?? '').toString();
 
+          // Check if this is a child record (same logic as RegisterChildListScreen)
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          final relation = info['relation']?.toString().toLowerCase() ?? '';
+          final isChild = memberType == 'child' || relation == 'child' ||
+              memberType == 'Child' || relation == 'daughter';
+
           // Pregnant
           final isPregnant =
               info['isPregnant']?.toString().toLowerCase() == 'yes' ||
@@ -147,27 +153,65 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                 (pregnantCountMap[householdRefKey] ?? 0) + 1;
           }
 
-          final dob = info['dob']?.toString();
-          if (dob != null && dob.isNotEmpty) {
-            final birthDate = DateTime.tryParse(dob);
+          final dob = info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
+          if (dob != null && dob.toString().isNotEmpty) {
+            DateTime? birthDate;
+            
+            // Use same date parsing logic as RegisterChildListScreen
+            String dateStr = dob.toString();
+            birthDate = DateTime.tryParse(dateStr);
+
+            if (birthDate == null) {
+              final timestamp = int.tryParse(dateStr);
+              if (timestamp != null && timestamp > 0) {
+                birthDate = DateTime.fromMillisecondsSinceEpoch(
+                  timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+                  isUtc: true,
+                );
+              }
+            }
+
             if (birthDate != null) {
               final now = DateTime.now();
-              int ageInMonths =
-                  (now.year - birthDate.year) * 12 +
-                      now.month -
-                      birthDate.month;
-              if (now.day < birthDate.day) ageInMonths--;
+              int years = now.year - birthDate.year;
+              int months = now.month - birthDate.month;
+              int days = now.day - birthDate.day;
 
-              if (ageInMonths >= 0 && ageInMonths < 12) {
-                child0to1Map[householdRefKey] =
-                    (child0to1Map[householdRefKey] ?? 0) + 1;
-              } else if (ageInMonths >= 12 && ageInMonths < 24) {
-                child1to2Map[householdRefKey] =
-                    (child1to2Map[householdRefKey] ?? 0) + 1;
-              } else if (ageInMonths >= 24 && ageInMonths < 60) {
-                child2to5Map[householdRefKey] =
-                    (child2to5Map[householdRefKey] ?? 0) + 1;
-              } else if (ageInMonths >= 65 * 12) {
+              if (days < 0) {
+                final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+                final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+                final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
+                days += daysInLastMonth;
+                months--;
+              }
+
+              if (months < 0) {
+                months += 12;
+                years--;
+              }
+
+              // Convert to total months for easier categorization
+              int totalMonths = years * 12 + months;
+              if (days < 0) totalMonths--; // Adjust if not yet reached birthday this month
+
+              // Only categorize as child if memberType indicates it's a child
+              if (isChild) {
+                if (totalMonths >= 0 && totalMonths < 12) {
+                  child0to1Map[householdRefKey] =
+                      (child0to1Map[householdRefKey] ?? 0) + 1;
+                } else if (totalMonths >= 12 && totalMonths <= 25) {
+                  // Include exactly 2 years (24 months) in 1-2 year category
+                  child1to2Map[householdRefKey] =
+                      (child1to2Map[householdRefKey] ?? 0) + 1;
+                } else if (totalMonths >= 26 && totalMonths < 60) {
+                  // Above 2 years (25+ months) in 2-5 year category
+                  child2to5Map[householdRefKey] =
+                      (child2to5Map[householdRefKey] ?? 0) + 1;
+                }
+              }
+              
+              // Still check for elderly regardless of memberType
+              if (totalMonths >= 65 * 12) {
                 elderlyCountMap[householdRefKey] =
                     (elderlyCountMap[householdRefKey] ?? 0) + 1;
               }

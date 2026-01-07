@@ -298,6 +298,102 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     }
   }
 
+  Future<bool> _hasTrackingDueStatus(String beneficiaryRefKey) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final rows = await db.query(
+        'child_care_activities',
+        where: 'beneficiary_ref_key = ? AND child_care_state = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryRefKey, 'tracking_due'],
+        limit: 1,
+      );
+      return rows.isNotEmpty;
+    } catch (e) {
+      print('Error checking tracking_due status for $beneficiaryRefKey: $e');
+      return false;
+    }
+  }
+
+  String _formatDateFromString(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'Not Available';
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
+    String age = 'Not Available';
+    String gender = (genderRaw?.toString().toLowerCase() ?? '');
+
+    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
+      try {
+        String dateStr = dobRaw.toString();
+        DateTime? dob;
+
+        dob = DateTime.tryParse(dateStr);
+
+        if (dob == null) {
+          final timestamp = int.tryParse(dateStr);
+          if (timestamp != null && timestamp > 0) {
+            dob = DateTime.fromMillisecondsSinceEpoch(
+              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+              isUtc: true,
+            );
+          }
+        }
+
+        if (dob != null) {
+          final now = DateTime.now();
+          int years = now.year - dob.year;
+          int months = now.month - dob.month;
+          int days = now.day - dob.day;
+
+          if (days < 0) {
+            final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+            final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+            final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
+            days += daysInLastMonth;
+            months--;
+          }
+
+          if (months < 0) {
+            months += 12;
+            years--;
+          }
+
+          if (years > 0) {
+            age = '$years Y';
+          } else if (months > 0) {
+            age = '$months M';
+          } else {
+            age = '$days D';
+          }
+        }
+      } catch (e) {
+        debugPrint('Error parsing date of birth: $e');
+      }
+    }
+
+    String displayGender;
+    switch (gender) {
+      case 'm':
+      case 'male':
+        displayGender = 'Male';
+        break;
+      case 'f':
+      case 'female':
+        displayGender = 'Female';
+        break;
+      default:
+        displayGender = 'Other';
+    }
+
+    return '$age | $displayGender';
+  }
+
   String _getLocalizedBadge(String badge, AppLocalizations l10n) {
     switch (badge) {
       case 'Family':
@@ -1875,190 +1971,162 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      String whereClause = '(form_json LIKE ? OR forms_ref_key = ?)';
-      List<dynamic> whereArgs = ['%child_registration_due%', '30bycxe4gv7fqnt6'];
+      // Get all child beneficiaries (same logic as RoutineScreen)
+      final List<Map<String, dynamic>> rows = await db.rawQuery('''
+        SELECT 
+          B.*
+        FROM beneficiaries_new B
+        WHERE 
+          B.is_deleted = 0
+          AND B.is_adult = 0
+          AND B.is_migrated = 0
+          AND B.current_user_key = ?
+        ORDER BY B.created_date_time DESC
+      ''', [ashaUniqueKey]);
 
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        whereClause += ' AND current_user_key = ?';
-        whereArgs.add(ashaUniqueKey);
+      // Get last visit dates from child_care_activities (same logic as RoutineScreen)
+      final lastVisitDates = <String, String>{};
+      final childCareRecords = await db.rawQuery('''
+        SELECT 
+          beneficiary_ref_key, 
+          created_date_time,
+          child_care_state
+        FROM child_care_activities 
+        ORDER BY created_date_time DESC
+      ''');
+
+      final Map<String, Map<String, dynamic>> latestRecordsByBeneficiary = {};
+      for (var record in childCareRecords) {
+        final beneficiaryKey = record['beneficiary_ref_key']?.toString();
+        if (beneficiaryKey != null && !latestRecordsByBeneficiary.containsKey(beneficiaryKey)) {
+          latestRecordsByBeneficiary[beneficiaryKey] = record;
+        }
       }
-
-      final results = await db.query(
-        FollowupFormDataTable.table,
-        where: whereClause,
-        whereArgs: whereArgs,
-        orderBy: 'id DESC',
-      );
+      
+      // Extract latest dates from records
+      for (var entry in latestRecordsByBeneficiary.entries) {
+        final beneficiaryKey = entry.key;
+        final record = entry.value;
+        final createdDate = record['created_date_time']?.toString();
+        if (createdDate != null) {
+          lastVisitDates[beneficiaryKey] = createdDate;
+        }
+      }
 
       final List<Map<String, dynamic>> items = [];
       final Set<String> seenBeneficiaries = <String>{};
 
-      final now = DateTime.now();
-      final todayDateOnly = DateTime(now.year, now.month, now.day);
-
-      for (final row in results) {
+      for (final row in rows) {
         try {
-          final formJson = row['form_json'] as String?;
-          if (formJson == null || formJson.isEmpty) {
+          final beneficiaryRefKey = row['unique_key']?.toString() ?? '';
+          
+          if (beneficiaryRefKey.isEmpty) continue;
+          if (seenBeneficiaries.contains(beneficiaryRefKey)) continue;
+          seenBeneficiaries.add(beneficiaryRefKey);
+
+          // Get beneficiary info
+          final info = row['beneficiary_info'] is String
+              ? jsonDecode(row['beneficiary_info'] as String)
+              : row['beneficiary_info'];
+
+          if (info is! Map) continue;
+
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          final relation = info['relation']?.toString().toLowerCase() ?? '';
+
+          // Only include children
+          if (!(memberType == 'child' || relation == 'child' ||
+              memberType == 'Child' || relation == 'daughter')) {
             continue;
           }
 
-          final decoded = jsonDecode(formJson);
-          final formType = decoded['form_type']?.toString() ?? '';
-          final formsRefKey = row['forms_ref_key']?.toString() ?? '';
-
-          final isChildRegistration =
-              formType == FollowupFormDataTable.childRegistrationDue;
-          final isChildTracking =
-              formsRefKey == '30bycxe4gv7fqnt6' ||
-              formType == FollowupFormDataTable.childTrackingDue;
-
-          if (!isChildRegistration && !isChildTracking) {
+          // Check if child has tracking_due status in child_care_activities
+          final hasTrackingDue = await _hasTrackingDueStatus(beneficiaryRefKey);
+          if (!hasTrackingDue) {
             continue;
           }
 
-          final formDataMap =
-              decoded['form_data'] as Map<String, dynamic>? ?? {};
-          final childName = formDataMap['child_name']?.toString() ?? '';
-          final beneficiaryRefKey =
-              row['beneficiary_ref_key']?.toString() ?? '';
+          // Check for case closure (deceased)
+          String ccWhere = 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0';
+          List<dynamic> ccArgs = [beneficiaryRefKey, '%case_closure%'];
 
-          if (childName.isEmpty) {
-            continue;
+          if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+             ccWhere += ' AND current_user_key = ?';
+             ccArgs.add(ashaUniqueKey);
           }
 
-          if (beneficiaryRefKey.isNotEmpty &&
-              seenBeneficiaries.contains(beneficiaryRefKey)) {
-            continue;
-          }
-          if (beneficiaryRefKey.isNotEmpty) {
-            seenBeneficiaries.add(beneficiaryRefKey);
-          }
-
-          if (beneficiaryRefKey.isNotEmpty) {
-            String ccWhere = 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0';
-            List<dynamic> ccArgs = [beneficiaryRefKey, '%case_closure%'];
-
-            if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-               ccWhere += ' AND current_user_key = ?';
-               ccArgs.add(ashaUniqueKey);
-            }
-
-            final caseClosureRecords = await db.query(
-              FollowupFormDataTable.table,
-              where: ccWhere,
-              whereArgs: ccArgs,
-            );
-
-            if (caseClosureRecords.isNotEmpty) {
-              bool hasCaseClosure = false;
-              for (final ccRecord in caseClosureRecords) {
-                try {
-                  final ccFormJson = ccRecord['form_json'] as String?;
-                  if (ccFormJson != null) {
-                    final ccDecoded = jsonDecode(ccFormJson);
-                    final ccFormDataMap =
-                        ccDecoded['form_data'] as Map<String, dynamic>? ?? {};
-                    final caseClosure =
-                        ccFormDataMap['case_closure']
-                            as Map<String, dynamic>? ??
-                        {};
-                    if (caseClosure['is_case_closure'] == true) {
-                      hasCaseClosure = true;
-                      break;
-                    }
-                  }
-                } catch (_) {}
-              }
-
-              if (hasCaseClosure) {
-                continue;
-              }
-            }
-          }
-
-          // Use modified_date_time if available, otherwise created_date_time,
-          // and only keep records whose date part equals today's date.
-          String? rawDate = row['modified_date_time']?.toString();
-          rawDate ??= row['created_date_time']?.toString();
-
-          DateTime? recordDate;
-          if (rawDate != null && rawDate.isNotEmpty) {
-            try {
-              String s = rawDate;
-              if (s.contains('T')) {
-                s = s.split('T')[0];
-              }
-              recordDate = DateTime.tryParse(s);
-            } catch (_) {}
-          }
-
-          if (recordDate == null) {
-            continue;
-          }
-
-          final recordDateOnly = DateTime(
-            recordDate.year,
-            recordDate.month,
-            recordDate.day,
+          final caseClosureRecords = await db.query(
+            FollowupFormDataTable.table,
+            where: ccWhere,
+            whereArgs: ccArgs,
           );
-          // Show records whose date is **up to** today (past or today),
-          // and skip only those with future dates.
-          if (recordDateOnly.isAfter(todayDateOnly)) {
-            continue;
+
+          if (caseClosureRecords.isNotEmpty) {
+            bool hasCaseClosure = false;
+            for (final ccRecord in caseClosureRecords) {
+              try {
+                final ccFormJson = ccRecord['form_json'] as String?;
+                if (ccFormJson != null) {
+                  final ccDecoded = jsonDecode(ccFormJson);
+                  final ccFormDataMap =
+                      ccDecoded['form_data'] as Map<String, dynamic>? ?? {};
+                  final caseClosure =
+                      ccFormDataMap['case_closure']
+                          as Map<String, dynamic>? ??
+                      {};
+                  if (caseClosure['is_case_closure'] == true) {
+                    hasCaseClosure = true;
+                    break;
+                  }
+                }
+              } catch (_) {}
+            }
+
+            if (hasCaseClosure) {
+              continue;
+            }
           }
 
-          final created = row['created_date_time']?.toString();
-          String lastVisitDate = '-';
-          if (created != null && created.isNotEmpty) {
-            try {
-              final date = DateTime.parse(created);
-              lastVisitDate =
-                  '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
-            } catch (_) {}
-          }
+          // Extract child information
+          final name = info['name']?.toString() ??
+              info['memberName']?.toString() ??
+              info['member_name']?.toString() ??
+              '';
 
-          String genderRaw =
-              formDataMap['gender']?.toString().toLowerCase() ?? '';
-          String gender;
+          final mobileNo = info['mobileNo']?.toString() ??
+              info['mobile']?.toString() ??
+              info['mobile_number']?.toString() ?? '';
+
+          final richId = info['RichIDChanged']?.toString() ??
+              info['richIdChanged']?.toString() ??
+              info['richId']?.toString() ?? '';
+
+          final dob = info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
+          final gender = info['gender'] ?? info['sex'];
+
+          // Calculate age using same logic as RegisterChildListScreen
+          String ageText = _formatAgeGender(dob, gender);
+          final genderRaw = gender?.toString().toLowerCase() ?? '';
+          String displayGender;
           switch (genderRaw) {
             case 'm':
             case 'male':
-              gender = 'Male';
+              displayGender = 'Male';
               break;
             case 'f':
             case 'female':
-              gender = 'Female';
+              displayGender = 'Female';
               break;
             default:
-              gender = 'Other';
+              displayGender = 'Other';
           }
 
-          String ageText = '-';
-          final dobRaw = formDataMap['date_of_birth'];
-          if (dobRaw != null && dobRaw.toString().isNotEmpty) {
-            try {
-              String dateStr = dobRaw.toString();
-              DateTime? dob = DateTime.tryParse(dateStr);
-              if (dob == null) {
-                final timestamp = int.tryParse(dateStr);
-                if (timestamp != null && timestamp > 0) {
-                  dob = DateTime.fromMillisecondsSinceEpoch(
-                    timestamp > 1000000000000 ? timestamp : timestamp * 1000,
-                    isUtc: true,
-                  );
-                }
-              }
-              if (dob != null) {
-                final now = DateTime.now();
-                int years = now.year - dob.year;
-                if (now.month < dob.month ||
-                    (now.month == dob.month && now.day < dob.day)) {
-                  years--;
-                }
-                ageText = years >= 0 ? '${years}y' : '0y';
-              }
-            } catch (_) {}
+          // Get last visit date from child_care_activities (same logic as RoutineScreen)
+          String lastVisitDate;
+          if (lastVisitDates.containsKey(beneficiaryRefKey)) {
+            lastVisitDate = _formatDateFromString(lastVisitDates[beneficiaryRefKey]);
+          } else {
+            lastVisitDate = 'Not Available';
           }
 
           final hhId = row['household_ref_key']?.toString() ?? '';
@@ -2068,14 +2136,15 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             'household_ref_key': hhId,
             'hhId': hhId,
             'BeneficiaryID': beneficiaryRefKey,
-            'name': childName,
+            'name': name,
             'age': ageText,
-            'gender': gender,
+            'gender': displayGender,
             'last Visit date': lastVisitDate,
-            'mobile': formDataMap['mobile_number']?.toString() ?? '-',
+            'mobile': mobileNo.isNotEmpty ? mobileNo : '-',
             'badge': 'RI',
           });
-        } catch (_) {
+        } catch (e) {
+          print('⚠️ Error processing beneficiary record: $e');
           continue;
         }
       }
@@ -2733,6 +2802,15 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         if (item['next hbnc visit due date'] != null) ...[
                           Text(
                             '${l10n?.nextVisit ?? "Next HBNC Visit Due Date"}: ${item['next hbnc visit due date']}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                        ],
+                        if (item['last Visit date'] != null) ...[
+                          Text(
+                            '${l10n?.lastVisit ?? "Last Visit Date"}: ${item['last Visit date']}',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14.sp,
