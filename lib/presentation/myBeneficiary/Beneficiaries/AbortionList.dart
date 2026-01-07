@@ -317,7 +317,7 @@ class _AbortionlistState extends State<Abortionlist> {
                     '',
                     visit.womanName ?? 'No Name',
                     textStyle:  TextStyle(
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontSize: 14.sp,
                     ),

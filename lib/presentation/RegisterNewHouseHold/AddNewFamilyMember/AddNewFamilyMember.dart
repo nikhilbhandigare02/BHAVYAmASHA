@@ -480,6 +480,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     if (gender == 'female') {
       return [
         'Self',
+        'Family Head',
         'Husband',
         'Father',
         'Mother',
@@ -496,6 +497,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     if (gender == 'male') {
       return [
         'Self',
+        'Family Head',
         'Wife',
         'Father',
         'Mother',
@@ -512,6 +514,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     if (gender == 'transgender') {
       return [
         'Self',
+        'Family Head',
         'Husband',
         'Wife',
         'Father',

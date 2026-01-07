@@ -2943,31 +2943,31 @@ class AppLocalizationsHi extends AppLocalizations {
   String get err_breastfeeding_problems_required => 'स्तनपान संबंधी समस्या का चयन अनिवार्य है।';
 
   @override
-  String get err_mcp_mother_filled_required => 'MCP card filled status is required.';
+  String get err_mcp_mother_filled_required => 'Please select MCP card filled status.';
 
   @override
-  String get err_excessive_bleeding_required => 'Excessive bleeding selection is required.';
+  String get err_excessive_bleeding_required => 'Please select excessive bleeding.';
 
   @override
-  String get err_unconscious_fits_required => 'Unconscious/fits selection is required.';
+  String get err_unconscious_fits_required => 'Please select unconscious/fits.';
 
   @override
-  String get err_breastfeeding_problem_description_required => 'Breastfeeding problem description is required.';
+  String get err_breastfeeding_problem_description_required => 'Please enter breastfeeding problem description.';
 
   @override
-  String get err_breastfeeding_help_required => 'Breastfeeding help/action description is required.';
+  String get err_breastfeeding_help_required => 'Please enter breastfeeding help or action taken.';
 
   @override
   String get err_pads_per_day_required => 'प्रतिदिन बदले जाने वाले पैड की संख्या अनिवार्य है।';
 
   @override
-  String get err_meals_per_day_required => 'Number of full meals per day is required.';
+  String get err_meals_per_day_required => 'Please enter number of full meals per day.';
 
   @override
   String get err_mothers_temperature_required => 'माता का तापमान अनिवार्य है।';
 
   @override
-  String get err_paracetamol_given_required => 'Paracetamol tablet given selection is required.';
+  String get err_paracetamol_given_required => 'Please select paracetamol tablet given.';
 
   @override
   String get err_foul_discharge_high_fever_required => 'दुर्गंधयुक्त स्राव/तेज बुखार का चयन अनिवार्य है।';
@@ -2985,13 +2985,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get err_nipple_cracks_pain_or_engorged_required => 'निप्पल में दरार/दर्द/कड़े स्तन का चयन अनिवार्य है।';
 
   @override
-  String get err_milk_counseling_advice_required => 'Counseling/advice for milk problem is required.';
+  String get err_milk_counseling_advice_required => 'Please enter counseling or advice for milk problem.';
 
   @override
-  String get err_refer_hospital_required => 'Refer to hospital selection is required.';
+  String get err_refer_hospital_required => 'Please select refer to hospital.';
 
   @override
-  String get err_refer_to_required => 'Referral facility selection is required.';
+  String get err_refer_to_required => 'Please select referral facility.';
 
   @override
   String get err_baby_condition_required => 'शिशु की स्थिति अनिवार्य है।';
@@ -3102,16 +3102,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get err_bloated_or_frequent_vomit_required => 'फूला हुआ पेट/बार-बार उल्टी का चयन अनिवार्य है।';
 
   @override
-  String get err_date_of_death_required => 'Date of death is required.';
+  String get err_date_of_death_required => 'Please enter date of death.';
 
   @override
-  String get err_death_place_required => 'Place of death selection is required.';
+  String get err_death_place_required => 'Please select place of death.';
 
   @override
-  String get err_reason_of_death_required => 'Reason of death selection is required.';
+  String get err_reason_of_death_required => 'Please select reason of death.';
 
   @override
-  String get err_other_reason_of_death_required => 'Other reason of death description is required.';
+  String get err_other_reason_of_death_required => 'Please enter other reason of death.';
 
   @override
   String get previousVisits => 'पिछले दौरे';
@@ -5089,7 +5089,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get categoryANC => 'एएनसी';
 
   @override
-  String get categoryANCbadge => 'एएनसी देय';
+  String get categoryANCbadge => 'ANC DUE';
 
   @override
   String get categoryANCsearch => 'प्रसवपूर्व देखभाल';

@@ -444,22 +444,18 @@ class AddnewfamilymemberBloc
     }
   }
 
-   int _getIsAdultValue(String? memberType, bool useDob, DateTime? dob) {
-    // If member type is explicitly 'child', return 0
-    if (memberType == 'child') {
+  int _getIsAdultValue(String? memberType, bool useDob, DateTime? dob) {
+    final type = (memberType ?? '').trim().toLowerCase();
+    if (type == 'child' || type == 'children') {
       return 0;
     }
-
-    if (memberType == 'Adult') {
+    if (type == 'adult') {
       return 1;
     }
-
-    // If DOB is available, calculate age
     if (useDob && dob != null) {
       final age = DateTime.now().difference(dob).inDays ~/ 365;
-      return age > 18 ? 1 : 0;
+      return age >= 18 ? 1 : 0;
     }
-
     return 1;
   }
 

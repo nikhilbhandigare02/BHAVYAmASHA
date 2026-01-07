@@ -504,8 +504,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         req('mcpCardAvailable', 'err_mcp_mother_required');
         reqIf(m['mcpCardAvailable'] == 'Yes', 'mcpCardFilled', 'err_mcp_mother_filled_required');
         req('postDeliveryProblems', 'err_post_delivery_problems_required');
-        final hasPostDeliveryProblem =
-            m['postDeliveryProblems'] != null && m['postDeliveryProblems'] != 'None';
+        final hasPostDeliveryProblem = m['postDeliveryProblems'] == 'Yes';
         reqIf(hasPostDeliveryProblem, 'excessiveBleeding', 'err_excessive_bleeding_required');
         reqIf(hasPostDeliveryProblem, 'unconsciousFits', 'err_unconscious_fits_required');
         req('breastfeedingProblems', 'err_breastfeeding_problems_required');

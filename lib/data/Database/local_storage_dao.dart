@@ -2463,6 +2463,7 @@ class LocalStorageDao {
       rethrow;
     }
   }
+
   Future<List<Map<String, dynamic>>> getANCList() async {
     try {
       final db = await _db;
