@@ -37,7 +37,6 @@ class DbMigration {
     }
   }
 
-
   final Map<String, String> keyMapping = {
     "beneficiaryType": "type_of_beneficiary",
 
@@ -48,7 +47,7 @@ class DbMigration {
     "name": "member_name",
     "memberName": "member_name",
     "motherName": "mother_name",
-    "headName": "mother_name",
+    "headName": "member_name",
     "fatherName": "father_name",
     "spouseName": "father_or_spouse_name",
 
@@ -114,7 +113,7 @@ class DbMigration {
 
     // 🔹 Status
     "memberStatus": "member_status",
-    "totalBorn":"total_children",
+    "totalBorn": "total_children",
     "totalLive": "total_live_children",
     "totalMale": "total_male_children",
     "totalFemale": "total_female_children",
@@ -124,7 +123,9 @@ class DbMigration {
   };
   static Future<void> runBeneficiaryTableMigration(Database db) async {
     try {
-      final List<Map<String, dynamic>> oldRows = await db.query("beneficiaries");
+      final List<Map<String, dynamic>> oldRows = await db.query(
+        "beneficiaries",
+      );
 
       const List<String> beneficiaryKeys = [
         "houseNo",
@@ -175,8 +176,13 @@ class DbMigration {
         "isFamilyheadWife",
         "weight",
         "birthWeight",
-        "totalBorn","totalLive","totalMale","totalFemale","youngestAge","ageUnit","youngestGender",
-
+        "totalBorn",
+        "totalLive",
+        "totalMale",
+        "totalFemale",
+        "youngestAge",
+        "ageUnit",
+        "youngestGender",
       ];
       // weight
       // weight_at_birth
@@ -238,7 +244,9 @@ class DbMigration {
       };
 
       for (final row in oldRows) {
-        final form = row["form_json"] != null ? jsonDecode(row["form_json"]) : {};
+        final form = row["form_json"] != null
+            ? jsonDecode(row["form_json"])
+            : {};
 
         final Map<String, dynamic> finalJson = {};
         for (final key in beneficiaryKeys) {
@@ -278,10 +286,10 @@ class DbMigration {
         Map<String, dynamic>? deathDetailsMap;
 
         final String reasonOfCloser =
-        (row["reason_of_closer"] ?? form["reason_of_closer"] ?? "")
-            .toString()
-            .trim()
-            .toLowerCase();
+            (row["reason_of_closer"] ?? form["reason_of_closer"] ?? "")
+                .toString()
+                .trim()
+                .toLowerCase();
 
         if (reasonOfCloser.isNotEmpty) {
           deathDetailsMap = {
@@ -294,12 +302,11 @@ class DbMigration {
 
           if (reasonOfCloser == "death") {
             isDeath = 1;
-          } else if (reasonOfCloser == "migrate_out" || reasonOfCloser == "migration") {
+          } else if (reasonOfCloser == "migrate_out" ||
+              reasonOfCloser == "migration") {
             isMigrated = 1;
           }
         }
-
-
 
         final existing = await db.query(
           "beneficiaries_new",
@@ -320,7 +327,9 @@ class DbMigration {
             "is_adult": row["is_adult"],
             "is_guest": row["is_guest"],
             "is_death": isDeath,
-            "death_details": deathDetailsMap != null ? jsonEncode(deathDetailsMap) : null,
+            "death_details": deathDetailsMap != null
+                ? jsonEncode(deathDetailsMap)
+                : null,
             "is_migrated": isMigrated,
             "current_user_key": row["added_by"],
             "created_date_time": row["created_date_time"],
@@ -336,7 +345,9 @@ class DbMigration {
           print('🔑 Unique Key: ${insertData['unique_key']}');
           print('🏠 Household Ref: ${insertData['household_ref_key']}');
           print('👤 Name: ${finalJson['name'] ?? finalJson['member_name']}');
-          print('👨‍👩‍👧‍👦 Relation: ${finalJson['relation'] ?? finalJson['relaton_with_family_head']}');
+          print(
+            '👨‍👩‍👧‍👦 Relation: ${finalJson['relation'] ?? finalJson['relaton_with_family_head']}',
+          );
           print('🎂 DOB: ${finalJson['dob']}');
           print('📱 Mobile: ${finalJson['mobileNo']}');
           print('💀 Is Death: ${insertData['is_death']}');
@@ -360,7 +371,6 @@ class DbMigration {
     }
   }
 
-
   static Future<void> runHouseholdTableMigration(Database db) async {
     final households = await db.query("household_registrations");
 
@@ -368,7 +378,7 @@ class DbMigration {
       try {
         // ---------- Household Key ----------
         final String? householdKey =
-        (house["unique_key"] as String?)?.trim().isNotEmpty == true
+            (house["unique_key"] as String?)?.trim().isNotEmpty == true
             ? house["unique_key"] as String
             : house["_id"] as String?;
 
@@ -396,18 +406,20 @@ class DbMigration {
 
           final bool isFamilyHead =
               data["isFamilyhead"] == true ||
-                  data["isFamilyhead"] == "true" ||
-                  data["isFamilyhead"] == 1;
+              data["isFamilyhead"] == "true" ||
+              data["isFamilyhead"] == 1;
 
           // relation_to_head check
-          final String? relation =
-          data["relation_to_head"]?.toString().toLowerCase().trim();
+          final String? relation = data["relation_to_head"]
+              ?.toString()
+              .toLowerCase()
+              .trim();
 
           final bool isRelationHead =
               relation == "self" ||
-                  relation == "head" ||
-                  relation == "household_head" ||
-                  relation == "hoh";
+              relation == "head" ||
+              relation == "household_head" ||
+              relation == "hoh";
 
           if (isFamilyHead || isRelationHead) {
             heads.add(member);
@@ -455,7 +467,6 @@ class DbMigration {
 
     print("✅ Household migration completed");
   }
-
 
   static Future<void> runFollowUpTableMigration(Database db) async {
     try {
@@ -505,7 +516,6 @@ class DbMigration {
       print("❌ Migration error: $e");
     }
   }
-
 
   static Future<void> runEligibleChildTableMigration(Database db) async {
     try {
@@ -558,9 +568,6 @@ class DbMigration {
     }
   }
 
-
-
-
   static Future<void> runEligileCoupleTableMigration(Database db) async {
     try {
       await db.rawInsert('''
@@ -607,7 +614,6 @@ class DbMigration {
       print("❌ Migration error: $e");
     }
   }
-
 
   static Future<void> runMotherCareTableMigration(Database db) async {
     try {
