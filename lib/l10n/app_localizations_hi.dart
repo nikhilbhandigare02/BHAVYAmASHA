@@ -383,7 +383,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get bcmNameLabel => 'ब्लॉक कम्युनिटी मोबिलाइज़र का नाम';
 
   @override
-  String get beneficiaryAbsentLabel => 'क्या लाभार्थी घर में नहीं है?';
+  String get beneficiaryAbsentLabel => 'क्या लाभार्थी अनुपस्थिति है?';
 
   @override
   String get beneficiaryIdLabel => 'लाभार्थी आईडी';
@@ -1312,7 +1312,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get haveChildrenQuestion => 'क्या आपके बच्चे हैं?';
 
   @override
-  String get hbncListTitle => 'एचबीएनसी सूची';
+  String get hbncListTitle => 'एचबीएनसी का दौरा ';
 
   @override
   String get hbncMotherTitle => 'एचबीएनसी माता';
@@ -2154,7 +2154,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get searchEligibleCouple => 'योग्य दम्पति की खोज';
 
   @override
-  String get searchDelOutcome => 'डिलीवरी परिणाम खोज';
+  String get searchDelOutcome => 'प्रसव परिणाम खोज';
 
   @override
   String get searchHintRegisterChildDueList => 'देय पंजीकरण खोजें';
@@ -2178,7 +2178,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get placeLabel => 'स्थान';
 
   @override
-  String get searchHBNC => 'खोज एचबीएनसी';
+  String get searchHBNC => 'एचबीएनसी खोज';
 
   @override
   String get secondAncLabel => 'दूसरी एएनसी';
@@ -2718,7 +2718,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dateOfHomeVisitLabel => 'गृह भ्रमण की तिथि*';
 
   @override
-  String get motherStatusLabel => 'मां की स्थिति*';
+  String get motherStatusLabel => 'माता की स्थिति*';
 
   @override
   String get mcpCardAvailableLabelMother => 'क्या \'मातृ शिशु संरक्षण (एमसीपी)\' कार्ड की उपलब्धता है? *';
@@ -2766,7 +2766,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get outcomeFormTitle => 'प्रसव परिणाम ';
 
   @override
-  String get deliveryOutcomeDetails => 'प्रसव परिणाम का विवरण';
+  String get deliveryOutcomeDetails => 'प्रसव परिणाम विवरण';
 
   @override
   String get deliveryDateLabel => 'Date of Delivery *';
@@ -2913,7 +2913,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get complications => 'Complications during delivery? *';
 
   @override
-  String get outcomeCount => 'परिणामों की संख्या *';
+  String get outcomeCount => 'प्रसव की संख्या *';
 
   @override
   String get familyPlanningCounseling => 'क्या परिवार नियोजन परामर्श दिया गया?';
@@ -5545,7 +5545,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get riskRhNegative => 'आर.एच. निगेटिव';
 
   @override
-  String get didPregnantWomanGiveBirth => 'क्या गर्भवती महिला ने बच्चे को जन्म दिया?';
+  String get didPregnantWomanGiveBirth => 'क्या गर्भवती ने शिशु को जन्म दे दिया?';
 
   @override
   String get dateOfAbortion => 'गर्भपात की तिथि';
@@ -5590,52 +5590,52 @@ class AppLocalizationsHi extends AppLocalizations {
   String get enterBabyWeight => 'शिशु का वजन दर्ज करें';
 
   @override
-  String get firstBabyName => 'पहले बच्चे का नाम *';
+  String get firstBabyName => 'पहले शिशु का नाम *';
 
   @override
-  String get enterFirstBabyName => 'पहले बच्चे का नाम दर्ज करें';
+  String get enterFirstBabyName => 'पहले शिशु का नाम दर्ज करें';
 
   @override
-  String get firstBabyGender => 'पहले बच्चे का लिंग *';
+  String get firstBabyGender => 'पहले शिशु का लिंग *';
 
   @override
-  String get firstBabyWeight => 'पहले बच्चे का वजन (1200–4000 ग्राम) *';
+  String get firstBabyWeight => 'पहले शिशु का वजन (1200–4000 ग्राम) *';
 
   @override
-  String get enterFirstBabyWeight => 'पहले बच्चे का वजन दर्ज करें';
+  String get enterFirstBabyWeight => 'पहले शिशु का वजन दर्ज करें';
 
   @override
-  String get secondBabyName => 'दूसरे बच्चे का नाम *';
+  String get secondBabyName => 'दूसरे शिशु का नाम *';
 
   @override
-  String get enterSecondBabyName => 'दूसरे बच्चे का नाम दर्ज करें';
+  String get enterSecondBabyName => 'दूसरे शिशु का नाम दर्ज करें';
 
   @override
-  String get secondBabyGender => 'दूसरे बच्चे का लिंग *';
+  String get secondBabyGender => 'दूसरे शिशु का लिंग *';
 
   @override
-  String get secondBabyWeight => 'दूसरे बच्चे का वजन (1200–4000 ग्राम) *';
+  String get secondBabyWeight => 'दूसरे शिशु का वजन (1200–4000 ग्राम) *';
 
   @override
-  String get enterSecondBabyWeight => 'दूसरे बच्चे का वजन दर्ज करें';
+  String get enterSecondBabyWeight => 'दूसरे शिशु का वजन दर्ज करें';
 
   @override
-  String get thirdBabyName => 'तीसरे बच्चे का नाम *';
+  String get thirdBabyName => 'तीसरे शिशु का नाम *';
 
   @override
-  String get enterThirdBabyName => 'तीसरे बच्चे का नाम दर्ज करें';
+  String get enterThirdBabyName => 'तीसरे शिशु का नाम दर्ज करें';
 
   @override
-  String get thirdBabyGender => 'तीसरे बच्चे का लिंग *';
+  String get thirdBabyGender => 'तीसरे शिशु का लिंग *';
 
   @override
-  String get thirdBabyWeight => 'तीसरे बच्चे का वजन (1200–4000 ग्राम) *';
+  String get thirdBabyWeight => 'तीसरे शिशु का वजन (1200–4000 ग्राम) *';
 
   @override
-  String get enterThirdBabyWeight => 'तीसरे बच्चे का वजन दर्ज करें';
+  String get enterThirdBabyWeight => 'तीसरे शिशु का वजन दर्ज करें';
 
   @override
-  String get reasonForAbsence => 'अनुपस्थिति का कारण';
+  String get reasonForAbsence => 'अनुपस्थिति रहने का कारण';
 
   @override
   String get enterReasonForAbsence => 'अनुपस्थिति का कारण दर्ज करें';
@@ -5788,7 +5788,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get enterOtherComplication => 'प्रसव के दौरान अन्य जटिलता दर्ज करें';
 
   @override
-  String get enterComplicationDuringDelivery => 'प्रसव के दौरान अन्य जटिलता?';
+  String get enterComplicationDuringDelivery => 'प्रसव के दौरान जटिलता?';
 
   @override
   String get discharge_time => 'डिस्चार्ज का समय (hh:mm)';

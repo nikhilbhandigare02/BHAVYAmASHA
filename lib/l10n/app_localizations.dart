@@ -13172,7 +13172,7 @@ abstract class AppLocalizations {
   /// No description provided for @previous.
   ///
   /// In en, this message translates to:
-  /// **'Previous'**
+  /// **'PREVIOUS'**
   String get previous;
 
   /// No description provided for @saveForm.

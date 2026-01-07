@@ -6562,7 +6562,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyPlanningCounselling => 'Family Planning Counselling?';
 
   @override
-  String get previous => 'Previous';
+  String get previous => 'PREVIOUS';
 
   @override
   String get saveForm => 'Save Form';
