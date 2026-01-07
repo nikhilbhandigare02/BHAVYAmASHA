@@ -110,7 +110,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
           children: [
             // Visit Date
             CustomDatePicker(
-              labelText: t?.dateOfVisit ?? 'भ्रमण की तिथि',
+              labelText: t?.visitDateLabel ?? 'भ्रमण की तिथि',
               initialDate: DateTime.now(),
               firstDate: DateTime(1900),
               lastDate: DateTime(2100),

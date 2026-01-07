@@ -1450,6 +1450,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get husbandLabel => 'Husband';
 
   @override
+  String get husband => 'Husband';
+
+  @override
+  String get firstAnc => 'First ANC';
+
+  @override
+  String get secondAnc => 'Second ANC';
+
+  @override
+  String get thirdAnc => 'Third ANC';
+
+  @override
+  String get fourthAnc => 'Fourth ANC';
+
+  @override
   String get husbandNameLabel => 'Husband\'s name';
 
   @override
@@ -3519,9 +3534,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightLabel => 'Weight (1.2–90)kg';
 
   @override
-  String get weightLabelTrackingDue => 'Weight (500-12500)gms';
-
-  @override
   String get enterWeight => 'Enter weight';
 
   @override
@@ -4496,9 +4508,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createAbhaAddress => 'Create ABHA Address';
-
-  @override
-  String get submit => 'SUBMIT';
 
   @override
   String get proceedwithkyc => 'Proceed With KYC';
@@ -6364,6 +6373,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterAddress => 'Enter address';
 
   @override
+  String get otherDropdown => 'Other';
+
+  @override
   String get pleaseEnterAddress => 'Please enter Address';
 
   @override
@@ -6547,7 +6559,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyPlanningCounselling => 'Family Planning Counselling?';
 
   @override
-  String get previous => 'Previous';
+  String get previous => 'PREVIOUS';
 
   @override
   String get saveForm => 'Save Form';
@@ -6625,10 +6637,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get migrationType => 'Migration Type';
 
   @override
-  String get enterReasonForClosure => 'Other reason of closure';
+  String get enterReasonForClosure => 'Enter reason for closure';
 
   @override
-  String get specifyReason => 'Other reason of closer';
+  String get specifyReason => 'Specify Reason';
 
   @override
   String get probableCauseOfDeath => 'Probable Cause of Death';
@@ -6647,9 +6659,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get no_ChildrenFound => 'No children found';
-
-  @override
-  String get caseClosureRecorded => 'Form saved successfully';
 
   @override
   String get childRegistration => 'Child Registration';
@@ -6880,9 +6889,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hscNameLabel => 'HSC';
 
   @override
-  String get hscNameLabelCbac => 'Name of Health Sub Center';
-
-  @override
   String get hwcNameHint => 'HWC';
 
   @override
@@ -6962,6 +6968,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get validateEmptyUsername => 'Please enter the username';
+
+  @override
+  String get submit => 'SUBMIT';
+
+  @override
+  String get weightLabelTrackingDue => 'Weight (500-12500)gms';
+
+  @override
+  String get hscNameLabelCbac => 'Name of Health Sub Center';
+
+  @override
+  String get caseClosureRecorded => 'Form saved successfully';
 
   @override
   String get validateEmptyCP => 'Please enter the current password';

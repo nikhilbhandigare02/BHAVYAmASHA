@@ -1604,8 +1604,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     children: [
                                       // Iron & Folic Acid Tablets Field  
                                       CustomTextField(
-                                        labelText: 'Number of Iron & Folic Acid tablets given',
-                                        hintText: 'Enter number of Iron & Folic Acid tablets',
+                                        labelText: l10n?.folicAcidTabletsLabel ??
+                                        'Number of Folic Acid tablets given',
+                                        hintText: l10n?.folicAcidTabletsLabel ??
+                                            'Enter number of Folic Acid tablets',
                                         initialValue: state.ironFolicAcidTablets,
                                         keyboardType: TextInputType.number,
                                         onChanged: (v) =>
@@ -2430,7 +2432,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   height: 4.5.h,
                                   child: RoundButton(
                                     title:
-                                        l10n?.previousVisitsButton ??
+                                        l10n?.previous ??
                                         'PREVIOUS VISITS',
                                     color: AppColors.primary,
                                     borderRadius: 4,
