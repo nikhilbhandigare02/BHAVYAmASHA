@@ -94,8 +94,7 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
     final receivedCount =
         _allData.where((x) => x['trainingType'] == 'Receiving').length;
 
-    final providedCount =
-        _allData.where((x) => x['trainingType'] == 'Providing').length;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppHeader(

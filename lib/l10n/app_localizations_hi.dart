@@ -3534,9 +3534,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get weightLabel => ' वजन (500–1200 ग्राम)';
 
   @override
-  String get weightLabelTrackingDue => 'Weight (500-12500)gms';
-
-  @override
   String get enterWeight => 'Enter weight';
 
   @override
@@ -6890,9 +6887,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get hscNameLabel => 'एच.एस.सी. का नाम';
-
-  @override
-  String get hscNameLabelCbac => 'Name of Health Sub Center';
 
   @override
   String get hwcNameHint => 'एच.डब्ल्यू.सी. का नाम';
