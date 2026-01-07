@@ -2151,7 +2151,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get searchHint => 'आईडी/नाम/संपर्क द्वारा खोजें';
 
   @override
-  String get searchEligibleCouple => 'योग्य दम्पति की खोज';
+  String get searchEligibleCouple => 'योग्य दम्पति की खोजें';
 
   @override
   String get searchDelOutcome => 'प्रसव परिणाम खोज';
@@ -4510,9 +4510,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get createAbhaAddress => 'एबीएचए पता बनाएं';
 
   @override
-  String get submit => 'सबमिट करें';
-
-  @override
   String get proceedwithkyc => 'केवाईसी जारी रखें';
 
   @override
@@ -5428,7 +5425,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get reasonForAbsent => 'अनुपस्थिति का कारण';
 
   @override
-  String get isBeneficiaryAbsent => 'क्या लाभार्थी घर में नहीं है?';
+  String get isBeneficiaryAbsent => 'क्या लाभार्थी अनुपस्थित है?';
 
   @override
   String get quantityOfMalaN => 'माला-एन (दैनिक गर्भनिरोधक गोली) की मात्रा';
@@ -6664,9 +6661,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get no_ChildrenFound => 'कोई बच्चा नहीं मिला';
 
   @override
-  String get caseClosureRecorded => 'केस समापन दर्ज किया गया। बच्चे को ट्रैकिंग सूची से हटाया गया है।';
-
-  @override
   String get childRegistration => 'शिशु पंजीकरण';
 
   @override
@@ -6974,6 +6968,15 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get validateEmptyUsername => 'कृपया उपयोगकर्ता का नाम दर्ज करें';
+
+  @override
+  String get caseClosureRecorded => 'केस समापन दर्ज किया गया। बच्चे को ट्रैकिंग सूची से हटाया गया है।';
+
+  @override
+  String get submit => 'सबमिट करें';
+
+  @override
+  String get hscNameLabelCbac => 'Name of Health Sub Center';
 
   @override
   String get validateEmptyCP => 'कृपया वर्तमान पासवर्ड दर्ज करें';

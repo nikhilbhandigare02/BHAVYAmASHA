@@ -9065,12 +9065,6 @@ abstract class AppLocalizations {
   /// **'Create ABHA Address'**
   String get createAbhaAddress;
 
-  /// No description provided for @submit.
-  ///
-  /// In en, this message translates to:
-  /// **'Submit'**
-  String get submit;
-
   /// No description provided for @proceedwithkyc.
   ///
   /// In en, this message translates to:
@@ -13373,12 +13367,6 @@ abstract class AppLocalizations {
   /// **'No children found'**
   String get no_ChildrenFound;
 
-  /// No description provided for @caseClosureRecorded.
-  ///
-  /// In en, this message translates to:
-  /// **'Case closure recorded. Child removed from tracking list.'**
-  String get caseClosureRecorded;
-
   /// No description provided for @childRegistration.
   ///
   /// In en, this message translates to:
@@ -13996,6 +13984,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter the username'**
   String get validateEmptyUsername;
+
+  /// No description provided for @caseClosureRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Form saved successfully'**
+  String get caseClosureRecorded;
+
+  /// No description provided for @submit.
+  ///
+  /// In en, this message translates to:
+  /// **'SUBMIT'**
+  String get submit;
+
+  /// No description provided for @hscNameLabelCbac.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of Health Sub Center'**
+  String get hscNameLabelCbac;
 
   /// No description provided for @validateEmptyCP.
   ///

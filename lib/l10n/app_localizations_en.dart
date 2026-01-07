@@ -4510,9 +4510,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createAbhaAddress => 'Create ABHA Address';
 
   @override
-  String get submit => 'Submit';
-
-  @override
   String get proceedwithkyc => 'Proceed With KYC';
 
   @override
@@ -6664,9 +6661,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get no_ChildrenFound => 'No children found';
 
   @override
-  String get caseClosureRecorded => 'Case closure recorded. Child removed from tracking list.';
-
-  @override
   String get childRegistration => 'Child Registration';
 
   @override
@@ -6974,6 +6968,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get validateEmptyUsername => 'Please enter the username';
+
+  @override
+  String get caseClosureRecorded => 'Form saved successfully';
+
+  @override
+  String get submit => 'SUBMIT';
+
+  @override
+  String get hscNameLabelCbac => 'Name of Health Sub Center';
 
   @override
   String get validateEmptyCP => 'Please enter the current password';
