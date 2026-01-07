@@ -44,7 +44,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     emit(state.copyWith(showValidationErrors: true));
   }
 
-
   Future<void> _login(LoginButton event, Emitter<LoginState> emit) async {
     if (state.username.isEmpty || state.password.isEmpty) {
       emit(state.copyWith(

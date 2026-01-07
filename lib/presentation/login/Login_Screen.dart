@@ -363,7 +363,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                               _showSnackBar(context, l10n.pleaseEnterValidUsername);
                                               return;
                                             }
-
                                             if (username.isNotEmpty && password.isEmpty) {
                                               _showSnackBar(context, l10n.pleaseEnterValidPassword);
                                               return;
@@ -411,7 +410,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           ],
                         ),
                       ),
-
                       BlocBuilder<LoginBloc, LoginState>(
                         builder: (context, state) {
                           if (state.postApiStatus == PostApiStatus.loading) {

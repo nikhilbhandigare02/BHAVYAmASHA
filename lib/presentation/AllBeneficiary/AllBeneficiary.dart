@@ -714,7 +714,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                           _buildRow([
                             _rowText(
                               l10n?.fatherName ?? 'Father Name',
-                              data['fatherName'],
+                              data['FatherName']?.toString() ?? (l10n?.notAvailable ?? 'Not Available'),
                             ),
                             _rowText(
                               l10n?.mobileLabelSimple ?? 'Mobile No.',

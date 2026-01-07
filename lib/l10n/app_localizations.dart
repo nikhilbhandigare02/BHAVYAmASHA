@@ -7091,6 +7091,12 @@ abstract class AppLocalizations {
   /// **'Weight (1.2–90)kg'**
   String get weightLabel;
 
+  /// No description provided for @weightLabelTrackingDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (500-12500)gms'**
+  String get weightLabelTrackingDue;
+
   /// No description provided for @enterWeight.
   ///
   /// In en, this message translates to:
@@ -9038,7 +9044,7 @@ abstract class AppLocalizations {
   /// No description provided for @submit.
   ///
   /// In en, this message translates to:
-  /// **'Submit'**
+  /// **'SUBMIT'**
   String get submit;
 
   /// No description provided for @proceedwithkyc.
@@ -13292,13 +13298,13 @@ abstract class AppLocalizations {
   /// No description provided for @enterReasonForClosure.
   ///
   /// In en, this message translates to:
-  /// **'Enter reason for closure'**
+  /// **'Other reason of closure'**
   String get enterReasonForClosure;
 
   /// No description provided for @specifyReason.
   ///
   /// In en, this message translates to:
-  /// **'Specify Reason'**
+  /// **'Other reason of closer'**
   String get specifyReason;
 
   /// No description provided for @probableCauseOfDeath.
@@ -13798,6 +13804,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'HSC'**
   String get hscNameLabel;
+
+  /// No description provided for @hscNameLabelCbac.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of Health Sub Center'**
+  String get hscNameLabelCbac;
 
   /// No description provided for @hwcNameHint.
   ///

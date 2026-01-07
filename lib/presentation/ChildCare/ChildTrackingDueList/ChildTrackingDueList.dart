@@ -752,6 +752,12 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           debugPrint('❌ formData is null, cannot navigate');
           return;
         }
+// 1. Try to find 'child_registration_due' directly at the top level (Scenario 2)
+// 2. If not found, try to find it inside 'form_data' (Scenario 1)
+// 3. Default to an empty map if neither exists
+        final childRegistrationMap = formData['child_registration_due'] ??
+            formData['form_data']?['child_registration_due'] ??
+            {};
 
         final completeFormData = {
           ...formData,
@@ -768,6 +774,11 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           'rch_id': data['RchID']?.toString() ?? formData['rch_id_child'] ?? '',
           'registration_type': data['RegitrationType']?.toString() ?? 'Child Registration',
           'registration_date': data['RegitrationDate']?.toString() ?? '',
+
+          // --- UPDATED LINES ---
+          // Now we use childRegistrationMap which holds the correct data regardless of structure
+          'weight_grams': childRegistrationMap['weight_grams']?.toString() ?? '',
+          'birth_weight_grams': childRegistrationMap['birth_weight_grams']?.toString() ?? '',
         };
 
         debugPrint('Complete form data to pass:');

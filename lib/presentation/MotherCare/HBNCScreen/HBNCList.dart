@@ -52,6 +52,59 @@ class _HBNCListScreenState
 
       final db = await DatabaseProvider.instance.database;
       final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+      
+      // Get the latest visit record to extract visit number
+      final latestVisitRows = await db.query(
+        FollowupFormDataTable.table,
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryId, hbncVisitKey],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+      
+      if (latestVisitRows.isNotEmpty) {
+        final result = latestVisitRows.first;
+        try {
+          final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
+          
+          if (formJson.containsKey('hbyc_form')) {
+            final hbycForm = formJson['hbyc_form'] as Map<String, dynamic>? ?? {};
+            
+            if (hbycForm.containsKey('visitDetails')) {
+              final visitDetails = hbycForm['visitDetails'] as Map<String, dynamic>? ?? {};
+              final visitNumber = visitDetails['visitNumber']?.toString();
+              
+              if (visitNumber != null) {
+                final number = int.tryParse(visitNumber);
+                if (number != null) {
+                  print('🔢 Found visit number from hbyc_form.visitDetails: $number for beneficiary $beneficiaryId');
+                  return number;
+                }
+              }
+            }
+          }
+          
+          final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
+          
+          if (formData.containsKey('visitDetails')) {
+            final visitDetails = formData['visitDetails'] as Map<String, dynamic>? ?? {};
+            final visitNumber = visitDetails['visitNumber']?.toString() ??
+                visitDetails['visit_number']?.toString();
+            
+            if (visitNumber != null) {
+              final number = int.tryParse(visitNumber);
+              if (number != null) {
+                print('🔢 Found visit number from form_data.visitDetails: $number for beneficiary $beneficiaryId');
+                return number;
+              }
+            }
+          }
+        } catch (e) {
+          print('❌ Error parsing visit number: $e');
+        }
+      }
+      
+      // Fallback to counting total records
       final countRows = await db.query(
         FollowupFormDataTable.table,
         where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
@@ -297,10 +350,20 @@ class _HBNCListScreenState
           final householdRefKey = beneficiary['household_ref_key']?.toString() ?? 'N/A';
           final createdDateTime = beneficiary['created_date_time']?.toString() ?? '';
 
+          print('🔍 FormData keys: ${formData.keys.toList()}');
+          print('📅 Delivery date from formData: ${formData['delivery_date']}');
+          print('📅 Delivery date type: ${formData['delivery_date'].runtimeType}');
 
           final visitCount = await _getVisitCount(beneficiaryRefKey);
           final previousHBNCDate = await _getLastVisitDate(beneficiaryRefKey);
-          final nextHBNCDate = await _getNextVisitDate(beneficiaryRefKey, formData['delivery_date']?.toString());
+          final deliveryDate = formData['delivery_date']?.toString();
+          print('📅 Passing delivery date to _getNextVisitDate: $deliveryDate');
+          final nextHBNCDate = await _getNextVisitDate(beneficiaryRefKey, deliveryDate);
+          
+          print('📊 Final values for beneficiary $beneficiaryRefKey:');
+          print('  - Visit Count: $visitCount');
+          print('  - Previous HBNC Date: $previousHBNCDate');
+          print('  - Next HBNC Date: $nextHBNCDate');
 
           final formattedData = {
             // Display values (last 11 digits)
@@ -378,6 +441,8 @@ class _HBNCListScreenState
         limit: 1,
       );
 
+      print('📋 Found ${results.length} HBNC visit records');
+
       if (results.isNotEmpty) {
         final result = results.first;
         print('📋 Found HBNC visit record with ID: ${result['id']}');
@@ -385,12 +450,38 @@ class _HBNCListScreenState
 
         try {
           final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
+          print('🔍 Parsed form JSON successfully');
+          
+          // Check for hbyc_form structure first (based on sample data)
+          if (formJson.containsKey('hbyc_form')) {
+            final hbycForm = formJson['hbyc_form'] as Map<String, dynamic>? ?? {};
+            print('🔍 Found hbyc_form structure');
+            
+            if (hbycForm.containsKey('visitDetails')) {
+              final visitDetails = hbycForm['visitDetails'] as Map<String, dynamic>? ?? {};
+              print('🔍 Found visitDetails in hbyc_form');
+              
+              final visitDate = visitDetails['visitDate'];
+              print('📅 Extracted visitDate from hbyc_form.visitDetails: $visitDate');
+              
+              if (visitDate != null && visitDate.toString().isNotEmpty) {
+                final formattedDate = _formatDate(visitDate.toString());
+                print('✅ Using visit date from hbyc_form.visitDetails: $formattedDate');
+                return formattedDate;
+              } else {
+                print('⚠️ visitDate is null or empty in hbyc_form.visitDetails');
+              }
+            } else {
+              print('⚠️ No visitDetails found in hbyc_form');
+            }
+          } else {
+            print('⚠️ No hbyc_form found in form JSON');
+          }
+          
+          // Fallback to form_data structure
           final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
-
-          print('🔑 Form data:');
-          formData.forEach((key, value) {
-            print('  - $key: $value (${value.runtimeType})');
-          });
+          print('🔑 Checking form_data structure');
+          print('🔑 Form data keys: ${formData.keys.toList()}');
 
           // Debug: Print full form data structure
           print('🔍 Full form data structure:');
@@ -414,6 +505,8 @@ class _HBNCListScreenState
                 return formattedDate;
               }
             }
+          } else {
+            print('⚠️ No visitDetails found in form_data');
           }
 
           // Try to get visit date directly from form data (check multiple possible field names)
@@ -463,28 +556,153 @@ class _HBNCListScreenState
 
   Future<String?> _getNextVisitDate(String beneficiaryId, String? deliveryDate) async {
     try {
-      final lastVisit = await _getLastVisitDate(beneficiaryId);
-      if (lastVisit != null) {
-        // If we have a last visit date, add 7 days to it
-        final lastVisitDate = DateTime.tryParse(lastVisit.split('-').reversed.join('-'));
-        if (lastVisitDate != null) {
-          final nextVisit = lastVisitDate.add(const Duration(days: 7));
-          return _formatDate(nextVisit.toString());
+      print('🔍 Calculating next visit date for beneficiary: $beneficiaryId');
+      
+      final db = await DatabaseProvider.instance.database;
+      final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+      
+      // Get the latest visit record to extract visit number and date
+      final latestVisitRows = await db.query(
+        FollowupFormDataTable.table,
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryId, hbncVisitKey],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+      
+      print('📋 Found ${latestVisitRows.length} visit records');
+      
+      if (latestVisitRows.isNotEmpty) {
+        final result = latestVisitRows.first;
+        print('📋 Processing visit record ID: ${result['id']}');
+        try {
+          final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
+          print('🔍 Parsed form JSON');
+          
+          // Check for hbyc_form structure first (based on sample data)
+          if (formJson.containsKey('hbyc_form')) {
+            final hbycForm = formJson['hbyc_form'] as Map<String, dynamic>? ?? {};
+            print('🔍 Found hbyc_form structure');
+            
+            if (hbycForm.containsKey('visitDetails')) {
+              final visitDetails = hbycForm['visitDetails'] as Map<String, dynamic>? ?? {};
+              print('🔍 Found visitDetails in hbyc_form');
+              
+              final visitNumber = visitDetails['visitNumber']?.toString();
+              final visitDate = visitDetails['visitDate']?.toString();
+              
+              print('📊 Visit number: $visitNumber');
+              print('📅 Visit date: $visitDate');
+              
+              if (visitNumber != null && visitDate != null) {
+                final number = int.tryParse(visitNumber);
+                final date = DateTime.tryParse(visitDate);
+                
+                print('🔢 Parsed visit number: $number');
+                print('📅 Parsed visit date: $date');
+                
+                if (number != null && date != null) {
+                  // For all visits, calculate next visit based on the visit date itself
+                  // The visit date becomes the base for calculating the next visit
+                  final nextVisitDate = _calculateNextVisitDate(number, date);
+                  if (nextVisitDate != null) {
+                    final formatted = _formatDate(nextVisitDate.toString());
+                    print('📅 Calculated next visit date from visit date: visit $number on ${_formatDate(date.toString())} → $formatted');
+                    return formatted;
+                  }
+                }
+              }
+            }
+          }
+          
+          // Fallback to form_data structure
+          final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
+          print('🔍 Checking form_data structure');
+          
+          if (formData.containsKey('visitDetails')) {
+            final visitDetails = formData['visitDetails'] as Map<String, dynamic>? ?? {};
+            final visitNumber = visitDetails['visitNumber']?.toString() ??
+                visitDetails['visit_number']?.toString();
+            final visitDate = visitDetails['visitDate']?.toString() ??
+                visitDetails['visit_date']?.toString();
+            
+            print('📊 Visit number from form_data: $visitNumber');
+            print('📅 Visit date from form_data: $visitDate');
+            
+            if (visitNumber != null && visitDate != null) {
+              final number = int.tryParse(visitNumber);
+              final date = DateTime.tryParse(visitDate);
+              
+              if (number != null && date != null) {
+                // For all visits, calculate next visit based on the visit date itself
+                // The visit date becomes the base for calculating the next visit
+                final nextVisitDate = _calculateNextVisitDate(number, date);
+                if (nextVisitDate != null) {
+                  final formatted = _formatDate(nextVisitDate.toString());
+                  print('📅 Calculated next visit date from visit date: visit $number on ${_formatDate(date.toString())} → $formatted');
+                  return formatted;
+                }
+              }
+            }
+          }
+        } catch (e) {
+          print('❌ Error parsing visit data for next visit calculation: $e');
         }
-      }
-
-      // Fall back to adding 1 day to delivery date if no last visit
-      if (deliveryDate != null) {
-        final delivery = DateTime.tryParse(deliveryDate);
-        if (delivery != null) {
-          final nextVisit = delivery.add(const Duration(days: 1));
-          return _formatDate(nextVisit.toString());
+      } else {
+        print('ℹ️ No visit records found - using registration date as base');
+        
+        // For first-time beneficiaries, get registration date and calculate next visit
+        final beneficiaryRows = await db.query(
+          'beneficiaries_new',
+          where: 'unique_key = ?',
+          whereArgs: [beneficiaryId],
+          columns: ['created_date_time'],
+        );
+        
+        if (beneficiaryRows.isNotEmpty) {
+          final registrationDate = beneficiaryRows.first['created_date_time']?.toString();
+          if (registrationDate != null) {
+            // For first-time beneficiary (no visit records), show registration date only
+            final formatted = _formatDate(registrationDate);
+            print('📅 First-time beneficiary, showing registration date only: $registrationDate → $formatted');
+            return formatted;
+          }
         }
+        
+        // Fallback: Use current date if registration date not available
+        print('⚠️ Registration date not found, using current date as fallback');
+        final today = DateTime.now();
+        final nextVisitDate = today.add(const Duration(days: 2));
+        final formatted = _formatDate(nextVisitDate.toString());
+        print('📅 Default next visit date set: $formatted');
+        return formatted;
       }
+      
     } catch (e) {
       print('❌ Error calculating next visit date: $e');
+      return null;
     }
-    return null;
+  }
+  
+  DateTime? _calculateNextVisitDate(int currentVisitNumber, DateTime currentVisitDate) {
+    switch (currentVisitNumber) {
+      case 0: // Day 0 → Day 1 (within 24 hours of birth)
+      case 1: // Day 1 → Day 3 (after 2 days)
+        return currentVisitDate.add(const Duration(days: 2));
+      case 3: // Day 3 → Day 7 (after 4 days)
+        return currentVisitDate.add(const Duration(days: 4));
+      case 7: // Day 7 → Day 14 (after 7 days)
+        return currentVisitDate.add(const Duration(days: 7));
+      case 14: // Day 14 → Day 21 (after 7 days)
+        return currentVisitDate.add(const Duration(days: 7));
+      case 21: // Day 21 → Day 28 (after 7 days)
+        return currentVisitDate.add(const Duration(days: 7));
+      case 28: // Day 28 → Day 42 (after 14 days)
+        return currentVisitDate.add(const Duration(days: 14));
+      default:
+        // For any other visit number, add 7 days as default
+        return currentVisitDate.add(const Duration(days: 7));
+    }
   }
 
   int _calculateAge(dynamic dob) {
@@ -507,10 +725,17 @@ class _HBNCListScreenState
   String _formatDate(String dateStr) {
     if (dateStr.isEmpty) return '';
     try {
+      print('🔍 Formatting date: $dateStr');
       final dt = DateTime.tryParse(dateStr);
-      if (dt == null) return '';
-      return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
-    } catch (_) {
+      if (dt == null) {
+        print('❌ Failed to parse date: $dateStr');
+        return '';
+      }
+      final formatted = '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
+      print('✅ Formatted date: $formatted');
+      return formatted;
+    } catch (e) {
+      print('❌ Error formatting date: $dateStr, error: $e');
       return '';
     }
   }
@@ -814,7 +1039,11 @@ class _HBNCListScreenState
                         Expanded(
                           child: _rowText(
                             t.nextHBNCDate,
-                            data['nextHBNCDate']?.toString() ?? 'Not Available',
+                            (() {
+                              final nextDate = data['nextHBNCDate']?.toString() ?? 'Not Available';
+                              print('🎯 Displaying next HBNC date in UI: $nextDate');
+                              return nextDate;
+                            })(),
                           ),
                         ),
                       ],

@@ -63,7 +63,6 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Initialize TabController only once when context is available
     if (!_formDataLoaded) {
       _tabController = TabController(length: getTabs(context).length, vsync: this);
       _tabController.addListener(() {
@@ -84,7 +83,6 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
     }
   }
 
-  // Calculate due date for each vaccination schedule
   String _calculateDueDate(int weeksAfterBirth) {
     final dueDate = _birthDate.add(Duration(days: weeksAfterBirth * 7));
     return '${dueDate.day.toString().padLeft(2, '0')}-${dueDate.month.toString().padLeft(2, '0')}-${dueDate.year}';
@@ -441,7 +439,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   }
 
   Widget _buildBirthDoseTab() {
-    final tabIndex = 0; // Birth Dose tab
+    final tabIndex = 0;
     _initializeTabState(tabIndex);
     final l = AppLocalizations.of(context);
     return SafeArea(
@@ -457,8 +455,8 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                   const Divider(),
                   const SizedBox(height: 8),
                   CustomTextField(
-                    labelText: l.weightLabel,
-                    hintText: l.weightLabel,
+                    labelText: l.weightLabelTrackingDue,
+                    hintText: l.weightLabelTrackingDue,
                     initialValue: _formData['weight_grams'] != null
                         ? '${(int.tryParse(_formData['weight_grams'].toString()) ?? 0) / 1000}'
                         : null,

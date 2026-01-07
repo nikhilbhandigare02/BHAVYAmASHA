@@ -247,9 +247,10 @@ class _CbacformState extends State<Cbacform> {
                                         .read<CbacFormBloc>()
                                         .add(const CbacPrevTab()),
                                     child: Text(
-                                      l10n?.previousButton ?? 'PREVIOUS',
+                                      'PREV',
                                       style: const TextStyle(
                                         color: Colors.white,
+                                        fontWeight: FontWeight.bold
                                       ),
                                     ),
                                   ),
@@ -262,9 +263,9 @@ class _CbacformState extends State<Cbacform> {
                               height: 34,
                               child: RoundButton(
                                 title: state.activeTab == tabs.length - 1
-                                    ? (l10n?.saveButton ?? 'SAVE')
+                                    ? (l10n?.submit ?? 'SUBMIT')
                                     : (l10n?.nextButton ?? 'NEXT'),
-                                width: 120,
+                                width: 100,
                                 borderRadius: 4,
                                 isLoading: state.submitting,
                                 onPress: () {
@@ -573,8 +574,8 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
 
             CustomTextField(
               key: ValueKey('hsc_${_hscName}'),
-              hintText: l10n.hscNameLabel,
-              labelText: l10n.hscNameLabel,
+              hintText: l10n.hscNameLabelCbac,
+              labelText: l10n.hscNameLabelCbac,
               initialValue: _hscName,
               readOnly: _hscName.isNotEmpty,
               onChanged: (v) => context.read<CbacFormBloc>().add(

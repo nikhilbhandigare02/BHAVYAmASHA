@@ -3519,6 +3519,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightLabel => 'Weight (1.2–90)kg';
 
   @override
+  String get weightLabelTrackingDue => 'Weight (500-12500)gms';
+
+  @override
   String get enterWeight => 'Enter weight';
 
   @override
@@ -4495,7 +4498,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createAbhaAddress => 'Create ABHA Address';
 
   @override
-  String get submit => 'Submit';
+  String get submit => 'SUBMIT';
 
   @override
   String get proceedwithkyc => 'Proceed With KYC';
@@ -6622,10 +6625,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get migrationType => 'Migration Type';
 
   @override
-  String get enterReasonForClosure => 'Enter reason for closure';
+  String get enterReasonForClosure => 'Other reason of closure';
 
   @override
-  String get specifyReason => 'Specify Reason';
+  String get specifyReason => 'Other reason of closer';
 
   @override
   String get probableCauseOfDeath => 'Probable Cause of Death';
@@ -6875,6 +6878,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hscNameLabel => 'HSC';
+
+  @override
+  String get hscNameLabelCbac => 'Name of Health Sub Center';
 
   @override
   String get hwcNameHint => 'HWC';

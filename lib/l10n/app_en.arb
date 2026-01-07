@@ -1181,6 +1181,8 @@
   "sixteenYear": "16 YEAR",
   "dateOfVisit": "Date of visit",
   "weightLabel": "Weight (1.2–90)kg",
+  "weightLabelTrackingDue": "Weight (500-12500)gms",
+
   "enterWeight": "Enter weight",
   "doseTableDueDate": "Due Date",
   "doseTableActualDate": "Actual Date",
@@ -1541,7 +1543,7 @@
   "enterOtp": "Enter OTP",
   "useExisting": "Use Existing",
   "createAbhaAddress": "Create ABHA Address",
-  "submit": "Submit",
+  "submit": "SUBMIT",
   "proceedwithkyc": "Proceed With KYC",
 
   "firstName": "First Name",
@@ -2263,8 +2265,8 @@
   "case_closer": "Case closure",
   "reasonOfClosure": "Reason of Closure",
   "migrationType": "Migration Type",
-  "enterReasonForClosure": "Enter reason for closure",
-  "specifyReason": "Specify Reason",
+  "enterReasonForClosure": "Other reason of closure",
+  "specifyReason": "Other reason of closer",
   "probableCauseOfDeath": "Probable Cause of Death",
   "specifyCauseOfDeath": "Specify cause of death",
   "deathPlace": "Death Place",
@@ -2350,6 +2352,8 @@
 
   "hscNameHint": "HSC",
   "hscNameLabel": "HSC",
+  "hscNameLabelCbac": "Name of Health Sub Center",
+
   "hwcNameHint": "HWC",
   "hwcNameLabel": "HWC",
 
@@ -2529,6 +2533,5 @@
   "abhaAddressLinked": "ABHA Address Linked!",
   "selectAbhaId": "Select ABHA ID",
   "mobileNumberMismatch": "Mobile number mismatch",
-  "mohallaTolaName": "Tola/Mohalla",
-  "categoryANCbadge": "ANC DUE"
+  "mohallaTolaName": "Tola/Mohalla"
 }

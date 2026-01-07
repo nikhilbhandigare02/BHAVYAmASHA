@@ -99,7 +99,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get occupationRetired => 'सेवानिवृत्त';
 
   @override
-  String get occupationOther => '';
+  String get occupationOther => 'अन्य';
 
   @override
   String get enterOccupationOther => 'व्यवसाय दर्ज करने';
@@ -1396,7 +1396,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get help => 'सहायता';
 
   @override
-  String get helpInstructions => 'किसी भी तरह की मदद और सहायता के लिए नीचे हेल्प नंबरों पर कॉल करें।';
+  String get helpInstructions => 'किसी भी तरह की मदद और सहायता के लिए कृपया नीचे दिए गए हेल्प नंबरों पर कॉल करें।';
 
   @override
   String get hemoglobinLabel => 'हीमोग्लोबिन (एच.बी)';
@@ -3519,6 +3519,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get weightLabel => ' वजन (500–1200 ग्राम)';
 
   @override
+  String get weightLabelTrackingDue => 'Weight (500-12500)gms';
+
+  @override
   String get enterWeight => 'Enter weight';
 
   @override
@@ -5089,7 +5092,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get categoryANC => 'एएनसी';
 
   @override
-  String get categoryANCbadge => 'एएनसी देय';
+  String get categoryANCbadge => 'ANC DUE';
 
   @override
   String get categoryANCsearch => 'प्रसवपूर्व देखभाल';
@@ -6875,6 +6878,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get hscNameLabel => 'एच.एस.सी. का नाम';
+
+  @override
+  String get hscNameLabelCbac => 'Name of Health Sub Center';
 
   @override
   String get hwcNameHint => 'एच.डब्ल्यू.सी. का नाम';

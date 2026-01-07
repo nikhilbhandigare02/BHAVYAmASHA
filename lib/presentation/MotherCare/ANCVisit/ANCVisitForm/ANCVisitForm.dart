@@ -1435,6 +1435,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 hintText:
                                     'dd-mm-yyyy',
                                 initialDate: state.td1Date,
+                                firstDate: state.lmpDate ?? DateTime(1900),
+                                lastDate: DateTime.now(),
                                 readOnly: (() {
                                   // If booster date is already selected, disable TD1 field
                                   if (state.tdBoosterDate != null) {
@@ -1476,6 +1478,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 hintText:
                                 'dd-mm-yyyy',
                                 initialDate: state.td2Date,
+                                firstDate: (state.td1Date ?? _lastTd1DateFromDb) ?? DateTime(1900),
+                                lastDate: DateTime.now(),
                                 readOnly: (() {
                                   final inspect =
                                       state.dateOfInspection ?? DateTime.now();
@@ -1496,7 +1500,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
                             Opacity(
                               opacity: (() {
-                                // If TD1 date is already selected in this visit, disable booster field
+                                if (state.tdBoosterDate != null) {
+                                  return false;
+                                }
                                 if (state.td1Date != null) {
                                   return true;
                                 }
@@ -1529,7 +1535,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 'dd-mm-yyyy',
                                 initialDate: state.tdBoosterDate,
                                 readOnly: (() {
-                                  // If TD1 date is already selected in this visit, disable booster field
+                                  if (state.tdBoosterDate != null) {
+                                    return false;
+                                  }
                                   if (state.td1Date != null) {
                                     return true;
                                   }
