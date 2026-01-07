@@ -2445,7 +2445,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get visitTypeSubcenter => 'Subcenter';
 
   @override
-  String get visitsLabel => 'Visits :';
+  String get visitsLabel => 'Visits';
 
   @override
   String get voterIdLabel => 'Voter Id';

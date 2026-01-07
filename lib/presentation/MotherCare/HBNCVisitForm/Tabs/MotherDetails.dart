@@ -146,9 +146,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                       ApiDropdown<String>(
                         key: MotherDetailsTab.fieldKeys['motherStatus'],
                         labelText: t.motherStatusLabel,
-                        validator: (v) => (v == null || v.isEmpty)
-                            ? t.requiredField
-                            : null,
                         items: const ['alive', 'death'],
                         getLabel: (e) => e == 'alive' ? t.alive : t.dead,
                         value: _asString(m['motherStatus']),
@@ -167,7 +164,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                         CustomDatePicker(
                           key: MotherDetailsTab.fieldKeys['dateOfDeath'],
                           labelText: t.date_of_death,
-                          validator: (v) => v == null ? t.requiredField : null,
                           initialDate: m['dateOfDeath'] is DateTime
                               ? m['dateOfDeath'] as DateTime
                               : null,
@@ -179,9 +175,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                         ApiDropdown<String>(
                           key: MotherDetailsTab.fieldKeys['deathPlace'],
                           labelText: t.place_of_death,
-                          validator: (v) => (v == null || v.isEmpty)
-                              ? t.requiredField
-                              : null,
                           items: [
                             t.home,
                             t.migrated_out,
@@ -239,9 +232,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                         ApiDropdown<String>(
                           key: MotherDetailsTab.fieldKeys['mcpCardAvailable'],
                           labelText: t.mcpCardAvailableLabelMother,
-                          validator: (v) => (v == null || v.isEmpty)
-                              ? t.requiredField
-                              : null,
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['mcpCardAvailable']),
@@ -258,9 +248,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           ApiDropdown<String>(
                             key: MotherDetailsTab.fieldKeys['mcpCardFilled'],
                             labelText: t.has_mcp_card_filled,
-                            validator: (v) => (v == null || v.isEmpty)
-                                ? t.requiredField
-                                : null,
                             items: const ['Yes', 'No'],
                             getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                             value: _asString(m['mcpCardFilled']),
@@ -277,9 +264,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                         ApiDropdown<String>(
                           key: MotherDetailsTab.fieldKeys['postDeliveryProblems'],
                           labelText: t.postDeliveryProblemsLabel,
-                          validator: (v) => (v == null || v.isEmpty)
-                              ? t.requiredField
-                              : null,
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['postDeliveryProblems']),
@@ -296,9 +280,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           ApiDropdown<String>(
                             key: MotherDetailsTab.fieldKeys['excessiveBleeding'],
                             labelText: t.excessive_bleeding,
-                            validator: (v) => (v == null || v.isEmpty)
-                                ? t.requiredField
-                                : null,
                             items: const ['Yes', 'No'],
                             getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                             value: _asString(m['excessiveBleeding']),
@@ -328,9 +309,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                         ApiDropdown<String>(
                           key: MotherDetailsTab.fieldKeys['breastfeedingProblems'],
                           labelText: t.breastfeedingProblemsLabel,
-                          validator: (v) => (v == null || v.isEmpty)
-                              ? t.requiredField
-                              : null,
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['breastfeedingProblems']),
@@ -361,9 +339,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           CustomTextField(
                             key: MotherDetailsTab.fieldKeys['breastfeedingHelpGiven'],
                             labelText: t.breastfeeding_problem_help,
-                            validator: (v) => (v == null || v.isEmpty)
-                                ? t.requiredField
-                                : null,
                             hintText: t.write_take_action,
                             initialValue: _asString(m['breastfeedingHelpGiven']),
                             onChanged: (val) => context.read<HbncVisitBloc>().add(
@@ -407,9 +382,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                         ApiDropdown<int>(
                           key: MotherDetailsTab.fieldKeys['padsPerDay'],
                           labelText: t.padsPerDayLabel,
-                          validator: (v) => (v == null)
-                              ? t.requiredField
-                              : null,
                           items: const [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
                           getLabel: (e) => e.toString(),
                           value: (m['padsPerDay'] is int)
@@ -424,9 +396,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                         ApiDropdown<String>(
                           key: MotherDetailsTab.fieldKeys['temperature'],
                           labelText: "${t.mothersTemperatureLabel} *",
-                          validator: (v) => (v == null || v.isEmpty)
-                              ? t.requiredField
-                              : null,
                           hintText: t.selectOption,
                           items: const [
                             'Temperature upto 102 degree F(38.9 degree C)',
@@ -462,9 +431,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                                   ApiDropdown<String>(
                                     key: MotherDetailsTab.fieldKeys['paracetamolGiven'],
                                     labelText: "${t.paracetamolGivenLabel} *",
-                                    validator: (v) => (v == null || v.isEmpty)
-                                        ? t.requiredField
-                                        : null,
                                     items: const ['Yes', 'No'],
                                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                                     value: _asString(m['paracetamolGiven']),
@@ -486,9 +452,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                         ApiDropdown<String>(
                           key: MotherDetailsTab.fieldKeys['foulDischargeHighFever'],
                           labelText: "${t.foulDischargeHighFeverLabel}",
-                          validator: (v) => (v == null || v.isEmpty)
-                              ? t.requiredField
-                              : null,
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['foulDischargeHighFever']),
@@ -518,9 +481,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                         ApiDropdown<String>(
                           key: MotherDetailsTab.fieldKeys['milkNotProducingOrLess'],
                           labelText: "${t.milkNotProducingOrLessLabel} *",
-                          validator: (v) => (v == null || v.isEmpty)
-                              ? t.requiredField
-                              : null,
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['milkNotProducingOrLess']),
@@ -537,9 +497,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           ApiDropdown<String>(
                             key: MotherDetailsTab.fieldKeys['milkCounselingAdvice'],
                             labelText: "${t.counselingAdviceLabel}",
-                            validator: (v) => (v == null || v.isEmpty)
-                                ? t.requiredField
-                                : null,
                             items: const ['Yes', 'No'],
                             getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                             value: _asString(m['milkCounselingAdvice']),
@@ -569,9 +526,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                         ApiDropdown<String>(
                           key: MotherDetailsTab.fieldKeys['referHospital'],
                           labelText: "${t.refer_to_hospital} *",
-                          validator: (v) => (v == null || v.isEmpty)
-                              ? t.requiredField
-                              : null,
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['referHospital']),
@@ -588,9 +542,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           ApiDropdown<String>(
                             key: MotherDetailsTab.fieldKeys['referTo'],
                             labelText: "${t.referToLabel} *",
-                            validator: (v) => (v == null || v.isEmpty)
-                                ? t.requiredField
-                                : null,
                             items: [
                               t.visitTypePhc,
                               t.chc,

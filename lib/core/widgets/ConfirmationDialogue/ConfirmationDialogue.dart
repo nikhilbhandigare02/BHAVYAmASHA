@@ -202,7 +202,7 @@ Future<bool?> showConfirmationDialog({
             message ?? '',
             style: TextStyle(
               color: messageTextColor ?? AppColors.onSurface,
-              fontSize: 19.sp, // Assuming you are using screen_util or similar
+              fontSize: 16.sp, // Assuming you are using screen_util or similar
               fontWeight: FontWeight.w500,
             ),
           ),

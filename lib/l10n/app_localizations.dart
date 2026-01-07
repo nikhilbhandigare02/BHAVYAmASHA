@@ -4946,7 +4946,7 @@ abstract class AppLocalizations {
   /// No description provided for @visitsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Visits :'**
+  /// **'Visits'**
   String get visitsLabel;
 
   /// No description provided for @voterIdLabel.

@@ -51,7 +51,7 @@ class ResponsiveFont {
   static double getInputFontSize(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     if (screenWidth < 360) {
-      return 15.0.sp; // Small screens
+      return 13.0.sp; // Small screens
     } else if (screenWidth < 600) {
       return 15.0.sp; // Medium screens
     } else {

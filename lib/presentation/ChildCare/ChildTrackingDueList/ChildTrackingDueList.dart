@@ -13,6 +13,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../core/widgets/SnackBar/app_snackbar.dart';
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/tables/followup_form_data_table.dart';
+import '../../../data/Database/tables/beneficiaries_table.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'ChildTrackingDueListForm.dart';
 
@@ -263,12 +264,32 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           final weightGrams = formDataMap['weight']?.toString()?.trim() ??
               formDataMap['weight_grams']?.toString()?.trim() ?? '';
 
-          // Handle different possible date fields
-          final dateOfBirth = formDataMap['dob']?.toString() ??
+          String dateOfBirth = formDataMap['dob']?.toString() ??
               formDataMap['date_of_birth']?.toString() ?? '';
+          if (dateOfBirth.isEmpty) {
+            final dd = formDataMap['dob_day']?.toString();
+            final mm = formDataMap['dob_month']?.toString();
+            final yy = formDataMap['dob_year']?.toString();
+            if ((dd != null && dd.isNotEmpty) &&
+                (mm != null && mm.isNotEmpty) &&
+                (yy != null && yy.isNotEmpty)) {
+              final d = int.tryParse(dd);
+              final m = int.tryParse(mm);
+              final y = int.tryParse(yy);
+              if (d != null && m != null && y != null) {
+                dateOfBirth = DateTime(y, m, d).toIso8601String();
+              }
+            }
+          }
 
-          // Handle different possible gender fields
-          final gender = (formDataMap['sex'] ?? formDataMap['gender'] ?? '').toString();
+          // Handle different possible gender fields and child_details fallback
+          final genderPrimary = (formDataMap['sex'] ?? formDataMap['gender'] ?? '').toString();
+          final childDetails = formDataMap['child_details'] is Map
+              ? Map<String, dynamic>.from(formDataMap['child_details'])
+              : <String, dynamic>{};
+          final genderBackup = (childDetails['gender'] ?? '').toString();
+          final ageBackup = (childDetails['age'] ?? '').toString();
+          final gender = genderPrimary.isNotEmpty ? genderPrimary : genderBackup;
 
 
           // If we still don't have a name, log all form data before skipping
@@ -354,6 +375,23 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
               ? _formatDate(row['created_date_time'].toString())
               : 'N/A';
 
+          String _normalizeGender(String g) {
+            final s = g.toLowerCase().trim();
+            if (s == 'm' || s == 'male' || s == 'boy' || s == 'b' || s == '1') return 'Male';
+            if (s == 'f' || s == 'female' || s == 'girl' || s == 'g' || s == '2') return 'Female';
+            if (s == 'other' || s == 'o' || s == '3') return 'Other';
+            return 'Other';
+          }
+
+          final ageGenderDisplay = dateOfBirth.isNotEmpty
+              ? _formatAgeGender(dateOfBirth, gender)
+              : (ageBackup.isNotEmpty
+                  ? '${ageBackup} | ${_normalizeGender(gender)}'
+                  : _formatAgeGender(dateOfBirth, gender));
+          final cleanedAgeGenderDisplay = ageGenderDisplay.contains(' | Other')
+              ? ageGenderDisplay.replaceAll(' | Other', '').trim()
+              : ageGenderDisplay;
+
           // Create child data map matching the form structure
           final childData = {
             'hhId': row['household_ref_key']?.toString() ?? 'N/A',
@@ -362,7 +400,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             'BeneficiaryID': beneficiaryRefKey,
             'RchID': rchId,
             'Name': childName,
-            'Age|Gender': _formatAgeGender(dateOfBirth, gender),
+            'Age|Gender': cleanedAgeGenderDisplay,
             'Mobileno.': mobileNumber,
             'FatherName': fatherName,
             'MotherName': motherName,
@@ -421,6 +459,15 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         DateTime? dob;
 
         dob = DateTime.tryParse(dateStr);
+        if (dob == null) {
+          final m = RegExp(r'^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$').firstMatch(dateStr);
+          if (m != null) {
+            final d = int.parse(m.group(1)!);
+            final mo = int.parse(m.group(2)!);
+            final y = int.parse(m.group(3)!);
+            dob = DateTime(y, mo, d);
+          }
+        }
 
         if (dob == null) {
           final timestamp = int.tryParse(dateStr);
@@ -468,11 +515,22 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     switch (gender) {
       case 'm':
       case 'male':
+      case 'boy':
+      case 'b':
+      case '1':
         displayGender = 'Male';
         break;
       case 'f':
       case 'female':
+      case 'girl':
+      case 'g':
+      case '2':
         displayGender = 'Female';
+        break;
+      case 'other':
+      case 'o':
+      case '3':
+        displayGender = 'Other';
         break;
       default:
         displayGender = 'Other';
@@ -532,6 +590,42 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       debugPrint('Error fetching sync status for $beneficiaryRefKey: $e');
       return {'is_synced': false, 'server_id': null};
     }
+  }
+
+  Future<String> _getAgeGenderRealtime(String beneficiaryRefKey, String fallback) async {
+    try {
+      if (beneficiaryRefKey.isEmpty) {
+        final f = fallback.replaceAll(' | Other', '').trim();
+        return f.isNotEmpty ? f : 'N/A';
+      }
+      final db = await DatabaseProvider.instance.database;
+      final rows = await db.query(
+        BeneficiariesTable.table,
+        where: 'unique_key = ?',
+        whereArgs: [beneficiaryRefKey],
+        limit: 1,
+      );
+      if (rows.isNotEmpty) {
+        Map<String, dynamic> info = {};
+        try {
+          final raw = rows.first['beneficiary_info'];
+          info = raw is String ? jsonDecode(raw) : Map<String, dynamic>.from(raw as Map);
+        } catch (_) {}
+        final dob = info['dob']?.toString() ?? '';
+        final genderRaw = info['gender']?.toString() ?? '';
+        String display = _formatAgeGender(dob, genderRaw);
+        if (display.contains(' | Other')) {
+          display = display.replaceAll(' | Other', '').trim();
+        }
+        if (display.isEmpty || display == 'Not Available') {
+          final f = fallback.replaceAll(' | Other', '').trim();
+          return f.isNotEmpty ? f : 'N/A';
+        }
+        return display;
+      }
+    } catch (_) {}
+    final f = fallback.replaceAll(' | Other', '').trim();
+    return f.isNotEmpty ? f : 'N/A';
   }
 
   @override
@@ -793,7 +887,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                     children: [
                       Expanded(child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate'] ?? 'N/A')),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.registrationTypeLabel ?? 'Registration Type', data['RegitrationType'] ?? 'Child Registration')),
+                      Expanded(child: _rowText(l10n?.registrationTypeLabel ?? 'Registration Type',  'Child')),
                       const SizedBox(width: 8),
                       Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
                           (data['BeneficiaryID']?.toString().length ?? 0) > 11
@@ -806,7 +900,18 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                     children: [
                       Expanded(child: _rowText("${l10n?.nameLabel}" , data['Name'] ?? 'N/A')),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? 'N/A')),
+                      Expanded(
+                        child: FutureBuilder<String>(
+                          future: _getAgeGenderRealtime(
+                            data['BeneficiaryID']?.toString() ?? '',
+                            data['Age|Gender']?.toString() ?? 'N/A',
+                          ),
+                          builder: (context, snapshot) {
+                            final display = snapshot.data ?? (data['Age|Gender']?.toString() ?? 'N/A');
+                            return _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', display);
+                          },
+                        ),
+                      ),
                       const SizedBox(width: 8),
                       Expanded(child: _rowText(
                         l10n?.rchIdLabel ?? 'RCH ID',
