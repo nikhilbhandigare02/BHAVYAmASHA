@@ -206,22 +206,7 @@ class _Migratedout extends State<Migratedout> {
                       ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      l10n?.badgeMigrated ?? 'Migrated',
-                      style: const TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12.5,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+
 
                 ],
               ),

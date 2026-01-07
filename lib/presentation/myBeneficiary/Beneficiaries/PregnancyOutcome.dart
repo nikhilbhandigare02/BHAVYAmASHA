@@ -174,7 +174,7 @@ ORDER BY d.created_date_time DESC
             }
           } catch (_) {}
 
-          // First try to get name from beneficiary info if available
+
           String womanName = 'Unknown';
           if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
             try {
@@ -184,7 +184,7 @@ ORDER BY d.created_date_time DESC
                   ? jsonDecode(beneficiaryRow['beneficiary_info'] as String)
                   : <String, dynamic>{});
 
-              womanName = (info['headName'] ?? info['name'] ??info['memberName'] ?? info['spouseName']?? info['woman_name'] ?? 'Unknown').toString();
+              womanName = (info['headName'] ?? info['name'] ??info['memberName'] ?? info['spouseName']?? info['woman_name'] ?? '').toString();
             } catch (e) {
               print('⚠️ Error parsing beneficiary_info: $e');
             }
@@ -250,9 +250,9 @@ ORDER BY d.created_date_time DESC
 
               gender = info['gender']?.toString() ?? '';
               if (gender.toLowerCase() == 'f') {
-                gender = 'F';
+                gender = 'Female';
               } else if (gender.toLowerCase() == 'female') {
-                gender = 'F';
+                gender = 'Female';
               }
 
               final m = (info['mobileNo']?.toString() ?? info['mobile']?.toString() ?? info['phone']?.toString() ?? '').trim();
