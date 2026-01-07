@@ -2424,7 +2424,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   height: 4.5.h,
                                   child: RoundButton(
                                     title:
-                                        l10n?.previousVisitsButton ??
+                                        l10n?.previous ??
                                         'PREVIOUS VISITS',
                                     color: AppColors.primary,
                                     borderRadius: 4,
