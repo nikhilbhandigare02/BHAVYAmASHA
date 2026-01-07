@@ -99,7 +99,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get occupationRetired => 'सेवानिवृत्त';
 
   @override
-  String get occupationOther => '';
+  String get occupationOther => 'अन्य';
 
   @override
   String get enterOccupationOther => 'व्यवसाय दर्ज करने';

@@ -257,7 +257,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
       return [
         'Self',
         'Husband',
-
         'Father',
         'Mother',
         'Son',
