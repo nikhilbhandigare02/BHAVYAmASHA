@@ -13346,7 +13346,7 @@ abstract class AppLocalizations {
   /// No description provided for @caseClosureRecorded.
   ///
   /// In en, this message translates to:
-  /// **'Case closure recorded. Child removed from tracking list.'**
+  /// **'Form saved successfully'**
   String get caseClosureRecorded;
 
   /// No description provided for @childRegistration.

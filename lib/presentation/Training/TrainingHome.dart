@@ -143,16 +143,7 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
                     },
                   ),
                   const SizedBox(width: 8),
-                  _FeatureCard(
-                    width: cardWidth,
-                    title: (l10n?.trainingProvidedTitle ?? 'Training Provided')
-                        .toString(),
-                    image: 'assets/images/notes.png',
-                    count: providedCount,
-                    onClick: () {
-                      Navigator.pushNamed(context, Route_Names.TrainingProvided);
-                    },
-                  ),
+
                 ],
               ),
             ],

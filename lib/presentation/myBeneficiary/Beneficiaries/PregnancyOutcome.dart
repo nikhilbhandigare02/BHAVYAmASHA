@@ -264,9 +264,7 @@ ORDER BY d.created_date_time DESC
             }
           }
 
-          final ageGenderCombined = (ageYearsDisplay.isNotEmpty || gender.isNotEmpty)
-              ? '${ageYearsDisplay.isNotEmpty ? ageYearsDisplay : 'N/A'} | ${gender.isNotEmpty ? gender : 'N/A'}'
-              : 'N/A';
+          final ageGenderCombined = ageYearsDisplay.isNotEmpty ? '${ageYearsDisplay}Y | $gender' : 'N/A';
 
           processedData.add({
             'hhId': row['household_ref_key']?.toString() ?? '',
@@ -388,7 +386,7 @@ ORDER BY d.created_date_time DESC
     final hhId = data['beneficiaryId']?.toString() ?? '';
     final displayHhId = hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId;
     final name = data['name'] ?? 'N/A';
-    final ageGender = data['age'] ?? 'N/A';
+    final age = data['age'] ?? 'N/A';
     final status = 'Pregnant';
 
     return Container(
@@ -460,7 +458,7 @@ ORDER BY d.created_date_time DESC
                 ),
 
                 // Age and Gender
-                _infoRow('', ageGender, isWrappable: true),
+                _infoRow('', age, isWrappable: true),
   ]
             ),
           ),

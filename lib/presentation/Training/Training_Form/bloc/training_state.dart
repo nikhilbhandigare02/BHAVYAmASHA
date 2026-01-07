@@ -27,7 +27,7 @@ class TrainingState extends Equatable {
   });
 
   factory TrainingState.initial() => TrainingState(
-        trainingTypes: const ['Receiving', 'Providing'],
+        trainingTypes: const ['Receiving'],
         trainingNames: const ['ASHA module 1', 'ASHA module 2','ASHA module 3','ASHA module 4','ASHA module 5,6 & 7','NCD', 'HBNC', 'HBYC', 'ASHA Facilitator training','Induction Training','MAA(Mothers Absolute Affection)','IDCF(Integrated Diarrhoea Control Fortnight)','Other Training'],
         trainingType: null,
         trainingName: null,
@@ -40,7 +40,7 @@ class TrainingState extends Equatable {
       );
 
   factory TrainingState.localized(AppLocalizations l10n) => TrainingState(
-        trainingTypes: [l10n.trainingTypeReceiving, l10n.trainingTypeProviding],
+        trainingTypes: [l10n.trainingTypeReceiving],
         trainingNames: [
           l10n.trainingNameAshaModule1,
           l10n.trainingNameAshaModule2,

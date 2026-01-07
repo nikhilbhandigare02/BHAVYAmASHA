@@ -6649,7 +6649,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get no_ChildrenFound => 'No children found';
 
   @override
-  String get caseClosureRecorded => 'Case closure recorded. Child removed from tracking list.';
+  String get caseClosureRecorded => 'Form saved successfully';
 
   @override
   String get childRegistration => 'Child Registration';

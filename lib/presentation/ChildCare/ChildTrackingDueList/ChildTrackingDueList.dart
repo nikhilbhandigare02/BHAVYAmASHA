@@ -796,20 +796,13 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             'isEdit': true,
           },
         )?.then((result) {
+          // Always reload data to reflect the latest state from the database
+          // This ensures that if case closure wasn't selected, the card remains visible
+          _loadChildTrackingData();
+          
           if (result is Map && result['saved'] == true) {
-            debugPrint('✅ Form saved, removing card for beneficiary: ${completeFormData['beneficiary_id']}');
-
-            setState(() {
-              _childTrackingList.removeWhere((child) {
-                final childBeneficiaryId = child['BeneficiaryID']?.toString() ?? '';
-                final formBeneficiaryId = completeFormData['beneficiary_id']?.toString() ?? '';
-                return childBeneficiaryId == formBeneficiaryId && childBeneficiaryId.isNotEmpty;
-              });
-              _filtered = List<Map<String, dynamic>>.from(_childTrackingList);
-            });
-            showAppSnackBar(context, 'Case closure recorded. Child removed from tracking list.');
-          } else {
-            _loadChildTrackingData();
+             // Optional: You can show a message here if needed, but the form already shows one
+             debugPrint('✅ Form saved, reloading list...');
           }
         });
       },
