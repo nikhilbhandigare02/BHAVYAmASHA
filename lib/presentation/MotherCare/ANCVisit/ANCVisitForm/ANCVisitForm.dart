@@ -1596,8 +1596,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     children: [
                                       // Iron & Folic Acid Tablets Field  
                                       CustomTextField(
-                                        labelText: 'Number of Iron & Folic Acid tablets given',
-                                        hintText: 'Enter number of Iron & Folic Acid tablets',
+                                        labelText: l10n?.folicAcidTabletsLabel ??
+                                        'Number of Folic Acid tablets given',
+                                        hintText: l10n?.folicAcidTabletsLabel ??
+                                            'Enter number of Folic Acid tablets',
                                         initialValue: state.ironFolicAcidTablets,
                                         keyboardType: TextInputType.number,
                                         onChanged: (v) =>

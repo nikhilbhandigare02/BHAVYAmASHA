@@ -3,6 +3,8 @@ import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/utils/responsive_font.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 class MultiSelect<T> extends StatefulWidget {
   final List<MultiSelectItem<T>> items;
   final List<T> selectedValues;
@@ -50,7 +52,7 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
 
   Future<void> _showMultiSelect() async {
     if (widget.isDisabled) return;
-
+    final l10n = AppLocalizations.of(context);
     final localSelectedItems = List<T>.from(_selectedItems);
 
     final result = await showDialog<List<T>>(
@@ -133,7 +135,7 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                         Navigator.pop(context);
                       },
                       child: Text(
-                        'CANCEL',
+                        l10n!.cancel,
                         style: TextStyle(
                           fontSize:
                           ResponsiveFont.getLabelFontSize(context) + 1,
@@ -148,7 +150,7 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                         Navigator.pop(context, localSelectedItems);
                       },
                       child: Text(
-                        'OK',
+                        l10n!.ok,
                         style: TextStyle(
                           fontSize:
                           ResponsiveFont.getLabelFontSize(context) + 1,

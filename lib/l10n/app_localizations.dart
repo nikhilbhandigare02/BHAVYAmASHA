@@ -2957,6 +2957,36 @@ abstract class AppLocalizations {
   /// **'Husband'**
   String get husbandLabel;
 
+  /// No description provided for @husband.
+  ///
+  /// In en, this message translates to:
+  /// **'Husband'**
+  String get husband;
+
+  /// No description provided for @firstAnc.
+  ///
+  /// In en, this message translates to:
+  /// **'First ANC'**
+  String get firstAnc;
+
+  /// No description provided for @secondAnc.
+  ///
+  /// In en, this message translates to:
+  /// **'Second ANC'**
+  String get secondAnc;
+
+  /// No description provided for @thirdAnc.
+  ///
+  /// In en, this message translates to:
+  /// **'Third ANC'**
+  String get thirdAnc;
+
+  /// No description provided for @fourthAnc.
+  ///
+  /// In en, this message translates to:
+  /// **'Fourth ANC'**
+  String get fourthAnc;
+
   /// No description provided for @husbandNameLabel.
   ///
   /// In en, this message translates to:

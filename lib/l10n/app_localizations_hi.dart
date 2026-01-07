@@ -233,16 +233,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get altMobileLabel => 'वैकल्पिक मोबाइल नंबर';
 
   @override
-  String get ancVisitFormTitle => 'एएनसी विज़िट फॉर्म';
+  String get ancVisitFormTitle => 'ए.एन.सी फॉर्म';
 
   @override
-  String get ancVisitLabel => 'एएनसी विज़िट';
+  String get ancVisitLabel => 'ए.एन.सी विज़िट';
 
   @override
-  String get ancVisitListTitle => 'एएनसी विज़िट सूची';
+  String get ancVisitListTitle => 'ए.एन.सी दौरे की सूची';
 
   @override
-  String get ancVisitSearchHint => 'एएनसी विज़िट खोज';
+  String get ancVisitSearchHint => 'ए.एन.सी दौरे की खोज';
 
   @override
   String get anganwadiCenterNoHint => 'आंगनवाड़ी केंद्र संख्या';
@@ -935,7 +935,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dateHint => 'dd-mm-yyyy';
 
   @override
-  String get dateOfInspectionLabel => 'निरीक्षण की तिथि *';
+  String get dateOfInspectionLabel => 'जांच की तिथि *';
 
   @override
   String get daughter => 'पुत्री का';
@@ -962,7 +962,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get declarationIntro => 'I hereby declare that:';
 
   @override
-  String get deliveryOutcomeTitle => 'प्रसव का परिणाम';
+  String get deliveryOutcomeTitle => 'प्रसव परिणाम';
 
   @override
   String get detailsLabel => 'विवरण';
@@ -1061,7 +1061,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get economicStatusLabel => 'आर्थिक स्थिति';
 
   @override
-  String get eddDateLabel => 'प्रसव की संभावित तिथि';
+  String get eddDateLabel => 'प्रसव होने की संभावित तिथि';
 
   @override
   String get edit => 'सुधारें';
@@ -1207,7 +1207,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get firstAncLabel => 'पहला एएनसी';
 
   @override
-  String get folicAcidTabletsLabel => 'दी गई फोलिक एसिड गोलियों की संख्या';
+  String get folicAcidTabletsLabel => 'आयरन और फोलिक एसिड की दी गई गोलियों की संख्या';
 
   @override
   String get fpAdoptingLabel => 'क्या आप/आपका साथी परिवार नियोजन अपना रहे हैं?';
@@ -1423,7 +1423,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get houseNone => 'कोई नहीं';
 
   @override
-  String get houseNumberLabel => 'मकान संख्या';
+  String get houseNumberLabel => 'घर संख्या';
 
   @override
   String get housePucca => 'पक्का घर';
@@ -1448,6 +1448,21 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get husbandLabel => 'पति का';
+
+  @override
+  String get husband => 'पति';
+
+  @override
+  String get firstAnc => 'पहली एएनसी';
+
+  @override
+  String get secondAnc => 'दूसरी एएनसी';
+
+  @override
+  String get thirdAnc => 'तीसरी एएनसी';
+
+  @override
+  String get fourthAnc => 'चौथी एएनसी';
 
   @override
   String get husbandNameLabel => 'पति का नाम';
@@ -1620,7 +1635,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get listRoutineImmunization => 'नियमित टीकाकरण (आरआई)';
 
   @override
-  String get lmpDateLabel => 'एलएमपी की तिथि';
+  String get lmpDateLabel => 'अंतिम माहवारी की तिथि';
 
   @override
   String get loginFailed => 'लॉगिन विफल। कृपया पुनः प्रयास करें।';
@@ -1770,7 +1785,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get nameOfMemberLabel => 'सदस्य का नाम';
 
   @override
-  String get nameOfPregnantWomanLabel => 'गर्भवती महिला का नाम';
+  String get nameOfPregnantWomanLabel => 'गर्भवती का नाम';
 
   @override
   String get nameOfWomanLabel => 'महिला का नाम';
@@ -1827,7 +1842,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get or => 'या';
 
   @override
-  String get orderOfPregnancyLabel => 'गर्भावस्था का क्रम (ग्रेवि डा)';
+  String get orderOfPregnancyLabel => 'गर्भावस्था का क्रम (ग्रेविडा)';
 
   @override
   String get otpGeneratedSuccess => 'OTP generated successfully';
@@ -1887,7 +1902,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get poweredBy => 'Powered By Medixcel Lite © ';
 
   @override
-  String get preExistingDiseaseLabel => 'पूर्व-विद्यमान रोग';
+  String get preExistingDiseaseLabel => 'पहले से मौजूद बीमारी';
 
   @override
   String get previousVisitsButton => 'पिछली विज़िट्स';
@@ -1908,7 +1923,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get rchIdLabel => 'आरसीएच आईडी';
 
   @override
-  String get rchNumberLabel => 'आरसीएच नंबर';
+  String get rchNumberLabel => 'आर.सी.एच संख्या';
 
   @override
   String get submissionCountLabel => 'Form Submfvissions';
@@ -2244,10 +2259,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get tabUnprotected => 'असुरक्षित';
 
   @override
-  String get td1DateLabel => 'टी.डी. (टेटनस एवं वयस्क डिप्थीरिया) की पहली खुराक की तिथि';
+  String get td1DateLabel => 'टी.डी. (टेटनस और वयस्क डिप्थीरिया) 1 की तिथि';
 
   @override
-  String get td2DateLabel => 'टी.डी. (टेटनस एवं वयस्क डिप्थीरिया) की दूसरी खुराक की तिथि';
+  String get td2DateLabel => 'टी.डी. (टेटनस और वयस्क डिप्थीरिया) 2 की तिथि';
 
   @override
   String get tdBoosterDateLabel => 'टी.डी. (टेटनस एवं वयस्क डिप्थीरिया) बूस्टर की तिथि';
@@ -2433,7 +2448,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get visitTypeHospital => 'Hospital';
 
   @override
-  String get visitTypeLabel => 'मिलने का प्रकार';
+  String get visitTypeLabel => 'दौरें प्रकार';
 
   @override
   String get visitTypePNC => 'प्रसवोत्तर देखभाल';
@@ -2445,7 +2460,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get visitTypeSubcenter => 'Subcenter';
 
   @override
-  String get visitsLabel => 'विज़िट्स :';
+  String get visitsLabel => 'दौरा :';
 
   @override
   String get voterIdLabel => 'वोटर आईडी';
@@ -2748,7 +2763,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get counselingAdviceLabel => 'परामर्श / सलाह';
 
   @override
-  String get outcomeFormTitle => 'Delivery Outcome';
+  String get outcomeFormTitle => 'प्रसव परिणाम ';
 
   @override
   String get deliveryOutcomeDetails => 'प्रसव परिणाम का विवरण';
@@ -4609,7 +4624,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get no_matching_records_found => 'कोई मिलते-जुलते रिकॉर्ड नहीं मिले';
 
   @override
-  String get refresh => 'रीफ़्रेश';
+  String get refresh => 'रीफ़्रेश करें';
 
   @override
   String get no_death_records_in_database => 'डेटाबेस में कोई मृत्यु रिकॉर्ड नहीं हैं।';
@@ -5434,7 +5449,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get reasonForRemoval => 'निकासी का कारण';
 
   @override
-  String get anc => 'एएनसी देय';
+  String get anc => 'ए.एन.सी';
 
   @override
   String get pmsma => 'पी.एम.एस.एम.ए';
@@ -5443,22 +5458,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get vhsndAnganwadi => 'वी.एच.एस.एन.डी/आंगनवाड़ी';
 
   @override
-  String get hscHwc => 'स्वास्थ्य उप-केंद्र/स्वास्थ्य एवं कल्याण केंद्र (HSC/HWC)';
+  String get hscHwc => 'स्वास्थ्य उप-केंद्र / स्वास्थ्य एवं धन केंद्र (एचएससी / एचडब्ल्यूसी)';
 
   @override
-  String get phcLabel => 'प्राथमिक स्वास्थ्य केंद्र (PHC)';
+  String get phcLabel => 'प्राथमिक स्वास्थ्य केंद्र (पीएचसी)';
 
   @override
-  String get chcLabel => 'सामुदायिक स्वास्थ्य केंद्र (CHC)';
+  String get chcLabel => 'सामुदायिक स्वास्थ्य केंद्र (सीएचसी)';
 
   @override
-  String get rh => 'आर ए्च';
+  String get rh => 'रेफरल अस्पताल (आर.एच.)';
 
   @override
-  String get dh => 'डि.ए्च ';
+  String get dh => 'जिला अस्पताल (डी.एच.)';
 
   @override
-  String get mch => 'एम सी ए्च';
+  String get mch => 'मेडिकल कॉलेज अस्पताल (एम.सी.एच.)';
 
   @override
   String get pmsmaSite => 'पी.एम.एस.एम.ए साइट';
@@ -5467,7 +5482,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hepetitisB => 'हेपेटाइटिस - बी';
 
   @override
-  String get tuberculosisLabel => 'क्षय रोग (टीबी)';
+  String get tuberculosisLabel => 'यक्ष्मा रोग (टीबी)';
 
   @override
   String get asthma => 'अस्थमा';
@@ -7129,7 +7144,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get accountNumberAtLeast10Digits => 'खाता संख्या कम से कम 10 अंकों की होनी चाहिए';
 
   @override
-  String get diseaseTb => 'क्षय रोग (टीबी)';
+  String get diseaseTb => 'यक्ष्मा रोग (टीबी)';
 
   @override
   String get diseaseHepatitisB => 'हेपेटाइटिस बी';
@@ -7147,10 +7162,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get diseaseHeart => 'हृदय रोग';
 
   @override
-  String get diseaseLiver => 'यकृत रोग';
+  String get diseaseLiver => 'लिवर की बीमारी';
 
   @override
-  String get diseaseKidney => 'गुर्दा रोग';
+  String get diseaseKidney => 'गुर्दे की बीमारी';
 
   @override
   String get diseaseEpilepsy => 'मिर्गी';
@@ -7159,7 +7174,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get pleaseSpecifyOtherDisease => 'कृपया अन्य रोग का विवरण दें';
 
   @override
-  String get calciumVitaminD3TabletsLabel => 'दी गई कैल्शियम एवं विटामिन डी3 गोलियों की संख्या';
+  String get calciumVitaminD3TabletsLabel => 'कैल्शियम और विटामिन डी3 की दी गई गोलियों की संख्या';
 
   @override
   String get selectVisitTypeError => 'कृपया विज़िट का प्रकार चुनें';

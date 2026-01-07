@@ -1450,6 +1450,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get husbandLabel => 'Husband';
 
   @override
+  String get husband => 'Husband';
+
+  @override
+  String get firstAnc => 'First ANC';
+
+  @override
+  String get secondAnc => 'Second ANC';
+
+  @override
+  String get thirdAnc => 'Third ANC';
+
+  @override
+  String get fourthAnc => 'Fourth ANC';
+
+  @override
   String get husbandNameLabel => 'Husband\'s name';
 
   @override
