@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/data/Database/local_storage_dao.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
@@ -243,60 +244,341 @@ Future<void> _loadPregnantWomen() async {
   }
 
   Future<void> _loadChild0to1() async {
-    print('Loading children 0-1 year data...');
-    try {
-      // Load all age groups for 0-1 year
-      final birthDose = await LocalStorageDao.instance.getChildTrackingForBirthDose();
-      final sixWeeks = await LocalStorageDao.instance.getChildTrackingFor6Weeks();
-      final tenWeeks = await LocalStorageDao.instance.getChildTrackingFor10Weeks();
-      final fourteenWeeks = await LocalStorageDao.instance.getChildTrackingFor14Weeks();
-      final birthDoseScoped = await _filterByCurrentUserKey(birthDose);
-      final sixWeeksScoped = await _filterByCurrentUserKey(sixWeeks);
-      final tenWeeksScoped = await _filterByCurrentUserKey(tenWeeks);
-      final fourteenWeeksScoped = await _filterByCurrentUserKey(fourteenWeeks);
-
-      setState(() {
-        _child0to1.clear();
-        // Combine all age groups into one list
-        _addFormDataToList(_child0to1, birthDoseScoped);
-        _addFormDataToList(_child0to1, sixWeeksScoped);
-        _addFormDataToList(_child0to1, tenWeeksScoped);
-        _addFormDataToList(_child0to1, fourteenWeeksScoped);
-        print('Total items in _child0to1: ${_child0to1.length}');
-      });
-    } catch (e) {
-      print('Error in _loadChild0to1: $e');
-      if (e is Error) {
-        print('Stack trace: ${e.stackTrace}');
-      }
-    }
+    await _loadChildBeneficiariesByAgeGroup('0-1');
   }
 
   Future<void> _loadChild1to2() async {
-    print('Loading children 1-2 years data...');
+    await _loadChildBeneficiariesByAgeGroup('1-2');
+  }
+
+  Future<void> _loadChild2to5() async {
+    await _loadChildBeneficiariesByAgeGroup('2-5');
+  }
+
+  Future<bool> _hasTrackingDueStatus(String beneficiaryRefKey) async {
     try {
-      final rows = await LocalStorageDao.instance.getChildTrackingFor16To24Months();
-      final scopedRows = await _filterByCurrentUserKey(rows);
-      _updateChildList(_child1to2, scopedRows, '1-2 years');
+      final db = await DatabaseProvider.instance.database;
+      final rows = await db.query(
+        'child_care_activities',
+        where: 'beneficiary_ref_key = ? AND child_care_state = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryRefKey, 'tracking_due'],
+        limit: 1,
+      );
+      return rows.isNotEmpty;
     } catch (e) {
-      print('Error in _loadChild1to2: $e');
+      print('Error checking tracking_due status for $beneficiaryRefKey: $e');
+      return false;
+    }
+  }
+
+  Future<void> _loadChildBeneficiariesByAgeGroup(String ageGroup) async {
+    print('Loading children $ageGroup years data...');
+    try {
+      final db = await DatabaseProvider.instance.database;
+
+      final deceasedChildren = await db.rawQuery('''
+        SELECT DISTINCT beneficiary_ref_key, form_json 
+        FROM followup_form_data 
+        WHERE form_json LIKE '%"reason_of_death":%'
+      ''');
+
+      final deceasedIds = <String>{};
+      for (var child in deceasedChildren) {
+        try {
+          final jsonData = jsonDecode(child['form_json'] as String);
+          final formData = jsonData['form_data'] as Map<String, dynamic>?;
+          final caseClosure = formData?['case_closure'] as Map<String, dynamic>?;
+
+          if (caseClosure?['is_case_closure'] == true &&
+              caseClosure?['reason_of_death']?.toString().toLowerCase() == 'death') {
+            final beneficiaryId = child['beneficiary_ref_key']?.toString();
+            if (beneficiaryId != null && beneficiaryId.isNotEmpty) {
+              deceasedIds.add(beneficiaryId);
+            }
+          }
+        } catch (e) {
+          print('⚠️ Error processing deceased record: $e');
+        }
+      }
+
+      // Get current user data
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      // Get last visit dates from child_care_activities (most recent entry)
+      final lastVisitDates = <String, String>{};
+      final childCareRecords = await db.rawQuery('''
+        SELECT 
+          beneficiary_ref_key, 
+          created_date_time,
+          child_care_state
+        FROM child_care_activities 
+        ORDER BY created_date_time DESC
+      ''');
+
+      final Map<String, Map<String, dynamic>> latestRecordsByBeneficiary = {};
+      for (var record in childCareRecords) {
+        final beneficiaryKey = record['beneficiary_ref_key']?.toString();
+        if (beneficiaryKey != null && !latestRecordsByBeneficiary.containsKey(beneficiaryKey)) {
+          latestRecordsByBeneficiary[beneficiaryKey] = record;
+        }
+      }
+      
+      // Extract latest dates from records
+      for (var entry in latestRecordsByBeneficiary.entries) {
+        final beneficiaryKey = entry.key;
+        final record = entry.value;
+        final createdDate = record['created_date_time']?.toString();
+        if (createdDate != null) {
+          lastVisitDates[beneficiaryKey] = createdDate;
+        }
+      }
+
+      // Get all child beneficiaries
+      final List<Map<String, dynamic>> rows = await db.rawQuery('''
+        SELECT 
+          B.*
+        FROM beneficiaries_new B
+        WHERE 
+          B.is_deleted = 0
+          AND B.is_adult = 0
+          AND B.is_migrated = 0
+          AND B.current_user_key = ?
+        ORDER BY B.created_date_time DESC
+      ''', [ashaUniqueKey]);
+
+      final allChildBeneficiaries = <Map<String, dynamic>>[];
+
+      for (final row in rows) {
+        try {
+          final rowHhId = row['household_ref_key']?.toString();
+          if (rowHhId == null) continue;
+
+          final info = row['beneficiary_info'] is String
+              ? jsonDecode(row['beneficiary_info'] as String)
+              : row['beneficiary_info'];
+
+          if (info is! Map) continue;
+
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          final relation = info['relation']?.toString().toLowerCase() ?? '';
+
+          if (memberType == 'child' || relation == 'child' ||
+              memberType == 'Child' || relation == 'daughter') {
+
+            final name = info['name']?.toString() ??
+                info['memberName']?.toString() ??
+                info['member_name']?.toString() ??
+                '';
+
+            final fatherName = info['fatherName']?.toString() ??
+                info['father_name']?.toString() ?? '';
+
+            final motherName = info['motherName']?.toString() ??
+                info['mother_name']?.toString() ?? '';
+
+            final mobileNo = info['mobileNo']?.toString() ??
+                info['mobile']?.toString() ??
+                info['mobile_number']?.toString() ?? '';
+
+            final richId = info['RichIDChanged']?.toString() ??
+                info['richIdChanged']?.toString() ??
+                info['richId']?.toString() ?? '';
+
+            final dob = info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
+            final gender = info['gender'] ?? info['sex'];
+
+            final beneficiaryId = row['unique_key']?.toString() ?? '';
+            final isDeceased = deceasedIds.contains(beneficiaryId);
+
+            // Calculate age in months for filtering
+            final ageInMonths = _calculateAgeInMonths(dob);
+            
+            // Filter by age group
+            bool belongsToAgeGroup = false;
+            if (ageGroup == '0-1') {
+              belongsToAgeGroup = ageInMonths >= 0 && ageInMonths <= 12;
+            } else if (ageGroup == '1-2') {
+              belongsToAgeGroup = ageInMonths > 12 && ageInMonths < 24;
+            } else if (ageGroup == '2-5') {
+              belongsToAgeGroup = ageInMonths >= 24 && ageInMonths <= 60;
+            }
+
+            if (!belongsToAgeGroup) continue;
+
+            // Get last visit date from child_care_activities
+            String lastVisitDate;
+            if (lastVisitDates.containsKey(beneficiaryId)) {
+              lastVisitDate = _formatDateFromString(lastVisitDates[beneficiaryId]);
+            } else {
+              lastVisitDate = 'Not Available';
+            }
+
+            // Check if child has tracking_due status in child_care_activities
+            final hasTrackingDue = await _hasTrackingDueStatus(beneficiaryId);
+            if (!hasTrackingDue) continue;
+
+            final card = <String, dynamic>{
+              'hhId': rowHhId,
+
+              'RegitrationType': 'Child',
+              'BeneficiaryID': beneficiaryId,
+              'RchID': richId,
+              'Name': name,
+              'Age|Gender': _formatAgeGender(dob, gender),
+              'Mobileno.': mobileNo,
+              'FatherName': fatherName,
+              'MotherName': motherName,
+              'is_deceased': isDeceased,
+              'is_death': row['is_death'] ?? 0,
+              'age_in_months': ageInMonths,
+              'LastVisitDate': lastVisitDate,
+              '_raw': row,
+            };
+
+            allChildBeneficiaries.add(card);
+          }
+        } catch (e) {
+          print('⚠️ Error processing beneficiary record: $e');
+        }
+      }
+
+      // Update the appropriate list based on age group
+      setState(() {
+        switch (ageGroup) {
+          case '0-1':
+            _child0to1.clear();
+            _child0to1.addAll(allChildBeneficiaries);
+            print('Total items in _child0to1: ${_child0to1.length}');
+            break;
+          case '1-2':
+            _child1to2.clear();
+            _child1to2.addAll(allChildBeneficiaries);
+            print('Total items in _child1to2: ${_child1to2.length}');
+            break;
+          case '2-5':
+            _child2to5.clear();
+            _child2to5.addAll(allChildBeneficiaries);
+            print('Total items in _child2to5: ${_child2to5.length}');
+            break;
+        }
+      });
+    } catch (e) {
+      print('Error in _loadChildBeneficiariesByAgeGroup($ageGroup): $e');
       if (e is Error) {
         print('Stack trace: ${e.stackTrace}');
       }
     }
   }
 
-  Future<void> _loadChild2to5() async {
-    print('Loading children 2-5 years data...');
+  int _calculateAgeInMonths(dynamic dob) {
+    if (dob == null) return 0;
     try {
-      final rows = await LocalStorageDao.instance.getChildTrackingFor5To6Years();
-      final scopedRows = await _filterByCurrentUserKey(rows);
-      _updateChildList(_child2to5, scopedRows, '2-5 years');
-    } catch (e) {
-      print('Error in _loadChild2to5: $e');
-      if (e is Error) {
-        print('Stack trace: ${e.stackTrace}');
+      DateTime? birthDate;
+      if (dob is String) {
+        birthDate = DateTime.tryParse(dob);
+        if (birthDate == null) {
+          final timestamp = int.tryParse(dob);
+          if (timestamp != null && timestamp > 0) {
+            birthDate = DateTime.fromMillisecondsSinceEpoch(
+              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+              isUtc: true,
+            );
+          }
+        }
+      } else if (dob is DateTime) {
+        birthDate = dob;
       }
+      if (birthDate == null) return 0;
+
+      final now = DateTime.now();
+      int months = (now.year - birthDate.year) * 12 + (now.month - birthDate.month);
+      if (now.day < birthDate.day) {
+        months--;
+      }
+      return months;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
+    String age = 'Not Available';
+    String gender = (genderRaw?.toString().toLowerCase() ?? '');
+
+    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
+      try {
+        String dateStr = dobRaw.toString();
+        DateTime? dob;
+
+        dob = DateTime.tryParse(dateStr);
+
+        if (dob == null) {
+          final timestamp = int.tryParse(dateStr);
+          if (timestamp != null && timestamp > 0) {
+            dob = DateTime.fromMillisecondsSinceEpoch(
+              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+              isUtc: true,
+            );
+          }
+        }
+
+        if (dob != null) {
+          final now = DateTime.now();
+          int years = now.year - dob.year;
+          int months = now.month - dob.month;
+          int days = now.day - dob.day;
+
+          if (days < 0) {
+            final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+            final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+            final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
+            days += daysInLastMonth;
+            months--;
+          }
+
+          if (months < 0) {
+            months += 12;
+            years--;
+          }
+
+          if (years > 0) {
+            age = '$years Y';
+          } else if (months > 0) {
+            age = '$months M';
+          } else {
+            age = '$days D';
+          }
+        }
+      } catch (e) {
+        debugPrint('Error parsing date of birth: $e');
+      }
+    }
+
+    String displayGender;
+    switch (gender) {
+      case 'm':
+      case 'male':
+        displayGender = 'Male';
+        break;
+      case 'f':
+      case 'female':
+        displayGender = 'Female';
+        break;
+      default:
+        displayGender = 'Other';
+    }
+
+    return '$age | $displayGender';
+  }
+
+  String _formatDateFromString(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'Not Available';
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+    } catch (e) {
+      return dateStr;
     }
   }
 
@@ -401,10 +683,9 @@ Future<void> _loadPregnantWomen() async {
       }
     }
 
-    // If all visits are in the past, return the last one
     final lastVisit = ancDates['pmsma_end'];
     if (lastVisit != null) {
-      return 'Last Visit: ${_formatDate(lastVisit)}';
+      return 'Last visit date: ${_formatDate(lastVisit)}';
     }
 
     return 'No visit scheduled';
@@ -569,12 +850,38 @@ Future<void> _loadPregnantWomen() async {
     final primary = Theme.of(context).primaryColor;
     final l10n = AppLocalizations.of(context);
     final ancDates = item['ancDates'] as Map<String, dynamic>?;
-    final mobile = item['mobile']?.toString() ?? '';
+    
+    // Handle both old and new data structures
+    final mobile = item['mobile']?.toString() ?? item['Mobileno.']?.toString() ?? '';
+    final isChildData = item.containsKey('Name') && item.containsKey('BeneficiaryID');
     final isSampoornTikakaran = item['age']?.toString().contains('16') ?? false;
 
     String _last11(String value) {
       if (value.length <= 11) return value;
       return value.substring(value.length - 11);
+    }
+
+    // Get appropriate ID based on data structure
+    String displayId;
+    String displayName;
+    String displayAgeGender;
+    String displayMobile;
+    String badge;
+    
+    if (isChildData) {
+      // New RegisterChildListScreen structure
+      displayId = _last11(item['BeneficiaryID']?.toString() ?? '-');
+      displayName = item['Name']?.toString() ?? '-';
+      displayAgeGender = item['Age|Gender']?.toString() ?? '-';
+      displayMobile = item['Mobileno.']?.toString() ?? '-';
+      badge = 'Child Tracking';
+    } else {
+      // Old structure or other data
+      displayId = _last11((item['beneficiary_ref_key'] ?? item['id'] ?? '-').toString());
+      displayName = item['name']?.toString() ?? '-';
+      displayAgeGender = '${item['age'] ?? '-'} Y | ${item['gender'] ?? '-'}';
+      displayMobile = item['mobile']?.toString() ?? '-';
+      badge = item['badge']?.toString() ?? 'Child Tracking';
     }
 
     return Container(
@@ -601,7 +908,7 @@ Future<void> _loadPregnantWomen() async {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    _last11((item['beneficiary_ref_key'] ?? item['id'] ?? '-').toString()),
+                    displayId,
                     style: TextStyle(
                       color: primary,
                       fontWeight: FontWeight.w600,
@@ -609,6 +916,27 @@ Future<void> _loadPregnantWomen() async {
                     ),
                   ),
                 ),
+                // Show deceased badge if applicable
+                if (item['is_deceased'] == true) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    margin: const EdgeInsets.only(right: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red.shade200, width: 1),
+                    ),
+                    child: Text(
+                      'Deceased'.toUpperCase(),
+                      style: TextStyle(
+                        color: Colors.red.shade800,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10.sp,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ],
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
@@ -616,7 +944,7 @@ Future<void> _loadPregnantWomen() async {
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Text(
-                    item['badge']?.toString() ?? 'Child Tracking',
+                    badge,
                     style:  TextStyle(color: Color(0xFF0E7C3A), fontWeight: FontWeight.w600, fontSize: 14.sp),
                   ),
                 ),
@@ -643,24 +971,35 @@ Future<void> _loadPregnantWomen() async {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            item['name']?.toString() ?? '-',
+                            displayName,
                             style:  TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16.sp),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            '${item['age'] ?? '-'} Y | ${item['gender'] ?? '-'}',
+                            displayAgeGender,
                             style:  TextStyle(color: Colors.white, fontSize: 14.sp),
                           ),
                           const SizedBox(height: 2),
+                          if (isChildData) ...[
+                            // Show last visit date for child data
+                            Text(
+                              'Last visit: ${item['LastVisitDate'] ?? '-'}',
+                              style:  TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
+                            ),
+                            const SizedBox(height: 2),
+
+                          ] else ...[
+                            // Show next visit for ANC or other data
+                            Text(
+                              item['badge'] == 'ANC'
+                                ? '${l10n!.antenatal} ${item['nextVisit'] ?? '-'}'
+                                : 'Next Visits: ${item['nextVisit'] ?? '-'}',
+                              style:  TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
+                            ),
+                            const SizedBox(height: 2),
+                          ],
                           Text(
-                            item['badge'] == 'ANC'
-                              ? '${l10n!.antenatal} ${item['nextVisit'] ?? '-'}'
-                              : '${'Next Visits'} ${item['nextVisit'] ?? '-'}',
-                            style:  TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${l10n?.mobileLabel} ${item['mobile'] ?? '-'}',
+                            '${l10n?.mobileLabel} $displayMobile',
                             style:  TextStyle(color: Colors.white, fontSize: 14.sp),
                           ),
                         ],
@@ -669,15 +1008,16 @@ Future<void> _loadPregnantWomen() async {
                     // Action buttons
                     Row(
                       children: [
-                        InkWell(
-                          onTap: () => _makePhoneCall(mobile),
-                          child: CircleAvatar(
-                            radius: 22,
-                            backgroundColor: Colors.white,
-                            child: Icon(Icons.phone, color: primary, size: 24),
+                        if (displayMobile.isNotEmpty)
+                          InkWell(
+                            onTap: () => _makePhoneCall(displayMobile),
+                            child: CircleAvatar(
+                              radius: 22,
+                              backgroundColor: Colors.white,
+                              child: Icon(Icons.phone, color: primary, size: 24),
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
+                        if (displayMobile.isNotEmpty) const SizedBox(width: 12),
                         Container(
                           width: 50,
                           height: 50,

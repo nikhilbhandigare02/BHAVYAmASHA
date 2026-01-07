@@ -137,6 +137,12 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
           final householdRefKey = (row['household_ref_key'] ?? '').toString();
 
+          // Check if this is a child record (same logic as RegisterChildListScreen)
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          final relation = info['relation']?.toString().toLowerCase() ?? '';
+          final isChild = memberType == 'child' || relation == 'child' ||
+              memberType == 'Child' || relation == 'daughter';
+
           // Pregnant
           final isPregnant =
               info['isPregnant']?.toString().toLowerCase() == 'yes' ||
@@ -147,27 +153,65 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                 (pregnantCountMap[householdRefKey] ?? 0) + 1;
           }
 
-          final dob = info['dob']?.toString();
-          if (dob != null && dob.isNotEmpty) {
-            final birthDate = DateTime.tryParse(dob);
+          final dob = info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
+          if (dob != null && dob.toString().isNotEmpty) {
+            DateTime? birthDate;
+            
+            // Use same date parsing logic as RegisterChildListScreen
+            String dateStr = dob.toString();
+            birthDate = DateTime.tryParse(dateStr);
+
+            if (birthDate == null) {
+              final timestamp = int.tryParse(dateStr);
+              if (timestamp != null && timestamp > 0) {
+                birthDate = DateTime.fromMillisecondsSinceEpoch(
+                  timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+                  isUtc: true,
+                );
+              }
+            }
+
             if (birthDate != null) {
               final now = DateTime.now();
-              int ageInMonths =
-                  (now.year - birthDate.year) * 12 +
-                      now.month -
-                      birthDate.month;
-              if (now.day < birthDate.day) ageInMonths--;
+              int years = now.year - birthDate.year;
+              int months = now.month - birthDate.month;
+              int days = now.day - birthDate.day;
 
-              if (ageInMonths >= 0 && ageInMonths < 12) {
-                child0to1Map[householdRefKey] =
-                    (child0to1Map[householdRefKey] ?? 0) + 1;
-              } else if (ageInMonths >= 12 && ageInMonths < 24) {
-                child1to2Map[householdRefKey] =
-                    (child1to2Map[householdRefKey] ?? 0) + 1;
-              } else if (ageInMonths >= 24 && ageInMonths < 60) {
-                child2to5Map[householdRefKey] =
-                    (child2to5Map[householdRefKey] ?? 0) + 1;
-              } else if (ageInMonths >= 65 * 12) {
+              if (days < 0) {
+                final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+                final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+                final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
+                days += daysInLastMonth;
+                months--;
+              }
+
+              if (months < 0) {
+                months += 12;
+                years--;
+              }
+
+              // Convert to total months for easier categorization
+              int totalMonths = years * 12 + months;
+              if (days < 0) totalMonths--; // Adjust if not yet reached birthday this month
+
+              // Only categorize as child if memberType indicates it's a child
+              if (isChild) {
+                if (totalMonths >= 0 && totalMonths < 12) {
+                  child0to1Map[householdRefKey] =
+                      (child0to1Map[householdRefKey] ?? 0) + 1;
+                } else if (totalMonths >= 12 && totalMonths <= 25) {
+                  // Include exactly 2 years (24 months) in 1-2 year category
+                  child1to2Map[householdRefKey] =
+                      (child1to2Map[householdRefKey] ?? 0) + 1;
+                } else if (totalMonths >= 26 && totalMonths < 60) {
+                  // Above 2 years (25+ months) in 2-5 year category
+                  child2to5Map[householdRefKey] =
+                      (child2to5Map[householdRefKey] ?? 0) + 1;
+                }
+              }
+              
+              // Still check for elderly regardless of memberType
+              if (totalMonths >= 65 * 12) {
                 elderlyCountMap[householdRefKey] =
                     (elderlyCountMap[householdRefKey] ?? 0) + 1;
               }
@@ -235,6 +279,8 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
         int totalExpectedChildren = 0;
         final Set<String> parentNames = <String>{};
+        final Set<int> childrenCounts = <int>{}; // Use Set to avoid duplicate counts
+
         for (final b in membersForHousehold) {
           final rawInfo = b['beneficiary_info'];
           Map<String, dynamic> bi;
@@ -250,14 +296,25 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           final hasChildren = hasChildrenRaw == true ||
               hasChildrenRaw?.toString().toLowerCase() == 'yes';
           if (hasChildren) {
-            final tlRaw = bi['totalLive'] ?? bi['totalLiveChildren'];
+            // Check for children field first (from your data format), then fallback to totalLive fields
+            final childrenRaw = bi['children'];
             int tl = 0;
-            if (tlRaw is int) {
-              tl = tlRaw;
+            if (childrenRaw != null) {
+              tl = int.tryParse(childrenRaw.toString()) ?? 0;
             } else {
-              tl = int.tryParse(tlRaw?.toString() ?? '') ?? 0;
+              final tlRaw = bi['totalLive'] ?? bi['totalLiveChildren'];
+              if (tlRaw is int) {
+                tl = tlRaw;
+              } else {
+                tl = int.tryParse(tlRaw?.toString() ?? '') ?? 0;
+              }
             }
-            totalExpectedChildren += tl;
+
+            // Add to Set to avoid duplicate counts from head and spouse
+            if (tl > 0) {
+              childrenCounts.add(tl);
+            }
+
             final pname = (bi['headName'] ?? bi['name'] ?? bi['memberName'] ?? bi['member_name'] ?? '')
                 .toString()
                 .trim()
@@ -267,6 +324,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             }
           }
         }
+
+        // Sum unique children counts (avoiding duplicates from head/spouse)
+        totalExpectedChildren = childrenCounts.fold(0, (sum, count) => sum + count);
 
         int recordedChildren = 0;
         for (final b in membersForHousehold) {
@@ -376,99 +436,99 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       body: _isLoading
           ? const CenterBoxLoader()
           : Column(
-              children: [
-                // Search
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  child: TextField(
-                    controller: _searchCtrl,
-                    decoration: InputDecoration(
-                      hintText: l10n?.searchHousehold ?? 'Household search',
-                      prefixIcon: const Icon(Icons.search),
-                      filled: true,
-                      fillColor: AppColors.background,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 12,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: AppColors.outlineVariant),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                    ),
+        children: [
+          // Search
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: InputDecoration(
+                hintText: l10n?.searchHousehold ?? 'Household search',
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: AppColors.background,
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.outlineVariant),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
-
-                // Padding(
-                //   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                //   child: Align(
-                //     alignment: Alignment.centerLeft,
-                //     child: Text(
-                //       'Total Households: ${_items.length}',
-                //       style: const TextStyle(
-                //         fontWeight: FontWeight.w600,
-                //         color: Colors.black87,
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                Expanded(
-                  child: _filtered.isEmpty
-                      ? Center(
-                          child: Text(
-                            (l10n?.noDataFound ?? 'No data found'),
-                            style: const TextStyle(
-                              color: Colors.black54,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                          itemCount: _filtered.length,
-                          itemBuilder: (context, index) {
-                            final data = _filtered[index];
-                            return _householdCard(context, data);
-                          },
-                        ),
-                ),
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12.0,
-                      vertical: 8,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 35,
-                      child: RoundButton(
-                        title:
-                            l10n?.newHouseholdRegistration ??
-                            'NEW HOUSEHOLD REGISTRATION',
-                        color: AppColors.primary,
-                        borderRadius: 8,
-                        height: 6.h,
-                        onPress: () {
-                          Navigator.pushNamed(
-                            context,
-                            Route_Names.RegisterNewHousehold,
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
+          ),
+
+          // Padding(
+          //   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          //   child: Align(
+          //     alignment: Alignment.centerLeft,
+          //     child: Text(
+          //       'Total Households: ${_items.length}',
+          //       style: const TextStyle(
+          //         fontWeight: FontWeight.w600,
+          //         color: Colors.black87,
+          //       ),
+          //     ),
+          //   ),
+          // ),
+          Expanded(
+            child: _filtered.isEmpty
+                ? Center(
+              child: Text(
+                (l10n?.noDataFound ?? 'No data found'),
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+                : ListView.builder(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              itemCount: _filtered.length,
+              itemBuilder: (context, index) {
+                final data = _filtered[index];
+                return _householdCard(context, data);
+              },
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12.0,
+                vertical: 8,
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                height: 35,
+                child: RoundButton(
+                  title:
+                  l10n?.newHouseholdRegistration ??
+                      'NEW HOUSEHOLD REGISTRATION',
+                  color: AppColors.primary,
+                  borderRadius: 8,
+                  height: 6.h,
+                  onPress: () {
+                    Navigator.pushNamed(
+                      context,
+                      Route_Names.RegisterNewHousehold,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -688,9 +748,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                       Expanded(
                           child:
                           _rowText(l10n?.thName ?? 'Name', data['name'])),
-                               const SizedBox(width: 8),
-                               Expanded(
-                                 child: _rowText(
+                      const SizedBox(width: 8),
+                      Expanded(
+                          child: _rowText(
                               l10n?.mobileLabelSimple ?? 'Mobile no.',
                               data['mobile'])),
                       const SizedBox(width: 8),
@@ -708,9 +768,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                           child: _rowText(
                               l10n?.eligibleCouples ?? 'Eligible couples',
                               data['eligibleCouples'].toString())),
-                              const SizedBox(width: 8),
-                           Expanded(
-                           child: _rowText(
+                      const SizedBox(width: 8),
+                      Expanded(
+                          child: _rowText(
                               l10n?.pregnantWomen ?? 'Pregnant women',
                               data['pregnantWomen'].toString())),
                       const SizedBox(width: 8),

@@ -1396,7 +1396,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get help => 'सहायता';
 
   @override
-  String get helpInstructions => 'किसी भी तरह की मदद और सहायता के लिए नीचे हेल्प नंबरों पर कॉल करें।';
+  String get helpInstructions => 'किसी भी तरह की मदद और सहायता के लिए कृपया नीचे दिए गए हेल्प नंबरों पर कॉल करें।';
 
   @override
   String get hemoglobinLabel => 'हीमोग्लोबिन (एच.बी)';
