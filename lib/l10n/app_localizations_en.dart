@@ -1947,7 +1947,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reenterPasswordTooShort => 'Password must be at least 6 characters';
 
   @override
-  String get registrationDateLabel => 'Registration Date';
+  String get registrationDateLabel => 'Date of registration';
 
   @override
   String get registrationThroughTitle => 'Registration through';
@@ -2574,7 +2574,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rchIdChildLabel => 'RCH ID (Child)';
 
   @override
-  String get rchChildSerialHint => 'Serial number of the child in the RCH register';
+  String get rchChildSerialHint => 'Sr. no of the child in RCH register';
 
   @override
   String get dateOfBirthLabel => 'Date of Birth *';

@@ -68,19 +68,10 @@ class RegisterChildFormBloc extends Bloc<RegisterChildFormEvent, RegisterChildFo
     if (state.motherName.isEmpty) missing.add("Mother's name");
     if (state.mobileNumber.isEmpty) missing.add('Mobile number');
     
-    // Validate religion
-    if (state.religion.isEmpty) {
-      missing.add('Religion');
-    } else if (state.religion == 'Other' && state.customReligion.trim().isEmpty) {
-      missing.add('Please specify your religion');
-    }
+
     
     // Validate caste/category
-    if (state.caste.isEmpty) {
-      missing.add('Category');
-    } else if (state.caste == 'Other' && state.customCaste.trim().isEmpty) {
-      missing.add('Please specify your category');
-    }
+
 
     if (missing.isNotEmpty) {
       emit(state.copyWith(error: 'Please fill: ' + missing.join(', ')));

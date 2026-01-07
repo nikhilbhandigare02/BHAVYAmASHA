@@ -341,7 +341,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ashaIdHint => 'A10000555';
 
   @override
-  String get ashaIdLabel => 'आशा आईडी';
+  String get ashaIdLabel => 'आशा आई.डी';
 
   @override
   String get ashaNameHint => 'आशा का नाम';

@@ -1052,6 +1052,7 @@ class _RegisterChildDueListFormScreen
                                 labelText: "${l10n?.mobileNumberLabel} *" ??
                                     'Mobile number *',
                                 hintText: l10n?.enter10DigitMobileNumber,
+                                maxLength: 10,
                                 initialValue: state.mobileNumber,
                                 keyboardType: TextInputType.phone,
                                 onChanged: (v) =>
@@ -1263,6 +1264,7 @@ class _RegisterChildDueListFormScreen
                                       }
                                     },
                                     hintText: l10n?.select ?? 'choose',
+                                    readOnly: (_beneficiaryData?.religion?.isNotEmpty ?? false) || (_beneficiaryData?.otherReligion?.isNotEmpty ?? false),
                                   ),
                                   Divider(
                                       color: AppColors.divider,
@@ -1272,13 +1274,23 @@ class _RegisterChildDueListFormScreen
                                     Padding(
                                       padding:
                                       const EdgeInsets.only(top: 8.0),
-                                      child: CustomTextField(
-                                        labelText: l10n?.specifyReligionLabel,
-                                        hintText: l10n?.enterReligion,
-                                        initialValue: state.customReligion,
-                                        onChanged: (v) =>
-                                            bloc.add(CustomReligionChanged(v)),
-                                      ),
+                                      child: (_beneficiaryData?.otherReligion?.isNotEmpty ?? false)
+                                          ? Opacity(
+                                              opacity: 0.7,
+                                              child: CustomTextField(
+                                                labelText: l10n?.specifyReligionLabel,
+                                                hintText: l10n?.enterReligion,
+                                                initialValue: state.customReligion,
+                                                readOnly: true,
+                                                onChanged: (v) => bloc.add(CustomReligionChanged(v)),
+                                              ),
+                                            )
+                                          : CustomTextField(
+                                              labelText: l10n?.specifyReligionLabel,
+                                              hintText: l10n?.enterReligion,
+                                              initialValue: state.customReligion,
+                                              onChanged: (v) => bloc.add(CustomReligionChanged(v)),
+                                            ),
                                     ),
                                 ],
                               ),
@@ -1347,6 +1359,7 @@ class _RegisterChildDueListFormScreen
                                       }
                                     },
                                     hintText: l10n!.select ?? 'choose',
+                                    readOnly: (_beneficiaryData?.socialClass?.isNotEmpty ?? false) || (_beneficiaryData?.otherCategory?.isNotEmpty ?? false),
                                   ),
                                   Divider(
                                       color: AppColors.divider,
@@ -1356,13 +1369,23 @@ class _RegisterChildDueListFormScreen
                                     Padding(
                                       padding:
                                       const EdgeInsets.only(top: 8.0),
-                                      child: CustomTextField(
-                                        labelText: l10n.specifyCategoryShort,
-                                        hintText: l10n.enter_category,
-                                        initialValue: state.customCaste,
-                                        onChanged: (v) =>
-                                            bloc.add(CustomCasteChanged(v)),
-                                      ),
+                                      child: (_beneficiaryData?.otherCategory?.isNotEmpty ?? false)
+                                          ? Opacity(
+                                              opacity: 0.7,
+                                              child: CustomTextField(
+                                                labelText: l10n.specifyCategoryShort,
+                                                hintText: l10n.enter_category,
+                                                initialValue: state.customCaste,
+                                                readOnly: true,
+                                                onChanged: (v) => bloc.add(CustomCasteChanged(v)),
+                                              ),
+                                            )
+                                          : CustomTextField(
+                                              labelText: l10n.specifyCategoryShort,
+                                              hintText: l10n.enter_category,
+                                              initialValue: state.customCaste,
+                                              onChanged: (v) => bloc.add(CustomCasteChanged(v)),
+                                            ),
                                     ),
                                 ],
                               ),
