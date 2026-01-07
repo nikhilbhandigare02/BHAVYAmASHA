@@ -138,6 +138,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         beneficiaries.add({
           'hhId': hhId,
           'unique_key': uniqueKey,
+          'created_date_time': createdDate,
           'RegitrationDate': createdDate,
           'RegitrationType': registrationType,
           'BeneficiaryID': beneficiaryId,
@@ -183,15 +184,29 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
       print('=== End Processing ===\n');
 
-      // 🔃 Sort by registration date (latest first)
+      // 🔃 Sort by created_date_time (latest first) - using original database field
       beneficiaries.sort((a, b) {
-        final da = DateTime.tryParse(
-            (a['RegitrationDate'] ?? '').toString());
-        final db = DateTime.tryParse(
-            (b['RegitrationDate'] ?? '').toString());
+        final String dateStrA = (a['created_date_time'] ?? '').toString();
+        final String dateStrB = (b['created_date_time'] ?? '').toString();
+        
+        // Try to parse dates
+        final DateTime? da = DateTime.tryParse(dateStrA);
+        final DateTime? db = DateTime.tryParse(dateStrB);
+        
+        // Handle different cases:
+        // 1. Both dates valid - sort descending (newest first)
         if (da != null && db != null) {
-          return db.compareTo(da);
+          return db.compareTo(da); // descending order
         }
+        // 2. Only A has valid date - A comes first
+        if (da != null && db == null) {
+          return -1;
+        }
+        // 3. Only B has valid date - B comes first  
+        if (da == null && db != null) {
+          return 1;
+        }
+        // 4. Both dates invalid - maintain original order or sort by ID
         return 0;
       });
 

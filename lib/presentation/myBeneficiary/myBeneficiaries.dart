@@ -272,11 +272,13 @@ LEFT JOIN LatestANC a
     try {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
-      if (currentUserKey.isEmpty) return 0;
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) return 0;
 
       final query = '''
-        SELECT DISTINCT b.*, e.eligible_couple_state 
+        SELECT DISTINCT b.*, e.eligible_couple_state, 
+               e.created_date_time as registration_date
         FROM beneficiaries_new b
         INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
         WHERE b.is_deleted = 0 
@@ -284,31 +286,32 @@ LEFT JOIN LatestANC a
           AND e.eligible_couple_state = 'eligible_couple'
           AND e.is_deleted = 0
           AND e.current_user_key = ?
-        ORDER BY b.created_date_time DESC
       ''';
 
-      final rows = await db.rawQuery(query, [currentUserKey]);
-      if (rows.isEmpty) return 0;
-
+      final rows = await db.rawQuery(query, [ashaUniqueKey]);
+      
       int count = 0;
       for (final row in rows) {
         try {
-          final Map<String, dynamic> mappedRow = Map<String, dynamic>.from(row);
-          Map<String, dynamic> info = {};
-          try {
-            info = jsonDecode(mappedRow['beneficiary_info'] ?? '{}');
-          } catch (_) {}
-          final gender = (info['gender']?.toString().toLowerCase() ?? '');
-          if (gender == 'male') continue;
+          final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
+          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty 
+              ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfo))
+              : <String, dynamic>{};
+          
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          if (memberType != 'child') {
+            count++;
+          }
+        } catch (_) {
           count++;
-        } catch (_) {}
+        }
       }
+      
       return count;
-    } catch (_) {
+    } catch (e) {
       return 0;
     }
   }
-
   Future<int> _getPregnantWomenCount() async {
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();

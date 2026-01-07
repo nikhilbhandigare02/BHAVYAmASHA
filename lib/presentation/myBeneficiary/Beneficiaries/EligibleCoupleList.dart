@@ -36,9 +36,9 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
       final db = await DatabaseProvider.instance.database;
 
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
-
-      if (currentUserKey.isEmpty) {
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
         setState(() {
           _filtered = [];
         });
@@ -46,7 +46,8 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
       }
 
       final query = '''
-        SELECT DISTINCT b.*, e.eligible_couple_state 
+        SELECT DISTINCT b.*, e.eligible_couple_state, 
+               e.created_date_time as registration_date
         FROM beneficiaries_new b
         INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
         WHERE b.is_deleted = 0 
@@ -57,45 +58,67 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
         ORDER BY b.created_date_time DESC
       ''';
 
-      final rows = await db.rawQuery(query, [currentUserKey]);
+      print('Executing query: $query');
+      print('With param: $ashaUniqueKey');
+      
+      final rows = await db.rawQuery(query, [ashaUniqueKey]);
+      print('Found ${rows.length} eligible couples');
+      
       if (rows.isEmpty) {
+        print('No eligible couples found for current user');
         setState(() {
           _filtered = [];
         });
         return;
       }
-
+      
       final filteredRows = rows.map((row) {
         final Map<String, dynamic> mappedRow = Map<String, dynamic>.from(row);
+        
         try {
           mappedRow['beneficiary_info'] = jsonDecode(mappedRow['beneficiary_info'] ?? '{}');
-        } catch (_) {}
+          mappedRow['geo_location'] = jsonDecode(mappedRow['geo_location'] ?? '{}');
+          mappedRow['device_details'] = jsonDecode(mappedRow['device_details'] ?? '{}');
+          mappedRow['app_details'] = jsonDecode(mappedRow['app_details'] ?? '{}');
+          mappedRow['parent_user'] = jsonDecode(mappedRow['parent_user'] ?? '{}');
+        } catch (e) {
+          print('Error parsing JSON fields: $e');
+        }
+        
         return mappedRow;
       }).toList();
+      
+      print('Processed ${filteredRows.length} rows');
 
       final couples = <Map<String, dynamic>>[];
+
+      // Process each eligible row
       for (final member in filteredRows) {
-        final infoRaw = member['beneficiary_info'];
-        final info = infoRaw is Map<String, dynamic> ? infoRaw : <String, dynamic>{};
-        final gender = (info['gender']?.toString().toLowerCase() ?? '');
-        if (gender == 'male') {
+        final info = _toStringMap(member['beneficiary_info']);
+        final memberUniqueKey = member['unique_key']?.toString() ?? '';
+        
+        // Check memberType and skip if child
+        final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+        if (memberType == 'child') {
+          print('Skipping child record: $memberUniqueKey');
           continue;
         }
-        final hhId = member['household_ref_key']?.toString() ?? '';
-        final name = info['memberName']?.toString() ?? info['headName']?.toString() ?? 'Unknown';
-        final ageGender = _formatAgeGender(info['dob'], info['gender']);
-        couples.add({
-          'hhId': hhId,
-          'name': name,
-          'age_gender': ageGender,
-          'status': 'Eligible Couple',
-        });
+
+        couples.add(_formatCoupleData(
+          _toStringMap(member),
+          info,
+          <String, dynamic>{}, // Empty counterpart
+          isHead: false,
+        ));
       }
 
+      print('Final couples list contains ${couples.length} items');
       setState(() {
         _filtered = couples;
       });
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Error in _loadEligibleCouples: $e');
+      print('Stack trace: $stackTrace');
       setState(() {
         _filtered = [];
       });
@@ -129,25 +152,6 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
     }
   }
 
-  String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
-    String age = 'N/A';
-    String gender = (genderRaw?.toString().toLowerCase() ?? '');
-    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
-      DateTime? dob;
-      try {
-        dob = DateTime.tryParse(dobRaw.toString());
-      } catch (_) {}
-      if (dob != null) {
-        age = '${DateTime.now().difference(dob).inDays ~/ 365}';
-      }
-    }
-    String displayGender = gender == 'm' || gender == 'male'
-        ? 'Male'
-        : gender == 'f' || gender == 'female'
-            ? 'Female'
-            : 'Other';
-    return '$age Y | $displayGender';
-  }
 
   @override
   void dispose() {
@@ -321,4 +325,57 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
       ),
     );
   }
+
+  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead}) {
+    final hhId = row['household_ref_key']?.toString() ?? '';
+    final uniqueKey = row['unique_key']?.toString() ?? '';
+    final createdDate = row['registration_date']?.toString() ?? '';
+    final info = _toStringMap(row['beneficiary_info']);
+    final head = _toStringMap(info['head_details']);
+    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
+    final gender = female['gender']?.toString().toLowerCase();
+    final displayGender = gender?.isNotEmpty == true ? gender![0].toUpperCase() + gender!.substring(1) : 'Not Available';
+    final age = _calculateAge(female['dob']);
+    final richId = female['RichID']?.toString() ?? female['richId']?.toString() ?? '';
+
+    return {
+      'hhId': hhId,
+      'unique_key': uniqueKey,
+      'RegistrationDate': _formatDate(createdDate),
+      'RegistrationType': 'Eligible Couple',
+      'BeneficiaryID': uniqueKey,
+      'RCH ID': richId,
+      'name': name,  // Changed from 'Name' to 'name'
+      'age_gender': '$age Y | $displayGender',  // Changed from 'age' to 'age_gender'
+      'Age': '$displayGender | $age',
+      'RCHID': richId,
+    };
+  }
+
+  Map<String, dynamic> _toStringMap(dynamic value) {
+    if (value == null) return {};
+    if (value is Map) {
+      return Map<String, dynamic>.from(value);
+    }
+    if (value is String) {
+      try {
+        return Map<String, dynamic>.from(jsonDecode(value));
+      } catch (_) {
+        return {};
+      }
+    }
+    return {};
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'Not Available';
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+
 }

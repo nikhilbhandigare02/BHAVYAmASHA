@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:medixcel_new/data/Database/local_storage_dao.dart';
+import 'package:medixcel_new/data/Database/database_provider.dart';
+import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
@@ -82,8 +84,27 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final households = await LocalStorageDao.instance.getAllHouseholds();
-      final ecActivities = await LocalStorageDao.instance.getEligibleCoupleActivities();
+      
+      // Query households directly with JOIN to only get households where head_id matches a beneficiary
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
+      
+      final households = await db.rawQuery('''
+        SELECT h.* FROM households h
+        INNER JOIN beneficiaries_new b ON h.head_id = b.unique_key
+        WHERE h.is_deleted = 0 
+          AND h.current_user_key = ?
+          AND b.is_deleted = 0
+        ORDER BY h.created_date_time DESC
+      ''', [currentUserKey]);
+      
+      // Query database directly to get ALL eligible couple activities records
+      final ecActivities = await db.rawQuery('''
+        SELECT * FROM eligible_couple_activities 
+        WHERE current_user_key = ?
+        ORDER BY created_date_time ASC
+      ''', [currentUserKey]);
 
       final pregnantCountMap = <String, int>{};
       final elderlyCountMap = <String, int>{};
@@ -103,24 +124,13 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         } catch (_) {}
       }
 
-      /// --------- ELIGIBLE COUPLE COUNTS (DISTINCT BENEFICIARIES) ----------
-      final Set<String> _distinctEcKeys = <String>{};
+      /// --------- ELIGIBLE COUPLE COUNTS (ALL RECORDS) ----------
       for (final ec in ecActivities) {
         try {
           final hhKey = (ec['household_ref_key'] ?? '').toString();
           if (hhKey.isEmpty) continue;
 
-          final state = (ec['eligible_couple_state'] ?? '').toString();
-          if (state != 'eligible_couple') continue;
-
-          final beneficiaryKey = (ec['beneficiary_ref_key'] ?? '').toString();
-          if (beneficiaryKey.isEmpty) continue;
-
-
-          final uniqueKey = '$hhKey::$beneficiaryKey';
-          if (_distinctEcKeys.contains(uniqueKey)) continue;
-          _distinctEcKeys.add(uniqueKey);
-
+          // Count all eligible_couple_activities records regardless of state or deletion status
           eligibleCoupleTrackingDueCountMap[hhKey] =
               (eligibleCoupleTrackingDueCountMap[hhKey] ?? 0) + 1;
         } catch (_) {}

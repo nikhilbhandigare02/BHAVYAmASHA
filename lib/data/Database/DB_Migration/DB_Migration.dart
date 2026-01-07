@@ -38,22 +38,93 @@ class DbMigration {
   }
 
 
- static String toCamelCase(String key) {
-    if (!key.contains('_')) return key;
-    final parts = key.split('_');
-    return parts.first +
-        parts
-            .skip(1)
-            .map((e) => e.isNotEmpty
-            ? e[0].toUpperCase() + e.substring(1)
-            : '')
-            .join();
-  }
+  final Map<String, String> keyMapping = {
+    "beneficiaryType": "type_of_beneficiary",
 
+    // 🔹 Basic identity
+    "memberType": "ben_type",
+    "relation": "relaton_with_family_head",
+    "relation_to_head": "relaton_with_family_head",
+    "name": "member_name",
+    "memberName": "member_name",
+    "motherName": "mother_name",
+    "headName": "mother_name",
+    "fatherName": "father_name",
+    "spouseName": "father_or_spouse_name",
+
+    // 🔹 Age / DOB
+    "dob": "date_of_birth",
+    "dob_day": "dob_day",
+    "dob_month": "dob_month",
+    "dob_year": "dob_year",
+    "approxAge": "formated_age",
+    "years": "dob_year",
+    "months": "dob_month",
+    "days": "dob_day",
+    "birthOrder": "birth_order",
+
+    // 🔹 Contact details
+    "mobileNo": "mobile_no",
+    "mobileOwner": "whose_mob_no",
+
+    // 🔹 Marriage
+    "maritalStatus": "marital_status",
+    "ageAtMarriage": "age_at_marrige",
+
+    // 🔹 Gender
+    "gender": "gender",
+
+    // 🔹 Education / Work
+    "education": "education",
+    "occupation": "occupation",
+
+    // 🔹 Social identity
+    "religion": "religion",
+    "category": "category",
+
+    // 🔹 Children
+    "hasChildren": "have_children",
+    "children": "total_children",
+
+    // 🔹 Pregnancy / Women-specific
+    "isPregnant": "is_pregnant",
+    "lmp": "lmp",
+    "edd": "edd",
+
+    // 🔹 Address
+    "houseNo": "house_no",
+    "village": "village_name",
+    "ward": "ward_name",
+    "wardNo": "ward_no",
+    "mohalla": "mohalla_name",
+    "mohallaTola": "mohalla_name",
+
+    // 🔹 ABHA / Health IDs
+    "abhaNumber": "abha_no",
+    "personalHealthId": "personal_health_id",
+    "phId": "personal_health_id",
+
+    // 🔹 Banking
+    "bankAccountNumber": "account_number",
+    "ifscCode": "ifsc_code",
+
+    // 🔹 Voter & Ration
+    "voterId": "voter_id",
+    "rationCardId": "ration_card_id",
+
+    // 🔹 Status
+    "memberStatus": "member_status",
+    "totalBorn":"total_children",
+    "totalLive": "total_live_children",
+    "totalMale": "total_male_children",
+    "totalFemale": "total_female_children",
+    "youngestAge": "age_of_youngest_child",
+    "ageUnit": "gender_of_younget_child",
+    "youngestGender": "age_of_youngest_child_unit",
+  };
   static Future<void> runBeneficiaryTableMigration(Database db) async {
     try {
-      final List<Map<String, dynamic>> oldRows =
-      await db.query("beneficiaries");
+      final List<Map<String, dynamic>> oldRows = await db.query("beneficiaries");
 
       const List<String> beneficiaryKeys = [
         "houseNo",
@@ -104,13 +175,11 @@ class DbMigration {
         "isFamilyheadWife",
         "weight",
         "birthWeight",
-        "total_live_children",
-        "total_male_children",
-        "total_female_children",
-        "age_of_youngest_child",
-        "gender_of_younget_child",
-        "age_of_youngest_child_unit",
+        "totalBorn","totalLive","totalMale","totalFemale","youngestAge","ageUnit","youngestGender",
+
       ];
+      // weight
+      // weight_at_birth
 
       final Map<String, String> keyMapping = {
         "beneficiaryType": "type_of_beneficiary",
@@ -159,21 +228,19 @@ class DbMigration {
         "isFamilyheadWife": "isFamilyheadWife",
         "weight": "weight",
         "birthWeight": "weight_at_birth",
-        "total_live_children": "total_live_children",
-        "total_male_children": "total_male_children",
-        "total_female_children": "total_female_children",
-        "age_of_youngest_child": "age_of_youngest_child",
-        "gender_of_younget_child": "gender_of_younget_child",
-        "age_of_youngest_child_unit": "age_of_youngest_child_unit",
+        "totalBorn": "total_children",
+        "totalLive": "total_live_children",
+        "totalMale": "total_male_children",
+        "totalFemale": "total_female_children",
+        "youngestAge": "age_of_youngest_child",
+        "ageUnit": "age_of_youngest_child_unit",
+        "youngestGender": "gender_of_youngest_child",
       };
 
       for (final row in oldRows) {
-        final form = row["form_json"] != null
-            ? jsonDecode(row["form_json"])
-            : <String, dynamic>{};
+        final form = row["form_json"] != null ? jsonDecode(row["form_json"]) : {};
 
         final Map<String, dynamic> finalJson = {};
-
         for (final key in beneficiaryKeys) {
           if (form[key] != null &&
               form[key].toString().isNotEmpty &&
@@ -192,36 +259,47 @@ class DbMigration {
           }
         }
 
-        int isDeath = row["is_death"] == 1 ? 1 : 0;
-        int isMigrated = row["is_migrated"] == 1 ? 1 : 0;
+        // First, get the direct column values from the old database
+        int isDeath = (row["is_death"] == 1) ? 1 : 0;
+        int isMigrated = (row["is_migrated"] == 1) ? 1 : 0;
 
-        final rawDeathDate =
+        dynamic resolvedDeathDate;
+
+        final dynamic rawDeathDate =
             row["date_of_death"] ?? form["date_of_death"];
 
-        final resolvedDeathDate =
-        rawDeathDate != null && rawDeathDate.toString().isNotEmpty
-            ? rawDeathDate
-            : row["created_date_time"];
-
+        if (rawDeathDate != null &&
+            rawDeathDate.toString().trim().isNotEmpty &&
+            rawDeathDate.toString() != "null") {
+          resolvedDeathDate = rawDeathDate;
+        } else {
+          resolvedDeathDate = row["created_date_time"];
+        }
         Map<String, dynamic>? deathDetailsMap;
 
-        final reasonOfCloser =
+        final String reasonOfCloser =
         (row["reason_of_closer"] ?? form["reason_of_closer"] ?? "")
             .toString()
+            .trim()
             .toLowerCase();
 
         if (reasonOfCloser.isNotEmpty) {
           deathDetailsMap = {
-            "reasonOfCloser": reasonOfCloser,
-            "dateOfDeath": resolvedDeathDate,
-            "causeOfDeath": row["cause_of_death"] ?? form["cause_of_death"],
-            "deathPlace": row["death_place"] ?? form["death_place"],
+            "reason_of_closer": reasonOfCloser,
+            "date_of_death": resolvedDeathDate,
+            "cause_of_death": row["cause_of_death"] ?? form["cause_of_death"],
+            "death_place": row["death_place"] ?? form["death_place"],
             "remark": form["remark"],
           };
 
-          if (reasonOfCloser == "death") isDeath = 1;
-          if (reasonOfCloser == "migration") isMigrated = 1;
+          if (reasonOfCloser == "death") {
+            isDeath = 1;
+          } else if (reasonOfCloser == "migrate_out" || reasonOfCloser == "migration") {
+            isMigrated = 1;
+          }
         }
+
+
 
         final existing = await db.query(
           "beneficiaries_new",
@@ -229,44 +307,59 @@ class DbMigration {
           whereArgs: [row["unique_key"]],
         );
 
-        if (existing.isNotEmpty) continue;
+        if (existing.isEmpty) {
+          final Map<String, dynamic> insertData = {
+            "server_id": row["_id"],
+            "household_ref_key": row["household_registrations_ref_key"],
+            "unique_key": row["unique_key"],
+            "beneficiary_info": jsonEncode(finalJson),
+            "spouse_key": row["spouse_ben_key"],
+            "mother_key": row["mother_ben_key"],
+            "father_key": row["father_ben_key"],
+            "is_family_planning": row["is_family_planning"],
+            "is_adult": row["is_adult"],
+            "is_guest": row["is_guest"],
+            "is_death": isDeath,
+            "death_details": deathDetailsMap != null ? jsonEncode(deathDetailsMap) : null,
+            "is_migrated": isMigrated,
+            "current_user_key": row["added_by"],
+            "created_date_time": row["created_date_time"],
+            "modified_date_time": row["modified_date_time"],
+            "is_synced": row["is_synced"],
+            "is_deleted": row["is_deleted"],
+            "is_separated": row["is_separated"],
+          };
 
-        /// 🔥 Convert beneficiary_info keys to camelCase
-        final Map<String, dynamic> camelCaseJson = {
-          for (final e in finalJson.entries)
-            toCamelCase(e.key): e.value
-        };
+          // Print the data being inserted
+          print('\n📌 Inserting beneficiary:');
+          print('----------------------------------------');
+          print('🔑 Unique Key: ${insertData['unique_key']}');
+          print('🏠 Household Ref: ${insertData['household_ref_key']}');
+          print('👤 Name: ${finalJson['name'] ?? finalJson['member_name']}');
+          print('👨‍👩‍👧‍👦 Relation: ${finalJson['relation'] ?? finalJson['relaton_with_family_head']}');
+          print('🎂 DOB: ${finalJson['dob']}');
+          print('📱 Mobile: ${finalJson['mobileNo']}');
+          print('💀 Is Death: ${insertData['is_death']}');
+          print('✈️ Is Migrated: ${insertData['is_migrated']}');
+          if (deathDetailsMap != null) {
+            print('⚰️ Death Details:');
+            deathDetailsMap.forEach((key, value) {
+              if (value != null) print('   • $key: $value');
+            });
+          }
+          print('----------------------------------------\n');
 
-        await db.insert("beneficiaries_new", {
-          "server_id": row["_id"],
-          "household_ref_key": row["household_registrations_ref_key"],
-          "unique_key": row["unique_key"],
-          "beneficiary_info": jsonEncode(camelCaseJson),
-          "spouse_key": row["spouse_ben_key"],
-          "mother_key": row["mother_ben_key"],
-          "father_key": row["father_ben_key"],
-          "is_family_planning": row["is_family_planning"],
-          "is_adult": row["is_adult"],
-          "is_guest": row["is_guest"],
-          "is_death": isDeath,
-          "death_details":
-          deathDetailsMap != null ? jsonEncode(deathDetailsMap) : null,
-          "is_migrated": isMigrated,
-          "current_user_key": row["added_by"],
-          "created_date_time": row["created_date_time"],
-          "modified_date_time": row["modified_date_time"],
-          "is_synced": row["is_synced"],
-          "is_deleted": row["is_deleted"],
-          "is_separated": row["is_separated"],
-        });
+          await db.insert("beneficiaries_new", insertData);
+        }
       }
 
-      print("✅ Beneficiary migration completed with camelCase JSON");
+      print("✅ Beneficiary migration completed (old table driven)");
     } catch (e, st) {
       print("❌ Beneficiary Migration Error: $e");
       print(st);
     }
   }
+
 
   static Future<void> runHouseholdTableMigration(Database db) async {
     final households = await db.query("household_registrations");
@@ -391,6 +484,7 @@ class DbMigration {
         a.created_by,
         a.modified_date_time,
 
+        -- JSON object for parent_user
         ('{' ||
           '"app_role_id":' || ifnull(a.app_role_id, 0) ||
           ',"is_guest":' || ifnull(a.is_guest, 0) ||
