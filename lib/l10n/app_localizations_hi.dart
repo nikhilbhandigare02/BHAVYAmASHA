@@ -383,7 +383,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get bcmNameLabel => 'ब्लॉक कम्युनिटी मोबिलाइज़र का नाम';
 
   @override
-  String get beneficiaryAbsentLabel => 'क्या लाभार्थी अनुपस्थित है?';
+  String get beneficiaryAbsentLabel => 'क्या लाभार्थी घर में नहीं है?';
 
   @override
   String get beneficiaryIdLabel => 'लाभार्थी आईडी';
@@ -1315,10 +1315,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hbncListTitle => 'एचबीएनसी सूची';
 
   @override
-  String get hbncMotherTitle => 'HBNC माता';
+  String get hbncMotherTitle => 'एचबीएनसी माता';
 
   @override
-  String get hbycAdviceAdministeringIfaSyrupLabel => 'आयरन फोलिक एसिड सिरप देने पर सलाह';
+  String get hbycAdviceAdministeringIfaSyrupLabel => 'आयरन फोलिक एसिड सिरप पिलाने के बारे में परामर्श';
 
   @override
   String get hbycAdviceComplementaryFoodsLabel => 'पूरक आहार शुरू करने पर सलाह';
@@ -1330,7 +1330,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hbycAdviceParentingSupportLabel => 'पेरेंटिंग (पालन-पोषण) सहायता पर सलाह';
 
   @override
-  String get hbycAdvicePreparingAdministeringOrsLabel => 'ओआरएस तैयार करने और देने पर सलाह';
+  String get hbycAdvicePreparingAdministeringOrsLabel => 'ओआरएस घोल बनाने के बारे में परामर्श';
 
   @override
   String get hbycBhramanLabel => 'HBYC भ्रमण*';
@@ -1345,7 +1345,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hbycCompleteDietProvidedLabel => 'क्या पूर्ण आहार दिया गया?';
 
   @override
-  String get hbycCompletionDateLabel => 'गतिविधियों की पूर्णता तिथि';
+  String get hbycCompletionDateLabel => 'गतिविधियों की पूर्ण होने की तिथि';
 
   @override
   String get hbycCounselingExclusiveBf6mLabel => 'छः माह तक केवल स्तनपान पर परामर्श';
@@ -1357,10 +1357,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hbycDevelopmentDelaysObservedLabel => 'क्या शारीरिक/मानसिक विकास में देरी/बाधाएँ देखी गईं?';
 
   @override
-  String get hbycFullyVaccinatedLabel => 'क्या MCP कार्ड के अनुसार पूर्ण टीकाकरण हुआ?';
+  String get hbycFullyVaccinatedLabel => 'क्या एमसीपी कार्ड के अनुसार पूर्ण टीकाकरण हुआ?';
 
   @override
-  String get hbycIronFolicSyrupAvailableLabel => 'क्या घर में आयरन फोलिक एसिड सिरप उपलब्ध है?';
+  String get hbycIronFolicSyrupAvailableLabel => 'आयरन फोलिक एसिड सिरप घर में  उपलब्ध है?';
 
   @override
   String get hbycIsChildSickLabel => 'क्या बच्चा बीमार है?';
@@ -1372,22 +1372,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hbycListTitle => 'एचबीवाईसी सूची';
 
   @override
-  String get hbycMeaslesVaccineGivenLabel => 'क्या खसरा (Measles) टीका (MCP कार्ड) हुआ?';
+  String get hbycMeaslesVaccineGivenLabel => 'एमसीपी कार्ड में उल्लिखित खसरा (खसरा) का टीका बच्चे को दिया गया है?';
 
   @override
-  String get hbycOrsPacketAvailableLabel => 'क्या घर में ORS पैकेट उपलब्ध है?';
+  String get hbycOrsPacketAvailableLabel => 'ओआरएस पैकेट घर में उपलब्ध है?';
 
   @override
   String get hbycTitleDetails => 'विवरण';
 
   @override
-  String get hbycVitaminADosageGivenLabel => 'क्या MCP कार्ड के अनुसार विटामिन-A खुराक दी गई?';
+  String get hbycVitaminADosageGivenLabel => 'एमसीपी कार्ड में उल्लिखित विटामिन-ए की खुराक बच्चे को दिया गया है?';
 
   @override
-  String get hbycWeighedByAwwLabel => 'क्या बच्चे का वजन आयु के आधार पर आंगनवाड़ी कार्यकर्ता द्वारा लिया गया?';
+  String get hbycWeighedByAwwLabel => 'बच्चे का आंगनवाड़ी कार्यकर्ता द्वारा वजन किया गया है?';
 
   @override
-  String get hbycWeightLessThan3sdLabel => 'क्या MCP कार्ड अनुसार वजन < 3 SD होने पर रेफ़र किया गया?';
+  String get hbycWeightLessThan3sdLabel => 'क्या एमसीपी कार्ड में अंकित माप/ऊँचाई के अनुसार वजन -3 एसडी से कम वजन वाले बच्चे को रेफ़र किया गया?';
 
   @override
   String get healthWorkerLabel => 'स्वास्थ्य कार्यकर्ता';
@@ -1734,7 +1734,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get mother => 'माँ का';
 
   @override
-  String get motherAncVisitTitle => 'एएनसी विज़िट';
+  String get motherAncVisitTitle => 'एएनसी दौरे';
 
   @override
   String get motherInLaw => 'सास का';
@@ -5413,7 +5413,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get reasonForAbsent => 'अनुपस्थिति का कारण';
 
   @override
-  String get isBeneficiaryAbsent => 'क्या लाभार्थी अनुपस्थित है?';
+  String get isBeneficiaryAbsent => 'क्या लाभार्थी घर में नहीं है?';
 
   @override
   String get quantityOfMalaN => 'माला-एन (दैनिक गर्भनिरोधक गोली) की मात्रा';
@@ -6448,25 +6448,25 @@ class AppLocalizationsHi extends AppLocalizations {
   String get noHbycChildrenFound => 'कोई HBYC बच्चे नहीं मिले';
 
   @override
-  String get months3 => '3 महीने';
+  String get months3 => '3 महीने पर';
 
   @override
-  String get months6 => '6 महीने';
+  String get months6 => '6 महीने पर';
 
   @override
-  String get months9 => '9 महीने';
+  String get months9 => '9 महीने पर';
 
   @override
-  String get months12 => '12 महीने';
+  String get months12 => '12 महीने पर';
 
   @override
-  String get months15 => '15 महीने';
+  String get months15 => '15 महीने पर';
 
   @override
-  String get homeBasedCareForYoungChild => 'युवा बच्चे के लिए होम बेस्ड केयर';
+  String get homeBasedCareForYoungChild => 'छोटे बच्चे की गृह आधारित देखभाल';
 
   @override
-  String get hbycHomeVisit => 'एचबीवाईसी गृह भ्रमण? *';
+  String get hbycHomeVisit => 'एचबीवाईसी भ्रमण? *';
 
   @override
   String get is_referred_to_health_facility => 'क्या नजदिकी स्वस्थ्य संस्थान पर रेफर किया गया?';
@@ -6487,13 +6487,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get foodAdvice_4 => 'एक समय में 3/4 से 1 कप/कटोरी भोजन, दिन में 3–4 बार, और भोजन के बीच 1–2 हल्के नाश्ते';
 
   @override
-  String get mentionRecordedWeightForAge => 'MCP कार्ड के अनुसार दर्ज वजन-के-अनुसार (किलोग्राम में) उल्लेख करें';
+  String get mentionRecordedWeightForAge => 'एमसीपी कार्ड के अनुसार दर्ज वजन-के-अनुसार (किलोग्राम में) उल्लेख करें';
 
   @override
   String get pleaseEnterWeightForAge => 'कृपया वजन-के-अनुसार दर्ज करें';
 
   @override
-  String get recordingWeightForLengthHeight => 'आंगनवाड़ी कार्यकर्ता द्वारा वजन-के-सापेक्ष लंबाई/ऊंचाई का रिकॉर्डिंग';
+  String get recordingWeightForLengthHeight => 'आंगनवाड़ी कार्यकर्ता द्वारा लंबाई/ऊंचाई का रिकॉर्डिंग किया गया है?';
 
   @override
   String get recorded_height => 'एमसीपी कार्ड में अंकित लम्बाई / उचाई का उल्लेख करें (सेंटीमीटर में)';
@@ -6511,7 +6511,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get isChildReferred => 'क्या बच्चे को रेफर किया गया है?';
 
   @override
-  String get immunizationStatusChecked => 'टीकाकरण स्थिति MCP कार्ड के अनुसार जाँची गई?';
+  String get immunizationStatusChecked => 'क्या बच्चे की उम्र के अनुसार एमसीपी कार्ड में उल्लिखित पूर्ण टीकाकरण हुआ है?';
 
   @override
   String get orsGiven => 'ORS दिया गया?';
@@ -6532,7 +6532,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ifaSyrupCountValidation => 'कृपया आयरन फोलिक एसिड सिरप की संख्या दर्ज करें';
 
   @override
-  String get counselExclusiveBreastfeeding => 'केवल स्तनपान के लिए परामर्श दिया गया?';
+  String get counselExclusiveBreastfeeding => 'छह माह तक केवल स्तनपान के बारे में परामर्श';
 
   @override
   String get is_counsel_for_complementary_feeding => 'पूरक आहार देने के बारे में परामर्श?';
@@ -6544,19 +6544,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get is_counsel_for_parenting => 'लालन-पालन (पालन-पोषण का समर्थन) के बारे में सलाह ?';
 
   @override
-  String get familyPlanningCounselling => 'परिवार नियोजन पर परामर्श?';
+  String get familyPlanningCounselling => 'परिवार नियोजन के बारे में परामर्श?';
 
   @override
-  String get previous => 'पीछे जाएँ';
+  String get previous => 'पिछले दौरे';
 
   @override
-  String get saveForm => 'फ़ॉर्म सहेजें';
+  String get saveForm => 'संरक्षित करें';
 
   @override
   String get child_deseased_list => 'मृत बच्चे की सूची';
 
   @override
-  String get child_deseased_search => 'मृत बच्चे खोजें';
+  String get child_deseased_search => 'मृत बच्चे की खोज';
 
   @override
   String get searchByNameIdMobile => 'नाम, आईडी या मोबाइल से खोजें';
@@ -6904,7 +6904,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get attention => 'ध्यान दें !';
 
   @override
-  String get deliveryOutcome => 'प्रसव का परिणाम ';
+  String get deliveryOutcome => 'प्रसव परिणाम ';
 
   @override
   String get formSavedSuccessfullyLabel => 'प्रपत्र सफलतापूर्वक संरक्षित कर दिया गया है |';
