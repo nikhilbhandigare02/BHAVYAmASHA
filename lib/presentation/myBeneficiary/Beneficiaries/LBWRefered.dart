@@ -265,7 +265,7 @@ class _Lbwrefered extends State<Lbwrefered> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.home, color: Colors.black54, size: 18),
+                      const Icon(Icons.home, color:AppColors.primary, size: 18),
                       const SizedBox(width: 6),
                       Text(
                         (data['beneficiaryKey']?.toString().length ?? 0) > 11 ? data['beneficiaryKey'].toString().substring(data['beneficiaryKey'].toString().length - 11) : (data['beneficiaryKey'] ?? ''),

@@ -11,6 +11,7 @@ import 'dart:convert';
 import '../../data/Database/database_provider.dart';
 import '../../data/Database/tables/child_care_activities_table.dart';
 import '../../data/Database/tables/mother_care_activities_table.dart';
+import '../../data/SecureStorage/SecureStorage.dart';
 class Misreport extends StatefulWidget {
   const Misreport({super.key});
 
@@ -65,14 +66,20 @@ class _MisreportState extends State<Misreport> {
     final now = DateTime.now();
     _selectedMonth = _months[now.month - 1];
   }
+
   Future<int> getCurrentMonthAncDueMotherCareCount() async {
     try {
       print('🔍 [getCurrentMonthAncDueMotherCareCount] Querying ANC due count (unique beneficiaries)...');
+
+      // 1. Get the current user key
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
       final db = await DatabaseProvider.instance.database;
-      final result = await db.rawQuery('''
-    SELECT COUNT(DISTINCT beneficiary_ref_key) AS total_count
-    FROM ${MotherCareActivitiesTable.table}
-    WHERE mother_care_state = ?
+
+      // 2. Prepare the WHERE clause parts
+      String whereClause = '''
+      mother_care_state = ?
       AND is_deleted = 0
       AND beneficiary_ref_key IS NOT NULL
       AND (
@@ -80,7 +87,21 @@ class _MisreportState extends State<Misreport> {
         OR
         strftime('%Y-%m', modified_date_time) = strftime('%Y-%m', 'now')
       )
-  ''', ['anc_due']);
+    ''';
+
+      List<dynamic> args = ['anc_due'];
+
+      // 3. Apply the ASHA Unique Key filter if it exists
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        whereClause += ' AND current_user_key = ?';
+        args.add(ashaUniqueKey);
+      }
+
+      final result = await db.rawQuery('''
+      SELECT COUNT(DISTINCT beneficiary_ref_key) AS total_count
+      FROM ${MotherCareActivitiesTable.table}
+      WHERE $whereClause
+    ''', args);
 
       final int count = Sqflite.firstIntValue(result) ?? 0;
 
@@ -96,37 +117,51 @@ class _MisreportState extends State<Misreport> {
   Future<Map<String, int>> getCurrentMonthChildCareDueCounts() async {
     try {
       print('🔍 [getCurrentMonthChildCareDueCounts] Querying child care due counts (state-wise total)...');
+
+      // 1. Get the current user key
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
       final db = await DatabaseProvider.instance.database;
 
-      final result = await db.rawQuery('''
-    SELECT
-      COUNT(DISTINCT CASE 
-        WHEN child_care_state = 'tracking_due'
-        THEN beneficiary_ref_key
-      END) AS tracking_due_count,
-
-      COUNT(DISTINCT CASE 
-        WHEN child_care_state = 'child_registration_due'
-        THEN beneficiary_ref_key
-      END) AS child_registration_due_count
-    FROM ${ChildCareActivitiesTable.table}
-    WHERE is_deleted = 0
+      // 2. Prepare the WHERE clause parts
+      String whereClause = '''
+      is_deleted = 0
       AND beneficiary_ref_key IS NOT NULL
       AND (
         strftime('%Y-%m', created_date_time) = strftime('%Y-%m', 'now')
         OR
         strftime('%Y-%m', modified_date_time) = strftime('%Y-%m', 'now')
       )
-  ''');
+    ''';
+
+      List<dynamic> args = [];
+
+      // 3. Apply the ASHA Unique Key filter if it exists
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        whereClause += ' AND current_user_key = ?';
+        args.add(ashaUniqueKey);
+      }
+
+      final result = await db.rawQuery('''
+      SELECT
+        COUNT(DISTINCT CASE 
+          WHEN child_care_state = 'tracking_due'
+          THEN beneficiary_ref_key
+        END) AS tracking_due_count,
+
+        COUNT(DISTINCT CASE 
+          WHEN child_care_state = 'child_registration_due'
+          THEN beneficiary_ref_key
+        END) AS child_registration_due_count
+      FROM ${ChildCareActivitiesTable.table}
+      WHERE $whereClause
+    ''', args);
 
       final row = result.isNotEmpty ? result.first : <String, Object?>{};
 
-      final int trackingDue =
-          (row['tracking_due_count'] as int?) ?? 0;
-
-      final int registrationDue =
-          (row['child_registration_due_count'] as int?) ?? 0;
-
+      final int trackingDue = (row['tracking_due_count'] as int?) ?? 0;
+      final int registrationDue = (row['child_registration_due_count'] as int?) ?? 0;
       final int total = trackingDue + registrationDue;
 
       print(
@@ -139,7 +174,7 @@ class _MisreportState extends State<Misreport> {
       return {
         'tracking_due': trackingDue,
         'child_registration_due': registrationDue,
-        'total_due': total, // 👈 explicit total
+        'total_due': total,
       };
     } catch (e, stackTrace) {
       print('❌ [getCurrentMonthChildCareDueCounts] Error: $e');
@@ -147,7 +182,6 @@ class _MisreportState extends State<Misreport> {
       rethrow;
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);

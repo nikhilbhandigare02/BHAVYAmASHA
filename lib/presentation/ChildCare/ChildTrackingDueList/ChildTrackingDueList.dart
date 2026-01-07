@@ -752,6 +752,12 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           debugPrint('❌ formData is null, cannot navigate');
           return;
         }
+// 1. Try to find 'child_registration_due' directly at the top level (Scenario 2)
+// 2. If not found, try to find it inside 'form_data' (Scenario 1)
+// 3. Default to an empty map if neither exists
+        final childRegistrationMap = formData['child_registration_due'] ??
+            formData['form_data']?['child_registration_due'] ??
+            {};
 
         final completeFormData = {
           ...formData,
@@ -768,6 +774,11 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           'rch_id': data['RchID']?.toString() ?? formData['rch_id_child'] ?? '',
           'registration_type': data['RegitrationType']?.toString() ?? 'Child Registration',
           'registration_date': data['RegitrationDate']?.toString() ?? '',
+
+          // --- UPDATED LINES ---
+          // Now we use childRegistrationMap which holds the correct data regardless of structure
+          'weight_grams': childRegistrationMap['weight_grams']?.toString() ?? '',
+          'birth_weight_grams': childRegistrationMap['birth_weight_grams']?.toString() ?? '',
         };
 
         debugPrint('Complete form data to pass:');
@@ -785,20 +796,13 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             'isEdit': true,
           },
         )?.then((result) {
+          // Always reload data to reflect the latest state from the database
+          // This ensures that if case closure wasn't selected, the card remains visible
+          _loadChildTrackingData();
+          
           if (result is Map && result['saved'] == true) {
-            debugPrint('✅ Form saved, removing card for beneficiary: ${completeFormData['beneficiary_id']}');
-
-            setState(() {
-              _childTrackingList.removeWhere((child) {
-                final childBeneficiaryId = child['BeneficiaryID']?.toString() ?? '';
-                final formBeneficiaryId = completeFormData['beneficiary_id']?.toString() ?? '';
-                return childBeneficiaryId == formBeneficiaryId && childBeneficiaryId.isNotEmpty;
-              });
-              _filtered = List<Map<String, dynamic>>.from(_childTrackingList);
-            });
-            showAppSnackBar(context, 'Case closure recorded. Child removed from tracking list.');
-          } else {
-            _loadChildTrackingData();
+             // Optional: You can show a message here if needed, but the form already shows one
+             debugPrint('✅ Form saved, reloading list...');
           }
         });
       },

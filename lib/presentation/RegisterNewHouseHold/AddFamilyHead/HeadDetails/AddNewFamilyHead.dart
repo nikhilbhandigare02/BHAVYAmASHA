@@ -288,7 +288,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     if (gender == 'transgender') {
       return [
         'Self',
-
         'Husband',
         'Wife',
         'Father',

@@ -262,23 +262,24 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                     ),
                     Container(
                       color: AppColors.primary,
-                      child: TabBar(
-                        controller: _tabController,
-                        isScrollable: true,
-                        labelColor: Colors.white,
-                        unselectedLabelColor: Colors.white70,
-                        indicatorColor: Colors.white,
-                        indicatorWeight: 3,
-                        labelStyle: const TextStyle(
-                          fontWeight: FontWeight.w600,
+                      child: IgnorePointer(
+                        ignoring: true,
+                        child: TabBar(
+                          controller: _tabController,
+                          isScrollable: true,
+                          labelColor: Colors.white,
+                          unselectedLabelColor: Colors.white70,
+                          indicatorColor: Colors.white,
+                          indicatorWeight: 3,
+                          labelStyle: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          tabs: [
+                            Tab(text: t.tabGeneralDetails),
+                            Tab(text: t.tabMotherDetails),
+                            ...List.generate(_childCount, (i) => Tab(text: '${t.tabNewbornDetails} ${i + 1}')),
+                          ],
                         ),
-                        tabs: [
-                          Tab(text: t.tabGeneralDetails),
-                          Tab(text: t.tabMotherDetails),
-                          ...List.generate(_childCount, (i) => Tab(text: '${t.tabNewbornDetails} ${i + 1}')),
-                        ],
-                        onTap: (index) =>
-                            context.read<HbncVisitBloc>().add(TabChanged(index)),
                       ),
                     ),
 
@@ -287,6 +288,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                         key: _formKey,
                         child: TabBarView(
                           controller: _tabController,
+                          physics: const NeverScrollableScrollPhysics(),
                           children: [
                             GeneralDetailsTab(beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? ''),
                             MotherDetailsTab(beneficiaryId: beneficiaryData?['unique_key']?.toString() ?? ''),

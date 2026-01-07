@@ -43,7 +43,6 @@ class ANCVisitModel {
     return '';
   }
 
-  // Getter to extract gender from the pre-formatted string (e.g., '23 Y / Female')
   String get displayGender {
     if (age != null && age!.contains('/')) {
       // Extract just the gender part (e.g., 'Female' from '23 Y / Female')
@@ -52,8 +51,8 @@ class ANCVisitModel {
         return parts[1].trim().isNotEmpty ? parts[1].trim() : 'F';
       }
     }
-    // Fallback to gender field if available, otherwise default to 'F'
-    return (gender ?? 'F').toUpperCase();
+
+    return (gender ?? 'F');
   }
 
   ANCVisitModel({

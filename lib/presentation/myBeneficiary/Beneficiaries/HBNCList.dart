@@ -130,11 +130,12 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
       for (final outcome in dbOutcomes) {
         try {
           final formJson = jsonDecode(outcome['form_json'] as String);
-          final formData = formJson['form_data'] ?? {};
+          // final formData = formJson['form_data'] ?? {}; // Uncomment if you need form data later
           final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
 
           if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) continue;
 
+          // Prevent duplicates
           if (processedBeneficiaries.contains(beneficiaryRefKey)) {
             continue;
           }
@@ -151,7 +152,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
 
           final beneficiary = beneficiaryResults.first;
           final beneficiaryInfoRaw = beneficiary['beneficiary_info'] as String? ?? '{}';
-          
+
           Map<String, dynamic> beneficiaryInfo;
           try {
             beneficiaryInfo = jsonDecode(beneficiaryInfoRaw);
@@ -163,16 +164,26 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
               beneficiaryInfo['headName']?.toString() ?? 'N/A';
           final dob = beneficiaryInfo['dob']?.toString();
           final age = _calculateAge(dob);
-          final gender = beneficiaryInfo['gender']?.toString() ?? 'N/A';
+
+          // 🔹 1. Updated Gender Logic (Capitalize first letter)
+          final rawGender = beneficiaryInfo['gender']?.toString() ?? 'N/A';
+          final gender = (rawGender.isNotEmpty && rawGender != 'N/A')
+              ? '${rawGender[0].toUpperCase()}${rawGender.substring(1).toLowerCase()}'
+              : 'N/A';
+
           final hhId = beneficiary['household_ref_key']?.toString() ?? 'N/A';
-          
           final displayHhId = hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId;
+
+          // 🔹 2. Grab the date from the outcome record (usually created_date_time or modified_date_time)
+          final dateStr = outcome['created_date_time'] ?? outcome['modified_date_time'];
+
           formattedData.add({
             'hhId': displayHhId,
             'name': name,
             'age | gender': '$age | $gender',
             'status': 'PNC',
             'beneficiaryRefKey': beneficiaryRefKey,
+            'modified_date_time': dateStr, // Added this so the UI can show the date
           });
         } catch (e) {
           print('Error processing beneficiary: $e');
@@ -303,7 +314,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _infoRow(data['name']),
+                  _infoRow(data['name'], isBold: true),
                   const SizedBox(height: 8),
                   _infoRow(
                     data['age | gender'] ?? '',
@@ -318,7 +329,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
     );
   }
 
-  Widget _infoRow(String value,{bool isWrappable = false}) {
+  Widget _infoRow(String value, {bool isWrappable = false, bool isBold = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -326,12 +337,15 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
           Expanded(
             child: Text(
               value.isEmpty ? 'N/A' : value,
-              style:  TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.w400,
+                // Logic: If isBold is true, use FontWeight.bold, else use w400
+                fontWeight: isBold ? FontWeight.bold : FontWeight.w400,
                 fontSize: 13.sp,
               ),
-              overflow: TextOverflow.ellipsis,
+              // Including the wrap logic so the parameter works
+              maxLines: isWrappable ? null : 1,
+              overflow: isWrappable ? null : TextOverflow.ellipsis,
             ),
           ),
         ],

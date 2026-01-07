@@ -172,7 +172,7 @@ class _CaseClosureWidgetState extends State<CaseClosureWidget> {
               labelText: l.specifyReason,
               hintText: l.enterReasonForClosure,
               controller: widget.otherReasonController,
-              maxLines: 2,
+
               onChanged: (value) {},
             ),
             const Divider(thickness: 0.5, height: 1, color: AppColors.divider),
