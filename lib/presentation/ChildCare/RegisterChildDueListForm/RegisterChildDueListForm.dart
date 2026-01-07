@@ -1012,7 +1012,7 @@ class _RegisterChildDueListFormScreen
                                       return "${l10n?.relative} ";
 
                                     case 'Other':
-                                      return '${l10n?.other} ';
+                                      return '${l10n?.otherDropdown} ';
 
                                     default:
                                       return s;

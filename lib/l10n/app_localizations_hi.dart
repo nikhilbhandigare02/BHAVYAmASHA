@@ -860,19 +860,19 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get childRegisteredBeneficiaryListTitle => 'पंजीकृत बालक\nलाभार्थी सूची';
+  String get childRegisteredBeneficiaryListTitle => 'पंजीकृत बालक लाभार्थी सूची';
 
   @override
   String get childRegisteredBeneficiaryListSearch => 'पंजीकृत बाल लाभार्थी खोंजे';
 
   @override
-  String get childRegisteredDueListTitle => 'बाल पंजीकरण\nदेय सूची';
+  String get childRegisteredDueListTitle => 'बाल पंजीकरण\nनियत सूची';
 
   @override
   String get childRegisteredDueListSearch => 'पंजीकृत बच्चे को खोंजे';
 
   @override
-  String get childTrackingDueListTitle => 'बाल ट्रैकिंग\nदेय सूची';
+  String get childTrackingDueListTitle => 'बाल ट्रैकिंग\nलंबित सूची';
 
   @override
   String get childTrackingDueSearch => 'लंबीत ट्रेकिंग वाले बच्चे को खोंजे ';
@@ -938,7 +938,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dateOfInspectionLabel => 'निरीक्षण की तिथि *';
 
   @override
-  String get daughter => 'पुत्री';
+  String get daughter => 'पुत्री का';
 
   @override
   String get dcmMobileHint => 'Mobile no.';
@@ -956,7 +956,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get deceasedChildSnack => 'बालक मृत्यु';
 
   @override
-  String get deceasedChildTitle => 'बालक मृत्यु';
+  String get deceasedChildTitle => 'मृत बच्चे';
 
   @override
   String get declarationIntro => 'I hereby declare that:';
@@ -1168,13 +1168,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get familyHeadDetailsTitle => 'परिवार के मुखिया का विवरण';
 
   @override
-  String get father => 'पिता ';
+  String get father => 'पिता का';
 
   @override
   String get fatherGuardianNameLabel => 'पिता/अभिभावक का नाम';
 
   @override
-  String get fatherInLaw => 'ससुर';
+  String get fatherInLaw => 'ससुर का';
 
   @override
   String get fatherNameLabel => 'पिता का नाम';
@@ -1447,7 +1447,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get husbandFatherNameLabel => 'पति / पिता का नाम';
 
   @override
-  String get husbandLabel => 'पति';
+  String get husbandLabel => 'पति का';
 
   @override
   String get husbandNameLabel => 'पति का नाम';
@@ -1731,16 +1731,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get monthlyTaskPC23 => 'PC2.3 - मातृ स्वस्थ- सभी गर्भावस्था माताओं का Line Listing एव 60% गर्भवती माताओं का चार प्रसूतिपूर्ण करने जांच (ANC) पर ';
 
   @override
-  String get mother => 'माँ ';
+  String get mother => 'माँ का';
 
   @override
   String get motherAncVisitTitle => 'एएनसी विज़िट';
 
   @override
-  String get motherInLaw => 'सास';
+  String get motherInLaw => 'सास का';
 
   @override
-  String get motherNameLabel => 'माता का नाम';
+  String get motherNameLabel => 'माँ  का नाम';
 
   @override
   String get mukhiyaMobileHint => 'मुखिया का मोबाइल नंबर';
@@ -1779,7 +1779,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ncd => 'एनसीडी';
 
   @override
-  String get neighbour => 'पड़ोसी';
+  String get neighbour => 'पड़ोसी का';
 
   @override
   String get newMemberDetailsTitle => 'नए सदस्य का विवरण';
@@ -2040,7 +2040,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get relationWithHeadLabel => 'परिवार के मुखिया के साथ संबंध';
 
   @override
-  String get relative => 'रिश्तेदार';
+  String get relative => 'रिश्तेदार का';
 
   @override
   String get religionChristian => 'ईसाई';
@@ -2103,13 +2103,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get routine => 'नियमित टीकाकरण (RI)';
 
   @override
-  String get routineChildList0to1 => '0-1 वर्ष बाल सूची';
+  String get routineChildList0to1 => '0-1 वर्ष के बच्चों की सूची';
 
   @override
-  String get routineChildList1to2 => '1-2 वर्ष बाल सूची';
+  String get routineChildList1to2 => '1-2 वर्ष के बच्चों की सूची';
 
   @override
-  String get routineChildList2to5 => '2-5 वर्ष बाल सूची';
+  String get routineChildList2to5 => '2-5 वर्ष के बच्चों की सूची';
 
   @override
   String get routinePoornTikakaran => 'पूर्ण टीकाकरण की संख्या';
@@ -2175,7 +2175,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get selectArea => 'क्षेत्र चुनें';
 
   @override
-  String get self => 'स्वयं';
+  String get self => 'स्वयं का';
 
   @override
   String get separated => 'अलग रह रहे';
@@ -2202,7 +2202,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get socioEconomicDetailsTitle => 'सामाजिक-आर्थिक विवरण';
 
   @override
-  String get son => 'पुत्र';
+  String get son => 'पुत्र का';
 
   @override
   String get spouse => 'जीवनसाथी';
@@ -2499,7 +2499,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get widowed => 'विधवा/विधुर';
 
   @override
-  String get wife => 'पत्नी';
+  String get wife => 'पत्नी का';
 
   @override
   String get yearsSuffix => 'Years';
@@ -2559,10 +2559,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get rchIdChildLabel => 'आरसीएच आईडी (बच्चा)';
 
   @override
-  String get rchChildSerialHint => 'आरसीएच रजिस्टर में बालक का क्रमांक';
+  String get rchChildSerialHint => 'आरसीएच रजिस्टर में बच्चे की क्रम संख्या';
 
   @override
-  String get dateOfBirthLabel => 'जन्म तिथि *';
+  String get dateOfBirthLabel => 'जन्म की तिथि *';
 
   @override
   String get dateOfRegistrationLabel => 'पंजीकरण तिथि *';
@@ -2697,7 +2697,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get homeVisitDayLabel => 'गृह भ्रमण का दिन *';
 
   @override
-  String get highRisk => 'उच्च जोखिम वाली गर्भावस्था';
+  String get highRisk => 'उच्च जोखिम वाली गर्भवतियों की सूची';
 
   @override
   String get dateOfHomeVisitLabel => 'गृह भ्रमण की तिथि*';
@@ -6361,6 +6361,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get enterAddress => 'पता दर्ज करें';
 
   @override
+  String get otherDropdown => 'अन्य का';
+
+  @override
   String get pleaseEnterAddress => 'कृपया पता दर्ज करें';
 
   @override
@@ -6829,7 +6832,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ashaFacilitatorTraining => 'आशा फैसिलिटेटर प्रशिक्षण';
 
   @override
-  String get inductionTraining => 'प्रवेश प्रशिक्षण';
+  String get inductionTraining => 'शुरुआती प्रशिक्षण';
 
   @override
   String get maa => 'एमएए (माँ का पूर्ण स्नेह)';

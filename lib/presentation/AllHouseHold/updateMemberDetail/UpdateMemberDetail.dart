@@ -554,7 +554,7 @@ class _UpdateMemberDetailScreenState extends State<UpdateMemberDetailScreen> {
                                       case 'Relative':
                                         return l.relative;
                                       case 'Other':
-                                        return l.other;
+                                        return l.otherDropdown;
                                       default:
                                         return s;
                                     }

@@ -996,7 +996,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       return "${l.relative} ";
 
                     case 'Other':
-                      return '${l.other} ';
+                      return '${l.otherDropdown} ';
 
                     default:
                       return s;

@@ -311,13 +311,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         SnackBar(
                                           content: Text(
                                             message,
-                                            style: const TextStyle(color: Colors.white),
+                                            style: TextStyle(color: Colors.white),
                                           ),
                                           backgroundColor: Colors.black,
                                           duration: const Duration(seconds: 3),
                                         ),
                                       );
-
                                       // Navigation after success
                                       Future.delayed(const Duration(milliseconds: 500), () {
                                         if (!context.mounted) return;

@@ -12767,6 +12767,12 @@ abstract class AppLocalizations {
   /// **'Enter address'**
   String get enterAddress;
 
+  /// No description provided for @otherDropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get otherDropdown;
+
   /// No description provided for @pleaseEnterAddress.
   ///
   /// In en, this message translates to:

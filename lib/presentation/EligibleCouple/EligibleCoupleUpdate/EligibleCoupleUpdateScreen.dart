@@ -338,7 +338,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                     case 'Relative':
                                       return t!.relative;
                                     case 'Other':
-                                      return t!.other;
+                                      return t!.otherDropdown;
                                     default:
                                       return s;
                                   }

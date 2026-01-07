@@ -6361,6 +6361,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterAddress => 'Enter address';
 
   @override
+  String get otherDropdown => 'Other';
+
+  @override
   String get pleaseEnterAddress => 'Please enter Address';
 
   @override

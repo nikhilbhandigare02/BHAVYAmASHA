@@ -2784,7 +2784,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             return "${l.relative} ";
 
                                           case 'Other':
-                                            return '${l.other} ';
+                                            return '${l.otherDropdown} ';
 
                                           default:
                                             return s;
@@ -3836,7 +3836,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             return "${l.relative} ";
 
                                           case 'Other':
-                                            return '${l.other} ';
+                                            return '${l.otherDropdown} ';
 
                                           default:
                                             return s;
