@@ -99,14 +99,22 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         ORDER BY h.created_date_time DESC
       ''', [currentUserKey]);
       
-      // Query database directly to get ALL eligible couple activities records
+      // Query database directly to get eligible couple activities records for due count
       final ecActivities = await db.rawQuery('''
         SELECT * FROM eligible_couple_activities 
-        WHERE current_user_key = ?
+        WHERE current_user_key = ? AND eligible_couple_state = 'due' AND is_deleted = 0
+        ORDER BY created_date_time ASC
+      ''', [currentUserKey]);
+
+      // Query database directly to get mother care activities records for ANC due count
+      final motherCareActivities = await db.rawQuery('''
+        SELECT * FROM mother_care_activities 
+        WHERE current_user_key = ? AND mother_care_state = 'anc_due' AND is_deleted = 0
         ORDER BY created_date_time ASC
       ''', [currentUserKey]);
 
       final pregnantCountMap = <String, int>{};
+      final ancDueCountMap = <String, int>{};
       final elderlyCountMap = <String, int>{};
       final child0to1Map = <String, int>{};
       final child1to2Map = <String, int>{};
@@ -124,15 +132,26 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         } catch (_) {}
       }
 
-      /// --------- ELIGIBLE COUPLE COUNTS (ALL RECORDS) ----------
+      /// --------- ELIGIBLE COUPLE COUNTS (DUE STATE) ----------
       for (final ec in ecActivities) {
         try {
           final hhKey = (ec['household_ref_key'] ?? '').toString();
           if (hhKey.isEmpty) continue;
 
-          // Count all eligible_couple_activities records regardless of state or deletion status
+          // Count eligible_couple_activities records with state = 'due'
           eligibleCoupleTrackingDueCountMap[hhKey] =
               (eligibleCoupleTrackingDueCountMap[hhKey] ?? 0) + 1;
+        } catch (_) {}
+      }
+
+      /// --------- ANC DUE COUNTS (PREGNANT WOMEN) ----------
+      for (final ma in motherCareActivities) {
+        try {
+          final hhKey = (ma['household_ref_key'] ?? '').toString();
+          if (hhKey.isEmpty) continue;
+
+          // Count ANC due records for pregnant women calculation
+          ancDueCountMap[hhKey] = (ancDueCountMap[hhKey] ?? 0) + 1;
         } catch (_) {}
       }
 
@@ -387,7 +406,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           'houseNo': info['houseNo'] ?? 0,
           'totalMembers': membersForHousehold.length,
           'elderly': elderlyCountMap[householdRefKey] ?? 0,
-          'pregnantWomen': pregnantCountMap[householdRefKey] ?? 0,
+          'pregnantWomen': ancDueCountMap[householdRefKey] ?? 0,
           'eligibleCouples': eligibleCoupleTrackingDueCountMap[householdRefKey] ?? 0,
           'child0to1': child0to1Map[householdRefKey] ?? 0,
           'child1to2': child1to2Map[householdRefKey] ?? 0,
