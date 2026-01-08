@@ -88,8 +88,8 @@ class DbMigration {
 
     // 🔹 Pregnancy / Women-specific
     "isPregnant": "is_pregnant",
-    "lmp": "lmp",
-    "edd": "edd",
+    "lmp": "lmp_date",
+    "edd": "edd_date",
 
     // 🔹 Address
     "houseNo": "house_no",
@@ -181,8 +181,7 @@ class DbMigration {
         "totalBorn","totalLive","totalMale","totalFemale","youngestAge","ageUnit","youngestGender",
 
       ];
-      // weight
-      // weight_at_birth
+
 
       final Map<String, String> keyMapping = {
         "beneficiaryType": "type_of_beneficiary",
@@ -262,7 +261,6 @@ class DbMigration {
           }
         }
 
-        // First, get the direct column values from the old database
         int isDeath = (row["is_death"] == 1) ? 1 : 0;
         int isMigrated = (row["is_migrated"] == 1) ? 1 : 0;
 
@@ -301,8 +299,6 @@ class DbMigration {
             isMigrated = 1;
           }
         }
-
-
 
         final existing = await db.query(
           "beneficiaries_new",
