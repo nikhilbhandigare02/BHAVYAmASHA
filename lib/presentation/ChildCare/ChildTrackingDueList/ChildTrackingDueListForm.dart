@@ -382,6 +382,10 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           userDetails['facilityId'] ??
           0;
 
+      final currentUserKey = userDetails['unique_key'] ??
+
+          0;
+
       final formDataForDb = {
         'server_id': '',
         'forms_ref_key': formsRefKey,
@@ -402,7 +406,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           'package_name': deviceInfo.packageName,
         }),
         'parent_user': '',
-        'current_user_key': '',
+        'current_user_key': currentUserKey,
         'facility_id': facilityId,
         'form_json': formJson,
         'created_date_time': now,

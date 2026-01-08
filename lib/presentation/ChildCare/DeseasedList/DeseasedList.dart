@@ -58,6 +58,7 @@ class _DeseasedListState extends State<DeseasedList> {
       WHERE b.is_death = 1
         AND b.is_deleted = 0
         AND b.is_migrated = 0
+        AND b.is_adult = 0
         ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
       ORDER BY b.created_date_time DESC
       ''',

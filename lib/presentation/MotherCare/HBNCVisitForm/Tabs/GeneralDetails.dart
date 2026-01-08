@@ -213,7 +213,7 @@ class GeneralDetailsTab extends StatelessWidget {
                         displayDay = nextDay;
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           context.read<HbncVisitBloc>().add(
-                            VisitDetailsChanged(field: 'visitNumber', value: displayDay),
+                            VisitDetailsChanged(field: 'visitNumber', value: displayDay, beneficiaryId: beneficiaryId),
                           );
                         });
                       }
@@ -230,7 +230,7 @@ class GeneralDetailsTab extends StatelessWidget {
                             onChanged: (val) {
                               if (val != null) {
                                 context.read<HbncVisitBloc>().add(
-                                  VisitDetailsChanged(field: 'visitNumber', value: val),
+                                  VisitDetailsChanged(field: 'visitNumber', value: val, beneficiaryId: beneficiaryId),
                                 );
                               }
                             },
@@ -248,7 +248,7 @@ class GeneralDetailsTab extends StatelessWidget {
                     lastDate: DateTime(2100),
                     onDateChanged: (date) {
                       context.read<HbncVisitBloc>().add(
-                            VisitDetailsChanged(field: 'visitDate', value: date),
+                            VisitDetailsChanged(field: 'visitDate', value: date, beneficiaryId: beneficiaryId),
                           );
                     },
                   ),

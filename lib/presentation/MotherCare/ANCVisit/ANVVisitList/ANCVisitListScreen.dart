@@ -62,6 +62,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       AND r.mother_care_state = 'anc_due'
       AND bn.is_deleted = 0
       AND bn.is_migrated = 0
+      AND bn.is_death = 0
     ORDER BY r.created_date_time DESC; 
     ''',
       [ashaUniqueKey],

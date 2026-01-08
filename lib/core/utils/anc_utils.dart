@@ -108,6 +108,7 @@ class ANCUtils {
       r.rn = 1
       AND r.mother_care_state = 'anc_due'
       AND bn.is_deleted = 0
+      AND (bn.is_death = 0 OR bn.is_death IS NULL)
       AND bn.is_migrated = 0
     ORDER BY r.created_date_time DESC; 
     ''',
@@ -425,6 +426,7 @@ INNER JOIN (
 INNER JOIN beneficiaries_new bn
   ON mca.beneficiary_ref_key = bn.unique_key
 WHERE bn.is_deleted = 0
+  AND (bn.is_death = 0 OR bn.is_death IS NULL)
   AND bn.is_migrated = 0
   AND bn.current_user_key = ?         -- ✅ ASHA filter (beneficiary)
   AND mca.is_deleted = 0
@@ -501,6 +503,10 @@ SELECT
   d.id AS form_id,
   COALESCE(a.form_json, '{}') AS form_json
 FROM DeliveryOutcomeOnly d
+INNER JOIN beneficiaries_new bn
+  ON d.beneficiary_ref_key = bn.unique_key
+  AND (bn.is_deleted IS NULL OR bn.is_deleted = 0)
+  AND (bn.is_death = 0 OR bn.is_death IS NULL)
 LEFT JOIN LatestANC a
   ON a.beneficiary_ref_key = d.beneficiary_ref_key
  AND a.rn = 1
@@ -847,6 +853,7 @@ GROUP BY mca.beneficiary_ref_key
       ON bn.unique_key = ffd.beneficiary_ref_key
     WHERE ffd.forms_ref_key = ? 
     AND ffd.is_deleted = 0
+    AND (bn.is_death = 0 OR bn.is_death IS NULL)
     AND ffd.beneficiary_ref_key IN ($placeholders)
   ''', [deliveryOutcomeKey, ...beneficiaryKeys]);
 
