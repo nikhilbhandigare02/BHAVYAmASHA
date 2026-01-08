@@ -66,10 +66,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get aboutUsP4 => 'ऐप आशा कार्यकर्ताओं को उनकी को उनकी देय सूची, आज के कार्यक्रम और आगामी पीएनसी मां और शिशु विवरण की एक सूची बनाए रखने की सुविधा देता है ।';
 
   @override
-  String get accountNumberHint => 'बैंक खाता संख्या';
+  String get accountNumberHint => 'खाता संख्या';
 
   @override
-  String get accountNumberLabel => 'बैंक खाता संख्या';
+  String get accountNumberLabel => 'खाता संख्या';
 
   @override
   String get addButton => 'जोड़ें';
@@ -908,7 +908,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get choNameLabel => 'सी.एच.ओ. का नाम';
 
   @override
-  String get completedVisits => 'पूर्ण कार्य';
+  String get completedVisits => 'पूर्ण दौरे';
 
   @override
   String get contactLabel => 'संपर्क';
@@ -941,7 +941,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get daughter => 'पुत्री का';
 
   @override
-  String get dcmMobileHint => 'Mobile no.';
+  String get dcmMobileHint => 'मोबाइल नंबर';
 
   @override
   String get dcmMobileLabel => 'जिला कम्युनिटी मोबिलाइज़र का मोबाइल नंबर';
@@ -1528,7 +1528,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get incentiveFormBeneficiaryCountLabel => 'लाभार्थी की संख्या : [*]';
 
   @override
-  String get incentiveFormBeneficiaryCountHint => 'Number of beneficiaries';
+  String get incentiveFormBeneficiaryCountHint => 'लाभार्थियों की संख्या';
 
   @override
   String get incentiveFormWorkAmountLabel => 'कार्य की राशी : [*]';
@@ -1620,7 +1620,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get linkedSuccessfully => 'सफलतापूर्वक लिंक हो गया';
 
   @override
-  String get listANC => 'प्रसव पूर्व जाँच';
+  String get listANC => 'प्रसव पूर्व जांच';
 
   @override
   String get listEligibleCoupleDue => 'योग्य दम्पत्ती';
@@ -1629,7 +1629,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get listFamilySurvey => 'परिवार सर्वेक्षण सूची';
 
   @override
-  String get listHBNC => 'एचबीएनसी जाँच';
+  String get listHBNC => 'एचबीएनसी जांच';
 
   @override
   String get listRoutineImmunization => 'नियमित टीकाकरण (आरआई)';
@@ -1755,7 +1755,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get motherInLaw => 'सास का';
 
   @override
-  String get motherNameLabel => 'माँ  का नाम';
+  String get motherNameLabel => 'माता का नाम';
 
   @override
   String get mukhiyaMobileHint => 'मुखिया का मोबाइल नंबर';
@@ -1764,10 +1764,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get mukhiyaMobileLabel => 'मुखिया का मोबाइल नंबर';
 
   @override
-  String get mukhiyaNameHint => 'गाँव मुखिया का नाम';
+  String get mukhiyaNameHint => 'गाँव के मुखिया का नाम';
 
   @override
-  String get mukhiyaNameLabel => 'गाँव मुखिया का नाम';
+  String get mukhiyaNameLabel => 'गाँव के मुखिया का नाम';
 
   @override
   String get nameLabel => 'नाम';
@@ -1893,10 +1893,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get pmsmaLabel => 'पीएमएसएमए';
 
   @override
-  String get populationCoveredHint => 'आशा के क्षेत्रों की जनसंख्या';
+  String get populationCoveredHint => 'आशा के क्षेत्र की जनसंख्या';
 
   @override
-  String get populationCoveredLabel => 'आशा के क्षेत्रों की जनसंख्या';
+  String get populationCoveredLabel => 'आशा के क्षेत्र की जनसंख्या';
 
   @override
   String get poweredBy => 'Powered By Medixcel Lite © ';
@@ -2298,7 +2298,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get thirdAncLabel => 'तीसरी एएनसी';
 
   @override
-  String get toDoVisits => 'निर्धारित कार्य';
+  String get toDoVisits => 'दौरा करना';
 
   @override
   String get todayWorkCompleted => 'Completed visits :';
@@ -3555,13 +3555,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get anyOtherSpecify => 'कोई अन्य निर्दिष्ट करें';
 
   @override
-  String get sixWeekDoses => '6 Week Doses';
+  String get sixWeekDoses => 'Doses';
 
   @override
-  String get tenWeekDoses => '10 Week Doses';
+  String get tenWeekDoses => 'Doses';
 
   @override
-  String get fourteenWeekDoses => '14 Week Doses';
+  String get fourteenWeekDoses => 'Doses';
 
   @override
   String get reasonLabel => 'कारण';
@@ -6121,7 +6121,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get specify_reason_required => 'कारण निर्दिष्ट करें *';
 
   @override
-  String get enter_12_digit_rch_id => '12 अंकों का RCH ID दर्ज करें';
+  String get enter_12_digit_rch_id => 'आरसीएच आईडी';
 
   @override
   String get must_be_12_digits => '12 अंकों का होना चाहिए';

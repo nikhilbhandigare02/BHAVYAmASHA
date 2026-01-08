@@ -869,7 +869,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get childRegisteredDueListTitle => 'Child Registered Due List';
 
   @override
-  String get childRegisteredDueListSearch => 'Search Child Registered Due ';
+  String get childRegisteredDueListSearch => 'Child Registered Due Search';
 
   @override
   String get childTrackingDueListTitle => 'Child Tracking Due List';
@@ -944,7 +944,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dcmMobileHint => 'Mobile no.';
 
   @override
-  String get dcmMobileLabel => 'Mobile no. of District Community Mobilizer';
+  String get dcmMobileLabel => 'Mobile no.of District Community Mobilizer';
 
   @override
   String get dcmNameHint => 'District Community Mobilizer name';
@@ -1947,7 +1947,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reenterPasswordTooShort => 'Password must be at least 6 characters';
 
   @override
-  String get registrationDateLabel => 'Date of registration';
+  String get registrationDateLabel => 'Registration Date';
 
   @override
   String get registrationThroughTitle => 'Registration through';
@@ -2175,7 +2175,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deathRegisterTitle => 'Death Register';
 
   @override
-  String get placeLabel => 'Place';
+  String get placeLabel => 'Place of death';
 
   @override
   String get searchHBNC => 'search HBNC';
@@ -2340,7 +2340,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trackEligibleCoupleTitle => 'Track Eligible Couples';
 
   @override
-  String get trainingDateLabel => 'Training Date';
+  String get trainingDateLabel => 'Date of Training';
 
   @override
   String get trainingDaysLabel => 'No. of days';
@@ -2349,7 +2349,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trainingFormTitle => 'Training Details';
 
   @override
-  String get trainingNameLabel => 'Training Name';
+  String get trainingNameLabel => 'Name of Training';
 
   @override
   String get trainingPlaceLabel => 'Place of Training';
@@ -2364,7 +2364,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trainingSave => 'SAVE';
 
   @override
-  String get trainingTitle => 'BHAVYA mASHA Training';
+  String get trainingTitle => 'Training';
 
   @override
   String get trainingTypeLabel => 'Training Type';
@@ -3129,7 +3129,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get err_other_reason_of_death_required => 'Please enter other reason of death.';
 
   @override
-  String get previousVisits => 'Previous Visits';
+  String get previousVisits => 'PREVIOUS VISITS';
 
   @override
   String get prevVisitSrNo => 'S. No.';
@@ -3555,13 +3555,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get anyOtherSpecify => 'Any other (specify)';
 
   @override
-  String get sixWeekDoses => '6 Week Doses';
+  String get sixWeekDoses => 'Doses';
 
   @override
-  String get tenWeekDoses => '10 Week Doses';
+  String get tenWeekDoses => 'Doses';
 
   @override
-  String get fourteenWeekDoses => '14 Week Doses';
+  String get fourteenWeekDoses => 'Doses';
 
   @override
   String get reasonLabel => 'Reason';
@@ -6121,7 +6121,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get specify_reason_required => 'Specify Reason *';
 
   @override
-  String get enter_12_digit_rch_id => 'Enter 12 digit RCH ID';
+  String get enter_12_digit_rch_id => 'RCH ID';
 
   @override
   String get must_be_12_digits => 'Must be 12 digits';
@@ -6547,7 +6547,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ifaSyrupCountValidation => 'Please enter number of Iron Folic Acid syrup given';
 
   @override
-  String get counselExclusiveBreastfeeding => 'Counsel for exclusive breastfeeding?';
+  String get counselExclusiveBreastfeeding => 'Counsel for exclusive breast feeding?';
 
   @override
   String get is_counsel_for_complementary_feeding => 'Counsel for complementary feeding?';
@@ -6679,25 +6679,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dateOfVisits => 'Date of Visits';
 
   @override
-  String get six_WeekDoses => '6 Week Doses';
+  String get six_WeekDoses => 'Doses';
 
   @override
-  String get ten_WeekDoses => '10 Week Doses';
+  String get ten_WeekDoses => 'Doses';
 
   @override
-  String get fourteen_WeekDoses => '14 Week Doses';
+  String get fourteen_WeekDoses => 'Doses';
 
   @override
-  String get nineMonthDoses => '9 Month Doses';
+  String get nineMonthDoses => 'Doses';
 
   @override
-  String get sixteenToTwentyFourMonthDoses => '16-24 Month Doses';
+  String get sixteenToTwentyFourMonthDoses => 'Doses';
 
   @override
-  String get fiveToSixYearDoses => '5-6 Year Doses';
+  String get fiveToSixYearDoses => 'Doses';
 
   @override
-  String get tenYearDoses => '10 Year Doses';
+  String get tenYearDoses => 'Doses';
 
   @override
   String get report => 'Report';
@@ -7327,10 +7327,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pentavalent1 => 'Pentavalent - 1';
 
   @override
-  String get rota1 => 'Rota - 1';
+  String get rota1 => 'Rota 1';
 
   @override
-  String get ipv1 => 'I.P.V. - 1';
+  String get ipv1 => 'IPV 1';
 
   @override
   String get pcv1 => 'P.C.V. - 1';
@@ -7339,16 +7339,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get opv2 => 'O.P.V. - 2';
 
   @override
-  String get pentavalent2 => 'Pentavalent - 2';
+  String get pentavalent2 => 'Pentavalent 2';
 
   @override
-  String get rota2 => 'Rota - 2';
+  String get rota2 => 'Rota 2';
 
   @override
   String get dpt2 => 'D.P.T. - 2';
 
   @override
-  String get ipv2 => 'I.P.V. - 2';
+  String get ipv2 => 'IPV 2';
 
   @override
   String get pcv2 => 'P.C.V. - 2';
@@ -7357,13 +7357,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get opv3 => 'O.P.V. - 3';
 
   @override
-  String get pentavalent3 => 'Pentavalent - 3';
+  String get pentavalent3 => 'Pentavalent 3';
 
   @override
-  String get rota3 => 'Rota - 3';
+  String get rota3 => 'Rota 3';
 
   @override
-  String get measles1 => 'Measles - 1';
+  String get measles1 => 'Measles 1';
 
   @override
   String get mrDose1 => 'M.R. Dose - 1';
@@ -7375,7 +7375,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jeVaccine1 => 'J.E. Vaccine - 1';
 
   @override
-  String get pcvBooster => 'P.C.V. Booster';
+  String get pcvBooster => 'P.C.V. -Booster';
 
   @override
   String get fipv3 => 'F.I.P.V. - 3';
@@ -7387,7 +7387,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dptBooster1 => 'D.P.T. Booster - 1';
 
   @override
-  String get measles2 => 'Measles - 2';
+  String get measles2 => 'Measles 2';
 
   @override
   String get jeVaccine2 => 'J.E. Vaccine - 2';
