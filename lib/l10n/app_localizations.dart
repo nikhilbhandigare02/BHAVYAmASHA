@@ -770,7 +770,7 @@ abstract class AppLocalizations {
   /// No description provided for @ashaNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'ASHA Name'**
+  /// **'Name of ASHA'**
   String get ashaNameLabel;
 
   /// No description provided for @ashaProfile.
@@ -9470,7 +9470,7 @@ abstract class AppLocalizations {
   /// No description provided for @ashaName.
   ///
   /// In en, this message translates to:
-  /// **'ASHA Name'**
+  /// **'Name of ASHA'**
   String get ashaName;
 
   /// No description provided for @healthcareProviderInformation.
