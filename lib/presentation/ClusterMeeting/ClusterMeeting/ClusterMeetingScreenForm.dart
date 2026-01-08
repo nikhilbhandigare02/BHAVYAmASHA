@@ -167,11 +167,12 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
     int selectedMonth = _selectedMonthYear?.month ?? DateTime.now().month;
     int selectedYear = _selectedMonthYear?.year ?? DateTime.now().year;
     final l10n = AppLocalizations.of(context);
+    final currentYear = DateTime.now().year;
     // Month Column index
     int monthIndex = selectedMonth - 1;
 
     // Year Column index
-    int yearIndex = 2025 - selectedYear;
+    int yearIndex = currentYear - selectedYear;
     final monthController = FixedExtentScrollController(
       initialItem: monthIndex,
     );
@@ -231,11 +232,11 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                   perspective: 0.005,
                   diameterRatio: 1.8,
                   physics: const FixedExtentScrollPhysics(),
-                  onSelectedItemChanged: (index) => selectedYear = 2025 - index,
+                  onSelectedItemChanged: (index) => selectedYear = currentYear - index,
                   childDelegate: ListWheelChildBuilderDelegate(
-                    childCount: 101, // 2025 to 1925 = 101 years
+                    childCount: 101,
                     builder: (context, index) {
-                      final year = 2025 - index;
+                      final year = currentYear - index;
                       return Center(
                         child: Text(
                           year.toString(),

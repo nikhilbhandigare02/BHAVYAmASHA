@@ -209,12 +209,16 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
     try {
       final db = await DatabaseProvider.instance.database;
 
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
       print('🔍 Fetching deceased beneficiaries...');
       final deceasedChildren = await db.rawQuery('''
         SELECT DISTINCT beneficiary_ref_key, form_json 
         FROM followup_form_data 
         WHERE form_json LIKE '%"reason_of_death":%' 
-      ''');
+        AND current_user_key = ?
+      ''', [ashaUniqueKey]);
 
       print('✅ Found ${deceasedChildren.length} potential deceased records');
 
@@ -239,8 +243,6 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       }
 
       print('✅ Total deceased beneficiaries: ${deceasedIds.length}');
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-          String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       final registrationDates = <String, String>{};
       // Get first entry for each beneficiary from child_care_activities table
@@ -345,11 +347,10 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
               print('ℹ️ Marking as deceased - ID: $beneficiaryId, Name: $name');
             }
 
-            // Get registration date: prioritize child_care_activities table, then fall back to beneficiaries_new table
             String registrationDate;
             print('🔍 Checking beneficiary ID: $beneficiaryId against ${registrationDates.length} registration dates');
             print('📋 Available registration keys: ${registrationDates.keys.toList()}');
-            
+
             if (registrationDates.containsKey(beneficiaryId)) {
               registrationDate = _formatDate(registrationDates[beneficiaryId]);
               print('📅 ✅ Using registration date from child_care_activities for $beneficiaryId: $registrationDate');

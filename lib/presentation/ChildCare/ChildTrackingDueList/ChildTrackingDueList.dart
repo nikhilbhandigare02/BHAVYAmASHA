@@ -164,7 +164,6 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           debugPrint('Forms ref key: $formsRefKey');
           debugPrint('Form data keys: ${formData.keys.join(', ')}');
 
-          // Check if this is a child registration or tracking form
           final isChildRegistration = formType == FollowupFormDataTable.childRegistrationDue ||
               formType == 'child_registration_due';
 
@@ -176,7 +175,6 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             debugPrint('Skipping form with type: $formType and ref key: $formsRefKey');
             continue;
           }
-
 
           debugPrint('Raw form data structure:');
           formData.forEach((key, value) {

@@ -3950,7 +3950,7 @@ abstract class AppLocalizations {
   /// No description provided for @registrationDateLabel.
   ///
   /// In en, this message translates to:
-  /// **'Registration Date'**
+  /// **'Date of registration'**
   String get registrationDateLabel;
 
   /// No description provided for @registrationThroughTitle.
@@ -5204,7 +5204,7 @@ abstract class AppLocalizations {
   /// No description provided for @rchChildSerialHint.
   ///
   /// In en, this message translates to:
-  /// **'Serial number of the child in the RCH register'**
+  /// **'Sr. no of the child in RCH register'**
   String get rchChildSerialHint;
 
   /// No description provided for @dateOfBirthLabel.

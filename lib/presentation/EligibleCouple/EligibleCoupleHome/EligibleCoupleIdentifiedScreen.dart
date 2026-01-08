@@ -28,7 +28,6 @@ class _EligibleCoupleIdentifiedScreenState
 
   List<Map<String, dynamic>> _filtered = [];
   bool _isLoading = true;
-  List<Map<String, dynamic>> _allCouples = [];
 
   @override
   void initState() {
@@ -80,7 +79,8 @@ class _EligibleCoupleIdentifiedScreenState
       }
 
       final query = '''
-        SELECT DISTINCT b.*, e.eligible_couple_state 
+        SELECT DISTINCT b.*, e.eligible_couple_state, 
+               e.created_date_time as registration_date
         FROM beneficiaries_new b
         INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
         WHERE b.is_deleted = 0 
@@ -126,24 +126,51 @@ class _EligibleCoupleIdentifiedScreenState
 
 
       final couples = <Map<String, dynamic>>[];
+      
+      // Track duplicates based on household_ref_key and name combination
+      final Map<String, int> recordCount = {};
+      final Map<String, int> processedRecords = {};
+
+      // First pass: count occurrences of each unique record
+      for (final member in filteredRows) {
+        final info = _toStringMap(member['beneficiary_info']);
+        final memberUniqueKey = member['unique_key']?.toString() ?? '';
+        final householdKey = member['household_ref_key']?.toString() ?? '';
+        final name = info['memberName']?.toString() ?? info['headName']?.toString() ?? '';
+        
+        // Create a unique key based on household and name combination
+        final uniqueKey = '$householdKey-$name';
+        recordCount[uniqueKey] = (recordCount[uniqueKey] ?? 0) + 1;
+      }
 
       // Process each eligible row
       for (final member in filteredRows) {
         final info = _toStringMap(member['beneficiary_info']);
         final memberUniqueKey = member['unique_key']?.toString() ?? '';
+        final householdKey = member['household_ref_key']?.toString() ?? '';
+        final name = info['memberName']?.toString() ?? info['headName']?.toString() ?? '';
         
-        // Check gender and skip if male
-        final gender = info['gender']?.toString().toLowerCase() ?? '';
-        if (gender == 'male') {
-          print('Skipping male record: $memberUniqueKey');
+        // Check memberType and skip if child
+        final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+        if (memberType == 'child') {
+          print('Skipping child record: $memberUniqueKey');
           continue;
         }
+
+        // Create the same unique key for duplicate detection
+        final uniqueKey = '$householdKey-$name';
+        final isDuplicate = recordCount[uniqueKey]! > 1;
+        
+        // Mark this record as guest if it's a duplicate and hasn't been marked yet
+        final shouldShowGuestBadge = isDuplicate && (processedRecords[uniqueKey] ?? 0) == 0;
+        processedRecords[uniqueKey] = (processedRecords[uniqueKey] ?? 0) + 1;
 
         couples.add(_formatCoupleData(
           _toStringMap(member),
           info,
           <String, dynamic>{}, // Empty counterpart
           isHead: false,
+          shouldShowGuestBadge: shouldShowGuestBadge,
         ));
       }
 
@@ -162,15 +189,15 @@ class _EligibleCoupleIdentifiedScreenState
     }
   }
 
-  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead}) {
+  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead, bool shouldShowGuestBadge = false}) {
     final hhId = row['household_ref_key']?.toString() ?? '';
     final uniqueKey = row['unique_key']?.toString() ?? '';
-    final createdDate = row['created_date_time']?.toString() ?? '';
+    final createdDate = row['registration_date']?.toString() ?? '';
     final info = _toStringMap(row['beneficiary_info']);
     final head = _toStringMap(info['head_details']);
     final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
     final gender = female['gender']?.toString().toLowerCase();
-    final displayGender = 'Female';
+    final displayGender = gender?.isNotEmpty == true ? gender![0].toUpperCase() + gender!.substring(1) : 'Not Available';
     final age = _calculateAge(female['dob']);
     final richId = female['RichID']?.toString() ?? '';
     final mobile = female['mobile_no']?.toString() ?? female['mobileNo']?.toString() ?? 'Not Available';
@@ -212,6 +239,7 @@ class _EligibleCoupleIdentifiedScreenState
       '_rawRow': row,
       'fullHhId': hhId,
       'fullBeneficiaryId': uniqueKey,
+      'shouldShowGuestBadge': shouldShowGuestBadge,
     };
   }
 
@@ -426,6 +454,25 @@ class _EligibleCoupleIdentifiedScreenState
                           style: TextStyle(color: primary, fontWeight: FontWeight.w600),
                         ),
                       ),
+
+                      const SizedBox(width: 8),
+                      if (data['shouldShowGuestBadge'] == true || beneficiaryInfo['gender']?.toString().toLowerCase() == 'male')
+                        Container(
+                          margin: const EdgeInsets.only(left: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Guest',
+                            style: TextStyle(
+                              color: Colors.green,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
                       const SizedBox(width: 8),
                       Image.asset(
                         'assets/images/sync.png',
@@ -459,7 +506,16 @@ class _EligibleCoupleIdentifiedScreenState
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          Expanded(child: _rowText(l10n?.nameLabel ??  'Name', data['Name'] ?? '')),
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: _rowText(l10n?.nameLabel ??  'Name', data['Name'] ?? ''),
+                                ),
+
+                              ],
+                            ),
+                          ),
                           const SizedBox(width: 12),
                           Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['age']?.toString() ?? '')),
                           const SizedBox(width: 12),

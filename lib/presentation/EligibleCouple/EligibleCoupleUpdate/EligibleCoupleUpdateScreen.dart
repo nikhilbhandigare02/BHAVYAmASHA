@@ -184,9 +184,10 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              t?.registrationThroughTitle ??
-                                  'Registration through',
-                              style: Theme.of(context).textTheme.titleMedium,
+                              t?.registrationThroughTitle ?? 'Registration through',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             CustomTextField(
@@ -488,7 +489,9 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
 
                             Text(
                               t?.childrenDetailsTitle ?? 'Children Details',
-                              style: TextStyle(fontWeight:FontWeight.bold),
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 12),
 

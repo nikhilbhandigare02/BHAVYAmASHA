@@ -20,6 +20,7 @@ class BeneficiaryData {
   final String? rchId;
   final String? fatherName;
   final String? motherName;
+  final String? spouseName;
   final String? dateOfBirth;
   final String? religion;
   final String? socialClass;
@@ -40,6 +41,7 @@ class BeneficiaryData {
     this.rchId,
     this.fatherName,
     this.motherName,
+    this.spouseName,
     this.dateOfBirth,
     this.religion,
     this.socialClass,
@@ -62,6 +64,7 @@ class BeneficiaryData {
       rchId: json['rchId']?.toString(),
       fatherName: json['fatherName']?.toString(),
       motherName: json['motherName']?.toString(),
+      spouseName: json['spouseName']?.toString(),
       dateOfBirth: json['dateOfBirth']?.toString(),
       religion: json['religion']?.toString(),
       socialClass: json['socialClass']?.toString(),
@@ -84,6 +87,7 @@ class BeneficiaryData {
     'rchId': rchId,
     'fatherName': fatherName,
     'motherName': motherName,
+    'spouseName': spouseName,
     'dateOfBirth': dateOfBirth,
     'religion': religion,
     'socialClass': socialClass,
@@ -211,6 +215,12 @@ class _RegisterChildDueListFormScreen
                 info['RichIDChanged']?.toString()),
             fatherName: info['fatherName']?.toString(),
             motherName: info['motherName']?.toString(),
+            spouseName: (info['spouseName']?.toString() ??
+                headDetails['spouseName']?.toString() ??
+                info['husbandName']?.toString() ??
+                headDetails['husbandName']?.toString() ??
+                info['wifeName']?.toString() ??
+                headDetails['wifeName']?.toString()),
             dateOfBirth: info['dob']?.toString(),
             religion: info['religion']?.toString(),
             socialClass: info['category']?.toString(),
@@ -297,6 +307,9 @@ class _RegisterChildDueListFormScreen
               gender: headDetails['gender']?.toString(),
               mobile: headDetails['mobileNo']?.toString(),
               fatherName: headDetails['fatherName']?.toString(),
+              spouseName: (headDetails['spouseName']?.toString() ??
+                  headDetails['husbandName']?.toString() ??
+                  headDetails['wifeName']?.toString()),
               dateOfBirth: headDetails['dob']?.toString(),
               religion: headDetails['religion']?.toString(),
               socialClass: headDetails['category']?.toString(),
@@ -334,6 +347,9 @@ class _RegisterChildDueListFormScreen
                   rchId: member['richId']?.toString(),
                   fatherName: member['fatherName']?.toString(),
                   motherName: member['motherName']?.toString(),
+                  spouseName: (member['spouseName']?.toString() ??
+                      member['husbandName']?.toString() ??
+                      member['wifeName']?.toString()),
                   dateOfBirth: member['dob']?.toString(),
                   religion: member['religion']?.toString(),
                   socialClass: member['category']?.toString(),
@@ -392,6 +408,7 @@ class _RegisterChildDueListFormScreen
               rchId: beneficiaryData?.rchId,
               fatherName: beneficiaryData?.fatherName,
               motherName: beneficiaryData?.motherName,
+              spouseName: beneficiaryData?.spouseName,
               dateOfBirth: beneficiaryData?.dateOfBirth,
               religion: beneficiaryData?.religion,
               socialClass: beneficiaryData?.socialClass,
@@ -452,6 +469,7 @@ class _RegisterChildDueListFormScreen
             rchId: beneficiaryData?.rchId,
             fatherName: beneficiaryData?.fatherName,
             motherName: beneficiaryData?.motherName,
+            spouseName: beneficiaryData?.spouseName,
             dateOfBirth: beneficiaryData?.dateOfBirth,
             religion: beneficiaryData?.religion,
             socialClass: beneficiaryData?.socialClass,
@@ -543,6 +561,8 @@ class _RegisterChildDueListFormScreen
       }
       if (data.fatherName != null) {
         bloc.add(FatherNameChanged(data.fatherName!));
+      } else if (data.spouseName != null && data.spouseName!.isNotEmpty) {
+        bloc.add(FatherNameChanged(data.spouseName!));
       }
       if (data.motherName != null) {
         bloc.add(MotherNameChanged(data.motherName!));
@@ -601,6 +621,8 @@ class _RegisterChildDueListFormScreen
       }
       if (args['fatherName'] != null) {
         bloc.add(FatherNameChanged(args['fatherName'].toString()));
+      } else if (args['spouseName'] != null) {
+        bloc.add(FatherNameChanged(args['spouseName'].toString()));
       }
       if (args['rchId'] != null) {
         bloc.add(RchIdChildChanged(args['rchId'].toString()));
@@ -691,23 +713,29 @@ class _RegisterChildDueListFormScreen
         ),
         body: SafeArea(
           child: BlocConsumer<RegisterChildFormBloc, RegisterChildFormState>(
-            listener: (context, state) {
+            listener: (context, state) async {
               if (state.error != null && state.error!.isNotEmpty) {
                 showAppSnackBar(context, state.error!);
               }
               if (state.isSuccess) {
                 showAppSnackBar(
                     context, l10n?.saveSuccess ?? 'Saved successfully');
-                Future.delayed(const Duration(milliseconds: 500), () {
-                  if (mounted) {
-                    Navigator.pop(context, {
-                      'saved': true,
-                      'beneficiaryId': _beneficiaryData?.uniqueKey ?? '',
-                      'name': _beneficiaryData?.name ?? '',
-                      'hhId': widget.arguments?['hhId']?.toString() ?? '',
-                    });
-                  }
-                });
+                await showDialog(
+                  context: context,
+                  builder: (context) => CustomDialog(
+                    title: 'Form has been saved successfully',
+                    message: 'Registration completed',
+                    onOkPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop({
+                        'saved': true,
+                        'beneficiaryId': _beneficiaryData?.uniqueKey ?? '',
+                        'name': _beneficiaryData?.name ?? '',
+                        'hhId': widget.arguments?['hhId']?.toString() ?? '',
+                      });
+                    },
+                  ),
+                );
               }
             },
             builder: (context, state) {
@@ -1046,6 +1074,7 @@ class _RegisterChildDueListFormScreen
                                 labelText: "${l10n?.mobileNumberLabel} *" ??
                                     'Mobile number *',
                                 hintText: l10n?.enter10DigitMobileNumber,
+                                maxLength: 10,
                                 initialValue: state.mobileNumber,
                                 keyboardType: TextInputType.phone,
                                 onChanged: (v) =>
@@ -1232,7 +1261,7 @@ class _RegisterChildDueListFormScreen
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   ApiDropdown<String>(
-                                    labelText: l10n?.religionLabel ?? 'Religion',
+                                    labelText: (l10n?.religionLabel ?? 'Religion').replaceAll('*', '').trim(),
                                     items: [
                                       l10n?.religionHindu ?? 'Hindu',
                                       l10n?.religionMuslim ?? 'Muslim',
@@ -1257,6 +1286,7 @@ class _RegisterChildDueListFormScreen
                                       }
                                     },
                                     hintText: l10n?.select ?? 'choose',
+                                    readOnly: (_beneficiaryData?.religion?.isNotEmpty ?? false) || (_beneficiaryData?.otherReligion?.isNotEmpty ?? false),
                                   ),
                                   Divider(
                                       color: AppColors.divider,
@@ -1266,13 +1296,23 @@ class _RegisterChildDueListFormScreen
                                     Padding(
                                       padding:
                                       const EdgeInsets.only(top: 8.0),
-                                      child: CustomTextField(
-                                        labelText: l10n?.specifyReligionLabel,
-                                        hintText: l10n?.enterReligion,
-                                        initialValue: state.customReligion,
-                                        onChanged: (v) =>
-                                            bloc.add(CustomReligionChanged(v)),
-                                      ),
+                                      child: (_beneficiaryData?.otherReligion?.isNotEmpty ?? false)
+                                          ? Opacity(
+                                              opacity: 0.7,
+                                              child: CustomTextField(
+                                                labelText: l10n?.specifyReligionLabel,
+                                                hintText: l10n?.enterReligion,
+                                                initialValue: state.customReligion,
+                                                readOnly: true,
+                                                onChanged: (v) => bloc.add(CustomReligionChanged(v)),
+                                              ),
+                                            )
+                                          : CustomTextField(
+                                              labelText: l10n?.specifyReligionLabel,
+                                              hintText: l10n?.enterReligion,
+                                              initialValue: state.customReligion,
+                                              onChanged: (v) => bloc.add(CustomReligionChanged(v)),
+                                            ),
                                     ),
                                 ],
                               ),
@@ -1291,7 +1331,7 @@ class _RegisterChildDueListFormScreen
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   ApiDropdown<String>(
-                                    labelText: l10n.categoryLabel,
+                                    labelText: (l10n?.categoryLabel ?? 'Category').replaceAll('*', '').trim(),
                                     items: const [
                                       'NotDisclosed',
                                       'General',
@@ -1341,6 +1381,7 @@ class _RegisterChildDueListFormScreen
                                       }
                                     },
                                     hintText: l10n!.select ?? 'choose',
+                                    readOnly: (_beneficiaryData?.socialClass?.isNotEmpty ?? false) || (_beneficiaryData?.otherCategory?.isNotEmpty ?? false),
                                   ),
                                   Divider(
                                       color: AppColors.divider,
@@ -1350,13 +1391,23 @@ class _RegisterChildDueListFormScreen
                                     Padding(
                                       padding:
                                       const EdgeInsets.only(top: 8.0),
-                                      child: CustomTextField(
-                                        labelText: l10n.specifyCategoryShort,
-                                        hintText: l10n.enter_category,
-                                        initialValue: state.customCaste,
-                                        onChanged: (v) =>
-                                            bloc.add(CustomCasteChanged(v)),
-                                      ),
+                                      child: (_beneficiaryData?.otherCategory?.isNotEmpty ?? false)
+                                          ? Opacity(
+                                              opacity: 0.7,
+                                              child: CustomTextField(
+                                                labelText: l10n.specifyCategoryShort,
+                                                hintText: l10n.enter_category,
+                                                initialValue: state.customCaste,
+                                                readOnly: true,
+                                                onChanged: (v) => bloc.add(CustomCasteChanged(v)),
+                                              ),
+                                            )
+                                          : CustomTextField(
+                                              labelText: l10n.specifyCategoryShort,
+                                              hintText: l10n.enter_category,
+                                              initialValue: state.customCaste,
+                                              onChanged: (v) => bloc.add(CustomCasteChanged(v)),
+                                            ),
                                     ),
                                 ],
                               ),
@@ -1393,7 +1444,7 @@ class _RegisterChildDueListFormScreen
                                 : (l10n?.saveButton ?? 'SAVE'),
                             color: AppColors.primary,
                             borderRadius: 4,
-                            onPress: () async {
+                            onPress: () {
                               _clearFirstError();
                               final form = _formKey.currentState;
                               if (form == null) return;
@@ -1417,31 +1468,8 @@ class _RegisterChildDueListFormScreen
                                 return;
                               }
 
-                              // Show loading indicator
-                              final result = await showDialog<bool>(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (context) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-
                               // Submit the form
                               bloc.add(const SubmitPressed());
-
-                              // Show success dialog
-                              if (result == true) {
-                                await showDialog(
-                                  context: context,
-                                  builder: (context) => CustomDialog(
-                                    title: 'Form has been saved successfully',
-                                    message: 'Registration completed',
-                                    onOkPressed: () {
-                                      Navigator.of(context).pop(true); // Return to previous screen
-                                    },
-                                  ),
-                                );
-                              }
                             },
                             disabled: state.isSubmitting,
                           ),

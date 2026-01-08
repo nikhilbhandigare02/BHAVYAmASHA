@@ -133,6 +133,12 @@ class _CbacformState extends State<Cbacform> {
                       return l10n.cbacB_b1_weightLoss;
                     case 'partB.b1.nightSweat':
                       return l10n.cbacB_b1_nightSweat;
+                    case 'partB.b1.druggs':
+                      return l10n.cbacB_b1_druggs;
+                    case 'partB.b1.Tuberculosis':
+                      return l10n.cbacB_b1_tuberculosisFamily;
+                    case 'partB.b1.history':
+                      return l10n.cbacB_b1_history;
                     case 'partB.b2.excessBleeding':
                       return l10n.cbacB_b2_excessBleeding;
                     case 'partB.b2.depression':
@@ -146,7 +152,7 @@ class _CbacformState extends State<Cbacform> {
                 // Show only the first missing field label in SnackBar
                 final firstKey = state.missingKeys.first;
                 final firstLabel = labelForKey(firstKey);
-                final msg = '${l10n.cbacPleaseFill}: $firstLabel';
+                final msg = '${l10n.cbacPleaseFill} $firstLabel';
                 showAppSnackBar(context, msg);
               } else if (state.errorMessage != null &&
                   state.errorMessage!.isNotEmpty) {
@@ -965,6 +971,7 @@ class _PartATab extends StatelessWidget {
           required String? value,
           required void Function(String?) onChanged,
           required int score,
+          bool readOnly = false,
         }) {
           return TableRow(
             children: [
@@ -979,6 +986,7 @@ class _PartATab extends StatelessWidget {
                   value: value,
                   onChanged: onChanged,
                   isExpanded: true,
+                  readOnly: readOnly,
                 ),
               ),
               Center(
@@ -1164,6 +1172,7 @@ class _PartATab extends StatelessWidget {
                     }
                   },
                   score: scoreAge,
+                  readOnly: true,
                 ),
                 buildQRow(
                   question: l10n.cbacA_tobaccoQ,
@@ -1617,7 +1626,7 @@ class _PartCTabState extends State<_PartCTab> {
           child: Center(
             child: Text(
               l10n.cbacHeaderLungRisk,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+
             ),
           ),
         ),

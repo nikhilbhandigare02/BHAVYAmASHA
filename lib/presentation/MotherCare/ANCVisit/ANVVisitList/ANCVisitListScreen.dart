@@ -142,6 +142,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           'Name': 'ANC Due - ${_getLast11Chars(beneficiaryId)}',
           'isAncDue': true,
           'RegistrationDate': ancDue['created_date_time'],
+          'lmpDate': _extractLmpDate(ancDue), // Extract LMP date for ANC due records
           '_rawRow': ancDue,
           'is_synced': ancDue['is_synced'],
         });
@@ -267,6 +268,9 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
       if (!isPregnant) return null;
 
+      // Extract LMP date
+      final lmpDate = _extractLmpDate(row);
+
       // Format registration date if available
       String formattedDate = 'N/A';
       if (registrationDate.isNotEmpty) {
@@ -298,6 +302,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         'Mobile No': person['mobileNo'] ?? '',
         'Husband': spouseName,
         'RegistrationDate': formattedDate,
+        'lmpDate': lmpDate, // Add LMP date to the data
         'beneficiary_info': jsonEncode(person),
         '_rawRow': row,
       };
@@ -309,6 +314,67 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
 
 
+
+  DateTime? _extractLmpDate(Map<String, dynamic> data) {
+    try {
+      // Try to get LMP from beneficiary_info first
+      dynamic rawInfo = data['beneficiary_info'];
+      Map<String, dynamic> info;
+      
+      if (rawInfo is String && rawInfo.isNotEmpty) {
+        info = jsonDecode(rawInfo) as Map<String, dynamic>;
+      } else if (rawInfo is Map) {
+        info = Map<String, dynamic>.from(rawInfo as Map);
+      } else {
+        info = <String, dynamic>{};
+      }
+
+      final lmpRaw = info['lmp']?.toString();
+      if (lmpRaw != null && lmpRaw.isNotEmpty) {
+        String dateStr = lmpRaw;
+        if (dateStr.contains('T')) {
+          dateStr = dateStr.split('T')[0];
+        }
+        final lmpDate = DateTime.tryParse(dateStr);
+        if (lmpDate != null) {
+          print('✅ Found LMP date: ${_formatDate(lmpDate)}');
+          return lmpDate;
+        }
+      }
+
+      // Fallback: try to get from _rawRow if available
+      final rawRow = data['_rawRow'] as Map<String, dynamic>?;
+      if (rawRow != null) {
+        rawInfo = rawRow['beneficiary_info'];
+        if (rawInfo is String && rawInfo.isNotEmpty) {
+          info = jsonDecode(rawInfo) as Map<String, dynamic>;
+        } else if (rawInfo is Map) {
+          info = Map<String, dynamic>.from(rawInfo as Map);
+        } else {
+          info = <String, dynamic>{};
+        }
+
+        final lmpRaw = info['lmp']?.toString();
+        if (lmpRaw != null && lmpRaw.isNotEmpty) {
+          String dateStr = lmpRaw;
+          if (dateStr.contains('T')) {
+            dateStr = dateStr.split('T')[0];
+          }
+          final lmpDate = DateTime.tryParse(dateStr);
+          if (lmpDate != null) {
+            print('✅ Found LMP date from _rawRow: ${_formatDate(lmpDate)}');
+            return lmpDate;
+          }
+        }
+      }
+
+      print('⚠️ No LMP date found for beneficiary');
+      return null;
+    } catch (e) {
+      print('⚠️ Error extracting LMP date: $e');
+      return null;
+    }
+  }
 
   int? _calculateAge(dynamic dob) {
     if (dob == null) return null;
@@ -722,46 +788,23 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
                       DateTime? lmpDate;
                       try {
-                        final rawRow = data['_rawRow'] as Map<String, dynamic>?;
-                        dynamic rawInfo = rawRow?['beneficiary_info'];
-                        Map<String, dynamic> info;
-
-                        if (rawInfo is String && rawInfo.isNotEmpty) {
-                          info = jsonDecode(rawInfo) as Map<String, dynamic>;
-                        } else if (rawInfo is Map) {
-                          info = Map<String, dynamic>.from(rawInfo as Map);
-                        } else {
-                          info = <String, dynamic>{};
+                        // First try to get LMP date from the processed data
+                        lmpDate = data['lmpDate'] as DateTime?;
+                        
+                        if (lmpDate == null) {
+                          // Fallback: try to extract from raw data
+                          lmpDate = _extractLmpDate(data);
                         }
 
-                        final lmpRaw = info['lmp']?.toString();
-                        if (lmpRaw != null && lmpRaw.isNotEmpty) {
-                          String dateStr = lmpRaw;
-                          if (dateStr.contains('T')) {
-                            dateStr = dateStr.split('T')[0];
-                          }
-                          lmpDate = DateTime.tryParse(dateStr);
+                        if (lmpDate == null) {
+                          print('⚠️ No LMP date found for beneficiary ${data['BeneficiaryID']}, using current date as fallback');
+                          lmpDate = DateTime.now();
+                        } else {
+                          print('✅ Using LMP date: ${_formatDate(lmpDate!)} for beneficiary ${data['BeneficiaryID']}');
                         }
                       } catch (e) {
                         print('⚠️ Error deriving LMP date: $e');
-                      }
-
-                      if (lmpDate == null) {
-                        try {
-                          final parts = registrationDate.split('/');
-                          if (parts.length == 3) {
-                            lmpDate = DateTime(
-                              int.parse(parts[2]),
-                              int.parse(parts[1]),
-                              int.parse(parts[0]),
-                            );
-                          } else {
-                            lmpDate = DateTime.now();
-                          }
-                        } catch (e) {
-                          print('⚠️ Error parsing fallback registration date: $e');
-                          lmpDate = DateTime.now();
-                        }
+                        lmpDate = DateTime.now();
                       }
 
                       final ancRanges = _calculateAncDateRanges(lmpDate!);
@@ -771,12 +814,14 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                         children: [
 
                           _ancDateBox(
-                            l10n!.firstAnc,                            ancRanges['1st_anc_start']!,
+                            l10n!.firstAnc,
+                            ancRanges['1st_anc_start']!,
                             ancRanges['1st_anc_end']!,
                           ),
                           const SizedBox(width: 4),
                           _ancDateBox(
-                            l10n!.secondAnc,                            ancRanges['2nd_anc_start']!,
+                            l10n!.secondAnc,
+                            ancRanges['2nd_anc_start']!,
                             ancRanges['2nd_anc_end']!,
                           ),
                           const SizedBox(width: 4),
@@ -840,6 +885,16 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
   }
 
   Widget _ancDateBox(String label, DateTime startDate, DateTime endDate) {
+    // Calculate duration in days
+    DateTime displayEndDate = endDate;
+    DateTime displayStartDate = startDate;
+    
+    // Special case for 4th ANC - set end date to 15 days after start date
+    if (label.toLowerCase().contains('4th') || label.toLowerCase().contains('fourth')) {
+      displayEndDate = startDate.add(const Duration(days: 15));
+    }
+    // Remove hardcoded PMSMS logic - use normal calculation
+    
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -856,7 +911,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           ),
           const SizedBox(height: 2),
           Text(
-            '${_formatDate(startDate)}\nTO\n${_formatDate(endDate)}',
+            '${_formatDate(displayStartDate)}\nTO\n${_formatDate(displayEndDate)}',
             style: TextStyle(
               color: AppColors.background,
               fontSize: 12.sp,

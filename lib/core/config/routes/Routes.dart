@@ -23,7 +23,6 @@ import 'package:medixcel_new/presentation/myBeneficiary/myBeneficiaries.dart';
 import 'package:medixcel_new/presentation/profile/Profile_screen.dart';
 import 'package:medixcel_new/presentation/EligibleCouple/EligibleCoupleHome/EligibleCoupleIdentifiedScreen.dart';
 
-
 import '../../../Splash_screen/Splash_screen.dart';
 import '../../../presentation/ABHALink/AbhaLinkScreen.dart' show Abhalinkscreen;
 import '../../../presentation/AllHouseHold/MigrtionSplitScreen/MigrationSplitScreen.dart';
@@ -31,31 +30,42 @@ import '../../../presentation/AllHouseHold/updateMemberDetail/UpdateMemberDetail
 import '../../../presentation/AshakiDuniya/AshaKiDuniyaScreen.dart';
 import '../../../presentation/CBACForm/CBACForm.dart';
 import '../../../presentation/ChildCare/ChildCareHomeScreen.dart';
-import '../../../presentation/ChildCare/ChildTrackingDueList/ChildTrackingDueList.dart' show CHildTrackingDueList;
+import '../../../presentation/ChildCare/ChildTrackingDueList/ChildTrackingDueList.dart'
+    show CHildTrackingDueList;
 import '../../../presentation/ChildCare/ChildTrackingDueList/ChildTrackingDueListForm.dart';
 import '../../../presentation/ChildCare/DeseasedList/DeseasedList.dart';
 import '../../../presentation/ChildCare/HBYCList/HBYCList.dart' show HBYCList;
 import '../../../presentation/ChildCare/HBYC_Child_Care_Form/HBYCChildCareForm.dart';
 import '../../../presentation/ChildCare/HBYC_Child_Care_Form/PreviouseVisitHBYC.dart';
-import '../../../presentation/ChildCare/RegisterChildBeneficieryList/RegisterChildListScreen.dart' show RegisterChildScreen;
-import '../../../presentation/ChildCare/RegisterChildDueList/RegisterChildDueList.dart' show RegisterChildDueList;
+import '../../../presentation/ChildCare/RegisterChildBeneficieryList/RegisterChildListScreen.dart'
+    show RegisterChildScreen;
+import '../../../presentation/ChildCare/RegisterChildDueList/RegisterChildDueList.dart'
+    show RegisterChildDueList;
 import '../../../presentation/ChildCare/RegisterChildDueListForm/RegisterChildDueListForm.dart';
-import '../../../presentation/EligibleCouple/EligibleCoupleHome/EligibleCoupleHomeScreen.dart' show EligibleCoupleHomeScreen;
-import '../../../presentation/EligibleCouple/EligibleCoupleUpdate/EligibleCoupleUpdateScreen.dart' show EligibleCoupleUpdateScreen;
-import '../../../presentation/EligibleCouple/TrackEligibleCouple/TrackEligibleCoupleScreen.dart' show TrackEligibleCoupleScreen;
-import '../../../presentation/EligibleCouple/UpdtedEligibleCoupleList/UpdatedEligibleCoupleListScreen.dart' show UpdatedEligibleCoupleListScreen;
+import '../../../presentation/EligibleCouple/EligibleCoupleHome/EligibleCoupleHomeScreen.dart'
+    show EligibleCoupleHomeScreen;
+import '../../../presentation/EligibleCouple/EligibleCoupleUpdate/EligibleCoupleUpdateScreen.dart'
+    show EligibleCoupleUpdateScreen;
+import '../../../presentation/EligibleCouple/TrackEligibleCouple/TrackEligibleCoupleScreen.dart'
+    show TrackEligibleCoupleScreen;
+import '../../../presentation/EligibleCouple/UpdtedEligibleCoupleList/UpdatedEligibleCoupleListScreen.dart'
+    show UpdatedEligibleCoupleListScreen;
 import '../../../presentation/GuestBeneficiarySearch/GuestBeneficiarySearch.dart';
 import '../../../presentation/Help/HelpScreen.dart';
 import '../../../presentation/High-Risk/High_Risk.dart';
 import '../../../presentation/HomeScreen/HomeScreen.dart';
 import '../../../presentation/Incentive_portal/NationalPrograms/NationalProgramsScreen.dart';
-import '../../../presentation/MotherCare/ANCVisit/PreviousVisits/PreviousVisit.dart' show Previousvisit;
+import '../../../presentation/MotherCare/ANCVisit/PreviousVisits/PreviousVisit.dart'
+    show Previousvisit;
 import '../../../presentation/MotherCare/DeliveryOutcome/Deliver_outcome_screen.dart';
-import '../../../presentation/MotherCare/HBNCScreen/HBNCList.dart' show HBNCListScreen;
+import '../../../presentation/MotherCare/HBNCScreen/HBNCList.dart'
+    show HBNCListScreen;
 import '../../../presentation/MotherCare/HBNCVisitForm/HBNCVisitScreen.dart';
-import '../../../presentation/MotherCare/MotherCareHomeScreen.dart' show Mothercarehomescreen;
+import '../../../presentation/MotherCare/MotherCareHomeScreen.dart'
+    show Mothercarehomescreen;
 import '../../../presentation/MotherCare/OutcomeForm/OutcomeForm.dart';
-import '../../../presentation/MotherCare/PreviousVisit/PreviousVisit.dart' show PreviousVisitScreen;
+import '../../../presentation/MotherCare/PreviousVisit/PreviousVisit.dart'
+    show PreviousVisitScreen;
 import '../../../presentation/NCD/NCDHome.dart';
 import '../../../presentation/NCD/NCDList.dart';
 import '../../../presentation/NCD/NCDNonEligibleList.dart';
@@ -68,34 +78,40 @@ import '../../../presentation/RegisterNewHouseHold/RegisterNewHouseHold/bloc/reg
 import '../../../presentation/ResetPassword/ResetPassword.dart';
 import '../../../presentation/Routine/RoutineScreen.dart' show Routinescreen;
 import '../../../presentation/SyncStatus/SyncStatusScreen.dart';
-import '../../../presentation/Training/ReceivedTraining/RecievedTraining.dart' show TrainingReceived;
-import '../../../presentation/Training/Training_Form/TrainingForm.dart' show Trainingform;
+import '../../../presentation/Training/ReceivedTraining/RecievedTraining.dart'
+    show TrainingReceived;
+import '../../../presentation/Training/Training_Form/TrainingForm.dart'
+    show Trainingform;
 import '../../../presentation/Training/Training_Provided/ProvidedTraining.dart';
 import '../../../presentation/login/Login_Screen.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/AbortionList.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/DeathRegister.dart';
-import '../../../presentation/myBeneficiary/Beneficiaries/EligibleCoupleList.dart' show EligibleCoupleList;
-import '../../../presentation/myBeneficiary/Beneficiaries/FamilyUpdateList.dart' show FamliyUpdate;
+import '../../../presentation/myBeneficiary/Beneficiaries/EligibleCoupleList.dart'
+    show EligibleCoupleList;
+import '../../../presentation/myBeneficiary/Beneficiaries/FamilyUpdateList.dart'
+    show FamliyUpdate;
 import '../../../presentation/myBeneficiary/Beneficiaries/GuestBeneficiaries.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/HBNCList.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/LBWRefered.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/MigratedOut.dart';
 import '../../../presentation/myBeneficiary/Beneficiaries/PregnancyOutcome.dart';
-import '../../../presentation/myBeneficiary/Beneficiaries/PregnantWomanList.dart' show PregnantWomenList;
+import '../../../presentation/myBeneficiary/Beneficiaries/PregnantWomanList.dart'
+    show PregnantWomenList;
 import 'Route_Name.dart' show Route_Names;
 
-class Routes{
-  static final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
-  static Route<dynamic> generateRoute(RouteSettings setting){
-    switch (setting.name){
+class Routes {
+  static final RouteObserver<ModalRoute<void>> routeObserver =
+      RouteObserver<ModalRoute<void>>();
+  static Route<dynamic> generateRoute(RouteSettings setting) {
+    switch (setting.name) {
       case Route_Names.splashScreen:
-        return MaterialPageRoute(builder: (context) => SplashScreen(),);
+        return MaterialPageRoute(builder: (context) => SplashScreen());
       case Route_Names.loginScreen:
-        return MaterialPageRoute(builder: (context) => LoginScreen(),);
+        return MaterialPageRoute(builder: (context) => LoginScreen());
       case Route_Names.homeScreen:
-        return MaterialPageRoute(builder: (context) => HomeScreen(),);
-        case Route_Names.Ncdlist:
-        return MaterialPageRoute(builder: (context) => Ncdlist(),);
+        return MaterialPageRoute(builder: (context) => HomeScreen());
+      case Route_Names.Ncdlist:
+        return MaterialPageRoute(builder: (context) => Ncdlist());
       case Route_Names.profileScreen:
         final args = setting.arguments as Map<String, dynamic>?;
         final fromLogin = args?['fromLogin'] as bool? ?? false;
@@ -106,13 +122,13 @@ class Routes{
           ),
         );
       case Route_Names.MISScreen:
-        return MaterialPageRoute(builder: (context) => Misreport(),);
+        return MaterialPageRoute(builder: (context) => Misreport());
       case Route_Names.Resetpassword:
-        return MaterialPageRoute(builder: (context) => Resetpassword(),);
+        return MaterialPageRoute(builder: (context) => Resetpassword());
       case Route_Names.setting:
-        return MaterialPageRoute(builder: (context) => Setting(),);
+        return MaterialPageRoute(builder: (context) => Setting());
       case Route_Names.aboutUs:
-        return MaterialPageRoute(builder: (context) => Aboutus(),);
+        return MaterialPageRoute(builder: (context) => Aboutus());
       case Route_Names.incentivePortal:
         return MaterialPageRoute(builder: (_) => const IncentivePortal());
       case Route_Names.incentiveForm:
@@ -120,7 +136,9 @@ class Routes{
       case Route_Names.Guestbeneficiaries:
         return MaterialPageRoute(builder: (_) => const Guestbeneficiaries());
       case Route_Names.GuestBeneficiarySearch:
-        return MaterialPageRoute(builder: (context) => GuestBeneficiarySearch(),);
+        return MaterialPageRoute(
+          builder: (context) => GuestBeneficiarySearch(),
+        );
       case Route_Names.RegisterNewHousehold:
         return MaterialPageRoute(
           builder: (context) => BlocProvider(
@@ -129,40 +147,52 @@ class Routes{
           ),
         );
       case Route_Names.AllHousehold:
-        return MaterialPageRoute(builder: (context) => AllhouseholdScreen(),);
+        return MaterialPageRoute(builder: (context) => AllhouseholdScreen());
       case Route_Names.houseHoldBeneficiaryScreen:
-        return MaterialPageRoute(builder: (context) => HouseHold_BeneficiaryScreen(),);
+        return MaterialPageRoute(
+          builder: (context) => HouseHold_BeneficiaryScreen(),
+        );
       case Route_Names.RegisterChildScreen:
-        return MaterialPageRoute(builder: (context) => RegisterChildScreen(),);
+        return MaterialPageRoute(builder: (context) => RegisterChildScreen());
       case Route_Names.RegisterChildDueList:
-        return MaterialPageRoute(builder: (context) => RegisterChildDueList(),);
+        return MaterialPageRoute(builder: (context) => RegisterChildDueList());
       case Route_Names.AllBeneficiaryScreen:
-        return MaterialPageRoute(builder: (context) => AllBeneficiaryScreen(),);
+        return MaterialPageRoute(builder: (context) => AllBeneficiaryScreen());
       case Route_Names.Mybeneficiaries:
-        return MaterialPageRoute(builder: (context) => Mybeneficiaries(),);
+        return MaterialPageRoute(builder: (context) => Mybeneficiaries());
       case Route_Names.ABHAGeneration:
-        return MaterialPageRoute(builder: (context) => ABHAScreen(),);
+        return MaterialPageRoute(builder: (context) => ABHAScreen());
       case Route_Names.WorkProgress:
-        return MaterialPageRoute(builder: (context) => Todaywork(),);
+        return MaterialPageRoute(builder: (context) => Todaywork());
       case Route_Names.Annoucement:
-        return MaterialPageRoute(builder: (context) => AnnoucementScree(),);
+        return MaterialPageRoute(builder: (context) => AnnoucementScree());
       case Route_Names.EligibleCoupleIdentified:
-        return MaterialPageRoute(builder: (context) => const EligibleCoupleIdentifiedScreen(),);
+        return MaterialPageRoute(
+          builder: (context) => const EligibleCoupleIdentifiedScreen(),
+        );
       case Route_Names.UpdatedEligibleCoupleList:
         return MaterialPageRoute(
           settings: setting,
           builder: (context) => const EligibleCoupleUpdateScreen(),
         );
       case Route_Names.EligibleCoupleHomeScreen:
-        return MaterialPageRoute(builder: (context) => const EligibleCoupleHomeScreen(),);
+        return MaterialPageRoute(
+          builder: (context) => const EligibleCoupleHomeScreen(),
+        );
       case Route_Names.UpdatedEligibleCoupleScreen:
-        return MaterialPageRoute(builder: (context) => const UpdatedEligibleCoupleListScreen(),);
+        return MaterialPageRoute(
+          builder: (context) => const UpdatedEligibleCoupleListScreen(),
+        );
       case Route_Names.Mothercarehomescreen:
-        return MaterialPageRoute(builder: (context) => const Mothercarehomescreen(),);
+        return MaterialPageRoute(
+          builder: (context) => const Mothercarehomescreen(),
+        );
       case Route_Names.Ancvisitlistscreen:
-        return MaterialPageRoute(builder: (context) => const Ancvisitlistscreen(),);
+        return MaterialPageRoute(
+          builder: (context) => const Ancvisitlistscreen(),
+        );
       case Route_Names.Ancvisitform:
-        return MaterialPageRoute(builder: (context) => const Ancvisitform(),);
+        return MaterialPageRoute(builder: (context) => const Ancvisitform());
       case Route_Names.Previousvisit:
         final args = setting.arguments as Map<String, dynamic>?;
         final beneficiaryId = args?['beneficiaryId']?.toString() ?? '';
@@ -173,27 +203,33 @@ class Routes{
         final args = setting.arguments as Map<String, dynamic>?;
         final beneficiaryId = args?['beneficiaryId'] as String? ?? '';
         return MaterialPageRoute(
-          builder: (context) => PreviousVisitsScreenHBYC(beneficiaryId: beneficiaryId),
+          builder: (context) =>
+              PreviousVisitsScreenHBYC(beneficiaryId: beneficiaryId),
         );
       case Route_Names.ChildCareHomeScreen:
-        return MaterialPageRoute(builder: (context) => const ChildCareHomeScreen(),);
+        return MaterialPageRoute(
+          builder: (context) => const ChildCareHomeScreen(),
+        );
       case Route_Names.TrainingHomeScreen:
-        return MaterialPageRoute(builder: (context) => const TrainingHomeScreen(),);
+        return MaterialPageRoute(
+          builder: (context) => const TrainingHomeScreen(),
+        );
       case Route_Names.Routinescreen:
-        return MaterialPageRoute(builder: (context) => const Routinescreen(),);
+        return MaterialPageRoute(builder: (context) => const Routinescreen());
       case Route_Names.Trainingform:
-        return MaterialPageRoute(builder: (context) => const Trainingform(),);
+        return MaterialPageRoute(builder: (context) => const Trainingform());
       case Route_Names.HelpScreen:
-        return MaterialPageRoute(builder: (context) => const HelpScreen(),);
+        return MaterialPageRoute(builder: (context) => const HelpScreen());
       case Route_Names.NCDHome:
-        return MaterialPageRoute(builder: (context) => const NCDHome(),);
+        return MaterialPageRoute(builder: (context) => const NCDHome());
       case Route_Names.Ncdeligiblelist:
-        return MaterialPageRoute(builder: (context) => const Ncdeligiblelist(),);
+        return MaterialPageRoute(builder: (context) => const Ncdeligiblelist());
       case Route_Names.TrackEligibleCoupleScreen:
         final args = setting.arguments as Map<String, dynamic>?;
         final beneficiaryId = args?['beneficiaryId'] ?? '';
         return MaterialPageRoute(
-          builder: (context) => TrackEligibleCoupleScreen(beneficiaryId: beneficiaryId),
+          builder: (context) =>
+              TrackEligibleCoupleScreen(beneficiaryId: beneficiaryId),
         );
 
       case Route_Names.cbacScreen:
@@ -205,24 +241,33 @@ class Routes{
           ),
         );
       case Route_Names.Abhalinkscreen:
-        return MaterialPageRoute(builder: (context) => const Abhalinkscreen(),);
+        return MaterialPageRoute(builder: (context) => const Abhalinkscreen());
       case Route_Names.TrainingReceived:
-        return MaterialPageRoute(builder: (context) => const TrainingReceived(),);
+        return MaterialPageRoute(
+          builder: (context) => const TrainingReceived(),
+        );
       case Route_Names.TrainingProvided:
-        return MaterialPageRoute(builder: (context) => const TrainingProvided(),);
+        return MaterialPageRoute(
+          builder: (context) => const TrainingProvided(),
+        );
       case Route_Names.DeliveryOutcomeScreen:
-        return MaterialPageRoute(builder: (context) => const DeliveryOutcomeScreen(),);
+        return MaterialPageRoute(
+          builder: (context) => const DeliveryOutcomeScreen(),
+        );
       case Route_Names.OutcomeFormScreen:
         final args = setting.arguments as Map<String, dynamic>? ?? {};
         return MaterialPageRoute(
-          builder: (context) => OutcomeFormPage(beneficiaryData: args['beneficiaryData'] ?? {}),
+          builder: (context) =>
+              OutcomeFormPage(beneficiaryData: args['beneficiaryData'] ?? {}),
         );
       case Route_Names.HBNCScreen:
-        return MaterialPageRoute(builder: (context) => const HBNCListScreen(),);
+        return MaterialPageRoute(builder: (context) => const HBNCListScreen());
       case Route_Names.HbncVisitFormScreen:
-        return MaterialPageRoute(builder: (context) => const HbncVisitScreen(),);
+        return MaterialPageRoute(builder: (context) => const HbncVisitScreen());
       case Route_Names.CHildTrackingDueList:
-        return MaterialPageRoute(builder: (context) => const CHildTrackingDueList(),);
+        return MaterialPageRoute(
+          builder: (context) => const CHildTrackingDueList(),
+        );
 
       case Route_Names.ChildTrackingDueListForm:
         final args = setting.arguments as Map<String, dynamic>?;
@@ -231,7 +276,7 @@ class Routes{
           settings: setting, // Pass the settings to access arguments
         );
       case Route_Names.HBYCList:
-        return MaterialPageRoute(builder: (context) => const HBYCList(),);
+        return MaterialPageRoute(builder: (context) => const HBYCList());
       case Route_Names.HBYCChildCareForm:
         final args = setting.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
@@ -243,37 +288,52 @@ class Routes{
           settings: setting,
         );
       case Route_Names.RegisterChildDueListFormScreen:
-        return MaterialPageRoute(builder: (context) => const RegisterChildDueListFormScreen(),);
+        return MaterialPageRoute(
+          builder: (context) => const RegisterChildDueListFormScreen(),
+        );
       case Route_Names.previousVisit:
         final args = setting.arguments as Map<String, dynamic>?;
         final beneficiaryId = args?['beneficiaryId']?.toString() ?? '';
         return MaterialPageRoute(
-          builder: (context) => PreviousVisitScreen(beneficiaryId: beneficiaryId),
+          builder: (context) =>
+              PreviousVisitScreen(beneficiaryId: beneficiaryId),
         );
-      
+
       case Route_Names.FamliyUpdate:
-        return MaterialPageRoute(builder: (context) => const FamliyUpdate(),);
+        return MaterialPageRoute(builder: (context) => const FamliyUpdate());
       case Route_Names.EligibleCoupleList:
-        return MaterialPageRoute(builder: (context) => const EligibleCoupleList(),);
+        return MaterialPageRoute(
+          builder: (context) => const EligibleCoupleList(),
+        );
       case Route_Names.PregnantWomenList:
-        return MaterialPageRoute(builder: (context) => const PregnantWomenList(),);
+        return MaterialPageRoute(
+          builder: (context) => const PregnantWomenList(),
+        );
       case Route_Names.SyncStatusScreen:
-        return MaterialPageRoute(builder: (context) => const SyncStatusScreen(),);
+        return MaterialPageRoute(
+          builder: (context) => const SyncStatusScreen(),
+        );
       case Route_Names.DeathRegister:
-        return MaterialPageRoute(builder: (context) => const DeathRegister(),);
+        return MaterialPageRoute(builder: (context) => const DeathRegister());
       case Route_Names.HBNCListBeneficiaries:
-        return MaterialPageRoute(builder: (context) => const HBNCListBeneficiaries(),);
+        return MaterialPageRoute(
+          builder: (context) => const HBNCListBeneficiaries(),
+        );
       case Route_Names.Ncdnoneligiblelist:
-        return MaterialPageRoute(builder: (context) => const Ncdnoneligiblelist(),);
+        return MaterialPageRoute(
+          builder: (context) => const Ncdnoneligiblelist(),
+        );
       case Route_Names.Ncdprioritylist:
-        return MaterialPageRoute(builder: (context) => const Ncdprioritylist(),);
+        return MaterialPageRoute(builder: (context) => const Ncdprioritylist());
       case Route_Names.Migratedout:
-        return MaterialPageRoute(builder: (context) => const Migratedout(),);
+        return MaterialPageRoute(builder: (context) => const Migratedout());
       case Route_Names.Pregnancyoutcome:
-        return MaterialPageRoute(builder: (context) => const Pregnancyoutcome(),);
+        return MaterialPageRoute(
+          builder: (context) => const Pregnancyoutcome(),
+        );
 
       case Route_Names.HighRisk:
-        return MaterialPageRoute(builder: (context) => const HighRisk(),);
+        return MaterialPageRoute(builder: (context) => const HighRisk());
       case Route_Names.MigrationSplitOption:
         return MaterialPageRoute(
           settings: setting,
@@ -284,27 +344,35 @@ class Routes{
           },
         );
       case Route_Names.AshaKiDuniyaScreen:
-        return MaterialPageRoute(builder: (context) => const AshaKiDuniyaScreen(),);
+        return MaterialPageRoute(
+          builder: (context) => const AshaKiDuniyaScreen(),
+        );
       case Route_Names.DeseasedList:
-        return MaterialPageRoute(builder: (context) => const DeseasedList(),);
+        return MaterialPageRoute(builder: (context) => const DeseasedList());
       case Route_Names.Abortionlist:
-        return MaterialPageRoute(builder: (context) => const Abortionlist(),);
+        return MaterialPageRoute(builder: (context) => const Abortionlist());
       case Route_Names.Lbwrefered:
-        return MaterialPageRoute(builder: (context) =>   Lbwrefered(),);
+        return MaterialPageRoute(builder: (context) => Lbwrefered());
       case Route_Names.ChildTrackingDueListForm:
-        return MaterialPageRoute(builder: (context) => const ChildTrackingDueListForm(),);
+        return MaterialPageRoute(
+          builder: (context) => const ChildTrackingDueListForm(),
+        );
       case Route_Names.notificationScreen:
-        return MaterialPageRoute(builder: (context) => const Notificationscreen(),);
+        return MaterialPageRoute(
+          builder: (context) => const Notificationscreen(),
+        );
       case Route_Names.updateMemberDetail:
         final args = setting.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
           builder: (context) => UpdateMemberDetailScreen(
             memberId: args['memberId'],
-           // isEdit: args['isEdit'] ?? false,
+            // isEdit: args['isEdit'] ?? false,
           ),
         );
-      case Route_Names.NationalProgramsScreen :
-        return MaterialPageRoute(builder: (context) =>  NationalProgramsScreen (),);
+      case Route_Names.NationalProgramsScreen:
+        return MaterialPageRoute(
+          builder: (context) => NationalProgramsScreen(),
+        );
       case Route_Names.addFamilyHead:
         return MaterialPageRoute(
           settings: setting,
@@ -325,14 +393,12 @@ class Routes{
             ),
           ),
         );
-      default :
-        return MaterialPageRoute(builder: (context) {
-          return Scaffold(
-            body: Center(
-              child: Text('No Route Found'),
-            ),
-          );
-        },);
+      default:
+        return MaterialPageRoute(
+          builder: (context) {
+            return Scaffold(body: Center(child: Text('No Route Found')));
+          },
+        );
     }
   }
 }

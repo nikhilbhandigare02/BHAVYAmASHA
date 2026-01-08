@@ -388,8 +388,13 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             memberData['dob'],
             memberData['gender'],
           ),
-          'Mobileno.': memberData['mobileNo']?.toString() ?? '',
-          'FatherName': memberData['fatherName']?.toString() ?? '',
+          'Mobileno.': memberData['mobileNo']?.toString() ?? 
+                      memberData['mobile_no']?.toString() ?? 
+                      memberData['mobile_number']?.toString() ?? '',
+          'FatherName': memberData['fatherName']?.toString() ?? 
+                        memberData['father_name']?.toString() ?? 
+                        memberData['spouseName']?.toString() ?? 
+                        memberData['spouse_name']?.toString() ?? '',
           'MotherName': memberData['motherName']?.toString() ?? '',
           '_raw': row,
           '_memberData': memberData,

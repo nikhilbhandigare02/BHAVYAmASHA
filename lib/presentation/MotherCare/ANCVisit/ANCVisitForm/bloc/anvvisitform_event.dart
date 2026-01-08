@@ -85,6 +85,13 @@ class GravidaIncremented extends AnvvisitformEvent {
   const GravidaIncremented();
 }
 
+class GravidaChanged extends AnvvisitformEvent {
+  final int value;
+  const GravidaChanged(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
 class IsBreastFeedingChanged extends AnvvisitformEvent {
   final String value;
   const IsBreastFeedingChanged(this.value);
