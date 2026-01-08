@@ -1947,7 +1947,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reenterPasswordTooShort => 'Password must be at least 6 characters';
 
   @override
-  String get registrationDateLabel => 'Date of registration';
+  String get registrationDateLabel => 'Registration Date';
 
   @override
   String get registrationThroughTitle => 'Registration through';
@@ -6121,7 +6121,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get specify_reason_required => 'Specify Reason *';
 
   @override
-  String get enter_12_digit_rch_id => 'Enter 12 digit RCH ID';
+  String get enter_12_digit_rch_id => 'RCH ID';
 
   @override
   String get must_be_12_digits => 'Must be 12 digits';

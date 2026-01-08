@@ -235,8 +235,11 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
     ranges['4th_anc_end'] = _calculateEdd(lmp);
 
-    ranges['pmsma_start'] = _dateAfterWeeks(lmp, 40);
-    ranges['pmsma_end'] = _dateAfterWeeks(lmp, 44);
+    // Calculate PMSMA dates based on ANC ranges:
+    // PMSMA start = First ANC "to date" + 1 day
+    // PMSMA end = Second ANC "from date" - 1 day
+    ranges['pmsma_start'] = ranges['1st_anc_end']!.add(const Duration(days: 1));
+    ranges['pmsma_end'] = ranges['2nd_anc_start']!.subtract(const Duration(days: 1));
 
     return ranges;
   }
@@ -937,37 +940,9 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     );
   }
 
-  Widget _ancDateRow(String label, DateTime startDate, DateTime endDate) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 70,
-          child: Text(
-            label,
-            style: TextStyle(
-              color: AppColors.background,
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            '${_formatDate(startDate)} - ${_formatDate(endDate)}',
-            style: TextStyle(
-              color: AppColors.background,
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _ancDateBox(String label, DateTime? startDate, DateTime? endDate) {
-    // If dates are null, show "Not Available"
     if (startDate == null || endDate == null) {
       return Expanded(
         child: Column(
@@ -997,16 +972,13 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       );
     }
 
-    // Calculate duration in days
     DateTime displayEndDate = endDate;
     DateTime displayStartDate = startDate;
     
-    // Special case for 4th ANC - set end date to 15 days after start date
     if (label.toLowerCase().contains('4th') || label.toLowerCase().contains('fourth')) {
       displayEndDate = startDate.add(const Duration(days: 15));
     }
-    // Remove hardcoded PMSMS logic - use normal calculation
-    
+
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
