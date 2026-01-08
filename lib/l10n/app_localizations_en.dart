@@ -7361,4 +7361,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rota3 => 'Rota - 3';
+
+  @override
+  String get measles1 => 'Measles - 1';
+
+  @override
+  String get mrDose1 => 'M.R. Dose - 1';
+
+  @override
+  String get vitaminADose1 => 'Vitamin A Dose - 1';
+
+  @override
+  String get jeVaccine1 => 'J.E. Vaccine - 1';
+
+  @override
+  String get pcvBooster => 'P.C.V. Booster';
+
+  @override
+  String get fipv3 => 'F.I.P.V. - 3';
+
+  @override
+  String get opvBooster => 'O.P.V. Booster';
+
+  @override
+  String get dptBooster1 => 'D.P.T. Booster - 1';
+
+  @override
+  String get measles2 => 'Measles - 2';
+
+  @override
+  String get jeVaccine2 => 'J.E. Vaccine - 2';
+
+  @override
+  String get mrDose2 => 'M.R. Dose - 2';
+
+  @override
+  String get dptBooster2 => 'D.P.T. Booster - 2';
+
+  @override
+  String get tdVaccine => 'Tetanus Diphtheria (Td)';
 }
