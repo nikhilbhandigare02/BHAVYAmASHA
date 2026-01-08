@@ -46,17 +46,67 @@ class _NCDHomeState extends State<Ncdlist> {
 
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      
+      debugPrint('Current user data: $currentUserData');
+      debugPrint('Extracted ashaUniqueKey: $ashaUniqueKey');
 
-      final List<Map<String, dynamic>> result = await db.query(
+      List<Map<String, dynamic>> result = [];
+      
+      // Try multiple approaches to get CBAC data
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        // First try: With user key filtering
+        result = await db.query(
+          ffd.FollowupFormDataTable.table,
+          where: 'forms_ref_key = ? AND TRIM(current_user_key) = ?',
+          whereArgs: ['vl7o6r9b6v3fbesk', ashaUniqueKey],
+        );
+        debugPrint('CBAC Forms Data with user filter (${result.length} records)');
+      }
+      
+      // Debug: Check if there are any CBAC records without user filtering
+      final allCbacRecords = await db.query(
         ffd.FollowupFormDataTable.table,
-        where: 'forms_ref_key = ? AND TRIM(current_user_key) = ?',
-        whereArgs: ['vl7o6r9b6v3fbesk', ashaUniqueKey],
+        where: 'forms_ref_key = ?',
+        whereArgs: ['vl7o6r9b6v3fbesk'],
       );
+      debugPrint('All CBAC records without user filter: ${allCbacRecords.length}');
+      
+      // Debug: Check distinct current_user_key values in CBAC records
+      if (allCbacRecords.isNotEmpty) {
+        final distinctKeys = allCbacRecords.map((r) => r['current_user_key']).toSet().toList();
+        debugPrint('Distinct current_user_key values in CBAC: $distinctKeys');
+      }
 
-      debugPrint('CBAC Forms Data (${result.length} records)');
-
-
-      debugPrint('CBAC Forms Data (${result.length} records):');
+      // Fallback strategies
+      if (result.isEmpty && allCbacRecords.isNotEmpty) {
+        debugPrint('No records found with user filter, trying fallback strategies...');
+        
+        // Strategy 1: Try without TRIM
+        if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+          result = await db.query(
+            ffd.FollowupFormDataTable.table,
+            where: 'forms_ref_key = ? AND current_user_key = ?',
+            whereArgs: ['vl7o6r9b6v3fbesk', ashaUniqueKey],
+          );
+          debugPrint('Strategy 1 - Without TRIM (${result.length} records)');
+        }
+        
+        // Strategy 2: Try with NULL current_user_key
+        if (result.isEmpty) {
+          result = await db.query(
+            ffd.FollowupFormDataTable.table,
+            where: 'forms_ref_key = ? AND (current_user_key IS NULL OR current_user_key = "")',
+            whereArgs: ['vl7o6r9b6v3fbesk'],
+          );
+          debugPrint('Strategy 2 - NULL/Empty current_user_key (${result.length} records)');
+        }
+        
+        // Strategy 3: Get all CBAC records (last resort)
+        if (result.isEmpty) {
+          result = allCbacRecords;
+          debugPrint('Strategy 3 - All CBAC records (${result.length} records)');
+        }
+      }
 
       List<Map<String, dynamic>> households = [];
 
@@ -65,7 +115,6 @@ class _NCDHomeState extends State<Ncdlist> {
           final formJson = jsonDecode(form['form_json']);
           final formData = formJson['form_data'] ?? {};
 
-          // Extract data from form_data
           String name = formData['name'] ?? formData['personal']?['name'] ?? 'N/A';
           String age = formData['age']?.toString() ?? formData['personal']?['age']?.toString() ?? 'N/A';
           String gender = formData['gender'] ?? formData['personal']?['gender'] ?? 'N/A';
