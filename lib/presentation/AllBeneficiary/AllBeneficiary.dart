@@ -406,8 +406,11 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
     final gender = (data['Gender']?.toString().toLowerCase() ?? '');
     final isFemale = gender == 'female' || gender == 'f';
+    final isMale = gender == 'male' || gender == 'm';
     final isChild =
         data['RegitrationType']?.toString().toLowerCase() == 'child';
+    final isGeneral =
+        data['RegitrationType']?.toString().toLowerCase() == 'general';
 
     final String completeBeneficiaryId =
         data['unique_key']?.toString() ??
@@ -607,6 +610,13 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                                 ? data['RichID'].toString()
                                 : (l10n?.notAvailable ?? 'Not Available'),
                           )
+                        else if (isMale && isGeneral)
+                          _rowText(
+                            l10n?.tolaMohalla ?? 'Tola/Mohalla',
+                            data['Tola/Mohalla']?.toString().isNotEmpty == true
+                                ? data['Tola/Mohalla']
+                                : (l10n?.na ?? 'N/A'),
+                          )
                         else
                           _rowText(
                             l10n?.mobileLabelSimple ?? 'Mobile No.',
@@ -618,7 +628,6 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                       const SizedBox(height: 8),
 
                       if (isChild) ...[
-                        // Child records: Father Name (or Spouse Name if Father Name not available), Mobile No., Village
                         _buildRow([
                           _rowText(
                             data['FatherName']?.toString().isNotEmpty == true
@@ -758,17 +767,18 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
                         const SizedBox(height: 8),
 
-                        // Show Village and Tola/Mohalla for general records
-                        _buildRow([
-                          _rowText(
-                            l10n?.tolaMohalla ?? 'Tola/Mohalla',
-                            data['Tola/Mohalla']?.toString().isNotEmpty == true
-                                ? data['Tola/Mohalla']
-                                : (l10n?.na ?? 'N/A'),
-                          ),
-                          _rowText('', ''), // Empty cell for layout
-                          _rowText('', ''), // Empty cell for layout
-                        ]),
+                        // Show Village and Tola/Mohalla for general records (except male+general where it's shown above)
+                        if (!(isMale && isGeneral))
+                          _buildRow([
+                            _rowText(
+                              l10n?.tolaMohalla ?? 'Tola/Mohalla',
+                              data['Tola/Mohalla']?.toString().isNotEmpty == true
+                                  ? data['Tola/Mohalla']
+                                  : (l10n?.na ?? 'N/A'),
+                            ),
+                            _rowText('', ''), // Empty cell for layout
+                            _rowText('', ''), // Empty cell for layout
+                          ]),
                     ],
                   ]),
                 ),

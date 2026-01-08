@@ -196,7 +196,7 @@ ORDER BY d.created_date_time DESC
           }
         } catch (_) {}
 
-        final formatted = _formatCoupleData(
+        final formatted = await _formatCoupleData(
           row,
           {},
           {},
@@ -265,7 +265,7 @@ ORDER BY d.created_date_time DESC
     return gender && maritalStatus && age >= 15 && age <= 49;
   }
 
-  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead, Map<String, dynamic>? beneficiaryRow}) {
+  Future<Map<String, dynamic>> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead, Map<String, dynamic>? beneficiaryRow}) async {
     try {
       print('🔄 Formatting couple data for row: $row');
 
@@ -357,26 +357,65 @@ ORDER BY d.created_date_time DESC
       String gender = '';
       String ageYearsDisplay = '';
 
+      // Get registration date from mother_care_activities table for delivery_outcome state
+      try {
+        final db = await DatabaseProvider.instance.database;
+        final mcaResult = await db.query(
+          'mother_care_activities',
+          where: 'beneficiary_ref_key = ? AND mother_care_state = ? AND is_deleted = 0',
+          whereArgs: [beneficiaryRefKey, 'delivery_outcome'],
+          orderBy: 'created_date_time DESC',
+          limit: 1,
+        );
+        
+        if (mcaResult.isNotEmpty) {
+          final mcaCreatedDate = mcaResult.first['created_date_time']?.toString() ?? '';
+          if (mcaCreatedDate.isNotEmpty) {
+            registrationDateDisplay = _formatDate(mcaCreatedDate);
+          }
+        }
+      } catch (e) {
+        print('⚠️ Error fetching registration date from mother_care_activities: $e');
+        // Fallback to existing logic if MCA query fails
+        if (row['beneficiary_created_date'] != null) {
+          final dbCreatedDate = row['beneficiary_created_date'].toString();
+          if (dbCreatedDate.isNotEmpty) {
+            registrationDateDisplay = _formatDate(dbCreatedDate);
+          }
+        }
+      }
+
       // Check if delivery outcome is live_birth and use followup form date if available
       final deliveryOutcome = formData['anc_form']?['delivery_outcome']?.toString().toLowerCase() ?? 
                               formData['delivery_outcome']?.toString().toLowerCase() ?? '';
       if (deliveryOutcome == 'live_birth' && row['followup_created_date'] != null) {
         final followupDate = row['followup_created_date'].toString();
         if (followupDate.isNotEmpty) {
-          registrationDateDisplay = _formatDate(followupDate);
+          // Use followup date for display but keep MCA registration date as primary
+          // This maintains the delivery outcome registration date while showing birth date
         }
-      } else if (row['beneficiary_created_date'] != null) {
-        final dbCreatedDate = row['beneficiary_created_date'].toString();
-        if (dbCreatedDate.isNotEmpty) {
-          registrationDateDisplay = _formatDate(dbCreatedDate);
-        }
-      } else if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
-        try {
-          final createdDt = beneficiaryRow['created_date_time']?.toString() ?? '';
-          if (createdDt.isNotEmpty) {
-            registrationDateDisplay = _formatDate(createdDt);
+      }
+      
+      // Only use beneficiary data if MCA date wasn't found
+      if (registrationDateDisplay == 'N/A' || registrationDateDisplay.isEmpty) {
+        if (row['beneficiary_created_date'] != null) {
+          final dbCreatedDate = row['beneficiary_created_date'].toString();
+          if (dbCreatedDate.isNotEmpty) {
+            registrationDateDisplay = _formatDate(dbCreatedDate);
           }
+        } else if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
+          try {
+            final createdDt = beneficiaryRow['created_date_time']?.toString() ?? '';
+            if (createdDt.isNotEmpty) {
+              registrationDateDisplay = _formatDate(createdDt);
+            }
+          } catch (_) {}
+        }
+      }
 
+      // Process beneficiary info for age and gender calculation
+      if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
+        try {
           final info = beneficiaryRow['beneficiary_info'] is Map
               ? Map<String, dynamic>.from(beneficiaryRow['beneficiary_info'] as Map)
               : <String, dynamic>{};

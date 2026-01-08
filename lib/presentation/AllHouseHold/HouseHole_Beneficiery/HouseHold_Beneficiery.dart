@@ -198,6 +198,9 @@ class _HouseHold_BeneficiaryScreenState
               info['motherName']?.toString() ??
               info['mother_name']?.toString() ??
               '',
+          'WifeName': info['wifeName']?.toString() ?? info['wife_name']?.toString() ?? info['wife']?.toString() ?? info['spouse_name']?.toString() ?? '',
+          'HusbandName': info['husbandName']?.toString() ?? info['husband_name']?.toString() ?? info['husband']?.toString() ?? info['spouse_name']?.toString() ?? '',
+          'SpouseName': info['spouseName']?.toString() ?? info['spouse_name']?.toString() ?? info['spouse']?.toString() ?? '',
           '_raw': row,
           '_memberData': info,
         };
@@ -573,6 +576,24 @@ class _HouseHold_BeneficiaryScreenState
     final headGenderStr = head['Age|Gender']?.toString().toLowerCase() ?? '';
     final isHeadMale = headGenderStr.contains('male');
 
+    // Get gender and unmarried status for current beneficiary
+    final gender = (data['_memberData']['gender']?.toString().toLowerCase() ?? '');
+    final isFemale = gender == 'female' || gender == 'f';
+    
+    final String relation =
+        data['Relation']?.toString().toLowerCase() ?? '';
+
+    final bool isUnmarried =
+        relation.isEmpty ||
+            relation == 'son' ||
+            relation == 'daughter' ||
+            relation == 'brother' ||
+            relation == 'sister' ||
+            relation == 'grandson' ||
+            relation == 'granddaughter' ||
+            relation == 'nephew' ||
+            relation == 'niece';
+
     // Compute complete beneficiary ID from raw row (unique_key) if available
     final Map<String, dynamic>? raw = (data['_raw'] is Map<String, dynamic>)
         ? data['_raw'] as Map<String, dynamic>
@@ -783,61 +804,48 @@ class _HouseHold_BeneficiaryScreenState
                     ],
                   ),
                   const SizedBox(height: 10),
-                  // Show Father's name for children
-                  if (data['Relation'] == 'Child')
-                    _rowText(
-                     l10n?.fatherNameLabel ?? 'Father\'s Name',
-                      data['FatherName']?.isNotEmpty == true
-                          ? data['FatherName']
-                          : (l10n?.notAvailable ??'Not Available'),
-                    ),
-
-                  // Show Mother's name for children if available
-                  if (data['Relation'] == 'Child' &&
-                      data['MotherName']?.isNotEmpty == true)
+                  // Show spouse information using the same logic as AllBeneficiary
+                  if (isFemale && data['HusbandName']?.toString().isNotEmpty == true)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: _rowText(
-                        l10n?.mothersName ?? 'Mother\'s Name',
-                        data['MotherName'] ?? (l10n?.notAvailable ??'Not Available)',
+                        l10n?.husbandNameLabel ?? 'Husband\'s Name',
+                        data['HusbandName'],
                       ),
                     ),
-                    ),
 
-                  // For Head cards, show spouse name with appropriate label based on gender
-                  if (data['Relation'] == 'Head' &&
-                      spouse['Name']?.isNotEmpty == true)
+                  if (!isFemale && data['WifeName']?.toString().isNotEmpty == true)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: _rowText(
-                        isHeadMale ? (l10n?.wifesName ?? 'Wife\'s Name') : (l10n?.husbandNameLabel ??'Husband\'s Name'),
-                        spouse['Name']?.toString() ?? (l10n?.notAvailable ??'Not Available'),
+                        l10n?.wifesName ?? 'Wife\'s Name',
+                        data['WifeName'],
                       ),
                     ),
 
-                  // For Spouse cards, show head's name with appropriate label based on gender
-                  if (data['Relation'] == 'Spouse' &&
-                      head['Name']?.isNotEmpty == true)
+                  // Show Spouse Name if available (fallback when specific husband/wife names are not available)
+                  if (data['SpouseName']?.toString().isNotEmpty == true &&
+                      data['HusbandName']?.toString().isEmpty == true &&
+                      data['WifeName']?.toString().isEmpty == true)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: _rowText(
-                        isHeadMale ? (l10n?.husbandNameLabel ?? 'Husband\'s Name') : (l10n?.wifesName ?? 'Wife\'s Name'),
-                        head['Name']?.toString() ??(l10n?.notAvailable?? 'Not Available'),
+                        isFemale
+                            ? (l10n?.husbandNameLabel ?? 'Husband\'s Name')
+                            : (l10n?.wifesName ?? 'Wife\'s Name'),
+                        data['SpouseName'],
                       ),
                     ),
 
-                  // For other members who are not head or spouse, show father's name if available
-                  if (data['Relation'] != 'Head' &&
-                      data['Relation'] != 'Spouse' &&
-                      data['Relation'] != 'Child')
-                    if (data['FatherName']?.isNotEmpty == true)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: _rowText(
-                          l10n?.fatherNameLabel ?? 'Father\'s Name',
-                          data['FatherName'] ?? (l10n?.notAvailable ?? 'Not Available'),
-                        ),
+                  // Show Father Name for unmarried members
+                  if (data['FatherName']?.toString().isNotEmpty == true && isUnmarried)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: _rowText(
+                        l10n?.fatherNameLabel ?? 'Father\'s Name',
+                        data['FatherName']?.toString() ?? (l10n?.notAvailable ?? 'Not Available'),
                       ),
+                    ),
                 ],
               ),
             ),

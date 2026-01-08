@@ -350,6 +350,28 @@ class _HBNCListScreenState
           final householdRefKey = beneficiary['household_ref_key']?.toString() ?? 'N/A';
           final createdDateTime = beneficiary['created_date_time']?.toString() ?? '';
 
+          // Get registration date from mother_care_activities table for pnc_mother state
+          String registrationDate = createdDateTime;
+          try {
+            final mcaResult = await db.query(
+              'mother_care_activities',
+              where: 'beneficiary_ref_key = ? AND mother_care_state = ? AND is_deleted = 0',
+              whereArgs: [beneficiaryRefKey, 'pnc_mother'],
+              orderBy: 'created_date_time DESC',
+              limit: 1,
+            );
+            
+            if (mcaResult.isNotEmpty) {
+              final mcaCreatedDate = mcaResult.first['created_date_time']?.toString() ?? '';
+              if (mcaCreatedDate.isNotEmpty) {
+                registrationDate = mcaCreatedDate;
+              }
+            }
+          } catch (e) {
+            print('⚠️ Error fetching registration date from mother_care_activities: $e');
+            // Fallback to beneficiary created date
+          }
+
           print('🔍 FormData keys: ${formData.keys.toList()}');
           print('📅 Delivery date from formData: ${formData['delivery_date']}');
           print('📅 Delivery date type: ${formData['delivery_date'].runtimeType}');
@@ -375,7 +397,7 @@ class _HBNCListScreenState
             'fullBeneficiaryId': beneficiaryRefKey,
 
             // Other display data
-            'registrationDate': _formatDate(createdDateTime),
+            'registrationDate': _formatDate(registrationDate),
             'name': name,
             'age': age,
             'gender': gender,

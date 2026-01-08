@@ -12,6 +12,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 
 import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/local_storage_dao.dart';
+import '../../../data/SecureStorage/SecureStorage.dart';
 import '../../AllHouseHold/HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
 import '../../RegisterNewHouseHold/AddFamilyHead/HeadDetails/AddNewFamilyHead.dart';
 
@@ -78,14 +79,65 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
     }
 
     try {
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final households = await LocalStorageDao.instance.getAllHouseholds();
+      // Use same data fetching logic as AllHouseHold_Screen.dart
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
+
+      if (currentUserKey.isEmpty) {
+        print('Error: Current user key not found');
+        if (mounted) {
+          setState(() {
+            _items = [];
+            _filtered = [];
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+
+      // Same query as AllHouseHold_Screen.dart
+      final households = await db.rawQuery(
+        '''
+        SELECT h.* FROM households h
+        INNER JOIN beneficiaries_new b ON h.head_id = b.unique_key
+        WHERE h.is_deleted = 0 
+          AND h.current_user_key = ?
+          AND b.current_user_key = ?
+          AND b.is_deleted = 0
+        ORDER BY h.created_date_time DESC
+      ''',
+        [currentUserKey, currentUserKey],
+      );
+
+      // Query database directly to get eligible couple activities records for eligible_couple and tracking_due states
+      final ecActivities = await db.rawQuery(
+        '''
+        SELECT * FROM eligible_couple_activities 
+        WHERE current_user_key = ? AND is_deleted = 0 
+        AND (eligible_couple_state LIKE '%eligible_couple%' OR eligible_couple_state LIKE '%tracking_due%')
+        ORDER BY created_date_time ASC
+      ''',
+        [currentUserKey],
+      );
+
+      // Query database directly to get mother care activities records for ANC due count
+      final motherCareActivities = await db.rawQuery(
+        '''
+        SELECT * FROM mother_care_activities 
+        WHERE current_user_key = ? AND mother_care_state = 'anc_due' AND is_deleted = 0
+        ORDER BY created_date_time ASC
+      ''',
+        [currentUserKey],
+      );
 
       final pregnantCountMap = <String, int>{};
+      final ancDueCountMap = <String, int>{};
       final elderlyCountMap = <String, int>{};
       final child0to1Map = <String, int>{};
       final child1to2Map = <String, int>{};
       final child2to5Map = <String, int>{};
+      final eligibleCoupleTrackingDueCountMap = <String, int>{};
 
       /// Household -> configured head map
       final headKeyByHousehold = <String, String>{};
@@ -98,7 +150,38 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         } catch (_) {}
       }
 
+      /// --------- ELIGIBLE COUPLE COUNTS (ELIGIBLE_COUPLE OR TRACKING_DUE STATES) ----------
+      final eligibleCoupleUniqueSet = <String, Set<String>>{};
+      for (final ec in ecActivities) {
+        try {
+          final hhKey = (ec['household_ref_key'] ?? '').toString();
+          final beneficiaryKey = (ec['beneficiary_ref_key'] ?? '').toString();
+          if (hhKey.isEmpty || beneficiaryKey.isEmpty) continue;
+
+          // Count unique beneficiaries per household with state containing 'eligible_couple' or 'tracking_due'
+          eligibleCoupleUniqueSet.putIfAbsent(hhKey, () => <String>{});
+          eligibleCoupleUniqueSet[hhKey]!.add(beneficiaryKey);
+        } catch (_) {}
+      }
+
+      // Convert sets to counts
+      for (final hhKey in eligibleCoupleUniqueSet.keys) {
+        eligibleCoupleTrackingDueCountMap[hhKey] = eligibleCoupleUniqueSet[hhKey]!.length;
+      }
+
+      /// --------- ANC DUE COUNTS (PREGNANT WOMEN) ----------
+      for (final ma in motherCareActivities) {
+        try {
+          final hhKey = (ma['household_ref_key'] ?? '').toString();
+          if (hhKey.isEmpty) continue;
+
+          // Count ANC due records for pregnant women calculation
+          ancDueCountMap[hhKey] = (ancDueCountMap[hhKey] ?? 0) + 1;
+        } catch (_) {}
+      }
+
       /// --------- AGGREGATE COUNTS ----------
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       for (final row in rows) {
         try {
           final info = Map<String, dynamic>.from(
@@ -108,6 +191,14 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           );
 
           final householdRefKey = (row['household_ref_key'] ?? '').toString();
+
+          // Check if this is a child record (same logic as RegisterChildListScreen)
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          final relation = info['relation']?.toString().toLowerCase() ?? '';
+          final isChild = memberType == 'child' ||
+              relation == 'child' ||
+              memberType == 'Child' ||
+              relation == 'daughter';
 
           // Pregnant
           final isPregnant =
@@ -119,27 +210,71 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                 (pregnantCountMap[householdRefKey] ?? 0) + 1;
           }
 
-          final dob = info['dob']?.toString();
-          if (dob != null && dob.isNotEmpty) {
-            final birthDate = DateTime.tryParse(dob);
+          final dob = info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
+          if (dob != null && dob.toString().isNotEmpty) {
+            DateTime? birthDate;
+
+            // Use same date parsing logic as RegisterChildListScreen
+            String dateStr = dob.toString();
+            birthDate = DateTime.tryParse(dateStr);
+
+            if (birthDate == null) {
+              final timestamp = int.tryParse(dateStr);
+              if (timestamp != null && timestamp > 0) {
+                birthDate = DateTime.fromMillisecondsSinceEpoch(
+                  timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+                  isUtc: true,
+                );
+              }
+            }
+
             if (birthDate != null) {
               final now = DateTime.now();
-              int ageInMonths =
-                  (now.year - birthDate.year) * 12 +
-                      now.month -
-                      birthDate.month;
-              if (now.day < birthDate.day) ageInMonths--;
+              int years = now.year - birthDate.year;
+              int months = now.month - birthDate.month;
+              int days = now.day - birthDate.day;
 
-              if (ageInMonths >= 0 && ageInMonths < 12) {
-                child0to1Map[householdRefKey] =
-                    (child0to1Map[householdRefKey] ?? 0) + 1;
-              } else if (ageInMonths >= 12 && ageInMonths < 24) {
-                child1to2Map[householdRefKey] =
-                    (child1to2Map[householdRefKey] ?? 0) + 1;
-              } else if (ageInMonths >= 24 && ageInMonths < 60) {
-                child2to5Map[householdRefKey] =
-                    (child2to5Map[householdRefKey] ?? 0) + 1;
-              } else if (ageInMonths >= 65 * 12) {
+              if (days < 0) {
+                final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+                final lastMonthYear = now.month - 1 < 1
+                    ? now.year - 1
+                    : now.year;
+                final daysInLastMonth = DateTime(
+                  lastMonthYear,
+                  lastMonth + 1,
+                  0,
+                ).day;
+                days += daysInLastMonth;
+                months--;
+              }
+
+              if (months < 0) {
+                months += 12;
+                years--;
+              }
+
+              // Convert to total months for easier categorization
+              int totalMonths = years * 12 + months;
+              if (days < 0) totalMonths--; // Adjust if not yet reached birthday this month
+
+              // Only categorize as child if memberType indicates it's a child
+              if (isChild) {
+                if (totalMonths >= 0 && totalMonths < 12) {
+                  child0to1Map[householdRefKey] =
+                      (child0to1Map[householdRefKey] ?? 0) + 1;
+                } else if (totalMonths >= 12 && totalMonths <= 25) {
+                  // Include exactly 2 years (24 months) in 1-2 year category
+                  child1to2Map[householdRefKey] =
+                      (child1to2Map[householdRefKey] ?? 0) + 1;
+                } else if (totalMonths >= 26 && totalMonths < 60) {
+                  // Above 2 years (25+ months) in 2-5 year category
+                  child2to5Map[householdRefKey] =
+                      (child2to5Map[householdRefKey] ?? 0) + 1;
+                }
+              }
+
+              // Still check for elderly regardless of memberType
+              if (totalMonths >= 65 * 12) {
                 elderlyCountMap[householdRefKey] =
                     (elderlyCountMap[householdRefKey] ?? 0) + 1;
               }
@@ -158,34 +293,12 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           // Exclude migrated & death
           if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
 
-          final rawInfo = r['beneficiary_info'];
-          Map<String, dynamic> info;
-          if (rawInfo is Map) {
-            info = Map<String, dynamic>.from(rawInfo);
-          } else if (rawInfo is String && rawInfo.isNotEmpty) {
-            info = Map<String, dynamic>.from(jsonDecode(rawInfo));
-          } else {
-            info = {};
-          }
-
           final configuredHeadKey = headKeyByHousehold[householdRefKey];
 
           final bool isConfiguredHead =
               configuredHeadKey != null && configuredHeadKey == uniqueKey;
 
-          final relation = (info['relation_to_head'] ?? info['relation'] ?? '')
-              .toString()
-              .toLowerCase();
-
-          final bool isHeadByRelation =
-              relation == 'head' || relation == 'self';
-
-          // ✅ NEW CONDITION
-          final bool isFamilyHead =
-              info['isFamilyHead'] == true ||
-                  info['isFamilyHead']?.toString().toLowerCase() == 'true';
-
-          return isConfiguredHead || isHeadByRelation || isFamilyHead;
+          return isConfiguredHead;
         } catch (_) {
           return false;
         }
@@ -207,6 +320,8 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
 
         int totalExpectedChildren = 0;
         final Set<String> parentNames = <String>{};
+        final Set<int> childrenCounts = <int>{}; // Use Set to avoid duplicate counts
+
         for (final b in membersForHousehold) {
           final rawInfo = b['beneficiary_info'];
           Map<String, dynamic> bi;
@@ -222,23 +337,45 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           final hasChildren = hasChildrenRaw == true ||
               hasChildrenRaw?.toString().toLowerCase() == 'yes';
           if (hasChildren) {
-            final tlRaw = bi['totalLive'] ?? bi['totalLiveChildren'];
+            // Check for children field first (from your data format), then fallback to totalLive fields
+            final childrenRaw = bi['children'];
             int tl = 0;
-            if (tlRaw is int) {
-              tl = tlRaw;
+            if (childrenRaw != null) {
+              tl = int.tryParse(childrenRaw.toString()) ?? 0;
             } else {
-              tl = int.tryParse(tlRaw?.toString() ?? '') ?? 0;
+              final tlRaw = bi['totalLive'] ?? bi['totalLiveChildren'];
+              if (tlRaw is int) {
+                tl = tlRaw;
+              } else {
+                tl = int.tryParse(tlRaw?.toString() ?? '') ?? 0;
+              }
             }
-            totalExpectedChildren += tl;
-            final pname = (bi['headName'] ?? bi['name'] ?? bi['memberName'] ?? bi['member_name'] ?? '')
-                .toString()
-                .trim()
-                .toLowerCase();
+
+            // Add to Set to avoid duplicate counts from head and spouse
+            if (tl > 0) {
+              childrenCounts.add(tl);
+            }
+
+            final pname =
+                (bi['headName'] ??
+                        bi['name'] ??
+                        bi['memberName'] ??
+                        bi['member_name'] ??
+                        '')
+                    .toString()
+                    .trim()
+                    .toLowerCase();
             if (pname.isNotEmpty) {
               parentNames.add(pname);
             }
           }
         }
+
+        // Sum unique children counts (avoiding duplicates from head/spouse)
+        totalExpectedChildren = childrenCounts.fold(
+          0,
+          (sum, count) => sum + count,
+        );
 
         int recordedChildren = 0;
         for (final b in membersForHousehold) {
@@ -265,8 +402,10 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
             continue;
           }
 
-          final matchesFather = fatherName.isNotEmpty && parentNames.contains(fatherName);
-          final matchesMother = motherName.isNotEmpty && parentNames.contains(motherName);
+          final matchesFather =
+              fatherName.isNotEmpty && parentNames.contains(fatherName);
+          final matchesMother =
+              motherName.isNotEmpty && parentNames.contains(motherName);
           if (matchesFather || matchesMother) {
             recordedChildren += 1;
           }
@@ -291,7 +430,8 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           'mohallaTola': (info['mohallaTola'] ?? info['tola'] ?? '').toString(),
           'totalMembers': membersForHousehold.length,
           'elderly': elderlyCountMap[householdRefKey] ?? 0,
-          'pregnantWomen': pregnantCountMap[householdRefKey] ?? 0,
+          'pregnantWomen': ancDueCountMap[householdRefKey] ?? 0,
+          'eligibleCouples': eligibleCoupleTrackingDueCountMap[householdRefKey] ?? 0,
           'child0to1': child0to1Map[householdRefKey] ?? 0,
           'child1to2': child1to2Map[householdRefKey] ?? 0,
           'child2to5': child2to5Map[householdRefKey] ?? 0,
@@ -321,6 +461,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         });
       }
     } catch (e) {
+      print('Error in _loadData: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;

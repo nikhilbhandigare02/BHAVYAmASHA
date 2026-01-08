@@ -931,7 +931,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                           l10n?.rchIdLabel ?? 'RCH ID',
                           data['RchID']?.isNotEmpty == true
                               ? data['RchID']
-                              : 'N/A',
+                              : l10n!.na,
                         ),
                       ),
                     ],

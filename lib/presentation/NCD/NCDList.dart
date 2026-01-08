@@ -49,10 +49,12 @@ class _NCDHomeState extends State<Ncdlist> {
 
       final List<Map<String, dynamic>> result = await db.query(
         ffd.FollowupFormDataTable.table,
-
-        where: 'forms_ref_key = ? AND current_user_key = ?',
+        where: 'forms_ref_key = ? AND TRIM(current_user_key) = ?',
         whereArgs: ['vl7o6r9b6v3fbesk', ashaUniqueKey],
       );
+
+      debugPrint('CBAC Forms Data (${result.length} records)');
+
 
       debugPrint('CBAC Forms Data (${result.length} records):');
 

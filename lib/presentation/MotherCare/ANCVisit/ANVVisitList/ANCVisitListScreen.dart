@@ -11,6 +11,7 @@ import '../../../../core/config/themes/CustomColors.dart';
 
 import '../../../../data/Database/database_provider.dart';
 import '../../../../data/Database/local_storage_dao.dart';
+import '../../../../data/Database/tables/followup_form_data_table.dart';
 import '../../../../data/SecureStorage/SecureStorage.dart';
 import '../ANCVisitForm/ANCVisitForm.dart';
 
@@ -111,7 +112,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           if ((isPregnant || isAncDue) &&
               (gender == 'f' || gender == 'female')) {
             final personData =
-            _processPerson(row, info, isPregnant: true);
+            await _processPerson(row, info, isPregnant: true);
 
             if (personData != null) {
               personData['isAncDue'] = isAncDue;
@@ -142,7 +143,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           'Name': 'ANC Due - ${_getLast11Chars(beneficiaryId)}',
           'isAncDue': true,
           'RegistrationDate': ancDue['created_date_time'],
-          'lmpDate': _extractLmpDate(ancDue), // Extract LMP date for ANC due records
+          'lmpDate': await _extractLmpDate(ancDue), // Extract LMP date for ANC due records
           '_rawRow': ancDue,
           'is_synced': ancDue['is_synced'],
         });
@@ -245,11 +246,11 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
   }
 
-  Map<String, dynamic>? _processPerson(
+  Future<Map<String, dynamic>?> _processPerson(
       Map<String, dynamic> row,
       Map<String, dynamic> person, {
         required bool isPregnant,
-      }) {
+      }) async {
     try {
       final name = person['memberName'] ?? person['headName'] ?? 'Unknown';
       final gender = person['gender']?.toString().toLowerCase() ?? '';
@@ -269,7 +270,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       if (!isPregnant) return null;
 
       // Extract LMP date
-      final lmpDate = _extractLmpDate(row);
+      final lmpDate = await _extractLmpDate(row);
 
       // Format registration date if available
       String formattedDate = 'N/A';
@@ -315,9 +316,9 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
 
 
-  DateTime? _extractLmpDate(Map<String, dynamic> data) {
+  Future<DateTime?> _extractLmpDate(Map<String, dynamic> data) async {
     try {
-      // Try to get LMP from beneficiary_info first
+      // First try to get LMP from beneficiary_info (beneficiaries_new table)
       dynamic rawInfo = data['beneficiary_info'];
       Map<String, dynamic> info;
       
@@ -337,7 +338,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         }
         final lmpDate = DateTime.tryParse(dateStr);
         if (lmpDate != null) {
-          print('✅ Found LMP date: ${_formatDate(lmpDate)}');
+          print('✅ Found LMP date from beneficiaries_new: ${_formatDate(lmpDate)}');
           return lmpDate;
         }
       }
@@ -368,10 +369,81 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         }
       }
 
-      print('⚠️ No LMP date found for beneficiary');
+      // If not found in beneficiaries_new, check followup forms
+      print('⚠️ No LMP found in beneficiaries_new, checking followup forms...');
+      final lmpFromFollowup = await _getLmpFromFollowupForm(data);
+      if (lmpFromFollowup != null) {
+        print('✅ Found LMP date from followup form: ${_formatDate(lmpFromFollowup)}');
+        return lmpFromFollowup;
+      }
+
+      print('⚠️ No LMP date found in beneficiaries_new or followup forms');
       return null;
     } catch (e) {
       print('⚠️ Error extracting LMP date: $e');
+      return null;
+    }
+  }
+
+  Future<DateTime?> _getLmpFromFollowupForm(Map<String, dynamic> data) async {
+    try {
+      final benId = data['BeneficiaryID']?.toString() ?? 
+                   data['unique_key']?.toString() ?? 
+                   (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['unique_key']?.toString() : null);
+
+      final hhId = data['hhId']?.toString() ?? 
+                  (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['household_ref_key']?.toString() : null);
+
+      if (benId == null || benId.isEmpty || hhId == null || hhId.isEmpty) {
+        print('⚠️ Missing beneficiary ID or household ID for followup form LMP lookup');
+        return null;
+      }
+
+      final dao = LocalStorageDao();
+      final forms = await dao.getFollowupFormsByHouseholdAndBeneficiary(
+        formType: FollowupFormDataTable.eligibleCoupleTrackingDue,
+        householdId: hhId,
+        beneficiaryId: benId,
+      );
+
+      if (forms.isEmpty) {
+        print('ℹ️ No eligible couple tracking due forms found for beneficiary');
+        return null;
+      }
+
+      for (final form in forms) {
+        final formJsonStr = form['form_json']?.toString();
+        if (formJsonStr == null || formJsonStr.isEmpty) {
+          continue;
+        }
+
+        try {
+          final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
+          
+          // Check for LMP date in eligible_couple_tracking_due_from structure
+          final trackingData = root['eligible_couple_tracking_due_from'];
+          if (trackingData is Map) {
+            final lmpStr = trackingData['lmp_date']?.toString();
+            
+            if (lmpStr != null && lmpStr.isNotEmpty) {
+              try {
+                final lmpDate = DateTime.parse(lmpStr);
+                print('✅ Found LMP date from followup form: $lmpDate');
+                return lmpDate;
+              } catch (e) {
+                print('⚠️ Error parsing LMP date from followup form: $e');
+              }
+            }
+          }
+        } catch (e) {
+          print('⚠️ Error parsing followup form JSON: $e');
+        }
+      }
+
+      print('ℹ️ No LMP date found in any eligible couple tracking due forms');
+      return null;
+    } catch (e) {
+      print('❌ Error loading LMP from followup form: $e');
       return null;
     }
   }
@@ -787,63 +859,72 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                           ? List<String>.from(snapshot.data?['highRiskReasons'] ?? [])
                           : <String>[];
 
-                      DateTime? lmpDate;
-                      try {
-                        // First try to get LMP date from the processed data
-                        lmpDate = data['lmpDate'] as DateTime?;
-                        
-                        if (lmpDate == null) {
-                          // Fallback: try to extract from raw data
-                          lmpDate = _extractLmpDate(data);
-                        }
-
-                        if (lmpDate == null) {
-                          print('⚠️ No LMP date found for beneficiary ${data['BeneficiaryID']}, using current date as fallback');
-                          lmpDate = DateTime.now();
-                        } else {
-                          print('✅ Using LMP date: ${_formatDate(lmpDate!)} for beneficiary ${data['BeneficiaryID']}');
-                        }
-                      } catch (e) {
-                        print('⚠️ Error deriving LMP date: $e');
-                        lmpDate = DateTime.now();
+                      // First try to get LMP date from the processed data
+                      final lmpDateFromData = data['lmpDate'] as DateTime?;
+                      
+                      // If we have LMP date from data, use it directly
+                      if (lmpDateFromData != null) {
+                        final ancRanges = _calculateAncDateRanges(lmpDateFromData);
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _ancDateBox(l10n!.firstAnc, ancRanges['1st_anc_start']!, ancRanges['1st_anc_end']!),
+                            const SizedBox(width: 4),
+                            _ancDateBox(l10n!.secondAnc, ancRanges['2nd_anc_start']!, ancRanges['2nd_anc_end']!),
+                            const SizedBox(width: 4),
+                            _ancDateBox(l10n!.thirdAnc, ancRanges['3rd_anc_start']!, ancRanges['3rd_anc_end']!),
+                            const SizedBox(width: 4),
+                            _ancDateBox(l10n!.fourthAnc, ancRanges['4th_anc_start']!, ancRanges['4th_anc_end']!),
+                            const SizedBox(width: 4),
+                            _ancDateBox(l10n!.pmsma, ancRanges['pmsma_start']!, ancRanges['pmsma_end']!),
+                          ],
+                        );
                       }
 
-                      final ancRanges = _calculateAncDateRanges(lmpDate!);
+                      // If no LMP date from data, use FutureBuilder to extract it
+                      return FutureBuilder<DateTime?>(
+                        future: _extractLmpDate(data),
+                        builder: (context, lmpSnapshot) {
+                          final lmpDate = lmpSnapshot.data;
 
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                          if (lmpDate == null) {
+                            print('⚠️ No LMP date found for beneficiary ${data['BeneficiaryID']}');
+                            // Show "Not Available" for all ANC dates when LMP is not found
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _ancDateBox(l10n!.firstAnc, null, null),
+                                const SizedBox(width: 4),
+                                _ancDateBox(l10n!.secondAnc, null, null),
+                                const SizedBox(width: 4),
+                                _ancDateBox(l10n!.thirdAnc, null, null),
+                                const SizedBox(width: 4),
+                                _ancDateBox(l10n!.fourthAnc, null, null),
+                                const SizedBox(width: 4),
+                                _ancDateBox(l10n!.pmsma, null, null),
+                              ],
+                            );
+                          } else {
+                            print('✅ Using LMP date: ${_formatDate(lmpDate)} for beneficiary ${data['BeneficiaryID']}');
+                          }
 
-                          _ancDateBox(
-                            l10n!.firstAnc,
-                            ancRanges['1st_anc_start']!,
-                            ancRanges['1st_anc_end']!,
-                          ),
-                          const SizedBox(width: 4),
-                          _ancDateBox(
-                            l10n!.secondAnc,
-                            ancRanges['2nd_anc_start']!,
-                            ancRanges['2nd_anc_end']!,
-                          ),
-                          const SizedBox(width: 4),
-                          _ancDateBox(
-                            l10n!.thirdAnc,
-                            ancRanges['3rd_anc_start']!,
-                            ancRanges['3rd_anc_end']!,
-                          ),
-                          const SizedBox(width: 4),
-                          _ancDateBox(
-                            l10n!.fourthAnc,
-                            ancRanges['4th_anc_start']!,
-                            ancRanges['4th_anc_end']!,
-                          ),
-                          const SizedBox(width: 4),
-                          _ancDateBox(
-                            l10n!.pmsma,
-                            ancRanges['pmsma_start']!,
-                            ancRanges['pmsma_end']!,
-                          ),
-                        ],
+                          final ancRanges = _calculateAncDateRanges(lmpDate);
+
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _ancDateBox(l10n!.firstAnc, ancRanges['1st_anc_start']!, ancRanges['1st_anc_end']!),
+                              const SizedBox(width: 4),
+                              _ancDateBox(l10n!.secondAnc, ancRanges['2nd_anc_start']!, ancRanges['2nd_anc_end']!),
+                              const SizedBox(width: 4),
+                              _ancDateBox(l10n!.thirdAnc, ancRanges['3rd_anc_start']!, ancRanges['3rd_anc_end']!),
+                              const SizedBox(width: 4),
+                              _ancDateBox(l10n!.fourthAnc, ancRanges['4th_anc_start']!, ancRanges['4th_anc_end']!),
+                              const SizedBox(width: 4),
+                              _ancDateBox(l10n!.pmsma, ancRanges['pmsma_start']!, ancRanges['pmsma_end']!),
+                            ],
+                          );
+                        },
                       );
                     },
                   ),
@@ -885,7 +966,37 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     );
   }
 
-  Widget _ancDateBox(String label, DateTime startDate, DateTime endDate) {
+  Widget _ancDateBox(String label, DateTime? startDate, DateTime? endDate) {
+    // If dates are null, show "Not Available"
+    if (startDate == null || endDate == null) {
+      return Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: AppColors.background,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'Not Available',
+              style: TextStyle(
+                color: AppColors.background,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     // Calculate duration in days
     DateTime displayEndDate = endDate;
     DateTime displayStartDate = startDate;
