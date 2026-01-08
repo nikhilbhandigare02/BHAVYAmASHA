@@ -365,7 +365,13 @@ ORDER BY d.created_date_time DESC
 
                 Expanded(
                   child: _filtered.isEmpty
-                      ? _buildNoRecordCard(context)
+                      ? Align(
+                    alignment: Alignment.topCenter,
+                    child: SizedBox(
+                      height: 180,
+                      child: _buildNoRecordCard(context),
+                    ),
+                  )
                       : ListView.builder(
                           padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                           itemCount: _filtered.length,

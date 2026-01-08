@@ -564,8 +564,8 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
                   _childBeneficiaries.isEmpty
-                      ? 'No child beneficiaries found. Add a new child to get started.'
-                      : 'No matching child beneficiaries found.',
+                      ? l10n!.noChildBeneficiaries
+                      : l10n!.noMatchingChild,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       fontSize: 16, color: Colors.grey[600]),

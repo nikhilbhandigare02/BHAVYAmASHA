@@ -347,7 +347,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ashaNameHint => 'ASHA Name';
 
   @override
-  String get ashaNameLabel => 'ASHA Name';
+  String get ashaNameLabel => 'Name of ASHA';
 
   @override
   String get ashaProfile => 'ASHA Profile';
@@ -3381,6 +3381,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Retry';
 
   @override
+  String get errorANCList => 'No abortion complication cases found';
+
+  @override
   String get myBeneficiariesTitle => 'My Beneficiaries';
 
   @override
@@ -4708,7 +4711,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get anmName => 'ANM Name';
 
   @override
-  String get ashaName => 'ASHA Name';
+  String get ashaName => 'Name of ASHA';
 
   @override
   String get healthcareProviderInformation => 'Healthcare Provider Information';

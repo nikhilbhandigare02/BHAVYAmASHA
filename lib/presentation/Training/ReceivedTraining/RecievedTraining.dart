@@ -121,18 +121,36 @@ class _TrainingReceivedState extends State<TrainingReceived> {
               child: CircularProgressIndicator(),
             )
                 : _filtered.isEmpty
-                ? Center(
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child:  Text(
-                  l10n!.noRecordFound,
-                  style:  TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w500,
+                ? Align(
+              alignment: Alignment.topCenter,
+              child: SizedBox(
+                width: double.infinity,
+                height: 110, // 👈 fixed height
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  child: Card(
+                    color: Colors.white,
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 20.0,
+                        horizontal: 20.0,
+                      ),
+                      child: Center(
+                        child: Text(
+                          l10n?.noRecordFound ?? 'No Record Found',
+                          style: TextStyle(
+                            fontSize: 17,
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

@@ -180,10 +180,31 @@ class _NCDHomeState extends State<Ncdlist> {
       body: _isLoading
           ? const CenterBoxLoader()
           : _filtered.isEmpty
-          ? Center(
-        child: Text(
-          l10n?.noRecordsFound ??'No records found',
-          style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+          ? Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        child: Card(
+          color: Colors.white,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 50.0, horizontal: 20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  l10n?.noRecordFound ?? 'No Record Found',
+                  style: TextStyle(
+                      fontSize: 17.sp,
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w600
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
         ),
       )
           : Column(
