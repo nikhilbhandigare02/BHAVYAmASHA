@@ -341,7 +341,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ashaIdHint => 'A10000555';
 
   @override
-  String get ashaIdLabel => 'आशा आईडी';
+  String get ashaIdLabel => 'आशा आई.डी';
 
   @override
   String get ashaNameHint => 'आशा का नाम';
@@ -1216,10 +1216,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get fpMethodLabel => 'गर्भनिरोधक का तरीका';
 
   @override
-  String get fruNameHint => 'एफ.आर.यू. का नाम';
+  String get fruNameHint => 'एफ.आर.यू. नाम';
 
   @override
-  String get fruNameLabel => 'एफ.आर.यू. का नाम';
+  String get fruNameLabel => 'एफ.आर.यू. नाम';
 
   @override
   String get fuelCoal => 'कोयला';
@@ -1893,10 +1893,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get pmsmaLabel => 'पीएमएसएमए';
 
   @override
-  String get populationCoveredHint => 'आशा के अंतर्गत आबादी';
+  String get populationCoveredHint => 'आशा के क्षेत्रों की जनसंख्या';
 
   @override
-  String get populationCoveredLabel => 'आशा के अंतर्गत आबादी';
+  String get populationCoveredLabel => 'आशा के क्षेत्रों की जनसंख्या';
 
   @override
   String get poweredBy => 'Powered By Medixcel Lite © ';
@@ -3246,13 +3246,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get passwordHint => 'अपना पासवर्ड दर्ज करें';
 
   @override
-  String get years => 'वर्ष';
+  String get years => 'साल';
 
   @override
   String get yearsHint => 'Year';
 
   @override
-  String get months => 'महीने';
+  String get months => 'महीना';
 
   @override
   String get monthsHint => 'Month';
