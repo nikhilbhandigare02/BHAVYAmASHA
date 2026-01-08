@@ -128,12 +128,13 @@ LEFT JOIN LatestANC a
 LEFT JOIN ${BeneficiariesTable.table} b
   ON b.unique_key = d.beneficiary_ref_key
   AND (b.is_deleted IS NULL OR b.is_deleted = 0)
+  AND (b.is_death = 0 OR b.is_death IS NULL)
 ORDER BY d.created_date_time DESC
 ''',
         [
-          ashaUniqueKey, // 🔑 LatestMCA
-          ancRefKey,     // 🔑 LatestANC (forms_ref_key)
-          ashaUniqueKey, // 🔑 LatestANC (ASHA)
+          ashaUniqueKey,
+          ancRefKey,
+          ashaUniqueKey,
         ],
       );
 
@@ -167,7 +168,7 @@ ORDER BY d.created_date_time DESC
             final fallback = await db.query(
               'beneficiaries_new',
               where:
-              'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND current_user_key = ?',
+              'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND (is_death = 0 OR is_death IS NULL) AND current_user_key = ?',
               whereArgs: [beneficiaryRefKey, ashaUniqueKey],
               limit: 1,
             );
@@ -195,6 +196,12 @@ ORDER BY d.created_date_time DESC
             }
           }
         } catch (_) {}
+
+        // Skip if beneficiary data is not found (likely deceased beneficiary)
+        if (beneficiaryRow == null) {
+          print('⚠️ Skipping beneficiary $beneficiaryRefKey - data not found (likely deceased)');
+          continue;
+        }
 
         final formatted = await _formatCoupleData(
           row,

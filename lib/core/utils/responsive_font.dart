@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
-// Shared responsive font sizing utility for all widgets
 class ResponsiveFont {
   static double getLabelFontSize(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;

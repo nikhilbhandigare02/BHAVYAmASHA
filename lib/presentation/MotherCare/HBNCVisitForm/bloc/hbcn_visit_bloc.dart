@@ -120,9 +120,13 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
       print('  - Name: $formName');
       print('  - Ref Key: $formsRefKey');
 
-      final userInfo = await UserInfo.getCurrentUser();
-      final facilityId = userInfo?['facility_id']?.toString() ?? '0';
-      final currentUserKey = userInfo?['user_key']?.toString() ?? '';
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? currentUserKey = currentUserData?['unique_key']?.toString();
+
+      final facilityId = currentUserData?['asha_associated_with_facility_id'] ??
+          currentUserData?['facility_id'] ??
+          currentUserData?['facilityId'] ??
+          0;
 
       print('👤 Current User:');
       print('  - User Key: $currentUserKey');
@@ -195,7 +199,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         'app_details': jsonEncode(appInfo),
         'parent_user': '',
         'current_user_key': currentUserKey,
-        'facility_id': int.tryParse(facilityId) ?? 0,
+        'facility_id': facilityId,
         'form_json': jsonEncode(formData),
         'created_date_time': now,
         'modified_date_time': now,
@@ -411,46 +415,87 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
     // Auto-calculate next visit date when visit number changes
     if (event.field == 'visitNumber' && event.value != null) {
       final visitNumber = int.tryParse(event.value.toString()) ?? 0;
-      final nextVisitDate = _calculateNextHbncVisitDate(visitNumber);
       
-      if (nextVisitDate != null) {
-        updatedVisitDetails['nextVisitDate'] = nextVisitDate;
-        print('🗓️ Auto-calculated next visit date for visit $visitNumber: $nextVisitDate');
-      }
+      // Calculate and set next visit date asynchronously
+      _calculateAndSetNextVisitDate(visitNumber, event.beneficiaryId, emit);
     }
 
     emit(state.copyWith(visitDetails: updatedVisitDetails));
   }
 
-  /// Calculate next HBNC visit date based on visit number (weeks after delivery)
-  String? _calculateNextHbncVisitDate(int visitNumber) {
+  /// Helper method to calculate and set next visit date asynchronously
+  Future<void> _calculateAndSetNextVisitDate(int visitNumber, String? beneficiaryId, Emitter<HbncVisitState> emit) async {
+    try {
+      final nextVisitDate = await _calculateNextHbncVisitDate(visitNumber, beneficiaryId);
+      
+      if (nextVisitDate != null) {
+        final updatedVisitDetails = Map<String, dynamic>.from(state.visitDetails)
+          ..['nextVisitDate'] = nextVisitDate;
+        
+        emit(state.copyWith(visitDetails: updatedVisitDetails));
+        print('🗓️ Auto-calculated next visit date for visit $visitNumber: $nextVisitDate');
+      }
+    } catch (e) {
+      print('❌ Error in _calculateAndSetNextVisitDate: $e');
+    }
+  }
+
+  /// Calculate next HBNC visit date based on visit number and last inserted record
+  Future<String?> _calculateNextHbncVisitDate(int visitNumber, String? beneficiaryId) async {
     try {
       final now = DateTime.now();
-      final schedule = <int>[1, 3, 7, 14, 21, 28, 42]; // weeks after delivery
       
-      // For initial visit (no previous visits), next visit is 1 week after
-      if (visitNumber <= 0) {
-        final nextVisitDate = now.add(Duration(days: 7)); // 1 week
-        return '${nextVisitDate.year.toString().padLeft(4, '0')}-${nextVisitDate.month.toString().padLeft(2, '0')}-${nextVisitDate.day.toString().padLeft(2, '0')}';
+      // If visit number is 0 or null, show last record's created date
+      if (visitNumber == 0 || beneficiaryId == null || beneficiaryId.isEmpty) {
+        return '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
       }
       
-      // Find the next visit number in the schedule
-      int? nextVisitWeeks;
-      for (int i = 0; i < schedule.length; i++) {
-        if (schedule[i] == visitNumber && i < schedule.length - 1) {
-          nextVisitWeeks = schedule[i + 1];
-          break;
+      // Get last inserted record's created date from database
+      final db = await DatabaseProvider.instance.database;
+      final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+      
+      final lastRecordResults = await db.query(
+        FollowupFormDataTable.table,
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryId, hbncVisitKey],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+      
+      DateTime baseDate;
+      if (lastRecordResults.isNotEmpty) {
+        final createdDateTime = lastRecordResults.first['created_date_time']?.toString();
+        if (createdDateTime != null) {
+          baseDate = DateTime.tryParse(createdDateTime) ?? now;
+        } else {
+          baseDate = now;
         }
+      } else {
+        baseDate = now;
       }
-
-      if (nextVisitWeeks == null) {
-        // Either visitNumber is 42 (last visit) or not in schedule
-        return null;
+      
+      // Calculate next visit date based on visit number
+      DateTime nextVisitDate;
+      switch (visitNumber) {
+        case 1:
+          nextVisitDate = baseDate.add(const Duration(days: 2));
+          break;
+        case 3:
+          nextVisitDate = baseDate.add(const Duration(days: 4));
+          break;
+        case 7:
+        case 14:
+        case 21:
+        case 28:
+          nextVisitDate = baseDate.add(const Duration(days: 7));
+          break;
+        case 42:
+          nextVisitDate = baseDate.add(const Duration(days: 14));
+          break;
+        default:
+          // For any other visit number, add 7 days as default
+          nextVisitDate = baseDate.add(const Duration(days: 7));
       }
-
-      // Calculate next visit date as current date + weeks until next visit
-      final weeksToAdd = nextVisitWeeks - visitNumber;
-      final nextVisitDate = now.add(Duration(days: weeksToAdd * 7));
       
       return '${nextVisitDate.year.toString().padLeft(4, '0')}-${nextVisitDate.month.toString().padLeft(2, '0')}-${nextVisitDate.day.toString().padLeft(2, '0')}';
     } catch (e) {

@@ -38,27 +38,8 @@ class _TodayworkState extends State<Todaywork> {
   @override
   void initState() {
     _loadData();
-    
-    // Reload counts from storage after a delay to ensure TodaysProgramm has saved them
-    Future.delayed(Duration(seconds: 2), () async {
-      if (mounted) {
-        await _reloadCountsFromStorage();
-      }
-    });
-    
-    // Add additional reload attempts
-    Future.delayed(Duration(seconds: 5), () async {
-      if (mounted) {
-        await _reloadCountsFromStorage();
-      }
-    });
-    
-    Future.delayed(Duration(seconds: 10), () async {
-      if (mounted) {
-        await _reloadCountsFromStorage();
-      }
-    });
   }
+
   Future<void> _loadData() async {
     if (!mounted) return;
 
@@ -82,9 +63,9 @@ class _TodayworkState extends State<Todaywork> {
       // Finally, load the completed visits count
       await _loadCompletedVisitsCount();
 
-      // Don't save counts here as it will override the correct values from storage
-      // The _loadCompletedVisitsCount() method already handles saving correctly
-      
+      // Save counts to storage now that all data is loaded
+      await _saveTodayWorkCountsToStorage();
+
       // Trigger a rebuild to ensure UI is updated
       if (mounted) {
         setState(() {});
@@ -126,7 +107,7 @@ class _TodayworkState extends State<Todaywork> {
               formType == FollowupFormDataTable.childRegistrationDue;
           final isChildTracking =
               formsRefKey == '30bycxe4gv7fqnt6' ||
-                  formType == FollowupFormDataTable.childTrackingDue;
+              formType == FollowupFormDataTable.childTrackingDue;
 
           if (!isChildRegistration && !isChildTracking) {
             continue;
@@ -154,7 +135,7 @@ class _TodayworkState extends State<Todaywork> {
             final caseClosureRecords = await db.query(
               FollowupFormDataTable.table,
               where:
-              'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0',
+                  'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0',
               whereArgs: [beneficiaryRefKey, '%case_closure%'],
             );
 
@@ -168,7 +149,9 @@ class _TodayworkState extends State<Todaywork> {
                     final ccFormDataMap =
                         ccDecoded['form_data'] as Map<String, dynamic>? ?? {};
                     final caseClosure =
-                        ccFormDataMap['case_closure'] as Map<String, dynamic>? ?? {};
+                        ccFormDataMap['case_closure']
+                            as Map<String, dynamic>? ??
+                        {};
                     if (caseClosure['is_case_closure'] == true) {
                       hasCaseClosure = true;
                       break;
@@ -203,8 +186,11 @@ class _TodayworkState extends State<Todaywork> {
             continue;
           }
 
-          final recordDateOnly =
-          DateTime(recordDate.year, recordDate.month, recordDate.day);
+          final recordDateOnly = DateTime(
+            recordDate.year,
+            recordDate.month,
+            recordDate.day,
+          );
           // Show records whose date is **up to** today (past or today),
           // and skip only those with future dates.
           if (recordDateOnly.isAfter(todayDateOnly)) {
@@ -217,7 +203,7 @@ class _TodayworkState extends State<Todaywork> {
             try {
               final date = DateTime.parse(created);
               lastVisitDate =
-              '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+                  '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
             } catch (_) {}
           }
 
@@ -287,7 +273,6 @@ class _TodayworkState extends State<Todaywork> {
         setState(() {
           _riItems = items;
         });
-        _saveTodayWorkCountsToStorage();
       }
     } catch (_) {}
   }
@@ -330,8 +315,7 @@ class _TodayworkState extends State<Todaywork> {
               ? infoRaw
               : Map<String, dynamic>.from(infoRaw as Map);
 
-          final name =
-          (info['headName'] ?? info['memberName'] ?? info['name'])
+          final name = (info['headName'] ?? info['memberName'] ?? info['name'])
               ?.toString()
               .trim();
           if (name == null || name.isEmpty) continue;
@@ -422,8 +406,8 @@ class _TodayworkState extends State<Todaywork> {
 
           String rawId =
               row['unique_key']?.toString() ??
-                  row['server_id']?.toString() ??
-                  '-';
+              row['server_id']?.toString() ??
+              '-';
           if (rawId.length > 11) {
             rawId = rawId.substring(rawId.length - 11);
           }
@@ -448,30 +432,30 @@ class _TodayworkState extends State<Todaywork> {
         setState(() {
           _familySurveyItems = items;
         });
-        _saveTodayWorkCountsToStorage();
       }
     } catch (_) {}
   }
+
   Future<void> _loadEligibleCoupleItems() async {
     try {
       if (mounted) {
         setState(() {
           _eligibleCoupleItems = [];
         });
-        _saveTodayWorkCountsToStorage();
       }
     } catch (_) {}
   }
+
   Future<void> _loadHbncItems() async {
     try {
-
       _hbncItems = [];
 
       final Set<String> processedBeneficiaries = <String>{};
 
       // Get delivery outcome data (similar to HBNCList)
       final db = await DatabaseProvider.instance.database;
-      final deliveryOutcomeKey = '4r7twnycml3ej1vg'; // Delivery outcome form key
+      final deliveryOutcomeKey =
+          '4r7twnycml3ej1vg'; // Delivery outcome form key
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
@@ -490,13 +474,17 @@ class _TodayworkState extends State<Todaywork> {
           final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
 
           if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
-            debugPrint('⚠️ Missing beneficiary_ref_key in outcome: ${outcome['id']}');
+            debugPrint(
+              '⚠️ Missing beneficiary_ref_key in outcome: ${outcome['id']}',
+            );
             continue;
           }
 
           // Skip if already processed
           if (processedBeneficiaries.contains(beneficiaryRefKey)) {
-            debugPrint('ℹ️ Skipping duplicate outcome for beneficiary: $beneficiaryRefKey');
+            debugPrint(
+              'ℹ️ Skipping duplicate outcome for beneficiary: $beneficiaryRefKey',
+            );
             continue;
           }
           processedBeneficiaries.add(beneficiaryRefKey);
@@ -514,7 +502,8 @@ class _TodayworkState extends State<Todaywork> {
           }
 
           final beneficiary = beneficiaryResults.first;
-          final beneficiaryInfoRaw = beneficiary['beneficiary_info'] as String? ?? '{}';
+          final beneficiaryInfoRaw =
+              beneficiary['beneficiary_info'] as String? ?? '{}';
 
           Map<String, dynamic> beneficiaryInfo;
           try {
@@ -525,21 +514,30 @@ class _TodayworkState extends State<Todaywork> {
           }
 
           // Extract data
-          final name = beneficiaryInfo['memberName']?.toString() ??
-              beneficiaryInfo['headName']?.toString() ?? 'N/A';
+          final name =
+              beneficiaryInfo['memberName']?.toString() ??
+              beneficiaryInfo['headName']?.toString() ??
+              'N/A';
           final dob = beneficiaryInfo['dob']?.toString();
           final age = _calculateAge(dob);
-          final gender = (beneficiaryInfo['gender']?.toString() ?? 'female').toLowerCase() == 'female'
-              ? 'Female' : 'Male';
+          final gender =
+              (beneficiaryInfo['gender']?.toString() ?? 'female')
+                      .toLowerCase() ==
+                  'female'
+              ? 'Female'
+              : 'Male';
           final mobile = beneficiaryInfo['mobileNo']?.toString() ?? '-';
           final spouseName = beneficiaryInfo['spouseName']?.toString() ?? '-';
-          final householdRefKey = beneficiary['household_ref_key']?.toString() ?? '';
+          final householdRefKey =
+              beneficiary['household_ref_key']?.toString() ?? '';
 
           // Get visit count
           final visitCount = await _getHbncVisitCount(beneficiaryRefKey);
 
           // Get last and next visit dates
-          final lastVisitDate = await _getHbncLastVisitDateForDisplay(beneficiaryRefKey);
+          final lastVisitDate = await _getHbncLastVisitDateForDisplay(
+            beneficiaryRefKey,
+          );
           final nextVisitDate = await _getHbncNextVisitDateForDisplay(
             beneficiaryRefKey,
             formData['delivery_date']?.toString(),
@@ -564,8 +562,12 @@ class _TodayworkState extends State<Todaywork> {
             'beneficiary_info': jsonEncode(beneficiaryInfo),
             'form_data': formData,
             'badge': 'HBNC', // Add this line to ensure the badge shows "HBNC"
-            'last Visit date': lastVisitDate ?? '-', // Ensure this matches the card's expected field name
-            'Current HBNC last due date': nextVisitDate ?? '-', // Ensure this matches the card's expected field name
+            'last Visit date':
+                lastVisitDate ??
+                '-', // Ensure this matches the card's expected field name
+            'Current HBNC last due date':
+                nextVisitDate ??
+                '-', // Ensure this matches the card's expected field name
             'fullBeneficiaryId': beneficiaryRefKey, // Add this for navigation
             'fullHhId': householdRefKey, // Add this for navigation
           };
@@ -573,31 +575,32 @@ class _TodayworkState extends State<Todaywork> {
           setState(() {
             _hbncItems.add(formattedData);
           });
-
         } catch (e) {
           debugPrint('❌ Error processing outcome ${outcome['id']}: $e');
         }
       }
     } catch (e) {
       debugPrint('❌ Error in _loadHbncItems: $e');
-    } finally {
-
-    }
+    } finally {}
   }
+
   Future<void> _loadAncItems() async {
     try {
       final db = await DatabaseProvider.instance.database;
       final ancFormKey =
-          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+              .ancDueRegistration] ??
+          '';
 
       final List<Map<String, dynamic>> items = [];
       final Set<String> processedBeneficiaries = {};
 
       final excludedStates = await db.query(
-          'mother_care_activities',
-          where: "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother')",
-          columns: ['beneficiary_ref_key'],
-          distinct: true
+        'mother_care_activities',
+        where:
+            "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother')",
+        columns: ['beneficiary_ref_key'],
+        distinct: true,
       );
 
       final excludedBeneficiaryIds = excludedStates
@@ -608,7 +611,8 @@ class _TodayworkState extends State<Todaywork> {
       debugPrint('Excluded beneficiary IDs: $excludedBeneficiaryIds');
 
       // Get all beneficiaries with anc_due state that are not in excluded states
-      final query = '''
+      final query =
+          '''
   SELECT 
     mca.*, 
     bn.*, 
@@ -620,9 +624,7 @@ class _TodayworkState extends State<Todaywork> {
   WHERE (mca.mother_care_state = 'anc_due' 
          OR mca.mother_care_state = 'anc_due')
     AND bn.is_deleted = 0
-    ${excludedBeneficiaryIds.isNotEmpty
-          ? 'AND mca.beneficiary_ref_key NOT IN (${excludedBeneficiaryIds.map((_) => '?').join(',')})'
-          : ''}
+    ${excludedBeneficiaryIds.isNotEmpty ? 'AND mca.beneficiary_ref_key NOT IN (${excludedBeneficiaryIds.map((_) => '?').join(',')})' : ''}
   ORDER BY mca.created_date_time DESC
 ''';
 
@@ -631,15 +633,20 @@ class _TodayworkState extends State<Todaywork> {
 
       final ancDueRecords = await db.rawQuery(
         query,
-        excludedBeneficiaryIds.isNotEmpty ? excludedBeneficiaryIds.toList() : [],
+        excludedBeneficiaryIds.isNotEmpty
+            ? excludedBeneficiaryIds.toList()
+            : [],
       );
 
-      debugPrint('Found ${ancDueRecords.length} ANC due records after filtering');
+      debugPrint(
+        'Found ${ancDueRecords.length} ANC due records after filtering',
+      );
 
       // Process the filtered rows
       for (final row in ancDueRecords) {
         final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
-        if (beneficiaryId.isEmpty || processedBeneficiaries.contains(beneficiaryId)) {
+        if (beneficiaryId.isEmpty ||
+            processedBeneficiaries.contains(beneficiaryId)) {
           continue; // Skip if already processed or no beneficiary ID
         }
         try {
@@ -662,15 +669,21 @@ class _TodayworkState extends State<Todaywork> {
             debugPrint('Error parsing beneficiary_info: $e');
             continue;
           }
-          final isPregnant = info['isPregnant']?.toString().toLowerCase() == 'yes';
+          final isPregnant =
+              info['isPregnant']?.toString().toLowerCase() == 'yes';
           final genderRaw = info['gender']?.toString().toLowerCase() ?? '';
 
           // For ANC due records, we still want to show them even if not marked as pregnant
-          if (!isPregnant && genderRaw != 'f' && genderRaw != 'female') continue;
+          if (!isPregnant && genderRaw != 'f' && genderRaw != 'female')
+            continue;
 
-          final name = (info['memberName'] ?? info['headName'] ?? info['name'] ?? 'Unknown')
-              .toString()
-              .trim();
+          final name =
+              (info['memberName'] ??
+                      info['headName'] ??
+                      info['name'] ??
+                      'Unknown')
+                  .toString()
+                  .trim();
 
           String ageText = '-';
           final dobRaw =
@@ -686,8 +699,7 @@ class _TodayworkState extends State<Todaywork> {
                 final now = DateTime.now();
                 int ageYears = now.year - birthDate.year;
                 if (now.month < birthDate.month ||
-                    (now.month == birthDate.month &&
-                        now.day < birthDate.day)) {
+                    (now.month == birthDate.month && now.day < birthDate.day)) {
                   ageYears--;
                 }
                 if (ageYears >= 0) {
@@ -759,11 +771,17 @@ class _TodayworkState extends State<Todaywork> {
           bool _isTodayInWindow(DateTime start, DateTime end) {
             final startDate = DateTime(start.year, start.month, start.day);
             final endDate = DateTime(end.year, end.month, end.day);
-            return (todayDate.isAtSameMomentAs(startDate) || todayDate.isAfter(startDate)) &&
-                (todayDate.isAtSameMomentAs(endDate) || todayDate.isBefore(endDate));
+            return (todayDate.isAtSameMomentAs(startDate) ||
+                    todayDate.isAfter(startDate)) &&
+                (todayDate.isAtSameMomentAs(endDate) ||
+                    todayDate.isBefore(endDate));
           }
 
-          bool _hasFormInWindow(List<Map<String, dynamic>> forms, DateTime start, DateTime end) {
+          bool _hasFormInWindow(
+            List<Map<String, dynamic>> forms,
+            DateTime start,
+            DateTime end,
+          ) {
             for (final formRow in forms) {
               try {
                 final formJsonRaw = formRow['form_json']?.toString();
@@ -772,7 +790,9 @@ class _TodayworkState extends State<Todaywork> {
                 if (formJsonRaw != null && formJsonRaw.isNotEmpty) {
                   final decoded = jsonDecode(formJsonRaw);
                   if (decoded is Map && decoded['form_data'] is Map) {
-                    final formData = Map<String, dynamic>.from(decoded['form_data'] as Map);
+                    final formData = Map<String, dynamic>.from(
+                      decoded['form_data'] as Map,
+                    );
                     dateRaw = formData['date_of_inspection']?.toString();
                   }
                 }
@@ -794,7 +814,8 @@ class _TodayworkState extends State<Todaywork> {
                 final d = DateTime(dt.year, dt.month, dt.day);
                 final startDate = DateTime(start.year, start.month, start.day);
                 final endDate = DateTime(end.year, end.month, end.day);
-                final within = (d.isAtSameMomentAs(startDate) || d.isAfter(startDate)) &&
+                final within =
+                    (d.isAtSameMomentAs(startDate) || d.isAfter(startDate)) &&
                     (d.isAtSameMomentAs(endDate) || d.isBefore(endDate));
                 if (within) return true;
               } catch (_) {}
@@ -826,28 +847,40 @@ class _TodayworkState extends State<Todaywork> {
 
           bool hasDueVisit = false;
 
-          if (!hasDueVisit && firstStart != null && firstEnd != null && _isTodayInWindow(firstStart, firstEnd)) {
+          if (!hasDueVisit &&
+              firstStart != null &&
+              firstEnd != null &&
+              _isTodayInWindow(firstStart, firstEnd)) {
             if (!_hasFormInWindow(existingForms, firstStart, firstEnd)) {
               hasDueVisit = true;
               dueVisitEndDate = firstEnd;
             }
           }
 
-          if (!hasDueVisit && secondStart != null && secondEnd != null && _isTodayInWindow(secondStart, secondEnd)) {
+          if (!hasDueVisit &&
+              secondStart != null &&
+              secondEnd != null &&
+              _isTodayInWindow(secondStart, secondEnd)) {
             if (!_hasFormInWindow(existingForms, secondStart, secondEnd)) {
               hasDueVisit = true;
               dueVisitEndDate = secondEnd;
             }
           }
 
-          if (!hasDueVisit && thirdStart != null && thirdEnd != null && _isTodayInWindow(thirdStart, thirdEnd)) {
+          if (!hasDueVisit &&
+              thirdStart != null &&
+              thirdEnd != null &&
+              _isTodayInWindow(thirdStart, thirdEnd)) {
             if (!_hasFormInWindow(existingForms, thirdStart, thirdEnd)) {
               hasDueVisit = true;
               dueVisitEndDate = thirdEnd;
             }
           }
 
-          if (!hasDueVisit && fourthStart != null && fourthEnd != null && _isTodayInWindow(fourthStart, fourthEnd)) {
+          if (!hasDueVisit &&
+              fourthStart != null &&
+              fourthEnd != null &&
+              _isTodayInWindow(fourthStart, fourthEnd)) {
             if (!_hasFormInWindow(existingForms, fourthStart, fourthEnd)) {
               hasDueVisit = true;
               dueVisitEndDate = fourthEnd;
@@ -893,20 +926,20 @@ class _TodayworkState extends State<Todaywork> {
           continue;
         }
       }
-        if (mounted) {
+      if (mounted) {
         setState(() {
           _ancItems = items;
         });
-        _saveTodayWorkCountsToStorage();
         debugPrint('Updated _ancItems with ${items.length} filtered records');
       }
     } catch (_) {}
   }
+
   Future<void> _loadCompletedVisitsCount() async {
     try {
       // Load counts from SecureStorage (both to-do and completed)
       final counts = await SecureStorageService.getTodayWorkCounts();
-      
+
       print('=== WorkProgress Initial Storage Load ===');
       print('Raw storage data: $counts');
       print('To-Do from storage: ${counts['toDo']}');
@@ -922,7 +955,9 @@ class _TodayworkState extends State<Todaywork> {
       }
 
       print('=== WorkProgress After setState ===');
-      print('State - To-Do: $_toDoVisitsCount, Completed: $_completedVisitsCount');
+      print(
+        'State - To-Do: $_toDoVisitsCount, Completed: $_completedVisitsCount',
+      );
       print('===============================');
 
       // Initialize completed items lists
@@ -943,10 +978,19 @@ class _TodayworkState extends State<Todaywork> {
 
         // Load ANC completed items
         try {
-          final ancFormKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+          final ancFormKey =
+              FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+                  .ancDueRegistration] ??
+              '';
           if (ancFormKey.isNotEmpty) {
-            String motherCareWhereClause = '(mother_care_state = ? OR mother_care_state = ? OR mother_care_state = ?) AND (is_deleted IS NULL OR is_deleted = 0) AND DATE(modified_date_time) = DATE(?)';
-            List<dynamic> motherCareWhereArgs = ['anc_due', 'anc_visit', 'delivery_outcome', todayStr];
+            String motherCareWhereClause =
+                '(mother_care_state = ? OR mother_care_state = ? OR mother_care_state = ?) AND (is_deleted IS NULL OR is_deleted = 0) AND DATE(modified_date_time) = DATE(?)';
+            List<dynamic> motherCareWhereArgs = [
+              'anc_due',
+              'anc_visit',
+              'delivery_outcome',
+              todayStr,
+            ];
 
             if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
               motherCareWhereClause += ' AND current_user_key = ?';
@@ -955,7 +999,11 @@ class _TodayworkState extends State<Todaywork> {
 
             final motherCareRows = await db.query(
               'mother_care_activities',
-              columns: ['beneficiary_ref_key', 'mother_care_state', 'modified_date_time'],
+              columns: [
+                'beneficiary_ref_key',
+                'mother_care_state',
+                'modified_date_time',
+              ],
               where: motherCareWhereClause,
               whereArgs: motherCareWhereArgs,
             );
@@ -966,15 +1014,24 @@ class _TodayworkState extends State<Todaywork> {
                 .toSet();
 
             if (ancBeneficiaryKeys.isNotEmpty) {
-              final placeholders = List.filled(ancBeneficiaryKeys.length, '?').join(',');
-              String query = 'SELECT * FROM ${FollowupFormDataTable.table} '
+              final placeholders = List.filled(
+                ancBeneficiaryKeys.length,
+                '?',
+              ).join(',');
+              String query =
+                  'SELECT * FROM ${FollowupFormDataTable.table} '
                   'WHERE forms_ref_key = ? '
                   'AND beneficiary_ref_key IN ($placeholders) '
                   'AND (is_deleted IS NULL OR is_deleted = 0) '
                   'AND DATE(created_date_time) = DATE(?) '
                   'AND current_user_key = ?';
 
-              List<dynamic> args = [ancFormKey, ...ancBeneficiaryKeys, todayStr, ashaUniqueKey ?? ''];
+              List<dynamic> args = [
+                ancFormKey,
+                ...ancBeneficiaryKeys,
+                todayStr,
+                ashaUniqueKey ?? '',
+              ];
               final rows = await db.rawQuery(query, args);
 
               for (final row in rows) {
@@ -994,7 +1051,11 @@ class _TodayworkState extends State<Todaywork> {
         // Load other completed items (HBNC, EC, RI) - simplified for now
         // The actual logic would be similar to ANC loading above
 
-        final totalCount = _ancCompletedItems.length + _hbncCompletedItems.length + _eligibleCompletedCoupleItems.length + _riCompletedItems.length;
+        final totalCount =
+            _ancCompletedItems.length +
+            _hbncCompletedItems.length +
+            _eligibleCompletedCoupleItems.length +
+            _riCompletedItems.length;
 
         print('=== WorkProgress Completed Items Debug ===');
         print('ANC Completed: ${_ancCompletedItems.length}');
@@ -1012,8 +1073,7 @@ class _TodayworkState extends State<Todaywork> {
           // Don't save here as it will reset to-do count to 0
           // The to-do count should remain what was loaded from storage
         }
-      } catch (e) {
-      }
+      } catch (e) {}
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -1028,17 +1088,25 @@ class _TodayworkState extends State<Todaywork> {
     try {
       if (!mounted) return;
 
-      final currentStorage = await SecureStorageService.getTodayWorkCounts();
-      final currentToDoCount = currentStorage['toDo'] ?? 0;
-      final completedCount = _completedVisitsCount >= 0 ? _completedVisitsCount : 0;
+      // Calculate to-do count from current items
+      final familyCount = _familySurveyItems.length;
+      final eligibleCoupleCount = _eligibleCoupleItems.length;
+      final ancCount = _ancItems.length;
+      final hbncCount = _hbncItems.length;
+      final riCount = _riItems.length;
+
+      final toDoCount = familyCount + eligibleCoupleCount + ancCount + hbncCount + riCount;
+      final completedCount = _completedVisitsCount >= 0
+          ? _completedVisitsCount
+          : 0;
 
       print('=== WorkProgress Saving to Storage ===');
-      print('Current To-Do from storage: $currentToDoCount');
-      print('Completed Count (calculated): $completedCount');
+      print('Calculated To-Do Count: $toDoCount');
+      print('Completed Count: $completedCount');
       print('==================================');
 
       await SecureStorageService.saveTodayWorkCounts(
-        toDo: currentToDoCount,
+        toDo: toDoCount,
         completed: completedCount,
       );
 
@@ -1050,17 +1118,16 @@ class _TodayworkState extends State<Todaywork> {
     }
   }
 
-
   Future<void> _reloadCountsFromStorage() async {
     try {
       final counts = await SecureStorageService.getTodayWorkCounts();
-      
+
       print('=== WorkProgress Delayed Reload ===');
       print('Raw storage data: $counts');
       print('To-Do from storage: ${counts['toDo']}');
       print('Completed from storage: ${counts['completed']}');
       print('==============================');
-      
+
       if (mounted) {
         setState(() {
           _toDoVisitsCount = counts['toDo'] ?? 0;
@@ -1078,6 +1145,7 @@ class _TodayworkState extends State<Todaywork> {
     if (input == null || input.isEmpty) return '-';
     return input.length <= 11 ? input : input.substring(input.length - 11);
   }
+
   Future<void> _loadCountsFromStorage(TodaysWorkBloc bloc) async {
     try {
       final stored = await SecureStorageService.getTodayWorkCounts();
@@ -1096,14 +1164,16 @@ class _TodayworkState extends State<Todaywork> {
       }
 
       final db = await DatabaseProvider.instance.database;
-      final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+      final hbncVisitKey =
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
       if (hbncVisitKey == null || hbncVisitKey.isEmpty) {
         return 0;
       }
 
       final List<Map<String, dynamic>> results = await db.query(
         FollowupFormDataTable.table,
-        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        where:
+            'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
         whereArgs: [beneficiaryId, hbncVisitKey],
         orderBy: 'created_date_time DESC',
       );
@@ -1114,11 +1184,14 @@ class _TodayworkState extends State<Todaywork> {
 
       try {
         final latestRecord = results.first;
-        final formJson = jsonDecode(latestRecord['form_json'] as String? ?? '{}');
+        final formJson = jsonDecode(
+          latestRecord['form_json'] as String? ?? '{}',
+        );
         final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
 
         if (formData.containsKey('visitDetails')) {
-          final visitDetails = formData['visitDetails'] as Map<String, dynamic>? ?? {};
+          final visitDetails =
+              formData['visitDetails'] as Map<String, dynamic>? ?? {};
           final visitNumber = visitDetails['visitNumber'] as int? ?? 0;
           return visitNumber;
         }
@@ -1130,7 +1203,11 @@ class _TodayworkState extends State<Todaywork> {
     }
   }
 
-  Future<String?> _getNextHbncVisitDate(Database db, String beneficiaryId, String? deliveryDate) async {
+  Future<String?> _getNextHbncVisitDate(
+    Database db,
+    String beneficiaryId,
+    String? deliveryDate,
+  ) async {
     if (deliveryDate == null || deliveryDate.isEmpty) return null;
     try {
       final d = DateTime.tryParse(deliveryDate);
@@ -1164,15 +1241,19 @@ class _TodayworkState extends State<Todaywork> {
   }
 
   Future<String?> _getHbncNextVisitDateForDisplay(
-      String beneficiaryId,
-      String? deliveryDate,
-      ) async {
+    String beneficiaryId,
+    String? deliveryDate,
+  ) async {
     try {
       // Use the scheduled HBNC visits (1,3,7,14,21,28,42 days after
       // delivery) to determine the next visit date, then format it for
       // display.
       final db = await DatabaseProvider.instance.database;
-      final nextRaw = await _getNextHbncVisitDate(db, beneficiaryId, deliveryDate);
+      final nextRaw = await _getNextHbncVisitDate(
+        db,
+        beneficiaryId,
+        deliveryDate,
+      );
       if (nextRaw == null || nextRaw.isEmpty) {
         return null;
       }
@@ -1181,17 +1262,18 @@ class _TodayworkState extends State<Todaywork> {
     } catch (_) {}
     return null;
   }
+
   Future<String?> _getHbncLastVisitDateForDisplay(String beneficiaryId) async {
     try {
       final db = await DatabaseProvider.instance.database;
 
       final hbncVisitKey =
-      FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
 
       final results = await db.query(
         FollowupFormDataTable.table,
         where:
-        'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+            'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
         whereArgs: [beneficiaryId, hbncVisitKey],
         orderBy: 'created_date_time DESC',
         limit: 1,
@@ -1200,15 +1282,14 @@ class _TodayworkState extends State<Todaywork> {
       if (results.isNotEmpty) {
         final result = results.first;
         try {
-          final formJson =
-          jsonDecode(result['form_json'] as String? ?? '{}');
-          final formData =
-              formJson['form_data'] as Map<String, dynamic>? ?? {};
+          final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
+          final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
 
           if (formData.containsKey('visitDetails')) {
             final visitDetails = formData['visitDetails'];
             if (visitDetails is Map) {
-              final visitDate = visitDetails['visitDate'] ??
+              final visitDate =
+                  visitDetails['visitDate'] ??
                   visitDetails['visit_date'] ??
                   visitDetails['dateOfVisit'] ??
                   visitDetails['date_of_visit'];
@@ -1219,7 +1300,8 @@ class _TodayworkState extends State<Todaywork> {
             }
           }
 
-          final visitDate = formData['visit_date'] ??
+          final visitDate =
+              formData['visit_date'] ??
               formData['visitDate'] ??
               formData['dateOfVisit'] ??
               formData['date_of_visit'] ??
@@ -1317,6 +1399,7 @@ class _TodayworkState extends State<Todaywork> {
       return 0;
     }
   }
+
   int? detectSlice(Offset local, int completed, int pending) {
     const size = Size(220, 220);
     final center = Offset(size.width / 2, size.height / 2);
@@ -1342,6 +1425,7 @@ class _TodayworkState extends State<Todaywork> {
     _bloc.add(const TwLoad(toDo: 0, completed: 0));
     await _loadCountsFromStorage(_bloc);
   }
+
   late TodaysWorkBloc _bloc;
 
   @override
@@ -1349,7 +1433,7 @@ class _TodayworkState extends State<Todaywork> {
     final l10n = AppLocalizations.of(context);
     return RefreshIndicator(
       onRefresh: _refreshData,
-    child: BlocProvider(
+      child: BlocProvider(
         create: (_) {
           _bloc = TodaysWorkBloc()..add(const TwLoad(toDo: 0, completed: 0));
           _loadCountsFromStorage(_bloc);
@@ -1375,7 +1459,8 @@ class _TodayworkState extends State<Todaywork> {
                 final total = completed + pending;
                 final progress = state.completed + state.pending == 0
                     ? 0
-                    : (state.completed / (state.completed + state.pending)) * 100;
+                    : (state.completed / (state.completed + state.pending)) *
+                          100;
                 final percent = progress.toStringAsFixed(2);
 
                 return ListView(
@@ -1399,22 +1484,30 @@ class _TodayworkState extends State<Todaywork> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _kv("${l10n!.toDoVisits}:", state.toDo.toString()),
-                            _kv('${l10n.completedVisits} :', state.completed.toString()),
-                            _kv('${l10n.pendingVisits}:', state.pending.toString()),
+                            _kv(
+                              '${l10n.completedVisits} :',
+                              state.completed.toString(),
+                            ),
+                            _kv(
+                              '${l10n.pendingVisits}:',
+                              state.pending.toString(),
+                            ),
                             _kv('${l10n.progress} :', '$percent%'),
                             const SizedBox(height: 8),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 _legend(
-                                    color: Colors.green,
-                                    label: l10n.completed,
-                                    sliceIndex: 0),
+                                  color: Colors.green,
+                                  label: l10n.completed,
+                                  sliceIndex: 0,
+                                ),
                                 const SizedBox(width: 16),
                                 _legend(
-                                    color: AppColors.primary,
-                                    label: l10n.pending,
-                                    sliceIndex: 1),
+                                  color: AppColors.primary,
+                                  label: l10n.pending,
+                                  sliceIndex: 1,
+                                ),
                               ],
                             ),
                             const SizedBox(height: 16),
@@ -1431,7 +1524,10 @@ class _TodayworkState extends State<Todaywork> {
                                       GestureDetector(
                                         onTapDown: (details) {
                                           int? tappedSlice = detectSlice(
-                                              details.localPosition, completed, pending);
+                                            details.localPosition,
+                                            completed,
+                                            pending,
+                                          );
                                           setState(() {
                                             if (_selectedSlice == tappedSlice) {
                                               _selectedSlice = null;
@@ -1445,12 +1541,17 @@ class _TodayworkState extends State<Todaywork> {
                                           painter: _PiePainter(
                                             completed: completed,
                                             pending: pending,
-                                            legendSelected: _selectedSliceFromLegend,
+                                            legendSelected:
+                                                _selectedSliceFromLegend,
                                           ),
                                         ),
                                       ),
                                       if (_selectedSlice != null)
-                                        _buildTooltip(completed, pending, _selectedSlice!),
+                                        _buildTooltip(
+                                          completed,
+                                          pending,
+                                          _selectedSlice!,
+                                        ),
                                     ],
                                   ),
                                 ),
@@ -1543,7 +1644,9 @@ class _TodayworkState extends State<Todaywork> {
             style: TextStyle(
               color: Colors.black,
               fontSize: 15,
-              decoration: isStriked ? TextDecoration.lineThrough : TextDecoration.none,
+              decoration: isStriked
+                  ? TextDecoration.lineThrough
+                  : TextDecoration.none,
               decorationThickness: 2,
             ),
           ),
@@ -1551,7 +1654,6 @@ class _TodayworkState extends State<Todaywork> {
       ),
     );
   }
-
 
   /*Widget _legend({
     required Color color,
@@ -1738,6 +1840,6 @@ class _PiePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _PiePainter old) =>
       old.completed != completed ||
-          old.pending != pending ||
-          old.legendSelected != legendSelected;
+      old.pending != pending ||
+      old.legendSelected != legendSelected;
 }

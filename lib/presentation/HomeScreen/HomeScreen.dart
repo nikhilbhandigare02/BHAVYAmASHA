@@ -446,6 +446,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
           AND e.eligible_couple_state = 'eligible_couple'
           AND e.is_deleted = 0
+          AND b.is_death = 0
           AND e.current_user_key = ?
       ''';
 

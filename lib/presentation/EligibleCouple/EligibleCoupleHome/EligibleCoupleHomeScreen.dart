@@ -67,6 +67,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
         WHERE b.is_deleted = 0 
           AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+          AND (b.is_death = 0 OR b.is_death IS NULL)
           AND e.eligible_couple_state = 'eligible_couple'
           AND e.is_deleted = 0
           AND e.current_user_key = ?
@@ -137,6 +138,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         AND e.is_deleted = 0
         AND b.is_deleted = 0
         AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND (b.is_death = 0 OR b.is_death IS NULL)
         AND e.current_user_key = ?
         AND (b.beneficiary_info IS NULL OR b.beneficiary_info NOT LIKE '%"gender":"male"%')
     ''', [currentUserKey])) ?? 0;
@@ -150,6 +152,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         AND e.is_deleted = 0
         AND b.is_deleted = 0
         AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND (b.is_death = 0 OR b.is_death IS NULL)
         AND e.current_user_key = ?
         AND (b.is_family_planning = 1 OR b.is_family_planning = '1' OR b.is_family_planning = 'true')
         AND (b.beneficiary_info IS NULL OR b.beneficiary_info NOT LIKE '%"gender":"male"%')

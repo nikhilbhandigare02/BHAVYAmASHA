@@ -582,7 +582,7 @@ class LocalStorageDao {
       final db = await _db;
       final rows = await db.query(
         'beneficiaries_new',
-        where: 'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        where: 'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND (is_death = 0 OR is_death IS NULL)',
         whereArgs: [uniqueKey],
         limit: 1,
       );
@@ -988,6 +988,7 @@ class LocalStorageDao {
       WHERE b.is_death = 1
         AND b.is_deleted = 0
         AND b.is_migrated = 0
+        AND b.is_adult = 0
         ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
       ORDER BY b.created_date_time DESC
       ''',

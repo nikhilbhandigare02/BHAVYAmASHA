@@ -40,11 +40,12 @@ class NewbornDetailsChanged extends HbncVisitEvent {
 class VisitDetailsChanged extends HbncVisitEvent {
   final String field;
   final dynamic value;
+  final String? beneficiaryId;
 
-  const VisitDetailsChanged({required this.field, required this.value});
+  const VisitDetailsChanged({required this.field, required this.value, this.beneficiaryId});
 
   @override
-  List<Object?> get props => [field, value];
+  List<Object?> get props => [field, value, beneficiaryId];
 }
 
 class SubmitHbncVisit extends HbncVisitEvent {

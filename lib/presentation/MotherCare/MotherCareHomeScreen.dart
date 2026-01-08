@@ -107,7 +107,8 @@ INNER JOIN (
  AND mca.created_date_time = latest.max_date
 INNER JOIN beneficiaries_new bn
   ON mca.beneficiary_ref_key = bn.unique_key
-WHERE bn.is_deleted = 0;
+WHERE bn.is_deleted = 0 
+  AND (bn.is_death = 0 OR bn.is_death IS NULL);
   ''');
 
     return rows
@@ -147,6 +148,7 @@ WHERE bn.is_deleted = 0;
       r.rn = 1
       AND r.mother_care_state = 'anc_due'
       AND bn.is_deleted = 0
+      AND (bn.is_death = 0 OR bn.is_death IS NULL)
       AND bn.is_migrated = 0
     ORDER BY r.created_date_time DESC;
       ''', [ashaUniqueKey]);
@@ -246,6 +248,10 @@ LatestANC AS (
 SELECT
   d.beneficiary_ref_key
 FROM DeliveryOutcomeOnly d
+INNER JOIN beneficiaries_new bn
+  ON d.beneficiary_ref_key = bn.unique_key
+  AND (bn.is_deleted IS NULL OR bn.is_deleted = 0)
+  AND (bn.is_death = 0 OR bn.is_death IS NULL)
 LEFT JOIN LatestANC a
   ON a.beneficiary_ref_key = d.beneficiary_ref_key
  AND a.rn = 1
@@ -325,6 +331,7 @@ ORDER BY d.created_date_time DESC
     AND ffd.current_user_key = ?
     AND bn.current_user_key = ?
     AND bn.is_deleted = 0
+    AND (bn.is_death = 0 OR bn.is_death IS NULL)
     AND ffd.beneficiary_ref_key IN ($placeholders)
 ''', [
         deliveryOutcomeKey,

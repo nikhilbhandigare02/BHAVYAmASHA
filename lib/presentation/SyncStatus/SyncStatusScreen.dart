@@ -470,7 +470,6 @@ sfgfdd
         return;
       }
 
-      // Use the same logic as myBeneficiaries.dart _getEligibleCoupleCount()
       final query = '''
         SELECT DISTINCT b.*, e.eligible_couple_state, 
                e.created_date_time as registration_date,
@@ -481,6 +480,7 @@ sfgfdd
           AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
           AND e.eligible_couple_state = 'eligible_couple'
           AND e.is_deleted = 0
+          AND b.is_death = 0
           AND e.current_user_key = ?
       ''';
 

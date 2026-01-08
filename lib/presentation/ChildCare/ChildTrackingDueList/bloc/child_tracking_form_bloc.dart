@@ -284,6 +284,8 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
           userDetails['facility_id'] ??
           userDetails['facilityId'] ??
           0;
+      final currentUserKey = userDetails['unique_key']?.toString() ?? '';
+
 
       final formDataForDb = {
         'server_id': '',
@@ -305,7 +307,7 @@ class ChildTrackingFormBloc extends Bloc<ChildTrackingFormEvent, ChildTrackingFo
           'package_name': deviceInfo.packageName,
         }),
         'parent_user': '',
-        'current_user_key': '',
+        'current_user_key': currentUserKey,
         'facility_id': facilityId,
         'form_json': formJson,
         'created_date_time': now,
