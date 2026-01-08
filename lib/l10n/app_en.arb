@@ -1132,6 +1132,7 @@
   "healthMinisterMessage": "Message from the Honorable Health Minister Bihar",
   "errorLoadingVideo": "Error loading video",
   "retry": "Retry",
+  "errorANCList":"No abortion complication cases found",
   "myBeneficiariesTitle": "My Beneficiaries",
   "familyUpdate": "Family Update",
   "eligibleCoupleList": "Eligible Couple List",

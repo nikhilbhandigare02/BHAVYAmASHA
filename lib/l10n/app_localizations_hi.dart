@@ -3381,6 +3381,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get retry => 'पुनः प्रयास करें';
 
   @override
+  String get errorANCList => 'गर्भपात से जुड़ी कोई जटिलता नहीं मिली';
+
+  @override
   String get myBeneficiariesTitle => 'मेरे लाभार्थी';
 
   @override
@@ -6658,7 +6661,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get otherReasonOfDeath => 'अन्य मृत्यु का कारण';
 
   @override
-  String get no_ChildrenFound => 'कोई बच्चा नहीं मिला';
+  String get no_ChildrenFound => 'कोई बच्चा नहीं मिला.';
 
   @override
   String get childRegistration => 'शिशु पंजीकरण';

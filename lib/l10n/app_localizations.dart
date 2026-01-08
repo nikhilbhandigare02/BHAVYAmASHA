@@ -6815,6 +6815,12 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get retry;
 
+  /// No description provided for @errorANCList.
+  ///
+  /// In en, this message translates to:
+  /// **'No abortion complication cases found'**
+  String get errorANCList;
+
   /// No description provided for @myBeneficiariesTitle.
   ///
   /// In en, this message translates to:

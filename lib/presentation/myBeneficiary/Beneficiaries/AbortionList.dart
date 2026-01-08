@@ -213,14 +213,14 @@ class _AbortionlistState extends State<Abortionlist> {
                     const Icon(Icons.error_outline, color: Colors.red, size: 48),
                     const SizedBox(height: 16),
                     Text(
-                      _error,
+                     l10n.errorANCList,
                       style: const TextStyle(color: Colors.red),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: _loadANCVisits,
-                      child: const Text('Retry'),
+                      child:  Text(l10n.retry),
                     ),
                   ],
                 ),

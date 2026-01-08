@@ -3381,6 +3381,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Retry';
 
   @override
+  String get errorANCList => 'No abortion complication cases found';
+
+  @override
   String get myBeneficiariesTitle => 'My Beneficiaries';
 
   @override
