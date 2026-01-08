@@ -25,22 +25,18 @@ class NCDHome extends StatefulWidget {
 
 class _NCDHomeState extends State<NCDHome> {
   int _cbacFormsCount = 0;
-
   @override
   void initState() {
     super.initState();
     _loadCBACFormsCount();
     _loadCBACFormsData();
   }
-
   Future<void> _loadCBACFormsCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
-
       // 1. Fetch current user data to get the ASHA key
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
       // 2. Mandatory Validation: If key is null/empty, stop and set count to 0
       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
         debugPrint('Error: ASHA Unique Key is missing. Cannot load CBAC forms count.');
@@ -51,7 +47,6 @@ class _NCDHomeState extends State<NCDHome> {
         }
         return;
       }
-
       final List<Map<String, dynamic>> result = await db.query(
         ffd.FollowupFormDataTable.table,
         // 3. Add mandatory current_user_key condition
@@ -61,7 +56,6 @@ class _NCDHomeState extends State<NCDHome> {
           ashaUniqueKey, // Pass the valid key here
         ],
       );
-
       if (mounted) {
         setState(() {
           _cbacFormsCount = result.length;
@@ -75,18 +69,15 @@ class _NCDHomeState extends State<NCDHome> {
   Future<void> _loadCBACFormsData() async {
     try {
       final db = await DatabaseProvider.instance.database;
-
       // 1. Fetch current user data to get the ASHA key
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
       final List<Map<String, dynamic>> result = await db.query(
         ffd.FollowupFormDataTable.table,
         // 2. Add current_user_key condition
         where: 'forms_ref_key = ? AND current_user_key = ?',
         whereArgs: ['vl7o6r9b6v3fbesk', ashaUniqueKey],
       );
-
       debugPrint('CBAC Forms Data (${result.length} records):');
       for (var form in result) {
         debugPrint('Form ID: ${form['id']}');
@@ -105,10 +96,8 @@ class _NCDHomeState extends State<NCDHome> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
     // Define spacing constant
     const double spacingBetweenCards = 8;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppHeader(
@@ -124,11 +113,9 @@ class _NCDHomeState extends State<NCDHome> {
           // 1. LayoutBuilder provides the parent's box constraints
           child: LayoutBuilder(
             builder: (context, constraints) {
-
               // 2. Calculate width dynamically based on available space (constraints.maxWidth)
               // We subtract the total gap space (2 gaps of 8px) and divide by 3 items
               final double cardWidth = (constraints.maxWidth - (2 * spacingBetweenCards)) / 3;
-
               return Column(
                 children: [
                   // 🔹 First Row
@@ -179,9 +166,7 @@ class _NCDHomeState extends State<NCDHome> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 10),
-
                   // 🔹 Second Row
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,7 +225,6 @@ class _FeatureCard extends StatelessWidget {
     MediaQuery.of(context).orientation == Orientation.portrait
         ? 15.h
         : 22.h;
-
     return InkWell(
       onTap: onClick,
       borderRadius: BorderRadius.circular(10),

@@ -712,7 +712,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             child: _filtered.isEmpty
                 ? Center(
               child: Text(
-                'No children found',
+                l10n!.no_ChildrenFound,
                 style: TextStyle(
                   fontSize: 16.sp,
                   color: Colors.grey[600],

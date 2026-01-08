@@ -252,8 +252,8 @@ class _DeseasedListState extends State<DeseasedList> {
                       const SizedBox(height: 16),
                       Text(
                         _deceasedList.isEmpty
-                            ? 'No deceased children found'
-                            : 'No matching records found',
+                            ? t.noDeceasedChildrenFound
+                            : t.noDeceasedChildrenFound,
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.grey[600],

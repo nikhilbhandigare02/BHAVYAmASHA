@@ -18,10 +18,8 @@ class TrainingReceived extends StatefulWidget {
 
 class _TrainingReceivedState extends State<TrainingReceived> {
   final TextEditingController _searchCtrl = TextEditingController();
-
   List<Map<String, dynamic>> _allData = [];
   List<Map<String, dynamic>> _filtered = [];
-
   @override
   void initState() {
     super.initState();
@@ -32,7 +30,6 @@ class _TrainingReceivedState extends State<TrainingReceived> {
   Future<void> _loadTrainingData() async {
     try {
       final rows = await LocalStorageDao.instance.fetchTrainingList();
-
       final List<Map<String, dynamic>> parsed = [];
       for (final row in rows) {
         try {
@@ -40,10 +37,8 @@ class _TrainingReceivedState extends State<TrainingReceived> {
           if (formJson is! Map) continue;
           final data = formJson['form_data'];
           if (data is! Map) continue;
-
           final trainingType = (data['training_type'] ?? '').toString();
           if (trainingType != 'Receiving') continue;
-
           final trainingName = (data['training_name'] ?? '').toString();
           final rawDate = data['training_date']?.toString();
           String dateStr = '';
@@ -59,13 +54,11 @@ class _TrainingReceivedState extends State<TrainingReceived> {
               dateStr = rawDate;
             }
           }
-
           final hhIdRaw = (row['household_ref_key'] ?? '').toString();
           final hhId = hhIdRaw.isNotEmpty ? hhIdRaw : 'N/A';
           final displayHhId = hhId.length > 11
               ? hhId.substring(hhId.length - 11)
               : hhId;
-
           parsed.add({
             'hhId': displayHhId,
             'trainingName': trainingName,
@@ -75,7 +68,6 @@ class _TrainingReceivedState extends State<TrainingReceived> {
           continue;
         }
       }
-
       if (!mounted) return;
       setState(() {
         _allData = parsed;
@@ -91,7 +83,6 @@ class _TrainingReceivedState extends State<TrainingReceived> {
     _searchCtrl.dispose();
     super.dispose();
   }
-
   void _onSearchChanged() {
     final q = _searchCtrl.text.toLowerCase();
     setState(() {
@@ -101,13 +92,11 @@ class _TrainingReceivedState extends State<TrainingReceived> {
       }).toList();
     });
   }
-
   bool _isLoading = true;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
     return Scaffold(
       appBar: AppHeader(
         screenTitle: l10n?.trainingReceivedTitle ?? "Training Received",
@@ -121,18 +110,36 @@ class _TrainingReceivedState extends State<TrainingReceived> {
               child: CircularProgressIndicator(),
             )
                 : _filtered.isEmpty
-                ? Center(
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child:  Text(
-                  l10n!.noRecordFound,
-                  style:  TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w500,
+                ? Align(
+              alignment: Alignment.topCenter,
+              child: SizedBox(
+                width: double.infinity,
+                height: 110,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  child: Card(
+                    color: Colors.white,
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 20.0,
+                        horizontal: 20.0,
+                      ),
+                      child: Center(
+                        child: Text(
+                          l10n?.noRecordFound ?? 'No Record Found',
+                          style: TextStyle(
+                            fontSize: 17,
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -153,7 +160,6 @@ class _TrainingReceivedState extends State<TrainingReceived> {
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
     final l10n = AppLocalizations.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -202,7 +208,6 @@ class _TrainingReceivedState extends State<TrainingReceived> {
                   ],
                 ),
               ),
-
               Container(
                 decoration: BoxDecoration(
                   color: primary.withOpacity(0.95),

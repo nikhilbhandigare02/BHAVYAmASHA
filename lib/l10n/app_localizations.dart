@@ -422,7 +422,7 @@ abstract class AppLocalizations {
   /// No description provided for @maritalStatusWidowed.
   ///
   /// In en, this message translates to:
-  /// **'Widowed'**
+  /// **'Widow'**
   String get maritalStatusWidowed;
 
   /// No description provided for @maritalStatusWidower.
@@ -770,7 +770,7 @@ abstract class AppLocalizations {
   /// No description provided for @ashaNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'ASHA Name'**
+  /// **'Name of ASHA'**
   String get ashaNameLabel;
 
   /// No description provided for @ashaProfile.
@@ -3260,7 +3260,7 @@ abstract class AppLocalizations {
   /// No description provided for @isWomanPregnantQuestion.
   ///
   /// In en, this message translates to:
-  /// **'Woman is Pregnant?'**
+  /// **'Is the Woman Pregnant?'**
   String get isWomanPregnantQuestion;
 
   /// No description provided for @kitchenInsideLabel.
@@ -6815,6 +6815,12 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get retry;
 
+  /// No description provided for @errorANCList.
+  ///
+  /// In en, this message translates to:
+  /// **'No abortion complication cases found'**
+  String get errorANCList;
+
   /// No description provided for @myBeneficiariesTitle.
   ///
   /// In en, this message translates to:
@@ -9464,7 +9470,7 @@ abstract class AppLocalizations {
   /// No description provided for @ashaName.
   ///
   /// In en, this message translates to:
-  /// **'ASHA Name'**
+  /// **'Name of ASHA'**
   String get ashaName;
 
   /// No description provided for @healthcareProviderInformation.

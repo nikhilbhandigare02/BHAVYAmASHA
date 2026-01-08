@@ -50,7 +50,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
     final version = await AppVersion.getAppVersion();
     if (mounted) {
       setState(() {
-        _appVersion = version;
+        // _appVersion = version;
+        _appVersion = '1.1.1';
       });
     }
   }

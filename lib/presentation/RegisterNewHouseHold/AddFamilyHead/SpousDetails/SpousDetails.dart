@@ -396,28 +396,28 @@ class _SpousdetailsState extends State<Spousdetails>
         }
 
         final headReligion = head.religion?.trim();
-        if ((curr.religion == null || curr.religion!.isEmpty) &&
-            headReligion != null &&
-            headReligion.isNotEmpty) {
+        if (headReligion != null && headReligion.isNotEmpty) {
           spBloc.add(SpUpdateReligion(headReligion));
           if (headReligion == 'Other') {
             final or = head.otherReligion?.trim();
             if (or != null && or.isNotEmpty) {
               spBloc.add(SpUpdateOtherReligion(or));
             }
+          } else {
+            spBloc.add(SpUpdateOtherReligion(''));
           }
         }
 
         final headCategory = head.category?.trim();
-        if ((curr.category == null || curr.category!.isEmpty) &&
-            headCategory != null &&
-            headCategory.isNotEmpty) {
+        if (headCategory != null && headCategory.isNotEmpty) {
           spBloc.add(SpUpdateCategory(headCategory));
           if (headCategory == 'Other') {
             final oc = head.otherCategory?.trim();
             if (oc != null && oc.isNotEmpty) {
               spBloc.add(SpUpdateOtherCategory(oc));
             }
+          } else {
+            spBloc.add(SpUpdateOtherCategory(''));
           }
         }
 
@@ -520,24 +520,26 @@ class _SpousdetailsState extends State<Spousdetails>
           if (spouseName.isNotEmpty && spouseName != currSpouse) {
             spBloc.add(SpUpdateSpouseName(spouseName));
           }
-          if ((curr.religion == null || curr.religion!.isEmpty) &&
-              st.religion != null &&
-              st.religion!.isNotEmpty) {
+          if (st.religion != null && st.religion!.isNotEmpty) {
             spBloc.add(SpUpdateReligion(st.religion!));
-            if (st.religion == 'Other' &&
-                st.otherReligion != null &&
-                st.otherReligion!.isNotEmpty) {
-              spBloc.add(SpUpdateOtherReligion(st.otherReligion!.trim()));
+            if (st.religion == 'Other') {
+              final or = st.otherReligion?.trim();
+              if (or != null && or.isNotEmpty) {
+                spBloc.add(SpUpdateOtherReligion(or));
+              }
+            } else {
+              spBloc.add(SpUpdateOtherReligion(''));
             }
           }
-          if ((curr.category == null || curr.category!.isEmpty) &&
-              st.category != null &&
-              st.category!.isNotEmpty) {
+          if (st.category != null && st.category!.isNotEmpty) {
             spBloc.add(SpUpdateCategory(st.category!));
-            if (st.category == 'Other' &&
-                st.otherCategory != null &&
-                st.otherCategory!.isNotEmpty) {
-              spBloc.add(SpUpdateOtherCategory(st.otherCategory!.trim()));
+            if (st.category == 'Other') {
+              final oc = st.otherCategory?.trim();
+              if (oc != null && oc.isNotEmpty) {
+                spBloc.add(SpUpdateOtherCategory(oc));
+              }
+            } else {
+              spBloc.add(SpUpdateOtherCategory(''));
             }
           }
         },
@@ -745,11 +747,11 @@ class _SpousdetailsState extends State<Spousdetails>
 
                 _section(
                   CustomTextField(
-                    key: const ValueKey('member_name'),
+                    key:   ValueKey('member_name'),
                     labelText: '${l.nameOfMemberLabel} *',
                     hintText: l.nameOfMemberHint,
                     initialValue: state.memberName,
-                    readOnly: false,
+                    readOnly: true,
                     onChanged: (v) => context.read<SpousBloc>().add(
                       SpUpdateMemberName(v.trim()),
                     ),
@@ -786,8 +788,9 @@ class _SpousdetailsState extends State<Spousdetails>
                     key: const ValueKey('spouse_name'),
                     labelText: '${l.spouseNameLabel} *',
                     hintText: l.spouseNameHint,
+                    readOnly :true,
                     initialValue: state.spouseName,
-                    readOnly: widget.isEdit,
+                    //readOnly: widget.isEdit,
                     // validator: (value) => captureSpousError(
                     //   value == null || value.trim().isEmpty ? 'Spouse name is required' : null,
                     // ),

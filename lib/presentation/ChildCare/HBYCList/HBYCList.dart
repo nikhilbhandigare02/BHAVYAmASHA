@@ -511,7 +511,7 @@ class _HBYCListState extends State<HBYCList> {
                 : _filtered.isEmpty
                     ? Center(
                         child: Text(
-                          'No HBYC children found',
+                       l10n!.noHbycChildrenFound,
                           style: TextStyle(fontSize: 14.sp, color: Colors.grey),
                         ),
                       )

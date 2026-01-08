@@ -532,6 +532,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
   }
 
   Widget _buildList() {
+    final l10n = AppLocalizations.of(context);
     if (_isLoading) {
       return const Expanded(
         child: Center(child: CircularProgressIndicator()),
@@ -547,12 +548,12 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
               Icon(Icons.pregnant_woman, size: 48, color: Colors.grey[400]),
               const SizedBox(height: 16),
               Text(
-                'No pregnant women found',
+               l10n!.noPregnantWomenFound,
                 style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
               const SizedBox(height: 8),
               Text(
-                'Register new ANC cases in the family registration',
+                l10n.registerNewANCCases,
                 style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                 textAlign: TextAlign.center,
               ),

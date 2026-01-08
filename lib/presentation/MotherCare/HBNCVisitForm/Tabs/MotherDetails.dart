@@ -543,7 +543,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             key: MotherDetailsTab.fieldKeys['referTo'],
                             labelText: "${t.referToLabel} *",
                             items: [
-                              t.visitTypePhc,
+                              t.phc,
                               t.chc,
                               t.rh,
                               t.sdh,

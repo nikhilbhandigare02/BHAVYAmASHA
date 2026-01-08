@@ -367,23 +367,23 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                         getLabel: (value) {
                           switch (value) {
                             case 'Condom':
-                              return t!.condom;
+                              return t?.condom ?? 'Condom';
                             case 'Mala -N (Daily contraceptive pill)':
-                              return t!.malaN;
+                              return t?.malaN ?? 'Mala -N (Daily contraceptive pill)';
                             case 'Atra Injection':
-                              return t!.atraInjection;
+                              return t?.atraInjection ?? 'Atra Injection';
                             case 'Copper -T (IUCD)':
-                              return t!.copperT;
+                              return t?.copperT ?? 'Copper -T (IUCD)';
                             case 'Chhaya (Weekly contraceptive pill)':
-                              return t!.chhaya;
+                              return t?.chhaya ?? 'Chhaya (Weekly contraceptive pill)';
                             case 'ECP (Emergency contraceptive pill)':
-                              return t!.ecp;
+                              return t?.ecp ?? 'ECP (Emergency contraceptive pill)';
                             case 'Male Sterilization':
-                              return t!.maleSterilization;
+                              return t?.maleSterilization ?? 'Male Sterilization';
                             case 'Female Sterilization':
-                              return t!.femaleSterilization;
+                              return t?.femaleSterilization ?? 'Female Sterilization';
                             case 'Any Other Specify':
-                              return t!.anyOtherSpecifyy;
+                              return t?.anyOtherSpecifyy ?? 'Any Other Specify';
                             default:
                               return value;
                           }
