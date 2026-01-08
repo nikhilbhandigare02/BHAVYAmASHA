@@ -1802,7 +1802,7 @@ abstract class AppLocalizations {
   /// No description provided for @childRegisteredDueListSearch.
   ///
   /// In en, this message translates to:
-  /// **'Search Child Registered Due '**
+  /// **'Child Registered Due Search'**
   String get childRegisteredDueListSearch;
 
   /// No description provided for @childTrackingDueListTitle.
@@ -1952,7 +1952,7 @@ abstract class AppLocalizations {
   /// No description provided for @dcmMobileLabel.
   ///
   /// In en, this message translates to:
-  /// **'Mobile no. of District Community Mobilizer'**
+  /// **'Mobile no.of District Community Mobilizer'**
   String get dcmMobileLabel;
 
   /// No description provided for @dcmNameHint.
@@ -4406,7 +4406,7 @@ abstract class AppLocalizations {
   /// No description provided for @placeLabel.
   ///
   /// In en, this message translates to:
-  /// **'Place'**
+  /// **'Place of death'**
   String get placeLabel;
 
   /// No description provided for @searchHBNC.
@@ -4736,7 +4736,7 @@ abstract class AppLocalizations {
   /// No description provided for @trainingDateLabel.
   ///
   /// In en, this message translates to:
-  /// **'Training Date'**
+  /// **'Date of Training'**
   String get trainingDateLabel;
 
   /// No description provided for @trainingDaysLabel.
@@ -4754,7 +4754,7 @@ abstract class AppLocalizations {
   /// No description provided for @trainingNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Training Name'**
+  /// **'Name of Training'**
   String get trainingNameLabel;
 
   /// No description provided for @trainingPlaceLabel.
@@ -4784,7 +4784,7 @@ abstract class AppLocalizations {
   /// No description provided for @trainingTitle.
   ///
   /// In en, this message translates to:
-  /// **'BHAVYA mASHA Training'**
+  /// **'Training'**
   String get trainingTitle;
 
   /// No description provided for @trainingTypeLabel.
@@ -6314,7 +6314,7 @@ abstract class AppLocalizations {
   /// No description provided for @previousVisits.
   ///
   /// In en, this message translates to:
-  /// **'Previous Visits'**
+  /// **'PREVIOUS VISITS'**
   String get previousVisits;
 
   /// No description provided for @prevVisitSrNo.
@@ -7166,19 +7166,19 @@ abstract class AppLocalizations {
   /// No description provided for @sixWeekDoses.
   ///
   /// In en, this message translates to:
-  /// **'6 Week Doses'**
+  /// **'Doses'**
   String get sixWeekDoses;
 
   /// No description provided for @tenWeekDoses.
   ///
   /// In en, this message translates to:
-  /// **'10 Week Doses'**
+  /// **'Doses'**
   String get tenWeekDoses;
 
   /// No description provided for @fourteenWeekDoses.
   ///
   /// In en, this message translates to:
-  /// **'14 Week Doses'**
+  /// **'Doses'**
   String get fourteenWeekDoses;
 
   /// No description provided for @reasonLabel.
@@ -13142,7 +13142,7 @@ abstract class AppLocalizations {
   /// No description provided for @counselExclusiveBreastfeeding.
   ///
   /// In en, this message translates to:
-  /// **'Counsel for exclusive breastfeeding?'**
+  /// **'Counsel for exclusive breast feeding?'**
   String get counselExclusiveBreastfeeding;
 
   /// No description provided for @is_counsel_for_complementary_feeding.
@@ -13406,43 +13406,43 @@ abstract class AppLocalizations {
   /// No description provided for @six_WeekDoses.
   ///
   /// In en, this message translates to:
-  /// **'6 Week Doses'**
+  /// **'Doses'**
   String get six_WeekDoses;
 
   /// No description provided for @ten_WeekDoses.
   ///
   /// In en, this message translates to:
-  /// **'10 Week Doses'**
+  /// **'Doses'**
   String get ten_WeekDoses;
 
   /// No description provided for @fourteen_WeekDoses.
   ///
   /// In en, this message translates to:
-  /// **'14 Week Doses'**
+  /// **'Doses'**
   String get fourteen_WeekDoses;
 
   /// No description provided for @nineMonthDoses.
   ///
   /// In en, this message translates to:
-  /// **'9 Month Doses'**
+  /// **'Doses'**
   String get nineMonthDoses;
 
   /// No description provided for @sixteenToTwentyFourMonthDoses.
   ///
   /// In en, this message translates to:
-  /// **'16-24 Month Doses'**
+  /// **'Doses'**
   String get sixteenToTwentyFourMonthDoses;
 
   /// No description provided for @fiveToSixYearDoses.
   ///
   /// In en, this message translates to:
-  /// **'5-6 Year Doses'**
+  /// **'Doses'**
   String get fiveToSixYearDoses;
 
   /// No description provided for @tenYearDoses.
   ///
   /// In en, this message translates to:
-  /// **'10 Year Doses'**
+  /// **'Doses'**
   String get tenYearDoses;
 
   /// No description provided for @report.
@@ -14702,13 +14702,13 @@ abstract class AppLocalizations {
   /// No description provided for @rota1.
   ///
   /// In en, this message translates to:
-  /// **'Rota - 1'**
+  /// **'Rota 1'**
   String get rota1;
 
   /// No description provided for @ipv1.
   ///
   /// In en, this message translates to:
-  /// **'I.P.V. - 1'**
+  /// **'IPV 1'**
   String get ipv1;
 
   /// No description provided for @pcv1.
@@ -14726,13 +14726,13 @@ abstract class AppLocalizations {
   /// No description provided for @pentavalent2.
   ///
   /// In en, this message translates to:
-  /// **'Pentavalent - 2'**
+  /// **'Pentavalent 2'**
   String get pentavalent2;
 
   /// No description provided for @rota2.
   ///
   /// In en, this message translates to:
-  /// **'Rota - 2'**
+  /// **'Rota 2'**
   String get rota2;
 
   /// No description provided for @dpt2.
@@ -14744,7 +14744,7 @@ abstract class AppLocalizations {
   /// No description provided for @ipv2.
   ///
   /// In en, this message translates to:
-  /// **'I.P.V. - 2'**
+  /// **'IPV 2'**
   String get ipv2;
 
   /// No description provided for @pcv2.
@@ -14762,19 +14762,19 @@ abstract class AppLocalizations {
   /// No description provided for @pentavalent3.
   ///
   /// In en, this message translates to:
-  /// **'Pentavalent - 3'**
+  /// **'Pentavalent 3'**
   String get pentavalent3;
 
   /// No description provided for @rota3.
   ///
   /// In en, this message translates to:
-  /// **'Rota - 3'**
+  /// **'Rota 3'**
   String get rota3;
 
   /// No description provided for @measles1.
   ///
   /// In en, this message translates to:
-  /// **'Measles - 1'**
+  /// **'Measles 1'**
   String get measles1;
 
   /// No description provided for @mrDose1.
@@ -14798,7 +14798,7 @@ abstract class AppLocalizations {
   /// No description provided for @pcvBooster.
   ///
   /// In en, this message translates to:
-  /// **'P.C.V. Booster'**
+  /// **'P.C.V. -Booster'**
   String get pcvBooster;
 
   /// No description provided for @fipv3.
@@ -14822,7 +14822,7 @@ abstract class AppLocalizations {
   /// No description provided for @measles2.
   ///
   /// In en, this message translates to:
-  /// **'Measles - 2'**
+  /// **'Measles 2'**
   String get measles2;
 
   /// No description provided for @jeVaccine2.
