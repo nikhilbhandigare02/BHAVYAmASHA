@@ -116,7 +116,7 @@ class _TrainingFormViewState extends State<_TrainingFormView> {
                           child: Text(
                             l10n.trainingDateLabel,
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 10,
                               fontWeight: FontWeight.w500,
                               color: Color(0xFF333333),
                             ),

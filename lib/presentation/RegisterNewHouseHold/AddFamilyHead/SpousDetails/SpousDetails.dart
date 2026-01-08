@@ -366,10 +366,7 @@ class _SpousdetailsState extends State<Spousdetails>
           // Sync Gender and Relation
           if (member.gender != null) {
             final isMale = member.gender == 'Male';
-            final relation = isMale ? 'Wife' : 'Husband';
             final oppositeGender = isMale ? 'Female' : 'Male';
-
-            spBloc.add(SpUpdateRelation(relation));
             spBloc.add(SpUpdateGender(oppositeGender));
           }
 
@@ -524,12 +521,8 @@ class _SpousdetailsState extends State<Spousdetails>
             // Update gender and relation when member's gender changes
             if (st.gender != null) {
               final isMale = st.gender == 'Male';
-              final relation = isMale ? 'Wife' : 'Husband';
               final oppositeGender = isMale ? 'Female' : 'Male';
 
-              if (curr.relation != relation) {
-                spBloc.add(SpUpdateRelation(relation));
-              }
               if (curr.gender != oppositeGender) {
                 spBloc.add(SpUpdateGender(oppositeGender));
               }
@@ -698,12 +691,14 @@ class _SpousdetailsState extends State<Spousdetails>
 
     if (gender != null) {
       spBloc.add(SpUpdateGender(gender));
-      final headGender = context.read<AddFamilyHeadBloc>().state.gender;
-      final expectedRelation = headGender == 'Male' ? 'Wife' : 'Husband';
-      if (gender == 'Female' && headGender == 'Male') {
-        spBloc.add(SpUpdateRelation('Wife'));
-      } else if (gender == 'Male' && headGender == 'Female') {
-        spBloc.add(SpUpdateRelation('Husband'));
+      if (!widget.isMemberDetails) {
+        final headGender = context.read<AddFamilyHeadBloc>().state.gender;
+        final expectedRelation = headGender == 'Male' ? 'Wife' : 'Husband';
+        if (gender == 'Female' && headGender == 'Male') {
+          spBloc.add(SpUpdateRelation('Wife'));
+        } else if (gender == 'Male' && headGender == 'Female') {
+          spBloc.add(SpUpdateRelation('Husband'));
+        }
       }
     }
 
@@ -738,7 +733,7 @@ class _SpousdetailsState extends State<Spousdetails>
               children: [
                 _section(
                   IgnorePointer(
-                    ignoring: widget.isEdit,
+                    ignoring: widget.isEdit || !widget.isMemberDetails,
                     child: ApiDropdown<String>(
                       key: const ValueKey('relation_with_head'),
                       labelText: '${l.relationWithFamilyHead} *',
@@ -826,7 +821,10 @@ class _SpousdetailsState extends State<Spousdetails>
                       },
 
                       value: widget.isMemberDetails
-                          ? state.relation
+                          ? ((state.relation == null ||
+                                  state.relation!.trim().isEmpty)
+                                ? null
+                                : state.relation)
                           : (state.relation == 'Spouse'
                                 ? (state.gender == 'Female'
                                       ? 'Husband'

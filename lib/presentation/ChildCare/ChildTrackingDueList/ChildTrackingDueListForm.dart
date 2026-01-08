@@ -55,6 +55,84 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   final Map<int, TextEditingController> _otherReasonControllers = {};
   final Map<int, TextEditingController> _reasonForAbsentControllers = {};
 
+  DateTime? _tryParseDate(dynamic value) {
+    if (value == null) return null;
+    final s = value.toString().trim();
+    if (s.isEmpty) return null;
+    try {
+      return DateTime.parse(s);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _loadBirthDateFromFormData() {
+    final directDob = _tryParseDate(_formData['date_of_birth']);
+    if (directDob != null) {
+      _birthDate = directDob;
+      return;
+    }
+
+    final childRegTop = _formData['child_registration_due'];
+    if (childRegTop is Map) {
+      final nestedTopDob = _tryParseDate(childRegTop['date_of_birth']);
+      if (nestedTopDob != null) {
+        _birthDate = nestedTopDob;
+        return;
+      }
+    }
+
+    final formDataMap = _formData['form_data'];
+    if (formDataMap is Map) {
+      final nestedDob = _tryParseDate(formDataMap['date_of_birth']);
+      if (nestedDob != null) {
+        _birthDate = nestedDob;
+        return;
+      }
+
+      final childRegInFormData = formDataMap['child_registration_due'];
+      if (childRegInFormData is Map) {
+        final nestedDob2 = _tryParseDate(childRegInFormData['date_of_birth']);
+        if (nestedDob2 != null) {
+          _birthDate = nestedDob2;
+          return;
+        }
+      }
+    }
+  }
+
+  String _getWeightMode() {
+    final directMode = _formData['weight_mode']?.toString().trim().toLowerCase();
+    if (directMode == 'kg' || directMode == 'gms') {
+      return directMode!;
+    }
+
+    final nestedMode = (_formData['form_data'] is Map)
+        ? (_formData['form_data']['weight_mode']?.toString().trim().toLowerCase())
+        : null;
+    if (nestedMode == 'kg' || nestedMode == 'gms') {
+      _formData['weight_mode'] = nestedMode;
+      return nestedMode!;
+    }
+
+    final weightVal = _formData['weight_grams'];
+    if (weightVal != null && weightVal.toString().trim().isNotEmpty) {
+      final n = double.tryParse(weightVal.toString().trim());
+      if (n != null) {
+        final inferred = n < 200 ? 'kg' : 'gms';
+        _formData['weight_mode'] = inferred;
+        return inferred;
+      }
+    }
+
+    final nowTime = DateTime.now();
+    final thresholdDate = DateTime(_birthDate.year + 1, _birthDate.month + 3, _birthDate.day + 1);
+    final isOlder = nowTime.isAfter(thresholdDate) || nowTime.isAtSameMomentAs(thresholdDate);
+    final fallback = isOlder ? 'kg' : 'gms';
+    _formData['weight_mode'] = fallback;
+    return fallback;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -80,25 +158,8 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       if (args != null && args['formData'] is Map<String, dynamic>) {
         _formData.addAll(args['formData'] as Map<String, dynamic>);
 
-        if (_formData['date_of_birth'] != null && _formData['date_of_birth'].toString().isNotEmpty) {
-           try {
-             _birthDate = DateTime.parse(_formData['date_of_birth'].toString());
-           } catch (e) {
-             debugPrint('Error parsing date_of_birth: $e');
-           }
-        } else {
-           final childReg = _formData['child_registration_due'];
-           if (childReg is Map<String, dynamic>) {
-             final dob = childReg['date_of_birth'];
-             if (dob != null) {
-                try {
-                   _birthDate = DateTime.parse(dob.toString());
-                } catch(e) {
-                   debugPrint('Error parsing nested date_of_birth: $e');
-                }
-             }
-           }
-        }
+        _loadBirthDateFromFormData();
+        _getWeightMode();
 
         debugPrint('Loaded form data with keys: ${_formData.keys.toList()}');
         debugPrint('Household Ref Key: ${_formData['household_ref_key']}');
@@ -217,13 +278,19 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       }
       final latestWeight = formDataMap['weight_grams']?.toString() ?? '';
       final latestBirthWeight = formDataMap['birth_weight_grams']?.toString() ?? '';
-      if (latestWeight.isNotEmpty || latestBirthWeight.isNotEmpty) {
+      final latestWeightMode = formDataMap['weight_mode']?.toString().trim().toLowerCase() ?? '';
+      if (latestWeight.isNotEmpty || latestBirthWeight.isNotEmpty || (latestWeightMode == 'kg' || latestWeightMode == 'gms')) {
         setState(() {
           if (latestWeight.isNotEmpty) {
             _formData['weight_grams'] = latestWeight;
           }
           if (latestBirthWeight.isNotEmpty) {
             _formData['birth_weight_grams'] = latestBirthWeight;
+          }
+          if (latestWeightMode == 'kg' || latestWeightMode == 'gms') {
+            _formData['weight_mode'] = latestWeightMode;
+          } else {
+            _getWeightMode();
           }
         });
       }
@@ -236,15 +303,12 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
     if (_isSaving) return;
 
     // Validation for weight
-    final dob = _birthDate;
-    final nowTime = DateTime.now();
-    final thresholdDate = DateTime(dob.year + 1, dob.month + 3, dob.day + 1);
-    final isOlder = nowTime.isAfter(thresholdDate) || nowTime.isAtSameMomentAs(thresholdDate);
+    final weightMode = _getWeightMode();
 
     final weightVal = _formData['weight_grams'];
     if (weightVal != null && weightVal.toString().trim().isNotEmpty) {
       final double? weight = double.tryParse(weightVal.toString().trim());
-      if (isOlder) {
+      if (weightMode == 'kg') {
         if (weight != null && (weight < 1.2 || weight > 90)) {
           showAppSnackBar(context, "Please enter weight between 1.2 to 90 kg");
           return;
@@ -295,6 +359,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           'current_tab_index': currentTabIndex,
           'weight_grams': _formData['weight_grams'],
           'birth_weight_grams': _formData['birth_weight_grams'],
+          'weight_mode': _getWeightMode(),
           'case_closure': caseClosureData,
           'visit_date': now,
           'is_beneficiary_absent': _tabCaseClosureState[currentTabIndex]?['isBeneficiaryAbsent'],
@@ -600,17 +665,19 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               child: ListView(
                 children: [
                   const SizedBox(height: 8),
-                  _infoRow(l!.dateOfVisit, _getBirthDateFormatted()),
+                  _infoRow(
+                    l!.dateOfVisit,
+                    '${DateTime.now().day.toString().padLeft(2, '0')}-'
+                        '${DateTime.now().month.toString().padLeft(2, '0')}-'
+                        '${DateTime.now().year}',
+                  ),
+
                   const Divider(),
                   const SizedBox(height: 8),
                   Builder(
                     builder: (context) {
-                      final dob = _birthDate;
-                      final now = DateTime.now();
-                      final thresholdDate = DateTime(dob.year + 1, dob.month + 3, dob.day + 1);
-                      final isOlder = now.isAfter(thresholdDate) || now.isAtSameMomentAs(thresholdDate);
-
-                      if (isOlder) {
+                      final weightMode = _getWeightMode();
+                      if (weightMode == 'kg') {
                         return Column(
                           children: [
                             CustomTextField(
@@ -623,6 +690,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               onChanged: (value) {
                                 _formData['weight_grams'] = value;
+                                _formData['weight_mode'] = 'kg';
                               },
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) return null;
@@ -650,6 +718,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                               keyboardType: TextInputType.number,
                               onChanged: (value) {
                                 _formData['weight_grams'] = value;
+                                _formData['weight_mode'] = 'gms';
                               },
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) return null;

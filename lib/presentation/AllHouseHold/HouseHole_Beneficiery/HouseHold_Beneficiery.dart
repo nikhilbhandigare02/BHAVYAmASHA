@@ -627,6 +627,7 @@ class _HouseHold_BeneficiaryScreenState
             'tolaMohalla': _mohalla?.toString() ?? '',
 
             'householdData': data,
+            'isSeparated': (data['_raw']['is_separated'] == 1 || data['_raw']['is_separated'] == '1'),
           },
         );
 
