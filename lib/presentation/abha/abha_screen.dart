@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -57,6 +58,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
 
   bool verifyAbhaFlag = false;
+  bool showAadhaarNumber = false;
   bool searchFlag = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isABDMEnabled = true;
@@ -65,22 +67,25 @@ class _ABHAScreenState extends State<ABHAScreen> {
   bool isEnableSearch = true;
   String? validateMobile(String value) {
     if (value.isEmpty) {
-      return "Please enter mobile number";
+      return "Please enter a valid Mobile Number";
     }
 
     // Must be exactly 10 digits
     if (value.length != 10) {
-      return "Please enter a valid 10-digit mobile number";
+     // return "Please enter a valid 10-digit mobile number";
+      return "Please enter a valid Mobile Number";
     }
 
     // Must start with 6, 7, 8 or 9 (Indian mobile)
     if (!RegExp(r'^[6-9]').hasMatch(value)) {
-      return "Please enter a valid 10-digit mobile number";
+      //return "Please enter a valid 10-digit mobile number";
+      return "Please enter a valid Mobile Number";
     }
 
     // Reject same digit repeated (1111111111, 9999999999)
     if (RegExp(r'^(\d)\1{9}$').hasMatch(value)) {
-      return "Mobile number cannot contain all same digits";
+      //return "Mobile number cannot contain all same digits";
+      return "Please enter a valid Mobile Number";
     }
 
     // Reject obvious sequential numbers
@@ -98,12 +103,13 @@ class _ABHAScreenState extends State<ABHAScreen> {
     ];
 
     if (invalidSequences.contains(value)) {
-      return "Sequential mobile numbers are not allowed";
+      //return "Sequential mobile numbers are not allowed";
+      return "Please enter a valid Mobile Number";
     }
 
     // Reject common fake patterns
     if (RegExp(r'(0123|1234|2345|3456|4567|5678|6789)').hasMatch(value)) {
-      return "Please enter a valid mobile number";
+      return "Please enter a valid Mobile Number";
     }
 
     return null; // ✅ valid
@@ -524,6 +530,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
     availableAbha = false;
     createnewFlag = false;
     enableAbhaClick = false;
+    showAadhaarNumber = false;
 
     updateMobile = false;
     linkExistAbha = false;
@@ -564,6 +571,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
     availableAbhaNumbersSelectedIndex = -1;
     listABHAID = [];
   }
+  final FocusNode mobileFocusNode = FocusNode();
 
   @override
   Widget createAbhaAddress(BuildContext context) {
@@ -593,7 +601,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              localText.mobileLabel,
+              localText.mobileNumber,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -613,6 +621,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   height: 35.h,
                   child: TextFormField(
                     controller: mobileController,
+                    focusNode: mobileFocusNode,
                     style: TextStyle(fontSize: 11),
                     keyboardType: TextInputType.number,
                     inputFormatters: [
@@ -678,6 +687,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
               // if(checkavailableAbha)
               InkWell(
                 onTap: () {
+                  // Remove focus
+                  mobileFocusNode.unfocus();
                   if (!isEnableSearch) return;
 
                   final mobile = mobileController.text.trim();
@@ -920,15 +931,21 @@ class _ABHAScreenState extends State<ABHAScreen> {
                 if (availableAbhaNumbers != null &&
                     availableAbhaNumbers.length != 0 &&
                     enableAbhaClick)
-                  Text(
-                    "Select to Proceed",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
+                  Align(
+                    alignment: AlignmentGeometry.centerLeft,
+                    child: Text(
+                      "Existing ABHA Found with Aadhaar!",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
 
+                if (availableAbhaNumbers != null &&
+                    availableAbhaNumbers.length != 0 &&
+                    enableAbhaClick)
                 Container(
                     padding: EdgeInsets.symmetric(vertical: 10),
                     child: ConstrainedBox(
@@ -1386,10 +1403,10 @@ class _ABHAScreenState extends State<ABHAScreen> {
                               width: 150.w,
                               height: 30.h,
                               decoration: BoxDecoration(
-                                color: Colors.amberAccent,
+                                color: AppColors.primary,
                                 borderRadius: BorderRadius.circular(5.0),
                                 border: Border.all(
-                                    color: Colors.amberAccent, width: 1.w),
+                                    color: AppColors.primary, width: 1.w),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1403,7 +1420,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                   SizedBox(width: 6.w),
                                   // Small space between icon and text
                                   Text(
-                                    localText.proceedwithkyc,
+                                    localText.sendOtp,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.sp,
@@ -1432,6 +1449,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                 termCondFlag = true;
                                 createnewFlag = false;
                                 enableAbhaClick = false;
+                                showAadhaarNumber = true;
                               });
                             },
                             child: Container(
@@ -1540,7 +1558,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
               ],
             ),
 
-          if (createViaAbha && dropdownvalue == 'Aadhaar')
+          //if (createViaAbha && dropdownvalue == 'Aadhaar'&&(!availableAbha))
+          if (showAadhaarNumber)
             Column(
               children: [
                 Align(
@@ -1603,11 +1622,11 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     ],
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter Aadhaar number';
+                        return 'Please enter a valid Aadhaar Number';
                       }
 
                       if (!RegExp(r'^[2-9][0-9]{11}$').hasMatch(value)) {
-                        return 'Enter a valid 12-digit Aadhaar number';
+                        return 'Please enter a valid Aadhaar Number';
                       }
 
                       return null;
@@ -2048,10 +2067,10 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
                         var msg ="";
                         if (aadhaarController.text == null || aadhaarController.text.isEmpty) {
-                          msg = 'Please enter Aadhaar number';
+                          msg = 'Please enter a valid Aadhaar Number';
                         }
                         else if (!RegExp(r'^[2-9][0-9]{11}$').hasMatch(aadhaarController.text)) {
-                          msg = 'Enter a valid 12-digit Aadhaar number';
+                          msg = 'Please enter a valid Aadhaar Number';
                         }
                         Utils.showToastMessage(msg);
                       }
@@ -2134,6 +2153,8 @@ class _ABHAScreenState extends State<ABHAScreen> {
                       InkWell(
                         onTap: isResendEnabled
                             ? () {
+                          otpController.text='';
+                          otpLinkController.text='';
                           if (dropdownvalue == 'Aadhaar') {
                             if (aadhaarController.text.isNotEmpty) {
                               if (updateMobile) {
@@ -2145,10 +2166,11 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
                             } else {
                               Utils.showToastMessage(
-                                  'Please enter Aadhaar number');
+                                  'Please enter a valid Aadhaar Number');
                             }
-                          } else {
-                            _aadhaarOTPABHA(sendOTP);
+                          } else  {
+                              _sendOTPLinkExisting();
+
                           }
                         }
                             : null,
@@ -2158,11 +2180,11 @@ class _ABHAScreenState extends State<ABHAScreen> {
                           height: 30.h,
                           decoration: BoxDecoration(
                             color: isResendEnabled
-                                ? Colors.yellow
-                                : Colors.yellow.withOpacity(0.4),
+                                ? AppColors.primary
+                                : AppColors.primary.withOpacity(0.4),
                             borderRadius: BorderRadius.circular(5.0),
                             border:
-                            Border.all(color: Colors.yellow, width: 1.w),
+                            Border.all(color: AppColors.primary, width: 1.w),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -2367,8 +2389,9 @@ class _ABHAScreenState extends State<ABHAScreen> {
                   child: Text('suggestion'))*/
                       ],
                     ),
-                  if (listMobileAbhaSuggestion != null &&
-                      listMobileAbhaSuggestion.length != 0)
+                  /*if (listMobileAbhaSuggestion != null &&
+                      listMobileAbhaSuggestion.length != 0)*/
+                  if(showTextFieldABHAID)
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Padding(
@@ -2446,7 +2469,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'ABHA Address Linked!',
+                                        'Existing ABHA Found with Aadhaar!',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
@@ -2539,22 +2562,22 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                     left: 10.0, right: 10),
                                 height: 30.h,
                                 decoration: BoxDecoration(
-                                  color: Colors.yellow,
+                                  color: AppColors.greenHighlight,
                                   borderRadius: BorderRadius.circular(5.0),
                                   border: Border.all(
-                                      color: Colors.yellow, width: 1.w),
+                                      color: AppColors.greenHighlight, width: 1.w),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
-                                      Icons.person, // prefix icon
-                                      size: 14.sp,
+                                      Icons.download, // Prefix icon for "Create New"
                                       color: Colors.white,
+                                      size: 16.sp,
                                     ),
                                     SizedBox(width: 6),
                                     Text(
-                                      localText.useExisting,
+                                      localText.download,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 11.sp,
@@ -2596,10 +2619,10 @@ class _ABHAScreenState extends State<ABHAScreen> {
                               const EdgeInsets.only(left: 10.0, right: 10),
                               height: 30.h,
                               decoration: BoxDecoration(
-                                color: Colors.yellow,
+                                color: AppColors.primary,
                                 borderRadius: BorderRadius.circular(5.0),
                                 border: Border.all(
-                                    color: Colors.yellow, width: 1.w),
+                                    color: AppColors.primary, width: 1.w),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -3338,7 +3361,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter OTP';
+                        return 'Please enter a valid OTP';
                       }
                       return null;
                     },
@@ -3372,6 +3395,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                 ),
               ),
             ),
+          SizedBox(height: 10,),
           if (listMobileAbhaSuggestion != null &&
               listMobileAbhaSuggestion.length != 0)
             Wrap(
@@ -3505,6 +3529,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
   }
 
   SendOtpExisting? sendOtpExisting;
+
 
   Future<void> _sendOTPLinkExisting() async {
     if (await Utils.isConnected()) {
@@ -4246,6 +4271,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                 linkExistAbha = true;
                 sendOtpAbha = false;
                 termCondFlag = false;
+                showAadhaarNumber = false;
               });
               startTimer();
             }
@@ -5016,18 +5042,31 @@ class _ABHAScreenState extends State<ABHAScreen> {
           // sMessage = createAadhaarResponse?.;
           // Utils.showToastMessage(sMessage);
         } else {
+
+          Error400 error400 = Error400.fromJson(response?.data);
+          Utils.showToastMessage(error400.error?.message ??
+              'Something went wrong!');
+          /*
           final abhaAddressError =
           response?.data is Map ? response!.data['abhaAddress'] : 'Something went wrong!';
-          Utils.showToastMessage(abhaAddressError);
+          Utils.showToastMessage(abhaAddressError);*/
           /* Utils.showToastMessage('Something went wrong!');
           print(response);*/
         }
         dataResponseSync = jsonEncode(response?.data ?? {});
-      } catch (e) {
+      }
+
+      catch (e) {
+
+      }/*catch (e) {
+
+        Error400 error400 = Error400.fromJson(response?.data);
+        Utils.showToastMessage(error400.errorDetails?.message ??
+            'Something went wrong! ${response?.statusCode}');
         dataResponseSync = e.toString() ?? '';
         Utils.showToastMessage('Something went wrong!');
         print(e);
-      } finally {
+      } */finally {
         if (_isLoading) {
           Navigator.pop(context);
         }

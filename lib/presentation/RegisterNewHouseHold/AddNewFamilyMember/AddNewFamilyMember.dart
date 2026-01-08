@@ -473,7 +473,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
 
   List<String> _getMobileOwnerList(String gender) {
-    const common = [];
 
     gender = gender.toLowerCase();
 
@@ -544,7 +543,59 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
       'Neighbour',
       'Relative',
       'Other',
-      ...common,
+
+    ];
+  }
+  List<String> _getchildMobileOwnerList(String gender) {
+
+    gender = gender.toLowerCase();
+
+    if (gender == 'female') {
+      return [
+        'Self',
+        'Family Head',
+        'Father',
+        'Mother',
+        'Neighbour',
+        'Relative',
+        'Other',
+      ];
+    }
+
+    if (gender == 'male') {
+      return [
+        'Self',
+        'Family Head',
+        'Father',
+        'Mother',
+        'Neighbour',
+        'Relative',
+        'Other',
+      ];
+    }
+
+    if (gender == 'transgender') {
+      return [
+        'Self',
+        'Family Head',
+        'Father',
+        'Mother',
+        'Neighbour',
+        'Relative',
+        'Other',
+      ];
+    }
+
+    // Fallback if gender is unknown
+    return [
+      'Self',
+      'Family Head',
+      'Father',
+      'Mother',
+      'Neighbour',
+      'Relative',
+      'Other',
+
     ];
   }
 
@@ -2745,7 +2796,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   _section(
                                     ApiDropdown<String>(
                                       labelText: '${l.whoseMobileLabel} *',
-                                      items: _getMobileOwnerList(state.gender ?? ''),
+                                      items: _getchildMobileOwnerList(state.gender ?? ''),
                                       getLabel: (s) {
                                         switch (s) {
                                           case 'Self':

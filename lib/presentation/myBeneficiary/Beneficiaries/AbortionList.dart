@@ -338,7 +338,7 @@ class _AbortionlistState extends State<Abortionlist> {
                         ),
                       if (visit.abortionDate != null)
                         Padding(
-                          padding: const EdgeInsets.only(left: 150.0), 
+                          padding: const EdgeInsets.only(left: 110.0),
                           child: Text(
                             'Abortion Date: ${_formatDate(visit.abortionDate!)}',
                             style: TextStyle(
