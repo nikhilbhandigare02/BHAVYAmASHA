@@ -153,7 +153,7 @@
   "childRegisteredBeneficiaryListSearch": "पंजीकृत बाल लाभार्थी खोंजे",
   "childRegisteredDueListSearch": "पंजीकृत बच्चे को खोंजे",
   "childRegisteredDueListTitle": "बाल पंजीकरण\nनियत सूची",
-  "childTrackingDueListTitle": "बाल ट्रैकिंग\nलंबित सूची",
+  "childTrackingDueListTitle": "बाल ट्रैकिंग लंबित सूची",
   "trainingSuccess": "प्रशिक्षण सफलतापूर्वक निर्धारित किया गया है",
   "childTrackingDueSearch": "लंबीत ट्रेकिंग वाले बच्चे को खोंजे ",
   "children0to1": "0-1 वर्ष के बच्चे",
@@ -2382,8 +2382,22 @@
   "pleaseEnterAbhaId": "कृपया ABHA ID दर्ज करें",
   "abhaAddressLinked": "ABHA पता लिंक हो गया है!",
   "selectAbhaId": "ABHA ID चुनें",
-  "mobileNumberMismatch": "मोबाइल नंबर मेल नहीं खा रहा है"
-
+  "mobileNumberMismatch": "मोबाइल नंबर मेल नहीं खा रहा है",
+  "opv1": "ओ.पी.वी. - 1",
+  "dpt1": "डी.पी.टी. - 1",
+  "pentavalent1": "पेंटावैलेंट - 1",
+  "rota1": "रोटा - 1",
+  "ipv1": "आईपीवी. - 1",
+  "pcv1": "पी.सी.वी. - 1",
+  "opv2": "ओ.पी.वी. - 2",
+  "pentavalent2": "पेंटावैलेंट - 2",
+  "rota2": "रोटा - 2",
+  "dpt2": "डी.पी.टी. - 2",
+  "ipv2": "आईपीवी. - 2",
+  "pcv2": "पी.सी.वी. - 2",
+  "opv3": "ओ.पी.वी. - 3",
+  "pentavalent3": "पेंटावैलेंट - 3",
+  "rota3": "रोटा - 3"
 }
 
 

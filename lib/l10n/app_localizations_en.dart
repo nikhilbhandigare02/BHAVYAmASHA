@@ -7316,4 +7316,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mohallaTolaName => 'Tola/Mohalla';
+
+  @override
+  String get opv1 => 'O.P.V. - 1';
+
+  @override
+  String get dpt1 => 'D.P.T. - 1';
+
+  @override
+  String get pentavalent1 => 'Pentavalent - 1';
+
+  @override
+  String get rota1 => 'Rota - 1';
+
+  @override
+  String get ipv1 => 'I.P.V. - 1';
+
+  @override
+  String get pcv1 => 'P.C.V. - 1';
+
+  @override
+  String get opv2 => 'O.P.V. - 2';
+
+  @override
+  String get pentavalent2 => 'Pentavalent - 2';
+
+  @override
+  String get rota2 => 'Rota - 2';
+
+  @override
+  String get dpt2 => 'D.P.T. - 2';
+
+  @override
+  String get ipv2 => 'I.P.V. - 2';
+
+  @override
+  String get pcv2 => 'P.C.V. - 2';
+
+  @override
+  String get opv3 => 'O.P.V. - 3';
+
+  @override
+  String get pentavalent3 => 'Pentavalent - 3';
+
+  @override
+  String get rota3 => 'Rota - 3';
 }
