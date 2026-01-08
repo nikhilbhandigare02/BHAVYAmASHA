@@ -245,7 +245,6 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       print('✅ Total deceased beneficiaries: ${deceasedIds.length}');
 
       final registrationDates = <String, String>{};
-      // Get first entry for each beneficiary from child_care_activities table
       final childCareRecords = await db.rawQuery('''
         SELECT 
           beneficiary_ref_key, 
@@ -742,18 +741,18 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.nameLabel ?? 'Name', data['Name'] ?? 'Not Available')),
+                      Expanded(child: _rowText(l10n?.nameLabel ?? 'Name', data['Name'] ??  l10n!.na)),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? 'Not Available')),
+                      Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ??  l10n!.na)),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RchID']?.isNotEmpty == true ? data['RchID'] : 'Not Available')),
+                      Expanded(child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RchID']?.isNotEmpty == true ? data['RchID'] : l10n!.na)),
                     ],
                   ),
                   const SizedBox(height: 10),
 
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.mobileLabelSimple ?? '', data['Mobileno.']?.isNotEmpty == true ? data['Mobileno.'] : 'N/A',)),
+                      Expanded(child: _rowText(l10n?.mobileLabelSimple ?? '', data['Mobileno.']?.isNotEmpty == true ? data['Mobileno.'] :  l10n!.na,)),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText('', '')),
                       const SizedBox(width: 12),

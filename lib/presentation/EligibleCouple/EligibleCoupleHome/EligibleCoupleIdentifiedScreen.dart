@@ -366,6 +366,8 @@ class _EligibleCoupleIdentifiedScreenState
             headDetails['childrendetails'] ??
             headDetails['childrenDetails']
     );
+    final isMale = beneficiaryInfo['gender']?.toString().toLowerCase() == 'male';
+    final spouseLabel = isMale ? (l10n?.wifeName ?? 'Wife Name') : (l10n?.husbandName ?? 'Husband Name');
 
     return Card(
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
@@ -519,7 +521,7 @@ class _EligibleCoupleIdentifiedScreenState
                           const SizedBox(width: 12),
                           Expanded(child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['age']?.toString() ?? '')),
                           const SizedBox(width: 12),
-                          Expanded(child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RCH ID']?.toString() ?? '')),
+                          Expanded(child: _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RCH ID']?.toString() ?? l10n!.na)),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -531,7 +533,7 @@ class _EligibleCoupleIdentifiedScreenState
                           Expanded(child: SizedBox.shrink()),
                           const SizedBox(width: 12),
                           Expanded(
-                              child: _rowText(l10n?.husbandName ?? 'Husband Name', data['HusbandName'] ?? '')),
+                              child: _rowText(spouseLabel, data['HusbandName'] ?? '')),
                         ],
                       ),
                     ],

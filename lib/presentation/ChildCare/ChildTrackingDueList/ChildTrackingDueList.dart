@@ -917,7 +917,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                       const SizedBox(width: 8),
                       Expanded(child: _rowText(
                         l10n?.rchIdLabel ?? 'RCH ID',
-                        data['RchID']?.isNotEmpty == true ? data['RchID'] : 'N/A',
+                        data['RchID']?.isNotEmpty == true ? data['RchID'] : l10n!.na,
                       )),
                     ],
                   ),

@@ -43,8 +43,79 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
 
   Future<void> _loadCounts() async {
     try {
-      // Get family update count using the new DAO function
-      final familyCount = await LocalStorageDao.instance.getFamilyUpdateCount();
+      // Use same data fetching logic as FamilyUpdateList.dart and AllHouseHold_Screen.dart
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
+
+      if (currentUserKey.isEmpty) {
+        print('Error: Current user key not found');
+        if (mounted) {
+          setState(() {
+            familyUpdateCount = 0;
+            eligibleCoupleCount = 0;
+            pregnantWomenCount = 0;
+            pregnancyOutcomeCount = 0;
+            hbcnCount = 0;
+            lbwReferredCount = 0;
+            abortionListCount = 0;
+            deathRegisterCount = 0;
+            migratedOutCount = 0;
+            guestBeneficiaryCount = 0;
+            isLoading = false;
+          });
+        }
+        return;
+      }
+
+      // Same query as AllHouseHold_Screen.dart for family update count
+      final households = await db.rawQuery(
+        '''
+        SELECT h.* FROM households h
+        INNER JOIN beneficiaries_new b ON h.head_id = b.unique_key
+        WHERE h.is_deleted = 0 
+          AND h.current_user_key = ?
+          AND b.current_user_key = ?
+          AND b.is_deleted = 0
+        ORDER BY h.created_date_time DESC
+      ''',
+        [currentUserKey, currentUserKey],
+      );
+
+      /// Household -> configured head map
+      final headKeyByHousehold = <String, String>{};
+      for (final hh in households) {
+        try {
+          final hhRefKey = (hh['unique_key'] ?? '').toString();
+          final headId = (hh['head_id'] ?? '').toString();
+          if (hhRefKey.isEmpty || headId.isEmpty) continue;
+          headKeyByHousehold[hhRefKey] = headId;
+        } catch (_) {}
+      }
+
+      /// --------- FAMILY HEAD FILTER ----------
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final familyHeads = rows.where((r) {
+        try {
+          final householdRefKey = (r['household_ref_key'] ?? '').toString();
+          final uniqueKey = (r['unique_key'] ?? '').toString();
+          if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
+
+          // Exclude migrated & death
+          if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
+
+          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+
+          final bool isConfiguredHead =
+              configuredHeadKey != null && configuredHeadKey == uniqueKey;
+
+          return isConfiguredHead;
+        } catch (_) {
+          return false;
+        }
+      }).toList();
+
+      final familyCount = familyHeads.length;
 
       final poCount = await _getPregnancyOutcomeCount();
       final hbnc = await _getHBNCCount();

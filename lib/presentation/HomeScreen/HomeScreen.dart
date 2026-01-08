@@ -345,26 +345,59 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   Future<void> _loadHouseholdCount() async {
     householdCount = 0;
     try {
-      // Use the centralized loadAllHouseholdData function from LocalStorageDao
-      // This ensures the dashboard count matches the All Household screen
-      final familyHeads = await LocalStorageDao.instance.loadAllHouseholdData();
+      // Use same logic as AllHouseHold_Screen.dart for household count
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
 
-      final syncedCount = familyHeads.where((r) {
+      if (currentUserKey.isEmpty) {
+        print('Error: Current user key not found');
+        if (mounted) {
+          setState(() {
+            householdCount = 0;
+            Constant.householdTotal = 0;
+            Constant.householdTotalSync = 0;
+          });
+        }
+        return;
+      }
+
+      // Same query as AllHouseHold_Screen.dart
+      final households = await db.rawQuery(
+        '''
+        SELECT h.* FROM households h
+        INNER JOIN beneficiaries_new b ON h.head_id = b.unique_key
+        WHERE h.is_deleted = 0 
+          AND h.current_user_key = ?
+          AND b.current_user_key = ?
+          AND b.is_deleted = 0
+        ORDER BY h.created_date_time DESC
+      ''',
+        [currentUserKey, currentUserKey],
+      );
+
+      final syncedCount = households.where((r) {
         final s = r['is_synced'];
         return s == 1 || s == '1';
       }).length;
 
       if (mounted) {
         setState(() {
-          householdCount = familyHeads.length;
+          householdCount = households.length;
           Constant.householdTotal = householdCount;
           Constant.householdTotalSync = syncedCount;
         });
       }
-      print(householdCount);
-      print('call');
+      print('Household count: $householdCount');
     } catch (e) {
       print('Error loading household count: $e');
+      if (mounted) {
+        setState(() {
+          householdCount = 0;
+          Constant.householdTotal = 0;
+          Constant.householdTotalSync = 0;
+        });
+      }
     }
   }
 

@@ -889,10 +889,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     DateTime displayEndDate = endDate;
     DateTime displayStartDate = startDate;
     
-    // Special case for 4th ANC - set end date to 15 days after start date
-    if (label.toLowerCase().contains('4th') || label.toLowerCase().contains('fourth')) {
-      displayEndDate = startDate.add(const Duration(days: 15));
-    }
     // Remove hardcoded PMSMS logic - use normal calculation
     
     return Expanded(
