@@ -724,7 +724,7 @@ class _RegisterChildDueListFormScreen
                   context: context,
                   builder: (context) => CustomDialog(
                     title: 'Form has been saved successfully',
-                    message: 'Registration completed',
+                    message: 'Registration has been completed',
                     onOkPressed: () {
                       Navigator.of(context).pop();
                       Navigator.of(context).pop({
