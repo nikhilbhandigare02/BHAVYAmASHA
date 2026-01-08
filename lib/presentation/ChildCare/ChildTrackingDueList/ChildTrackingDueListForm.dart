@@ -80,16 +80,31 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       if (args != null && args['formData'] is Map<String, dynamic>) {
         _formData.addAll(args['formData'] as Map<String, dynamic>);
 
-        final childReg = _formData['child_registration_due'];
-
-        if (childReg is Map<String, dynamic>) {
-          final dob = childReg['date_of_birth'];
-
-          debugPrint('Loaded form data with keys: ${_formData.keys.toList()}');
-          debugPrint('Household Ref Key: ${_formData['household_ref_key']}');
-          debugPrint('Beneficiary Ref Key: ${_formData['beneficiary_ref_key']}');
-          debugPrint('Date of Birth: $dob');
+        if (_formData['date_of_birth'] != null && _formData['date_of_birth'].toString().isNotEmpty) {
+           try {
+             _birthDate = DateTime.parse(_formData['date_of_birth'].toString());
+           } catch (e) {
+             debugPrint('Error parsing date_of_birth: $e');
+           }
+        } else {
+           final childReg = _formData['child_registration_due'];
+           if (childReg is Map<String, dynamic>) {
+             final dob = childReg['date_of_birth'];
+             if (dob != null) {
+                try {
+                   _birthDate = DateTime.parse(dob.toString());
+                } catch(e) {
+                   debugPrint('Error parsing nested date_of_birth: $e');
+                }
+             }
+           }
         }
+
+        debugPrint('Loaded form data with keys: ${_formData.keys.toList()}');
+        debugPrint('Household Ref Key: ${_formData['household_ref_key']}');
+        debugPrint('Beneficiary Ref Key: ${_formData['beneficiary_ref_key']}');
+        debugPrint('Date of Birth: ${_formData['date_of_birth']}');
+        debugPrint('Parsed Birth Date: $_birthDate');
       }
 
       _formDataLoaded = true;
@@ -1234,13 +1249,14 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
   Widget _buildNineMonthDoseTable() {
     final l = AppLocalizations.of(context)!;
+    final nineMonthDueDate = _calculateDueDate(39);
     final data = [
-      {'name': l.measles1, 'due': '14-07-2023'},
-      {'name': l.mrDose1, 'due': '14-07-2023'},
-      {'name': l.vitaminADose1, 'due': '14-07-2023'},
-      {'name': l.jeVaccine1, 'due': '14-07-2023'},
-      {'name': l.pcvBooster, 'due': '14-07-2023'},
-      {'name': l.fipv3, 'due': '14-07-2023'},
+      {'name': l.measles1, 'due': nineMonthDueDate},
+      {'name': l.mrDose1, 'due': nineMonthDueDate},
+      {'name': l.vitaminADose1, 'due': nineMonthDueDate},
+      {'name': l.jeVaccine1, 'due': nineMonthDueDate},
+      {'name': l.pcvBooster, 'due': nineMonthDueDate},
+      {'name': l.fipv3, 'due': nineMonthDueDate},
     ];
 
     return Table(
@@ -1373,7 +1389,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
   Widget _buildSixteenToTwentyFourMonthDoseTable() {
     final l = AppLocalizations.of(context)!;
-    final sixteenToTwentyFourMonthDueDate = _calculateDueDate(20);
+    final sixteenToTwentyFourMonthDueDate = _calculateDueDate(69);
     final data = [
       {'name': l.opvBooster, 'due': sixteenToTwentyFourMonthDueDate},
       {'name': l.dptBooster1, 'due': sixteenToTwentyFourMonthDueDate},

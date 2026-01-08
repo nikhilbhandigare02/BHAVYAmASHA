@@ -777,6 +777,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           // Now we use childRegistrationMap which holds the correct data regardless of structure
           'weight_grams': childRegistrationMap['weight_grams']?.toString() ?? '',
           'birth_weight_grams': childRegistrationMap['birth_weight_grams']?.toString() ?? '',
+          'date_of_birth': childRegistrationMap['date_of_birth']?.toString() ?? '',
         };
 
         debugPrint('Complete form data to pass:');
