@@ -1582,8 +1582,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           final householdRefKey =
               beneficiary['household_ref_key']?.toString() ?? '';
 
-          // Get visit count
+          // Get visit count and visit number from latest HBNC record
           final visitCount = await _getHbncVisitCount(beneficiaryRefKey);
+          final visitNumber = await _getHbncVisitNumber(beneficiaryRefKey);
 
           // Get last and next visit dates
           final lastVisitDate = await _getHbncLastVisitDateForDisplay(
@@ -1594,6 +1595,33 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             formData['delivery_date']?.toString(),
           );
 
+          // Apply filtering logic based on visit number
+          if (visitNumber != null) {
+            // If visit number exists, only show if it's one of the specific values
+            // and next visit date is today or in the past
+            final specificVisitNumbers = [3, 7, 14, 21, 28, 42];
+            if (!specificVisitNumbers.contains(visitNumber)) {
+              debugPrint('🗑️ Skipping HBNC record for $beneficiaryRefKey - visit number $visitNumber not in specific list');
+              continue;
+            }
+
+            // Check if next visit date is today or in the past
+            if (nextVisitDate != null && nextVisitDate.isNotEmpty) {
+              final nextDate = _parseDate(nextVisitDate);
+              if (nextDate != null) {
+                final now = DateTime.now();
+                final today = DateTime(now.year, now.month, now.day);
+                final nextDateOnly = DateTime(nextDate.year, nextDate.month, nextDate.day);
+                
+                if (nextDateOnly.isAfter(today)) {
+                  debugPrint('🗑️ Skipping HBNC record for $beneficiaryRefKey - next visit date $nextVisitDate is in the future');
+                  continue;
+                }
+              }
+            }
+          }
+          // If visitNumber is null, show all records (existing behavior)
+
           // Check if visit count will change between current date and next HBNC visit date
           final shouldRemoveFromList =
           await _shouldRemoveHbncRecordDueToCountChange(
@@ -1602,7 +1630,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             visitCount,
           );
 
-          // If count will change, skip adding this record to the list
+          // If count will change, skip adding this record to list
           if (shouldRemoveFromList) {
             debugPrint(
               '🗑️ Removing HBNC record for $beneficiaryRefKey - visit count will change before next visit',
@@ -1796,6 +1824,105 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       }
     } catch (_) {}
     return null;
+  }
+
+  // Helper method to get visit number from latest HBNC record
+  Future<int?> _getHbncVisitNumber(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) {
+        return null;
+      }
+
+      final db = await DatabaseProvider.instance.database;
+      final hbncVisitKey =
+      FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+      if (hbncVisitKey == null || hbncVisitKey.isEmpty) {
+        return null;
+      }
+
+      final results = await db.query(
+        FollowupFormDataTable.table,
+        where:
+        'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        whereArgs: [beneficiaryId, hbncVisitKey],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      if (results.isEmpty) {
+        return null;
+      }
+
+      try {
+        final latestRecord = results.first;
+        final formJson = jsonDecode(
+          latestRecord['form_json'] as String? ?? '{}',
+        );
+        
+        // Check for hbyc_form structure first (based on sample data)
+        if (formJson.containsKey('hbyc_form')) {
+          final hbycForm = formJson['hbyc_form'] as Map<String, dynamic>? ?? {};
+          if (hbycForm.containsKey('visitDetails')) {
+            final visitDetails = hbycForm['visitDetails'] as Map<String, dynamic>? ?? {};
+            final visitNumber = visitDetails['visitNumber']?.toString();
+            if (visitNumber != null) {
+              final number = int.tryParse(visitNumber);
+              if (number != null) {
+                return number;
+              }
+            }
+          }
+        }
+        
+        // Fallback to form_data structure
+        final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
+
+        if (formData.containsKey('visitDetails')) {
+          final visitDetails =
+              formData['visitDetails'] as Map<String, dynamic>? ?? {};
+          final visitNumber = visitDetails['visitNumber']?.toString() ??
+              visitDetails['visit_number']?.toString();
+          if (visitNumber != null) {
+            final number = int.tryParse(visitNumber);
+            if (number != null) {
+              return number;
+            }
+          }
+        }
+      } catch (_) {}
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // Helper method to parse date strings in different formats
+  DateTime? _parseDate(String dateStr) {
+    if (dateStr.isEmpty) return null;
+    try {
+      // Try parsing in different formats
+      // ISO format: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss
+      if (dateStr.contains('-')) {
+        return DateTime.tryParse(dateStr);
+      }
+      
+      // Format: dd-MM-yyyy
+      if (RegExp(r'\d{2}-\d{2}-\d{4}').hasMatch(dateStr)) {
+        final parts = dateStr.split('-');
+        if (parts.length == 3) {
+          final day = int.tryParse(parts[0]);
+          final month = int.tryParse(parts[1]);
+          final year = int.tryParse(parts[2]);
+          if (day != null && month != null && year != null) {
+            return DateTime(year, month, day);
+          }
+        }
+      }
+      
+      return null;
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<int> _getHbncVisitCount(String beneficiaryId) async {
