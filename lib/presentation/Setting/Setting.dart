@@ -142,7 +142,7 @@ class _SettingState extends State<Setting> {
                     TextButton(
                       onPressed: () => Navigator.pop(ctx),
                       child: Text(
-                        'CANCEL',
+                        l10n.cancel,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -158,7 +158,7 @@ class _SettingState extends State<Setting> {
                         Navigator.pop(ctx);
                       },
                       child: Text(
-                        'OK',
+                        l10n.ok,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
