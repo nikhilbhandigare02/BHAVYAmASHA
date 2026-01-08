@@ -457,54 +457,72 @@ sfgfdd
     try {
       print('🔍 Starting to load eligible couples count...');
       final db = await DatabaseProvider.instance.database;
-      final currentUser = await SecureStorageService.getCurrentUserData();
-      final currentUserKey = currentUser?['unique_key']?.toString() ?? '';
-      print('👤 Current user key: $currentUserKey');
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      // Get total eligible couples count
-      final totalQuery = '''
-      SELECT COUNT(DISTINCT b.unique_key) as count
-      FROM beneficiaries_new b
-      INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
-      WHERE b.is_deleted = 0 
-        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
-        AND e.eligible_couple_state = 'eligible_couple'
-        AND e.is_deleted = 0
-        ${currentUserKey.isNotEmpty ? "AND e.current_user_key = '$currentUserKey'" : ""}
-        AND (b.beneficiary_info IS NULL OR b.beneficiary_info NOT LIKE '%"gender":"male"%')
-    ''';
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+        if (mounted) {
+          setState(() {
+            _eligibleCoupleTotal = 0;
+            _eligibleCoupleSynced = 0;
+          });
+        }
+        return;
+      }
 
-      print('🔍 Total query: $totalQuery');
-      final totalResult = await db.rawQuery(totalQuery);
-      print('📊 Total result: $totalResult');
+      // Use the same logic as myBeneficiaries.dart _getEligibleCoupleCount()
+      final query = '''
+        SELECT DISTINCT b.*, e.eligible_couple_state, 
+               e.created_date_time as registration_date,
+               e.is_synced as e_is_synced
+        FROM beneficiaries_new b
+        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+        WHERE b.is_deleted = 0 
+          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+          AND e.eligible_couple_state = 'eligible_couple'
+          AND e.is_deleted = 0
+          AND e.current_user_key = ?
+      ''';
 
-      // Get synced eligible couples count
-      final syncedQuery = '''
-      SELECT COUNT(DISTINCT b.unique_key) as count
-      FROM beneficiaries_new b
-      INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
-      WHERE b.is_deleted = 0 
-        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
-        AND e.eligible_couple_state = 'eligible_couple'
-        AND e.is_deleted = 0
-        AND e.is_synced = 1
-        ${currentUserKey.isNotEmpty ? "AND e.current_user_key = '$currentUserKey'" : ""}
-        AND (b.beneficiary_info IS NULL OR b.beneficiary_info NOT LIKE '%"gender":"male"%')
-    ''';
-
-      print('🔍 Synced query: $syncedQuery');
-      final syncedResult = await db.rawQuery(syncedQuery);
-      print('📊 Synced result: $syncedResult');
+      final rows = await db.rawQuery(query, [ashaUniqueKey]);
+      
+      int totalCount = 0;
+      int syncedCount = 0;
+      
+      for (final row in rows) {
+        try {
+          final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
+          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty 
+              ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfo))
+              : <String, dynamic>{};
+          
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          if (memberType != 'child') {
+            totalCount++;
+            
+            // Check if synced
+            final isSynced = (row['e_is_synced'] ?? 0) == 1;
+            if (isSynced) {
+              syncedCount++;
+            }
+          }
+        } catch (_) {
+          totalCount++;
+          // If there's an error parsing beneficiary_info, still count it
+          // and check sync status from the activity record
+          final isSynced = (row['e_is_synced'] ?? 0) == 1;
+          if (isSynced) {
+            syncedCount++;
+          }
+        }
+      }
+      
+      print('✅ Setting counts - Total: $totalCount, Synced: $syncedCount');
 
       if (mounted) {
-        final total = totalResult.isNotEmpty ? (totalResult.first['count'] as int?) ?? 0 : 0;
-        final synced = syncedResult.isNotEmpty ? (syncedResult.first['count'] as int?) ?? 0 : 0;
-
-        print('✅ Setting counts - Total: $total, Synced: $synced');
-
         setState(() {
-          _eligibleCoupleTotal = total;
-          _eligibleCoupleSynced = synced;
+          _eligibleCoupleTotal = totalCount;
+          _eligibleCoupleSynced = syncedCount;
         });
       }
     } catch (e) {

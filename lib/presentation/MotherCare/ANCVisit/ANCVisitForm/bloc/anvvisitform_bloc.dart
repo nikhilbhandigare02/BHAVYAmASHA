@@ -722,7 +722,6 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     return 6;
   }
 
-  // Helper function to calculate next visit date
   String _calculateNextVisitDate(AnvvisitformState state) {
     final currentDate = state.dateOfInspection ?? DateTime.now();
     final nextVisitDate = currentDate.add(Duration(days: 28)); // 4 weeks interval

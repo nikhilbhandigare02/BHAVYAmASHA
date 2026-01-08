@@ -128,6 +128,31 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
       print('  - User Key: $currentUserKey');
       print('  - Facility ID: $facilityId');
 
+      // Calculate hbnc_visit_date based on visitNumber using the same logic as HBNCScreen
+      final visitNumber = state.visitDetails['visitNumber'] as int?;
+      final visitDate = state.visitDetails['visitDate'] as DateTime?;
+      DateTime? calculatedHbncVisitDate;
+      
+      if (visitNumber != null) {
+        // Get delivery date from beneficiary data if available
+        DateTime? deliveryDate;
+        if (event.beneficiaryData != null) {
+          final deliveryDateStr = event.beneficiaryData!['delivery_date']?.toString();
+          if (deliveryDateStr != null) {
+            deliveryDate = DateTime.tryParse(deliveryDateStr);
+          }
+        }
+        
+        // Use the visit date as base for calculation, or delivery date if available
+        final baseDate = visitDate ?? deliveryDate;
+        calculatedHbncVisitDate = calculateHbncVisitDate(visitNumber, baseDate);
+        
+        print('🗓️ Calculated HBNC visit date:');
+        print('  - Visit Number: $visitNumber');
+        print('  - Base Date: $baseDate');
+        print('  - Calculated Date: $calculatedHbncVisitDate');
+      }
+
       // Update the device info section
       final deviceInfo = await DeviceInfo.getDeviceInfo();
       final appInfo = {
@@ -149,6 +174,8 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         },
         'created_at': now,
         'updated_at': now,
+        if (calculatedHbncVisitDate != null)
+          'hbnc_visit_date': calculatedHbncVisitDate!.toIso8601String().split('T').first,
       });
 
       final followupData = {
@@ -202,9 +229,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         print('  - Beneficiary Ref Key: ${savedData.first['beneficiary_ref_key']}');
         print('  - Created: ${savedData.first['created_date_time']}');
 
-        final visitNumber = state.visitDetails['visitNumber'] as int?;
-
-        // Also close the mother care activity if both mother and baby are recorded as death
+      // Also close the mother care activity if both mother and baby are recorded as death
         final motherStatus = state.motherDetails['motherStatus']?.toString();
         String? babyCondition;
         if (state.newbornDetailsList.isNotEmpty) {
@@ -430,6 +455,38 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
       return '${nextVisitDate.year.toString().padLeft(4, '0')}-${nextVisitDate.month.toString().padLeft(2, '0')}-${nextVisitDate.day.toString().padLeft(2, '0')}';
     } catch (e) {
       print('❌ Error calculating next HBNC visit date: $e');
+      return null;
+    }
+  }
+
+  /// Calculate HBNC visit date based on visit number using the same logic as HBNCScreen
+  /// This calculates the actual visit date that should be saved in hbnc_visit_date field
+  DateTime? calculateHbncVisitDate(int visitNumber, DateTime? baseDate) {
+    try {
+      // Use the current visit date as base, or delivery date if provided
+      final DateTime currentDate = baseDate ?? DateTime.now();
+      
+      switch (visitNumber) {
+        case 1: // Day 1 (within 24 hours of birth)
+          return currentDate;
+        case 3: // Day 3 (2 days after day 1)
+          return currentDate.add(const Duration(days: 2));
+        case 7: // Day 7 (4 days after day 3)
+          return currentDate.add(const Duration(days: 4));
+        case 14: // Day 14 (7 days after day 7)
+          return currentDate.add(const Duration(days: 7));
+        case 21: // Day 21 (7 days after day 14)
+          return currentDate.add(const Duration(days: 7));
+        case 28: // Day 28 (7 days after day 21)
+          return currentDate.add(const Duration(days: 7));
+        case 42: // Day 42 (14 days after day 28)
+          return currentDate.add(const Duration(days: 14));
+        default:
+          // For any other visit number, add 7 days as default
+          return currentDate.add(const Duration(days: 7));
+      }
+    } catch (e) {
+      print('❌ Error calculating HBNC visit date: $e');
       return null;
     }
   }

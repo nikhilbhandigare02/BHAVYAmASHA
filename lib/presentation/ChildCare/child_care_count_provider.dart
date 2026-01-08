@@ -415,8 +415,8 @@ class ChildCareCountProvider {
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      String whereClause = 'is_deleted = ? AND is_adult = ?';
-      List<dynamic> whereArgs = [0, 0];
+      String whereClause = 'is_deleted = ? AND is_adult = ? AND is_death = ?';
+      List<dynamic> whereArgs = [0, 0, 0];
 
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         whereClause += ' AND current_user_key = ?';
@@ -431,6 +431,7 @@ class ChildCareCountProvider {
     B.is_deleted = 0
     AND B.is_adult = 0
     AND B.is_migrated = 0
+    AND B.is_death = 0
     AND B.current_user_key = ?
   ORDER BY B.created_date_time DESC
 ''', [ashaUniqueKey]);
@@ -499,8 +500,8 @@ class ChildCareCountProvider {
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       
-      String whereClause = 'is_deleted = ? AND is_adult = ?';
-      List<dynamic> whereArgs = [0, 0]; // is_deleted = 0, is_adult = 0 (child)
+      String whereClause = 'is_deleted = ? AND is_adult = ? AND is_death = ?';
+      List<dynamic> whereArgs = [0, 0, 0]; // is_deleted = 0, is_adult = 0 (child)
       
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         whereClause += ' AND current_user_key = ?';
@@ -515,6 +516,7 @@ class ChildCareCountProvider {
     B.is_deleted = 0
     AND B.is_adult = 0
     AND B.is_migrated = 0
+    AND B.is_death = 0
     AND B.current_user_key = ?
   ORDER BY B.created_date_time DESC
 ''', [ashaUniqueKey]);
