@@ -355,10 +355,24 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                           ),
                                         );
                                       }
+                                      else if (message == ''){
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Please enter valid user credentials.',
+                                              style: const TextStyle(color: Colors.white),
+                                            ),
+                                            backgroundColor: Colors.black,
+                                            duration: const Duration(seconds: 3),
+                                          ),
+                                        );
+
+                                      }
 
 
 
                                     }
+
 
                                     // ❌ NO error handling here
                                     // ❌ No snackbar for error

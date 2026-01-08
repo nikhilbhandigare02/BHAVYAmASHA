@@ -236,12 +236,24 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
     if (_isSaving) return;
 
     // Validation for weight
+    final dob = _birthDate;
+    final nowTime = DateTime.now();
+    final thresholdDate = DateTime(dob.year + 1, dob.month + 3, dob.day + 1);
+    final isOlder = nowTime.isAfter(thresholdDate) || nowTime.isAtSameMomentAs(thresholdDate);
+
     final weightVal = _formData['weight_grams'];
     if (weightVal != null && weightVal.toString().trim().isNotEmpty) {
       final double? weight = double.tryParse(weightVal.toString().trim());
-      if (weight != null && (weight < 500 || weight > 12500)) {
-        showAppSnackBar(context, "Please enter weight between 500 to 12500 gms");
-        return;
+      if (isOlder) {
+        if (weight != null && (weight < 1.2 || weight > 90)) {
+          showAppSnackBar(context, "Please enter weight between 1.2 to 90 kg");
+          return;
+        }
+      } else {
+        if (weight != null && (weight < 500 || weight > 12500)) {
+          showAppSnackBar(context, "Please enter weight between 500 to 12500 gms");
+          return;
+        }
       }
     }
 
@@ -591,38 +603,83 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                   _infoRow(l!.dateOfVisit, _getBirthDateFormatted()),
                   const Divider(),
                   const SizedBox(height: 8),
-                  CustomTextField(
-                    maxLength: 5,
-                    labelText: l.weightLabelTrackingDue,
-                    hintText: l.weightLabelTrackingDue,
+                  Builder(
+                    builder: (context) {
+                      final dob = _birthDate;
+                      final now = DateTime.now();
+                      final thresholdDate = DateTime(dob.year + 1, dob.month + 3, dob.day + 1);
+                      final isOlder = now.isAfter(thresholdDate) || now.isAtSameMomentAs(thresholdDate);
 
-                    initialValue: (_formData['weight_grams'] != null &&
-                        _formData['weight_grams'].toString().isNotEmpty)
-                        ? _formData['weight_grams'].toString()
-                        : null,
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      // Store value directly without conversion
-                      _formData['weight_grams'] = value;
+                      if (isOlder) {
+                        return Column(
+                          children: [
+                            CustomTextField(
+                              labelText: l?.weightRange,
+                              hintText: l?.weightRange,
+                              initialValue: (_formData['weight_grams'] != null &&
+                                      _formData['weight_grams'].toString().isNotEmpty)
+                                  ? _formData['weight_grams'].toString()
+                                  : null,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              onChanged: (value) {
+                                _formData['weight_grams'] = value;
+                              },
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) return null;
+                                final n = double.tryParse(value.trim());
+                                if (n == null || n < 1.2 || n > 90) {
+                                  return 'Enter value between 1.2 to 90';
+                                }
+                                return null;
+                              },
+                            ),
+                            const Divider(),
+                          ],
+                        );
+                      } else {
+                        return Column(
+                          children: [
+                            CustomTextField(
+                              maxLength: 5,
+                              labelText: l!.weightLabelTrackingDue,
+                              hintText: l.weightLabelTrackingDue,
+                              initialValue: (_formData['weight_grams'] != null &&
+                                      _formData['weight_grams'].toString().isNotEmpty)
+                                  ? _formData['weight_grams'].toString()
+                                  : null,
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                _formData['weight_grams'] = value;
+                              },
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) return null;
+                                final n = double.tryParse(value.trim());
+                                if (n == null || n < 500 || n > 12500) {
+                                  return 'Enter value between 500 to 12500';
+                                }
+                                return null;
+                              },
+                            ),
+                            const Divider(),
+                            CustomTextField(
+                              maxLength: 4,
+                              labelText: l.birthWeightRange,
+                              hintText: l.birthWeightRange,
+                              initialValue: (_formData['birth_weight_grams'] != null &&
+                                      _formData['birth_weight_grams'].toString().isNotEmpty)
+                                  ? _formData['birth_weight_grams'].toString()
+                                  : null,
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                _formData['birth_weight_grams'] = value;
+                              },
+                            ),
+                          ],
+                        );
+                      }
                     },
                   ),
-                  const Divider(),
-                  CustomTextField(
-                    maxLength: 4,
-                    labelText: l.birthWeightRange,
-                    hintText: l.birthWeightRange,
-                    // Show value exactly as stored (grams)
-                    initialValue: (_formData['birth_weight_grams'] != null &&
-                        _formData['birth_weight_grams'].toString().isNotEmpty)
-                        ? _formData['birth_weight_grams'].toString()
-                        : null,
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      // Store value directly without conversion
-                      _formData['birth_weight_grams'] = value;
-                    },
-                  ),
-                  const Divider(),
+
                   const SizedBox(height: 16),
                   _buildDoseTable(),
                   const SizedBox(height: 16),
