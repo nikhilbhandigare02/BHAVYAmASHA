@@ -7361,4 +7361,43 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get rota3 => 'रोटा - 3';
+
+  @override
+  String get measles1 => 'खसरा - 1';
+
+  @override
+  String get mrDose1 => 'एम.आर. खुराक - 1';
+
+  @override
+  String get vitaminADose1 => 'विटामिन ए खुराक - 1';
+
+  @override
+  String get jeVaccine1 => 'जे.ई. वैक्सीन  - 1';
+
+  @override
+  String get pcvBooster => 'पी.सी.वी. बूस्टर';
+
+  @override
+  String get fipv3 => 'एफ.आई.पी.वी. - 3';
+
+  @override
+  String get opvBooster => 'ओ.पी.वी. बूस्टर';
+
+  @override
+  String get dptBooster1 => 'डी.पी.टी. बूस्टर - 1';
+
+  @override
+  String get measles2 => 'खसरा - 2';
+
+  @override
+  String get jeVaccine2 => 'जे.ई. वैक्सीन  - 2';
+
+  @override
+  String get mrDose2 => 'एम.आर. खुराक - 2';
+
+  @override
+  String get dptBooster2 => 'डी.पी.टी. बूस्टर - 2';
+
+  @override
+  String get tdVaccine => 'टेटनस डिफ्थीरिया (टी.डी.)';
 }
