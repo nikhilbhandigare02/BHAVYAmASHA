@@ -74,13 +74,24 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       });
 
       // Load form data from arguments only once
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final args =
+      ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
       if (args != null && args['formData'] is Map<String, dynamic>) {
         _formData.addAll(args['formData'] as Map<String, dynamic>);
-        debugPrint('Loaded form data with keys: ${_formData.keys.toList()}');
-        debugPrint('Household Ref Key: ${_formData['household_ref_key']}');
-        debugPrint('Beneficiary Ref Key: ${_formData['beneficiary_ref_key']}');
+
+        final childReg = _formData['child_registration_due'];
+
+        if (childReg is Map<String, dynamic>) {
+          final dob = childReg['date_of_birth'];
+
+          debugPrint('Loaded form data with keys: ${_formData.keys.toList()}');
+          debugPrint('Household Ref Key: ${_formData['household_ref_key']}');
+          debugPrint('Beneficiary Ref Key: ${_formData['beneficiary_ref_key']}');
+          debugPrint('Date of Birth: $dob');
+        }
       }
+
       _formDataLoaded = true;
       _prefillWeightsFromDb();
     }
@@ -261,6 +272,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           'visit_date': now,
           'is_beneficiary_absent': _tabCaseClosureState[currentTabIndex]?['isBeneficiaryAbsent'],
           'reason_for_absent': _reasonForAbsentControllers[currentTabIndex]?.text,
+
           // Ensure household_id and beneficiary_id are saved (use ref_key if id not available)
           'household_id': _formData['household_id'] ?? _formData['household_ref_key'] ?? _formData['hhId'] ?? '',
           'beneficiary_id': _formData['beneficiary_id'] ?? _formData['beneficiary_ref_key'] ?? _formData['BeneficiaryID'] ?? '',
