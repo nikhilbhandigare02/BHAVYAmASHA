@@ -152,19 +152,15 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
     }
   }
 
-
   @override
   void dispose() {
     _searchCtrl.dispose();
     super.dispose();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
     return Scaffold(
       appBar: AppHeader(
         screenTitle: l10n?.eligibleCoupleListTitle ?? 'Eligible Couple List',
@@ -173,7 +169,6 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
       drawer: const CustomDrawer(),
       body: Column(
         children: [
-
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
@@ -194,7 +189,6 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
     final l10n = AppLocalizations.of(context);
     return InkWell(
       onTap: () {
-
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),

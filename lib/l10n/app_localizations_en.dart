@@ -171,7 +171,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get maritalStatusUnmarried => 'Unmarried';
 
   @override
-  String get maritalStatusWidowed => 'Widowed';
+  String get maritalStatusWidowed => 'Widow';
 
   @override
   String get maritalStatusWidower => 'Widower';
@@ -1602,7 +1602,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get isWomanBreastfeedingLabel => 'Is woman breastfeeding?';
 
   @override
-  String get isWomanPregnantQuestion => 'Woman is Pregnant?';
+  String get isWomanPregnantQuestion => 'Is the Woman Pregnant?';
 
   @override
   String get kitchenInsideLabel => 'Is the kitchen inside the house';

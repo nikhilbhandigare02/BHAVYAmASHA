@@ -422,7 +422,7 @@ abstract class AppLocalizations {
   /// No description provided for @maritalStatusWidowed.
   ///
   /// In en, this message translates to:
-  /// **'Widowed'**
+  /// **'Widow'**
   String get maritalStatusWidowed;
 
   /// No description provided for @maritalStatusWidower.
@@ -3260,7 +3260,7 @@ abstract class AppLocalizations {
   /// No description provided for @isWomanPregnantQuestion.
   ///
   /// In en, this message translates to:
-  /// **'Woman is Pregnant?'**
+  /// **'Is the Woman Pregnant?'**
   String get isWomanPregnantQuestion;
 
   /// No description provided for @kitchenInsideLabel.

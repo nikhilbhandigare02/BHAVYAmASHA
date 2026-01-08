@@ -141,8 +141,7 @@ class _TrainingHomeScreenState extends State<TrainingHomeScreen> {
                       Navigator.pushNamed(context, Route_Names.TrainingReceived);
                     },
                   ),
-                  const SizedBox(width: 8),
-
+                  SizedBox(width: 8),
                 ],
               ),
             ],
@@ -175,7 +174,6 @@ class _FeatureCard extends StatelessWidget {
         ? 15.h
         : 22.h;
     final scaleFactor = MediaQuery.of(context).textScaleFactor;
-
     return InkWell(
       onTap: onClick,
       borderRadius: BorderRadius.circular(10),
