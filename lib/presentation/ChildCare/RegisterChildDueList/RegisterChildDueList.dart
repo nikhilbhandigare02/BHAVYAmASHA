@@ -660,7 +660,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No children found for registration',
+                         l10n!.noChildrenFound,
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.grey[600],
@@ -668,7 +668,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Children with "registration_due" status will appear here',
+                          l10n!.childrenRegistrationDue,
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[500],

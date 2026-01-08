@@ -2005,7 +2005,7 @@
   "deathPlace": "मृत्यु का स्थान",
   "reasonOfDeath": "मृत्यु का कारण",
   "otherReasonOfDeath": "अन्य मृत्यु का कारण",
-  "no_ChildrenFound": "कोई बच्चा नहीं मिला",
+  "no_ChildrenFound": "कोई बच्चा नहीं मिला.",
   "caseClosureRecorded": "केस समापन दर्ज किया गया। बच्चे को ट्रैकिंग सूची से हटाया गया है।",
   "caseClosure": "केस बंद",
   "childRegistration": "शिशु पंजीकरण",
