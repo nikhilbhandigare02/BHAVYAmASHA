@@ -2536,5 +2536,20 @@
   "abhaAddressLinked": "ABHA Address Linked!",
   "selectAbhaId": "Select ABHA ID",
   "mobileNumberMismatch": "Mobile number mismatch",
-  "mohallaTolaName": "Tola/Mohalla"
+  "mohallaTolaName": "Tola/Mohalla",
+  "opv1": "O.P.V. - 1",
+  "dpt1": "D.P.T. - 1",
+  "pentavalent1": "Pentavalent - 1",
+  "rota1": "Rota - 1",
+  "ipv1": "I.P.V. - 1",
+  "pcv1": "P.C.V. - 1",
+  "opv2": "O.P.V. - 2",
+  "pentavalent2": "Pentavalent - 2",
+  "rota2": "Rota - 2",
+  "dpt2": "D.P.T. - 2",
+  "ipv2": "I.P.V. - 2",
+  "pcv2": "P.C.V. - 2",
+  "opv3": "O.P.V. - 3",
+  "pentavalent3": "Pentavalent - 3",
+  "rota3": "Rota - 3"
 }

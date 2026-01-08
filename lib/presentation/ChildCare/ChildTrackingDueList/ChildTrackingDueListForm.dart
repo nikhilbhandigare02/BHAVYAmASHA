@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -686,14 +687,15 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   }
 
   Widget _buildSixWeekDoseTable() {
+    final l10n = AppLocalizations.of(context);
     final sixWeekDueDate = _calculateDueDate(6);
     final data = [
-      {'name': 'O.P.V. -1', 'due': sixWeekDueDate},
-      {'name': 'D.P.T. -1', 'due': sixWeekDueDate},
-      {'name': 'Pentavelent 1', 'due': sixWeekDueDate},
-      {'name': 'Rota-1', 'due': sixWeekDueDate},
-      {'name': 'IPV 1', 'due': sixWeekDueDate},
-      {'name': 'P.C.V.-1', 'due': sixWeekDueDate},
+      {'name': l10n!.opv1, 'due': sixWeekDueDate},
+      {'name': l10n.dpt1, 'due': sixWeekDueDate},
+      {'name': l10n.pentavalent1, 'due': sixWeekDueDate},
+      {'name': l10n.rota1, 'due': sixWeekDueDate},
+      {'name': l10n.ipv1, 'due': sixWeekDueDate},
+      {'name': l10n.pcv1, 'due': sixWeekDueDate},
     ];
 
     return Table(
@@ -704,20 +706,20 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       },
       border: const TableBorder(horizontalInside: BorderSide(width: 0.5)),
       children: [
-        const TableRow(
-          decoration: BoxDecoration(color: Color(0xFFF2F2F2)),
+        TableRow(
+          decoration: const BoxDecoration(color: Color(0xFFF2F2F2)),
           children: [
             Padding(
-              padding: EdgeInsets.all(8),
-              child: Text('6 Week Doses', style: TextStyle(fontWeight: FontWeight.bold)),
+              padding: const EdgeInsets.all(8),
+              child: Text(l10n!.six_WeekDoses, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ),
+             Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(l10n.doseTableDueDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
-              padding: EdgeInsets.all(8),
-              child: Text('Due Date', style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-            Padding(
-              padding: EdgeInsets.all(8),
-              child: Text('Actual Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              padding: const EdgeInsets.all(8),
+              child: Text(l10n.doseTableActualDate, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -802,11 +804,12 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   }
 
   Widget _buildTenWeekDoseTable() {
+    final l = AppLocalizations.of(context);
     final tenWeekDueDate = _calculateDueDate(10);
     final data = [
-      {'name': 'O.P.V.-2', 'due': tenWeekDueDate},
-      {'name': 'Pentavelent -2', 'due': tenWeekDueDate},
-      {'name': 'Rota-2', 'due': tenWeekDueDate},
+      {'name': l!.opv2, 'due': tenWeekDueDate},
+      {'name': l!.pentavalent2, 'due': tenWeekDueDate},
+      {'name': l!.rota2, 'due': tenWeekDueDate},
     ];
 
     return Table(
@@ -817,20 +820,20 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       },
       border: const TableBorder(horizontalInside: BorderSide(width: 0.5)),
       children: [
-        const TableRow(
+         TableRow(
           decoration: BoxDecoration(color: Color(0xFFF2F2F2)),
           children: [
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('10 Week Doses', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l!.tenWeekDoses, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Due Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l!.doseTableDueDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Actual Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l!.doseTableActualDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -856,13 +859,14 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   }
 
   Widget _buildFourteenWeekDoseTable() {
+    final l = AppLocalizations.of(context);
     final fourteenWeekDueDate = _calculateDueDate(14);
     final data = [
-      {'name': 'O.P.V.-3', 'due': fourteenWeekDueDate},
-      {'name': 'Pentavalent 3', 'due': fourteenWeekDueDate},
-      {'name': 'Rota 3', 'due': fourteenWeekDueDate},
-      {'name': 'IPV 2', 'due': fourteenWeekDueDate},
-      {'name': 'P.V.C. -2', 'due': fourteenWeekDueDate},
+      {'name': l!.opv3, 'due': fourteenWeekDueDate},
+      {'name': l!.pentavalent3, 'due': fourteenWeekDueDate},
+      {'name': l!.rota3, 'due': fourteenWeekDueDate},
+      {'name': l!.ipv2, 'due': fourteenWeekDueDate},
+      {'name': l!.pcv2, 'due': fourteenWeekDueDate},
     ];
 
     return Table(
@@ -873,20 +877,20 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       },
       border: const TableBorder(horizontalInside: BorderSide(width: 0.5)),
       children: [
-        const TableRow(
+         TableRow(
           decoration: BoxDecoration(color: Color(0xFFF2F2F2)),
           children: [
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('14 Week Doses', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l!.fourteenWeekDoses, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Due Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l!.doseTableDueDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Actual Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l!.doseTableActualDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -915,6 +919,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
     final tabIndex = 3; // 14 Week tab
     _initializeTabState(tabIndex);
     final List<String> absentOptions = ['No', 'Yes'];
+    final l = AppLocalizations.of(context);
 
     return StatefulBuilder(
       builder: (context, setState) {
@@ -986,7 +991,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
 
                           ApiDropdown<String>(
-                            labelText: 'Is Beneficiary Absent?',
+                            labelText: l!.beneficiaryAbsentLabel,
                             items: absentOptions,
                             value: _tabCaseClosureState[tabIndex]?['isBeneficiaryAbsent'],
                             onChanged: (value) {
@@ -1001,8 +1006,8 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                           if (_tabCaseClosureState[tabIndex]?['isBeneficiaryAbsent'] == 'Yes') ...[
 
                             CustomTextField(
-                              labelText: 'Reason for Absent',
-                              hintText: 'Reason for Absent',
+                              labelText: l!.reasonForAbsence,
+                              hintText: l!.reasonForAbsence,
                               controller: _reasonForAbsentControllers[tabIndex],
                             ),
                           ],

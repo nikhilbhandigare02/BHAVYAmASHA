@@ -872,7 +872,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get childRegisteredDueListSearch => 'पंजीकृत बच्चे को खोंजे';
 
   @override
-  String get childTrackingDueListTitle => 'बाल ट्रैकिंग\nलंबित सूची';
+  String get childTrackingDueListTitle => 'बाल ट्रैकिंग लंबित सूची';
 
   @override
   String get childTrackingDueSearch => 'लंबीत ट्रेकिंग वाले बच्चे को खोंजे ';
@@ -7316,4 +7316,49 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get mohallaTolaName => 'टोला/मोहल्ला';
+
+  @override
+  String get opv1 => 'ओ.पी.वी. - 1';
+
+  @override
+  String get dpt1 => 'डी.पी.टी. - 1';
+
+  @override
+  String get pentavalent1 => 'पेंटावैलेंट - 1';
+
+  @override
+  String get rota1 => 'रोटा - 1';
+
+  @override
+  String get ipv1 => 'आईपीवी. - 1';
+
+  @override
+  String get pcv1 => 'पी.सी.वी. - 1';
+
+  @override
+  String get opv2 => 'ओ.पी.वी. - 2';
+
+  @override
+  String get pentavalent2 => 'पेंटावैलेंट - 2';
+
+  @override
+  String get rota2 => 'रोटा - 2';
+
+  @override
+  String get dpt2 => 'डी.पी.टी. - 2';
+
+  @override
+  String get ipv2 => 'आईपीवी. - 2';
+
+  @override
+  String get pcv2 => 'पी.सी.वी. - 2';
+
+  @override
+  String get opv3 => 'ओ.पी.वी. - 3';
+
+  @override
+  String get pentavalent3 => 'पेंटावैलेंट - 3';
+
+  @override
+  String get rota3 => 'रोटा - 3';
 }

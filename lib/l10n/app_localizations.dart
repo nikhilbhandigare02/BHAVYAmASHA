@@ -14680,6 +14680,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tola/Mohalla'**
   String get mohallaTolaName;
+
+  /// No description provided for @opv1.
+  ///
+  /// In en, this message translates to:
+  /// **'O.P.V. - 1'**
+  String get opv1;
+
+  /// No description provided for @dpt1.
+  ///
+  /// In en, this message translates to:
+  /// **'D.P.T. - 1'**
+  String get dpt1;
+
+  /// No description provided for @pentavalent1.
+  ///
+  /// In en, this message translates to:
+  /// **'Pentavalent - 1'**
+  String get pentavalent1;
+
+  /// No description provided for @rota1.
+  ///
+  /// In en, this message translates to:
+  /// **'Rota - 1'**
+  String get rota1;
+
+  /// No description provided for @ipv1.
+  ///
+  /// In en, this message translates to:
+  /// **'I.P.V. - 1'**
+  String get ipv1;
+
+  /// No description provided for @pcv1.
+  ///
+  /// In en, this message translates to:
+  /// **'P.C.V. - 1'**
+  String get pcv1;
+
+  /// No description provided for @opv2.
+  ///
+  /// In en, this message translates to:
+  /// **'O.P.V. - 2'**
+  String get opv2;
+
+  /// No description provided for @pentavalent2.
+  ///
+  /// In en, this message translates to:
+  /// **'Pentavalent - 2'**
+  String get pentavalent2;
+
+  /// No description provided for @rota2.
+  ///
+  /// In en, this message translates to:
+  /// **'Rota - 2'**
+  String get rota2;
+
+  /// No description provided for @dpt2.
+  ///
+  /// In en, this message translates to:
+  /// **'D.P.T. - 2'**
+  String get dpt2;
+
+  /// No description provided for @ipv2.
+  ///
+  /// In en, this message translates to:
+  /// **'I.P.V. - 2'**
+  String get ipv2;
+
+  /// No description provided for @pcv2.
+  ///
+  /// In en, this message translates to:
+  /// **'P.C.V. - 2'**
+  String get pcv2;
+
+  /// No description provided for @opv3.
+  ///
+  /// In en, this message translates to:
+  /// **'O.P.V. - 3'**
+  String get opv3;
+
+  /// No description provided for @pentavalent3.
+  ///
+  /// In en, this message translates to:
+  /// **'Pentavalent - 3'**
+  String get pentavalent3;
+
+  /// No description provided for @rota3.
+  ///
+  /// In en, this message translates to:
+  /// **'Rota - 3'**
+  String get rota3;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
