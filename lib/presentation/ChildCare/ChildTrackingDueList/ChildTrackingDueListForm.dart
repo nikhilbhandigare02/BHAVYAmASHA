@@ -825,7 +825,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           children: [
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text(l!.tenWeekDoses, style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l!.ten_WeekDoses, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
@@ -882,7 +882,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           children: [
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text(l!.fourteenWeekDoses, style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l!.fourteen_WeekDoses, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
@@ -916,10 +916,10 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   }
 
   Widget _buildFourteenWeekTab() {
+    final l = AppLocalizations.of(context);
     final tabIndex = 3; // 14 Week tab
     _initializeTabState(tabIndex);
-    final List<String> absentOptions = ['No', 'Yes'];
-    final l = AppLocalizations.of(context);
+    final List<String> absentOptions = [l!.yes,l!.no];
 
     return StatefulBuilder(
       builder: (context, setState) {
@@ -996,14 +996,14 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                             value: _tabCaseClosureState[tabIndex]?['isBeneficiaryAbsent'],
                             onChanged: (value) {
                               _updateTabState(tabIndex, 'isBeneficiaryAbsent', value);
-                              if (value != 'Yes') {
+                              if (value != l.yes) {
                                 _reasonForAbsentControllers[tabIndex]!.clear();
                               }
                             },
                             getLabel: (value) => value,
                           ),
                           Divider(height: 0,),
-                          if (_tabCaseClosureState[tabIndex]?['isBeneficiaryAbsent'] == 'Yes') ...[
+                          if (_tabCaseClosureState[tabIndex]?['isBeneficiaryAbsent'] == l.yes) ...[
 
                             CustomTextField(
                               labelText: l!.reasonForAbsence,
@@ -1221,13 +1221,14 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   }
 
   Widget _buildNineMonthDoseTable() {
+    final l = AppLocalizations.of(context)!;
     final data = [
-      {'name': 'Measles 1', 'due': '14-07-2023'},
-      {'name': 'M.R Dose -1', 'due': '14-07-2023'},
-      {'name': 'Vitamin A Dose -1', 'due': '14-07-2023'},
-      {'name': 'J.E Vaccine -1', 'due': '14-07-2023'},
-      {'name': 'P.V.C -Booster', 'due': '14-07-2023'},
-      {'name': 'F.I.P.V. -3', 'due': '14-07-2023'},
+      {'name': l.measles1, 'due': '14-07-2023'},
+      {'name': l.mrDose1, 'due': '14-07-2023'},
+      {'name': l.vitaminADose1, 'due': '14-07-2023'},
+      {'name': l.jeVaccine1, 'due': '14-07-2023'},
+      {'name': l.pcvBooster, 'due': '14-07-2023'},
+      {'name': l.fipv3, 'due': '14-07-2023'},
     ];
 
     return Table(
@@ -1238,20 +1239,20 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       },
       border: const TableBorder(horizontalInside: BorderSide(width: 0.5)),
       children: [
-        const TableRow(
+         TableRow(
           decoration: BoxDecoration(color: Color(0xFFF2F2F2)),
           children: [
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('9 Month Doses', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.nineMonthDoses, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Due Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.doseTableDueDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Actual Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.doseTableActualDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -1359,15 +1360,14 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   }
 
   Widget _buildSixteenToTwentyFourMonthDoseTable() {
+    final l = AppLocalizations.of(context)!;
     final sixteenToTwentyFourMonthDueDate = _calculateDueDate(20);
     final data = [
-      {'name': 'O.P.V. Booster', 'due': sixteenToTwentyFourMonthDueDate},
-      {'name': 'D.P.T. Booster-1', 'due': sixteenToTwentyFourMonthDueDate},
-      {'name': 'Measles 2', 'due': sixteenToTwentyFourMonthDueDate},
-
-      {'name': 'J.E Vaccine -2', 'due': sixteenToTwentyFourMonthDueDate},
-      {'name': 'M.R dose -2', 'due': sixteenToTwentyFourMonthDueDate},
-
+      {'name': l.opvBooster, 'due': sixteenToTwentyFourMonthDueDate},
+      {'name': l.dptBooster1, 'due': sixteenToTwentyFourMonthDueDate},
+      {'name': l.measles2, 'due': sixteenToTwentyFourMonthDueDate},
+      {'name': l.jeVaccine2, 'due': sixteenToTwentyFourMonthDueDate},
+      {'name': l.mrDose2, 'due': sixteenToTwentyFourMonthDueDate},
     ];
 
     return Table(
@@ -1378,20 +1378,20 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       },
       border: const TableBorder(horizontalInside: BorderSide(width: 0.5)),
       children: [
-        const TableRow(
+         TableRow(
           decoration: BoxDecoration(color: Color(0xFFF2F2F2)),
           children: [
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('16-24 Month Doses', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.sixteenToTwentyFourMonthDoses, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Due Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.doseTableDueDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Actual Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.doseTableActualDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -1495,9 +1495,10 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   }
 
   Widget _buildFiveToSixYearDoseTable() {
+    final l = AppLocalizations.of(context)!;
     final fiveToSixYearDueDate = _calculateDueDate(260);
     final data = [
-      {'name': 'D.P.T Booster-2', 'due': fiveToSixYearDueDate},
+      {'name': l.dptBooster2, 'due': fiveToSixYearDueDate},
     ];
 
     return Table(
@@ -1508,20 +1509,20 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       },
       border: const TableBorder(horizontalInside: BorderSide(width: 0.5)),
       children: [
-        const TableRow(
+         TableRow(
           decoration: BoxDecoration(color: Color(0xFFF2F2F2)),
           children: [
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('5-6 Year Doses', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.fiveToSixYearDoses, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Due Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.doseTableDueDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Actual Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.doseTableActualDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -1625,9 +1626,10 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   }
 
   Widget _buildTenYearDoseTable() {
+    final l = AppLocalizations.of(context)!;
     final tenYearDueDate = _calculateDueDate(520);
     final data = [
-      {'name': 'Tetanus Diphtheria (Td)', 'due': tenYearDueDate},
+      {'name': l.tdVaccine, 'due': tenYearDueDate},
     ];
 
     return Table(
@@ -1638,20 +1640,20 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       },
       border: const TableBorder(horizontalInside: BorderSide(width: 0.5)),
       children: [
-        const TableRow(
+         TableRow(
           decoration: BoxDecoration(color: Color(0xFFF2F2F2)),
           children: [
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('10 Year Doses', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.tenYearDoses, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Due Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.doseTableDueDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Actual Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.doseTableActualDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -1766,9 +1768,10 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   }
 
   Widget _buildSixteenYearDoseTable() {
+    final l = AppLocalizations.of(context)!;
     final sixteenYearDueDate = _calculateDueDate(832);
     final data = [
-      {'name': 'Tetanus Diphtheria (Td)', 'due': sixteenYearDueDate},
+      {'name': l.tdVaccine, 'due': sixteenYearDueDate},
     ];
 
     return Table(
@@ -1779,20 +1782,20 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       },
       border: const TableBorder(horizontalInside: BorderSide(width: 0.5)),
       children: [
-        const TableRow(
+         TableRow(
           decoration: BoxDecoration(color: Color(0xFFF2F2F2)),
           children: [
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('16 Year Doses', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.doses16Year, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Due Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.doseTableDueDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: EdgeInsets.all(8),
-              child: Text('Actual Date', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l.doseTableActualDate, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),

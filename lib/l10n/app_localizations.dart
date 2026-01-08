@@ -14770,6 +14770,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rota - 3'**
   String get rota3;
+
+  /// No description provided for @measles1.
+  ///
+  /// In en, this message translates to:
+  /// **'Measles - 1'**
+  String get measles1;
+
+  /// No description provided for @mrDose1.
+  ///
+  /// In en, this message translates to:
+  /// **'M.R. Dose - 1'**
+  String get mrDose1;
+
+  /// No description provided for @vitaminADose1.
+  ///
+  /// In en, this message translates to:
+  /// **'Vitamin A Dose - 1'**
+  String get vitaminADose1;
+
+  /// No description provided for @jeVaccine1.
+  ///
+  /// In en, this message translates to:
+  /// **'J.E. Vaccine - 1'**
+  String get jeVaccine1;
+
+  /// No description provided for @pcvBooster.
+  ///
+  /// In en, this message translates to:
+  /// **'P.C.V. Booster'**
+  String get pcvBooster;
+
+  /// No description provided for @fipv3.
+  ///
+  /// In en, this message translates to:
+  /// **'F.I.P.V. - 3'**
+  String get fipv3;
+
+  /// No description provided for @opvBooster.
+  ///
+  /// In en, this message translates to:
+  /// **'O.P.V. Booster'**
+  String get opvBooster;
+
+  /// No description provided for @dptBooster1.
+  ///
+  /// In en, this message translates to:
+  /// **'D.P.T. Booster - 1'**
+  String get dptBooster1;
+
+  /// No description provided for @measles2.
+  ///
+  /// In en, this message translates to:
+  /// **'Measles - 2'**
+  String get measles2;
+
+  /// No description provided for @jeVaccine2.
+  ///
+  /// In en, this message translates to:
+  /// **'J.E. Vaccine - 2'**
+  String get jeVaccine2;
+
+  /// No description provided for @mrDose2.
+  ///
+  /// In en, this message translates to:
+  /// **'M.R. Dose - 2'**
+  String get mrDose2;
+
+  /// No description provided for @dptBooster2.
+  ///
+  /// In en, this message translates to:
+  /// **'D.P.T. Booster - 2'**
+  String get dptBooster2;
+
+  /// No description provided for @tdVaccine.
+  ///
+  /// In en, this message translates to:
+  /// **'Tetanus Diphtheria (Td)'**
+  String get tdVaccine;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
