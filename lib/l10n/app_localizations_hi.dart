@@ -1755,7 +1755,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get motherInLaw => 'सास का';
 
   @override
-  String get motherNameLabel => 'माँ  का नाम';
+  String get motherNameLabel => 'माता का नाम';
 
   @override
   String get mukhiyaMobileHint => 'मुखिया का मोबाइल नंबर';
@@ -6121,7 +6121,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get specify_reason_required => 'कारण निर्दिष्ट करें *';
 
   @override
-  String get enter_12_digit_rch_id => '12 अंकों का RCH ID दर्ज करें';
+  String get enter_12_digit_rch_id => 'आरसीएच आईडी';
 
   @override
   String get must_be_12_digits => '12 अंकों का होना चाहिए';

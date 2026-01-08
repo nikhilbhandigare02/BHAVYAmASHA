@@ -3950,7 +3950,7 @@ abstract class AppLocalizations {
   /// No description provided for @registrationDateLabel.
   ///
   /// In en, this message translates to:
-  /// **'Date of registration'**
+  /// **'Registration Date'**
   String get registrationDateLabel;
 
   /// No description provided for @registrationThroughTitle.
@@ -12290,7 +12290,7 @@ abstract class AppLocalizations {
   /// No description provided for @enter_12_digit_rch_id.
   ///
   /// In en, this message translates to:
-  /// **'Enter 12 digit RCH ID'**
+  /// **'RCH ID'**
   String get enter_12_digit_rch_id;
 
   /// No description provided for @must_be_12_digits.
