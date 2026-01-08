@@ -4417,7 +4417,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                 if (state.memberType == 'Adult' &&
                                     state.maritalStatus == 'Married' &&
                                     state.gender == 'Female') ...[
-                                  if(_isEdit) ... [
+                                  if(!_isEdit) ... [
                                     _section(
                                       ApiDropdown<String>(
                                         key: ValueKey(
@@ -4455,7 +4455,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     thickness: 0.5,
                                     height: 0,
                                   ),
-                                  if (state.isPregnant == 'Yes') ...[
+                                  if (!_isEdit && state.isPregnant == 'Yes') ...[
                                     _section(
                                       CustomDatePicker(
                                         key: const ValueKey('lmp_date_picker'),
@@ -4508,7 +4508,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     ),
                                   ],
 
-                                  if(_isEdit)... [
+                                  if(!_isEdit)... [
                                     if (state.isPregnant == 'No') ...[
                                       _section(
                                         ApiDropdown<String>(
