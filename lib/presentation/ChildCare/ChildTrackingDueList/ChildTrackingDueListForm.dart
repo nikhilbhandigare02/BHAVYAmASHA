@@ -134,6 +134,26 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       _tabCaseClosureState[tabIndex]![key] = value;
     });
   }
+  void _updateCaseClosureForAllTabs(bool value) {
+    setState(() {
+      final totalTabs = getTabs(context).length;
+      for (int i = 0; i < totalTabs; i++) {
+        _initializeTabState(i);
+        _tabCaseClosureState[i]!['isCaseClosureChecked'] = value;
+        if (!value) {
+          _tabCaseClosureState[i]!['selectedClosureReason'] = null;
+          _tabCaseClosureState[i]!['migrationType'] = null;
+          _tabCaseClosureState[i]!['dateOfDeath'] = null;
+          _tabCaseClosureState[i]!['probableCauseOfDeath'] = null;
+          _tabCaseClosureState[i]!['deathPlace'] = null;
+          _tabCaseClosureState[i]!['reasonOfDeath'] = null;
+          _tabCaseClosureState[i]!['showOtherCauseField'] = false;
+          _otherCauseControllers[i]?.clear();
+          _otherReasonControllers[i]?.clear();
+        }
+      }
+    });
+  }
   Future<void> _prefillWeightsFromDb() async {
     try {
       final householdId = _formData['household_id']?.toString().trim().isNotEmpty == true
@@ -593,18 +613,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                         otherCauseController: _otherCauseControllers[tabIndex]!,
                         otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
-                          if (!value) {
-                            _updateTabState(tabIndex, 'selectedClosureReason', null);
-                            _updateTabState(tabIndex, 'migrationType', null);
-                            _updateTabState(tabIndex, 'dateOfDeath', null);
-                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
-                            _updateTabState(tabIndex, 'deathPlace', null);
-                            _updateTabState(tabIndex, 'reasonOfDeath', null);
-                            _updateTabState(tabIndex, 'showOtherCauseField', false);
-                            _otherCauseControllers[tabIndex]!.clear();
-                            _otherReasonControllers[tabIndex]!.clear();
-                          }
+                          _updateCaseClosureForAllTabs(value);
                         },
                         onClosureReasonChanged: (value) {
                           _updateTabState(tabIndex, 'selectedClosureReason', value);
@@ -937,18 +946,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                             otherCauseController: _otherCauseControllers[tabIndex]!,
                             otherReasonController: _otherReasonControllers[tabIndex]!,
                             onCaseClosureChanged: (value) {
-                              _updateTabState(tabIndex, 'isCaseClosureChecked', value);
-                              if (!value) {
-                                _updateTabState(tabIndex, 'selectedClosureReason', null);
-                                _updateTabState(tabIndex, 'migrationType', null);
-                                _updateTabState(tabIndex, 'dateOfDeath', null);
-                                _updateTabState(tabIndex, 'probableCauseOfDeath', null);
-                                _updateTabState(tabIndex, 'deathPlace', null);
-                                _updateTabState(tabIndex, 'reasonOfDeath', null);
-                                _updateTabState(tabIndex, 'showOtherCauseField', false);
-                                _otherCauseControllers[tabIndex]!.clear();
-                                _otherReasonControllers[tabIndex]!.clear();
-                              }
+                              _updateCaseClosureForAllTabs(value);
                             },
                             onClosureReasonChanged: (value) {
                               _updateTabState(tabIndex, 'selectedClosureReason', value);
@@ -1052,18 +1050,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                         otherCauseController: _otherCauseControllers[tabIndex]!,
                         otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
-                          if (!value) {
-                            _updateTabState(tabIndex, 'selectedClosureReason', null);
-                            _updateTabState(tabIndex, 'migrationType', null);
-                            _updateTabState(tabIndex, 'dateOfDeath', null);
-                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
-                            _updateTabState(tabIndex, 'deathPlace', null);
-                            _updateTabState(tabIndex, 'reasonOfDeath', null);
-                            _updateTabState(tabIndex, 'showOtherCauseField', false);
-                            _otherCauseControllers[tabIndex]!.clear();
-                            _otherReasonControllers[tabIndex]!.clear();
-                          }
+                          _updateCaseClosureForAllTabs(value);
                         },
                         onClosureReasonChanged: (value) {
                           _updateTabState(tabIndex, 'selectedClosureReason', value);
@@ -1141,18 +1128,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                         otherCauseController: _otherCauseControllers[tabIndex]!,
                         otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
-                          if (!value) {
-                            _updateTabState(tabIndex, 'selectedClosureReason', null);
-                            _updateTabState(tabIndex, 'migrationType', null);
-                            _updateTabState(tabIndex, 'dateOfDeath', null);
-                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
-                            _updateTabState(tabIndex, 'deathPlace', null);
-                            _updateTabState(tabIndex, 'reasonOfDeath', null);
-                            _updateTabState(tabIndex, 'showOtherCauseField', false);
-                            _otherCauseControllers[tabIndex]!.clear();
-                            _otherReasonControllers[tabIndex]!.clear();
-                          }
+                          _updateCaseClosureForAllTabs(value);
                         },
                         onClosureReasonChanged: (value) {
                           _updateTabState(tabIndex, 'selectedClosureReason', value);
@@ -1328,18 +1304,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                         otherCauseController: _otherCauseControllers[tabIndex]!,
                         otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
-                          if (!value) {
-                            _updateTabState(tabIndex, 'selectedClosureReason', null);
-                            _updateTabState(tabIndex, 'migrationType', null);
-                            _updateTabState(tabIndex, 'dateOfDeath', null);
-                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
-                            _updateTabState(tabIndex, 'deathPlace', null);
-                            _updateTabState(tabIndex, 'reasonOfDeath', null);
-                            _updateTabState(tabIndex, 'showOtherCauseField', false);
-                            _otherCauseControllers[tabIndex]!.clear();
-                            _otherReasonControllers[tabIndex]!.clear();
-                          }
+                          _updateCaseClosureForAllTabs(value);
                         },
                         onClosureReasonChanged: (value) {
                           _updateTabState(tabIndex, 'selectedClosureReason', value);
@@ -1475,18 +1440,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                         otherCauseController: _otherCauseControllers[tabIndex]!,
                         otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
-                          if (!value) {
-                            _updateTabState(tabIndex, 'selectedClosureReason', null);
-                            _updateTabState(tabIndex, 'migrationType', null);
-                            _updateTabState(tabIndex, 'dateOfDeath', null);
-                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
-                            _updateTabState(tabIndex, 'deathPlace', null);
-                            _updateTabState(tabIndex, 'reasonOfDeath', null);
-                            _updateTabState(tabIndex, 'showOtherCauseField', false);
-                            _otherCauseControllers[tabIndex]!.clear();
-                            _otherReasonControllers[tabIndex]!.clear();
-                          }
+                          _updateCaseClosureForAllTabs(value);
                         },
                         onClosureReasonChanged: (value) {
                           _updateTabState(tabIndex, 'selectedClosureReason', value);
@@ -1616,18 +1570,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                         otherCauseController: _otherCauseControllers[tabIndex]!,
                         otherReasonController: _otherReasonControllers[tabIndex]!,
                         onCaseClosureChanged: (value) {
-                          _updateTabState(tabIndex, 'isCaseClosureChecked', value);
-                          if (!value) {
-                            _updateTabState(tabIndex, 'selectedClosureReason', null);
-                            _updateTabState(tabIndex, 'migrationType', null);
-                            _updateTabState(tabIndex, 'dateOfDeath', null);
-                            _updateTabState(tabIndex, 'probableCauseOfDeath', null);
-                            _updateTabState(tabIndex, 'deathPlace', null);
-                            _updateTabState(tabIndex, 'reasonOfDeath', null);
-                            _updateTabState(tabIndex, 'showOtherCauseField', false);
-                            _otherCauseControllers[tabIndex]!.clear();
-                            _otherReasonControllers[tabIndex]!.clear();
-                          }
+                          _updateCaseClosureForAllTabs(value);
                         },
                         onClosureReasonChanged: (value) {
                           _updateTabState(tabIndex, 'selectedClosureReason', value);

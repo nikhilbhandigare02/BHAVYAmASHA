@@ -730,49 +730,47 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           }
 
           final rowsHBNC = await db.rawQuery(queryHBNC, argsHBNC);
-
-          _hbncCompletedItems = [];
-
+ 
+          final List<Map<String, dynamic>> hbncCompleted = [];
+ 
           for (final row in rowsHBNC) {
             final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
-
-            // 🔹 Decode form_json
+ 
             final Map<String, dynamic> formJson = row['form_json'] != null
                 ? jsonDecode(row['form_json'] as String)
                 : {};
-
+ 
             final Map<String, dynamic> hbncForm =
                 formJson['pnc_mother_form'] ?? {};
-
+ 
             final fields = beneficiaryId.isNotEmpty
                 ? await _getBeneficiaryFields(beneficiaryId)
                 : {
-              'name': hbncForm['woman_name']?.toString() ?? '',
-              'age': hbncForm['age']?.toString() ?? '',
-              'gender': 'Female',
-              'mobile': hbncForm['mobile']?.toString() ?? '-',
-            };
-
-            _hbncCompletedItems.add({
+                  'name': hbncForm['woman_name']?.toString() ?? '',
+                  'age': hbncForm['age']?.toString() ?? '',
+                  'gender': 'Female',
+                  'mobile': hbncForm['mobile']?.toString() ?? '-',
+                };
+ 
+            hbncCompleted.add({
               'id': row['id'] ?? '',
               'household_ref_key': row['household_ref_key']?.toString() ?? '',
               'hhId': row['household_ref_key']?.toString() ?? '',
               'unique_key': row['beneficiary_ref_key']?.toString() ?? '',
               'BeneficiaryID': row['beneficiary_ref_key']?.toString() ?? '',
-
               'name': fields['name'],
               'age': fields['age'],
-              'gender': fields['gender']?.isNotEmpty == true
-                  ? fields['gender']
-                  : 'Female',
-              'last Visit date': _formatDateOnly(
-                row['created_date_time']?.toString(),
-              ),
-              'Current ANC last due date': 'currentAncLastDueDateText',
+              'gender': fields['gender']?.isNotEmpty == true ? fields['gender'] : 'Female',
+              'last Visit date': _formatDateOnly(row['created_date_time']?.toString()),
               'mobile': fields['mobile'],
               'badge': 'HBNC',
-
               '_rawRow': row,
+            });
+          }
+ 
+          if (mounted) {
+            setState(() {
+              _hbncCompletedItems = hbncCompleted;
             });
           }
         } catch (e) {

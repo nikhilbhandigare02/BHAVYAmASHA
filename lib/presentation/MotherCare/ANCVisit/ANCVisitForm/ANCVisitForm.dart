@@ -1542,6 +1542,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 hintText:
                                 'dd-mm-yyyy',
                                 initialDate: state.tdBoosterDate,
+
+                                lastDate: DateTime(DateTime.now().year, 12, 31),
                                 readOnly: (() {
                                   if (state.tdBoosterDate != null) {
                                     return false;

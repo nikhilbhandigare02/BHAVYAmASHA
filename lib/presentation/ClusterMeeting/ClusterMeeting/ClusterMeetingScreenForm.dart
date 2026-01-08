@@ -953,8 +953,9 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
 
               // Date of the Meeting
               CustomDatePicker(
-                labelText: l10n?.dateOfMeeting ?? "Date of the Meeting *",
-                hintText: l10n?.dateOfMeeting ?? "Date of the Meeting*",
+                labelText: "${l10n?.dateOfMeeting} *",
+
+                hintText: l10n?.dateOfMeeting ?? "Date of the Meeting",
                 initialDate: _meetingDate,
                 onDateChanged: (date) {
                   setState(() {

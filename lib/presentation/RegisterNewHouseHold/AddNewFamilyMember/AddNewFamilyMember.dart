@@ -473,7 +473,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
 
   List<String> _getMobileOwnerList(String gender) {
-    const common = [];
 
     gender = gender.toLowerCase();
 
@@ -544,7 +543,59 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
       'Neighbour',
       'Relative',
       'Other',
-      ...common,
+
+    ];
+  }
+  List<String> _getchildMobileOwnerList(String gender) {
+
+    gender = gender.toLowerCase();
+
+    if (gender == 'female') {
+      return [
+        'Self',
+        'Family Head',
+        'Father',
+        'Mother',
+        'Neighbour',
+        'Relative',
+        'Other',
+      ];
+    }
+
+    if (gender == 'male') {
+      return [
+        'Self',
+        'Family Head',
+        'Father',
+        'Mother',
+        'Neighbour',
+        'Relative',
+        'Other',
+      ];
+    }
+
+    if (gender == 'transgender') {
+      return [
+        'Self',
+        'Family Head',
+        'Father',
+        'Mother',
+        'Neighbour',
+        'Relative',
+        'Other',
+      ];
+    }
+
+    // Fallback if gender is unknown
+    return [
+      'Self',
+      'Family Head',
+      'Father',
+      'Mother',
+      'Neighbour',
+      'Relative',
+      'Other',
+
     ];
   }
 
@@ -2745,7 +2796,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   _section(
                                     ApiDropdown<String>(
                                       labelText: '${l.whoseMobileLabel} *',
-                                      items: _getMobileOwnerList(state.gender ?? ''),
+                                      items: _getchildMobileOwnerList(state.gender ?? ''),
                                       getLabel: (s) {
                                         switch (s) {
                                           case 'Self':
@@ -4366,7 +4417,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                 if (state.memberType == 'Adult' &&
                                     state.maritalStatus == 'Married' &&
                                     state.gender == 'Female') ...[
-                                  if(_isEdit) ... [
+                                  if(!_isEdit) ... [
                                     _section(
                                       ApiDropdown<String>(
                                         key: ValueKey(
@@ -4404,7 +4455,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     thickness: 0.5,
                                     height: 0,
                                   ),
-                                  if (state.isPregnant == 'Yes') ...[
+                                  if (!_isEdit && state.isPregnant == 'Yes') ...[
                                     _section(
                                       CustomDatePicker(
                                         key: const ValueKey('lmp_date_picker'),
@@ -4457,7 +4508,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     ),
                                   ],
 
-                                  if(_isEdit)... [
+                                  if(!_isEdit)... [
                                     if (state.isPregnant == 'No') ...[
                                       _section(
                                         ApiDropdown<String>(

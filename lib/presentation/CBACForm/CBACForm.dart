@@ -1321,7 +1321,7 @@ class _PartBTab extends StatelessWidget {
                   labelText: question,
                   hintText: l10n.select,
                   labelFontSize: 15.sp,
-                  items: [l10n.yes, l10n.no],
+                  items: [l10n.no,l10n.yes],
                   getLabel: (s) => s,
                   value: state.data[keyPath],
                   onChanged: (v) => bloc.add(CbacFieldChanged(keyPath, v)),

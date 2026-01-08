@@ -339,6 +339,26 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         }
                                       });
                                     }
+                                    else {
+                                      final message = state.error.isNotEmpty
+                                          ? state.error
+                                          : "";
+                                      if(message.contains('User does not exists')){
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              message,
+                                              style: const TextStyle(color: Colors.white),
+                                            ),
+                                            backgroundColor: Colors.black,
+                                            duration: const Duration(seconds: 3),
+                                          ),
+                                        );
+                                      }
+
+
+
+                                    }
 
                                     // ❌ NO error handling here
                                     // ❌ No snackbar for error

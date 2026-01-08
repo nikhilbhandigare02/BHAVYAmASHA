@@ -232,7 +232,7 @@ Future<bool?> showConfirmationDialog({
                 if (onNo != null) onNo();
               },
               child: Text(
-                noText!,
+                noText ?? 'No',
                 style: TextStyle(
                   // ✅ LOGIC: If noButtonColor is provided, use it.
                   // Otherwise, fall back to AppColors.error (or your preferred default).

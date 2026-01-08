@@ -85,8 +85,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
 
-      // Query households directly with JOIN to only get households where head_id matches a beneficiary
-      final db = await DatabaseProvider.instance.database;
+       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
 
