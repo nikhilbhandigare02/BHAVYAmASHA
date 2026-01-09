@@ -143,11 +143,30 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     }
   }
 
+  String _formatAgeWithSuffix(int age) {
+    if (age <= 0) return '0 Y';
+    
+    final now = DateTime.now();
+    // We need to calculate more precise age, so let's use the same logic as _formatAgeGender
+    // But since we only have years, we'll just show years with Y suffix
+    return '$age Y';
+  }
+
   String _formatDateOnly(String? dateTime) {
     if (dateTime == null || dateTime.isEmpty) return '-';
     try {
       final dt = DateTime.parse(dateTime);
-      return DateFormat('dd-MM-yyyy').format(dt);
+      return DateFormat('dd-mm-yyyy').format(dt);
+    } catch (_) {
+      return '-';
+    }
+  }
+
+  String _formatAncDateOnly(String? dateTime) {
+    if (dateTime == null || dateTime.isEmpty) return '-';
+    try {
+      final dt = DateTime.parse(dateTime);
+      return DateFormat('dd-mm-yyyy').format(dt);
     } catch (_) {
       return '-';
     }
@@ -324,6 +343,65 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     }
   }
 
+  String _formatAgeOnly(dynamic dobRaw) {
+    String age = 'Not Available';
+
+    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
+      try {
+        String dateStr = dobRaw.toString();
+        DateTime? dob;
+
+        dob = DateTime.tryParse(dateStr);
+
+        if (dob == null) {
+          final timestamp = int.tryParse(dateStr);
+          if (timestamp != null && timestamp > 0) {
+            dob = DateTime.fromMillisecondsSinceEpoch(
+              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+              isUtc: true,
+            );
+          }
+        }
+
+        if (dob != null) {
+          final now = DateTime.now();
+          int years = now.year - dob.year;
+          int months = now.month - dob.month;
+          int days = now.day - dob.day;
+
+          if (days < 0) {
+            final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+            final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+            final daysInLastMonth = DateTime(
+              lastMonthYear,
+              lastMonth + 1,
+              0,
+            ).day;
+            days += daysInLastMonth;
+            months--;
+          }
+
+          if (months < 0) {
+            months += 12;
+            years--;
+          }
+
+          if (years > 0) {
+            age = '$years Y';
+          } else if (months > 0) {
+            age = '$months M';
+          } else {
+            age = '$days D';
+          }
+        }
+      } catch (e) {
+        debugPrint('Error parsing date of birth: $e');
+      }
+    }
+
+    return age;
+  }
+
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
     String age = 'Not Available';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
@@ -440,21 +518,17 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         final todayStr =
             '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
         
-        // Also get yesterday's date to include records from yesterday
-        final yesterday = now.subtract(const Duration(days: 1));
-        final yesterdayStr =
-            '${yesterday.year.toString().padLeft(4, '0')}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}';
+        // Only get today's date for completed visits filter
         
         print('=== Date Range for Completed Visits Filter ===');
-        print('Yesterday String: $yesterdayStr');
         print('Today String: $todayStr');
         print('Current DateTime: $now');
         print('============================================');
 
-        // Debug: Check all records in followup_form_data for today and yesterday
-        final debugQuery = 'SELECT * FROM ${FollowupFormDataTable.table} WHERE DATE(created_date_time) >= DATE(?) AND (is_deleted IS NULL OR is_deleted = 0)';
-        final debugRows = await db.rawQuery(debugQuery, [yesterdayStr]);
-        print('=== DEBUG: All followup_form_data records for today & yesterday ===');
+        // Debug: Check all records in followup_form_data for today only
+        final debugQuery = 'SELECT * FROM ${FollowupFormDataTable.table} WHERE DATE(created_date_time) = DATE(?) AND (is_deleted IS NULL OR is_deleted = 0)';
+        final debugRows = await db.rawQuery(debugQuery, [todayStr]);
+        print('=== DEBUG: All followup_form_data records for today ===');
         print('Total records found: ${debugRows.length}');
         for (final row in debugRows) {
           print('ID: ${row['id']}, forms_ref_key: ${row['forms_ref_key']}, beneficiary_ref_key: ${row['beneficiary_ref_key']}, created_date_time: ${row['created_date_time']}, current_user_key: ${row['current_user_key']}');
@@ -476,19 +550,19 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         if (ancFormKey.isEmpty) return;
 
         try {
-          // Direct query for ANC completed forms created today or yesterday
+          // Direct query for ANC completed forms created today only
           String query =
               'SELECT f.* FROM ${FollowupFormDataTable.table} f '
               'JOIN beneficiaries_new b ON f.beneficiary_ref_key = b.unique_key '
               'WHERE f.forms_ref_key = ? '
               'AND (f.is_deleted IS NULL OR f.is_deleted = 0) '
-              'AND DATE(f.created_date_time) >= DATE(?) '
+              'AND DATE(f.created_date_time) = DATE(?) '
               'AND f.current_user_key = ? '
               'AND (b.is_death IS NULL OR b.is_death = 0)';
 
           List<dynamic> args = [
             ancFormKey,
-            yesterdayStr,
+            todayStr,
             ashaUniqueKey ?? '',
           ];
 
@@ -534,7 +608,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               'gender': fields['gender']?.isNotEmpty == true
                   ? fields['gender']
                   : 'Female',
-              'last Visit date': _formatDateOnly(
+              'last Visit date': _formatAncDateOnly(
                 row['created_date_time']?.toString(),
               ),
               'Current ANC last due date': 'currentAncLastDueDateText',
@@ -556,14 +630,14 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               '';
 
           if (ecFormKey.isNotEmpty) {
-            // 1. Get all EC Tracking Due forms created TODAY or YESTERDAY
+            // 1. Get all EC Tracking Due forms created TODAY only
             String queryForms =
                 'SELECT * FROM ${FollowupFormDataTable.table} '
                 'WHERE forms_ref_key = ? '
                 'AND (is_deleted IS NULL OR is_deleted = 0) '
-                'AND DATE(created_date_time) >= DATE(?)';
+                'AND DATE(created_date_time) = DATE(?)';
 
-            List<dynamic> argsForms = [ecFormKey, yesterdayStr];
+            List<dynamic> argsForms = [ecFormKey, todayStr];
 
             if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
               queryForms += ' AND current_user_key = ?';
@@ -688,8 +762,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               'SELECT * FROM ${FollowupFormDataTable.table} '
               'WHERE forms_ref_key IN ($placeholdersHBNC) '
               'AND (is_deleted IS NULL OR is_deleted = 0) '
-              'AND DATE(created_date_time) >= DATE(?)';
-          List<dynamic> argsHBNC = [...formKeysHBNC, yesterdayStr];
+              'AND DATE(created_date_time) = DATE(?)';
+          List<dynamic> argsHBNC = [...formKeysHBNC, todayStr];
 
           if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
             queryHBNC += ' AND current_user_key = ?';
@@ -765,10 +839,10 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               'SELECT f.* FROM ${FollowupFormDataTable.table} f '
               'JOIN beneficiaries_new b ON f.beneficiary_ref_key = b.unique_key '
               'WHERE f.forms_ref_key = ? '
-              'AND DATE(f.created_date_time) >= DATE(?) '
+              'AND DATE(f.created_date_time) = DATE(?) '
               'AND (b.is_death IS NULL OR b.is_death = 0)';
 
-          List<dynamic> argsRI = ['30bycxe4gv7fqnt6', yesterdayStr];
+          List<dynamic> argsRI = ['30bycxe4gv7fqnt6', todayStr];
 
           if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
             queryRI += ' AND f.current_user_key = ?';
@@ -1217,13 +1291,29 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               final birthDate = DateTime.tryParse(dateStr);
               if (birthDate != null) {
                 final now = DateTime.now();
-                int ageYears = now.year - birthDate.year;
-                if (now.month < birthDate.month ||
-                    (now.month == birthDate.month && now.day < birthDate.day)) {
-                  ageYears--;
+                int years = now.year - birthDate.year;
+                int months = now.month - birthDate.month;
+                int days = now.day - birthDate.day;
+
+                if (days < 0) {
+                  final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+                  final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+                  final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
+                  days += daysInLastMonth;
+                  months--;
                 }
-                if (ageYears >= 0) {
-                  ageText = '${ageYears}y';
+
+                if (months < 0) {
+                  months += 12;
+                  years--;
+                }
+
+                if (years > 0) {
+                  ageText = '$years Y';
+                } else if (months > 0) {
+                  ageText = '$months M';
+                } else {
+                  ageText = '$days D';
                 }
               }
             } catch (_) {}
@@ -1233,9 +1323,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             final years = info['years']?.toString();
             final approxAge = info['approxAge']?.toString();
             ageText = (years != null && years.isNotEmpty)
-                ? '${years}Y'
+                ? '${years} Y'
                 : (approxAge != null && approxAge.isNotEmpty)
-                ? '${approxAge}y'
+                ? '${approxAge} Y'
                 : '-';
           }
 
@@ -1261,10 +1351,10 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
           if (modifiedStr != null) {
             lastVisitDt = DateTime.tryParse(modifiedStr);
-            lastVisitDate = modifiedStr;
+            lastVisitDate = _formatAncDateOnly(modifiedStr);
           } else if (createdStr != null) {
             lastVisitDt = DateTime.tryParse(createdStr);
-            lastVisitDate = createdStr;
+            lastVisitDate = _formatAncDateOnly(createdStr);
           }
 
           DateTime? lmpDate;
@@ -1413,8 +1503,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           }
 
           // For display, use the end date of the currently due visit window
-          final currentAncLastDueDateText =
-              '${dueVisitEndDate.year.toString().padLeft(4, '0')}-${dueVisitEndDate.month.toString().padLeft(2, '0')}-${dueVisitEndDate.day.toString().padLeft(2, '0')}';
+          final currentAncLastDueDateText = _formatAncDateOnly(
+              '${dueVisitEndDate.year.toString().padLeft(4, '0')}-${dueVisitEndDate.month.toString().padLeft(2, '0')}-${dueVisitEndDate.day.toString().padLeft(2, '0')}');
 
           final householdRefKey = row['household_ref_key']?.toString() ?? '';
 
@@ -1679,7 +1769,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             'id': _last11(beneficiaryRefKey),
             'unique_key': beneficiaryRefKey,
             'name': name,
-            'age': age,
+            'age': _formatAgeWithSuffix(age),
             'gender': gender,
             'mobile': mobile,
             // spouse_name removed as requested
@@ -2362,7 +2452,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           final gender = info['gender'] ?? info['sex'];
 
           // Calculate age using same logic as RegisterChildListScreen
-          String ageText = _formatAgeGender(dob, gender);
+          String ageText = _formatAgeOnly(dob);
           final genderRaw = gender?.toString().toLowerCase() ?? '';
           String displayGender;
           switch (genderRaw) {
@@ -2678,6 +2768,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
     return InkWell(
       onTap: () async {
+        // Hide confirmation dialog for completed visits tab
+        if (!todayVisitClick) {
+          return;
+        }
+
         final confirmed = await showConfirmationDialog(
           context: context,
           message: l10n?.moveForward ?? 'Move forward?',
@@ -2910,8 +3005,14 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 (element) =>
                     element['fullBeneficiaryId'] == item['fullBeneficiaryId'],
               );
+              
+              // Add the completed item to the completed list immediately
+              final completedItem = Map<String, dynamic>.from(item);
+              completedItem['last Visit date'] = _formatDateOnly(DateTime.now().toIso8601String());
+              completedItem['_rawRow'] = {};
+              _hbncCompletedItems.insert(0, completedItem);
             });
-            _saveTodayWorkCountsToStorage();
+            await _loadData();
           }
         } else if (badge == 'RI') {
           final hhKey =
@@ -2951,8 +3052,14 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                     element['id'] == item['id'] &&
                     element['BeneficiaryID'] == item['BeneficiaryID'],
               );
+              
+              // Add the completed item to the completed list immediately
+              final completedItem = Map<String, dynamic>.from(item);
+              completedItem['last Visit date'] = _formatDateOnly(DateTime.now().toIso8601String());
+              completedItem['_rawRow'] = {};
+              _riCompletedItems.insert(0, completedItem);
             });
-            _saveTodayWorkCountsToStorage();
+            await _loadData();
           }
         }
       },
@@ -3067,16 +3174,26 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         // spouse_name display removed as requested
                         if (item['next hbnc visit due date'] != null) ...[
                           Text(
-                            '${l10n?.nextVisit ?? "Next HBNC Visit Due Date"}: ${item['next hbnc visit due date']}',
+                            '${ "Next HBNC due date"}: ${item['next hbnc visit due date']}',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14.sp,
                             ),
                           ),
                         ],
-                        if (item['last Visit date'] != null) ...[
+
+                        if (item['last Visit date'] != null && badge != 'HBNC') ...[
                           Text(
-                            '${l10n?.lastVisit ?? "Last Visit Date"}: ${item['last Visit date']}',
+                            '${ "Last visit date"}: ${item['last Visit date']}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                        ],
+                        if (item['Current ANC last due date'] != null) ...[
+                          Text(
+                            '${"Current ANC last due date"}: ${item['Current ANC last due date']}',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14.sp,
@@ -3085,7 +3202,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         ],
                         if (item['mobile'] != null) ...[
                           Text(
-                            '${l10n?.mobile ?? "Mobile"}: ${item['mobile']}',
+                            '${l10n?.mobileNo ?? "Mobile"}: ${item['mobile']}',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14.sp,
@@ -3143,7 +3260,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   }
 
   String _getTranslatedTitle(String key, AppLocalizations l10n) {
-    // Map English keys to translation keys
     switch (key) {
       case 'Family Survey List':
         return l10n.listFamilySurvey;
@@ -3163,7 +3279,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             key == l10n.listRoutineImmunization) {
           return key;
         }
-        return key; // Fallback to original key
+        return key;
     }
   }
 
@@ -3241,7 +3357,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Grid Boxes
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(

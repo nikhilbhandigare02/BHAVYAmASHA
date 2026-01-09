@@ -130,41 +130,73 @@ class _Lbwrefered extends State<Lbwrefered> {
 
 
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
-    String ageDisplay = 'N/A';
+    String age = 'Not Available';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
 
     if (dobRaw != null && dobRaw.toString().isNotEmpty) {
-      DateTime? dob;
       try {
-        dob = DateTime.tryParse(dobRaw.toString());
-      } catch (_) {}
+        String dateStr = dobRaw.toString();
+        DateTime? dob;
 
-      if (dob != null) {
-        final now = DateTime.now();
-        final diffDays = now.difference(dob).inDays;
+        dob = DateTime.tryParse(dateStr);
 
-        if (diffDays >= 365) {
-          // Show in years
-          final years = diffDays ~/ 365;
-          ageDisplay = '${years}Y';
-        } else if (diffDays >= 30) {
-          // Show in months
-          final months = diffDays ~/ 30;
-          ageDisplay = '${months}M';
-        } else if (diffDays >= 0) {
-          // Show in days (for < 1 month)
-          ageDisplay = '${diffDays}D';
+        if (dob == null) {
+          final timestamp = int.tryParse(dateStr);
+          if (timestamp != null && timestamp > 0) {
+            dob = DateTime.fromMillisecondsSinceEpoch(
+              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+              isUtc: true,
+            );
+          }
         }
+
+        if (dob != null) {
+          final now = DateTime.now();
+          int years = now.year - dob.year;
+          int months = now.month - dob.month;
+          int days = now.day - dob.day;
+
+          if (days < 0) {
+            final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+            final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+            final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
+            days += daysInLastMonth;
+            months--;
+          }
+
+          if (months < 0) {
+            months += 12;
+            years--;
+          }
+
+          if (years > 0) {
+            age = '$years Y';
+          } else if (months > 0) {
+            age = '$months M';
+          } else {
+            age = '$days D';
+          }
+        }
+      } catch (e) {
+        debugPrint('Error parsing date of birth: $e');
       }
     }
 
-    String displayGender = gender == 'm' || gender == 'male'
-        ? 'Male'
-        : gender == 'f' || gender == 'female'
-        ? 'Female'
-        : 'Other';
+    String displayGender;
+    switch (gender) {
+      case 'm':
+      case 'male':
+        displayGender = 'Male';
+        break;
+      case 'f':
+      case 'female':
+        displayGender = 'Female';
+        break;
+      default:
+        displayGender = 'Other';
+    }
 
-    return '$ageDisplay | $displayGender';
+    return '$age | $displayGender';
   }
 
   num? _parseNumFlexible(dynamic v) {

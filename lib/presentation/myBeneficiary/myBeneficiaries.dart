@@ -44,7 +44,6 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
   Future<void> _loadCounts() async {
     try {
       // Use same data fetching logic as FamilyUpdateList.dart and AllHouseHold_Screen.dart
-      final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
 
@@ -68,54 +67,40 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
         return;
       }
 
-      // Same query as AllHouseHold_Screen.dart for family update count
-      final households = await db.rawQuery(
-        '''
-        SELECT h.* FROM households h
-        INNER JOIN beneficiaries_new b ON h.head_id = b.unique_key
-        WHERE h.is_deleted = 0 
-          AND h.current_user_key = ?
-          AND b.current_user_key = ?
-          AND b.is_deleted = 0
-        ORDER BY h.created_date_time DESC
-      ''',
-        [currentUserKey, currentUserKey],
-      );
-
-      /// Household -> configured head map
-      final headKeyByHousehold = <String, String>{};
-      for (final hh in households) {
-        try {
-          final hhRefKey = (hh['unique_key'] ?? '').toString();
-          final headId = (hh['head_id'] ?? '').toString();
-          if (hhRefKey.isEmpty || headId.isEmpty) continue;
-          headKeyByHousehold[hhRefKey] = headId;
-        } catch (_) {}
+      List<Map<String, dynamic>> rows;
+      try {
+        rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      } catch (_) {
+        rows = <Map<String, dynamic>>[];
       }
 
-      /// --------- FAMILY HEAD FILTER ----------
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       final familyHeads = rows.where((r) {
         try {
           final householdRefKey = (r['household_ref_key'] ?? '').toString();
-          final uniqueKey = (r['unique_key'] ?? '').toString();
-          if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
+          if (householdRefKey.isEmpty) return false;
 
-          // Exclude migrated & death
           if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
 
-          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+          final rawInfo = r['beneficiary_info'];
+          Map<String, dynamic> info;
+          if (rawInfo is Map) {
+            info = Map<String, dynamic>.from(rawInfo);
+          } else if (rawInfo is String && rawInfo.isNotEmpty) {
+            info = Map<String, dynamic>.from(jsonDecode(rawInfo));
+          } else {
+            info = {};
+          }
 
-          final bool isConfiguredHead =
-              configuredHeadKey != null && configuredHeadKey == uniqueKey;
-
-          return isConfiguredHead;
+          return info['isFamilyHead'] == true ||
+              info['isFamilyHead']?.toString().toLowerCase() == 'true';
         } catch (_) {
           return false;
         }
       }).toList();
 
-      final familyCount = familyHeads.length;
+      final familyCount = familyHeads.isNotEmpty
+          ? familyHeads.length
+          : (await LocalStorageDao.instance.getAllHouseholds()).length;
 
       final poCount = await _getPregnancyOutcomeCount();
       final hbnc = await _getHBNCCount();
@@ -251,40 +236,107 @@ WITH LatestMCA AS (
     ) AS rn
   FROM mother_care_activities mca
   WHERE mca.is_deleted = 0
-    AND mca.current_user_key = ?
+    AND mca.current_user_key = ?          
 ),
+
 DeliveryOutcomeOnly AS (
   SELECT *
   FROM LatestMCA
   WHERE rn = 1
     AND mother_care_state = 'delivery_outcome'
 ),
+
 LatestANC AS (
   SELECT
     f.beneficiary_ref_key,
     f.form_json,
+    f.created_date_time,
     ROW_NUMBER() OVER (
       PARTITION BY f.beneficiary_ref_key
       ORDER BY f.created_date_time DESC, f.id DESC
     ) AS rn
   FROM ${FollowupFormDataTable.table} f
-  WHERE
-    f.forms_ref_key = ?
+  WHERE f.forms_ref_key = ?
     AND f.is_deleted = 0
-    AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
-    AND f.current_user_key = ?
+    AND f.current_user_key = ?           
 )
+
 SELECT
-  d.beneficiary_ref_key
+  d.beneficiary_ref_key,
+  COALESCE(b.household_ref_key, d.household_ref_key) AS household_ref_key,
+  d.created_date_time,
+  d.id AS form_id,
+  COALESCE(a.form_json, '{}') AS form_json,
+  a.created_date_time AS followup_created_date,
+  b.created_date_time AS beneficiary_created_date
 FROM DeliveryOutcomeOnly d
 LEFT JOIN LatestANC a
   ON a.beneficiary_ref_key = d.beneficiary_ref_key
  AND a.rn = 1
+LEFT JOIN ${BeneficiariesTable.table} b
+  ON b.unique_key = d.beneficiary_ref_key
+  AND (b.is_deleted IS NULL OR b.is_deleted = 0)
+  AND (b.is_death = 0 OR b.is_death IS NULL)
+ORDER BY d.created_date_time DESC
 ''',
         [ashaUniqueKey, ancRefKey, ashaUniqueKey],
       );
 
-      return results.length;
+      // Process results to filter out deceased beneficiaries (same logic as PregnancyOutcome.dart)
+      int validCount = 0;
+      for (final row in results) {
+        final beneficiaryRefKey = row['beneficiary_ref_key']?.toString();
+        if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
+          continue;
+        }
+
+        Map<String, dynamic>? beneficiaryRow;
+        try {
+          beneficiaryRow = await LocalStorageDao.instance
+              .getBeneficiaryByUniqueKey(beneficiaryRefKey);
+
+          if (beneficiaryRow == null) {
+            final fallback = await db.query(
+              'beneficiaries_new',
+              where:
+              'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND (is_death = 0 OR is_death IS NULL) AND current_user_key = ?',
+              whereArgs: [beneficiaryRefKey, ashaUniqueKey],
+              limit: 1,
+            );
+
+            if (fallback.isNotEmpty) {
+              final legacy = Map<String, dynamic>.from(fallback.first);
+              Map<String, dynamic> info = {};
+              try {
+                final formJson = legacy['form_json'];
+                if (formJson is String && formJson.isNotEmpty) {
+                  final decoded = jsonDecode(formJson);
+                  if (decoded is Map) {
+                    info = Map<String, dynamic>.from(decoded);
+                  }
+                }
+              } catch (_) {}
+
+              beneficiaryRow = {
+                ...legacy,
+                'beneficiary_info': info,
+                'geo_location': {},
+                'death_details': {},
+              };
+            }
+          }
+        } catch (_) {}
+
+        // Skip if beneficiary data is not found (likely deceased beneficiary)
+        if (beneficiaryRow == null) {
+          print('⚠️ Skipping beneficiary $beneficiaryRefKey - data not found (likely deceased)');
+          continue;
+        }
+
+        validCount++;
+      }
+
+      return validCount;
     } catch (_) {
       return 0;
     }
@@ -361,15 +413,15 @@ LEFT JOIN LatestANC a
       ''';
 
       final rows = await db.rawQuery(query, [ashaUniqueKey]);
-      
+
       int count = 0;
       for (final row in rows) {
         try {
           final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
-          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty 
+          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty
               ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfo))
               : <String, dynamic>{};
-          
+
           final memberType = info['memberType']?.toString().toLowerCase() ?? '';
           if (memberType != 'child') {
             count++;
@@ -378,7 +430,7 @@ LEFT JOIN LatestANC a
           count++;
         }
       }
-      
+
       return count;
     } catch (e) {
       return 0;
@@ -622,7 +674,7 @@ LEFT JOIN LatestANC a
         count: isLoading ? 0 : guestBeneficiaryCount,
       ),
     ];
-    
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppHeader(screenTitle: l10n.myBeneficiariesTitle, showBack: true,),
@@ -654,9 +706,9 @@ LEFT JOIN LatestANC a
                 case 5:
                   Navigator.pushNamed(context, Route_Names.Lbwrefered);
                   break;
-                 case 6:
+                case 6:
                   Navigator.pushNamed(context, Route_Names.Abortionlist);
-                   break;
+                  break;
                 case 7:
                   Navigator.pushNamed(context, Route_Names.DeathRegister);
                   break;

@@ -55,7 +55,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       // First, get all beneficiary_ref_keys from child_care_activities where child_care_state = 'tracking_due'
       final childCareActivities = await db.query(
         'child_care_activities',
-        where: 'child_care_state = ? AND is_deleted = 0',
+        where: 'child_care_state = ?',
         whereArgs: ['tracking_due'],
         columns: ['beneficiary_ref_key'],
         orderBy: 'created_date_time DESC',
@@ -77,16 +77,19 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           .toSet()
           .toList();
 
-      debugPrint('Found ${beneficiaryRefKeys.length} beneficiaries with tracking_due state');
+      debugPrint(
+        'Found ${beneficiaryRefKeys.length} beneficiaries with tracking_due state',
+      );
 
       List<Map<String, dynamic>> results = [];
 
       if (beneficiaryRefKeys.isNotEmpty) {
         try {
-          String whereClause = 'beneficiary_ref_key IN (${List.filled(beneficiaryRefKeys.length, '?').join(',')}) ';
+          String whereClause =
+              'beneficiary_ref_key IN (${List.filled(beneficiaryRefKeys.length, '?').join(',')}) ';
           List<Object?> whereArgs = [...beneficiaryRefKeys];
 
-         /* whereClause += 'AND (form_json LIKE ? OR forms_ref_key = ?) ';
+          /* whereClause += 'AND (form_json LIKE ? OR forms_ref_key = ?) ';
           whereArgs.addAll(['%child_registration_due_form%', '30bycxe4gv7fqnt6']);
 
           whereClause += 'AND id IN (SELECT MAX(id) FROM ${FollowupFormDataTable.table} WHERE beneficiary_ref_key IN (${List.filled(beneficiaryRefKeys.length, '?').join(',')}) GROUP BY beneficiary_ref_key)';
@@ -107,7 +110,9 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         }
       }
 
-      debugPrint('\n🔍 Found ${results.length} child registration/tracking records after filtering');
+      debugPrint(
+        '\n🔍 Found ${results.length} child registration/tracking records after filtering',
+      );
 
       final List<Map<String, dynamic>> childTrackingList = [];
       final Set<String> seenBeneficiaries = <String>{};
@@ -120,8 +125,8 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             continue;
           }
 
-
-          final beneficiaryRefKey = row['beneficiary_ref_key']?.toString() ?? '';
+          final beneficiaryRefKey =
+              row['beneficiary_ref_key']?.toString() ?? '';
           if (beneficiaryRefKey.isEmpty) {
             debugPrint('Skipping row with empty beneficiary_ref_key');
             continue;
@@ -129,17 +134,22 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
           final beneficiary = await db.query(
             'beneficiaries_new',
-            where: 'unique_key = ? AND (is_death IS NULL OR is_death = 0) AND current_user_key = ?',
+            where:
+                'unique_key = ? AND (is_death IS NULL OR is_death = 0) AND current_user_key = ?',
             whereArgs: [beneficiaryRefKey, ashaUniqueKey],
             limit: 1,
           );
 
           if (beneficiary.isEmpty) {
-            debugPrint('Skipping deceased or non-existent beneficiary: $beneficiaryRefKey');
+            debugPrint(
+              'Skipping deceased or non-existent beneficiary: $beneficiaryRefKey',
+            );
             continue;
           }
 
-          debugPrint('Processing form_json: ${formJson.substring(0, formJson.length > 100 ? 100 : formJson.length)}...');
+          debugPrint(
+            'Processing form_json: ${formJson.substring(0, formJson.length > 100 ? 100 : formJson.length)}...',
+          );
 
           final formData = jsonDecode(formJson);
           String formType = '';
@@ -147,8 +157,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
           if (formData['form_type'] != null) {
             formType = formData['form_type'].toString();
-          }
-          else if (formData['child_registration_due_form'] is Map) {
+          } else if (formData['child_registration_due_form'] is Map) {
             formType = 'child_registration_due';
           }
           // Try to get form type from the first key if it's a map
@@ -164,15 +173,19 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           debugPrint('Forms ref key: $formsRefKey');
           debugPrint('Form data keys: ${formData.keys.join(', ')}');
 
-          final isChildRegistration = formType == FollowupFormDataTable.childRegistrationDue ||
+          final isChildRegistration =
+              formType == FollowupFormDataTable.childRegistrationDue ||
               formType == 'child_registration_due';
 
-          final isChildTracking = formsRefKey == '30bycxe4gv7fqnt6' ||
+          final isChildTracking =
+              formsRefKey == '30bycxe4gv7fqnt6' ||
               formType == FollowupFormDataTable.childTrackingDue ||
               formType == 'child_tracking_due';
 
           if (!isChildRegistration && !isChildTracking) {
-            debugPrint('Skipping form with type: $formType and ref key: $formsRefKey');
+            debugPrint(
+              'Skipping form with type: $formType and ref key: $formsRefKey',
+            );
             continue;
           }
 
@@ -193,7 +206,9 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           }
           // Case 2: form_data is already a Map
           else if (formData['form_data'] is Map) {
-            formDataMap = Map<String, dynamic>.from(formData['form_data'] as Map);
+            formDataMap = Map<String, dynamic>.from(
+              formData['form_data'] as Map,
+            );
           }
           // Case 3: Direct fields (legacy)
           else if (formData.containsKey('child_name')) {
@@ -201,7 +216,9 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           }
           // Case 4: Nested under formData
           else if (formData['formData'] is Map) {
-            formDataMap = Map<String, dynamic>.from(formData['formData'] as Map);
+            formDataMap = Map<String, dynamic>.from(
+              formData['formData'] as Map,
+            );
           }
 
           // Debug print the form data map
@@ -218,10 +235,11 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
               if (formJson is Map && formJson.isNotEmpty) {
                 if (formJson['child_registration_due_form'] is Map) {
-                  formDataMap = Map<String, dynamic>.from(formJson['child_registration_due_form']);
+                  formDataMap = Map<String, dynamic>.from(
+                    formJson['child_registration_due_form'],
+                  );
                   debugPrint('Extracted data from child_registration_due_form');
-                }
-                else {
+                } else {
                   final firstKey = formJson.keys.first;
                   if (firstKey != null && formJson[firstKey] is Map) {
                     formDataMap = Map<String, dynamic>.from(formJson[firstKey]);
@@ -242,28 +260,41 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           }
 
           // Extract fields with null safety
-          final formTypeInData = formDataMap['form_type']?.toString() ?? formType;
+          final formTypeInData =
+              formDataMap['form_type']?.toString() ?? formType;
 
           // Extract fields with null safety - using the correct field names from the form data
-          final childName = formDataMap['name_of_child']?.toString()?.trim() ??
-              formDataMap['child_name']?.toString()?.trim() ?? '';
+          final childName =
+              formDataMap['name_of_child']?.toString()?.trim() ??
+              formDataMap['child_name']?.toString()?.trim() ??
+              '';
 
-          final motherName = formDataMap['mother_name']?.toString()?.trim() ?? '';
-          final fatherName = formDataMap['father_name']?.toString()?.trim() ?? '';
-          final rchId = formDataMap['child_rch_id']?.toString()?.trim() ??
-              formDataMap['rch_id_child']?.toString()?.trim() ?? '';
+          final motherName =
+              formDataMap['mother_name']?.toString()?.trim() ?? '';
+          final fatherName =
+              formDataMap['father_name']?.toString()?.trim() ?? '';
+          final rchId =
+              formDataMap['child_rch_id']?.toString()?.trim() ??
+              formDataMap['rch_id_child']?.toString()?.trim() ??
+              '';
 
-          final mobileNumber = formDataMap['mob_no']?.toString()?.trim() ??
-              formDataMap['mobile_number']?.toString()?.trim() ?? '';
+          final mobileNumber =
+              formDataMap['mob_no']?.toString()?.trim() ??
+              formDataMap['mobile_number']?.toString()?.trim() ??
+              '';
 
           final address = formDataMap['address']?.toString()?.trim() ?? '';
 
           // Handle different possible weight fields
-          final weightGrams = formDataMap['weight']?.toString()?.trim() ??
-              formDataMap['weight_grams']?.toString()?.trim() ?? '';
+          final weightGrams =
+              formDataMap['weight']?.toString()?.trim() ??
+              formDataMap['weight_grams']?.toString()?.trim() ??
+              '';
 
-          String dateOfBirth = formDataMap['dob']?.toString() ??
-              formDataMap['date_of_birth']?.toString() ?? '';
+          String dateOfBirth =
+              formDataMap['dob']?.toString() ??
+              formDataMap['date_of_birth']?.toString() ??
+              '';
           if (dateOfBirth.isEmpty) {
             final dd = formDataMap['dob_day']?.toString();
             final mm = formDataMap['dob_month']?.toString();
@@ -281,18 +312,22 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           }
 
           // Handle different possible gender fields and child_details fallback
-          final genderPrimary = (formDataMap['sex'] ?? formDataMap['gender'] ?? '').toString();
+          final genderPrimary =
+              (formDataMap['sex'] ?? formDataMap['gender'] ?? '').toString();
           final childDetails = formDataMap['child_details'] is Map
               ? Map<String, dynamic>.from(formDataMap['child_details'])
               : <String, dynamic>{};
           final genderBackup = (childDetails['gender'] ?? '').toString();
           final ageBackup = (childDetails['age'] ?? '').toString();
-          final gender = genderPrimary.isNotEmpty ? genderPrimary : genderBackup;
-
+          final gender = genderPrimary.isNotEmpty
+              ? genderPrimary
+              : genderBackup;
 
           // If we still don't have a name, log all form data before skipping
           if (childName.isEmpty) {
-            debugPrint('❌ Skipping record with empty child name. Complete form data:');
+            debugPrint(
+              '❌ Skipping record with empty child name. Complete form data:',
+            );
             formData.forEach((key, value) {
               debugPrint('    $key: $value');
             });
@@ -303,8 +338,11 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
             // Try to find any field that might contain the name
             final nameFields = formDataMap.entries
-                .where((entry) => entry.key.toString().toLowerCase().contains('name') ||
-                entry.key.toString().toLowerCase().contains('child'))
+                .where(
+                  (entry) =>
+                      entry.key.toString().toLowerCase().contains('name') ||
+                      entry.key.toString().toLowerCase().contains('child'),
+                )
                 .toList();
 
             if (nameFields.isNotEmpty) {
@@ -320,8 +358,11 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           }
 
           // De-duplicate on beneficiary_ref_key so each child appears only once
-          if (beneficiaryRefKey.isNotEmpty && seenBeneficiaries.contains(beneficiaryRefKey)) {
-            debugPrint('⏭️ Skipping duplicate record for beneficiary: $beneficiaryRefKey');
+          if (beneficiaryRefKey.isNotEmpty &&
+              seenBeneficiaries.contains(beneficiaryRefKey)) {
+            debugPrint(
+              '⏭️ Skipping duplicate record for beneficiary: $beneficiaryRefKey',
+            );
             continue;
           }
           if (beneficiaryRefKey.isNotEmpty) {
@@ -329,10 +370,12 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           }
 
           if (beneficiaryRefKey.isNotEmpty) {
-            final caseClosureWhere = (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
+            final caseClosureWhere =
+                (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
                 ? 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0 AND current_user_key = ?'
                 : 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0';
-            final caseClosureArgs = (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
+            final caseClosureArgs =
+                (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
                 ? [beneficiaryRefKey, '%case_closure%', ashaUniqueKey]
                 : [beneficiaryRefKey, '%case_closure%'];
             final caseClosureRecords = await db.query(
@@ -349,8 +392,12 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                   final ccFormJson = ccRecord['form_json'] as String?;
                   if (ccFormJson != null) {
                     final ccFormData = jsonDecode(ccFormJson);
-                    final ccFormDataMap = ccFormData['form_data'] as Map<String, dynamic>? ?? {};
-                    final caseClosure = ccFormDataMap['case_closure'] as Map<String, dynamic>? ?? {};
+                    final ccFormDataMap =
+                        ccFormData['form_data'] as Map<String, dynamic>? ?? {};
+                    final caseClosure =
+                        ccFormDataMap['case_closure']
+                            as Map<String, dynamic>? ??
+                        {};
                     if (caseClosure['is_case_closure'] == true) {
                       hasCaseClosure = true;
                       break;
@@ -362,7 +409,9 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
               }
 
               if (hasCaseClosure) {
-                debugPrint('⏭️ Skipping child $childName - case closure already recorded');
+                debugPrint(
+                  '⏭️ Skipping child $childName - case closure already recorded',
+                );
                 continue;
               }
             }
@@ -375,8 +424,14 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
           String _normalizeGender(String g) {
             final s = g.toLowerCase().trim();
-            if (s == 'm' || s == 'male' || s == 'boy' || s == 'b' || s == '1') return 'Male';
-            if (s == 'f' || s == 'female' || s == 'girl' || s == 'g' || s == '2') return 'Female';
+            if (s == 'm' || s == 'male' || s == 'boy' || s == 'b' || s == '1')
+              return 'Male';
+            if (s == 'f' ||
+                s == 'female' ||
+                s == 'girl' ||
+                s == 'g' ||
+                s == '2')
+              return 'Female';
             if (s == 'other' || s == 'o' || s == '3') return 'Other';
             return 'Other';
           }
@@ -384,8 +439,8 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           final ageGenderDisplay = dateOfBirth.isNotEmpty
               ? _formatAgeGender(dateOfBirth, gender)
               : (ageBackup.isNotEmpty
-                  ? '${ageBackup} | ${_normalizeGender(gender)}'
-                  : _formatAgeGender(dateOfBirth, gender));
+                    ? '${ageBackup} | ${_normalizeGender(gender)}'
+                    : _formatAgeGender(dateOfBirth, gender));
           final cleanedAgeGenderDisplay = ageGenderDisplay.contains(' | Other')
               ? ageGenderDisplay.replaceAll(' | Other', '').trim()
               : ageGenderDisplay;
@@ -404,11 +459,15 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             'MotherName': motherName,
             'Address': address,
             'Weight': weightGrams,
-            'is_synced': row['is_synced'] ?? 0, // Ensure we have a default value of 0 if null
+            'is_synced':
+                row['is_synced'] ??
+                0, // Ensure we have a default value of 0 if null
             'formData': formData, // Store the complete form data
           };
 
-          debugPrint('Sync status for ${childData['Name']}: ${childData['is_synced']} (type: ${childData['is_synced'].runtimeType})');
+          debugPrint(
+            'Sync status for ${childData['Name']}: ${childData['is_synced']} (type: ${childData['is_synced'].runtimeType})',
+          );
           childTrackingList.add(childData);
           debugPrint('✅ Successfully added child: $childName');
         } catch (e) {
@@ -417,7 +476,9 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         }
       }
 
-      debugPrint('📊 Total child records processed: ${childTrackingList.length}');
+      debugPrint(
+        '📊 Total child records processed: ${childTrackingList.length}',
+      );
 
       if (mounted) {
         setState(() {
@@ -430,7 +491,8 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       debugPrint('Error loading child registration data: $e');
       if (mounted) {
         setState(() {
-          _errorMessage = 'Failed to load child registration data. Please try again.';
+          _errorMessage =
+              'Failed to load child registration data. Please try again.';
           _isLoading = false;
         });
       }
@@ -458,7 +520,9 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
         dob = DateTime.tryParse(dateStr);
         if (dob == null) {
-          final m = RegExp(r'^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$').firstMatch(dateStr);
+          final m = RegExp(
+            r'^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$',
+          ).firstMatch(dateStr);
           if (m != null) {
             final d = int.parse(m.group(1)!);
             final mo = int.parse(m.group(2)!);
@@ -486,7 +550,11 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           if (days < 0) {
             final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
             final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
-            final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
+            final daysInLastMonth = DateTime(
+              lastMonthYear,
+              lastMonth + 1,
+              0,
+            ).day;
             days += daysInLastMonth;
             months--;
           }
@@ -536,19 +604,22 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
     return '$age | $displayGender';
   }
+
   Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
     try {
       final db = await DatabaseProvider.instance.database;
-      
+
       // First try to get the latest record from followup_form_data
       final formRows = await db.query(
         FollowupFormDataTable.table,
         columns: ['is_synced', 'server_id', 'created_date_time'],
-        where: 'beneficiary_ref_key = ? AND (forms_ref_key = ? OR form_json LIKE ?) AND is_deleted = 0',
+        where:
+            'beneficiary_ref_key = ? AND (forms_ref_key = ? OR form_json LIKE ?) AND is_deleted = 0',
         whereArgs: [
-          beneficiaryRefKey, 
-          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.childTrackingDue],
-          '%${FollowupFormDataTable.childTrackingDue}%'
+          beneficiaryRefKey,
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+              .childTrackingDue],
+          '%${FollowupFormDataTable.childTrackingDue}%',
         ],
         orderBy: 'created_date_time DESC',
         limit: 1,
@@ -556,10 +627,12 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
       if (formRows.isNotEmpty) {
         final isSynced = formRows.first['is_synced'] == 1;
-        debugPrint('Sync status for $beneficiaryRefKey from followup_form_data: $isSynced');
+        debugPrint(
+          'Sync status for $beneficiaryRefKey from followup_form_data: $isSynced',
+        );
         return {
           'is_synced': isSynced,
-          'server_id': formRows.first['server_id']
+          'server_id': formRows.first['server_id'],
         };
       }
 
@@ -575,10 +648,12 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
 
       if (activityRows.isNotEmpty) {
         final isSynced = activityRows.first['is_synced'] == 1;
-        debugPrint('Sync status for $beneficiaryRefKey from child_care_activities: $isSynced');
+        debugPrint(
+          'Sync status for $beneficiaryRefKey from child_care_activities: $isSynced',
+        );
         return {
           'is_synced': isSynced,
-          'server_id': activityRows.first['server_id']
+          'server_id': activityRows.first['server_id'],
         };
       }
 
@@ -590,7 +665,10 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     }
   }
 
-  Future<String> _getAgeGenderRealtime(String beneficiaryRefKey, String fallback) async {
+  Future<String> _getAgeGenderRealtime(
+    String beneficiaryRefKey,
+    String fallback,
+  ) async {
     try {
       if (beneficiaryRefKey.isEmpty) {
         final f = fallback.replaceAll(' | Other', '').trim();
@@ -607,7 +685,9 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         Map<String, dynamic> info = {};
         try {
           final raw = rows.first['beneficiary_info'];
-          info = raw is String ? jsonDecode(raw) : Map<String, dynamic>.from(raw as Map);
+          info = raw is String
+              ? jsonDecode(raw)
+              : Map<String, dynamic>.from(raw as Map);
         } catch (_) {}
         final dob = info['dob']?.toString() ?? '';
         final genderRaw = info['gender']?.toString() ?? '';
@@ -656,7 +736,8 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: l10n?.childTrackingDueListTitle ?? 'Child Tracking Due List',
+        screenTitle:
+            l10n?.childTrackingDueListTitle ?? 'Child Tracking Due List',
         showBack: true,
       ),
       drawer: const CustomDrawer(),
@@ -664,76 +745,81 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage.isNotEmpty
           ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _errorMessage,
-              style: TextStyle(fontSize: 16.sp, color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadChildTrackingData,
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      )
-          : Column(
-        children: [
-          // 🔍 Search Field
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: TextField(
-              controller: _searchCtrl,
-              decoration: InputDecoration(
-                hintText: l10n!.childTrackingDueSearch,
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.outlineVariant),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                ),
-              ),
-            ),
-          ),
-
-          Expanded(
-            child: _filtered.isEmpty
-                ? Center(
-              child: Text(
-                l10n!.no_ChildrenFound,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _errorMessage,
+                    style: TextStyle(fontSize: 16.sp, color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _loadChildTrackingData,
+                    child: const Text('Retry'),
+                  ),
+                ],
               ),
             )
-                : RefreshIndicator(
-              onRefresh: _loadChildTrackingData,
-              child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(5, 0, 5, 12),
-                itemCount: _filtered.length,
-                itemBuilder: (context, index) {
-                  final childData = _filtered[index];
-                  return _householdCard(context, childData);
-                },
-              ),
+          : Column(
+              children: [
+                // 🔍 Search Field
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    decoration: InputDecoration(
+                      hintText: l10n!.childTrackingDueSearch,
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: AppColors.outlineVariant),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                Expanded(
+                  child: _filtered.isEmpty
+                      ? Center(
+                          child: Text(
+                            'No children found',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: _loadChildTrackingData,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(5, 0, 5, 12),
+                            itemCount: _filtered.length,
+                            itemBuilder: (context, index) {
+                              final childData = _filtered[index];
+                              return _householdCard(context, childData);
+                            },
+                          ),
+                        ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -745,15 +831,15 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
       onTap: () {
         final formData = data['formData'] as Map<String, dynamic>?;
 
-
         if (formData == null) {
           debugPrint('❌ formData is null, cannot navigate');
           return;
         }
-// 1. Try to find 'child_registration_due' directly at the top level (Scenario 2)
-// 2. If not found, try to find it inside 'form_data' (Scenario 1)
-// 3. Default to an empty map if neither exists
-        final childRegistrationMap = formData['child_registration_due'] ??
+        // 1. Try to find 'child_registration_due' directly at the top level (Scenario 2)
+        // 2. If not found, try to find it inside 'form_data' (Scenario 1)
+        // 3. Default to an empty map if neither exists
+        final childRegistrationMap =
+            formData['child_registration_due'] ??
             formData['form_data']?['child_registration_due'] ??
             {};
 
@@ -763,26 +849,36 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           'household_id': data['hhId']?.toString() ?? '',
           'beneficiary_ref_key': data['BeneficiaryID']?.toString() ?? '',
           'beneficiary_id': data['BeneficiaryID']?.toString() ?? '',
-          'child_name': data['Name']?.toString() ?? formData['child_name'] ?? '',
+          'child_name':
+              data['Name']?.toString() ?? formData['child_name'] ?? '',
           'age': data['Age|Gender']?.toString() ?? '',
           'gender': formData['gender'] ?? '',
-          'father_name': data['FatherName']?.toString() ?? formData['father_name'] ?? '',
-          'mother_name': data['MotherName']?.toString() ?? formData['mother_name'] ?? '',
-          'mobile_number': data['Mobileno.']?.toString() ?? formData['mobile_number'] ?? '',
+          'father_name':
+              data['FatherName']?.toString() ?? formData['father_name'] ?? '',
+          'mother_name':
+              data['MotherName']?.toString() ?? formData['mother_name'] ?? '',
+          'mobile_number':
+              data['Mobileno.']?.toString() ?? formData['mobile_number'] ?? '',
           'rch_id': data['RchID']?.toString() ?? formData['rch_id_child'] ?? '',
-          'registration_type': data['RegitrationType']?.toString() ?? 'Child Registration',
+          'registration_type':
+              data['RegitrationType']?.toString() ?? 'Child Registration',
           'registration_date': data['RegitrationDate']?.toString() ?? '',
 
           // --- UPDATED LINES ---
           // Now we use childRegistrationMap which holds the correct data regardless of structure
-          'weight_grams': childRegistrationMap['weight_grams']?.toString() ?? '',
-          'birth_weight_grams': childRegistrationMap['birth_weight_grams']?.toString() ?? '',
-          'date_of_birth': childRegistrationMap['date_of_birth']?.toString() ?? '',
+          'weight_grams':
+              childRegistrationMap['weight_grams']?.toString() ?? '',
+          'birth_weight_grams':
+              childRegistrationMap['birth_weight_grams']?.toString() ?? '',
         };
 
         debugPrint('Complete form data to pass:');
-        debugPrint('  household_ref_key: ${completeFormData['household_ref_key']}');
-        debugPrint('  beneficiary_ref_key: ${completeFormData['beneficiary_ref_key']}');
+        debugPrint(
+          '  household_ref_key: ${completeFormData['household_ref_key']}',
+        );
+        debugPrint(
+          '  beneficiary_ref_key: ${completeFormData['beneficiary_ref_key']}',
+        );
         debugPrint('  child_name: ${completeFormData['child_name']}');
         debugPrint('  age: ${completeFormData['age']}');
         debugPrint('  gender: ${completeFormData['gender']}');
@@ -790,18 +886,15 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
         Navigator.pushNamed(
           context,
           Route_Names.ChildTrackingDueListForm,
-          arguments: {
-            'formData': completeFormData,
-            'isEdit': true,
-          },
+          arguments: {'formData': completeFormData, 'isEdit': true},
         )?.then((result) {
           // Always reload data to reflect the latest state from the database
           // This ensures that if case closure wasn't selected, the card remains visible
           _loadChildTrackingData();
-          
+
           if (result is Map && result['saved'] == true) {
-             // Optional: You can show a message here if needed, but the form already shows one
-             debugPrint('✅ Form saved, reloading list...');
+            // Optional: You can show a message here if needed, but the form already shows one
+            debugPrint('✅ Form saved, reloading list...');
           }
         });
       },
@@ -834,8 +927,11 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      (data['hhId'] != null && data['hhId'].toString().length > 11)
-                          ? data['hhId'].toString().substring(data['hhId'].toString().length - 11)
+                      (data['hhId'] != null &&
+                              data['hhId'].toString().length > 11)
+                          ? data['hhId'].toString().substring(
+                              data['hhId'].toString().length - 11,
+                            )
                           : (data['hhId']?.toString() ?? ''),
                       style: TextStyle(
                         color: primary,
@@ -848,15 +944,15 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                   const SizedBox(width: 8),
 
                   FutureBuilder<Map<String, dynamic>>(
-                    future: _getSyncStatus(data['BeneficiaryID']?.toString() ?? ''),
+                    future: _getSyncStatus(
+                      data['BeneficiaryID']?.toString() ?? '',
+                    ),
                     builder: (context, snapshot) {
                       final isSynced = snapshot.data?['is_synced'] == true;
                       return Image.asset(
                         'assets/images/sync.png',
                         width: 25,
-                        color: isSynced 
-                            ? null
-                            : Colors.grey[500],
+                        color: isSynced ? null : Colors.grey[500],
                       );
                     },
                   ),
@@ -880,7 +976,9 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             Container(
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.95),
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4)),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(4),
+                ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Column(
@@ -888,20 +986,41 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                 children: [
                   Row(
                     children: [
-                      Expanded(child: _rowText(l10n?.registrationDateLabel ?? 'Registration Date', data['RegitrationDate'] ?? 'N/A')),
+                      Expanded(
+                        child: _rowText(
+                          l10n?.registrationDateLabel ?? 'Registration Date',
+                          data['RegitrationDate'] ?? 'N/A',
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.registrationTypeLabel ?? 'Registration Type',  'Child')),
+                      Expanded(
+                        child: _rowText(
+                          l10n?.registrationTypeLabel ?? 'Registration Type',
+                          'Child',
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
+                      Expanded(
+                        child: _rowText(
+                          l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
                           (data['BeneficiaryID']?.toString().length ?? 0) > 11
-                              ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11)
-                              : (data['BeneficiaryID']?.toString() ?? 'N/A'))),
+                              ? data['BeneficiaryID'].toString().substring(
+                                  data['BeneficiaryID'].toString().length - 11,
+                                )
+                              : (data['BeneficiaryID']?.toString() ?? 'N/A'),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(child: _rowText("${l10n?.nameLabel}" , data['Name'] ?? 'N/A')),
+                      Expanded(
+                        child: _rowText(
+                          "${l10n?.nameLabel}",
+                          data['Name'] ?? 'N/A',
+                        ),
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: FutureBuilder<String>(
@@ -910,16 +1029,25 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                             data['Age|Gender']?.toString() ?? 'N/A',
                           ),
                           builder: (context, snapshot) {
-                            final display = snapshot.data ?? (data['Age|Gender']?.toString() ?? 'N/A');
-                            return _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', display);
+                            final display =
+                                snapshot.data ??
+                                (data['Age|Gender']?.toString() ?? 'N/A');
+                            return _rowText(
+                              l10n?.ageGenderLabel ?? 'Age | Gender',
+                              display,
+                            );
                           },
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Expanded(child: _rowText(
-                        l10n?.rchIdLabel ?? 'RCH ID',
-                        data['RchID']?.isNotEmpty == true ? data['RchID'] : l10n!.na,
-                      )),
+                      Expanded(
+                        child: _rowText(
+                          l10n?.rchIdLabel ?? 'RCH ID',
+                          data['RchID']?.isNotEmpty == true
+                              ? data['RchID']
+                              : l10n!.na,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -928,21 +1056,20 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                       Expanded(
                         child: _rowText(
                           l10n?.mobileLabelSimple ?? 'Mobile No.',
-                          data['Mobileno.']?.isNotEmpty == true ? data['Mobileno.'] : 'N/A',
+                          data['Mobileno.']?.isNotEmpty == true
+                              ? data['Mobileno.']
+                              : 'N/A',
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Expanded(
-                        child: _rowText(
-                          '',
-                          '',
-                        ),
-                      ),
+                      Expanded(child: _rowText('', '')),
                       const SizedBox(width: 8),
                       Expanded(
                         child: _rowText(
                           l10n?.fatherNameLabel ?? 'Father\'s Name',
-                          data['FatherName']?.isNotEmpty == true ? data['FatherName'] : 'N/A',
+                          data['FatherName']?.isNotEmpty == true
+                              ? data['FatherName']
+                              : 'N/A',
                         ),
                       ),
                     ],
