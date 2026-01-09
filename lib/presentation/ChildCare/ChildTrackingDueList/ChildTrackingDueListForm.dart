@@ -889,7 +889,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text(item['due']!),
+                child: Text(item['due']!,style: TextStyle(color: Colors.grey)),
               ),
               const Padding(
                 padding: EdgeInsets.all(8),
@@ -1003,7 +1003,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text(item['due']!),
+                child: Text(item['due']!,style: TextStyle(color: Colors.grey)),
               ),
               const Padding(
                 padding: EdgeInsets.all(8),
@@ -1060,7 +1060,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text(item['due']!),
+                child: Text(item['due']!,style: TextStyle(color: Colors.grey)),
               ),
               const Padding(
                 padding: EdgeInsets.all(8),
@@ -1423,7 +1423,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text(item['due']!),
+                child: Text(item['due']!,style: TextStyle(color: Colors.grey)),
               ),
               const Padding(
                 padding: EdgeInsets.all(8),
@@ -1562,7 +1562,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text(item['due']!),
+                child: Text(item['due']!,style: TextStyle(color: Colors.grey)),
               ),
               const Padding(
                 padding: EdgeInsets.all(8),
@@ -1693,7 +1693,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text(item['due']!),
+                child: Text(item['due']!,style: TextStyle(color: Colors.grey)),
               ),
               const Padding(
                 padding: EdgeInsets.all(8),
@@ -1824,7 +1824,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text(item['due']!),
+                child: Text(item['due']!, style: TextStyle(color: Colors.grey)),
               ),
               const Padding(
                 padding: EdgeInsets.all(8),
@@ -1966,7 +1966,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text(item['due']!),
+                child: Text(item['due']!,style: TextStyle(color: Colors.grey)),
               ),
               const Padding(
                 padding: EdgeInsets.all(8),
@@ -2111,7 +2111,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
               ),
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text(item['due']!),
+                child: Text(item['due']!,style: TextStyle(color: Colors.grey)),
               ),
               const Padding(
                 padding: EdgeInsets.all(8),

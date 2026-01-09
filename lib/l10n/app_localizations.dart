@@ -14696,7 +14696,7 @@ abstract class AppLocalizations {
   /// No description provided for @pentavalent1.
   ///
   /// In en, this message translates to:
-  /// **'Pentavalent - 1'**
+  /// **'Pentavalent 1'**
   String get pentavalent1;
 
   /// No description provided for @rota1.

@@ -7324,7 +7324,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dpt1 => 'D.P.T. - 1';
 
   @override
-  String get pentavalent1 => 'Pentavalent - 1';
+  String get pentavalent1 => 'Pentavalent 1';
 
   @override
   String get rota1 => 'Rota 1';
