@@ -111,6 +111,19 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
             MaterialTapTargetSize.shrinkWrap, // small checkbox
         visualDensity: VisualDensity.compact, // reduce padding around checkbox
         value: value,
+
+        fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+          if (states.contains(MaterialState.selected)) {
+            return Colors.blue.shade200; // checked background
+          }
+          return Colors.black; // unchecked background
+        }),
+
+        // ✔ Tick color
+        checkColor: Colors.black,
+
+        // ⬛ Border (important)
+        side: const BorderSide(color: Colors.grey, width: 1.5),
         onChanged: (val) {
           setState(() {
             if (index < _presentList.length) {
@@ -232,7 +245,8 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                   perspective: 0.005,
                   diameterRatio: 1.8,
                   physics: const FixedExtentScrollPhysics(),
-                  onSelectedItemChanged: (index) => selectedYear = currentYear - index,
+                  onSelectedItemChanged: (index) =>
+                      selectedYear = currentYear - index,
                   childDelegate: ListWheelChildBuilderDelegate(
                     childCount: 101,
                     builder: (context, index) {
@@ -574,119 +588,6 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
     return {};
   }
 
-  Future<void> _showTopicsDialog(BuildContext context) async {
-    final current = Set<String>.from(_selectedTopics);
-    final otherTopicText = _otherTopicController.text;
-    final otherTopicController = TextEditingController(text: otherTopicText);
-    bool showOtherField = current.contains('Other');
-    final l10n = AppLocalizations.of(context);
-
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-              backgroundColor: Colors.white,
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n?.discussionTopicProgram ?? "Select Discussion Topics",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w400,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Divider(
-                    color: Colors.grey.shade400,
-                    thickness: 0.8,
-                    height: 0,
-                  ),
-                ],
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (final topic in discussionTopics)
-                      Column(
-                        children: [
-                          StatefulBuilder(
-                            builder: (ctx2, _) {
-                              final isChecked = current.contains(topic.name);
-                              return Padding(
-                                padding: const EdgeInsets.only(left: 6.0),
-                                child: Transform.scale(
-                                  scale: 1.0,
-                                  child: CheckboxListTile(
-                                    dense: true,
-                                    visualDensity: const VisualDensity(
-                                      vertical: -2,
-                                    ),
-                                    contentPadding: EdgeInsets.zero,
-                                    title: Text(
-                                      topic.name,
-                                      style: const TextStyle(fontSize: 12.5),
-                                    ),
-                                    value: isChecked,
-                                    controlAffinity:
-                                        ListTileControlAffinity.leading,
-                                    onChanged: (checked) {
-                                      setStateDialog(() {
-                                        if (checked == true) {
-                                          current.add(topic.name);
-                                          if (topic.name == 'Other') {
-                                            showOtherField = true;
-                                          }
-                                        } else {
-                                          current.remove(topic.name);
-                                          if (topic.name == 'Other') {
-                                            showOtherField = false;
-                                            otherTopicController.clear();
-                                          }
-                                        }
-                                      });
-                                    },
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: Text(l10n?.cancel ?? 'Cancel'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _selectedTopics = current;
-                      _otherTopicController.text = otherTopicController.text;
-                      _showOtherTopicField = current.contains('Other');
-                    });
-                    Navigator.of(ctx).pop();
-                  },
-                  child: Text(l10n?.ok ?? 'OK'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
   Future<void> _loadExistingMeeting() async {
     try {
       final row = await LocalStorageDao.instance.getClusterMeetingById(
@@ -811,11 +712,218 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
     return const TimeOfDay(hour: 9, minute: 0);
   }
 
+  Set<int> _selectedTopicIds = {};
+  Map<int, String> _selectedSubTopics = {};
+
+  Future<void> showMultiSelectDialog({
+    required BuildContext context,
+    required String title,
+    required List<String> options,
+    required String? selected, // single value now
+    required Function(String?) onSubmit,
+  }) async {
+    String? tempValue = selected;
+    final l10n = AppLocalizations.of(context);
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => StatefulBuilder(
+        builder: (context, setStateDialog) => AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              ),
+              const Divider(height: 2),
+            ],
+          ),
+
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 350),
+            child: SingleChildScrollView(
+              child: Column(
+                children: options.map((e) {
+                  return RadioListTile<String>(
+                    title: Text(e, style: const TextStyle(fontSize: 14)),
+                    value: e,
+                    groupValue: tempValue,
+                    dense: true,
+                    visualDensity: const VisualDensity(vertical: -4),
+                    onChanged: (val) {
+                      setStateDialog(() {
+                        tempValue = val;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+
+          actions: [
+            const Divider(height: 1),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    l10n?.cancel ?? 'CANCEL',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    onSubmit(tempValue);
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    l10n?.ok ?? 'OK',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+
+  Future<void> _showTopicsDialog(BuildContext context) async {
+    final currentIds = Set<int>.from(_selectedTopicIds);
+    final l10n = AppLocalizations.of(context);
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => StatefulBuilder(
+        builder: (context, setStateDialog) => AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n?.discussionTopicProgram ?? "Select Discussion Topics",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              ),
+              const Divider(height: 2),
+            ],
+          ),
+
+          /// 🔹 CONTENT WITH HEIGHT LIMIT
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 350),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: discussionTopics.map((topic) {
+                  final isChecked = currentIds.contains(topic.id);
+
+                  return CheckboxListTile(
+                    title: Text(
+                      topic.name,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    value: isChecked,
+                    dense: true,
+                    visualDensity: const VisualDensity(vertical: -4),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    onChanged: (checked) {
+                      setStateDialog(() {
+                        if (checked == true) {
+                          currentIds.add(topic.id);
+                        } else {
+                          currentIds.remove(topic.id);
+                          _selectedSubTopics.remove(topic.id);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+
+          /// 🔹 DIVIDER + BUTTON ROW (LIKE OLD APP)
+          actions: [
+            const Divider(height: 1),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    l10n?.cancel ?? 'CANCEL',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedTopicIds = currentIds;
+                      _showOtherTopicField = _selectedTopicIds.contains(
+                        14,
+                      ); // Other
+                    });
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    l10n?.ok ?? 'OK',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isEdit = widget.isEditMode;
-
     days = [
       Day(id: 1, name: l10n?.monday ?? 'Monday'),
       Day(id: 2, name: l10n?.tuesday ?? 'Tuesday'),
@@ -825,7 +933,6 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       Day(id: 6, name: l10n?.saturday ?? 'Saturday'),
       Day(id: 7, name: l10n?.sunday ?? 'Sunday'),
     ];
-
     discussionTopics = [
       DiscussionTopic(id: 1, name: l10n?.immunization ?? "Immunization"),
       DiscussionTopic(id: 2, name: l10n?.pregnantWomen ?? "Pregnant Women"),
@@ -854,6 +961,75 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       ),
       DiscussionTopic(id: 14, name: l10n?.other ?? "Other"),
     ];
+    final Map<int, List<String>> subTopicsByTopicId = {
+      1: [ // Immunization
+        l10n.immunizationDueListPreparation,
+        l10n.immunizationVHSND,
+        l10n.immunizationVHSC,
+        l10n.immunizationDropoutChildren,
+        l10n.immunizationLeftoutChildren,
+        l10n.immunizationZerodoseChildren,
+        l10n.immunizationImmunizationInPrivate,
+        l10n.immunizationDocumentation,
+        l10n.immunizationOther,
+      ],
+
+      2: [ // Pregnant Women
+        l10n.pregnantWomenANC,
+        l10n.pregnantWomenRegistartionForANC,
+        l10n.pregnantWomenDangerSigns,
+        l10n.pregnantWomenOther,
+      ],
+
+      8: [
+        l10n.deathMaternalDeath,
+        l10n.deathChild,
+        l10n.deathNowBorn,
+        l10n.deathInfant,
+        l10n.deathDocumentation,
+        l10n.deathNotification,
+        l10n.deathOther,
+      ],
+      10: [ // Family Planning
+        l10n.familyPlanningEligibleCouple,
+      ],
+
+      11: [ // Other Public Health Program
+        l10n.otherPublicHealthProgramTuberculosis,
+        l10n.otherPublicHealthProgramLeprosy,
+        l10n.otherPublicHealthProgramMalnutrition,
+        l10n.otherPublicHealthProgramAnemia,
+        l10n.otherPublicHealthProgramDiarrhea,
+        l10n.otherPublicHealthProgramNCD,
+        l10n.otherPublicHealthProgramPolio,
+        l10n.otherPublicHealthProgramKalaAzar,
+        l10n.otherPublicHealthProgramAES,
+        l10n.otherPublicHealthProgramCovid19,
+        l10n.otherPublicHealthProgramCholera,
+        l10n.otherPublicHealthProgramDengue,
+        l10n.otherPublicHealthProgramDogBite,
+        l10n.otherPublicHealthProgramKilkari,
+      ],
+
+      12: [ // Administrative
+        l10n.administrativeRegisters,
+        l10n.administrativeDrugs,
+        l10n.administrativeEquipement,
+        l10n.administrativePlanning,
+        l10n.administrativeCounselingMaterialFlipbooksCards,
+        l10n.administrativeImmunizationCardsMCPCards,
+        l10n.administrativeHealthPromotionalMaterial,
+      ],
+
+      13: [ // Training and Support
+        l10n.trainingAndSupportTrainingSupport,
+        l10n.trainingAndSupportMentoringSupport,
+        l10n.trainingAndSupportFieldSupport,
+        l10n.trainingAndSupportASHAWorkPlanning,
+        l10n.trainingAndSupportHomeVisits,
+        l10n.trainingAndSupportMobileAcademy,
+      ],
+    };
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -876,7 +1052,6 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                 readOnly: false,
               ),
               Divider(color: AppColors.divider, thickness: 0.5),
-
               // Subcenter Name
               CustomTextField(
                 controller: _subcenterNameController,
@@ -955,7 +1130,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
               CustomDatePicker(
                 labelText: "${l10n?.dateOfMeeting} *",
 
-                hintText: l10n?.dateOfMeeting ?? "Date of the Meeting",
+                hintText: l10n?.dateHint ?? "dd-mm-yyyy",
                 initialDate: _meetingDate,
                 onDateChanged: (date) {
                   setState(() {
@@ -969,7 +1144,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                 items: days,
                 value: selectedDay,
                 getLabel: (day) => day.name,
-                hintText: l10n?.selectDay ?? "Select Day",
+                hintText: l10n?.day ?? "Day",
                 onChanged: (Day? newValue) {
                   setState(() {
                     selectedDay = newValue;
@@ -983,7 +1158,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                 child: AbsorbPointer(
                   child: CustomTextField(
                     labelText: l10n?.fromTime ?? "From (HH:MM)",
-                    hintText: l10n?.fromTime ?? "From (hh:mm)",
+                    hintText: l10n?.deliveryTimeHint,
                     initialValue: _fromTime != null
                         ? _fromTime!.format(context)
                         : "",
@@ -998,7 +1173,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                 child: AbsorbPointer(
                   child: CustomTextField(
                     labelText: l10n?.toTime ?? "To (HH:MM)",
-                    hintText: l10n?.toTime ?? "To (hh:mm)",
+                    hintText: l10n?.deliveryTimeHint,
                     initialValue: _toTime != null
                         ? _toTime!.format(context)
                         : "",
@@ -1047,7 +1222,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                   Expanded(
                     child: Text(
                       l10n?.totalAshaUnderFacilitator ??
-                          "Total no. of ASHA under facilitator",
+                          "Total Number of ASHA's under the Facilitator",
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -1278,50 +1453,112 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                 ),
               ),
               Divider(color: AppColors.divider, thickness: 0.5),
-              GestureDetector(
-                onTap: () => _showTopicsDialog(context),
-                child: AbsorbPointer(
-                  child: Stack(
-                    alignment: Alignment.centerRight,
-                    children: [
-                      CustomTextField(
-                        labelText:
-                            l10n?.discussionTopicProgram ??
-                            "Discussion Topic/Program",
-                        hintText: _selectedTopics.isEmpty
-                            ? l10n?.selectTopics ?? "Select Topics"
-                            : _selectedTopics.join(", "),
-                        readOnly: true,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// 1️⃣ MAIN DISCUSSION TOPIC DROPDOWN
+                  GestureDetector(
+                    onTap: () => _showTopicsDialog(context),
+                    child: AbsorbPointer(
+                      child: Stack(
+                        alignment: Alignment.centerRight,
+                        children: [
+                          CustomTextField(
+                            labelText:
+                                l10n?.discussionTopicProgram ??
+                                "Discussion Topic/Program",
+                            hintText: l10n?.selectOptionLabel ?? "Select",
+
+                            /// ✅ SHOW SELECTED TOPICS
+                            initialValue: _selectedTopicIds.isEmpty
+                                ? null
+                                : discussionTopics
+                                      .where(
+                                        (e) => _selectedTopicIds.contains(e.id),
+                                      )
+                                      .map((e) => e.name)
+                                      .join(", "),
+
+                            /// ✅ COLOR BASED ON SAME SOURCE
+                            textStyle: TextStyle(
+                              color: _selectedTopicIds.isEmpty
+                                  ? Colors.grey
+                                  : Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Positioned(
+                            right: 12,
+                            child: Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
-                      const Positioned(
-                        right: 12,
-                        child: Icon(Icons.arrow_drop_down, color: Colors.grey),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  /// 2️⃣ DYNAMIC SUB-TOPIC DROPDOWNS (THIS IS WHERE YOUR CODE GOES)
+                  Column(
+                    children: _selectedTopicIds.map((topicId) {
+                      final topic = discussionTopics.firstWhere((e) => e.id == topicId);
+                      final subTopics = subTopicsByTopicId[topicId];
+
+                      if (subTopics == null) return const SizedBox.shrink();
+
+                      return Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: GestureDetector(
+                              onTap: () {
+                                showMultiSelectDialog(
+                                  context: context,
+                                  title: "${topic.name}_${l10n.discussionTopic}",
+                                  options: subTopics,
+                                  selected: _selectedSubTopics[topicId], // single String
+                                  onSubmit: (val) {
+                                    setState(() {
+                                      _selectedSubTopics[topicId] = val ?? ''; // save as string
+                                    });
+                                  },
+                                );
+                              },
+                              child: AbsorbPointer(
+                                child: CustomTextField(
+                                  labelText: "${topic.name}_${l10n.discussionTopic}",
+                                  hintText: l10n?.select ?? "Select",
+                                  initialValue: _selectedSubTopics[topicId] ?? '',
+                                ),
+                              ),
+                            ),
+                          ),
+                          const Divider(
+                            color: AppColors.divider,
+                            thickness: 0.5,
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                  /// 3️⃣ OTHER TEXT FIELD (UNCHANGED)
+                  if (_showOtherTopicField) ...[
+                    const SizedBox(height: 8),
+                    CustomTextField(
+                      controller: _otherTopicController,
+                      labelText:
+                          l10n?.otherDiscussionSubTopicProgram ??
+                          "Other_Discussion Sub Topic/Program",
+                      hintText: l10n?.select,
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    Divider(color: AppColors.divider, thickness: 0.5),
+                  ],
+                ],
               ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-
-              if (_showOtherTopicField) ...[
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                  child: CustomTextField(
-                    controller: _otherTopicController,
-                    labelText:
-                        l10n?.discussionSubTopicProgram ??
-                        "Discussion Sub Topic/Program",
-                    hintText:
-                        l10n?.discussionSubTopicProgram ??
-                        "Discussion Sub Topic/Program",
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                  ),
-                ),
-                Divider(color: AppColors.divider, thickness: 0.5),
-              ],
-
               // Decision Taken During the Meeting
               CustomTextField(
                 controller: _decisionTakenController,
@@ -1373,11 +1610,18 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     ? "${_selectedMonthYear!.month.toString().padLeft(2, '0')}-${_selectedMonthYear!.year}"
                     : null,
                 'discussion_topics': _selectedTopics.join(", "),
+                'immunization_discussion_topic': _selectedSubTopics[1] ?? '',
+                'pregnant_women_discussion_topic': _selectedSubTopics[2] ?? '',
+                'deaths_discussion_topic': _selectedSubTopics[8] ?? '',
+                'family_planning_discussion_topic': _selectedSubTopics[10] ?? '',
+                'other_public_health_program_discussion_topic': _selectedSubTopics[11] ?? '',
+                'administrative_discussion_topic': _selectedSubTopics[12] ?? '',
+                'training_and_support_discussion_topic': _selectedSubTopics[13] ?? '',
                 'other_topic_details': _otherTopicController.text.trim(),
                 'decision_taken': _decisionTakenController.text.trim(),
                 'saved_at': DateTime.now().toIso8601String(),
               };
-
+              print("Form Data to Save: ${jsonEncode(formData)}");
               try {
                 if (widget.isEditMode && uniqueKey != null) {
                   await LocalStorageDao.instance.updateClusterMeeting(

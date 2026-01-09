@@ -4954,7 +4954,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get decisionTakenDuringMeeting => 'बैठक के दौरान लिया गया फैसला';
 
   @override
-  String get discussionSubTopicProgram => 'चर्चा का उप विषय/कार्यक्रम';
+  String get otherDiscussionSubTopicProgram => 'चर्चा का उप विषय/कार्यक्रम';
 
   @override
   String get discussionTopicProgram => 'चर्चा का विषय/कार्यक्रम';
@@ -7400,4 +7400,160 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get tdVaccine => 'टेटनस डिफ्थीरिया (टी.डी.)';
+
+  @override
+  String get currentAncDueDate => 'वर्तमान प्रसव पूर्व जांच की अंतिम तिथि';
+
+  @override
+  String get lastVisitDate => 'अंतिम दौरे की तिथीी';
+
+  @override
+  String get nextHbncDueDate => 'अगली एचबीएनसी तिथि';
+
+  @override
+  String get immunizationDueListPreparation => 'देय सूची तैयार करना';
+
+  @override
+  String get immunizationVHSND => 'वी.एच.एस.एन.डी';
+
+  @override
+  String get immunizationVHSC => 'वी.एच.एस.सी';
+
+  @override
+  String get immunizationDropoutChildren => 'ड्रॉपआउट बच्चे';
+
+  @override
+  String get immunizationLeftoutChildren => 'छूटे हुए बच्चे';
+
+  @override
+  String get immunizationZerodoseChildren => 'shunya khurak wale  बच्चे';
+
+  @override
+  String get immunizationImmunizationInPrivate => 'निजी taur par टीकाकरण';
+
+  @override
+  String get immunizationDocumentation => 'दस्तावेज़ीकरण';
+
+  @override
+  String get immunizationOther => 'अन्य';
+
+  @override
+  String get pregnantWomenANC => 'ए.एन.सी';
+
+  @override
+  String get pregnantWomenRegistartionForANC => 'एएनसी के लिए पंजीकरण';
+
+  @override
+  String get pregnantWomenDangerSigns => 'खतरे के संकेत';
+
+  @override
+  String get pregnantWomenOther => 'अन्य';
+
+  @override
+  String get familyPlanningEligibleCouple => 'योग्य दम्पत्ति';
+
+  @override
+  String get otherPublicHealthProgramTuberculosis => 'क्षय रोग';
+
+  @override
+  String get otherPublicHealthProgramLeprosy => 'तपेदिक';
+
+  @override
+  String get otherPublicHealthProgramMalnutrition => 'कुपोषण';
+
+  @override
+  String get otherPublicHealthProgramAnemia => 'रक्ताल्पता';
+
+  @override
+  String get otherPublicHealthProgramDiarrhea => 'दस्त';
+
+  @override
+  String get otherPublicHealthProgramNCD => 'एन.सी.डी';
+
+  @override
+  String get otherPublicHealthProgramPolio => 'पोलियो';
+
+  @override
+  String get otherPublicHealthProgramKalaAzar => 'काला आजार';
+
+  @override
+  String get otherPublicHealthProgramAES => 'ए.ई.एस';
+
+  @override
+  String get otherPublicHealthProgramCovid19 => 'कोविड-19';
+
+  @override
+  String get otherPublicHealthProgramCholera => 'हैजा';
+
+  @override
+  String get otherPublicHealthProgramDengue => 'डेंगू';
+
+  @override
+  String get otherPublicHealthProgramDogBite => 'कुत्ते का काटना';
+
+  @override
+  String get otherPublicHealthProgramKilkari => 'किलकारी';
+
+  @override
+  String get administrativeRegisters => 'रजिस्टर';
+
+  @override
+  String get administrativeDrugs => 'ड्रग्स';
+
+  @override
+  String get administrativeEquipement => 'उपकरण';
+
+  @override
+  String get administrativePlanning => 'योजना';
+
+  @override
+  String get administrativeCounselingMaterialFlipbooksCards => 'परामर्श सामग्री (फ्लिपबुक/कार्ड)';
+
+  @override
+  String get administrativeImmunizationCardsMCPCards => 'टीकाकरण कार्ड (एमसीपी कार्ड)';
+
+  @override
+  String get administrativeHealthPromotionalMaterial => 'स्वास्थ्य प्रचार सामग्री';
+
+  @override
+  String get trainingAndSupportTrainingSupport => 'प्रशिक्षण सहयोग';
+
+  @override
+  String get trainingAndSupportMentoringSupport => 'मार्गदर्शन सहयोग';
+
+  @override
+  String get trainingAndSupportFieldSupport => 'मैदान में सहायता';
+
+  @override
+  String get trainingAndSupportASHAWorkPlanning => 'आशा कार्य योजना';
+
+  @override
+  String get trainingAndSupportHomeVisits => 'घर का दौरे';
+
+  @override
+  String get trainingAndSupportMobileAcademy => 'मोबाइल एकेडमी';
+
+  @override
+  String get deathMaternalDeath => 'मातृ मृत्यु';
+
+  @override
+  String get deathChild => 'बच्चे की मृत्यु';
+
+  @override
+  String get deathNowBorn => 'जन्म बच्चे की मृत्युु';
+
+  @override
+  String get deathInfant => 'शिशु मृत्यु';
+
+  @override
+  String get deathDocumentation => 'दस्तावेज़ीकरण';
+
+  @override
+  String get deathNotification => 'अधिसूचना';
+
+  @override
+  String get deathOther => 'अन्य';
+
+  @override
+  String get discussionTopic => 'चर्चा का उप विषय/कार्यक्रम';
 }
