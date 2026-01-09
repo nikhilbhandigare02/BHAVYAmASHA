@@ -2738,7 +2738,7 @@ abstract class AppLocalizations {
   /// No description provided for @hbycBreastfeedingContinuingLabel.
   ///
   /// In en, this message translates to:
-  /// **'Breastfeeding continuing?'**
+  /// **'Breastfeeding continued?'**
   String get hbycBreastfeedingContinuingLabel;
 
   /// No description provided for @hbycCompleteDietProvidedLabel.
@@ -5396,7 +5396,7 @@ abstract class AppLocalizations {
   /// No description provided for @newbornWeightGramLabel.
   ///
   /// In en, this message translates to:
-  /// **'Baby\'s weight (1200-4000)gms'**
+  /// **'Birth weight (1200-4000)gms'**
   String get newbornWeightGramLabel;
 
   /// No description provided for @newbornTemperatureLabel.
@@ -5570,7 +5570,7 @@ abstract class AppLocalizations {
   /// No description provided for @abnormalSpeechOrSeizureLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the mother speaking abnormally or having fits?'**
+  /// **'Is mother speaking abnormally or having fits?'**
   String get abnormalSpeechOrSeizureLabel;
 
   /// No description provided for @counselingAdviceLabel.
@@ -10682,7 +10682,7 @@ abstract class AppLocalizations {
   /// No description provided for @skinFoldRednessLabel.
   ///
   /// In en, this message translates to:
-  /// **'Are there any cracks/redness in the skin fold? (thigh/ Axilla / Buttock)'**
+  /// **'Are there any cracks/redness on the skin fold (thigh/ Axilla / Buttock)'**
   String get skinFoldRednessLabel;
 
   /// No description provided for @newbornJaundiceLabel.
@@ -10694,7 +10694,7 @@ abstract class AppLocalizations {
   /// No description provided for @pusBumpsOrBoilLabel.
   ///
   /// In en, this message translates to:
-  /// **'More than ten pus- filled pustules or large boil'**
+  /// **'More than ten pus- filled pustules or a large boil'**
   String get pusBumpsOrBoilLabel;
 
   /// No description provided for @pusInNavelLabel.
@@ -13010,7 +13010,7 @@ abstract class AppLocalizations {
   /// No description provided for @hbycHomeVisit.
   ///
   /// In en, this message translates to:
-  /// **'HBYC home visit? *'**
+  /// **'HBYC home visit *'**
   String get hbycHomeVisit;
 
   /// No description provided for @is_referred_to_health_facility.
@@ -13820,25 +13820,25 @@ abstract class AppLocalizations {
   /// No description provided for @hscNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HSC'**
+  /// **'HSC Name'**
   String get hscNameHint;
 
   /// No description provided for @hscNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HSC'**
+  /// **'HSC Name'**
   String get hscNameLabel;
 
   /// No description provided for @hwcNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HWC'**
+  /// **'HWC Name'**
   String get hwcNameHint;
 
   /// No description provided for @hwcNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HWC'**
+  /// **'HWC Name'**
   String get hwcNameLabel;
 
   /// No description provided for @moveForward.

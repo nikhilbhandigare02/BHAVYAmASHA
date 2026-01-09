@@ -266,15 +266,13 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     labelText: "${t.babyGenderLabel} *",
                     hintText: t.babyGenderLabel,
                     validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
-                    items: const ['Male', 'Female', 'Transgender'],
+                    items: const ['Male', 'Female'],
                     getLabel: (s) {
                       switch (s) {
                         case 'Male':
                           return t.genderMale;
                         case 'Female':
                           return t.genderFemale;
-                        case 'Transgender':
-                          return t.transgender;
                         default:
                           return s;
                       }
@@ -334,6 +332,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      SizedBox(height: 10),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
                         child: RichText(
@@ -342,8 +341,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                               TextSpan(
                                 text: t.infantTemperatureUnitLabel,
                                 style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 9,
                                   color: Colors.black, // label color
                                 ),
                               ),
@@ -425,7 +423,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
                   ApiDropdown<String>(
                     labelText: "${t.weighingScaleColorLabel} *",
-                    items: const ['Green', 'Yellow', 'Red'],
+                    items: const ['Red', 'Yellow','Green'],
                     getLabel: (e) => e == 'Green' ? t.colorGreen : (e == 'Yellow' ? t.colorYellow : t.colorRed),
                     value: s(c['weighingScaleColor']),
                     onChanged: (val) => context.read<HbncVisitBloc>().add(

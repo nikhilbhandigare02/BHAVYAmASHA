@@ -441,7 +441,7 @@
   "hbycAdvicePreparingAdministeringOrsLabel": "Assisted mother on Steps to prepare ORS at home and serve to child",
   "hbycBhramanLabel": "HBYC home visit",
   "hbycBhramanRequired": "HBYC home visit",
-  "hbycBreastfeedingContinuingLabel": "Breastfeeding continuing?",
+  "hbycBreastfeedingContinuingLabel": "Breastfeeding continued?",
   "hbycCompleteDietProvidedLabel": "Was a complete diet provided?",
   "hbycCompletionDateLabel": "Date of completion of HBYC visit activities",
   "hbycCounselingExclusiveBf6mLabel": "Counseling on exclusive breastfeeding for 6 months",
@@ -885,7 +885,7 @@
   "babyConditionLabel": "Child status",
   "babyNameLabel": "Baby's name",
   "babyGenderLabel": "Baby's gender ",
-  "newbornWeightGramLabel": "Baby's weight (1200-4000)gms",
+  "newbornWeightGramLabel": "Birth weight (1200-4000)gms",
   "newbornTemperatureLabel": "Temperature",
   "infantTemperatureUnitLabel": "Temperature of the baby (Measure in axial and record)",
   "temperatureUnitCelsius": "Celsius",
@@ -913,7 +913,8 @@
   "mealsPerDayLabel": "No. of times mother takes full meal in 24 hours?",
   "padsPerDayLabel": "How many pads have been changed in a day for bleeding? *",
   "mothersTemperatureLabel": "Temperature of mother",
-  "foulDischargeHighFeverLabel": "Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C) *",  "abnormalSpeechOrSeizureLabel": "Is the mother speaking abnormally or having fits?",
+  "foulDischargeHighFeverLabel": "Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C) *",
+  "abnormalSpeechOrSeizureLabel": "Is mother speaking abnormally or having fits?",
   "counselingAdviceLabel": "Counseling / Advise *",
 
   "outcomeFormTitle": "Delivery Outcome",
@@ -1814,9 +1815,9 @@
   "congenitalAbnormalitiesLabel": "Is the baby having any congenital physical abnormality",
   "eyesNormalLabel": "Eyes: Normal",
   "eyesSwollenOrPusLabel": "Are the eyes swollen? Is there pus coming out of the eyes?",
-  "skinFoldRednessLabel": "Are there any cracks/redness in the skin fold? (thigh/ Axilla / Buttock)",
+  "skinFoldRednessLabel": "Are there any cracks/redness on the skin fold (thigh/ Axilla / Buttock)",
   "newbornJaundiceLabel": "Yellowness in skin/ palm/ sole/eyes: Jaudice",
-  "pusBumpsOrBoilLabel": "More than ten pus- filled pustules or large boil",
+  "pusBumpsOrBoilLabel": "More than ten pus- filled pustules or a large boil",
   "pusInNavelLabel": "Is pus in the navel?",
   "routineCareDoneLabel": "Whether the Routine Newborn care tasks was performed?",
   "cryingConstantlyOrLessUrineLabel": "Is the baby crying continuously or passing urine less than 6 times a day?",
@@ -2211,7 +2212,7 @@
   "months12": "12 months",
   "months15": "15 months",
   "homeBasedCareForYoungChild": "Home Based Care For Young Child",
-  "hbycHomeVisit": "HBYC home visit? *",
+  "hbycHomeVisit": "HBYC home visit *",
   "is_referred_to_health_facility": "Child referred to health facility?",
   "is_complementary_food_given": "Complementary food given?",
  "foodAdvice_1": "2–3 tablespoons of food at a time, 2–3 times each day",
@@ -2348,16 +2349,10 @@
   "sr_No": "Sr.No.",
   "present": "Present?",
 
-
-  "hscNameHint": "HSC",
-  "hscNameLabel": "HSC",
-  "hwcNameHint": "HWC",
-  "hwcNameLabel": "HWC",
-
-
-
-
-
+  "hscNameHint": "HSC Name",
+  "hscNameLabel": "HSC Name",
+  "hwcNameHint": "HWC Name",
+  "hwcNameLabel": "HWC Name",
 
   "moveForward": "Move forward?",
   "lastVisit": "Last Visit",
