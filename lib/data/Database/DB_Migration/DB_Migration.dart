@@ -467,7 +467,9 @@ class DbMigration {
         current_user_key,
         modified_date_time,
         parent_user,
-        is_deleted
+        is_deleted,
+        facility_id
+        
       )
       SELECT 
         a._id,
@@ -479,6 +481,7 @@ class DbMigration {
         a.created_date_time,
         a.created_by,
         a.modified_date_time,
+        a.hsc_id,
 
         -- JSON object for parent_user
         ('{' ||

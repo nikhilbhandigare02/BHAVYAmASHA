@@ -118,7 +118,7 @@ class ANCUtils {
     return rows;
   }
 
- static Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
+  static Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
     try {
       final db = await DatabaseProvider.instance.database;
       final rows = await db.query(

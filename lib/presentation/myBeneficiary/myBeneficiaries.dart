@@ -557,18 +557,60 @@ ORDER BY d.created_date_time DESC
 
   Future<int> _getAbortionListCount() async {
     try {
-      final forms = await LocalStorageDao.instance.getHighRiskANCVisits();
-      int c = 0;
-      for (final row in forms) {
+      // Get abortion visits from followup forms directly - same logic as AbortionList.dart
+      final dbForms = await LocalStorageDao.instance.getAbortionFollowupForms();
+      
+      print('Total abortion records fetched for count: ${dbForms.length}');
+      
+      int count = 0;
+      for (final row in dbForms) {
         try {
-          final fd = Map<String, dynamic>.from(row['form_data'] as Map);
-          final v = fd['is_abortion'];
-          final s = v?.toString().toLowerCase() ?? '';
-          if (s == 'yes') c++;
-        } catch (_) {}
+          final formData = row['form_data'] as Map<String, dynamic>;
+          
+          // Beneficiary info is already fetched by DAO
+          final beneficiaryData = row['beneficiary_data'] as Map<String, dynamic>?;
+          final beneficiaryInfo = beneficiaryData?['beneficiary_info'] as Map<String, dynamic>? ?? {};
+          
+          final dobStr = beneficiaryInfo['dob']?.toString();
+          final gender = beneficiaryInfo['gender']?.toString() ?? formData['gender'] ?? 'Female';
+          
+          // Map fields - same logic as AbortionList.dart
+          final visitData = {
+            'id': row['beneficiary_ref_key']?.toString(),
+            'hhId': beneficiaryData?['household_ref_key']?.toString(),
+            'house_number': formData['house_no'] ?? formData['house_number'],
+            'woman_name': formData['pw_name'],
+            'husband_name': formData['husband_name'],
+            'rch_number': formData['rch_reg_no_of_pw'] ?? formData['rch_number'],
+            'visit_type': formData['visit_type'],
+            'high_risk': (formData['is_high_risk'] == 'yes') || (formData['high_risk'] == true),
+            'date_of_inspection': formData['date_of_inspection'],
+            'edd_date': formData['edd_date'],
+            'weeks_of_pregnancy': formData['week_of_pregnancy'] ?? formData['weeks_of_pregnancy'],
+            'weight': formData['weight'],
+            'hemoglobin': formData['hemoglobin'],
+            'pre_existing_disease': formData['pre_exist_desease'] ?? formData['pre_existing_disease'],
+            'mobileNumber': formData['mobile_number'] ?? formData['contact_number'],
+            'date_of_birth': dobStr,
+            'gender': gender,
+            'has_abortion_complication': true,
+            'abortion_date': formData['date_of_abortion'] ?? formData['abortion_date'],
+          };
+          
+          // Only count if we have valid abortion data
+          if (visitData['woman_name'] != null && visitData['abortion_date'] != null) {
+            count++;
+            print('Added abortion count for: ${formData['pw_name']}');
+          }
+        } catch (e) {
+          print('Error mapping abortion row for count: $e');
+        }
       }
-      return c;
-    } catch (_) {
+      
+      print('Total abortion count calculated: $count');
+      return count;
+    } catch (e) {
+      print('Error loading abortion count: $e');
       return 0;
     }
   }

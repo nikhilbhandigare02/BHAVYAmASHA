@@ -38,92 +38,51 @@ class _AbortionlistState extends State<Abortionlist> {
         _error = '';
       });
 
-      // Get all ANC visits
-      final dbForms = await LocalStorageDao.instance.getHighRiskANCVisits();
+      // Get abortion visits from followup forms directly
+      final dbForms = await LocalStorageDao.instance.getAbortionFollowupForms();
 
-      print('Total records fetched: ${dbForms.length}'); // Debug log
+      print('Total records fetched: ${dbForms.length}');
 
       final List<ANCVisitModel> abortionVisits = [];
 
-      for (final row in dbForms)
-
-      {
+      for (final row in dbForms) {
         try {
-          final formData = Map<String, dynamic>.from(row['form_data'] as Map);
+          final formData = row['form_data'] as Map<String, dynamic>;
 
+          // Beneficiary info is already fetched by DAO
+          final beneficiaryData = row['beneficiary_data'] as Map<String, dynamic>?;
+          final beneficiaryInfo = beneficiaryData?['beneficiary_info'] as Map<String, dynamic>? ?? {};
 
-          // Fixed condition - check for multiple possible values
-          final abortionValue = formData['is_abortion'];
-          bool hasAbortion = false;
+          final dobStr = beneficiaryInfo['dob']?.toString();
+          final gender = beneficiaryInfo['gender']?.toString() ?? formData['gender'] ?? 'Female';
 
-          if (abortionValue != null) {
-            if (abortionValue is bool) {
-              hasAbortion = abortionValue;
-            } else if (abortionValue is String) {
-              final lowerValue = abortionValue.toLowerCase().trim();
-              hasAbortion = lowerValue == 'yes' || lowerValue == 'true' || lowerValue == '1';
-            } else if (abortionValue is int) {
-              hasAbortion = abortionValue == 1;
-            }
-          }
-
-          if (!hasAbortion) {
-            print('Skipping record - no abortion complication'); // Debug log
-            continue;
-          }
-
-          print('Processing abortion case'); // Debug log
-
-          final String beneficiaryKey = row['beneficiary_ref_key']?.toString() ?? '';
-          String? dobStr;
-          if (beneficiaryKey.isNotEmpty) {
-            try {
-              final ben = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(beneficiaryKey);
-              if (ben != null) {
-                final rawInfo = ben['beneficiary_info'];
-                Map<String, dynamic> info;
-                if (rawInfo is Map) {
-                  info = Map<String, dynamic>.from(rawInfo);
-                } else if (rawInfo is String && rawInfo.isNotEmpty) {
-                  info = jsonDecode(rawInfo) as Map<String, dynamic>;
-                } else {
-                  info = <String, dynamic>{};
-                }
-                dobStr = info['dob']?.toString();
-              }
-            } catch (e) {
-              print('Error fetching beneficiary for abortion case: $e');
-            }
-          }
-
+          // Map fields
           final visitData = {
-            'id': beneficiaryKey,
-            'hhId': row['beneficiary_data']?['household_ref_key']?.toString(),
-
-            'house_number': formData['house_number'],
+            'id': row['beneficiary_ref_key']?.toString(),
+            'hhId': beneficiaryData?['household_ref_key']?.toString(),
+            'house_number': formData['house_no'] ?? formData['house_number'],
             'woman_name': formData['pw_name'],
             'husband_name': formData['husband_name'],
-            'rch_number': formData['rch_number'],
+            'rch_number': formData['rch_reg_no_of_pw'] ?? formData['rch_number'],
             'visit_type': formData['visit_type'],
-            'high_risk': formData['high_risk'] ?? false,
+            'high_risk': (formData['is_high_risk'] == 'yes') || (formData['high_risk'] == true),
             'date_of_inspection': formData['date_of_inspection'],
             'edd_date': formData['edd_date'],
-            'weeks_of_pregnancy': formData['weeks_of_pregnancy'],
+            'weeks_of_pregnancy': formData['week_of_pregnancy'] ?? formData['weeks_of_pregnancy'],
             'weight': formData['weight'],
             'hemoglobin': formData['hemoglobin'],
-            'pre_existing_disease': formData['pre_existing_disease'],
+            'pre_existing_disease': formData['pre_exist_desease'] ?? formData['pre_existing_disease'],
             'mobileNumber': formData['mobile_number'] ?? formData['contact_number'],
-            'age': '', // age will be derived from DOB
             'date_of_birth': dobStr,
-            'gender': formData['gender'] ?? 'Female',
-            'has_abortion_complication': formData['has_abortion_complication'],
-            'abortion_date': formData['abortion_date'] ?? formData['date_of_abortion'],
+            'gender': gender,
+            'has_abortion_complication': true,
+            'abortion_date': formData['date_of_abortion'] ?? formData['abortion_date'],
           };
 
           abortionVisits.add(ANCVisitModel.fromJson(visitData));
-          print('Added abortion visit for: ${formData['woman_name']}'); // Debug log
+          print('Added abortion visit for: ${formData['pw_name']}');
         } catch (e) {
-          print('Error mapping high-risk ANC DB row: $e');
+          print('Error mapping abortion row: $e');
         }
       }
 
@@ -205,34 +164,28 @@ class _AbortionlistState extends State<Abortionlist> {
               child: Center(child: CircularProgressIndicator()),
             )
           else if (_error.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-              child: Card(
-                color: Colors.white,
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 50.0, horizontal: 20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        l10n?.noRecordFound ?? 'No Record Found',
-                        style: TextStyle(
-                            fontSize: 17.sp,
-                            color: Colors.black54,
-                            fontWeight: FontWeight.w600
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                    const SizedBox(height: 16),
+                    Text(
+                      _error,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _loadANCVisits,
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 ),
               ),
             )
-        else if (displayVisits.isEmpty)
+          else if (displayVisits.isEmpty)
               Expanded(
                 child: _buildNoRecordCard(context),
               )
@@ -344,7 +297,7 @@ class _AbortionlistState extends State<Abortionlist> {
                         ),
                       if (visit.abortionDate != null)
                         Padding(
-                          padding: const EdgeInsets.only(left: 110.0),
+                          padding: const EdgeInsets.only(left: 150.0),
                           child: Text(
                             'Abortion Date: ${_formatDate(visit.abortionDate!)}',
                             style: TextStyle(
