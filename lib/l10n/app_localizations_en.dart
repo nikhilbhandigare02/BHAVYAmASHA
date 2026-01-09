@@ -1339,7 +1339,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hbycBhramanRequired => 'HBYC home visit';
 
   @override
-  String get hbycBreastfeedingContinuingLabel => 'Breastfeeding continuing?';
+  String get hbycBreastfeedingContinuingLabel => 'Breastfeeding continued?';
 
   @override
   String get hbycCompleteDietProvidedLabel => 'Was a complete diet provided?';
@@ -1360,7 +1360,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hbycFullyVaccinatedLabel => 'Fully vaccinated as per MCP card?';
 
   @override
-  String get hbycIronFolicSyrupAvailableLabel => ' iron folic acid syrup available at home?';
+  String get hbycIronFolicSyrupAvailableLabel => 'Iron folic acid syrup available at home?';
 
   @override
   String get hbycIsChildSickLabel => 'Whether child is sick?';
@@ -1384,7 +1384,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hbycVitaminADosageGivenLabel => 'Vitamin A  given?';
 
   @override
-  String get hbycWeighedByAwwLabel => 'Recording of weight for-age by Anganwadi Worker?';
+  String get hbycWeighedByAwwLabel => 'Recording of weight for-age by Anganwadi Worker';
 
   @override
   String get hbycWeightLessThan3sdLabel => 'Child with <3SD weight-for-length/height referred?';
@@ -2670,7 +2670,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get babyGenderLabel => 'Baby\'s gender ';
 
   @override
-  String get newbornWeightGramLabel => 'Baby\'s weight (1200-4000)gms';
+  String get newbornWeightGramLabel => 'Birth weight (1200-4000)gms';
 
   @override
   String get newbornTemperatureLabel => 'Temperature';
@@ -2757,7 +2757,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get foulDischargeHighFeverLabel => 'Foul smelling discharge and fever 102 degree Fahrenheit (38.9 degree C) *';
 
   @override
-  String get abnormalSpeechOrSeizureLabel => 'Is the mother speaking abnormally or having fits?';
+  String get abnormalSpeechOrSeizureLabel => 'Is mother speaking abnormally or having fits?';
 
   @override
   String get counselingAdviceLabel => 'Counseling / Advise *';
@@ -5317,13 +5317,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eyesSwollenOrPusLabel => 'Are the eyes swollen? Is there pus coming out of the eyes?';
 
   @override
-  String get skinFoldRednessLabel => 'Are there any cracks/redness in the skin fold? (thigh/ Axilla / Buttock)';
+  String get skinFoldRednessLabel => 'Are there any cracks/redness on the skin fold (thigh/ Axilla / Buttock)';
 
   @override
   String get newbornJaundiceLabel => 'Yellowness in skin/ palm/ sole/eyes: Jaudice';
 
   @override
-  String get pusBumpsOrBoilLabel => 'More than ten pus- filled pustules or large boil';
+  String get pusBumpsOrBoilLabel => 'More than ten pus- filled pustules or a large boil';
 
   @override
   String get pusInNavelLabel => 'Is pus in the navel?';
@@ -6481,7 +6481,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeBasedCareForYoungChild => 'Home Based Care For Young Child';
 
   @override
-  String get hbycHomeVisit => 'HBYC home visit? *';
+  String get hbycHomeVisit => 'HBYC home visit *';
 
   @override
   String get is_referred_to_health_facility => 'Child referred to health facility?';
@@ -6886,16 +6886,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get present => 'Present?';
 
   @override
-  String get hscNameHint => 'HSC';
+  String get hscNameHint => 'HSC Name';
 
   @override
-  String get hscNameLabel => 'HSC';
+  String get hscNameLabel => 'HSC Name';
 
   @override
-  String get hwcNameHint => 'HWC';
+  String get hwcNameHint => 'HWC Name';
 
   @override
-  String get hwcNameLabel => 'HWC';
+  String get hwcNameLabel => 'HWC Name';
 
   @override
   String get moveForward => 'Move forward?';
@@ -7213,7 +7213,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get igree5 => 'confirm that I have duly informed and explained the beneficiary of the contents of consent for the aforementioned purposes.';
 
   @override
-  String get birthDosesTab => 'BIRTH DOSES';
+  String get birthDosesTab => 'Birth Doses';
 
   @override
   String get sixWeekTab => '6 WEEK';

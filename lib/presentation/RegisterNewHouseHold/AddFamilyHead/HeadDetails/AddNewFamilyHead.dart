@@ -742,20 +742,20 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               child: ApiDropdown<String>(
                 labelText: l.categoryLabel,
                 items: const [
-                  'NotDisclosed',
+                  'Not Disclosed',
                   'General',
                   'OBC',
                   'SC',
                   'ST',
-                  'PichdaVarg1',
-                  'PichdaVarg2',
-                  'AtyantPichdaVarg',
-                  'DontKnow',
+                  'Pichda Varg 1',
+                  'Pichda Varg 2',
+                  'Atyant Pichda Varg',
+                  'Do not Know',
                   'Other',
                 ],
                 getLabel: (s) {
                   switch (s) {
-                    case 'NotDisclosed':
+                    case 'Not Disclosed':
                       return l.categoryNotDisclosed;
                     case 'General':
                       return l.categoryGeneral;
@@ -765,13 +765,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       return l.categorySC;
                     case 'ST':
                       return l.categoryST;
-                    case 'PichdaVarg1':
+                    case 'Pichda Varg 1':
                       return l.categoryPichdaVarg1;
-                    case 'PichdaVarg2':
+                    case 'Pichda Varg 2':
                       return l.categoryPichdaVarg2;
-                    case 'AtyantPichdaVarg':
+                    case 'Atyant Pichda Varg':
                       return l.categoryAtyantPichdaVarg;
-                    case 'DontKnow':
+                    case 'Do not Know':
                       return l.categoryDontKnow;
                     case 'Other':
                       return l.religionOther;

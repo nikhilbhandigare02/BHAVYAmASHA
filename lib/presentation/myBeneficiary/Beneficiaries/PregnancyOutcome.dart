@@ -68,18 +68,21 @@ WITH LatestMCA AS (
     ) AS rn
   FROM mother_care_activities mca
   WHERE mca.is_deleted = 0
-    AND mca.current_user_key = ?
+    AND mca.current_user_key = ?          
 ),
+
 DeliveryOutcomeOnly AS (
   SELECT *
   FROM LatestMCA
   WHERE rn = 1
     AND mother_care_state = 'delivery_outcome'
 ),
+
 LatestANC AS (
   SELECT
     f.beneficiary_ref_key,
     f.form_json,
+    f.created_date_time,
     ROW_NUMBER() OVER (
       PARTITION BY f.beneficiary_ref_key
       ORDER BY f.created_date_time DESC, f.id DESC
@@ -87,21 +90,28 @@ LatestANC AS (
   FROM ${FollowupFormDataTable.table} f
   WHERE f.forms_ref_key = ?
     AND f.is_deleted = 0
-    AND f.current_user_key = ?
+    AND f.current_user_key = ?           
 )
+
 SELECT
   d.beneficiary_ref_key,
-  d.household_ref_key,
+  COALESCE(b.household_ref_key, d.household_ref_key) AS household_ref_key,
   d.created_date_time,
   d.id AS form_id,
-  COALESCE(a.form_json, '{}') AS form_json
+  COALESCE(a.form_json, '{}') AS form_json,
+  a.created_date_time AS followup_created_date,
+  b.created_date_time AS beneficiary_created_date
 FROM DeliveryOutcomeOnly d
 LEFT JOIN LatestANC a
   ON a.beneficiary_ref_key = d.beneficiary_ref_key
  AND a.rn = 1
+LEFT JOIN ${BeneficiariesTable.table} b
+  ON b.unique_key = d.beneficiary_ref_key
+  AND (b.is_deleted IS NULL OR b.is_deleted = 0)
+  AND (b.is_death = 0 OR b.is_death IS NULL)
 ORDER BY d.created_date_time DESC
 '''
-      , [ashaUniqueKey, ancRefKey, ashaUniqueKey],
+        , [ashaUniqueKey, ancRefKey, ashaUniqueKey],
       );
 
       if (results.isEmpty) {
@@ -133,7 +143,7 @@ ORDER BY d.created_date_time DESC
               final fallback = await db.query(
                 'beneficiaries_new',
                 where:
-                'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND current_user_key = ?',
+                'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND (is_death = 0 OR is_death IS NULL) AND current_user_key = ?',
                 whereArgs: [beneficiaryRefKey, ashaUniqueKey],
                 limit: 1,
               );
@@ -161,6 +171,12 @@ ORDER BY d.created_date_time DESC
               }
             }
           } catch (_) {}
+
+        // Skip if beneficiary data is not found (likely deceased beneficiary)
+        if (beneficiaryRow == null) {
+          print('⚠️ Skipping beneficiary $beneficiaryRefKey - data not found (likely deceased)');
+          continue;
+        }
 
           final formJsonStr = row['form_json']?.toString() ?? '{}';
           Map<String, dynamic> formJson = {};
