@@ -51,7 +51,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
     if (mounted) {
       setState(() {
         // _appVersion = version;
-        _appVersion = '1.1.1';
+        _appVersion = '1.1.2';
       });
     }
   }
@@ -64,10 +64,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
     try {
       developer.log('Loading user data from secure storage...', name: 'Drawer');
 
-      // Fetch user data
       Map<String, dynamic>? data = await SecureStorageService.getCurrentUserData();
 
-      // If not found, try legacy format
       if (data == null || data.isEmpty) {
         final legacy = await SecureStorageService.getUserData();
         if (legacy != null && legacy.isNotEmpty) {

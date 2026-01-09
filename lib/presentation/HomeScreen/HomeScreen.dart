@@ -346,7 +346,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     householdCount = 0;
     try {
       // Use same logic as AllHouseHold_Screen.dart for household count
-      final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
 
@@ -362,28 +361,76 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         return;
       }
 
-      // Same query as AllHouseHold_Screen.dart
-      final households = await db.rawQuery(
-        '''
-        SELECT h.* FROM households h
-        INNER JOIN beneficiaries_new b ON h.head_id = b.unique_key
-        WHERE h.is_deleted = 0 
-          AND h.current_user_key = ?
-          AND b.current_user_key = ?
-          AND b.is_deleted = 0
-        ORDER BY h.created_date_time DESC
-      ''',
-        [currentUserKey, currentUserKey],
-      );
+      List<Map<String, dynamic>> beneficiaries;
+      try {
+        beneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
+      } catch (_) {
+        beneficiaries = <Map<String, dynamic>>[];
+      }
 
-      final syncedCount = households.where((r) {
-        final s = r['is_synced'];
-        return s == 1 || s == '1';
-      }).length;
+      final households = await LocalStorageDao.instance.getAllHouseholds();
+
+      final familyHeads = beneficiaries.where((r) {
+        try {
+          final householdRefKey = (r['household_ref_key'] ?? '').toString();
+          if (householdRefKey.isEmpty) return false;
+
+          if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
+
+          final rawInfo = r['beneficiary_info'];
+          Map<String, dynamic> info;
+          if (rawInfo is Map) {
+            info = Map<String, dynamic>.from(rawInfo);
+          } else if (rawInfo is String && rawInfo.isNotEmpty) {
+            info = Map<String, dynamic>.from(jsonDecode(rawInfo));
+          } else {
+            info = {};
+          }
+
+          return info['isFamilyHead'] == true ||
+              info['isFamilyHead']?.toString().toLowerCase() == 'true';
+        } catch (_) {
+          return false;
+        }
+      }).toList();
+
+      final int computedTotal;
+      final int syncedCount;
+
+      if (familyHeads.isNotEmpty) {
+        final householdKeys = familyHeads
+            .map((e) => (e['household_ref_key'] ?? '').toString())
+            .where((e) => e.isNotEmpty)
+            .toSet();
+
+        computedTotal = householdKeys.length;
+
+        final householdByKey = <String, Map<String, dynamic>>{};
+        for (final hh in households) {
+          final k = (hh['unique_key'] ?? '').toString();
+          if (k.isEmpty) continue;
+          householdByKey[k] = hh;
+        }
+
+        int synced = 0;
+        for (final k in householdKeys) {
+          final hh = householdByKey[k];
+          if (hh == null) continue;
+          final s = hh['is_synced'];
+          if (s == 1 || s == '1') synced++;
+        }
+        syncedCount = synced;
+      } else {
+        computedTotal = households.length;
+        syncedCount = households.where((r) {
+          final s = r['is_synced'];
+          return s == 1 || s == '1';
+        }).length;
+      }
 
       if (mounted) {
         setState(() {
-          householdCount = households.length;
+          householdCount = computedTotal;
           Constant.householdTotal = householdCount;
           Constant.householdTotalSync = syncedCount;
         });

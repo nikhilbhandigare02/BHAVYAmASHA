@@ -66,6 +66,11 @@ class _TodayworkState extends State<Todaywork> {
       // Save counts to storage now that all data is loaded
       await _saveTodayWorkCountsToStorage();
 
+      // Initialize bloc with the loaded counts
+      if (mounted && _bloc != null) {
+        _loadCountsFromStorage(_bloc);
+      }
+
       // Trigger a rebuild to ensure UI is updated
       if (mounted) {
         setState(() {});
@@ -1422,8 +1427,10 @@ class _TodayworkState extends State<Todaywork> {
   }
 
   Future<void> _refreshData() async {
+    // Reset bloc to loading state
     _bloc.add(const TwLoad(toDo: 0, completed: 0));
-    await _loadCountsFromStorage(_bloc);
+    // Reload all data
+    await _loadData();
   }
 
   late TodaysWorkBloc _bloc;
@@ -1435,8 +1442,8 @@ class _TodayworkState extends State<Todaywork> {
       onRefresh: _refreshData,
       child: BlocProvider(
         create: (_) {
-          _bloc = TodaysWorkBloc()..add(const TwLoad(toDo: 0, completed: 0));
-          _loadCountsFromStorage(_bloc);
+          _bloc = TodaysWorkBloc();
+          // Don't load counts here, let _loadData handle it
           return _bloc;
         },
         child: Scaffold(

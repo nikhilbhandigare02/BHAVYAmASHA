@@ -50,315 +50,391 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     try {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      // Get all child beneficiaries (same logic as RoutineScreen)
-      final List<Map<String, dynamic>> rows = await db.rawQuery(
-        '''
-        SELECT 
-          B.*
-        FROM beneficiaries_new B
-        WHERE 
-          B.is_deleted = 0
-          AND B.is_adult = 0
-          AND B.is_migrated = 0
-          AND B.current_user_key = ?
-        ORDER BY B.created_date_time DESC
-      ''',
-        [ashaUniqueKey],
+      // First, get all beneficiary_ref_keys from child_care_activities where child_care_state = 'tracking_due'
+      final childCareActivities = await db.query(
+        'child_care_activities',
+        where: 'child_care_state = ? AND is_deleted = 0',
+        whereArgs: ['tracking_due'],
+        columns: ['beneficiary_ref_key'],
+        orderBy: 'created_date_time DESC',
       );
 
-      // Get last visit dates from child_care_activities (same logic as RoutineScreen)
-      final lastVisitDates = <String, String>{};
-      final childCareRecords = await db.rawQuery('''
-        SELECT 
-          beneficiary_ref_key, 
-          created_date_time,
-          child_care_state
-        FROM child_care_activities 
-        ORDER BY created_date_time DESC
-      ''');
+      if (childCareActivities.isEmpty) {
+        debugPrint('No child care activities found with state: tracking_due');
+        setState(() {
+          _childTrackingList = [];
+          _filtered = [];
+          _isLoading = false;
+        });
+        return;
+      }
 
-      final Map<String, Map<String, dynamic>> latestRecordsByBeneficiary = {};
-      for (var record in childCareRecords) {
-        final beneficiaryKey = record['beneficiary_ref_key']?.toString();
-        if (beneficiaryKey != null &&
-            !latestRecordsByBeneficiary.containsKey(beneficiaryKey)) {
-          latestRecordsByBeneficiary[beneficiaryKey] = record;
+      final beneficiaryRefKeys = childCareActivities
+          .map((e) => e['beneficiary_ref_key'] as String?)
+          .where((key) => key != null && key.isNotEmpty)
+          .toSet()
+          .toList();
+
+      debugPrint('Found ${beneficiaryRefKeys.length} beneficiaries with tracking_due state');
+
+      List<Map<String, dynamic>> results = [];
+
+      if (beneficiaryRefKeys.isNotEmpty) {
+        try {
+          String whereClause = 'beneficiary_ref_key IN (${List.filled(beneficiaryRefKeys.length, '?').join(',')}) ';
+          List<Object?> whereArgs = [...beneficiaryRefKeys];
+
+          /* whereClause += 'AND (form_json LIKE ? OR forms_ref_key = ?) ';
+          whereArgs.addAll(['%child_registration_due_form%', '30bycxe4gv7fqnt6']);
+
+          whereClause += 'AND id IN (SELECT MAX(id) FROM ${FollowupFormDataTable.table} WHERE beneficiary_ref_key IN (${List.filled(beneficiaryRefKeys.length, '?').join(',')}) GROUP BY beneficiary_ref_key)';
+          whereArgs.addAll(beneficiaryRefKeys);*/
+
+          debugPrint('Executing query with whereClause: $whereClause');
+          debugPrint('Query args: $whereArgs');
+
+          results = await db.query(
+            FollowupFormDataTable.table,
+            where: whereClause,
+            whereArgs: whereArgs,
+            orderBy: 'id DESC',
+          );
+        } catch (e) {
+          debugPrint('Error querying followup_form_data: $e');
+          results = [];
         }
       }
 
-      // Extract latest dates from records
-      for (var entry in latestRecordsByBeneficiary.entries) {
-        final beneficiaryKey = entry.key;
-        final record = entry.value;
-        final createdDate = record['created_date_time']?.toString();
-        if (createdDate != null) {
-          lastVisitDates[beneficiaryKey] = createdDate;
-        }
-      }
+      debugPrint('\n🔍 Found ${results.length} child registration/tracking records after filtering');
 
-      final List<Map<String, dynamic>> items = [];
+      final List<Map<String, dynamic>> childTrackingList = [];
       final Set<String> seenBeneficiaries = <String>{};
 
-      for (final row in rows) {
+      for (final row in results) {
         try {
-          final beneficiaryRefKey = row['unique_key']?.toString() ?? '';
-
-          if (beneficiaryRefKey.isEmpty) continue;
-          if (seenBeneficiaries.contains(beneficiaryRefKey)) continue;
-          seenBeneficiaries.add(beneficiaryRefKey);
-
-          // Get beneficiary info
-          final info = row['beneficiary_info'] is String
-              ? jsonDecode(row['beneficiary_info'] as String)
-              : row['beneficiary_info'];
-
-          if (info is! Map) continue;
-
-          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
-          final relation = info['relation']?.toString().toLowerCase() ?? '';
-
-          // Only include children
-          if (!(memberType == 'child' ||
-              relation == 'child' ||
-              memberType == 'Child' ||
-              relation == 'daughter')) {
+          final formJson = row['form_json'] as String?;
+          if (formJson == null || formJson.isEmpty) {
+            debugPrint('Skipping row with empty form_json');
             continue;
           }
 
-          // Check if child has tracking_due status in child_care_activities
-          final hasTrackingDue = await _hasTrackingDueStatus(beneficiaryRefKey);
-          if (!hasTrackingDue) {
+
+          final beneficiaryRefKey = row['beneficiary_ref_key']?.toString() ?? '';
+          if (beneficiaryRefKey.isEmpty) {
+            debugPrint('Skipping row with empty beneficiary_ref_key');
             continue;
           }
 
-          // Check for case closure (deceased)
-          String ccWhere =
-              'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0';
-          List<dynamic> ccArgs = [beneficiaryRefKey, '%case_closure%'];
-
-          if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-            ccWhere += ' AND current_user_key = ?';
-            ccArgs.add(ashaUniqueKey);
-          }
-
-          final caseClosureRecords = await db.query(
-            FollowupFormDataTable.table,
-            where: ccWhere,
-            whereArgs: ccArgs,
+          final beneficiary = await db.query(
+            'beneficiaries_new',
+            where: 'unique_key = ? AND (is_death IS NULL OR is_death = 0) AND current_user_key = ?',
+            whereArgs: [beneficiaryRefKey, ashaUniqueKey],
+            limit: 1,
           );
 
-          if (caseClosureRecords.isNotEmpty) {
-            bool hasCaseClosure = false;
-            for (final ccRecord in caseClosureRecords) {
-              try {
-                final ccFormJson = ccRecord['form_json'] as String?;
-                if (ccFormJson != null) {
-                  final ccDecoded = jsonDecode(ccFormJson);
-                  final ccFormDataMap =
-                      ccDecoded['form_data'] as Map<String, dynamic>? ?? {};
-                  final caseClosure =
-                      ccFormDataMap['case_closure'] as Map<String, dynamic>? ??
-                      {};
-                  if (caseClosure['is_case_closure'] == true) {
-                    hasCaseClosure = true;
-                    break;
+          if (beneficiary.isEmpty) {
+            debugPrint('Skipping deceased or non-existent beneficiary: $beneficiaryRefKey');
+            continue;
+          }
+
+          debugPrint('Processing form_json: ${formJson.substring(0, formJson.length > 100 ? 100 : formJson.length)}...');
+
+          final formData = jsonDecode(formJson);
+          String formType = '';
+          final formsRefKey = row['forms_ref_key']?.toString() ?? '';
+
+          if (formData['form_type'] != null) {
+            formType = formData['form_type'].toString();
+          }
+          else if (formData['child_registration_due_form'] is Map) {
+            formType = 'child_registration_due';
+          }
+          // Try to get form type from the first key if it's a map
+          else if (formData is Map && formData.isNotEmpty) {
+            final firstKey = formData.keys.first;
+            if (firstKey.toString().contains('child_registration') ||
+                firstKey.toString().contains('child_tracking')) {
+              formType = firstKey.toString();
+            }
+          }
+
+          debugPrint('Form type found: $formType');
+          debugPrint('Forms ref key: $formsRefKey');
+          debugPrint('Form data keys: ${formData.keys.join(', ')}');
+
+          final isChildRegistration = formType == FollowupFormDataTable.childRegistrationDue ||
+              formType == 'child_registration_due';
+
+          final isChildTracking = formsRefKey == '30bycxe4gv7fqnt6' ||
+              formType == FollowupFormDataTable.childTrackingDue ||
+              formType == 'child_tracking_due';
+
+          if (!isChildRegistration && !isChildTracking) {
+            debugPrint('Skipping form with type: $formType and ref key: $formsRefKey');
+            continue;
+          }
+
+          debugPrint('Raw form data structure:');
+          formData.forEach((key, value) {
+            debugPrint('  $key: $value (${value.runtimeType})');
+          });
+
+          Map<String, dynamic> formDataMap = {};
+
+          if (formData['form_data'] is String) {
+            try {
+              debugPrint('Parsing form_data as JSON string');
+              formDataMap = jsonDecode(formData['form_data']);
+            } catch (e) {
+              debugPrint('Error parsing form_data JSON: $e');
+            }
+          }
+          // Case 2: form_data is already a Map
+          else if (formData['form_data'] is Map) {
+            formDataMap = Map<String, dynamic>.from(formData['form_data'] as Map);
+          }
+          // Case 3: Direct fields (legacy)
+          else if (formData.containsKey('child_name')) {
+            formDataMap = Map<String, dynamic>.from(formData);
+          }
+          // Case 4: Nested under formData
+          else if (formData['formData'] is Map) {
+            formDataMap = Map<String, dynamic>.from(formData['formData'] as Map);
+          }
+
+          // Debug print the form data map
+          debugPrint('Processed form data map:');
+          formDataMap.forEach((key, value) {
+            debugPrint('  $key: $value (${value.runtimeType})');
+          });
+
+          // If we still don't have data, try to get it from the form_json field
+          if (row['form_json'] != null) {
+            try {
+              final formJson = jsonDecode(row['form_json'] as String);
+              debugPrint('Raw form_json content: $formJson');
+
+              if (formJson is Map && formJson.isNotEmpty) {
+                if (formJson['child_registration_due_form'] is Map) {
+                  formDataMap = Map<String, dynamic>.from(formJson['child_registration_due_form']);
+                  debugPrint('Extracted data from child_registration_due_form');
+                }
+                else {
+                  final firstKey = formJson.keys.first;
+                  if (firstKey != null && formJson[firstKey] is Map) {
+                    formDataMap = Map<String, dynamic>.from(formJson[firstKey]);
+                    debugPrint('Extracted data from key: $firstKey');
                   }
                 }
-              } catch (_) {}
-            }
 
-            if (hasCaseClosure) {
-              continue;
+                // Debug print the extracted data
+                debugPrint('Extracted form data:');
+                formDataMap.forEach((key, value) {
+                  debugPrint('  $key: $value (${value.runtimeType})');
+                });
+              }
+            } catch (e) {
+              debugPrint('Error parsing form_json: $e');
+              debugPrint('Raw form_json string: ${row['form_json']}');
             }
           }
 
-          // Extract child information
-          final name =
-              info['name']?.toString() ??
-              info['memberName']?.toString() ??
-              info['member_name']?.toString() ??
-              '';
+          // Extract fields with null safety
+          final formTypeInData = formDataMap['form_type']?.toString() ?? formType;
 
-          final mobileNo =
-              info['mobileNo']?.toString() ??
-              info['mobile']?.toString() ??
-              info['mobile_number']?.toString() ??
-              '';
+          // Extract fields with null safety - using the correct field names from the form data
+          final childName = formDataMap['name_of_child']?.toString()?.trim() ??
+              formDataMap['child_name']?.toString()?.trim() ?? '';
 
-          final richId =
-              info['RichIDChanged']?.toString() ??
-              info['richIdChanged']?.toString() ??
-              info['richId']?.toString() ??
-              '';
+          final motherName = formDataMap['mother_name']?.toString()?.trim() ?? '';
+          final fatherName = formDataMap['father_name']?.toString()?.trim() ?? '';
+          final rchId = formDataMap['child_rch_id']?.toString()?.trim() ??
+              formDataMap['rch_id_child']?.toString()?.trim() ?? '';
 
-          final dob =
-              info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
-          final gender = info['gender'] ?? info['sex'];
+          final mobileNumber = formDataMap['mob_no']?.toString()?.trim() ??
+              formDataMap['mobile_number']?.toString()?.trim() ?? '';
 
-          // Calculate age using same logic as RegisterChildListScreen
-          String ageText = _formatAgeOnly(dob);
-          final genderRaw = gender?.toString().toLowerCase() ?? '';
-          String displayGender;
-          switch (genderRaw) {
-            case 'm':
-            case 'male':
-              displayGender = 'Male';
-              break;
-            case 'f':
-            case 'female':
-              displayGender = 'Female';
-              break;
-            default:
-              displayGender = 'Other';
+          final address = formDataMap['address']?.toString()?.trim() ?? '';
+
+          // Handle different possible weight fields
+          final weightGrams = formDataMap['weight']?.toString()?.trim() ??
+              formDataMap['weight_grams']?.toString()?.trim() ?? '';
+
+          String dateOfBirth = formDataMap['dob']?.toString() ??
+              formDataMap['date_of_birth']?.toString() ?? '';
+          if (dateOfBirth.isEmpty) {
+            final dd = formDataMap['dob_day']?.toString();
+            final mm = formDataMap['dob_month']?.toString();
+            final yy = formDataMap['dob_year']?.toString();
+            if ((dd != null && dd.isNotEmpty) &&
+                (mm != null && mm.isNotEmpty) &&
+                (yy != null && yy.isNotEmpty)) {
+              final d = int.tryParse(dd);
+              final m = int.tryParse(mm);
+              final y = int.tryParse(yy);
+              if (d != null && m != null && y != null) {
+                dateOfBirth = DateTime(y, m, d).toIso8601String();
+              }
+            }
           }
 
-          // Get last visit date from child_care_activities (same logic as RoutineScreen)
-          String lastVisitDate;
-          if (lastVisitDates.containsKey(beneficiaryRefKey)) {
-            lastVisitDate = _formatDateFromString(
-              lastVisitDates[beneficiaryRefKey],
+          // Handle different possible gender fields and child_details fallback
+          final genderPrimary = (formDataMap['sex'] ?? formDataMap['gender'] ?? '').toString();
+          final childDetails = formDataMap['child_details'] is Map
+              ? Map<String, dynamic>.from(formDataMap['child_details'])
+              : <String, dynamic>{};
+          final genderBackup = (childDetails['gender'] ?? '').toString();
+          final ageBackup = (childDetails['age'] ?? '').toString();
+          final gender = genderPrimary.isNotEmpty ? genderPrimary : genderBackup;
+
+
+          // If we still don't have a name, log all form data before skipping
+          if (childName.isEmpty) {
+            debugPrint('❌ Skipping record with empty child name. Complete form data:');
+            formData.forEach((key, value) {
+              debugPrint('    $key: $value');
+            });
+            debugPrint('Processed form data map:');
+            formDataMap.forEach((key, value) {
+              debugPrint('    $key: $value');
+            });
+
+            // Try to find any field that might contain the name
+            final nameFields = formDataMap.entries
+                .where((entry) => entry.key.toString().toLowerCase().contains('name') ||
+                entry.key.toString().toLowerCase().contains('child'))
+                .toList();
+
+            if (nameFields.isNotEmpty) {
+              debugPrint('Potential name fields found:');
+              for (var field in nameFields) {
+                debugPrint('    ${field.key}: ${field.value}');
+              }
+            } else {
+              debugPrint('No name-like fields found in the form data');
+            }
+
+            continue;
+          }
+
+          // De-duplicate on beneficiary_ref_key so each child appears only once
+          if (beneficiaryRefKey.isNotEmpty && seenBeneficiaries.contains(beneficiaryRefKey)) {
+            debugPrint('⏭️ Skipping duplicate record for beneficiary: $beneficiaryRefKey');
+            continue;
+          }
+          if (beneficiaryRefKey.isNotEmpty) {
+            seenBeneficiaries.add(beneficiaryRefKey);
+          }
+
+          if (beneficiaryRefKey.isNotEmpty) {
+            final caseClosureWhere = (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
+                ? 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0 AND current_user_key = ?'
+                : 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0';
+            final caseClosureArgs = (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
+                ? [beneficiaryRefKey, '%case_closure%', ashaUniqueKey]
+                : [beneficiaryRefKey, '%case_closure%'];
+            final caseClosureRecords = await db.query(
+              FollowupFormDataTable.table,
+              where: caseClosureWhere,
+              whereArgs: caseClosureArgs,
             );
-          } else {
-            lastVisitDate = 'Not Available';
+
+            if (caseClosureRecords.isNotEmpty) {
+              // Check if any of these records have case_closure with is_case_closure = true
+              bool hasCaseClosure = false;
+              for (final ccRecord in caseClosureRecords) {
+                try {
+                  final ccFormJson = ccRecord['form_json'] as String?;
+                  if (ccFormJson != null) {
+                    final ccFormData = jsonDecode(ccFormJson);
+                    final ccFormDataMap = ccFormData['form_data'] as Map<String, dynamic>? ?? {};
+                    final caseClosure = ccFormDataMap['case_closure'] as Map<String, dynamic>? ?? {};
+                    if (caseClosure['is_case_closure'] == true) {
+                      hasCaseClosure = true;
+                      break;
+                    }
+                  }
+                } catch (e) {
+                  debugPrint('Error checking case closure: $e');
+                }
+              }
+
+              if (hasCaseClosure) {
+                debugPrint('⏭️ Skipping child $childName - case closure already recorded');
+                continue;
+              }
+            }
           }
 
-          final hhId = row['household_ref_key']?.toString() ?? '';
+          // Format registration date
+          final registrationDate = row['created_date_time'] != null
+              ? _formatDate(row['created_date_time'].toString())
+              : 'N/A';
 
-          items.add({
-            'id': _last11(beneficiaryRefKey),
-            'household_ref_key': hhId,
-            'hhId': hhId,
-            'BeneficiaryID': beneficiaryRefKey,
-            'RchID': richId,
-            'Name': name,
-            'Age|Gender': '$ageText | $displayGender',
-            'Mobileno.': mobileNo.isNotEmpty ? mobileNo : '-',
-            'RegitrationDate': lastVisitDate,
+          String _normalizeGender(String g) {
+            final s = g.toLowerCase().trim();
+            if (s == 'm' || s == 'male' || s == 'boy' || s == 'b' || s == '1') return 'Male';
+            if (s == 'f' || s == 'female' || s == 'girl' || s == 'g' || s == '2') return 'Female';
+            if (s == 'other' || s == 'o' || s == '3') return 'Other';
+            return 'Other';
+          }
+
+          final ageGenderDisplay = dateOfBirth.isNotEmpty
+              ? _formatAgeGender(dateOfBirth, gender)
+              : (ageBackup.isNotEmpty
+              ? '${ageBackup} | ${_normalizeGender(gender)}'
+              : _formatAgeGender(dateOfBirth, gender));
+          final cleanedAgeGenderDisplay = ageGenderDisplay.contains(' | Other')
+              ? ageGenderDisplay.replaceAll(' | Other', '').trim()
+              : ageGenderDisplay;
+
+          // Create child data map matching the form structure
+          final childData = {
+            'hhId': row['household_ref_key']?.toString() ?? 'N/A',
+            'RegitrationDate': registrationDate,
             'RegitrationType': 'Child Registration',
-            'FatherName': '',
-            'MotherName': '',
-            'Address': '',
-            'Weight': '',
-            'is_synced': 0,
-            'formData': {},
-          });
+            'BeneficiaryID': beneficiaryRefKey,
+            'RchID': rchId,
+            'Name': childName,
+            'Age|Gender': cleanedAgeGenderDisplay,
+            'Mobileno.': mobileNumber,
+            'FatherName': fatherName,
+            'MotherName': motherName,
+            'Address': address,
+            'Weight': weightGrams,
+            'is_synced': row['is_synced'] ?? 0, // Ensure we have a default value of 0 if null
+            'formData': formData, // Store the complete form data
+          };
+
+          debugPrint('Sync status for ${childData['Name']}: ${childData['is_synced']} (type: ${childData['is_synced'].runtimeType})');
+          childTrackingList.add(childData);
+          debugPrint('✅ Successfully added child: $childName');
         } catch (e) {
-          print('⚠️ Error processing beneficiary record: $e');
+          debugPrint('❌ Error processing child registration record: $e');
           continue;
         }
       }
 
-      debugPrint('📊 Total child records processed: ${items.length}');
+      debugPrint('📊 Total child records processed: ${childTrackingList.length}');
 
       if (mounted) {
         setState(() {
-          _childTrackingList = items;
-          _filtered = List<Map<String, dynamic>>.from(items);
+          _childTrackingList = childTrackingList;
+          _filtered = List<Map<String, dynamic>>.from(childTrackingList);
           _isLoading = false;
         });
       }
     } catch (e) {
-      debugPrint('Error loading child tracking data: $e');
+      debugPrint('Error loading child registration data: $e');
       if (mounted) {
         setState(() {
-          _errorMessage = 'Failed to load child tracking data. Please try again.';
+          _errorMessage = 'Failed to load child registration data. Please try again.';
           _isLoading = false;
         });
       }
     }
-  }
-
-  String _last11(String? input) {
-    if (input == null || input.isEmpty) return '-';
-    return input.length <= 11 ? input : input.substring(input.length - 11);
-  }
-
-  Future<bool> _hasTrackingDueStatus(String beneficiaryRefKey) async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-      final rows = await db.query(
-        'child_care_activities',
-        where:
-            'beneficiary_ref_key = ? AND child_care_state = ? AND is_deleted = 0',
-        whereArgs: [beneficiaryRefKey, 'tracking_due'],
-        limit: 1,
-      );
-      return rows.isNotEmpty;
-    } catch (e) {
-      print('Error checking tracking_due status for $beneficiaryRefKey: $e');
-      return false;
-    }
-  }
-
-  String _formatDateFromString(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return 'Not Available';
-    try {
-      final date = DateTime.parse(dateStr);
-      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
-    } catch (e) {
-      return dateStr;
-    }
-  }
-
-  String _formatAgeOnly(dynamic dobRaw) {
-    String age = 'Not Available';
-
-    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
-      try {
-        String dateStr = dobRaw.toString();
-        DateTime? dob;
-
-        dob = DateTime.tryParse(dateStr);
-
-        if (dob == null) {
-          final timestamp = int.tryParse(dateStr);
-          if (timestamp != null && timestamp > 0) {
-            dob = DateTime.fromMillisecondsSinceEpoch(
-              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
-              isUtc: true,
-            );
-          }
-        }
-
-        if (dob != null) {
-          final now = DateTime.now();
-          int years = now.year - dob.year;
-          int months = now.month - dob.month;
-          int days = now.day - dob.day;
-
-          if (days < 0) {
-            final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
-            final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
-            final daysInLastMonth = DateTime(
-              lastMonthYear,
-              lastMonth + 1,
-              0,
-            ).day;
-            days += daysInLastMonth;
-            months--;
-          }
-
-          if (months < 0) {
-            months += 12;
-            years--;
-          }
-
-          if (years > 0) {
-            age = '$years Y';
-          } else if (months > 0) {
-            age = '$months M';
-          } else {
-            age = '$days D';
-          }
-        }
-      } catch (e) {
-        debugPrint('Error parsing date of birth: $e');
-      }
-    }
-
-    return age;
   }
 
   String _formatDate(String? dateStr) {
@@ -463,14 +539,14 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
   Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
     try {
       final db = await DatabaseProvider.instance.database;
-      
+
       // First try to get the latest record from followup_form_data
       final formRows = await db.query(
         FollowupFormDataTable.table,
         columns: ['is_synced', 'server_id', 'created_date_time'],
         where: 'beneficiary_ref_key = ? AND (forms_ref_key = ? OR form_json LIKE ?) AND is_deleted = 0',
         whereArgs: [
-          beneficiaryRefKey, 
+          beneficiaryRefKey,
           FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.childTrackingDue],
           '%${FollowupFormDataTable.childTrackingDue}%'
         ],
@@ -636,7 +712,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
             child: _filtered.isEmpty
                 ? Center(
               child: Text(
-                l10n!.no_ChildrenFound,
+                'No children found',
                 style: TextStyle(
                   fontSize: 16.sp,
                   color: Colors.grey[600],
@@ -701,7 +777,6 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           // Now we use childRegistrationMap which holds the correct data regardless of structure
           'weight_grams': childRegistrationMap['weight_grams']?.toString() ?? '',
           'birth_weight_grams': childRegistrationMap['birth_weight_grams']?.toString() ?? '',
-          'date_of_birth': childRegistrationMap['date_of_birth']?.toString() ?? '',
         };
 
         debugPrint('Complete form data to pass:');
@@ -722,10 +797,10 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
           // Always reload data to reflect the latest state from the database
           // This ensures that if case closure wasn't selected, the card remains visible
           _loadChildTrackingData();
-          
+
           if (result is Map && result['saved'] == true) {
-             // Optional: You can show a message here if needed, but the form already shows one
-             debugPrint('✅ Form saved, reloading list...');
+            // Optional: You can show a message here if needed, but the form already shows one
+            debugPrint('✅ Form saved, reloading list...');
           }
         });
       },
@@ -778,7 +853,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                       return Image.asset(
                         'assets/images/sync.png',
                         width: 25,
-                        color: isSynced 
+                        color: isSynced
                             ? null
                             : Colors.grey[500],
                       );
