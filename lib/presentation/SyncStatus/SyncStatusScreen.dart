@@ -213,14 +213,14 @@ sfgfdd
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         // Followup total
         final followupTotalResult = await db.rawQuery(
-          'SELECT COUNT(*) as count FROM followup_form_data WHERE is_deleted = 0 AND current_user_key = ?',
+          'SELECT COUNT(*) as count FROM followup_form_data WHERE current_user_key = ?',
           [ashaUniqueKey],
         );
         _followupTotal = followupTotalResult.first['count'] as int? ?? 0;
 
         // Followup synced
         final followupSyncedResult = await db.rawQuery(
-          'SELECT COUNT(*) as count FROM followup_form_data WHERE is_deleted = 0 AND is_synced = 1 AND current_user_key = ?',
+          'SELECT COUNT(*) as count FROM followup_form_data WHERE is_synced = 1 AND current_user_key = ?',
           [ashaUniqueKey],
         );
         _followupSynced = followupSyncedResult.first['count'] as int? ?? 0;

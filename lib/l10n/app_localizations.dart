@@ -13700,7 +13700,7 @@ abstract class AppLocalizations {
   /// No description provided for @badgeLBW.
   ///
   /// In en, this message translates to:
-  /// **'LBW referred'**
+  /// **'LBW Referred'**
   String get badgeLBW;
 
   /// No description provided for @badgeMigrated.

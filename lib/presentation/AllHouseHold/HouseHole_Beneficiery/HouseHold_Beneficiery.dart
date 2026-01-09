@@ -804,10 +804,8 @@ class _HouseHold_BeneficiaryScreenState
                     ],
                   ),
                   const SizedBox(height: 10),
-                  // Third row: Show fields sequentially, filling empty spaces
                   Row(
                     children: [
-                      // First available field: Mobile number for children and females
                       if ((isChild || isFemale) && data['Mobileno.']?.toString().isNotEmpty == true)
                         Expanded(
                           child: _rowText(
@@ -875,6 +873,8 @@ class _HouseHold_BeneficiaryScreenState
                         data['FatherName']?.toString() ?? (l10n?.na ?? 'Not Available'),
                       ),
                     ),
+                    
+
                 ],
               ),
             ),

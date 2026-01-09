@@ -439,7 +439,7 @@ class _UpdatedEligibleCoupleListScreenState
                       const SizedBox(width: 12),
                       Expanded(child: _rowText(t?.ageLabelSimple ?? 'Age', data['age']?.toString() ?? '')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText(t?.richIdLabel ?? 'Rich ID', data['RichID']?.toString() ?? "${t?.na}")),
+                      Expanded(child: _rowText(t?.richIdLabel ?? 'Rich ID', data['RichID']?.toString() ?? "${t!.na}")),
                     ],
                   ),
                   const SizedBox(height: 10),

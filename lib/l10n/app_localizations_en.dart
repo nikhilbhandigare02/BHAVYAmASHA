@@ -6826,7 +6826,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get badgePNC => 'PNC';
 
   @override
-  String get badgeLBW => 'LBW referred';
+  String get badgeLBW => 'LBW Referred';
 
   @override
   String get badgeMigrated => 'Migrated';

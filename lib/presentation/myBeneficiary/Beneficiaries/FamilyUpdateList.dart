@@ -706,6 +706,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
   }
 
   Widget _infoRow(String? title, String value,{bool isWrappable = false}) {
+    final t = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -720,7 +721,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           ),
           Expanded(
             child: Text(
-              value.isEmpty ? 'N/A' : value,
+              value.isEmpty ? "${t?.na}" : value,
               style:  TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w400,
