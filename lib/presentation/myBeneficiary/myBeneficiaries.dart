@@ -413,15 +413,15 @@ ORDER BY d.created_date_time DESC
       ''';
 
       final rows = await db.rawQuery(query, [ashaUniqueKey]);
-      
+
       int count = 0;
       for (final row in rows) {
         try {
           final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
-          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty 
+          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty
               ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfo))
               : <String, dynamic>{};
-          
+
           final memberType = info['memberType']?.toString().toLowerCase() ?? '';
           if (memberType != 'child') {
             count++;
@@ -430,7 +430,7 @@ ORDER BY d.created_date_time DESC
           count++;
         }
       }
-      
+
       return count;
     } catch (e) {
       return 0;
@@ -674,7 +674,7 @@ ORDER BY d.created_date_time DESC
         count: isLoading ? 0 : guestBeneficiaryCount,
       ),
     ];
-    
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppHeader(screenTitle: l10n.myBeneficiariesTitle, showBack: true,),
@@ -706,9 +706,9 @@ ORDER BY d.created_date_time DESC
                 case 5:
                   Navigator.pushNamed(context, Route_Names.Lbwrefered);
                   break;
-                 case 6:
+                case 6:
                   Navigator.pushNamed(context, Route_Names.Abortionlist);
-                   break;
+                  break;
                 case 7:
                   Navigator.pushNamed(context, Route_Names.DeathRegister);
                   break;

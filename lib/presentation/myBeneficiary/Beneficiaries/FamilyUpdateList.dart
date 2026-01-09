@@ -292,32 +292,32 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
               : <String, dynamic>{};
 
           final String headName = (head['name_of_family_head'] ??
-                  head['head_name'] ??
-                  hhInfo['head_name'] ??
-                  '')
+              head['head_name'] ??
+              hhInfo['head_name'] ??
+              '')
               .toString();
 
           final String mobile = (head['mobile_no_of_family_head'] ??
-                  head['mobileNo'] ??
-                  head['mobile_no'] ??
-                  '')
+              head['mobileNo'] ??
+              head['mobile_no'] ??
+              '')
               .toString();
 
           final dynamic houseNo =
               head['house_no'] ?? hhInfo['house_no'] ?? hhInfo['houseNo'] ?? 0;
 
           final mohalla = (head['mohalla_name'] ??
-                  head['mohalla'] ??
-                  hhInfo['mohalla_name'] ??
-                  hhInfo['mohalla'] ??
-                  '')
+              head['mohalla'] ??
+              hhInfo['mohalla_name'] ??
+              hhInfo['mohalla'] ??
+              '')
               .toString();
 
           final tola = (head['mohalla_tola'] ??
-                  head['tola'] ??
-                  hhInfo['mohalla_tola'] ??
-                  hhInfo['tola'] ??
-                  '')
+              head['tola'] ??
+              hhInfo['mohalla_tola'] ??
+              hhInfo['tola'] ??
+              '')
               .toString();
 
           final displayId = hhRefKey.length > 11
@@ -426,10 +426,10 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
               }
 
               final pname = (bi['headName'] ??
-                      bi['name'] ??
-                      bi['memberName'] ??
-                      bi['member_name'] ??
-                      '')
+                  bi['name'] ??
+                  bi['memberName'] ??
+                  bi['member_name'] ??
+                  '')
                   .toString()
                   .trim()
                   .toLowerCase();
@@ -441,7 +441,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
 
           totalExpectedChildren = childrenCounts.fold(
             0,
-            (sum, count) => sum + count,
+                (sum, count) => sum + count,
           );
 
           int recordedChildren = 0;
@@ -488,8 +488,8 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
 
           return {
             'name':
-                (info['headName'] ?? info['memberName'] ?? info['name'] ?? '')
-                    .toString(),
+            (info['headName'] ?? info['memberName'] ?? info['name'] ?? '')
+                .toString(),
             'mobile': (info['mobileNo'] ?? '').toString(),
             'hhId': headId,
             'houseNo': info['houseNo'] ?? 0,
@@ -500,7 +500,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
             'elderly': elderlyCountMap[householdRefKey] ?? 0,
             'pregnantWomen': ancDueCountMap[householdRefKey] ?? 0,
             'eligibleCouples':
-                eligibleCoupleTrackingDueCountMap[householdRefKey] ?? 0,
+            eligibleCoupleTrackingDueCountMap[householdRefKey] ?? 0,
             'child0to1': child0to1Map[householdRefKey] ?? 0,
             'child1to2': child1to2Map[householdRefKey] ?? 0,
             'child2to5': child2to5Map[householdRefKey] ?? 0,
@@ -555,40 +555,40 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
       drawer: const CustomDrawer(),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(),
-            )
+        child: CircularProgressIndicator(),
+      )
           : Column(
-              children: [
+        children: [
 
-                Expanded(
-                  child: _filtered.isEmpty
-                      ? Center(
-                          child: Text(
-                            (l10n?.noDataFound ?? 'No data found'),
-                            style: const TextStyle(
-                              color: Colors.black54,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                          itemCount: _filtered.length,
-                          itemBuilder: (context, index) {
-                            final data = _filtered[index];
-                            return _householdCard(context, data);
-                          },
-                        ),
+          Expanded(
+            child: _filtered.isEmpty
+                ? Center(
+              child: Text(
+                (l10n?.noDataFound ?? 'No data found'),
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w600,
                 ),
-              ],
+              ),
+            )
+                : ListView.builder(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              itemCount: _filtered.length,
+              itemBuilder: (context, index) {
+                final data = _filtered[index];
+                return _householdCard(context, data);
+              },
             ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final Color primary = Theme.of(context).primaryColor;
     final l10n = AppLocalizations.of(context);
-    
+
     return InkWell(
       onTap: () async {
         await Navigator.push(
