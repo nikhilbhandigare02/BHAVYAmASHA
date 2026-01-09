@@ -251,40 +251,107 @@ WITH LatestMCA AS (
     ) AS rn
   FROM mother_care_activities mca
   WHERE mca.is_deleted = 0
-    AND mca.current_user_key = ?
+    AND mca.current_user_key = ?          
 ),
+
 DeliveryOutcomeOnly AS (
   SELECT *
   FROM LatestMCA
   WHERE rn = 1
     AND mother_care_state = 'delivery_outcome'
 ),
+
 LatestANC AS (
   SELECT
     f.beneficiary_ref_key,
     f.form_json,
+    f.created_date_time,
     ROW_NUMBER() OVER (
       PARTITION BY f.beneficiary_ref_key
       ORDER BY f.created_date_time DESC, f.id DESC
     ) AS rn
   FROM ${FollowupFormDataTable.table} f
-  WHERE
-    f.forms_ref_key = ?
+  WHERE f.forms_ref_key = ?
     AND f.is_deleted = 0
-    AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%'
-    AND f.current_user_key = ?
+    AND f.current_user_key = ?           
 )
+
 SELECT
-  d.beneficiary_ref_key
+  d.beneficiary_ref_key,
+  COALESCE(b.household_ref_key, d.household_ref_key) AS household_ref_key,
+  d.created_date_time,
+  d.id AS form_id,
+  COALESCE(a.form_json, '{}') AS form_json,
+  a.created_date_time AS followup_created_date,
+  b.created_date_time AS beneficiary_created_date
 FROM DeliveryOutcomeOnly d
 LEFT JOIN LatestANC a
   ON a.beneficiary_ref_key = d.beneficiary_ref_key
  AND a.rn = 1
+LEFT JOIN ${BeneficiariesTable.table} b
+  ON b.unique_key = d.beneficiary_ref_key
+  AND (b.is_deleted IS NULL OR b.is_deleted = 0)
+  AND (b.is_death = 0 OR b.is_death IS NULL)
+ORDER BY d.created_date_time DESC
 ''',
         [ashaUniqueKey, ancRefKey, ashaUniqueKey],
       );
 
-      return results.length;
+      // Process results to filter out deceased beneficiaries (same logic as PregnancyOutcome.dart)
+      int validCount = 0;
+      for (final row in results) {
+        final beneficiaryRefKey = row['beneficiary_ref_key']?.toString();
+        if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
+          continue;
+        }
+
+        Map<String, dynamic>? beneficiaryRow;
+        try {
+          beneficiaryRow = await LocalStorageDao.instance
+              .getBeneficiaryByUniqueKey(beneficiaryRefKey);
+
+          if (beneficiaryRow == null) {
+            final fallback = await db.query(
+              'beneficiaries_new',
+              where:
+              'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND (is_death = 0 OR is_death IS NULL) AND current_user_key = ?',
+              whereArgs: [beneficiaryRefKey, ashaUniqueKey],
+              limit: 1,
+            );
+
+            if (fallback.isNotEmpty) {
+              final legacy = Map<String, dynamic>.from(fallback.first);
+              Map<String, dynamic> info = {};
+              try {
+                final formJson = legacy['form_json'];
+                if (formJson is String && formJson.isNotEmpty) {
+                  final decoded = jsonDecode(formJson);
+                  if (decoded is Map) {
+                    info = Map<String, dynamic>.from(decoded);
+                  }
+                }
+              } catch (_) {}
+
+              beneficiaryRow = {
+                ...legacy,
+                'beneficiary_info': info,
+                'geo_location': {},
+                'death_details': {},
+              };
+            }
+          }
+        } catch (_) {}
+
+        // Skip if beneficiary data is not found (likely deceased beneficiary)
+        if (beneficiaryRow == null) {
+          print('⚠️ Skipping beneficiary $beneficiaryRefKey - data not found (likely deceased)');
+          continue;
+        }
+
+        validCount++;
+      }
+
+      return validCount;
     } catch (_) {
       return 0;
     }
