@@ -1360,7 +1360,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hbycFullyVaccinatedLabel => 'Fully vaccinated as per MCP card?';
 
   @override
-  String get hbycIronFolicSyrupAvailableLabel => ' iron folic acid syrup available at home?';
+  String get hbycIronFolicSyrupAvailableLabel => 'Iron folic acid syrup available at home?';
 
   @override
   String get hbycIsChildSickLabel => 'Whether child is sick?';
@@ -1384,7 +1384,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hbycVitaminADosageGivenLabel => 'Vitamin A  given?';
 
   @override
-  String get hbycWeighedByAwwLabel => 'Recording of weight for-age by Anganwadi Worker?';
+  String get hbycWeighedByAwwLabel => 'Recording of weight for-age by Anganwadi Worker';
 
   @override
   String get hbycWeightLessThan3sdLabel => 'Child with <3SD weight-for-length/height referred?';
@@ -7213,7 +7213,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get igree5 => 'confirm that I have duly informed and explained the beneficiary of the contents of consent for the aforementioned purposes.';
 
   @override
-  String get birthDosesTab => 'BIRTH DOSES';
+  String get birthDosesTab => 'Birth Doses';
 
   @override
   String get sixWeekTab => '6 WEEK';

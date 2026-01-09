@@ -2780,7 +2780,7 @@ abstract class AppLocalizations {
   /// No description provided for @hbycIronFolicSyrupAvailableLabel.
   ///
   /// In en, this message translates to:
-  /// **' iron folic acid syrup available at home?'**
+  /// **'Iron folic acid syrup available at home?'**
   String get hbycIronFolicSyrupAvailableLabel;
 
   /// No description provided for @hbycIsChildSickLabel.
@@ -2828,7 +2828,7 @@ abstract class AppLocalizations {
   /// No description provided for @hbycWeighedByAwwLabel.
   ///
   /// In en, this message translates to:
-  /// **'Recording of weight for-age by Anganwadi Worker?'**
+  /// **'Recording of weight for-age by Anganwadi Worker'**
   String get hbycWeighedByAwwLabel;
 
   /// No description provided for @hbycWeightLessThan3sdLabel.
@@ -14474,7 +14474,7 @@ abstract class AppLocalizations {
   /// No description provided for @birthDosesTab.
   ///
   /// In en, this message translates to:
-  /// **'BIRTH DOSES'**
+  /// **'Birth Doses'**
   String get birthDosesTab;
 
   /// No description provided for @sixWeekTab.
