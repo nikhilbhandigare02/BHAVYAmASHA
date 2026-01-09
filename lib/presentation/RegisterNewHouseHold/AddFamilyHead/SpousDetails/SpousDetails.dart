@@ -357,102 +357,144 @@ class _SpousdetailsState extends State<Spousdetails>
     } else if (widget.syncFromHead) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        final headBloc = context.read<AddFamilyHeadBloc>();
-        final head = headBloc.state;
-        final spBloc = context.read<SpousBloc>();
-        final curr = spBloc.state;
 
-        if (head.gender != null) {
-          final isMale = head.gender == 'Male';
-          final relation = isMale ? 'Wife' : 'Husband';
-          final oppositeGender = isMale ? 'Female' : 'Male';
+        if (widget.isMemberDetails) {
+          final memberBloc = context.read<AddnewfamilymemberBloc>();
+          final member = memberBloc.state;
+          final spBloc = context.read<SpousBloc>();
 
-          spBloc.add(SpUpdateRelation(relation));
-          spBloc.add(SpUpdateGender(oppositeGender));
-        }
-
-        // Only sync names if NOT in edit mode, to prevent overwriting existing data with potentially incorrect Head data
-        if (!widget.isEdit) {
-          final memberName = head.spouseName?.trim() ?? '';
-          final spouseName = head.headName?.trim() ?? '';
-          final currMember = curr.memberName?.trim() ?? '';
-          // Only overwrite existing values when the new value is non-empty.
-          if (memberName.isNotEmpty && memberName != currMember) {
-            spBloc.add(SpUpdateMemberName(memberName));
+          // Sync Gender and Relation
+          if (member.gender != null) {
+            final isMale = member.gender == 'Male';
+            final oppositeGender = isMale ? 'Female' : 'Male';
+            spBloc.add(SpUpdateGender(oppositeGender));
           }
-          final currSpouse = curr.spouseName?.trim() ?? '';
-          if (spouseName.isNotEmpty && spouseName != currSpouse) {
-            spBloc.add(SpUpdateSpouseName(spouseName));
-          }
-        }
 
-        // Auto-fill mobile number if head's mobile is available and mobile owner is 'Family Head'
-        if (head.mobileNo != null && head.mobileNo!.isNotEmpty) {
-          if (widget.headMobileOwner == 'Family Head' ||
-              curr.mobileOwner == 'Family Head') {
-            spBloc.add(SpUpdateMobileNo(head.mobileNo!));
-            spBloc.add(SpUpdateMobileOwner('Family Head'));
-          }
-        }
-
-        final headReligion = head.religion?.trim();
-        if (headReligion != null && headReligion.isNotEmpty) {
-          spBloc.add(SpUpdateReligion(headReligion));
-          if (headReligion == 'Other') {
-            final or = head.otherReligion?.trim();
-            if (or != null && or.isNotEmpty) {
-              spBloc.add(SpUpdateOtherReligion(or));
+          // Sync Religion
+          final memReligion = member.religion?.trim();
+          if (memReligion != null && memReligion.isNotEmpty) {
+            spBloc.add(SpUpdateReligion(memReligion));
+            if (memReligion == 'Other') {
+              final or = member.otherReligion?.trim();
+              if (or != null && or.isNotEmpty) {
+                spBloc.add(SpUpdateOtherReligion(or));
+              }
+            } else {
+              spBloc.add(SpUpdateOtherReligion(''));
             }
-          } else {
-            spBloc.add(SpUpdateOtherReligion(''));
           }
-        }
 
-        final headCategory = head.category?.trim();
-        if (headCategory != null && headCategory.isNotEmpty) {
-          spBloc.add(SpUpdateCategory(headCategory));
-          if (headCategory == 'Other') {
-            final oc = head.otherCategory?.trim();
-            if (oc != null && oc.isNotEmpty) {
-              spBloc.add(SpUpdateOtherCategory(oc));
+          // Sync Category
+          final memCategory = member.category?.trim();
+          if (memCategory != null && memCategory.isNotEmpty) {
+            spBloc.add(SpUpdateCategory(memCategory));
+            if (memCategory == 'Other') {
+              final oc = member.otherCategory?.trim();
+              if (oc != null && oc.isNotEmpty) {
+                spBloc.add(SpUpdateOtherCategory(oc));
+              }
+            } else {
+              spBloc.add(SpUpdateOtherCategory(''));
             }
-          } else {
-            spBloc.add(SpUpdateOtherCategory(''));
           }
-        }
+        } else {
+          final headBloc = context.read<AddFamilyHeadBloc>();
+          final head = headBloc.state;
+          final spBloc = context.read<SpousBloc>();
+          final curr = spBloc.state;
 
-        if (curr.occupation != null && curr.occupation!.isNotEmpty) {
-          spBloc.add(SpUpdateOccupation(curr.occupation!));
-          if (curr.occupation == 'Other' &&
-              curr.otherOccupation != null &&
-              curr.otherOccupation!.isNotEmpty) {
-            spBloc.add(SpUpdateOtherOccupation(curr.otherOccupation!));
+          if (head.gender != null) {
+            final isMale = head.gender == 'Male';
+            final relation = isMale ? 'Wife' : 'Husband';
+            final oppositeGender = isMale ? 'Female' : 'Male';
+
+            spBloc.add(SpUpdateRelation(relation));
+            spBloc.add(SpUpdateGender(oppositeGender));
           }
-        }
 
-        if (curr.religion != null && curr.religion!.isNotEmpty) {
-          spBloc.add(SpUpdateReligion(curr.religion!));
-          if (curr.religion == 'Other' &&
-              curr.otherReligion != null &&
-              curr.otherReligion!.isNotEmpty) {
-            spBloc.add(SpUpdateOtherReligion(curr.otherReligion!));
+          // Only sync names if NOT in edit mode, to prevent overwriting existing data with potentially incorrect Head data
+          if (!widget.isEdit) {
+            final memberName = head.spouseName?.trim() ?? '';
+            final spouseName = head.headName?.trim() ?? '';
+            final currMember = curr.memberName?.trim() ?? '';
+            // Only overwrite existing values when the new value is non-empty.
+            if (memberName.isNotEmpty && memberName != currMember) {
+              spBloc.add(SpUpdateMemberName(memberName));
+            }
+            final currSpouse = curr.spouseName?.trim() ?? '';
+            if (spouseName.isNotEmpty && spouseName != currSpouse) {
+              spBloc.add(SpUpdateSpouseName(spouseName));
+            }
           }
-        }
 
-        if (curr.category != null && curr.category!.isNotEmpty) {
-          spBloc.add(SpUpdateCategory(curr.category!));
-          if (curr.category == 'Other' &&
-              curr.otherCategory != null &&
-              curr.otherCategory!.isNotEmpty) {
-            spBloc.add(SpUpdateOtherCategory(curr.otherCategory!));
+          // Auto-fill mobile number if head's mobile is available and mobile owner is 'Family Head'
+          if (head.mobileNo != null && head.mobileNo!.isNotEmpty) {
+            if (widget.headMobileOwner == 'Family Head' ||
+                curr.mobileOwner == 'Family Head') {
+              spBloc.add(SpUpdateMobileNo(head.mobileNo!));
+              spBloc.add(SpUpdateMobileOwner('Family Head'));
+            }
           }
-        }
 
-        if (curr.mobileOwnerOtherRelation != null &&
-            curr.mobileOwnerOtherRelation!.isNotEmpty) {
-          spBloc.add(
-            SpUpdateMobileOwnerOtherRelation(curr.mobileOwnerOtherRelation!),
-          );
+          final headReligion = head.religion?.trim();
+          if (headReligion != null && headReligion.isNotEmpty) {
+            spBloc.add(SpUpdateReligion(headReligion));
+            if (headReligion == 'Other') {
+              final or = head.otherReligion?.trim();
+              if (or != null && or.isNotEmpty) {
+                spBloc.add(SpUpdateOtherReligion(or));
+              }
+            } else {
+              spBloc.add(SpUpdateOtherReligion(''));
+            }
+          }
+
+          final headCategory = head.category?.trim();
+          if (headCategory != null && headCategory.isNotEmpty) {
+            spBloc.add(SpUpdateCategory(headCategory));
+            if (headCategory == 'Other') {
+              final oc = head.otherCategory?.trim();
+              if (oc != null && oc.isNotEmpty) {
+                spBloc.add(SpUpdateOtherCategory(oc));
+              }
+            } else {
+              spBloc.add(SpUpdateOtherCategory(''));
+            }
+          }
+
+          if (curr.occupation != null && curr.occupation!.isNotEmpty) {
+            spBloc.add(SpUpdateOccupation(curr.occupation!));
+            if (curr.occupation == 'Other' &&
+                curr.otherOccupation != null &&
+                curr.otherOccupation!.isNotEmpty) {
+              spBloc.add(SpUpdateOtherOccupation(curr.otherOccupation!));
+            }
+          }
+
+          if (curr.religion != null && curr.religion!.isNotEmpty) {
+            spBloc.add(SpUpdateReligion(curr.religion!));
+            if (curr.religion == 'Other' &&
+                curr.otherReligion != null &&
+                curr.otherReligion!.isNotEmpty) {
+              spBloc.add(SpUpdateOtherReligion(curr.otherReligion!));
+            }
+          }
+
+          if (curr.category != null && curr.category!.isNotEmpty) {
+            spBloc.add(SpUpdateCategory(curr.category!));
+            if (curr.category == 'Other' &&
+                curr.otherCategory != null &&
+                curr.otherCategory!.isNotEmpty) {
+              spBloc.add(SpUpdateOtherCategory(curr.otherCategory!));
+            }
+          }
+
+          if (curr.mobileOwnerOtherRelation != null &&
+              curr.mobileOwnerOtherRelation!.isNotEmpty) {
+            spBloc.add(
+              SpUpdateMobileOwnerOtherRelation(curr.mobileOwnerOtherRelation!),
+            );
+          }
         }
       });
     }
@@ -464,87 +506,139 @@ class _SpousdetailsState extends State<Spousdetails>
     final l = AppLocalizations.of(context)!;
 
     if (widget.syncFromHead) {
-      return BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
-        listenWhen: (previous, current) =>
-            previous.headName != current.headName ||
-            previous.spouseName != current.spouseName ||
-            previous.gender != current.gender ||
-            previous.mobileNo != current.mobileNo ||
-            previous.mobileOwner != current.mobileOwner ||
-            previous.religion != current.religion ||
-            previous.category != current.category ||
-            previous.otherReligion != current.otherReligion ||
-            previous.otherCategory != current.otherCategory,
-        listener: (ctx, st) {
-          final spBloc = ctx.read<SpousBloc>();
-          final curr = spBloc.state;
+      if (widget.isMemberDetails) {
+        return BlocListener<AddnewfamilymemberBloc, AddnewfamilymemberState>(
+          listenWhen: (previous, current) =>
+              previous.religion != current.religion ||
+              previous.category != current.category ||
+              previous.otherReligion != current.otherReligion ||
+              previous.otherCategory != current.otherCategory ||
+              previous.gender != current.gender,
+          listener: (ctx, st) {
+            final spBloc = ctx.read<SpousBloc>();
+            final curr = spBloc.state;
 
-          // Update gender and relation when head's gender changes
-          if (st.gender != null) {
-            final isMale = st.gender == 'Male';
-            final relation = isMale ? 'Wife' : 'Husband';
-            final oppositeGender = isMale ? 'Female' : 'Male';
+            // Update gender and relation when member's gender changes
+            if (st.gender != null) {
+              final isMale = st.gender == 'Male';
+              final oppositeGender = isMale ? 'Female' : 'Male';
 
-            if (curr.relation != relation) {
-              spBloc.add(SpUpdateRelation(relation));
-            }
-            if (curr.gender != oppositeGender) {
-              spBloc.add(SpUpdateGender(oppositeGender));
-            }
-          }
-
-          final previous = context.read<AddFamilyHeadBloc>().state;
-          if ((st.mobileNo != null && st.mobileNo != previous.mobileNo) ||
-              (st.mobileOwner != null &&
-                  st.mobileOwner != previous.mobileOwner)) {
-            if (st.mobileOwner == 'Family Head' &&
-                st.mobileNo != null &&
-                st.mobileNo!.isNotEmpty) {
-              spBloc.add(SpUpdateMobileNo(st.mobileNo!));
-              spBloc.add(SpUpdateMobileOwner('Family Head'));
-            } else if (st.mobileOwner != 'Family Head' &&
-                curr.mobileOwner == 'Family Head') {
-              spBloc.add(SpUpdateMobileNo(''));
-            }
-          }
-
-          // Update names from head form only when non-empty, so that
-          // member-flow prefilled values are not wiped out by blanks.
-          final memberName = st.spouseName?.trim() ?? '';
-          final spouseName = st.headName?.trim() ?? '';
-          final currMember = curr.memberName?.trim() ?? '';
-          if (memberName.isNotEmpty && memberName != currMember) {
-            spBloc.add(SpUpdateMemberName(memberName));
-          }
-          final currSpouse = curr.spouseName?.trim() ?? '';
-          if (spouseName.isNotEmpty && spouseName != currSpouse) {
-            spBloc.add(SpUpdateSpouseName(spouseName));
-          }
-          if (st.religion != null && st.religion!.isNotEmpty) {
-            spBloc.add(SpUpdateReligion(st.religion!));
-            if (st.religion == 'Other') {
-              final or = st.otherReligion?.trim();
-              if (or != null && or.isNotEmpty) {
-                spBloc.add(SpUpdateOtherReligion(or));
+              if (curr.gender != oppositeGender) {
+                spBloc.add(SpUpdateGender(oppositeGender));
               }
-            } else {
-              spBloc.add(SpUpdateOtherReligion(''));
             }
-          }
-          if (st.category != null && st.category!.isNotEmpty) {
-            spBloc.add(SpUpdateCategory(st.category!));
-            if (st.category == 'Other') {
-              final oc = st.otherCategory?.trim();
-              if (oc != null && oc.isNotEmpty) {
-                spBloc.add(SpUpdateOtherCategory(oc));
+
+            // Sync Religion
+            if (st.religion != null && st.religion!.isNotEmpty) {
+              spBloc.add(SpUpdateReligion(st.religion!));
+              if (st.religion == 'Other') {
+                final or = st.otherReligion?.trim();
+                if (or != null && or.isNotEmpty) {
+                  spBloc.add(SpUpdateOtherReligion(or));
+                }
+              } else {
+                spBloc.add(SpUpdateOtherReligion(''));
               }
-            } else {
-              spBloc.add(SpUpdateOtherCategory(''));
             }
-          }
-        },
-        child: _buildForm(l),
-      );
+
+            // Sync Category
+            if (st.category != null && st.category!.isNotEmpty) {
+              spBloc.add(SpUpdateCategory(st.category!));
+              if (st.category == 'Other') {
+                final oc = st.otherCategory?.trim();
+                if (oc != null && oc.isNotEmpty) {
+                  spBloc.add(SpUpdateOtherCategory(oc));
+                }
+              } else {
+                spBloc.add(SpUpdateOtherCategory(''));
+              }
+            }
+          },
+          child: _buildForm(l),
+        );
+      } else {
+        return BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
+          listenWhen: (previous, current) =>
+              previous.headName != current.headName ||
+              previous.spouseName != current.spouseName ||
+              previous.gender != current.gender ||
+              previous.mobileNo != current.mobileNo ||
+              previous.mobileOwner != current.mobileOwner ||
+              previous.religion != current.religion ||
+              previous.category != current.category ||
+              previous.otherReligion != current.otherReligion ||
+              previous.otherCategory != current.otherCategory,
+          listener: (ctx, st) {
+            final spBloc = ctx.read<SpousBloc>();
+            final curr = spBloc.state;
+
+            // Update gender and relation when head's gender changes
+            if (st.gender != null) {
+              final isMale = st.gender == 'Male';
+              final relation = isMale ? 'Wife' : 'Husband';
+              final oppositeGender = isMale ? 'Female' : 'Male';
+
+              if (curr.relation != relation) {
+                spBloc.add(SpUpdateRelation(relation));
+              }
+              if (curr.gender != oppositeGender) {
+                spBloc.add(SpUpdateGender(oppositeGender));
+              }
+            }
+
+            final previous = context.read<AddFamilyHeadBloc>().state;
+            if ((st.mobileNo != null && st.mobileNo != previous.mobileNo) ||
+                (st.mobileOwner != null &&
+                    st.mobileOwner != previous.mobileOwner)) {
+              if (st.mobileOwner == 'Family Head' &&
+                  st.mobileNo != null &&
+                  st.mobileNo!.isNotEmpty) {
+                spBloc.add(SpUpdateMobileNo(st.mobileNo!));
+                spBloc.add(SpUpdateMobileOwner('Family Head'));
+              } else if (st.mobileOwner != 'Family Head' &&
+                  curr.mobileOwner == 'Family Head') {
+                spBloc.add(SpUpdateMobileNo(''));
+              }
+            }
+
+            // Update names from head form only when non-empty, so that
+            // member-flow prefilled values are not wiped out by blanks.
+            final memberName = st.spouseName?.trim() ?? '';
+            final spouseName = st.headName?.trim() ?? '';
+            final currMember = curr.memberName?.trim() ?? '';
+            if (memberName.isNotEmpty && memberName != currMember) {
+              spBloc.add(SpUpdateMemberName(memberName));
+            }
+            final currSpouse = curr.spouseName?.trim() ?? '';
+            if (spouseName.isNotEmpty && spouseName != currSpouse) {
+              spBloc.add(SpUpdateSpouseName(spouseName));
+            }
+            if (st.religion != null && st.religion!.isNotEmpty) {
+              spBloc.add(SpUpdateReligion(st.religion!));
+              if (st.religion == 'Other') {
+                final or = st.otherReligion?.trim();
+                if (or != null && or.isNotEmpty) {
+                  spBloc.add(SpUpdateOtherReligion(or));
+                }
+              } else {
+                spBloc.add(SpUpdateOtherReligion(''));
+              }
+            }
+            if (st.category != null && st.category!.isNotEmpty) {
+              spBloc.add(SpUpdateCategory(st.category!));
+              if (st.category == 'Other') {
+                final oc = st.otherCategory?.trim();
+                if (oc != null && oc.isNotEmpty) {
+                  spBloc.add(SpUpdateOtherCategory(oc));
+                }
+              } else {
+                spBloc.add(SpUpdateOtherCategory(''));
+              }
+            }
+          },
+          child: _buildForm(l),
+        );
+      }
     }
 
     return _buildForm(l);
@@ -597,12 +691,14 @@ class _SpousdetailsState extends State<Spousdetails>
 
     if (gender != null) {
       spBloc.add(SpUpdateGender(gender));
-      final headGender = context.read<AddFamilyHeadBloc>().state.gender;
-      final expectedRelation = headGender == 'Male' ? 'Wife' : 'Husband';
-      if (gender == 'Female' && headGender == 'Male') {
-        spBloc.add(SpUpdateRelation('Wife'));
-      } else if (gender == 'Male' && headGender == 'Female') {
-        spBloc.add(SpUpdateRelation('Husband'));
+      if (!widget.isMemberDetails) {
+        final headGender = context.read<AddFamilyHeadBloc>().state.gender;
+        final expectedRelation = headGender == 'Male' ? 'Wife' : 'Husband';
+        if (gender == 'Female' && headGender == 'Male') {
+          spBloc.add(SpUpdateRelation('Wife'));
+        } else if (gender == 'Male' && headGender == 'Female') {
+          spBloc.add(SpUpdateRelation('Husband'));
+        }
       }
     }
 
@@ -637,11 +733,11 @@ class _SpousdetailsState extends State<Spousdetails>
               children: [
                 _section(
                   IgnorePointer(
-                    ignoring: widget.isEdit,
+                    ignoring: widget.isEdit || !widget.isMemberDetails,
                     child: ApiDropdown<String>(
                       key: const ValueKey('relation_with_head'),
                       labelText: '${l.relationWithFamilyHead} *',
-                      readOnly: true,
+
                       items: widget.isMemberDetails
                           ? [
                               'Self',
@@ -725,7 +821,10 @@ class _SpousdetailsState extends State<Spousdetails>
                       },
 
                       value: widget.isMemberDetails
-                          ? state.relation
+                          ? ((state.relation == null ||
+                                  state.relation!.trim().isEmpty)
+                                ? null
+                                : state.relation)
                           : (state.relation == 'Spouse'
                                 ? (state.gender == 'Female'
                                       ? 'Husband'

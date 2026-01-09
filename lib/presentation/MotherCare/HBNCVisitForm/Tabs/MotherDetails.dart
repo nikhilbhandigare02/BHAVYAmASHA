@@ -107,13 +107,23 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
 
       if (!mounted) return;
 
-      if (motherStatus == 'death') {
+      if (motherStatus == 'death' || motherStatus == 'alive') {
         final bloc = context.read<HbncVisitBloc>();
-        bloc.add(const MotherDetailsChanged(field: 'motherStatus', value: 'death'));
-        setState(() {
-          _isMotherStatusLocked = true;
-        });
+
+        bloc.add(
+          MotherDetailsChanged(
+            field: 'motherStatus',
+            value: motherStatus,
+          ),
+        );
+
+        if (motherStatus == 'death') {
+          setState(() {
+            _isMotherStatusLocked = true;
+          });
+        }
       }
+
     } catch (e) {
       print('Error loading last HBNC motherStatus: $e');
     }

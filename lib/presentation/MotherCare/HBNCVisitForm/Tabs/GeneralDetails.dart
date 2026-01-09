@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
-import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_bloc.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_state.dart';
 import 'package:medixcel_new/presentation/MotherCare/HBNCVisitForm/bloc/hbcn_visit_event.dart';
@@ -16,6 +15,67 @@ class GeneralDetailsTab extends StatelessWidget {
   final String beneficiaryId;
   
   const GeneralDetailsTab({super.key, required this.beneficiaryId});
+
+  Future<int> _getLastCompletedVisitDayFromDb() async {
+    try {
+      if (beneficiaryId.isEmpty) return 0;
+
+      final db = await DatabaseProvider.instance.database;
+      final formsRefKey =
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother] ??
+              '';
+      if (formsRefKey.isEmpty) return 0;
+
+      final rows = await db.query(
+        FollowupFormDataTable.table,
+        where:
+            'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        whereArgs: [formsRefKey, beneficiaryId],
+        orderBy: 'datetime(created_date_time) DESC',
+        limit: 1,
+      );
+
+      if (rows.isEmpty) return 0;
+
+      final rawJson = rows.first['form_json'] as String?;
+      if (rawJson == null || rawJson.isEmpty) return 0;
+
+      int? visitNumber;
+      try {
+        final decoded = jsonDecode(rawJson);
+        if (decoded is Map<String, dynamic>) {
+          // Normalized structure: form_data.visitDetails.visitNumber
+          if (decoded['form_data'] is Map &&
+              (decoded['form_data']['visitDetails'] is Map)) {
+            final vd = decoded['form_data']['visitDetails'] as Map;
+            visitNumber = int.tryParse(vd['visitNumber']?.toString() ?? '');
+          }
+
+          // Local HBNC save structure: hbyc_form.visitDetails.visitNumber
+          if (visitNumber == null && decoded['hbyc_form'] is Map) {
+            final h = decoded['hbyc_form'] as Map<String, dynamic>;
+            if (h['visitDetails'] is Map) {
+              final vd = h['visitDetails'] as Map;
+              visitNumber = int.tryParse(vd['visitNumber']?.toString() ?? '');
+            }
+          }
+
+          // Fallback: top-level visitDetails
+          if (visitNumber == null && decoded['visitDetails'] is Map) {
+            final vd = decoded['visitDetails'] as Map;
+            visitNumber = int.tryParse(vd['visitNumber']?.toString() ?? '');
+          }
+        }
+      } catch (e) {
+        print('Error parsing last HBNC visitNumber: $e');
+      }
+
+      return visitNumber ?? 0;
+    } catch (e) {
+      print('Error loading last HBNC visitNumber from DB: $e');
+      return 0;
+    }
+  }
 
   Future<Map<String, dynamic>?> _loadHbncVisitData() async {
     try {
@@ -189,7 +249,7 @@ class GeneralDetailsTab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   FutureBuilder<int>(
-                    future: SecureStorageService.getVisitCount(beneficiaryId),
+                    future: _getLastCompletedVisitDayFromDb(),
                     builder: (context, snapshot) {
                       final lastCompleted = snapshot.data ?? 0; // last completed visit day
                       const schedule = [1, 3, 7, 14, 21, 28, 42];

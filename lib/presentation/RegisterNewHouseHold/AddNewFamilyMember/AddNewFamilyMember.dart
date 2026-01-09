@@ -1385,7 +1385,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                             if (_currentStep == 1) {
                               return SizedBox.expand(
                                 child: Spousdetails(
-                                  syncFromHead: false,
+                                  syncFromHead: true,
                                   isMemberDetails: true,
                                   isAddMember: widget.isAddMember,
                                   hhId: widget.hhId,

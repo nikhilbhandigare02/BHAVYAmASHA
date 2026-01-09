@@ -1181,73 +1181,143 @@ class _RegisterChildDueListFormScreen
                                 thickness: 0.5,
                                 height: 0),
 
-                            Container(
-                              key: _keyWeight,
-                              child: CustomTextField(
-                                labelText: l10n?.child_weight,
-                                hintText: l10n?.child_weight,
-                                initialValue: state.weightGrams,
-                                keyboardType: TextInputType.number,
-                                onChanged: (v) =>
-                                    bloc.add(WeightGramsChanged(v)),
-                                validator: (value) {
-                                  final text = value?.trim() ?? '';
-                                  if (text.isEmpty) {
-                                    return null;
-                                  }
+                            if (state.dateOfBirth != null) ...[
+                              Builder(
+                                builder: (context) {
+                                  final dob = state.dateOfBirth!;
+                                  final now = DateTime.now();
+                                  final thresholdDate = DateTime(dob.year + 1, dob.month + 3, dob.day + 1);
+                                  final isOlder = now.isAfter(thresholdDate) || now.isAtSameMomentAs(thresholdDate);
 
-                                  final parsed = int.tryParse(text);
-                                  if (parsed == null) {
-                                    return _captureError(
-                                        l10n?.enterValidWeight, _keyWeight);
-                                  }
+                                  if (isOlder) {
+                                    return Container(
+                                      key: _keyWeight,
+                                      child: CustomTextField(
+                                        labelText:l10n?.weightRange,
+                                        hintText: l10n?.weightRange,
+                                        initialValue: state.weightGrams,
+                                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                        onChanged: (v) => bloc.add(WeightGramsChanged(v)),
+                                        validator: (value) {
+                                          final text = value?.trim() ?? '';
+                                          if (text.isEmpty) {
+                                            return null;
+                                          }
 
-                                  if (parsed < 500 || parsed > 12500) {
-                                    return _captureError(
-                                        l10n?.weightRangeError, _keyWeight);
-                                  }
+                                          final parsed = double.tryParse(text);
+                                          if (parsed == null) {
+                                            return _captureError('Enter valid weight', _keyWeight);
+                                          }
 
-                                  return null;
+                                          if (parsed < 1.2 || parsed > 90) {
+                                            return _captureError('Weight must be between 1.2 and 90 kg', _keyWeight);
+                                          }
+
+                                          return null;
+                                        },
+                                      ),
+                                    );
+                                  } else {
+                                    return Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          key: _keyWeight,
+                                          child: CustomTextField(
+                                            labelText: l10n?.child_weight,
+                                            hintText: l10n?.child_weight,
+                                            initialValue: state.weightGrams,
+                                            keyboardType: TextInputType.number,
+                                            onChanged: (v) => bloc.add(WeightGramsChanged(v)),
+                                            validator: (value) {
+                                              final text = value?.trim() ?? '';
+                                              if (text.isEmpty) {
+                                                return null;
+                                              }
+
+                                              final parsed = int.tryParse(text);
+                                              if (parsed == null) {
+                                                return _captureError(l10n?.enterValidWeight, _keyWeight);
+                                              }
+
+                                              if (parsed < 500 || parsed > 12500) {
+                                                return _captureError(l10n?.weightRangeError, _keyWeight);
+                                              }
+
+                                              return null;
+                                            },
+                                          ),
+                                        ),
+                                        Divider(
+                                            color: AppColors.divider,
+                                            thickness: 0.5,
+                                            height: 0),
+                                        Container(
+                                          key: _keyBirthWeight,
+                                          child: CustomTextField(
+                                            labelText: l10n?.birthWeightRange,
+                                            hintText: l10n?.enterBirthWeight,
+                                            initialValue: state.birthWeightGrams,
+                                            keyboardType: TextInputType.number,
+                                            onChanged: (v) =>
+                                                bloc.add(BirthWeightGramsChanged(v)),
+                                            validator: (value) {
+                                              final text = value?.trim() ?? '';
+                                              if (text.isEmpty) {
+                                                return null;
+                                              }
+
+                                              final parsed = int.tryParse(text);
+                                              if (parsed == null) {
+                                                return _captureError(
+                                                    l10n?.enterValidBirthWeight,
+                                                    _keyBirthWeight);
+                                              }
+
+                                              if (parsed < 1200 || parsed > 4000) {
+                                                return _captureError(
+                                                    l10n?.enterValidBirthWeight,
+                                                    _keyBirthWeight);
+                                              }
+
+                                              return null;
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }
                                 },
                               ),
-                            ),
-                            Divider(
-                                color: AppColors.divider,
-                                thickness: 0.5,
-                                height: 0),
+                            ] else ...[
+                              Container(
+                                key: _keyWeight,
+                                child: CustomTextField(
+                                  labelText: l10n?.child_weight,
+                                  hintText: l10n?.child_weight,
+                                  initialValue: state.weightGrams,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (v) => bloc.add(WeightGramsChanged(v)),
+                                  validator: (value) {
+                                    final text = value?.trim() ?? '';
+                                    if (text.isEmpty) {
+                                      return null;
+                                    }
 
-                            Container(
-                              key: _keyBirthWeight,
-                              child: CustomTextField(
-                                labelText: l10n?.birthWeightRange,
-                                hintText: l10n?.enterBirthWeight,
-                                initialValue: state.birthWeightGrams,
-                                keyboardType: TextInputType.number,
-                                onChanged: (v) =>
-                                    bloc.add(BirthWeightGramsChanged(v)),
-                                validator: (value) {
-                                  final text = value?.trim() ?? '';
-                                  if (text.isEmpty) {
+                                    final parsed = int.tryParse(text);
+                                    if (parsed == null) {
+                                      return _captureError(l10n?.enterValidWeight, _keyWeight);
+                                    }
+
+                                    if (parsed < 500 || parsed > 12500) {
+                                      return _captureError(l10n?.weightRangeError, _keyWeight);
+                                    }
+
                                     return null;
-                                  }
-
-                                  final parsed = int.tryParse(text);
-                                  if (parsed == null) {
-                                    return _captureError(
-                                        l10n?.enterValidBirthWeight,
-                                        _keyBirthWeight);
-                                  }
-
-                                  if (parsed < 1200 || parsed > 4000) {
-                                    return _captureError(
-                                        l10n?.enterValidBirthWeight,
-                                        _keyBirthWeight);
-                                  }
-
-                                  return null;
-                                },
+                                  },
+                                ),
                               ),
-                            ),
+                            ],
                             Divider(
                                 color: AppColors.divider,
                                 thickness: 0.5,

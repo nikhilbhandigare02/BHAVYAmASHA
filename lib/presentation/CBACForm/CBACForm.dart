@@ -1011,7 +1011,7 @@ class _PartATab extends StatelessWidget {
           l10n.cbacA_tobSometimes,
           l10n.cbacA_tobDaily,
         ];
-        final itemsYesNo = <String>[l10n.yes, l10n.no];
+        final itemsYesNo = <String>[l10n.no, l10n.yes];
         final itemsActivity = <String>[
           l10n.cbacA_actLT150,
           l10n.cbacA_actGT150,
@@ -1036,7 +1036,7 @@ class _PartATab extends StatelessWidget {
           'AGE_GE60',
         ];
         final codeTob = <String>['TOB_NEVER', 'TOB_SOMETIMES', 'TOB_DAILY'];
-        final codeYesNo = <String>['YES', 'NO'];
+        final codeYesNo = <String>['NO', 'YES'];
         final codeActivity = <String>['ACT_LT150', 'ACT_GE150'];
         final codeWaist = isFemale
             ? <String>['WAIST_LE80', 'WAIST_81_90', 'WAIST_GT90']
