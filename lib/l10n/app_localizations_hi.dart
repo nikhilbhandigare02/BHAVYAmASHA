@@ -2583,6 +2583,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dateOfRegistrationLabel => 'पंजीकरण तिथि *';
 
   @override
+  String get dateOfRegistrationLabelR => 'पंजीकरण तिथि';
+
+  @override
   String get childNameLabel => 'बच्चे  का नाम *';
 
   @override

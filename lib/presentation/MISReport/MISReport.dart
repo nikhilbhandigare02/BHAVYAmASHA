@@ -77,7 +77,6 @@ class _MisreportState extends State<Misreport> {
 
       final db = await DatabaseProvider.instance.database;
 
-      // 2. Prepare the WHERE clause parts
       String whereClause = '''
       mother_care_state = ?
       AND is_deleted = 0
@@ -145,13 +144,10 @@ class _MisreportState extends State<Misreport> {
 
       final result = await db.rawQuery('''
       SELECT
-        COUNT(DISTINCT CASE 
-          WHEN child_care_state = 'tracking_due'
-          THEN beneficiary_ref_key
-        END) AS tracking_due_count,
+       
 
         COUNT(DISTINCT CASE 
-          WHEN child_care_state = 'child_registration_due'
+          WHEN child_care_state = 'registration_due'
           THEN beneficiary_ref_key
         END) AS child_registration_due_count
       FROM ${ChildCareActivitiesTable.table}

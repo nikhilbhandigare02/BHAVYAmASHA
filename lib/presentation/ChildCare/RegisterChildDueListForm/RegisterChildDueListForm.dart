@@ -718,30 +718,34 @@ class _RegisterChildDueListFormScreen
                 showAppSnackBar(context, state.error!);
               }
               if (state.isSuccess) {
-                showAppSnackBar(
-                    context, l10n?.saveSuccess ?? 'Saved successfully');
-                await showDialog(
-                  context: context,
-                  builder: (context) => CustomDialog(
-                    title: 'Form has been saved successfully',
-                    message: 'Registration has been completed',
-                    onOkPressed: () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pop({
-                        'saved': true,
-                        'beneficiaryId': _beneficiaryData?.uniqueKey ?? '',
-                        'name': _beneficiaryData?.name ?? '',
-                        'hhId': widget.arguments?['hhId']?.toString() ?? '',
-                      });
-                    },
-                  ),
-                );
+                showAppSnackBar(context, l10n?.saveSuccess ?? 'Saved successfully');
+                Navigator.of(context).pop({
+                  'saved': true,
+                  'beneficiaryId': _beneficiaryData?.uniqueKey ?? '',
+                  'name': _beneficiaryData?.name ?? '',
+                  'hhId': widget.arguments?['hhId']?.toString() ?? '',
+                });
               }
             },
             builder: (context, state) {
               final bloc = context.read<RegisterChildFormBloc>();
+              final detailsBarColor = Theme.of(context).appBarTheme.backgroundColor ??
+                  Theme.of(context).colorScheme.primary;
               return Column(
                 children: [
+                  Container(
+                    width: double.infinity,
+                    height: 48,
+                    color: detailsBarColor,
+                    alignment: Alignment.center,
+                    child: Text(
+                      'DETAILS',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
                   Expanded(
                     child: SingleChildScrollView(
                       controller: _scrollController,
@@ -763,7 +767,7 @@ class _RegisterChildDueListFormScreen
                                     child: CustomTextField(
                                       labelText: l10n?.rchIdChildLabel ??
                                           'RCH ID (Child)',
-                                      hintText: l10n?.rchChildSerialHint ??
+                                      hintText: l10n?.rchIdChildLabel ??
                                           'Enter RCH ID of the child',
                                       initialValue: state.rchIdChild,
                                       maxLength: 12,
@@ -825,7 +829,7 @@ class _RegisterChildDueListFormScreen
                             CustomTextField(
                               labelText: l10n?.rchChildSerialHint ??
                                   'Register Serial Number',
-                              hintText: l10n?.enterSerialNumber,
+                              hintText: l10n?.rchChildSerialHint,
                               initialValue: state.registerSerialNumber,
                               onChanged: (v) =>
                                   bloc.add(SerialNumberOFRegister(v)),
@@ -860,7 +864,7 @@ class _RegisterChildDueListFormScreen
                             Container(
                               key: _keyDor,
                               child: CustomDatePicker(
-                                labelText: l10n?.registrationDateLabel ??
+                                labelText: l10n?.dateOfRegistrationLabelR ??
                                     'Date of Registration *',
                                 initialDate: state.dateOfRegistration,
                                 firstDate: DateTime.now(),
@@ -1186,15 +1190,16 @@ class _RegisterChildDueListFormScreen
                                 builder: (context) {
                                   final dob = state.dateOfBirth!;
                                   final now = DateTime.now();
-                                  final thresholdDate = DateTime(dob.year + 1, dob.month + 3, dob.day + 1);
-                                  final isOlder = now.isAfter(thresholdDate) || now.isAtSameMomentAs(thresholdDate);
+                                  final months = ((now.year - dob.year) * 12) + (now.month - dob.month) - (now.day < dob.day ? 1 : 0);
+                                  final showKg = months >= 24;
+                                  final showBirth = months < 15;
 
-                                  if (isOlder) {
+                                  if (showKg) {
                                     return Container(
                                       key: _keyWeight,
                                       child: CustomTextField(
-                                        labelText:l10n?.weightRange,
-                                        hintText: l10n?.weightRange,
+                                        labelText: ((l10n?.weightRange ?? 'Weight') + ' (1.2-90) kg'),
+                                        hintText: ((l10n?.weightRange ?? 'Weight') + ' (1.2-90) kg'),
                                         initialValue: state.weightGrams,
                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
                                         onChanged: (v) => bloc.add(WeightGramsChanged(v)),
@@ -1224,8 +1229,8 @@ class _RegisterChildDueListFormScreen
                                         Container(
                                           key: _keyWeight,
                                           child: CustomTextField(
-                                            labelText: l10n?.child_weight,
-                                            hintText: l10n?.child_weight,
+                                            labelText: l10n?.child_weight ?? 'Child weight',
+                                            hintText: l10n?.child_weight ?? 'Child weight',
                                             initialValue: state.weightGrams,
                                             keyboardType: TextInputType.number,
                                             onChanged: (v) => bloc.add(WeightGramsChanged(v)),
@@ -1252,38 +1257,34 @@ class _RegisterChildDueListFormScreen
                                             color: AppColors.divider,
                                             thickness: 0.5,
                                             height: 0),
-                                        Container(
-                                          key: _keyBirthWeight,
-                                          child: CustomTextField(
-                                            labelText: l10n?.birthWeightRange,
-                                            hintText: l10n?.enterBirthWeight,
-                                            initialValue: state.birthWeightGrams,
-                                            keyboardType: TextInputType.number,
-                                            onChanged: (v) =>
-                                                bloc.add(BirthWeightGramsChanged(v)),
-                                            validator: (value) {
-                                              final text = value?.trim() ?? '';
-                                              if (text.isEmpty) {
+                                        if (showBirth)
+                                          Container(
+                                            key: _keyBirthWeight,
+                                            child: CustomTextField(
+                                              labelText: l10n?.birthWeightRange ?? 'Birth weight',
+                                              hintText: l10n?.enterBirthWeight ?? 'Enter birth weight',
+                                              initialValue: state.birthWeightGrams,
+                                              keyboardType: TextInputType.number,
+                                              onChanged: (v) => bloc.add(BirthWeightGramsChanged(v)),
+                                              validator: (value) {
+                                                final text = value?.trim() ?? '';
+                                                if (text.isEmpty) {
+                                                  return null;
+                                                }
+
+                                                final parsed = int.tryParse(text);
+                                                if (parsed == null) {
+                                                  return _captureError(l10n?.enterValidBirthWeight, _keyBirthWeight);
+                                                }
+
+                                                if (parsed < 1200 || parsed > 4000) {
+                                                  return _captureError(l10n?.enterValidBirthWeight, _keyBirthWeight);
+                                                }
+
                                                 return null;
-                                              }
-
-                                              final parsed = int.tryParse(text);
-                                              if (parsed == null) {
-                                                return _captureError(
-                                                    l10n?.enterValidBirthWeight,
-                                                    _keyBirthWeight);
-                                              }
-
-                                              if (parsed < 1200 || parsed > 4000) {
-                                                return _captureError(
-                                                    l10n?.enterValidBirthWeight,
-                                                    _keyBirthWeight);
-                                              }
-
-                                              return null;
-                                            },
+                                              },
+                                            ),
                                           ),
-                                        ),
                                       ],
                                     );
                                   }
@@ -1293,8 +1294,8 @@ class _RegisterChildDueListFormScreen
                               Container(
                                 key: _keyWeight,
                                 child: CustomTextField(
-                                  labelText: l10n?.child_weight,
-                                  hintText: l10n?.child_weight,
+                                  labelText:  l10n?.child_weight ?? 'Child weight',
+                                  hintText: l10n?.child_weight ?? 'Child weight',
                                   initialValue: state.weightGrams,
                                   keyboardType: TextInputType.number,
                                   onChanged: (v) => bloc.add(WeightGramsChanged(v)),

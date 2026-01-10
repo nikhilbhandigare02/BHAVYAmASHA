@@ -11,6 +11,7 @@ import 'package:medixcel_new/l10n/app_localizations.dart';
 import '../../../data/Database/database_provider.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import '../RegisterChildDueListForm/RegisterChildDueListForm.dart';
+import '../../../core/widgets/SuccessDialogbox/SuccessDialogbox.dart';
 
 class RegisterChildDueList extends StatefulWidget {
   const RegisterChildDueList({super.key});
@@ -781,6 +782,11 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
                   _loadChildBeneficiaries();
+                  CustomDialog.show(
+                    context,
+                    title: 'Form has been saved successfully',
+                    message: 'Registration has been completed',
+                  );
                 }
               });
             }

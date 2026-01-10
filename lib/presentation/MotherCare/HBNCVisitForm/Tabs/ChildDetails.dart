@@ -217,6 +217,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                 validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
                 getLabel: (e) => e == 'alive' ? t.alive : t.dead,
                 value: condition,
+                autoOpenTick: state.focusedErrorField == 'babyCondition' ? state.validationTick : null,
                 onChanged: (val) => context.read<HbncVisitBloc>().add(
                   NewbornDetailsChanged(
                     field: 'babyCondition',
@@ -255,6 +256,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     hintText: t.babyNameLabel,
                     validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
                     initialValue: s(c['babyName']),
+                    autofocus: state.focusedErrorField == 'babyName',
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'babyName', value: val, childIndex: widget.childIndex),
                     ),
@@ -278,6 +280,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       }
                     },
                     value: s(c['gender']),
+                    autoOpenTick: state.focusedErrorField == 'gender' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(
                         field: 'gender',
@@ -296,6 +299,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     keyboardType: TextInputType.number,
                     validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
                     initialValue: s(c['weightAtBirth']),
+                    autofocus: state.focusedErrorField == 'weightAtBirth',
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'weightAtBirth', value: val, childIndex: widget.childIndex),
                     ),
@@ -309,6 +313,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     keyboardType: TextInputType.number,
                     validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
                     initialValue: s(c['temperature']),
+                    autofocus: state.focusedErrorField == 'temperature',
                     onChanged: (val) {
                       context.read<HbncVisitBloc>().add(
                         NewbornDetailsChanged(
@@ -414,6 +419,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['weightColorMatch']),
+                    autoOpenTick: state.focusedErrorField == 'weightColorMatch' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'weightColorMatch', value: val, childIndex: widget.childIndex),
                     ),
@@ -426,6 +432,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Red', 'Yellow','Green'],
                     getLabel: (e) => e == 'Green' ? t.colorGreen : (e == 'Yellow' ? t.colorYellow : t.colorRed),
                     value: s(c['weighingScaleColor']),
+                    autoOpenTick: state.focusedErrorField == 'weighingScaleColor' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'weighingScaleColor', value: val, childIndex: widget.childIndex),
                     ),
@@ -439,6 +446,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['motherReportsTempOrChestIndrawing']),
+                    autoOpenTick: state.focusedErrorField == 'motherReportsTempOrChestIndrawing' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'motherReportsTempOrChestIndrawing', value: val, childIndex: widget.childIndex),
                     ),
@@ -452,6 +460,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['exclusiveBreastfeedingStarted']),
+                    autoOpenTick: state.focusedErrorField == 'exclusiveBreastfeedingStarted' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'exclusiveBreastfeedingStarted', value: val, childIndex: widget.childIndex),
                     ),
@@ -488,6 +497,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       }
                     },
                     value: c['firstBreastfeedTiming'],
+                    autoOpenTick: state.focusedErrorField == 'firstBreastfeedTiming' ? state.validationTick : null,
                     onChanged: (val) {
                       context.read<HbncVisitBloc>().add(
                         NewbornDetailsChanged(
@@ -548,6 +558,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                         }
                       },
                       value: c['howWasBreastfed'],
+                      autoOpenTick: state.focusedErrorField == 'howWasBreastfed' ? state.validationTick : null,
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
                         NewbornDetailsChanged(
                           field: 'howWasBreastfed',
@@ -583,6 +594,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       }
                     },
                     value: s(c['firstFeedGivenAfterBirth']),
+                    autoOpenTick: state.focusedErrorField == 'firstFeedGivenAfterBirth' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'firstFeedGivenAfterBirth', value: val, childIndex: widget.childIndex),
                     ),
@@ -603,6 +615,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['adequatelyFedSevenToEightTimes']),
+                    autoOpenTick: state.focusedErrorField == 'adequatelyFedSevenToEightTimes' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'adequatelyFedSevenToEightTimes', value: val, childIndex: widget.childIndex),
                     ),
@@ -625,6 +638,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['babyDrinkingLessMilk']),
+                    autoOpenTick: state.focusedErrorField == 'babyDrinkingLessMilk' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'babyDrinkingLessMilk', value: val, childIndex: widget.childIndex),
                     ),
@@ -636,6 +650,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['breastfeedingStopped']),
+                    autoOpenTick: state.focusedErrorField == 'breastfeedingStopped' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'breastfeedingStopped', value: val, childIndex: widget.childIndex),
                     ),),
@@ -646,6 +661,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['bloatedStomachOrFrequentVomiting']),
+                    autoOpenTick: state.focusedErrorField == 'bloatedStomachOrFrequentVomiting' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'bloatedStomachOrFrequentVomiting', value: val, childIndex: widget.childIndex),
                     ),
@@ -656,6 +672,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['bleedingUmbilicalCord']),
+                    autoOpenTick: state.focusedErrorField == 'bleedingUmbilicalCord' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'bleedingUmbilicalCord', value: val, childIndex: widget.childIndex),
                     ),
@@ -680,6 +697,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['pusInNavel']),
+                    autoOpenTick: state.focusedErrorField == 'pusInNavel' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'pusInNavel', value: val, childIndex: widget.childIndex),
                     ),
@@ -692,6 +710,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['routineCareDone']),
+                    autoOpenTick: state.focusedErrorField == 'routineCareDone' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'routineCareDone', value: val, childIndex: widget.childIndex),
                     ),
@@ -749,6 +768,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['breathingRapid']),
+                    autoOpenTick: state.focusedErrorField == 'breathingRapid' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'breathingRapid', value: val, childIndex: widget.childIndex),
                     ),
@@ -773,6 +793,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['congenitalAbnormalities']),
+                    autoOpenTick: state.focusedErrorField == 'congenitalAbnormalities' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'congenitalAbnormalities', value: val, childIndex: widget.childIndex),
                     ),
@@ -831,6 +852,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['eyesNormal']),
+                    autoOpenTick: state.focusedErrorField == 'eyesNormal' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'eyesNormal', value: val, childIndex: widget.childIndex),
                     ),
@@ -858,6 +880,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['eyesSwollenOrPus']),
+                    autoOpenTick: state.focusedErrorField == 'eyesSwollenOrPus' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'eyesSwollenOrPus', value: val, childIndex: widget.childIndex),
                     ),
@@ -871,6 +894,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['skinFoldRedness']),
+                    autoOpenTick: state.focusedErrorField == 'skinFoldRedness' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'skinFoldRedness', value: val, childIndex: widget.childIndex),
                     ),
@@ -883,6 +907,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['jaundice']),
+                    autoOpenTick: state.focusedErrorField == 'jaundice' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'jaundice', value: val, childIndex: widget.childIndex),
                     ),
@@ -895,6 +920,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['pusBumpsOrBoil']),
+                    autoOpenTick: state.focusedErrorField == 'pusBumpsOrBoil' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'pusBumpsOrBoil', value: val, childIndex: widget.childIndex),
                     ),
@@ -905,6 +931,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['seizures']),
+                    autoOpenTick: state.focusedErrorField == 'seizures' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'seizures', value: val, childIndex: widget.childIndex),
                     ),
@@ -916,6 +943,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['cryingConstantlyOrLessUrine']),
+                    autoOpenTick: state.focusedErrorField == 'cryingConstantlyOrLessUrine' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'cryingConstantlyOrLessUrine', value: val, childIndex: widget.childIndex),
                     ),
@@ -942,30 +970,31 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['cryingSoftly']),
+                    autoOpenTick: state.focusedErrorField == 'cryingSoftly' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'cryingSoftly', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                   const Divider(height: 0,),
 
-
                   ApiDropdown<String>(
                     labelText: "${t.stoppedCryingLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['stoppedCrying']),
+                    autoOpenTick: state.focusedErrorField == 'stoppedCrying' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'stoppedCrying', value: val, childIndex: widget.childIndex),
                     ),
                   ),
                   const Divider(height: 0,),
 
-
                   ApiDropdown<String>(
                     labelText: "${t.newbornReferredByAshaLabel} *",
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['referredByASHA']),
+                    autoOpenTick: state.focusedErrorField == 'referredByASHA' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'referredByASHA', value: val, childIndex: widget.childIndex),
                     ),
@@ -991,6 +1020,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['birthRegistered']),
+                    autoOpenTick: state.focusedErrorField == 'birthRegistered' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'birthRegistered', value: val, childIndex: widget.childIndex),
                     ),
@@ -1003,6 +1033,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['birthCertificateIssued']),
+                    autoOpenTick: state.focusedErrorField == 'birthCertificateIssued' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'birthCertificateIssued', value: val, childIndex: widget.childIndex),
                     ),
@@ -1015,6 +1046,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['birthDoseVaccination']),
+                    autoOpenTick: state.focusedErrorField == 'birthDoseVaccination' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'birthDoseVaccination', value: val, childIndex: widget.childIndex),
                     ),
@@ -1031,6 +1063,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     items: const ['Yes', 'No'],
                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                     value: yn(c['mcpCardAvailable']),
+                    autoOpenTick: state.focusedErrorField == 'mcpCardAvailable' ? state.validationTick : null,
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'mcpCardAvailable', value: val, childIndex: widget.childIndex),
                     ),

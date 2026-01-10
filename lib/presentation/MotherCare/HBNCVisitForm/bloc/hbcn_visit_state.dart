@@ -13,6 +13,7 @@ class HbncVisitState extends Equatable {
   final int? lastValidatedIndex;
   final bool lastValidationWasSave;
   final int validationTick;
+  final String? focusedErrorField;
 
   const HbncVisitState({
     this.currentTabIndex = 0,
@@ -27,6 +28,7 @@ class HbncVisitState extends Equatable {
     this.lastValidatedIndex,
     this.lastValidationWasSave = false,
     this.validationTick = 0,
+    this.focusedErrorField,
   })  : motherDetails = motherDetails ?? const {
           'motherStatus': null,
           'dateOfDeath': null,
@@ -129,6 +131,7 @@ class HbncVisitState extends Equatable {
     int? lastValidatedIndex,
     bool? lastValidationWasSave,
     int? validationTick,
+    String? focusedErrorField,
   }) {
     return HbncVisitState(
       currentTabIndex: currentTabIndex ?? this.currentTabIndex,
@@ -143,6 +146,7 @@ class HbncVisitState extends Equatable {
       lastValidatedIndex: lastValidatedIndex ?? this.lastValidatedIndex,
       lastValidationWasSave: lastValidationWasSave ?? this.lastValidationWasSave,
       validationTick: validationTick ?? this.validationTick,
+      focusedErrorField: focusedErrorField,
     );
   }
 
@@ -163,5 +167,6 @@ class HbncVisitState extends Equatable {
         lastValidatedIndex,
         lastValidationWasSave,
         validationTick,
+        focusedErrorField,
       ];
 }

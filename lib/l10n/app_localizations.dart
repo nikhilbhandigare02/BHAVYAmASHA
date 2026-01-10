@@ -5219,6 +5219,12 @@ abstract class AppLocalizations {
   /// **'Date of Registration *'**
   String get dateOfRegistrationLabel;
 
+  /// No description provided for @dateOfRegistrationLabelR.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of Registration'**
+  String get dateOfRegistrationLabelR;
+
   /// No description provided for @childNameLabel.
   ///
   /// In en, this message translates to:
@@ -14696,7 +14702,7 @@ abstract class AppLocalizations {
   /// No description provided for @pentavalent1.
   ///
   /// In en, this message translates to:
-  /// **'Pentavalent - 1'**
+  /// **'Pentavalent 1'**
   String get pentavalent1;
 
   /// No description provided for @rota1.

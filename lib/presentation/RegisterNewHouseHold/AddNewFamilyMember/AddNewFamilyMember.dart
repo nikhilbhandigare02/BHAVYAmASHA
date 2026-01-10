@@ -2228,6 +2228,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     labelText: '${l.nameOfMemberLabel} *',
                                     hintText: l.nameOfMemberHint,
                                     initialValue: state.name ?? '',
+                                    readOnly: _isEdit,
                                     onChanged: (v) {
                                       final name = v.trim();
                                       context
