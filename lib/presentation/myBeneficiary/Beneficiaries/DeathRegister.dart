@@ -37,20 +37,25 @@ class _DeathRegisterState extends State<DeathRegister> {
     super.dispose();
   }
 
-  Future<String> _getMemberType(String uniqueKey) async {
-    try {
-      final beneficiary = await LocalStorageDao.instance
-          .getBeneficiaryByUniqueKey(uniqueKey);
-      if (beneficiary != null && beneficiary['beneficiary_info'] is Map) {
-        final beneficiaryInfo = Map<String, dynamic>.from(
-          beneficiary['beneficiary_info'],
-        );
-        return beneficiaryInfo['memberType']?.toString() ?? 'Adult';
+  String _getMemberTypeFromAgeGender(String ageString, String gender) {
+    // Extract numeric age from age string
+    int age = 0;
+    if (ageString != 'Not Available') {
+      if (ageString.contains('Y') || ageString.contains('years')) {
+        final match = RegExp(r'\d+').firstMatch(ageString);
+        age = int.tryParse(match?.group(0) ?? '0') ?? 0;
+      } else if (ageString.contains('M')) {
+        age = 0;
+      } else if (ageString.contains('D')) {
+        age = 0;
       }
-    } catch (e) {
-      print('Error fetching memberType for $uniqueKey: $e');
     }
-    return 'Adult';
+
+    if (age >= 15) {
+      return gender == 'Female' ? 'Pregnant Women' : 'Adult';
+    } else {
+      return 'Child';
+    }
   }
 
   String _getLocalizedMemberType(String memberType, AppLocalizations? l10n) {
@@ -59,6 +64,8 @@ class _DeathRegisterState extends State<DeathRegister> {
         return l10n?.badgeAdult ?? 'Adult';
       case 'child':
         return l10n?.badgeChild ?? 'Child';
+      case 'pregnant women':
+        return l10n?.pregnantWomen ?? 'Pregnant Women';
       default:
         return memberType; // Return the original value if no match
     }
@@ -267,10 +274,15 @@ class _DeathRegisterState extends State<DeathRegister> {
         deathDetails['date_of_death'] ??
             deathDetails['deathDate'] ??
             deathDetails['dateOfDeath'] ??
+            beneficiaryInfo['date_of_death'] ??
+            beneficiaryInfo['deathDate'] ??
+            beneficiaryInfo['dateOfDeath'] ??
             'Not recorded';
     final deathPlace =
         deathDetails['death_place'] ??
             deathDetails['deathPlace'] ??
+            beneficiaryInfo['death_place'] ??
+            beneficiaryInfo['deathPlace'] ??
             'Not specified';
 
     return Card(
@@ -321,30 +333,23 @@ class _DeathRegisterState extends State<DeathRegister> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  FutureBuilder<String>(
-                    future: _getMemberType(uniqueKey),
-                    builder: (context, snapshot) {
-                      final memberType = snapshot.data ?? 'Adult';
-
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          _getLocalizedMemberType(memberType, l10n),
-                          style: const TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12.5,
-                          ),
-                        ),
-                      );
-                    },
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      _getLocalizedMemberType(_getMemberTypeFromAgeGender(age, gender), l10n),
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12.5,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -356,7 +361,7 @@ class _DeathRegisterState extends State<DeathRegister> {
                 borderRadius:
                 const BorderRadius.vertical(bottom: Radius.circular(8)),
               ),
-              padding: const EdgeInsets.all(0),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -373,7 +378,7 @@ class _DeathRegisterState extends State<DeathRegister> {
                     children: [
                       Expanded(child: _rowText('', '$age | $gender')),
                       const SizedBox(width: 12),
-                      Expanded(child: _rowText('', "Place of Death: ${deathPlace}")),
+                      Expanded(child: _rowText('', "${l10n?.place_of_death}: ${deathPlace}")),
                     ],
                   ),
                 ],

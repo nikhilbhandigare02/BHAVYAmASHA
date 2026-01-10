@@ -156,7 +156,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     if (dateTime == null || dateTime.isEmpty) return '-';
     try {
       final dt = DateTime.parse(dateTime);
-      return DateFormat('dd-mm-yyyy').format(dt);
+      return DateFormat('dd-MM-yyyy').format(dt);
     } catch (_) {
       return '-';
     }
@@ -166,7 +166,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     if (dateTime == null || dateTime.isEmpty) return '-';
     try {
       final dt = DateTime.parse(dateTime);
-      return DateFormat('dd-mm-yyyy').format(dt);
+      return DateFormat('dd-MM-yyyy').format(dt);
     } catch (_) {
       return '-';
     }

@@ -11906,7 +11906,7 @@ abstract class AppLocalizations {
   /// No description provided for @place_of_death.
   ///
   /// In en, this message translates to:
-  /// **'Place of death '**
+  /// **'Place '**
   String get place_of_death;
 
   /// No description provided for @migrated_out.
