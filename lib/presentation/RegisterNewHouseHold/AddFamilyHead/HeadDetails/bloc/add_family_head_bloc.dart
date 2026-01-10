@@ -329,10 +329,26 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       // if (state.mobileOwner == null || state.mobileOwner!.trim().length < 10)
       //   errors.add('Please select whose mobile number');
       if (state.useDob) {
-        if (state.dob == null) errors.add('Please select date of birth');
+        if (state.dob == null) {
+          errors.add('Please enter valid  Date of Birth');
+        }
       } else {
-        if (state.approxAge == null || state.approxAge!.trim().isEmpty)
-          errors.add('please enter Age required');
+        // Approximate age path
+        final y = int.tryParse(state.years ?? '0') ?? 0;
+        final m = int.tryParse(state.months ?? '0') ?? 0;
+        final d = int.tryParse(state.days ?? '0') ?? 0;
+
+        final isEmptyAge = (y == 0 && m == 0 && d == 0);
+
+        if (isEmptyAge || state.approxAge?.trim().isEmpty == true) {
+          errors.add('Please enter approximate age (years/months/days are mandatory)');
+        } else if (y > 110 || y < 0) {
+          errors.add('Age in years should be between 0 and 110');
+        } else if (m > 11 || m < 0) {
+          errors.add('Months should be between 0 and 11');
+        } else if (d > 31 || d < 0) {
+          errors.add('Days should be between 0 and 31');
+        }
       }
       if (state.gender == null || state.gender!.isEmpty)
         errors.add('Please select gender');
