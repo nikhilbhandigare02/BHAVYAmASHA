@@ -168,13 +168,13 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
     );
     on<AfhRichIdChange>(
           (event, emit) {
-            final value = event.value;
-            final isButtonEnabled = value.length == 12;
-            emit(state.copyWith(
-              AfhRichIdChange: value,
-              isRchIdButtonEnabled: isButtonEnabled,
-            ));
-          },
+        final value = event.value;
+        final isButtonEnabled = value.length == 12;
+        emit(state.copyWith(
+          AfhRichIdChange: value,
+          isRchIdButtonEnabled: isButtonEnabled,
+        ));
+      },
     );
     on<AfhUpdateEducation>(
           (event, emit) => emit(state.copyWith(education: event.value)),
@@ -328,28 +328,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         errors.add('Please enter valid mobile number');
       // if (state.mobileOwner == null || state.mobileOwner!.trim().length < 10)
       //   errors.add('Please select whose mobile number');
-      if (state.useDob) {
-        if (state.dob == null) {
-          errors.add('Please enter valid  Date of Birth');
-        }
-      } else {
-        // Approximate age path
-        final y = int.tryParse(state.years ?? '0') ?? 0;
-        final m = int.tryParse(state.months ?? '0') ?? 0;
-        final d = int.tryParse(state.days ?? '0') ?? 0;
 
-        final isEmptyAge = (y == 0 && m == 0 && d == 0);
-
-        if (isEmptyAge || state.approxAge?.trim().isEmpty == true) {
-          errors.add('Please enter approximate age (years/months/days are mandatory)');
-        } else if (y > 110 || y < 0) {
-          errors.add('Age in years should be between 0 and 110');
-        } else if (m > 11 || m < 0) {
-          errors.add('Months should be between 0 and 11');
-        } else if (d > 31 || d < 0) {
-          errors.add('Days should be between 0 and 31');
-        }
-      }
       if (state.gender == null || state.gender!.isEmpty)
         errors.add('Please select gender');
       if (state.maritalStatus == null || state.maritalStatus!.isEmpty) {
@@ -426,17 +405,17 @@ extension _AddFamilyHeadBlocHelpers on AddFamilyHeadBloc {
   }
 
   Map<String, dynamic> _deviceDetails(dynamic deviceInfo) => {
-        'id': deviceInfo.deviceId,
-        'platform': deviceInfo.platform,
-        'version': deviceInfo.osVersion,
-      };
+    'id': deviceInfo.deviceId,
+    'platform': deviceInfo.platform,
+    'version': deviceInfo.osVersion,
+  };
 
   Map<String, dynamic> _appDetails(dynamic deviceInfo) => {
-        'app_version': deviceInfo.appVersion.split('+').first,
-        'app_name': deviceInfo.appName,
-        'build_number': deviceInfo.buildNumber,
-        'package_name': deviceInfo.packageName,
-      };
+    'app_version': deviceInfo.appVersion.split('+').first,
+    'app_name': deviceInfo.appName,
+    'build_number': deviceInfo.buildNumber,
+    'package_name': deviceInfo.packageName,
+  };
 
   Future<void> _syncBeneficiaryByUniqueKey({
     required String uniqueKey,
@@ -478,7 +457,7 @@ extension _AddFamilyHeadBlocHelpers on AddFamilyHeadBloc {
               if (sid.isNotEmpty && reqUniqueKey.isNotEmpty) {
                 final updated = await LocalStorageDao.instance
                     .updateBeneficiaryServerIdByUniqueKey(
-                        uniqueKey: reqUniqueKey, serverId: sid);
+                    uniqueKey: reqUniqueKey, serverId: sid);
                 print('Updated beneficiary with server_id=$sid rows=$updated');
               }
             }
@@ -488,7 +467,7 @@ extension _AddFamilyHeadBlocHelpers on AddFamilyHeadBloc {
             if (sid.isNotEmpty && reqUniqueKey.isNotEmpty) {
               final updated = await LocalStorageDao.instance
                   .updateBeneficiaryServerIdByUniqueKey(
-                      uniqueKey: reqUniqueKey, serverId: sid);
+                  uniqueKey: reqUniqueKey, serverId: sid);
               print('Updated beneficiary with server_id=$sid rows=$updated');
             }
           }
@@ -502,20 +481,20 @@ extension _AddFamilyHeadBlocHelpers on AddFamilyHeadBloc {
   }
 
   Map<String, dynamic> _buildBeneficiaryApiPayload(
-    Map<String, dynamic> row,
-    Map<String, dynamic> userDetails,
-    Map<String, dynamic> working,
-    dynamic deviceInfo,
-    String ts,
-    dynamic ashaUniqueKey,
-    dynamic facilityId,
-  ) {
+      Map<String, dynamic> row,
+      Map<String, dynamic> userDetails,
+      Map<String, dynamic> working,
+      dynamic deviceInfo,
+      String ts,
+      dynamic ashaUniqueKey,
+      dynamic facilityId,
+      ) {
     final rawInfo = row['beneficiary_info'];
     final info = (rawInfo is Map)
         ? Map<String, dynamic>.from(rawInfo)
         : (rawInfo is String && rawInfo.isNotEmpty)
-            ? Map<String, dynamic>.from(jsonDecode(rawInfo))
-            : <String, dynamic>{};
+        ? Map<String, dynamic>.from(jsonDecode(rawInfo))
+        : <String, dynamic>{};
 
     String? _genderCode(String? g) {
       if (g == null) return null;
@@ -591,20 +570,20 @@ extension _AddFamilyHeadBlocHelpers on AddFamilyHeadBloc {
       'mother_ben_ref_key': info['mother_ben_ref_key'] ?? row['mother_key']?.toString() ?? '',
       'father_ben_ref_key': info['father_ben_ref_key'] ?? row['father_key']?.toString() ?? '',
       'relaton_with_family_head':
-          info['relaton_with_family_head'] ?? info['relation_to_head'] ?? 'self',
+      info['relaton_with_family_head'] ?? info['relation_to_head'] ?? 'self',
       'member_status': info['member_status'] ?? 'alive',
       'member_name': info['member_name'] ?? info['headName'] ?? info['memberName'] ?? info['name'],
       'father_or_spouse_name':
-          info['father_or_spouse_name'] ?? info['fatherName'] ?? info['spouseName'] ?? '',
+      info['father_or_spouse_name'] ?? info['fatherName'] ?? info['spouseName'] ?? '',
       'have_children': info['have_children'] ?? info['hasChildren'],
       'is_family_planning': info['is_family_planning'] ?? row['is_family_planning'] ?? 0,
       'total_children': info['total_children'] ?? info['totalBorn'],
       'total_live_children': info['total_live_children'] ?? info['totalLive'],
       'total_male_children': info['total_male_children'] ?? info['totalMale'],
       'age_of_youngest_child':
-          info['age_of_youngest_child'] ?? info['youngestAge'],
+      info['age_of_youngest_child'] ?? info['youngestAge'],
       'gender_of_younget_child':
-          info['gender_of_younget_child'] ?? info['youngestGender'],
+      info['gender_of_younget_child'] ?? info['youngestGender'],
       'whose_mob_no': info['whose_mob_no'] ?? info['mobileOwner'],
       'mobile_no': info['mobile_no'] ?? info['mobileNo'],
       'dob_day': info['dob_day'],
@@ -618,9 +597,9 @@ extension _AddFamilyHeadBlocHelpers on AddFamilyHeadBloc {
       'isFamilyhead': info['isFamilyhead'] ?? true,
       'isFamilyheadWife': info['isFamilyheadWife'] ?? false,
       'age_of_youngest_child_unit':
-          info['age_of_youngest_child_unit'] ?? info['ageUnit'],
+      info['age_of_youngest_child_unit'] ?? info['ageUnit'],
       'type_of_beneficiary':
-          info['type_of_beneficiary'] ?? info['beneficiaryType'] ?? 'staying_in_house',
+      info['type_of_beneficiary'] ?? info['beneficiaryType'] ?? 'staying_in_house',
       'name_of_spouse': info['name_of_spouse'] ?? info['spouseName'] ?? '',
     }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty));
 
