@@ -473,7 +473,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-      
+
       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
         print('Error: Current user key not found');
         if (mounted) {
@@ -498,15 +498,15 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       ''';
 
       final rows = await db.rawQuery(query, [ashaUniqueKey]);
-      
+
       int count = 0;
       for (final row in rows) {
         try {
           final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
-          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty 
+          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty
               ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfo))
               : <String, dynamic>{};
-          
+
           final memberType = info['memberType']?.toString().toLowerCase() ?? '';
           if (memberType != 'child') {
             count++;
@@ -515,7 +515,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           count++;
         }
       }
-      
+
       if (mounted) {
         setState(() {
           eligibleCouplesCount = count;
@@ -546,7 +546,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   Future<void> _loadAncVisitCount() async {
     try {
-     /* final count = await ANCUtils.getMotherCareTotalCount();
+      /* final count = await ANCUtils.getMotherCareTotalCount();
       final countSync = await ANCUtils.getMotherCareSyncedTotalCount();*/
       await ANCUtils.loadPregnantWomen();
       if (mounted) {
@@ -563,7 +563,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   Future<void> _loadChildRegisteredCount() async {
     try {
-       final result = await _childCareCountProvider.getRegisteredChildCountTotalAndSync();
+      final result = await _childCareCountProvider.getRegisteredChildCountTotalAndSync();
       final total = result['total']!;
       final synced = result['synced']!;
       if (mounted) {
@@ -687,240 +687,240 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           return shouldExit ?? false;
         },
         child: Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppHeader(
-            screenTitle: l10n.homeTitle,
-            showBack: false,
-            icon1Image: 'assets/images/search.png',
-            onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.GuestBeneficiarySearch),
-            icon2Widget: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 12.0),
-                  child: Image.asset(
-                    'assets/images/img_1.png',
-                    height: MediaQuery.of(context).orientation == Orientation.landscape ? 5.h : 2.7.h,
-                    width: MediaQuery.of(context).orientation == Orientation.landscape ? 5.h : 2.7.h,
-                    color: Theme.of(context).colorScheme.onPrimary,
+            backgroundColor: Colors.white,
+            appBar: AppHeader(
+              screenTitle: l10n.homeTitle,
+              showBack: false,
+              icon1Image: 'assets/images/search.png',
+              onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.GuestBeneficiarySearch),
+              icon2Widget: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: Image.asset(
+                      'assets/images/img_1.png',
+                      height: MediaQuery.of(context).orientation == Orientation.landscape ? 5.h : 2.7.h,
+                      width: MediaQuery.of(context).orientation == Orientation.landscape ? 5.h : 2.7.h,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
                   ),
-                ),
-                if (notificationCount > 0)
-                  Positioned(
-                    right: 6,
-                    top: -4,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      child: Center(
-                        child: Text(
-                          notificationCount.toString(),
-                          style:  TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                  if (notificationCount > 0)
+                    Positioned(
+                      right: 6,
+                      top: -4,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Center(
+                          child: Text(
+                            notificationCount.toString(),
+                            style:  TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
                         ),
                       ),
                     ),
-                  ),
-              ],
-            ),
-            onIcon2Tap: () => Navigator.pushNamed(context, Route_Names.notificationScreen),
-            icon3Image: 'assets/images/home.png',
-            onIcon3Tap: () => Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomeScreen(initialTabIndex: 1),
+                ],
               ),
-            ),
-          ),
-          drawer: CustomDrawer(
-            onSyncCompleted: () async {
-              await _loadHouseholdCount();
-              await _loadBeneficiariesCount();
-              await _loadEligibleCouplesCount();
-              // await _loadPregnantWomenCount();
-              await _loadAncVisitCount();
-              await _loadChildRegisteredCount();
-              await _loadHighRiskCount();
-              await _loadNotificationCount();
-              await _loadNcdCount();
-            },
-          ),
-          body: Stack(
-            children: [
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Image.asset(
-                  'assets/images/sakhi-bg.jpg',
-                  width: 25.h,
-                  fit: BoxFit.cover,
-                  opacity: AlwaysStoppedAnimation(0.1),
+              onIcon2Tap: () => Navigator.pushNamed(context, Route_Names.notificationScreen),
+              icon3Image: 'assets/images/home.png',
+              onIcon3Tap: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomeScreen(initialTabIndex: 1),
                 ),
               ),
-              Column(
+            ),
+            drawer: CustomDrawer(
+              onSyncCompleted: () async {
+                await _loadHouseholdCount();
+                await _loadBeneficiariesCount();
+                await _loadEligibleCouplesCount();
+                // await _loadPregnantWomenCount();
+                await _loadAncVisitCount();
+                await _loadChildRegisteredCount();
+                await _loadHighRiskCount();
+                await _loadNotificationCount();
+                await _loadNcdCount();
+              },
+            ),
+            body: Stack(
                 children: [
-              // Tabs
-              Material(
-                color: AppColors.background,
-                elevation: 2,
-                borderRadius: BorderRadius.circular(8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => setState(() => selectedIndex = 0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Image.asset(
+                      'assets/images/sakhi-bg.jpg',
+                      width: 25.h,
+                      fit: BoxFit.cover,
+                      opacity: AlwaysStoppedAnimation(0.1),
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      // Tabs
+                      Material(
+                        color: AppColors.background,
+                        elevation: 2,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Row(
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.today,
-                                    color:AppColors.primary,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    l10n.tabTodaysProgram,
-                                    style: TextStyle(
-                                      fontSize: 15.sp,
+                            Expanded(
+                              child: InkWell(
+                                onTap: () => setState(() => selectedIndex = 0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.today,
+                                            color:AppColors.primary,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            l10n.tabTodaysProgram,
+                                            style: TextStyle(
+                                              fontSize: 15.sp,
+                                              color: selectedIndex == 0
+                                                  ? AppColors.primary
+                                                  : AppColors.outline,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 3,
                                       color: selectedIndex == 0
                                           ? AppColors.primary
-                                          : AppColors.outline,
-                                      fontWeight: FontWeight.w500,
+                                          : Colors.transparent,
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                            Container(
-                              height: 3,
-                              color: selectedIndex == 0
-                                  ? AppColors.primary
-                                  : Colors.transparent,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Container(width: 1, height: 50, color: AppColors.divider),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () async {
-                          setState(() => selectedIndex = 1);
-                          await _loadBeneficiariesCount();
-                        },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                      Icons.apps_sharp,
-                                      color: AppColors.primary
+                            Container(width: 1, height: 50, color: AppColors.divider),
+                            Expanded(
+                              child: InkWell(
+                                onTap: () async {
+                                  setState(() => selectedIndex = 1);
+                                  await _loadBeneficiariesCount();
+                                },
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                              Icons.apps_sharp,
+                                              color: AppColors.primary
 
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    l10n.tabAshaDashboard,
-                                    style: TextStyle(
-                                      fontSize: 15.sp,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            l10n.tabAshaDashboard,
+                                            style: TextStyle(
+                                              fontSize: 15.sp,
+                                              color: selectedIndex == 1
+                                                  ? AppColors.primary
+                                                  : AppColors.outline,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 3,
                                       color: selectedIndex == 1
                                           ? AppColors.primary
-                                          : AppColors.outline,
-                                      fontWeight: FontWeight.w500,
+                                          : Colors.transparent,
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            Container(
-                              height: 3,
-                              color: selectedIndex == 1
-                                  ? AppColors.primary
-                                  : Colors.transparent,
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-              Expanded(
-                child: selectedIndex == 0
-                    ? isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : SingleChildScrollView(
-                      child: TodayProgramSection(
-                        selectedGridIndex: selectedGridIndex,
-                        onGridTap: (index) =>
-                            setState(() => selectedGridIndex = index),
-                        apiData: apiData,
+                      Expanded(
+                        child: selectedIndex == 0
+                            ? isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : SingleChildScrollView(
+                          child: TodayProgramSection(
+                            selectedGridIndex: selectedGridIndex,
+                            onGridTap: (index) =>
+                                setState(() => selectedGridIndex = index),
+                            apiData: apiData,
+                          ),
+                        )
+                            : SingleChildScrollView(
+                          child: AshaDashboardSection(
+                            householdCount: householdCount,
+                            beneficiariesCount: beneficiariesCount,
+                            eligibleCouplesCount: eligibleCouplesCount,
+                            pregnantWomenCount: pregnantWomenCount,
+                            ancVisitCount: ancVisitCount,
+                            childRegisteredCount: childRegisteredCount,
+                            highRiskCount: highRiskCount,
+                            ncdCount: ncdCount,
+                            selectedGridIndex: selectedGridIndex,
+                            onGridTap: (index) =>
+                                setState(() => selectedGridIndex = index),
+                            appRoleId: appRoleId ?? 0,
+                            mainGridActions: [
+                              null,
+                              null,
+                              null,
+                              null,
+                              null,
+                              null,
+                              null,
+                                  () async {
+                                final result = await Navigator.pushNamed(
+                                    context, Route_Names.Mothercarehomescreen);
+                                if (!mounted) return;
+                                if (result is int) {
+                                  setState(() {
+                                    ancVisitCount = result;
+                                  });
+                                } else if (result == true) {
+                                  await _loadAncVisitCount();
+                                } else {
+                                  await _loadAncVisitCount();
+                                }
+                              },
+                            ],
+                          ),
+                        ),
                       ),
-                    )
-                    : SingleChildScrollView(
-                      child: AshaDashboardSection(
-                        householdCount: householdCount,
-                        beneficiariesCount: beneficiariesCount,
-                        eligibleCouplesCount: eligibleCouplesCount,
-                        pregnantWomenCount: pregnantWomenCount,
-                        ancVisitCount: ancVisitCount,
-                        childRegisteredCount: childRegisteredCount,
-                        highRiskCount: highRiskCount,
-                        ncdCount: ncdCount,
-                        selectedGridIndex: selectedGridIndex,
-                        onGridTap: (index) =>
-                            setState(() => selectedGridIndex = index),
-                        appRoleId: appRoleId ?? 0,
-                        mainGridActions: [
-                          null,
-                          null,
-                          null,
-                          null,
-                          null,
-                          null,
-                          null,
-                              () async {
-                            final result = await Navigator.pushNamed(
-                                context, Route_Names.Mothercarehomescreen);
-                            if (!mounted) return;
-                            if (result is int) {
-                              setState(() {
-                                ancVisitCount = result;
-                              });
-                            } else if (result == true) {
-                              await _loadAncVisitCount();
-                            } else {
-                              await _loadAncVisitCount();
-                            }
-                          },
-                        ],
-                      ),
-                    ),
-              ),
-            ],
-          ),
-        ])));
+                    ],
+                  ),
+                ])));
   }
 
   @override

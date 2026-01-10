@@ -9956,14 +9956,14 @@ abstract class AppLocalizations {
   /// No description provided for @decisionTakenDuringMeeting.
   ///
   /// In en, this message translates to:
-  /// **'Decision Taken During the Meeting'**
+  /// **'Decision taken during the meeting'**
   String get decisionTakenDuringMeeting;
 
-  /// No description provided for @discussionSubTopicProgram.
+  /// No description provided for @otherDiscussionSubTopicProgram.
   ///
   /// In en, this message translates to:
-  /// **'Discussion Sub Topic/Program'**
-  String get discussionSubTopicProgram;
+  /// **'Other_Discussion Sub Topic/Program'**
+  String get otherDiscussionSubTopicProgram;
 
   /// No description provided for @discussionTopicProgram.
   ///
@@ -9980,7 +9980,7 @@ abstract class AppLocalizations {
   /// No description provided for @clusterMeetingsCountThisMonth.
   ///
   /// In en, this message translates to:
-  /// **'No. of cluster meetings conducted in this month'**
+  /// **'No. of Cluster meetings conducted in this month'**
   String get clusterMeetingsCountThisMonth;
 
   /// No description provided for @noOfASHAAbsentInThisMeeting.
@@ -9998,7 +9998,7 @@ abstract class AppLocalizations {
   /// No description provided for @totalAshaUnderFacilitator.
   ///
   /// In en, this message translates to:
-  /// **'Total no. of ASHA under facilitator'**
+  /// **'Total Number of ASHA\'s under the Facilitator'**
   String get totalAshaUnderFacilitator;
 
   /// No description provided for @noOfHours.
@@ -10178,7 +10178,7 @@ abstract class AppLocalizations {
   /// No description provided for @pnc.
   ///
   /// In en, this message translates to:
-  /// **'PNC (Post Natal Care)'**
+  /// **'PNC'**
   String get pnc;
 
   /// No description provided for @maternalChildHealth.
@@ -13706,7 +13706,7 @@ abstract class AppLocalizations {
   /// No description provided for @badgeLBW.
   ///
   /// In en, this message translates to:
-  /// **'LBW referred'**
+  /// **'LBW Referred'**
   String get badgeLBW;
 
   /// No description provided for @badgeMigrated.
@@ -14854,6 +14854,318 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tetanus Diphtheria (Td)'**
   String get tdVaccine;
+
+  /// No description provided for @currentAncDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Current ANC last due date'**
+  String get currentAncDueDate;
+
+  /// No description provided for @lastVisitDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Last visit date'**
+  String get lastVisitDate;
+
+  /// No description provided for @nextHbncDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Next HBNC due date'**
+  String get nextHbncDueDate;
+
+  /// No description provided for @immunizationDueListPreparation.
+  ///
+  /// In en, this message translates to:
+  /// **'Due list preparation'**
+  String get immunizationDueListPreparation;
+
+  /// No description provided for @immunizationVHSND.
+  ///
+  /// In en, this message translates to:
+  /// **'VHSND'**
+  String get immunizationVHSND;
+
+  /// No description provided for @immunizationVHSC.
+  ///
+  /// In en, this message translates to:
+  /// **'VHSC'**
+  String get immunizationVHSC;
+
+  /// No description provided for @immunizationDropoutChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropout Children'**
+  String get immunizationDropoutChildren;
+
+  /// No description provided for @immunizationLeftoutChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Leftout Children'**
+  String get immunizationLeftoutChildren;
+
+  /// No description provided for @immunizationZerodoseChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Zerodose Children'**
+  String get immunizationZerodoseChildren;
+
+  /// No description provided for @immunizationImmunizationInPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Immunization in private'**
+  String get immunizationImmunizationInPrivate;
+
+  /// No description provided for @immunizationDocumentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Documentation'**
+  String get immunizationDocumentation;
+
+  /// No description provided for @immunizationOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get immunizationOther;
+
+  /// No description provided for @pregnantWomenANC.
+  ///
+  /// In en, this message translates to:
+  /// **'ANC'**
+  String get pregnantWomenANC;
+
+  /// No description provided for @pregnantWomenRegistartionForANC.
+  ///
+  /// In en, this message translates to:
+  /// **'Registartion for ANC'**
+  String get pregnantWomenRegistartionForANC;
+
+  /// No description provided for @pregnantWomenDangerSigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger Signs'**
+  String get pregnantWomenDangerSigns;
+
+  /// No description provided for @pregnantWomenOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get pregnantWomenOther;
+
+  /// No description provided for @familyPlanningEligibleCouple.
+  ///
+  /// In en, this message translates to:
+  /// **'Eligible Couple'**
+  String get familyPlanningEligibleCouple;
+
+  /// No description provided for @otherPublicHealthProgramTuberculosis.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuberculosis'**
+  String get otherPublicHealthProgramTuberculosis;
+
+  /// No description provided for @otherPublicHealthProgramLeprosy.
+  ///
+  /// In en, this message translates to:
+  /// **'Leprosy'**
+  String get otherPublicHealthProgramLeprosy;
+
+  /// No description provided for @otherPublicHealthProgramMalnutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'Malnutrition'**
+  String get otherPublicHealthProgramMalnutrition;
+
+  /// No description provided for @otherPublicHealthProgramAnemia.
+  ///
+  /// In en, this message translates to:
+  /// **'Anemia'**
+  String get otherPublicHealthProgramAnemia;
+
+  /// No description provided for @otherPublicHealthProgramDiarrhea.
+  ///
+  /// In en, this message translates to:
+  /// **'Diarrhea'**
+  String get otherPublicHealthProgramDiarrhea;
+
+  /// No description provided for @otherPublicHealthProgramNCD.
+  ///
+  /// In en, this message translates to:
+  /// **'NCD'**
+  String get otherPublicHealthProgramNCD;
+
+  /// No description provided for @otherPublicHealthProgramPolio.
+  ///
+  /// In en, this message translates to:
+  /// **'Polio'**
+  String get otherPublicHealthProgramPolio;
+
+  /// No description provided for @otherPublicHealthProgramKalaAzar.
+  ///
+  /// In en, this message translates to:
+  /// **'Kala Azar'**
+  String get otherPublicHealthProgramKalaAzar;
+
+  /// No description provided for @otherPublicHealthProgramAES.
+  ///
+  /// In en, this message translates to:
+  /// **'AES'**
+  String get otherPublicHealthProgramAES;
+
+  /// No description provided for @otherPublicHealthProgramCovid19.
+  ///
+  /// In en, this message translates to:
+  /// **'Covid-19'**
+  String get otherPublicHealthProgramCovid19;
+
+  /// No description provided for @otherPublicHealthProgramCholera.
+  ///
+  /// In en, this message translates to:
+  /// **'Cholera'**
+  String get otherPublicHealthProgramCholera;
+
+  /// No description provided for @otherPublicHealthProgramDengue.
+  ///
+  /// In en, this message translates to:
+  /// **'Dengue'**
+  String get otherPublicHealthProgramDengue;
+
+  /// No description provided for @otherPublicHealthProgramDogBite.
+  ///
+  /// In en, this message translates to:
+  /// **'Dog Bite'**
+  String get otherPublicHealthProgramDogBite;
+
+  /// No description provided for @otherPublicHealthProgramKilkari.
+  ///
+  /// In en, this message translates to:
+  /// **'Kilkari'**
+  String get otherPublicHealthProgramKilkari;
+
+  /// No description provided for @administrativeRegisters.
+  ///
+  /// In en, this message translates to:
+  /// **'Registers'**
+  String get administrativeRegisters;
+
+  /// No description provided for @administrativeDrugs.
+  ///
+  /// In en, this message translates to:
+  /// **'Drugs'**
+  String get administrativeDrugs;
+
+  /// No description provided for @administrativeEquipement.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipement'**
+  String get administrativeEquipement;
+
+  /// No description provided for @administrativePlanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Planning'**
+  String get administrativePlanning;
+
+  /// No description provided for @administrativeCounselingMaterialFlipbooksCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Counseling material (Flipbooks/Cards)'**
+  String get administrativeCounselingMaterialFlipbooksCards;
+
+  /// No description provided for @administrativeImmunizationCardsMCPCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Immunization cards(MCP Cards)'**
+  String get administrativeImmunizationCardsMCPCards;
+
+  /// No description provided for @administrativeHealthPromotionalMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Promotional Material'**
+  String get administrativeHealthPromotionalMaterial;
+
+  /// No description provided for @trainingAndSupportTrainingSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Training Support'**
+  String get trainingAndSupportTrainingSupport;
+
+  /// No description provided for @trainingAndSupportMentoringSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Mentoring Support'**
+  String get trainingAndSupportMentoringSupport;
+
+  /// No description provided for @trainingAndSupportFieldSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Field support'**
+  String get trainingAndSupportFieldSupport;
+
+  /// No description provided for @trainingAndSupportASHAWorkPlanning.
+  ///
+  /// In en, this message translates to:
+  /// **'ASHA work planning'**
+  String get trainingAndSupportASHAWorkPlanning;
+
+  /// No description provided for @trainingAndSupportHomeVisits.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Visits'**
+  String get trainingAndSupportHomeVisits;
+
+  /// No description provided for @trainingAndSupportMobileAcademy.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Academy'**
+  String get trainingAndSupportMobileAcademy;
+
+  /// No description provided for @deathMaternalDeath.
+  ///
+  /// In en, this message translates to:
+  /// **'Maternal Death'**
+  String get deathMaternalDeath;
+
+  /// No description provided for @deathChild.
+  ///
+  /// In en, this message translates to:
+  /// **'Child Death'**
+  String get deathChild;
+
+  /// No description provided for @deathNowBorn.
+  ///
+  /// In en, this message translates to:
+  /// **'Now Born Death'**
+  String get deathNowBorn;
+
+  /// No description provided for @deathInfant.
+  ///
+  /// In en, this message translates to:
+  /// **'Infant Death'**
+  String get deathInfant;
+
+  /// No description provided for @deathDocumentation.
+  ///
+  /// In en, this message translates to:
+  /// **'Documentation'**
+  String get deathDocumentation;
+
+  /// No description provided for @deathNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get deathNotification;
+
+  /// No description provided for @deathOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get deathOther;
+
+  /// No description provided for @discussionTopic.
+  ///
+  /// In en, this message translates to:
+  /// **'discussion topic/program'**
+  String get discussionTopic;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

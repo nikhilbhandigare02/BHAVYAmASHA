@@ -56,6 +56,7 @@ class CustomTextField extends StatefulWidget {
   final String? suffixText;
   final String? unitLetterSuffix;
   final AutovalidateMode? autovalidateMode;
+  final TextStyle? textStyle;
 
   const CustomTextField({
     super.key,
@@ -80,6 +81,7 @@ class CustomTextField extends StatefulWidget {
     this.suffixText,
     this.unitLetterSuffix,
     this.autovalidateMode,
+    this.textStyle,
   });
 
   @override
@@ -245,6 +247,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       focusNode: widget.focusNode,
       textInputAction: widget.textInputAction,
       autofocus: widget.autofocus,
+
       decoration: InputDecoration(
         alignLabelWithHint: true,
         isDense: true,

@@ -867,7 +867,6 @@ class _HBNCListScreenState
           print('🆔 Complete Beneficiary ID: ${data['fullBeneficiaryId']}');
           print('👤 Name: ${data['name']}');
 
-
           // Pass only beneficiary ID, household ID, and name
           final childTabCount = await _getChildTabCount(data['fullBeneficiaryId']?.toString() ?? '');
           print('👤 tabcount: ${data['child_tab_count']}');

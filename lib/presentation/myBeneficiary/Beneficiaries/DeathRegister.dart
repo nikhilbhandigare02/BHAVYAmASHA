@@ -125,22 +125,22 @@ class _DeathRegisterState extends State<DeathRegister> {
         children: [
           _isLoading
               ? const Expanded(
-                  child: Center(child: CircularProgressIndicator()),
-                )
+            child: Center(child: CircularProgressIndicator()),
+          )
               : _deathRecords.isEmpty
               ? _buildNoRecordCard(context)
               : Expanded(
-                  child: _filtered.isEmpty
-                      ? _buildNoRecordCard(context)
-                      : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                          itemCount: _filtered.length,
-                          itemBuilder: (context, index) {
-                            final data = _filtered[index];
-                            return _householdCard(context, data);
-                          },
-                        ),
-                ),
+            child: _filtered.isEmpty
+                ? _buildNoRecordCard(context)
+                : ListView.builder(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              itemCount: _filtered.length,
+              itemBuilder: (context, index) {
+                final data = _filtered[index];
+                return _householdCard(context, data);
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -190,9 +190,9 @@ class _DeathRegisterState extends State<DeathRegister> {
     // Parse beneficiary info
     final name =
         beneficiaryInfo['memberName'] ??
-        beneficiaryInfo['headName'] ??
-        beneficiaryInfo['name'] ??
-        'Unknown';
+            beneficiaryInfo['headName'] ??
+            beneficiaryInfo['name'] ??
+            'Unknown';
 
     // Calculate age from DOB if available using same logic as RegisterChildListScreen
     String age = 'Not Available';
@@ -265,13 +265,13 @@ class _DeathRegisterState extends State<DeathRegister> {
 
     final deathDate =
         deathDetails['date_of_death'] ??
-        deathDetails['deathDate'] ??
-        deathDetails['dateOfDeath'] ??
-        'Not recorded';
+            deathDetails['deathDate'] ??
+            deathDetails['dateOfDeath'] ??
+            'Not recorded';
     final deathPlace =
         deathDetails['death_place'] ??
-        deathDetails['deathPlace'] ??
-        'Not specified';
+            deathDetails['deathPlace'] ??
+            'Not specified';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
@@ -357,7 +357,7 @@ class _DeathRegisterState extends State<DeathRegister> {
                 borderRadius:
                 const BorderRadius.vertical(bottom: Radius.circular(8)),
               ),
-              padding: const EdgeInsets.only(bottom: 12, right: 12, left: 12),
+              padding: const EdgeInsets.all(0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -366,6 +366,7 @@ class _DeathRegisterState extends State<DeathRegister> {
                       Expanded(child: _rowText('', name)),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText('', "Date :${_formatDate(deathDate)}")),
+
 
                     ],
                   ),

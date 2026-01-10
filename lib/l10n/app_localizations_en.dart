@@ -4954,10 +4954,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phcName => 'PHC Name';
 
   @override
-  String get decisionTakenDuringMeeting => 'Decision Taken During the Meeting';
+  String get decisionTakenDuringMeeting => 'Decision taken during the meeting';
 
   @override
-  String get discussionSubTopicProgram => 'Discussion Sub Topic/Program';
+  String get otherDiscussionSubTopicProgram => 'Other_Discussion Sub Topic/Program';
 
   @override
   String get discussionTopicProgram => 'Discussion Topic/Program';
@@ -4966,7 +4966,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectTopics => 'Select Topics';
 
   @override
-  String get clusterMeetingsCountThisMonth => 'No. of cluster meetings conducted in this month';
+  String get clusterMeetingsCountThisMonth => 'No. of Cluster meetings conducted in this month';
 
   @override
   String get noOfASHAAbsentInThisMeeting => 'No. of ASHA absent in this meeting';
@@ -4975,7 +4975,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ashaPresentCount => 'No. of ASHA present in this meeting';
 
   @override
-  String get totalAshaUnderFacilitator => 'Total no. of ASHA under facilitator';
+  String get totalAshaUnderFacilitator => 'Total Number of ASHA\'s under the Facilitator';
 
   @override
   String get noOfHours => 'No. of hours';
@@ -5065,7 +5065,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliveries => 'Deliveries';
 
   @override
-  String get pnc => 'PNC (Post Natal Care)';
+  String get pnc => 'PNC';
 
   @override
   String get maternalChildHealth => 'Maternal & Child Health';
@@ -6829,7 +6829,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get badgePNC => 'PNC';
 
   @override
-  String get badgeLBW => 'LBW referred';
+  String get badgeLBW => 'LBW Referred';
 
   @override
   String get badgeMigrated => 'Migrated';
@@ -7403,4 +7403,160 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tdVaccine => 'Tetanus Diphtheria (Td)';
+
+  @override
+  String get currentAncDueDate => 'Current ANC last due date';
+
+  @override
+  String get lastVisitDate => 'Last visit date';
+
+  @override
+  String get nextHbncDueDate => 'Next HBNC due date';
+
+  @override
+  String get immunizationDueListPreparation => 'Due list preparation';
+
+  @override
+  String get immunizationVHSND => 'VHSND';
+
+  @override
+  String get immunizationVHSC => 'VHSC';
+
+  @override
+  String get immunizationDropoutChildren => 'Dropout Children';
+
+  @override
+  String get immunizationLeftoutChildren => 'Leftout Children';
+
+  @override
+  String get immunizationZerodoseChildren => 'Zerodose Children';
+
+  @override
+  String get immunizationImmunizationInPrivate => 'Immunization in private';
+
+  @override
+  String get immunizationDocumentation => 'Documentation';
+
+  @override
+  String get immunizationOther => 'Other';
+
+  @override
+  String get pregnantWomenANC => 'ANC';
+
+  @override
+  String get pregnantWomenRegistartionForANC => 'Registartion for ANC';
+
+  @override
+  String get pregnantWomenDangerSigns => 'Danger Signs';
+
+  @override
+  String get pregnantWomenOther => 'Other';
+
+  @override
+  String get familyPlanningEligibleCouple => 'Eligible Couple';
+
+  @override
+  String get otherPublicHealthProgramTuberculosis => 'Tuberculosis';
+
+  @override
+  String get otherPublicHealthProgramLeprosy => 'Leprosy';
+
+  @override
+  String get otherPublicHealthProgramMalnutrition => 'Malnutrition';
+
+  @override
+  String get otherPublicHealthProgramAnemia => 'Anemia';
+
+  @override
+  String get otherPublicHealthProgramDiarrhea => 'Diarrhea';
+
+  @override
+  String get otherPublicHealthProgramNCD => 'NCD';
+
+  @override
+  String get otherPublicHealthProgramPolio => 'Polio';
+
+  @override
+  String get otherPublicHealthProgramKalaAzar => 'Kala Azar';
+
+  @override
+  String get otherPublicHealthProgramAES => 'AES';
+
+  @override
+  String get otherPublicHealthProgramCovid19 => 'Covid-19';
+
+  @override
+  String get otherPublicHealthProgramCholera => 'Cholera';
+
+  @override
+  String get otherPublicHealthProgramDengue => 'Dengue';
+
+  @override
+  String get otherPublicHealthProgramDogBite => 'Dog Bite';
+
+  @override
+  String get otherPublicHealthProgramKilkari => 'Kilkari';
+
+  @override
+  String get administrativeRegisters => 'Registers';
+
+  @override
+  String get administrativeDrugs => 'Drugs';
+
+  @override
+  String get administrativeEquipement => 'Equipement';
+
+  @override
+  String get administrativePlanning => 'Planning';
+
+  @override
+  String get administrativeCounselingMaterialFlipbooksCards => 'Counseling material (Flipbooks/Cards)';
+
+  @override
+  String get administrativeImmunizationCardsMCPCards => 'Immunization cards(MCP Cards)';
+
+  @override
+  String get administrativeHealthPromotionalMaterial => 'Health Promotional Material';
+
+  @override
+  String get trainingAndSupportTrainingSupport => 'Training Support';
+
+  @override
+  String get trainingAndSupportMentoringSupport => 'Mentoring Support';
+
+  @override
+  String get trainingAndSupportFieldSupport => 'Field support';
+
+  @override
+  String get trainingAndSupportASHAWorkPlanning => 'ASHA work planning';
+
+  @override
+  String get trainingAndSupportHomeVisits => 'Home Visits';
+
+  @override
+  String get trainingAndSupportMobileAcademy => 'Mobile Academy';
+
+  @override
+  String get deathMaternalDeath => 'Maternal Death';
+
+  @override
+  String get deathChild => 'Child Death';
+
+  @override
+  String get deathNowBorn => 'Now Born Death';
+
+  @override
+  String get deathInfant => 'Infant Death';
+
+  @override
+  String get deathDocumentation => 'Documentation';
+
+  @override
+  String get deathNotification => 'Notification';
+
+  @override
+  String get deathOther => 'Other';
+
+  @override
+  String get discussionTopic => 'discussion topic/program';
 }
