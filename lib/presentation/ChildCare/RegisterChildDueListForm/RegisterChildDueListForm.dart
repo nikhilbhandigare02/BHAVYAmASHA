@@ -640,13 +640,12 @@ class _RegisterChildDueListFormScreen
       if (gender == 'female') {
         return [
           'Self',
-          'Husband',
+          'Family Head',
           'Father',
           'Mother',
           'Son',
           'Daughter',
-          'Father In Law',
-          'Mother In Law',
+
           'Neighbour',
           'Relative',
           'Other',
@@ -656,13 +655,12 @@ class _RegisterChildDueListFormScreen
       if (gender == 'male') {
         return [
           'Self',
-          'Wife',
+          'Family Head',
           'Father',
           'Mother',
           'Son',
-          'Daughter',
-          'Father In Law',
-          'Mother In Law',
+
+
           'Neighbour',
           'Relative',
           'Other',
@@ -1014,8 +1012,6 @@ class _RegisterChildDueListFormScreen
                                     case 'Self':
                                       return "${l10n?.self}";
 
-                                    case 'Husband':
-                                      return '${l10n?.husbandLabel} ';
 
                                     case 'Mother':
                                       return '${l10n?.mother} ';
@@ -1023,8 +1019,7 @@ class _RegisterChildDueListFormScreen
                                     case 'Father':
                                       return '${l10n?.father}';
 
-                                    case 'Wife':
-                                      return '${l10n?.wife} ';
+
 
                                     case 'Son':
                                       return '${l10n?.son}';
@@ -1175,7 +1170,7 @@ class _RegisterChildDueListFormScreen
                               labelText:
                               l10n?.birthCertificateNumberLabel ??
                                   'Birth Certificate Number',
-                              hintText: l10n?.enterBirthCertificateNumber,
+                              hintText: l10n?.birthCertificateIssuedLabel,
                               initialValue: state.birthCertificateNumber,
                               onChanged: (v) =>
                                   bloc.add(BirthCertificateNumberChanged(v)),

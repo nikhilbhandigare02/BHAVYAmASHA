@@ -18,6 +18,7 @@ import '../../../core/utils/device_info_utils.dart';
 import '../../../core/utils/id_generator_utils.dart';
 import '../../../l10n/app_localizations.dart';
 import 'bloc/migration_split_bloc.dart';
+import '../../../core/config/routes/Route_Name.dart';
 
 enum MigrationSplitOption { migration, split }
 
@@ -271,6 +272,15 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                 _isSplitting = false;
               });
             }
+          }
+          if (state is MigrationSplitUpdated &&
+              state.error == null &&
+              state.updatedCount > 0) {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              Route_Names.homeScreen,
+              (route) => false,
+            );
           }
         },
         child: Padding(
@@ -802,6 +812,13 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       setState(() {
         _resetForm();
       });
+    }
+    if (updated > 0) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        Route_Names.homeScreen,
+        (route) => false,
+      );
     }
   }
 

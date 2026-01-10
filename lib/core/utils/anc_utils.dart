@@ -333,9 +333,9 @@ class ANCUtils {
         'hhId_display': householdRefKeyDisplay,
         // Other fields
         'Name': name,
-        'Age': age?.toString() ?? 'N/A',
+        'Age': age?.toString() ?? 'Not Available',
         'Gender': 'Female',
-        'RCH ID': person['RCH_ID'] ?? person['RichID'] ?? 'N/A',
+        'RCH ID': person['RCH_ID'] ?? person['RichID'] ?? 'Not Available',
         'Mobile No': person['mobileNo'] ?? '',
         'Husband': spouseName,
         'RegistrationDate': formattedDate,

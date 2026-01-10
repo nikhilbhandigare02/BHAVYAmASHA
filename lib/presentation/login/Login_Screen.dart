@@ -304,79 +304,55 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   listener: (context, state) {
                                     // ✅ ONLY SUCCESS (200)
                                     if (state.postApiStatus == PostApiStatus.success) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            state.error.isNotEmpty
+                                                ? state.error
+                                                : l10n.loginSuccess,
+                                            style: const TextStyle(color: Colors.white),
+                                          ),
+                                          backgroundColor: Colors.black,
+                                        ),
+                                      );
+
+                                      Future.delayed(const Duration(milliseconds: 500), () {
+                                        if (!context.mounted) return;
+
+                                        Navigator.pushNamedAndRemoveUntil(
+                                          context,
+                                          state.isNewUser
+                                              ? Route_Names.profileScreen
+                                              : Route_Names.homeScreen,
+                                              (_) => false,
+                                        );
+                                      });
+                                    }
+
+                                    else if (state.postApiStatus == PostApiStatus.error) {
                                       final message = state.error.isNotEmpty
                                           ? state.error
-                                          : l10n.loginSuccess;
+                                          : 'Please enter valid user credentials.';
+
+                                      if (message.trim().isEmpty) return;
+
+                                      // 🚫 Ignore message if it contains "error" in any case
+                                      if (message.toLowerCase().contains('error')) {
+                                        return;
+                                      }
+
 
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(
                                             message,
-                                            style: TextStyle(color: Colors.white),
+                                            style: const TextStyle(color: Colors.white),
                                           ),
                                           backgroundColor: Colors.black,
-                                          duration: const Duration(seconds: 3),
                                         ),
                                       );
-                                      // Navigation after success
-                                      Future.delayed(const Duration(milliseconds: 500), () {
-                                        if (!context.mounted) return;
-
-                                        if (state.isNewUser) {
-                                          Navigator.pushNamedAndRemoveUntil(
-                                            context,
-                                            Route_Names.profileScreen,
-                                            (route) => false,
-                                            arguments: {
-                                              'fromLogin': true,
-                                            },
-                                          );
-                                        } else {
-                                          Navigator.pushNamedAndRemoveUntil(
-                                            context,
-                                            Route_Names.homeScreen,
-                                                (route) => false,
-                                          );
-                                        }
-                                      });
-                                    }
-                                    else {
-                                      final message = state.error.isNotEmpty
-                                          ? state.error
-                                          : "";
-                                      if(message.contains('User does not exists')){
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              message,
-                                              style: const TextStyle(color: Colors.white),
-                                            ),
-                                            backgroundColor: Colors.black,
-                                            duration: const Duration(seconds: 3),
-                                          ),
-                                        );
-                                      }
-                                      else if (message == ''){
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Please enter valid user credentials.',
-                                              style: const TextStyle(color: Colors.white),
-                                            ),
-                                            backgroundColor: Colors.black,
-                                            duration: const Duration(seconds: 3),
-                                          ),
-                                        );
-
-                                      }
-
-
-
                                     }
 
-
-                                    // ❌ NO error handling here
-                                    // ❌ No snackbar for error
                                   },
                                   child: BlocBuilder<LoginBloc, LoginState>(
                                     buildWhen: (previous, current) => false,

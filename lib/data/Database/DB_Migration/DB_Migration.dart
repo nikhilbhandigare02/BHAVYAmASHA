@@ -124,6 +124,9 @@ class DbMigration {
     "youngestAge": "age_of_youngest_child",
     "ageUnit": "gender_of_younget_child",
     "youngestGender": "age_of_youngest_child_unit",
+    "death_place":"death_place",
+    "date_of_death":"date_of_death",
+
   };
   static Future<void> runBeneficiaryTableMigration(Database db) async {
     try {
@@ -132,6 +135,8 @@ class DbMigration {
       const List<String> beneficiaryKeys = [
         "houseNo",
         "headName",
+        "death_place",
+        "date_of_death",
         "fatherName",
         "motherName",
         "spouseName",
@@ -194,6 +199,8 @@ class DbMigration {
         "fatherName": "father_name",
         "spouseName": "father_or_spouse_name",
         "dob": "date_of_birth",
+        "date_of_death":"date_of_death",
+        "death_place":"death_place",
         "years": "dob_year",
         "months": "dob_month",
         "days": "dob_day",
