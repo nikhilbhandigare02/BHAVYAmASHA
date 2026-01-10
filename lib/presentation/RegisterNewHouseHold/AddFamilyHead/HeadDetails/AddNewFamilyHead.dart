@@ -2534,13 +2534,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                               true;
                                                           if (i == 0) {
                                                             _clearFormError();
-                                                            final headForm =
-                                                                _formKey
-                                                                    .currentState;
-                                                            if (headForm ==
-                                                                    null ||
-                                                                !headForm
-                                                                    .validate()) {
+                                                            final headForm = _formKey.currentState;
+                                                            if (headForm == null || !headForm.validate()) {
                                                               canProceed =
                                                                   false;
                                                               final msg =
@@ -2552,6 +2547,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                               );
                                                               _scrollToFirstError();
                                                             }
+
                                                           } else if (i == 1) {
                                                             clearSpousFormError();
                                                             final spouseForm =
