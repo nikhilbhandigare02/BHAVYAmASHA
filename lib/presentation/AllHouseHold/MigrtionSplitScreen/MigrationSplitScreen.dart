@@ -19,6 +19,7 @@ import '../../../core/utils/id_generator_utils.dart';
 import '../../../l10n/app_localizations.dart';
 import 'bloc/migration_split_bloc.dart';
 import '../../../core/config/routes/Route_Name.dart';
+import '../../HomeScreen/HomeScreen.dart';
 
 enum MigrationSplitOption { migration, split }
 
@@ -69,6 +70,20 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
   static const double _buttonWidth = 105.0;
 
   final List<Map<String, dynamic>> _memberTypes = [];
+
+  void _navigateToHomeDashboard() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) => const HomeScreen(initialTabIndex: 1),
+        ),
+        (route) => false,
+      );
+    });
+  }
 
   String get _selectedMemberLabel {
     final l10n =  AppLocalizations.of(context);
@@ -276,11 +291,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
           if (state is MigrationSplitUpdated &&
               state.error == null &&
               state.updatedCount > 0) {
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              Route_Names.homeScreen,
-              (route) => false,
-            );
+            _navigateToHomeDashboard();
           }
         },
         child: Padding(
@@ -814,11 +825,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       });
     }
     if (updated > 0) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        Route_Names.homeScreen,
-        (route) => false,
-      );
+      _navigateToHomeDashboard();
     }
   }
 

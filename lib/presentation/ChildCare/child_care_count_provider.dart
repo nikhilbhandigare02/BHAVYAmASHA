@@ -585,44 +585,60 @@ class ChildCareCountProvider {
         return 0;
       }
 
-      // Build WHERE clause like _loadChildBeneficiaries
-      String whereClause = 'child_care_state = ? AND is_deleted = ?';
-      List<dynamic> whereArgs = ['registration_due', 0];
-
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        whereClause += ' AND current_user_key = ?';
-        whereArgs.add(ashaUniqueKey);
-      }
-
-      final List<Map<String, dynamic>> childActivities = await db.query(
-        'child_care_activities',
-        where: whereClause,
-        whereArgs: whereArgs,
+      // Use the SAME query structure as _loadChildBeneficiaries
+      final List<Map<String, dynamic>> childActivities = await db.rawQuery(
+        '''
+      SELECT cca.*
+      FROM child_care_activities cca
+      INNER JOIN (
+          SELECT beneficiary_ref_key,
+                 MAX(created_date_time) AS max_date
+          FROM child_care_activities
+          WHERE is_deleted = 0
+          GROUP BY beneficiary_ref_key
+      ) latest
+        ON cca.beneficiary_ref_key = latest.beneficiary_ref_key
+       AND cca.created_date_time = latest.max_date
+      WHERE cca.child_care_state = ?
+        AND cca.is_deleted = ?
+        ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND cca.current_user_key = ?' : ''}
+      GROUP BY cca.beneficiary_ref_key 
+      ORDER BY cca.created_date_time DESC
+      ''',
+        [
+          'registration_due',
+          0,
+          if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) ashaUniqueKey,
+        ],
       );
 
-      developer.log('Found ${childActivities.length} child care activities with registration_due status',
-          name: 'ChildCareCountProvider');
+      developer.log(
+        'Found ${childActivities.length} unique child care activities',
+        name: 'ChildCareCountProvider',
+      );
 
       if (childActivities.isEmpty) return 0;
 
       int validChildCount = 0;
 
-      // Process each activity
+      // Process each activity (same logic as _loadChildBeneficiaries)
       for (final activity in childActivities) {
         final beneficiaryRefKey = activity['beneficiary_ref_key']?.toString();
+
         if (beneficiaryRefKey == null) continue;
 
+        // Get the beneficiary record
         final List<Map<String, dynamic>> beneficiaryRows = await db.query(
           'beneficiaries_new',
           where: 'unique_key = ?',
           whereArgs: [beneficiaryRefKey],
-          limit: 1,
         );
 
         if (beneficiaryRows.isEmpty) continue;
 
         final row = beneficiaryRows.first;
 
+        // Parse beneficiary_info
         dynamic info;
         try {
           info = (row['beneficiary_info'] is String)
@@ -636,33 +652,43 @@ class ChildCareCountProvider {
         if (info is! Map) continue;
 
         final memberData = Map<String, dynamic>.from(info);
-        final memberType = (memberData['memberType']?.toString() ?? '').trim().toLowerCase();
+        final memberType = (memberData['memberType']?.toString() ?? '')
+            .trim()
+            .toLowerCase();
 
         if (memberType != 'child') continue;
 
-        final name = memberData['memberName']?.toString() ??
-            memberData['name']?.toString() ??
-            memberData['member_name']?.toString() ??
-            memberData['memberNameLocal']?.toString() ??
-            memberData['Name']?.toString() ??
+        final name = memberData['memberName']?.toString().trim() ??
+            memberData['name']?.toString().trim() ??
             '';
 
         if (name.isEmpty) continue;
 
-        // ✅ Use beneficiaryRefKey instead of householdRefKey
-        final isAlreadyRegistered = await _isChildRegistered(db, beneficiaryRefKey, name);
+        // Check registration (same as _loadChildBeneficiaries)
+        final isAlreadyRegistered = await _isChildRegistered(
+          db,
+          beneficiaryRefKey,
+          name,
+        );
 
-        if (!isAlreadyRegistered) validChildCount++;
+        if (!isAlreadyRegistered) {
+          validChildCount++;
+        }
       }
 
-      developer.log('FINAL REGISTRATION DUE COUNT = $validChildCount', name: 'ChildCareCountProvider');
+      developer.log(
+        'FINAL REGISTRATION DUE COUNT = $validChildCount',
+        name: 'ChildCareCountProvider',
+      );
       return validChildCount;
 
     } catch (e, stackTrace) {
-      developer.log('Error in getRegistrationDueCount: $e',
-          name: 'ChildCareCountProvider',
-          error: e,
-          stackTrace: stackTrace);
+      developer.log(
+        'Error in getRegistrationDueCount: $e',
+        name: 'ChildCareCountProvider',
+        error: e,
+        stackTrace: stackTrace,
+      );
       return 0;
     }
   }
