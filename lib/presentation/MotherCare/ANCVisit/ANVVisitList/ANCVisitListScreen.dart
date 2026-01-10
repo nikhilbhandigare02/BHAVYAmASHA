@@ -14,6 +14,7 @@ import '../../../../data/Database/local_storage_dao.dart';
 import '../../../../data/Database/tables/followup_form_data_table.dart';
 import '../../../../data/SecureStorage/SecureStorage.dart';
 import '../ANCVisitForm/ANCVisitForm.dart';
+import '../../../../core/widgets/SuccessDialogbox/SuccessDialogbox.dart';
 
 class Ancvisitlistscreen extends StatefulWidget {
   const Ancvisitlistscreen({super.key});
@@ -647,12 +648,36 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
         print('Passing visit data to form: $visitData');
 
-        Navigator.push(
+        final result = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => Ancvisitform(beneficiaryData: formData),
           ),
-        ).then((_) => _onRefresh());
+        );
+        if (!mounted) return;
+        if (result is Map<String, dynamic> && (result['saved'] == true)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            _onRefresh();
+            final shouldShowDialog = result['showDialog'] == true;
+            final dialogMessage = (result['message']?.toString() ?? 'Registration has been completed');
+            if (shouldShowDialog) {
+              showDialog(
+                context: context,
+                useRootNavigator: true,
+                builder: (dialogContext) => CustomDialog(
+                  title: 'Form has been saved successfully',
+                  message: dialogMessage,
+                  onOkPressed: () {
+                    Navigator.of(dialogContext).pop();
+                  },
+                ),
+              );
+            }
+          });
+        } else {
+          _onRefresh();
+        }
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),

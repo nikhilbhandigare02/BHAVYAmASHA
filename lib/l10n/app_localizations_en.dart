@@ -2574,7 +2574,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rchIdChildLabel => 'RCH ID (Child)';
 
   @override
-  String get rchChildSerialHint => 'Sr. no of the child in RCH register';
+  String get rchChildSerialHint => 'Sr. no of child in RCH register';
 
   @override
   String get dateOfBirthLabel => 'Date of Birth *';

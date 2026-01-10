@@ -1191,24 +1191,22 @@ class _AncvisitformState extends State<Ancvisitform> {
               if (state.isSuccess) {
                 if (state.givesBirthToBaby == (l10n?.yes ?? 'Yes')) {
                   final count = _childrenCount(state.numberOfChildren);
-                  CustomDialog.show(
-                    context,
-                    title:
-                        l10n?.formSavedSuccessfully ??
-                        'Form has been saved successfully.',
-                    message:
-                        '${l10n?.deliveryOutcome ?? "Delivery outcome"} : $count',
-                    onOkPressed: () {
-                      Navigator.of(context, rootNavigator: true).pop();
-                      Navigator.pop(context, true);
-                    },
-                  );
+                  final msg =
+                      '${l10n?.deliveryOutcome ?? "Delivery outcome"} : $count';
+                  Navigator.pop(context, {
+                    'saved': true,
+                    'showDialog': true,
+                    'message': msg,
+                  });
                 } else {
                   showAppSnackBar(
                     context,
                     l10n?.saveSuccess ?? 'Form Submitted successfully',
                   );
-                  Navigator.pop(context, true);
+                  Navigator.pop(context, {
+                    'saved': true,
+                    'showDialog': false,
+                  });
                 }
               }
             },

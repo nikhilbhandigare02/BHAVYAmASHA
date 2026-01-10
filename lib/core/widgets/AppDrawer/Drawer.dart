@@ -381,7 +381,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                                 ),
                                 _UserInfoRow(
                                   label: l10n.userRoleLabel,
-                                  value: _appRoleId == 4 ? 'ASHA Facilitator' : 'ASHA Worker',
+                                  value: _appRoleId == 4 ? 'ASHA Facilitator' : 'Bhavya ASHA',
                                 ),
                                 if (_appRoleId != 4) ...[
                                   _UserInfoRow(

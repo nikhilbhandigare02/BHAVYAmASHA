@@ -70,17 +70,7 @@ class _OutcomeFormView extends StatelessWidget {
 
             if (state.submitted) {
               showAppSnackBar(context, l10n.dataSavedSuccessMessage);
-              Future.microtask(() {
-                CustomDialog.show(
-                  context,
-                  title: l10n.deliveryOutcomeDialogue,
-                  message: l10n.savedBeneficiary,
-                  onOkPressed: () {
-                    Navigator.of(context, rootNavigator: true).pop();
-                    Navigator.pop(context);
-                  },
-                );
-              });
+              Navigator.pop(context, true);
             }
           },
           builder: (context, state) {

@@ -40,6 +40,25 @@ import 'package:medixcel_new/core/widgets/ConfirmationDialogue/ConfirmationDialo
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/RegisterNewHouseHold/bloc/registernewhousehold_bloc.dart';
 import 'package:sizer/sizer.dart';
+class MaxValueFormatter extends TextInputFormatter {
+  final int max;
+
+  MaxValueFormatter(this.max);
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
+    if (newValue.text.isEmpty) return newValue;
+
+    final value = int.tryParse(newValue.text);
+    if (value == null || value > max) {
+      return oldValue;
+    }
+    return newValue;
+  }
+}
 
 class AddNewFamilyHeadScreen extends StatefulWidget {
   final bool isEdit;
@@ -199,6 +218,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   int _ageFromDob(DateTime dob) {
     return DateTime.now().year - dob.year;
   }
+  bool useDob = true;
+
+  DateTime? dob;
+
+  final TextEditingController yearsCtrl = TextEditingController();
+  final TextEditingController monthsCtrl = TextEditingController();
+  final TextEditingController daysCtrl = TextEditingController();
 
   String? _validateYoungestChild(ChildrenState s, AppLocalizations l) {
     // Check if age unit is selected but age is empty
@@ -319,7 +345,42 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
       ...common,
     ];
   }
+  void updateDobFromAge() {
+    final y = int.tryParse(yearsCtrl.text) ?? 0;
+    final m = int.tryParse(monthsCtrl.text) ?? 0;
+    final d = int.tryParse(daysCtrl.text) ?? 0;
 
+    setState(() {
+      dob = DateTime(
+        DateTime.now().year - y,
+        DateTime.now().month - m,
+        DateTime.now().day - d,
+      );
+    });
+  }
+
+  // ✅ METHOD MUST BE HERE
+  void updateAgeFromDob(DateTime date) {
+    final now = DateTime.now();
+
+    int years = now.year - date.year;
+    int months = now.month - date.month;
+    int days = now.day - date.day;
+
+    if (days < 0) {
+      months--;
+      days += 30;
+    }
+
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    yearsCtrl.text = years.toString();
+    monthsCtrl.text = months.toString();
+    daysCtrl.text = days.toString();
+  }
   Widget _buildFamilyHeadForm(
     BuildContext context,
     AddFamilyHeadState state,
@@ -330,6 +391,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
         FocusScope.of(context).unfocus();
       },
       behavior: HitTestBehavior.opaque,
+
       child: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.5.h),
         child: Column(
@@ -407,18 +469,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 child: CustomDatePicker(
                   labelText: '${l.dobLabel} *',
                   hintText: l.dateHint,
-                  initialDate: state.dob,
-                  firstDate: DateTime(now.year - 110, now.month, now.day),
-                  lastDate: DateTime(now.year - 15, now.month, now.day),
+                  initialDate: dob,
+                  firstDate: DateTime.now().subtract(const Duration(days: 365 * 110)),
+                  lastDate: DateTime.now().subtract(const Duration(days: 365 * 15)),
                   onDateChanged: (date) {
                     if (date != null) {
-                      context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(date));
+                      setState(() {
+                        dob = date;
+                      });
+                      updateAgeFromDob(date);
                     }
                   },
-                  validator: (date) =>
-                      _captureError(Validations.validateDOB(l, date)),
-                  readOnly: widget.isEdit,
-                ),
+                )
               )
             else
               _Section(
@@ -448,100 +510,56 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     ),
                     Row(
                       children: [
+                        // YEARS
                         Expanded(
                           child: CustomTextField(
+                            controller: yearsCtrl,
                             labelText: l.years,
                             hintText: l.years,
+                            keyboardType: TextInputType.number,
                             maxLength: 3,
-                            initialValue: state.years ?? '',
-                            keyboardType: TextInputType.number,
-                            readOnly: widget.isEdit,
-                            onChanged: widget.isEdit
-                                ? null
-                                : (v) => context.read<AddFamilyHeadBloc>().add(
-                                    UpdateYears(v.trim()),
-                                  ),
-                            validator: (value) => _captureError(
-                              Validations.validateApproxAge(
-                                l,
-                                value,
-                                state.months,
-                                state.days,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // // --- Divider between Years & Months ---
-                        // Container(
-                        //   width: 1,
-                        //   height: 4.h,
-                        //   color: Colors.grey.shade300,
-                        //   margin: EdgeInsets.symmetric(horizontal: 1.w),
-                        // ),
-
-                        // --- Months ---
-                        Expanded(
-                          child: CustomTextField(
-                            labelText: l.months,
-                            hintText: l.months,
-                            maxLength: 2,
-                            initialValue: state.months ?? '',
-                            keyboardType: TextInputType.number,
-                            readOnly: widget.isEdit,
-                            onChanged: widget.isEdit
-                                ? null
-                                : (v) => context.read<AddFamilyHeadBloc>().add(
-                                    UpdateMonths(v.trim()),
-                                  ),
-                            validator: (value) => _captureError(
-                              Validations.validateApproxAge(
-                                l,
-                                state.years,
-                                value,
-                                state.days,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // --- Divider between Months & Days ---
-                        // Container(
-                        //   width: 1,
-                        //   height: 4.h,
-                        //   color: Colors.grey.shade300,
-                        //   margin: EdgeInsets.symmetric(horizontal: 1.w),
-                        // ),
-
-                        // --- Days ---
-                        Expanded(
-                          child: CustomTextField(
-                            labelText: l.days,
-                            hintText: l.days,
-                            initialValue: state.days ?? '',
-                            keyboardType: TextInputType.number,
-                            maxLength: 2,
-                            readOnly: widget.isEdit,
-                            onChanged: widget.isEdit
-                                ? null
-                                : (v) => context.read<AddFamilyHeadBloc>().add(
-                                    UpdateDays(v.trim()),
-                                  ),
-                            validator: (value) => _captureError(
-                              Validations.validateApproxAge(
-                                l,
-                                state.years,
-                                state.months,
-                                value,
-                              ),
-                            ),
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
+                              MaxValueFormatter(110),
                             ],
+                            onChanged: (_) => updateDobFromAge(),
+                          ),
+                        ),
+
+                        // MONTHS
+                        Expanded(
+                          child: CustomTextField(
+                            controller: monthsCtrl,
+                            labelText: l.months,
+                            hintText: l.months,
+                            keyboardType: TextInputType.number,
+                            maxLength: 2,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              MaxValueFormatter(11),
+                            ],
+                            onChanged: (_) => updateDobFromAge(),
+                          ),
+                        ),
+
+                        // DAYS
+                        Expanded(
+                          child: CustomTextField(
+                            controller: daysCtrl,
+                            labelText: l.days,
+                            hintText: l.days,
+                            keyboardType: TextInputType.number,
+                            maxLength: 2,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              MaxValueFormatter(30),
+                            ],
+                            onChanged: (_) => updateDobFromAge(),
                           ),
                         ),
                       ],
-                    ),
+                    )
+
                   ],
                 ),
               ),

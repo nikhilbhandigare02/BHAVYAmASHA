@@ -263,32 +263,26 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      String whereClause = 'child_care_state = ? AND is_deleted = ?';
-      List<dynamic> whereArgs = ['registration_due', 0];
-
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        whereClause += ' AND current_user_key = ?';
-        whereArgs.add(ashaUniqueKey);
-      }
-
+      // 1. Modified Query: Added GROUP BY cca.beneficiary_ref_key
       final List<Map<String, dynamic>> childActivities = await db.rawQuery(
         '''
-  SELECT cca.*
-  FROM child_care_activities cca
-  INNER JOIN (
-      SELECT beneficiary_ref_key,
-             MAX(created_date_time) AS max_date
-      FROM child_care_activities
-      WHERE is_deleted = 0
-      GROUP BY beneficiary_ref_key
-  ) latest
-    ON cca.beneficiary_ref_key = latest.beneficiary_ref_key
-   AND cca.created_date_time = latest.max_date
-  WHERE cca.child_care_state = ?
-    AND cca.is_deleted = ?
-    ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND cca.current_user_key = ?' : ''}
-  ORDER BY cca.created_date_time DESC
-''',
+      SELECT cca.*
+      FROM child_care_activities cca
+      INNER JOIN (
+          SELECT beneficiary_ref_key,
+                 MAX(created_date_time) AS max_date
+          FROM child_care_activities
+          WHERE is_deleted = 0
+          GROUP BY beneficiary_ref_key
+      ) latest
+        ON cca.beneficiary_ref_key = latest.beneficiary_ref_key
+       AND cca.created_date_time = latest.max_date
+      WHERE cca.child_care_state = ?
+        AND cca.is_deleted = ?
+        ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND cca.current_user_key = ?' : ''}
+      GROUP BY cca.beneficiary_ref_key 
+      ORDER BY cca.created_date_time DESC
+      ''',
         [
           'registration_due',
           0,
@@ -297,7 +291,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       );
 
       debugPrint(
-        '🎯 Found ${childActivities.length} child care activities with registration_due status',
+        '🎯 Found ${childActivities.length} unique child care activities',
       );
 
       final childBeneficiaries = <Map<String, dynamic>>[];
@@ -305,14 +299,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       for (final activity in childActivities) {
         final beneficiaryRefKey = activity['beneficiary_ref_key']?.toString();
 
-        if (beneficiaryRefKey == null) {
-          debugPrint('⚠️ Skipping activity with null beneficiary_ref_key');
-          continue;
-        }
-
-        debugPrint(
-          '\n🔍 Processing child care activity for beneficiary: $beneficiaryRefKey',
-        );
+        if (beneficiaryRefKey == null) continue;
 
         // Get the beneficiary record
         final List<Map<String, dynamic>> beneficiaryRows = await db.query(
@@ -321,10 +308,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
           whereArgs: [beneficiaryRefKey],
         );
 
-        if (beneficiaryRows.isEmpty) {
-          debugPrint('⚠️ No beneficiary found for key: $beneficiaryRefKey');
-          continue;
-        }
+        if (beneficiaryRows.isEmpty) continue;
 
         final row = beneficiaryRows.first;
 
@@ -339,40 +323,28 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
           continue;
         }
 
-        if (info is! Map) {
-          debugPrint('⚠️ beneficiary_info is not a Map, skipping');
-          continue;
-        }
+        if (info is! Map) continue;
 
         final memberData = Map<String, dynamic>.from(info);
         final memberType = (memberData['memberType']?.toString() ?? '')
             .trim()
             .toLowerCase();
 
-        if (memberType != 'child') {
-          debugPrint('⏭️ Skipping non-child member type: $memberType');
-          continue;
-        }
+        if (memberType != 'child') continue;
 
-        final name =
-            memberData['memberName']?.toString().trim() ??
+        final name = memberData['memberName']?.toString().trim() ??
             memberData['name']?.toString().trim() ??
             '';
-        if (name.isEmpty) {
-          debugPrint('⚠️ Skipping child with empty name');
-          continue;
-        }
 
-        // ✅ Check registration by beneficiary_ref_key instead of household_ref_key
+        if (name.isEmpty) continue;
+
+        // Check registration
         final isAlreadyRegistered = await _isChildRegistered(
           db,
           beneficiaryRefKey,
           name,
         );
-        if (isAlreadyRegistered) {
-          debugPrint('⏭️ Skipping already registered child: $name');
-          continue;
-        }
+        if (isAlreadyRegistered) continue;
 
         // Prepare child card
         final card = <String, dynamic>{
@@ -389,30 +361,23 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
             memberData['dob'],
             memberData['gender'],
           ),
-          'Mobileno.': memberData['mobileNo']?.toString() ?? 
-                      memberData['mobile_no']?.toString() ?? 
-                      memberData['mobile_number']?.toString() ?? '',
-          'FatherName': memberData['fatherName']?.toString() ?? 
-                        memberData['father_name']?.toString() ?? 
-                        memberData['spouseName']?.toString() ?? 
-                        memberData['spouse_name']?.toString() ?? '',
+          'Mobileno.': memberData['mobileNo']?.toString() ??
+              memberData['mobile_no']?.toString() ?? '',
+          'FatherName': memberData['fatherName']?.toString() ??
+              memberData['father_name']?.toString() ??
+              memberData['spouseName']?.toString() ?? '',
           'MotherName': memberData['motherName']?.toString() ?? '',
           '_raw': row,
           '_memberData': memberData,
           '_activityData': activity,
         };
 
-        debugPrint('📋 Added child: ${card['Name']}');
         childBeneficiaries.add(card);
       }
 
-      debugPrint('📊 Total children found: ${childBeneficiaries.length}');
-
       if (mounted) {
         setState(() {
-          _childBeneficiaries = List<Map<String, dynamic>>.from(
-            childBeneficiaries,
-          );
+          _childBeneficiaries = List<Map<String, dynamic>>.from(childBeneficiaries);
           _filtered = List<Map<String, dynamic>>.from(childBeneficiaries);
           _isLoading = false;
         });
