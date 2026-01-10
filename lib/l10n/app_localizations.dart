@@ -5204,7 +5204,7 @@ abstract class AppLocalizations {
   /// No description provided for @rchChildSerialHint.
   ///
   /// In en, this message translates to:
-  /// **'Sr. no of the child in RCH register'**
+  /// **'Sr. no of child in RCH register'**
   String get rchChildSerialHint;
 
   /// No description provided for @dateOfBirthLabel.
