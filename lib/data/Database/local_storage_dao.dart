@@ -8,6 +8,7 @@ import 'package:medixcel_new/data/Database/tables/followup_form_data_table.dart'
 import 'package:medixcel_new/data/Database/tables/mother_care_activities_table.dart';
 import 'package:medixcel_new/data/Database/tables/notification_table.dart';
 import 'package:medixcel_new/data/Database/tables/training_data_table.dart';
+import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 import 'package:medixcel_new/data/Database/User_Info.dart';
@@ -519,6 +520,45 @@ class LocalStorageDao {
       return {'count': 0, 'isHighRisk': false};
     }
   }
+
+  Future<String?> getLastANCVisitDate(String beneficiaryId) async {
+    try {
+      final db = await _db;
+      
+      // Query to get the latest ANC visit record from followup table
+      final result = await db.rawQuery('''
+        SELECT created_date_time
+        FROM ${FollowupFormDataTable.table}
+        WHERE beneficiary_ref_key = ? 
+        AND forms_ref_key = ?
+        AND (is_deleted IS NULL OR is_deleted = 0)
+        ORDER BY created_date_time DESC
+        LIMIT 1
+      ''', [
+        beneficiaryId,
+        FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration],
+      ]);
+
+      if (result.isNotEmpty) {
+        final visitDate = result.first['created_date_time']?.toString();
+        if (visitDate != null && visitDate.isNotEmpty) {
+          try {
+            final dateTime = DateTime.parse(visitDate);
+            return '${dateTime.day.toString().padLeft(2, '0')}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.year}';
+          } catch (e) {
+            print('⚠️ Error parsing visit date: $e');
+            return visitDate; // Return raw string if parsing fails
+          }
+        }
+      }
+
+      return null; // No visit found
+    } catch (e) {
+      print('❌ Error getting last ANC visit date for $beneficiaryId: $e');
+      return null;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getAncFormsByBeneficiaryId(String beneficiaryId) async {
     try {
       final db = await _db;
@@ -1070,6 +1110,130 @@ class LocalStorageDao {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getUpdatedEligibleCouplesWithLocalization(AppLocalizations? t) async {
+    print('🔍 Starting to fetch updated eligible couples...');
+
+    try {
+      final db = await _db;
+
+      // Get current user data
+      final currentUser = await SecureStorageService.getCurrentUserData();
+      final ashaUniqueKey = currentUser?['unique_key']?.toString() ?? '';
+
+      String whereClause = 'eligible_couple_state = ? AND (is_deleted IS NULL OR is_deleted = 0)';
+      List<dynamic> whereArgs = ['tracking_due'];
+
+      if (ashaUniqueKey.isNotEmpty) {
+        whereClause += ' AND current_user_key = ?';
+        whereArgs.add(ashaUniqueKey);
+        print('🔑 Filtering by ASHA unique key: $ashaUniqueKey');
+      }
+
+      final trackingDueRows = await db.query(
+        'eligible_couple_activities',
+        columns: ['beneficiary_ref_key', 'current_user_key'],
+        where: whereClause,
+        whereArgs: whereArgs,
+      );
+
+      final trackingDueBeneficiaryKeys = trackingDueRows
+          .map((row) => row['beneficiary_ref_key']?.toString())
+          .whereType<String>()
+          .toSet();
+
+      print('🔑 Tracking due beneficiaries count: ${trackingDueBeneficiaryKeys.length}');
+
+      if (trackingDueBeneficiaryKeys.isEmpty) {
+        return [];
+      }
+
+      final placeholders = List.filled(trackingDueBeneficiaryKeys.length, '?').join(',');
+      final rows = await db.query(
+        'beneficiaries_new',
+        where: 'unique_key IN ($placeholders) AND (is_deleted IS NULL OR is_deleted = 0) AND (is_migrated IS NULL OR is_migrated = 0)',
+        whereArgs: trackingDueBeneficiaryKeys.toList(),
+        orderBy: 'created_date_time DESC',
+      );
+
+      print('📊 Found ${rows.length} beneficiaries matching tracking_due status');
+
+      final couples = <Map<String, dynamic>>[];
+      final households = <String, List<Map<String, dynamic>>>{};
+
+      for (final row in rows) {
+        final hhKey = row['household_ref_key']?.toString() ?? '';
+        households.putIfAbsent(hhKey, () => []).add(row);
+      }
+      print('🏠 Households found: ${households.length}');
+
+      for (final household in households.values) {
+        Map<String, dynamic>? head;
+        Map<String, dynamic>? spouse;
+
+        for (final member in household) {
+          try {
+            final dynamic infoRaw = member['beneficiary_info'];
+            final Map<String, dynamic> info = infoRaw is String
+                ? jsonDecode(infoRaw)
+                : Map<String, dynamic>.from(infoRaw ?? {});
+
+            // Check if this is the head or spouse
+            final relation = (info['relation_to_head'] ?? info['relation'] ?? '').toString().toLowerCase();
+            if (relation.contains('head') || relation == 'self') {
+              head = info;
+              head!['_row'] = member;
+            } else if (relation == 'spouse' || relation == 'wife' || relation == 'husband') {
+              spouse = info;
+              spouse!['_row'] = member;
+            }
+          } catch (e) {
+            print('❌ Error processing household member: $e');
+          }
+        }
+
+        for (final member in household) {
+          try {
+            final dynamic infoRaw = member['beneficiary_info'];
+            final Map<String, dynamic> info = infoRaw is String
+                ? jsonDecode(infoRaw)
+                : Map<String, dynamic>.from(infoRaw ?? {});
+
+            final isFp = member['is_family_planning'] == true ||
+                member['is_family_planning'] == 1 ||
+                member['is_family_planning']?.toString().toLowerCase() == 'yes';
+
+            // Determine if this is the head or spouse to pass the correct counterpart
+            final bool isHead = info == head;
+            final bool isSpouse = info == spouse;
+            final Map<String, dynamic> counterpart = isHead && spouse != null
+                ? spouse
+                : isSpouse && head != null
+                ? head
+                : <String, dynamic>{};
+
+            final coupleData = _formatEligibleCoupleData(
+              Map<String, dynamic>.from(member),
+              info,
+              counterpart,
+              isFamilyPlanning: isFp,
+              t: t,
+            );
+
+            couples.add(coupleData);
+          } catch (e) {
+            print('❌ Error processing EC member: $e');
+          }
+        }
+      }
+
+      print('🏁 Finished processing. Found ${couples.length} eligible couples');
+      return couples;
+    } catch (e) {
+      print('❌ Error in getUpdatedEligibleCouples: $e');
+      return [];
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getUpdatedEligibleCouples() async {
     print('🔍 Starting to fetch updated eligible couples...');
 
@@ -1198,39 +1362,40 @@ class LocalStorageDao {
       Map<String, dynamic> female,
       Map<String, dynamic> spouse, {
         bool isFamilyPlanning = false,
+        AppLocalizations? t,
       }) {
     final hhId = (row['household_ref_key']?.toString() ?? '');
     final beneficiary_ref = (row['unique_key']?.toString() ?? '');
     final uniqueKey = (row['unique_key']?.toString() ?? '');
     final createdDate = row['created_date_time']?.toString() ?? '';
 
-    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? 'N/A';
+    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? t?.na ?? 'N/A';
     final dob = female['dob']?.toString() ?? '';
     final age = _calculateAge(dob);
     final gender = (female['gender']?.toString().toLowerCase() ?? 'female');
     final mobile = female['mobileNo']?.toString() ?? 'Not Available';
-    final richId = female['RichID']?.toString() ?? 'N/A';
+    final richId = female['RichID']?.toString() ?? t?.na ?? 'N/A';
 
     final spouseName = spouse.isNotEmpty
-        ? (spouse['memberName'] ?? spouse['headName'] ?? spouse['spouseName'] ?? 'N/A').toString()
-        : (female['spouseName']?.toString() ?? 'N/A');
+        ? (spouse['memberName'] ?? spouse['headName'] ?? spouse['spouseName'] ?? t?.na ?? 'N/A').toString()
+        : (female['spouseName']?.toString() ?? t?.na ?? 'N/A');
 
     String last11(String s) => s.length > 11 ? s.substring(s.length - 11) : s;
 
     return {
       'hhId': last11(hhId),
       'beneficiary_ref': beneficiary_ref,
-      'RegistrationDate': _formatDate(createdDate).isNotEmpty ? _formatDate(createdDate) : 'N/A',
+      'RegistrationDate': _formatDate(createdDate, t).isNotEmpty ? _formatDate(createdDate, t) : t?.na ?? 'N/A',
       'RegistrationType': 'General',
       'BeneficiaryID': last11(uniqueKey),
-      'Name': name.isNotEmpty ? name : 'N/A',
-      'age': age > 0 ? '$age Y | Female' : 'N/A',
+      'Name': name.isNotEmpty ? name : t?.na ?? 'N/A',
+      'age': age > 0 ? '$age Y | Female' : t?.na ?? 'N/A',
       'gender': gender,
-      'RichID': richId.isNotEmpty ? richId : 'N/A',
-      'mobileno': mobile != 'Not Available' ? mobile : 'N/A',
+      'RichID': richId.isNotEmpty ? richId : t?.na ?? 'N/A',
+      'mobileno': mobile != 'Not Available' ? mobile : t?.na ?? 'N/A',
       'HusbandName': spouseName.isNotEmpty ? spouseName : 'Not Available',
-      'spouseName': spouseName.isNotEmpty ? spouseName : 'N/A',
-      'partnerName': spouseName.isNotEmpty ? spouseName : 'N/A',  // For backward compatibility
+      'spouseName': spouseName.isNotEmpty ? spouseName : t?.na ?? 'N/A',
+      'partnerName': spouseName.isNotEmpty ? spouseName : t?.na ?? 'N/A',  // For backward compatibility
       'dob': dob,
       'status': isFamilyPlanning
           ? 'Protected'
@@ -1259,14 +1424,14 @@ class LocalStorageDao {
     }
   }
 
-  String _formatDate(String dateStr) {
-    if (dateStr.isEmpty) return 'N/A';
+  String _formatDate(String dateStr, AppLocalizations? t) {
+    if (dateStr.isEmpty) return t?.na ?? 'N/A';
     try {
       final dt = DateTime.tryParse(dateStr);
-      if (dt == null) return 'N/A';
+      if (dt == null) return t?.na ?? 'N/A';
       return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
     } catch (_) {
-      return 'N/A';
+      return t?.na ?? 'N/A';
     }
   }
 

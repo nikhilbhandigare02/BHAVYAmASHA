@@ -335,19 +335,20 @@ class _HBNCListScreenState
             continue;
           }
 
+          final t = AppLocalizations.of(context);
           // Extract data based on the structure
           final name = beneficiaryInfo['memberName']?.toString() ??
-              beneficiaryInfo['headName']?.toString() ?? 'N/A';
+              beneficiaryInfo['headName']?.toString() ?? t!.na;
           final dob = beneficiaryInfo['dob']?.toString();
           final age = _calculateAge(dob);
-          final gender = beneficiaryInfo['gender']?.toString() ?? 'N/A';
-          final mobile = beneficiaryInfo['mobileNo']?.toString() ?? 'N/A';
+          final gender = beneficiaryInfo['gender']?.toString() ?? t!.na;
+          final mobile = beneficiaryInfo['mobileNo']?.toString() ?? t!.na;
           final rchId = beneficiaryInfo['RichID']?.toString() ??
-              beneficiaryInfo['rchId']?.toString() ?? 'N/A';
+              beneficiaryInfo['rchId']?.toString() ?? t!.na;
           final husbandName = beneficiaryInfo['spouseName']?.toString() ??
-              beneficiaryInfo['fatherName']?.toString() ?? 'N/A';
+              beneficiaryInfo['fatherName']?.toString() ?? t!.na;
 
-          final householdRefKey = beneficiary['household_ref_key']?.toString() ?? 'N/A';
+          final householdRefKey = beneficiary['household_ref_key']?.toString() ?? t!.na;
           final createdDateTime = beneficiary['created_date_time']?.toString() ?? '';
 
           // Get registration date from mother_care_activities table for pnc_mother state
@@ -404,9 +405,9 @@ class _HBNCListScreenState
             'mobile': mobile,
             'rchId': rchId,
             'husbandName': husbandName,
-            'deliveryDate': formData['delivery_date']?.toString() ?? 'N/A',
-            'deliveryType': formData['delivery_type']?.toString() ?? 'N/A',
-            'placeOfDelivery': formData['place_of_delivery']?.toString() ?? 'N/A',
+            'deliveryDate': formData['delivery_date']?.toString() ?? t!.na,
+            'deliveryType': formData['delivery_type']?.toString() ?? t!.na,
+            'placeOfDelivery': formData['place_of_delivery']?.toString() ?? t!.na,
             'outcomeCount': formData['outcome_count']?.toString() ?? '1',
             'previousHBNCDate': previousHBNCDate,
             'nextHBNCDate': nextHBNCDate,
@@ -443,7 +444,7 @@ class _HBNCListScreenState
 
 
   String _getLastDigits(String value, int count) {
-    if (value.isEmpty || value == 'N/A') return value;
+    if (value.isEmpty || value == '') return value;
     return value.length > count ? value.substring(value.length - count) : value;
   }
 
@@ -919,7 +920,7 @@ class _HBNCListScreenState
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        data['hhId']?.toString() ?? 'N/A',
+                        data['hhId']?.toString() ?? t!.na,
                         style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w600,
@@ -1018,21 +1019,21 @@ class _HBNCListScreenState
                         Expanded(
                           child: _rowText(
                             t.nameLabel,
-                            data['name']?.toString() ?? 'N/A',
+                            data['name']?.toString() ?? t!.na,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _rowText(
                             t.ageGenderLabel,
-                            '${data['age']?.toString() ?? '0'} Y | ${data['gender']?.toString() ?? 'N/A'}',
+                            '${data['age']?.toString() ?? '0'} Y | ${data['gender']?.toString() ?? t!.na}',
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _rowText(
                             t.husbandName,
-                            data['husbandName']?.toString() ?? 'N/A',
+                            data['husbandName']?.toString() ?? t!.na,
                           ),
                         ),
                       ],
@@ -1044,7 +1045,7 @@ class _HBNCListScreenState
                         Expanded(
                           child: _rowText(
                             t.mobileNumber,
-                            data['mobile']?.toString() ?? 'N/A',
+                            data['mobile']?.toString() ?? t!.na,
                           ),
                         ),
                         const SizedBox(width: 12),

@@ -29,10 +29,16 @@ class _DeseasedListState extends State<DeseasedList> {
   void initState() {
     super.initState();
     _searchCtrl.addListener(_onSearchChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _loadDeceasedList();
   }
 
   Future<void> _loadDeceasedList() async {
+    final t = AppLocalizations.of(context);
     try {
       setState(() {
         _isLoading = true;
@@ -75,11 +81,11 @@ class _DeseasedListState extends State<DeseasedList> {
         final deathDetails =
         jsonDecode(beneficiary['death_details']?.toString() ?? '{}');
 
-        String getValue(dynamic value, [String defaultValue = 'N/A']) {
+        String getValue(dynamic value, [String? defaultValue]) {
           if (value == null ||
               (value is String && value.trim().isEmpty) ||
               value == 'null') {
-            return defaultValue;
+            return defaultValue ?? t?.na ?? 'N/A';
           }
           return value.toString();
         }
@@ -133,7 +139,7 @@ class _DeseasedListState extends State<DeseasedList> {
               beneficiaryInfo['beneficiaryType'] ??
                   (beneficiary['is_adult'] == 1 ? 'Adult' : 'Child')),
           'BeneficiaryID': getValue(beneficiary['unique_key']),
-          'RchID': getValue(beneficiaryInfo['rch_id']),
+          'RchID': getValue(beneficiaryInfo['rch_id'], t?.na),
           'Name': getValue(
               beneficiaryInfo['name'] ??
                   beneficiaryInfo['headName'] ??

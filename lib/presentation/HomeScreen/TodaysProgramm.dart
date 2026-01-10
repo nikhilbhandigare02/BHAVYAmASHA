@@ -100,6 +100,170 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     return input.length <= 11 ? input : input.substring(input.length - 11);
   }
 
+  DateTime _dateAfterWeeks(DateTime startDate, int noOfWeeks) {
+    final days = noOfWeeks * 7;
+    return startDate.add(Duration(days: days));
+  }
+
+  DateTime _calculateEdd(DateTime lmp) {
+    return _dateAfterWeeks(lmp, 40);
+  }
+
+  Map<String, DateTime> _calculateAncDateRanges(DateTime lmp) {
+    final ranges = <String, DateTime>{};
+
+    ranges['1st_anc_start'] = lmp;
+    ranges['1st_anc_end'] = _dateAfterWeeks(lmp, 12);
+
+    ranges['2nd_anc_start'] = _dateAfterWeeks(lmp, 14);
+    ranges['2nd_anc_end'] = _dateAfterWeeks(lmp, 24);
+    ranges['3rd_anc_start'] = _dateAfterWeeks(lmp, 26);
+    ranges['3rd_anc_end'] = _dateAfterWeeks(lmp, 34);
+
+    ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
+    ranges['4th_anc_end'] = _calculateEdd(lmp);
+
+    ranges['pmsma_start'] = ranges['1st_anc_end']!.add(const Duration(days: 1));
+    ranges['pmsma_end'] = ranges['2nd_anc_start']!.subtract(const Duration(days: 1));
+
+    return ranges;
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+  }
+
+  Future<DateTime?> _extractLmpDate(Map<String, dynamic> data) async {
+    try {
+      dynamic rawInfo = data['beneficiary_info'];
+      Map<String, dynamic> info;
+
+      if (rawInfo is String && rawInfo.isNotEmpty) {
+        info = jsonDecode(rawInfo) as Map<String, dynamic>;
+      } else if (rawInfo is Map) {
+        info = Map<String, dynamic>.from(rawInfo as Map);
+      } else {
+        info = <String, dynamic>{};
+      }
+
+      final lmpRaw = info['lmp']?.toString();
+      if (lmpRaw != null && lmpRaw.isNotEmpty) {
+        String dateStr = lmpRaw;
+        if (dateStr.contains('T')) {
+          dateStr = dateStr.split('T')[0];
+        }
+        final lmpDate = DateTime.tryParse(dateStr);
+        if (lmpDate != null) {
+          print('✅ Found LMP date from beneficiaries_new: ${_formatDate(lmpDate)}');
+          return lmpDate;
+        }
+      }
+
+      // Fallback: try to get from _rawRow if available
+      final rawRow = data['_rawRow'] as Map<String, dynamic>?;
+      if (rawRow != null) {
+        rawInfo = rawRow['beneficiary_info'];
+        if (rawInfo is String && rawInfo.isNotEmpty) {
+          info = jsonDecode(rawInfo) as Map<String, dynamic>;
+        } else if (rawInfo is Map) {
+          info = Map<String, dynamic>.from(rawInfo as Map);
+        } else {
+          info = <String, dynamic>{};
+        }
+
+        final lmpRaw = info['lmp']?.toString();
+        if (lmpRaw != null && lmpRaw.isNotEmpty) {
+          String dateStr = lmpRaw;
+          if (dateStr.contains('T')) {
+            dateStr = dateStr.split('T')[0];
+          }
+          final lmpDate = DateTime.tryParse(dateStr);
+          if (lmpDate != null) {
+            print('✅ Found LMP date from _rawRow: ${_formatDate(lmpDate)}');
+            return lmpDate;
+          }
+        }
+      }
+
+      // If not found in beneficiaries_new, check followup forms
+      print('⚠️ No LMP found in beneficiaries_new, checking followup forms...');
+      final lmpFromFollowup = await _getLmpFromFollowupForm(data);
+      if (lmpFromFollowup != null) {
+        print('✅ Found LMP date from followup form: ${_formatDate(lmpFromFollowup)}');
+        return lmpFromFollowup;
+      }
+
+      print('⚠️ No LMP date found in beneficiaries_new or followup forms');
+      return null;
+    } catch (e) {
+      print('⚠️ Error extracting LMP date: $e');
+      return null;
+    }
+  }
+
+  Future<DateTime?> _getLmpFromFollowupForm(Map<String, dynamic> data) async {
+    try {
+      final benId = data['BeneficiaryID']?.toString() ??
+          data['unique_key']?.toString() ??
+          (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['unique_key']?.toString() : null);
+
+      final hhId = data['hhId']?.toString() ??
+          (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['household_ref_key']?.toString() : null);
+
+      if (benId == null || benId.isEmpty || hhId == null || hhId.isEmpty) {
+        print('⚠️ Missing beneficiary ID or household ID for followup form LMP lookup');
+        return null;
+      }
+
+      final dao = LocalStorageDao();
+      final forms = await dao.getFollowupFormsByHouseholdAndBeneficiary(
+        formType: FollowupFormDataTable.eligibleCoupleTrackingDue,
+        householdId: hhId,
+        beneficiaryId: benId,
+      );
+
+      if (forms.isEmpty) {
+        print('ℹ️ No eligible couple tracking due forms found for beneficiary');
+        return null;
+      }
+
+      for (final form in forms) {
+        final formJsonStr = form['form_json']?.toString();
+        if (formJsonStr == null || formJsonStr.isEmpty) {
+          continue;
+        }
+
+        try {
+          final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
+
+          // Check for LMP date in eligible_couple_tracking_due_from structure
+          final trackingData = root['eligible_couple_tracking_due_from'];
+          if (trackingData is Map) {
+            final lmpStr = trackingData['lmp_date']?.toString();
+
+            if (lmpStr != null && lmpStr.isNotEmpty) {
+              try {
+                final lmpDate = DateTime.parse(lmpStr);
+                print('✅ Found LMP date from followup form: $lmpDate');
+                return lmpDate;
+              } catch (e) {
+                print('⚠️ Error parsing LMP date from followup form: $e');
+              }
+            }
+          }
+        } catch (e) {
+          print('⚠️ Error parsing followup form JSON: $e');
+        }
+      }
+
+      print('ℹ️ No LMP date found in any eligible couple tracking due forms');
+      return null;
+    } catch (e) {
+      print('❌ Error loading LMP from followup form: $e');
+      return null;
+    }
+  }
+
   var _isLoading = true;
 
   int _calculateAge(String? dob) {
@@ -171,6 +335,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       return '-';
     }
   }
+
 
   Future<Map<String, String>> _getBeneficiaryFields(String uniqueKey) async {
     final rec = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(
@@ -1404,23 +1569,14 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             lastVisitDate = _formatAncDateOnly(createdStr);
           }
 
-          DateTime? lmpDate;
-          try {
-            final lmpRaw = info['lmp']?.toString();
-            if (lmpRaw != null && lmpRaw.isNotEmpty) {
-              String dateStr = lmpRaw;
-              if (dateStr.contains('T')) {
-                dateStr = dateStr.split('T')[0];
-              }
-              lmpDate = DateTime.tryParse(dateStr);
-            }
-          } catch (_) {}
+          // Extract LMP date using the comprehensive logic from ANCVisitListScreen
+          DateTime? lmpDate = await _extractLmpDate(row);
 
           if (lmpDate == null) {
             lmpDate = lastVisitDt ?? DateTime.now();
           }
 
-          final ancRanges = _calculateAncDateRangesForToday(lmpDate);
+          final ancRanges = _calculateAncDateRanges(lmpDate);
 
           final today = DateTime.now();
           final todayDate = DateTime(today.year, today.month, today.day);
@@ -1491,7 +1647,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           }
 
           // Determine if any ANC visit (1st–4th) is currently due
+          DateTime? dueVisitStartDate;
           DateTime? dueVisitEndDate;
+          String? currentAncVisitName;
 
           final firstStart = ancRanges['1st_anc_start'];
           final firstEnd = ancRanges['1st_anc_end'];
@@ -1510,7 +1668,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               _isTodayInWindow(firstStart, firstEnd)) {
             if (!_hasFormInWindow(existingForms, firstStart, firstEnd)) {
               hasDueVisit = true;
+              dueVisitStartDate = firstStart;
               dueVisitEndDate = firstEnd;
+              currentAncVisitName = '1st ANC';
             }
           }
 
@@ -1520,7 +1680,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               _isTodayInWindow(secondStart, secondEnd)) {
             if (!_hasFormInWindow(existingForms, secondStart, secondEnd)) {
               hasDueVisit = true;
+              dueVisitStartDate = secondStart;
               dueVisitEndDate = secondEnd;
+              currentAncVisitName = '2nd ANC';
             }
           }
 
@@ -1530,7 +1692,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               _isTodayInWindow(thirdStart, thirdEnd)) {
             if (!_hasFormInWindow(existingForms, thirdStart, thirdEnd)) {
               hasDueVisit = true;
+              dueVisitStartDate = thirdStart;
               dueVisitEndDate = thirdEnd;
+              currentAncVisitName = '3rd ANC';
             }
           }
 
@@ -1540,18 +1704,26 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               _isTodayInWindow(fourthStart, fourthEnd)) {
             if (!_hasFormInWindow(existingForms, fourthStart, fourthEnd)) {
               hasDueVisit = true;
+              dueVisitStartDate = fourthStart;
               dueVisitEndDate = fourthEnd;
+              currentAncVisitName = '4th ANC';
             }
           }
 
           // If no ANC visit is currently due (or all have forms in their windows), skip this beneficiary
-          if (!hasDueVisit || dueVisitEndDate == null) {
+          if (!hasDueVisit || dueVisitStartDate == null || dueVisitEndDate == null) {
             continue;
           }
 
-          // For display, use the end date of the currently due visit window
-          final currentAncLastDueDateText = _formatAncDateOnly(
-              '${dueVisitEndDate.year.toString().padLeft(4, '0')}-${dueVisitEndDate.month.toString().padLeft(2, '0')}-${dueVisitEndDate.day.toString().padLeft(2, '0')}');
+          // For display, use the start and end date of currently due visit window in "TO" format
+          DateTime displayEndDate = dueVisitEndDate;
+
+          // Special handling for 4th ANC - show 15 days window from start date
+          if (currentAncVisitName == '4th ANC') {
+            displayEndDate = dueVisitStartDate!.add(const Duration(days: 15));
+          }
+
+          final currentAncLastDueDateText = '${_formatDate(dueVisitStartDate!)} TO ${_formatDate(displayEndDate)}';
 
           final householdRefKey = row['household_ref_key']?.toString() ?? '';
 
@@ -2326,26 +2498,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     }
   }
 
-  Map<String, DateTime> _calculateAncDateRangesForToday(DateTime lmp) {
-    final ranges = <String, DateTime>{};
-
-    ranges['1st_anc_start'] = lmp;
-    ranges['1st_anc_end'] = lmp.add(const Duration(days: 12 * 7));
-
-    ranges['2nd_anc_start'] = lmp.add(const Duration(days: 14 * 7));
-    ranges['2nd_anc_end'] = lmp.add(const Duration(days: 24 * 7));
-
-    ranges['3rd_anc_start'] = lmp.add(const Duration(days: 26 * 7));
-    ranges['3rd_anc_end'] = lmp.add(const Duration(days: 34 * 7));
-
-    ranges['4th_anc_start'] = lmp.add(const Duration(days: 36 * 7));
-    ranges['4th_anc_end'] = lmp.add(const Duration(days: 40 * 7));
-
-    ranges['pmsma_start'] = lmp.add(const Duration(days: 40 * 7));
-    ranges['pmsma_end'] = lmp.add(const Duration(days: 44 * 7));
-
-    return ranges;
-  }
 
   Future<void> _loadRoutineImmunizationItems() async {
     try {
@@ -3023,6 +3175,12 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 element['unique_key'] == item['unique_key'] &&
                     element['BeneficiaryID'] == item['BeneficiaryID'],
               );
+
+              // Add the completed item to the completed list immediately
+              final completedItem = Map<String, dynamic>.from(item);
+              completedItem['last Visit date'] = _formatDateOnly(DateTime.now().toIso8601String());
+              completedItem['_rawRow'] = {};
+              _ancCompletedItems.insert(0, completedItem);
             });
             await _loadData();
           }
@@ -3229,7 +3387,32 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           ),
                         ],
 
-                        if (item['last Visit date'] != null && badge != 'HBNC') ...[
+                        // Show last visit date for ANC items
+                        if (badge == 'ANC') ...[
+                          FutureBuilder<String?>(
+                            future: _getLastANCVisitDateForItem(item),
+                            builder: (context, snapshot) {
+                              final lastVisitDate = snapshot.data;
+                              if (lastVisitDate != null && lastVisitDate.isNotEmpty) {
+                                return Text(
+                                  'Last visit date: $lastVisitDate',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14.sp,
+                                  ),
+                                );
+                              } else {
+                                return Text(
+                                  'Last visit date: No visit Yet',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14.sp,
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ] else if (item['last Visit date'] != null) ...[
                           Text(
                             '${ "Last visit date"}: ${item['last Visit date']}',
                             style: TextStyle(
@@ -3387,6 +3570,27 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   bool _isRoutineImmunizationList(String key, AppLocalizations l10n) {
     return key == 'Routine Immunization (RI)' ||
         key == l10n.listRoutineImmunization;
+  }
+
+  Future<String?> _getLastANCVisitDateForItem(Map<String, dynamic> item) async {
+    try {
+      final beneficiaryId = item['BeneficiaryID']?.toString() ??
+                           item['unique_key']?.toString() ??
+                           item['id']?.toString() ?? '';
+      
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiary ID provided to _getLastANCVisitDateForItem');
+        return null;
+      }
+
+      print('🔍 Fetching last ANC visit date for beneficiary: $beneficiaryId');
+      final result = await LocalStorageDao.instance.getLastANCVisitDate(beneficiaryId);
+      print('✅ Last visit date for $beneficiaryId: $result');
+      return result;
+    } catch (e) {
+      print('❌ Error in _getLastANCVisitDateForItem: $e');
+      return null;
+    }
   }
 
   @override

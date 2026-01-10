@@ -237,9 +237,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
     ranges['4th_anc_end'] = _calculateEdd(lmp);
 
-    // Calculate PMSMA dates based on ANC ranges:
-    // PMSMA start = First ANC "to date" + 1 day
-    // PMSMA end = Second ANC "from date" - 1 day
     ranges['pmsma_start'] = ranges['1st_anc_end']!.add(const Duration(days: 1));
     ranges['pmsma_end'] = ranges['2nd_anc_start']!.subtract(const Duration(days: 1));
 
@@ -282,7 +279,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
       if (registrationDate.isNotEmpty) {
         try {
           final dateTime = DateTime.parse(registrationDate);
-          // Format day and month to always show two digits
           final day = dateTime.day.toString().padLeft(2, '0');
           final month = dateTime.month.toString().padLeft(2, '0');
           formattedDate = '$day-$month-${dateTime.year}';
@@ -492,6 +488,23 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     } catch (e) {
       print('❌ Error in _getVisitCount for $beneficiaryId: $e');
       return {'count': 0, 'isHighRisk': false};
+    }
+  }
+
+  Future<String?> _getLastANCVisitDate(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiary ID provided to _getLastANCVisitDate');
+        return null;
+      }
+
+      print('🔍 Fetching last ANC visit date for beneficiary: $beneficiaryId');
+      final result = await LocalStorageDao.instance.getLastANCVisitDate(beneficiaryId);
+      print('✅ Last visit date for $beneficiaryId: $result');
+      return result;
+    } catch (e) {
+      print('❌ Error in _getLastANCVisitDate for $beneficiaryId: $e');
+      return null;
     }
   }
 
@@ -862,6 +875,20 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                         child: _rowText(
                           l10n?.rchIdLabel ?? 'RCH ID',
                           data['RCH ID'] ?? l10n?.na,
+                        ),
+                      ),
+                      Flexible(
+                        child: FutureBuilder<String?>(
+                          future: beneficiaryId.isNotEmpty
+                              ? _getLastANCVisitDate(beneficiaryId)
+                              : Future.value(null),
+                          builder: (context, snapshot) {
+                            final lastVisitDate = snapshot.data;
+                            return _rowText(
+                              'Last Visit Date',
+                              lastVisitDate ?? 'No visit Yet',
+                            );
+                          },
                         ),
                       ),
                     ],
