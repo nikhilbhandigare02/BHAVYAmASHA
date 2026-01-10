@@ -160,6 +160,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                         getLabel: (e) => e == 'alive' ? t.alive : t.dead,
                         value: _asString(m['motherStatus']),
                         readOnly: _isMotherStatusLocked,
+                        autoOpenTick: state.focusedErrorField == 'motherStatus' ? state.validationTick : null,
                         onChanged: _isMotherStatusLocked
                             ? null
                             : (val) => context.read<HbncVisitBloc>().add(
@@ -194,6 +195,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           ],
                           getLabel: (e) => e,
                           value: _asString(m['deathPlace']),
+                          autoOpenTick: state.focusedErrorField == 'deathPlace' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(field: 'deathPlace', value: val),
                           ),
@@ -245,6 +247,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['mcpCardAvailable']),
+                          autoOpenTick: state.focusedErrorField == 'mcpCardAvailable' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(
                               field: 'mcpCardAvailable',
@@ -261,6 +264,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             items: const ['Yes', 'No'],
                             getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                             value: _asString(m['mcpCardFilled']),
+                            autoOpenTick: state.focusedErrorField == 'mcpCardFilled' ? state.validationTick : null,
                             onChanged: (val) => context.read<HbncVisitBloc>().add(
                               MotherDetailsChanged(
                                 field: 'mcpCardFilled',
@@ -277,6 +281,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['postDeliveryProblems']),
+                          autoOpenTick: state.focusedErrorField == 'postDeliveryProblems' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(
                               field: 'postDeliveryProblems',
@@ -293,6 +298,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             items: const ['Yes', 'No'],
                             getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                             value: _asString(m['excessiveBleeding']),
+                            autoOpenTick: state.focusedErrorField == 'excessiveBleeding' ? state.validationTick : null,
                             onChanged: (val) => context.read<HbncVisitBloc>().add(
                               MotherDetailsChanged(
                                 field: 'excessiveBleeding',
@@ -306,6 +312,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             items: const ['Yes', 'No'],
                             getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                             value: _asString(m['unconsciousFits']),
+                            autoOpenTick: state.focusedErrorField == 'unconsciousFits' ? state.validationTick : null,
                             onChanged: (val) => context.read<HbncVisitBloc>().add(
                               MotherDetailsChanged(
                                 field: 'unconsciousFits',
@@ -322,6 +329,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['breastfeedingProblems']),
+                           autoOpenTick: state.focusedErrorField == 'breastfeedingProblems' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(
                               field: 'breastfeedingProblems',
@@ -338,6 +346,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             initialValue:
                             _asString(m['breastfeedingProblemDescription']) ??
                                 '',
+                            autofocus: state.focusedErrorField == 'breastfeedingProblemDescription',
                             onChanged: (val) => context.read<HbncVisitBloc>().add(
                               MotherDetailsChanged(
                                 field: 'breastfeedingProblemDescription',
@@ -351,6 +360,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             labelText: t.breastfeeding_problem_help,
                             hintText: t.write_take_action,
                             initialValue: _asString(m['breastfeedingHelpGiven']),
+                            autofocus: state.focusedErrorField == 'breastfeedingHelpGiven',
                             onChanged: (val) => context.read<HbncVisitBloc>().add(
                               MotherDetailsChanged(
                                 field: 'breastfeedingHelpGiven',
@@ -369,6 +379,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           value: (m['mealsPerDay'] is int)
                               ? m['mealsPerDay'] as int
                               : int.tryParse(_asString(m['mealsPerDay']) ?? ''),
+                          autoOpenTick: state.focusedErrorField == 'mealsPerDay' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(field: 'mealsPerDay', value: val),
                           ),
@@ -380,6 +391,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['counselingAdvice']),
+                          autoOpenTick: state.focusedErrorField == 'counselingAdvice' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(
                               field: 'counselingAdvice',
@@ -397,6 +409,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           value: (m['padsPerDay'] is int)
                               ? m['padsPerDay'] as int
                               : int.tryParse(_asString(m['padsPerDay']) ?? ''),
+                          autoOpenTick: state.focusedErrorField == 'padsPerDay' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(field: 'padsPerDay', value: val),
                           ),
@@ -422,6 +435,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             }
                           },
                           value: _asString(m['temperature']),
+                          autoOpenTick: state.focusedErrorField == 'temperature' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(field: 'temperature', value: val),
                           ),
@@ -444,6 +458,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                                     items: const ['Yes', 'No'],
                                     getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                                     value: _asString(m['paracetamolGiven']),
+                                    autoOpenTick: state.focusedErrorField == 'paracetamolGiven' ? state.validationTick : null,
                                     onChanged: (val) =>
                                         context.read<HbncVisitBloc>().add(
                                           MotherDetailsChanged(
@@ -465,6 +480,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['foulDischargeHighFever']),
+                          autoOpenTick: state.focusedErrorField == 'foulDischargeHighFever' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(
                               field: 'foulDischargeHighFever',
@@ -479,6 +495,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['abnormalSpeechOrSeizure']),
+                          autoOpenTick: state.focusedErrorField == 'abnormalSpeechOrSeizure' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(
                               field: 'abnormalSpeechOrSeizure',
@@ -494,6 +511,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['milkNotProducingOrLess']),
+                          autoOpenTick: state.focusedErrorField == 'milkNotProducingOrLess' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(
                               field: 'milkNotProducingOrLess',
@@ -510,6 +528,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             items: const ['Yes', 'No'],
                             getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                             value: _asString(m['milkCounselingAdvice']),
+                            autoOpenTick: state.focusedErrorField == 'milkCounselingAdvice' ? state.validationTick : null,
                             onChanged: (val) => context.read<HbncVisitBloc>().add(
                               MotherDetailsChanged(
                                 field: 'milkCounselingAdvice',
@@ -524,6 +543,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['nippleCracksPainOrEngorged']),
+                          autoOpenTick: state.focusedErrorField == 'nippleCracksPainOrEngorged' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(
                               field: 'nippleCracksPainOrEngorged',
@@ -539,6 +559,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['referHospital']),
+                          autoOpenTick: state.focusedErrorField == 'referHospital' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(
                               field: 'referHospital',
@@ -562,6 +583,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             ],
                             getLabel: (e) => e,
                             value: _asString(m['referTo']),
+                            autoOpenTick: state.focusedErrorField == 'referTo' ? state.validationTick : null,
                             onChanged: (val) => context.read<HbncVisitBloc>().add(
                               MotherDetailsChanged(field: 'referTo', value: val),
                             ),

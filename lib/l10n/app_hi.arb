@@ -705,6 +705,7 @@
   "rchChildSerialHint":  "आरसीएच रजिस्टर में बच्चे की क्रम संख्या",
   "dateOfBirthLabel": "जन्म की तिथि *",
   "dateOfRegistrationLabel": "पंजीकरण तिथि *",
+  "dateOfRegistrationLabelR": "पंजीकरण तिथि",
   "childNameLabel": "बच्चे  का नाम *",
   "whoseMobileNumberLabel": "मोबाइल उपयोगकर्ता",
   "mobileNumberLabel": "मोबाइल नंबर ",

@@ -5219,6 +5219,12 @@ abstract class AppLocalizations {
   /// **'Date of Registration *'**
   String get dateOfRegistrationLabel;
 
+  /// No description provided for @dateOfRegistrationLabelR.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of Registration'**
+  String get dateOfRegistrationLabelR;
+
   /// No description provided for @childNameLabel.
   ///
   /// In en, this message translates to:

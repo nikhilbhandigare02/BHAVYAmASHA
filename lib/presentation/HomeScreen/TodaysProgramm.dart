@@ -3260,7 +3260,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
   }
 
   String _getTranslatedTitle(String key, AppLocalizations l10n) {
-    // Map English keys to translation keys
     switch (key) {
       case 'Family Survey List':
         return l10n.listFamilySurvey;
@@ -3280,7 +3279,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             key == l10n.listRoutineImmunization) {
           return key;
         }
-        return key; // Fallback to original key
+        return key;
     }
   }
 
@@ -3358,7 +3357,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Grid Boxes
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(

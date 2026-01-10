@@ -2583,6 +2583,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dateOfRegistrationLabel => 'Date of Registration *';
 
   @override
+  String get dateOfRegistrationLabelR => 'Date of Registration';
+
+  @override
   String get childNameLabel => 'Name of child *';
 
   @override

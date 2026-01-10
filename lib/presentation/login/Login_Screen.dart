@@ -52,7 +52,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     final version = await AppVersion.getAppVersion();
     if (mounted) {
       setState(() {
-        _appVersion = version;
+        // _appVersion = version;
+        _appVersion = '1.1.2';
       });
     }
   }

@@ -567,15 +567,18 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
   void _onValidateSection(
       ValidateSection event, Emitter<HbncVisitState> emit) {
     final List<String> errors = [];
+    String? focusField;
     final idx = event.index;
 
     if (idx == 0) {
       final v = state.visitDetails;
       if (v['visitNumber'] == null || (v['visitNumber'].toString()).isEmpty) {
         errors.add('err_visit_day_required');
+        focusField ??= 'visitNumber';
       }
       if (v['visitDate'] == null) {
         errors.add('err_visit_date_required');
+        focusField ??= 'visitDate';
       }
     } else if (idx == 1) {
       final m = state.motherDetails;
@@ -583,6 +586,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         final val = m[key];
         if (val == null || (val is String && val.trim().isEmpty)) {
           errors.add(code);
+          focusField ??= key;
         }
       }
 
@@ -591,6 +595,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         final val = m[key];
         if (val == null || (val is String && val.trim().isEmpty)) {
           errors.add(code);
+          focusField ??= key;
         }
       }
       // Always validate motherStatus itself
@@ -635,6 +640,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         final val = c[key];
         if (val == null || (val is String && val.trim().isEmpty)) {
           errors.add(code);
+          focusField ??= key;
         }
       }
       req('babyCondition', 'err_baby_condition_required');
@@ -683,6 +689,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
       lastValidationWasSave: event.isSave,
       validationErrors: errors,
       validationTick: state.validationTick + 1,
+      focusedErrorField: focusField,
     ));
   }
 }

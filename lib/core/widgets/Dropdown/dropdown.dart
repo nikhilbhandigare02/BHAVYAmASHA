@@ -5,7 +5,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../../l10n/app_localizations.dart';
 
-class ApiDropdown<T> extends StatelessWidget {
+class ApiDropdown<T> extends StatefulWidget {
   final String? labelText;
   final List<T> items;
   final String Function(T) getLabel;
@@ -23,6 +23,7 @@ class ApiDropdown<T> extends StatelessWidget {
   final double? labelFontSize;
   final String? emptyOptionText;
   final bool readOnly;
+  final int? autoOpenTick;
 
   const ApiDropdown({
     super.key,
@@ -42,26 +43,27 @@ class ApiDropdown<T> extends StatelessWidget {
     this.emptyOptionText,
     this.readOnly = false,
     this.convertToTitleCase = true,
+    this.autoOpenTick,
   });
+
+  @override
+  State<ApiDropdown<T>> createState() => _ApiDropdownState<T>();
+}
+
+class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
+  int? _lastOpenedTick;
 
   String _toTitleCase(String text) {
     return text;
-    /*if (text.isEmpty) return text;
-    return text.split(' ').map((word) {
-      if (word.isEmpty) return '';
-      return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
-
-    }).join(' ');*/
   }
 
-
   Widget? get _labelWidget {
-    if (labelText == null || labelText!.isEmpty) return null;
+    if (widget.labelText == null || widget.labelText!.isEmpty) return null;
 
-    final bool required = labelText!.endsWith(' *');
+    final bool required = widget.labelText!.endsWith(' *');
     final String base = required
-        ? labelText!.substring(0, labelText!.length - 2).trim()
-        : labelText!;
+        ? widget.labelText!.substring(0, widget.labelText!.length - 2).trim()
+        : widget.labelText!;
 
     return Builder(
       builder: (context) => RichText(
@@ -80,12 +82,11 @@ class ApiDropdown<T> extends StatelessWidget {
               ),
           ],
         ),
-        maxLines: labelMaxLines,
+        maxLines: widget.labelMaxLines,
         overflow: TextOverflow.visible,
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -98,22 +99,31 @@ class ApiDropdown<T> extends StatelessWidget {
     );
 
     return FormField<T>(
-      initialValue: value,
+      initialValue: widget.value,
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      validator: validator,
+      validator: widget.validator,
       builder: (field) {
+        if (widget.autoOpenTick != null &&
+            widget.autoOpenTick != _lastOpenedTick &&
+            !widget.readOnly &&
+            widget.onChanged != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _lastOpenedTick = widget.autoOpenTick;
+            _showSelectDialog(context, field);
+          });
+        }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             AbsorbPointer(
-              absorbing: readOnly,
+              absorbing: widget.readOnly,
               child: Opacity(
-                opacity: readOnly ? 0.7 : 1.0,
+                opacity: widget.readOnly ? 0.7 : 1.0,
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: readOnly || onChanged == null
+                    onTap: widget.readOnly || widget.onChanged == null
                         ? null
                         : () {
                             FocusManager.instance.primaryFocus?.unfocus();
@@ -141,17 +151,17 @@ class ApiDropdown<T> extends StatelessWidget {
                                       fontWeight: FontWeight.w500,
                                       height: 1.2,
                                     ),
-                                    maxLines: labelMaxLines ?? 3,
+                                    maxLines: widget.labelMaxLines ?? 3,
                                     overflow: TextOverflow.ellipsis,
                                     child: _labelWidget!,
                                   ),
                                 const SizedBox(height: 3),
                                 Text(
-                                  value != null
-                                      ? getLabel(value!)
-                                      : (hintText ?? l10n.selectOptionLabel),
+                                  widget.value != null
+                                      ? widget.getLabel(widget.value as T)
+                                      : (widget.hintText ?? l10n.selectOptionLabel),
                                   style: inputStyle.copyWith(
-                                    color: value != null
+                                    color: widget.value != null
                                         ? AppColors.onSurfaceVariant
                                         : AppColors.grey,
                                     fontWeight: FontWeight.w400,
@@ -189,10 +199,9 @@ class ApiDropdown<T> extends StatelessWidget {
     );
   }
 
-
   Future<void> _showSelectDialog(
       BuildContext context, FormFieldState<T> field) async {
-    if (multiSelect) {
+    if (widget.multiSelect) {
       await _showMultiSelectDialog(context, field);
     } else {
       await _showSingleSelectDialog(context, field);
@@ -201,7 +210,7 @@ class ApiDropdown<T> extends StatelessWidget {
 
   Future<void> _showSingleSelectDialog(
       BuildContext context, FormFieldState<T> field) async {
-    T? tempValue = items.contains(value) ? value : null;
+    T? tempValue = widget.items.contains(widget.value) ? widget.value : null;
     final l10n = AppLocalizations.of(context);
 
 
@@ -220,9 +229,9 @@ class ApiDropdown<T> extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  (labelText ?? 'Select Option').replaceAll('', ''),
+                  (widget.labelText ?? 'Select Option').replaceAll('', ''),
                   style: TextStyle(
-                    fontSize: labelFontSize ?? 15.sp,
+                    fontSize: widget.labelFontSize ?? 15.sp,
                     fontWeight: FontWeight.bold,
                     color: AppColors.onSurfaceVariant,
                   ),
@@ -236,14 +245,14 @@ class ApiDropdown<T> extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: items.isEmpty
+                children: widget.items.isEmpty
                     ? [
                         ListTile(
                           leading: const Icon(Icons.radio_button_unchecked, color: Colors.grey),
                           title: Text(
-                            emptyOptionText ?? (  'No options found'),
+                            widget.emptyOptionText ?? ('No options found'),
                             style: TextStyle(
-                              fontSize: labelFontSize ?? 15.sp,
+                              fontSize: widget.labelFontSize ?? 15.sp,
                               color: Colors.grey,
                             ),
                           ),
@@ -253,11 +262,11 @@ class ApiDropdown<T> extends StatelessWidget {
                           visualDensity: const VisualDensity(vertical: -4),
                         )
                       ]
-                    : items.map((item) {
+                    : widget.items.map((item) {
                         return RadioListTile<T>(
                           title: Text(
-                            convertToTitleCase ? _toTitleCase(getLabel(item)) : getLabel(item),
-                            style: TextStyle(fontSize: labelFontSize ?? 15.sp),
+                            widget.convertToTitleCase ? _toTitleCase(widget.getLabel(item)) : widget.getLabel(item),
+                            style: TextStyle(fontSize: widget.labelFontSize ?? 15.sp),
                           ),
                           value: item,
                           groupValue: tempValue,
@@ -285,7 +294,7 @@ class ApiDropdown<T> extends StatelessWidget {
                   child: Text(
                       l10n?.cancel ?? 'CANCEL',
                     style: TextStyle(
-                      fontSize: labelFontSize ?? 14.sp,
+                      fontSize: widget.labelFontSize ?? 14.sp,
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).primaryColor,
                     ),
@@ -293,8 +302,8 @@ class ApiDropdown<T> extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    if (tempValue != null && onChanged != null) {
-                      onChanged!(tempValue);
+                    if (tempValue != null && widget.onChanged != null) {
+                      widget.onChanged!(tempValue);
                       field.didChange(tempValue);
                     }
                     FocusManager.instance.primaryFocus?.unfocus();
@@ -305,7 +314,7 @@ class ApiDropdown<T> extends StatelessWidget {
                   child: Text(
                     l10n?.ok ?? 'OK',
                     style: TextStyle(
-                      fontSize: labelFontSize ?? 14.sp,
+                      fontSize: widget.labelFontSize ?? 14.sp,
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).primaryColor,
                     ),
@@ -324,7 +333,7 @@ class ApiDropdown<T> extends StatelessWidget {
 
   Future<void> _showMultiSelectDialog(
       BuildContext context, FormFieldState<T> field) async {
-    List<T> tempValues = List<T>.from(selectedValues);
+    List<T> tempValues = List<T>.from(widget.selectedValues);
 
   final l10n = AppLocalizations.of(context);
     await showDialog<List<T>>(
@@ -338,9 +347,9 @@ class ApiDropdown<T> extends StatelessWidget {
           title: Column(
             children: <Widget>[
               Text(
-                (labelText ?? l10n!.selectOption).replaceAll(' *', ''),
+                (widget.labelText ?? l10n!.selectOption).replaceAll(' *', ''),
                 style: TextStyle(
-                  fontSize: labelFontSize ?? 16.sp,  
+                  fontSize: widget.labelFontSize ?? 16.sp,  
                   fontWeight: FontWeight.w600,
                   color: Colors.black,
                 ),
@@ -353,12 +362,12 @@ class ApiDropdown<T> extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: items.map((item) {
+                children: widget.items.map((item) {
                   final bool isSelected = tempValues.contains(item);
                   return CheckboxListTile(
                     title: Text(
-                      convertToTitleCase ? _toTitleCase(getLabel(item)) : getLabel(item),
-                      style: TextStyle(fontSize: labelFontSize ?? 15.sp),
+                      widget.convertToTitleCase ? _toTitleCase(widget.getLabel(item)) : widget.getLabel(item),
+                      style: TextStyle(fontSize: widget.labelFontSize ?? 15.sp),
                     ),
                     value: isSelected,
                     onChanged: (bool? checked) {
@@ -393,7 +402,7 @@ class ApiDropdown<T> extends StatelessWidget {
                   child: Text(
                     l10n?.cancel ?? 'CANCEL',
                     style: TextStyle(
-                      fontSize: labelFontSize ?? 14.sp,
+                      fontSize: widget.labelFontSize ?? 14.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.grey[700],
                     ),
@@ -401,7 +410,7 @@ class ApiDropdown<T> extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    onMultiChanged?.call(tempValues);
+                    widget.onMultiChanged?.call(tempValues);
                     FocusManager.instance.primaryFocus?.unfocus();
                     FocusScope.of(context).unfocus();
                     FocusScope.of(context).requestFocus(FocusNode());
@@ -410,7 +419,7 @@ class ApiDropdown<T> extends StatelessWidget {
                   child: Text(
                     l10n?.ok ?? 'OK',
                     style: TextStyle(
-                      fontSize: labelFontSize ?? 14.sp,
+                      fontSize: widget.labelFontSize ?? 14.sp,
                       fontWeight: FontWeight.w500,
                       color: Theme.of(context).primaryColor,
                     ),
