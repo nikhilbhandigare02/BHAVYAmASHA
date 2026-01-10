@@ -626,8 +626,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
           } else {
             normalized = relArg;
           }
-          // Directly update bloc so that dropdown shows correct initial value.
-          _bloc.add(AnmUpdateRelation(normalized));
+           _bloc.add(AnmUpdateRelation(normalized));
         }
       } else if (args is bool) {
         _isEdit = args == true;

@@ -815,7 +815,8 @@ class _HouseHold_BeneficiaryScreenState
                         ),
                       if ((isChild || isFemale) && data['Mobileno.']?.toString().isNotEmpty == true)
                         const SizedBox(width: 12),
-                      
+
+
                       // Second available field: Father name for children, Husband name for females
                       if (isChild && data['FatherName']?.toString().isNotEmpty == true)
                         Expanded(
@@ -826,7 +827,7 @@ class _HouseHold_BeneficiaryScreenState
                         ),
                       if (isChild && data['FatherName']?.toString().isNotEmpty == true)
                         const SizedBox(width: 12),
-                      
+
                       if (isFemale && data['HusbandName']?.toString().isNotEmpty == true)
                         Expanded(
                           child: _rowText(
@@ -836,7 +837,7 @@ class _HouseHold_BeneficiaryScreenState
                         ),
                       if (isFemale && data['HusbandName']?.toString().isNotEmpty == true)
                         const SizedBox(width: 12),
-                      
+
                       // Third available field: Wife name for males
                       if (!isFemale && data['WifeName']?.toString().isNotEmpty == true)
                         Expanded(
@@ -847,7 +848,7 @@ class _HouseHold_BeneficiaryScreenState
                         ),
                       if (!isFemale && data['WifeName']?.toString().isNotEmpty == true)
                         const SizedBox(width: 12),
-                      
+
                       // Fourth available field: Spouse name fallback
                       if (data['SpouseName']?.toString().isNotEmpty == true &&
                           data['HusbandName']?.toString().isEmpty == true &&
@@ -864,16 +865,8 @@ class _HouseHold_BeneficiaryScreenState
                     ],
                   ),
 
-                  // Show Father Name for unmarried members
-                  if (data['FatherName']?.toString().isNotEmpty == true && isUnmarried)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: _rowText(
-                        l10n?.fatherName ?? 'Father\'s Name',
-                        data['FatherName']?.toString() ?? (l10n?.na ?? 'Not Available'),
-                      ),
-                    ),
-                    
+
+
 
                 ],
               ),

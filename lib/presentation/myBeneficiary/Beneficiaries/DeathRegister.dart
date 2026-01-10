@@ -321,7 +321,6 @@ class _DeathRegisterState extends State<DeathRegister> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // MemberType Badge
                   FutureBuilder<String>(
                     future: _getMemberType(uniqueKey),
                     builder: (context, snapshot) {
@@ -375,8 +374,6 @@ class _DeathRegisterState extends State<DeathRegister> {
                       Expanded(child: _rowText('', '$age | $gender')),
                       const SizedBox(width: 12),
                       Expanded(child: _rowText('', "Place of Death: ${deathPlace}")),
-
-
                     ],
                   ),
                 ],

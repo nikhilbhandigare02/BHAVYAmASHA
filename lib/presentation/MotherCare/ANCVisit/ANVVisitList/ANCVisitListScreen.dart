@@ -655,16 +655,25 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           ),
         );
         if (!mounted) return;
-        if (result == true ||
-            (result is Map<String, dynamic> && (result['saved'] == true))) {
+        if (result is Map<String, dynamic> && (result['saved'] == true)) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
             _onRefresh();
-            CustomDialog.show(
-              context,
-              title: 'Form has been saved successfully',
-              message: 'Registration has been completed',
-            );
+            final shouldShowDialog = result['showDialog'] == true;
+            final dialogMessage = (result['message']?.toString() ?? 'Registration has been completed');
+            if (shouldShowDialog) {
+              showDialog(
+                context: context,
+                useRootNavigator: true,
+                builder: (dialogContext) => CustomDialog(
+                  title: 'Form has been saved successfully',
+                  message: dialogMessage,
+                  onOkPressed: () {
+                    Navigator.of(dialogContext).pop();
+                  },
+                ),
+              );
+            }
           });
         } else {
           _onRefresh();

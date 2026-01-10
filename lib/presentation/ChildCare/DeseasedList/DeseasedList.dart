@@ -350,7 +350,7 @@ class _DeseasedListState extends State<DeseasedList> {
                   children: [
                     _buildRow([
                       _rowText(l10n!.registrationDate, data['RegitrationDate'] ?? l10n.na),
-                      _rowText(l10n.registrationTypeLabel, data['RegitrationType'] ?? l10n.na),
+                      _rowText(l10n.registrationTypeLabel, 'Child' ?? l10n.na),
                       _rowText(l10n.beneficiaryId,
                           (data['BeneficiaryID']?.toString().length ?? 0) > 11
                               ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11)
@@ -366,7 +366,7 @@ class _DeseasedListState extends State<DeseasedList> {
                     const SizedBox(height: 8),
                     _buildRow([
                       _rowText(l10n.fatherName, data['FatherName'] ?? l10n.na),
-                      _rowText(l10n.mobileNumber, data['Mobileno.'] ?? l10n.na),
+                      _rowText(l10n.mobileNo, data['Mobileno.'] ?? l10n.na),
                       _rowText(l10n.dateOfDeathLabel, data['DateofDeath'] ?? l10n.na),
                     ]),
                     const SizedBox(height: 8),

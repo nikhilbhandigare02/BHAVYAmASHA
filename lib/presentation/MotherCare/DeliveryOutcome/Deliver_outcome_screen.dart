@@ -688,10 +688,16 @@ ORDER BY d.created_date_time DESC
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!mounted) return;
                 _loadPregnancyOutcomeeCouples();
-                CustomDialog.show(
-                  context,
-                  title: 'Form has been saved successfully',
-                  message: 'Registration has been completed',
+                showDialog(
+                  context: context,
+                  useRootNavigator: true,
+                  builder: (dialogContext) => CustomDialog(
+                    title: 'Form has been saved successfully',
+                    message: 'Registration has been completed',
+                    onOkPressed: () {
+                      Navigator.of(dialogContext).pop();
+                    },
+                  ),
                 );
               });
             } else {
