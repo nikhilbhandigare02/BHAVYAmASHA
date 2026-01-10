@@ -17,6 +17,7 @@ import '../../HomeScreen/HomeScreen.dart';
 import '../../../data/Database/local_storage_dao.dart';
 import '../OutcomeForm/OutcomeForm.dart';
 import '../../../core/widgets/SnackBar/app_snackbar.dart';
+import '../../../core/widgets/SuccessDialogbox/SuccessDialogbox.dart';
 
 class DeliveryOutcomeScreen extends StatefulWidget {
   const DeliveryOutcomeScreen({super.key});
@@ -638,7 +639,7 @@ ORDER BY d.created_date_time DESC
           side: BorderSide(color: Colors.grey.shade200),
         ),
         child: InkWell(
-          onTap: () {
+          onTap: () async {
             final beneficiaryData = <String, dynamic>{};
 
             print('📋 Raw data: $data');
@@ -665,20 +666,37 @@ ORDER BY d.created_date_time DESC
               return;
             }
 
-            Navigator.push(
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => OutcomeFormPage(
                   beneficiaryData: {
                     ...beneficiaryData,
-                    'householdId': data['household_id'] ?? data['_rawRow']?['household_ref_key'] ?? data['hhId'] ?? '',
+                    'householdId': data['household_id'] ??
+                        data['_rawRow']?['household_ref_key'] ??
+                        data['hhId'] ??
+                        '',
                     'beneficiaryId': beneficiaryData['BeneficiaryID'],
                   },
                 ),
               ),
-            ).then((_) {
+            );
+            if (!mounted) return;
+            if (result == true ||
+                (result is Map<String, dynamic> &&
+                    (result['saved'] == true))) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                _loadPregnancyOutcomeeCouples();
+                CustomDialog.show(
+                  context,
+                  title: 'Form has been saved successfully',
+                  message: 'Registration has been completed',
+                );
+              });
+            } else {
               _loadPregnancyOutcomeeCouples();
-            });
+            }
           },
           borderRadius: BorderRadius.circular(8),
           child: Container(
