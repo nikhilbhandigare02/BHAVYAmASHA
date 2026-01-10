@@ -1045,19 +1045,22 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                     formJson['form_data'] ??
                     {};
 
-            final fields = beneficiaryId.isNotEmpty
+            // Extract child information directly from RI form data
+            final childName = riForm['child_name']?.toString() ?? 
+                              riForm['name']?.toString() ?? '';
+            final childAge = riForm['age']?.toString() ?? '';
+            final childGender = riForm['gender']?.toString() ?? '';
+            final mobile = riForm['mobile']?.toString() ?? 
+                          riForm['mother_mobile']?.toString() ?? '-';
+
+            // Fallback to beneficiary fields if form data doesn't have child info
+            final fields = (beneficiaryId.isNotEmpty && (childName.isEmpty || childAge.isEmpty))
                 ? await _getBeneficiaryFields(beneficiaryId)
                 : {
-              'name':
-              riForm['mother_name']?.toString() ??
-                  riForm['woman_name']?.toString() ??
-                  '',
-              'age':
-              riForm['mother_age']?.toString() ??
-                  riForm['age']?.toString() ??
-                  '',
-              'gender': 'Female',
-              'mobile': riForm['mobile']?.toString() ?? '-',
+              'name': childName.isNotEmpty ? childName : riForm['mother_name']?.toString() ?? '',
+              'age': childAge.isNotEmpty ? childAge : '',
+              'gender': childGender.isNotEmpty ? childGender : 'Female',
+              'mobile': mobile,
             };
 
             _riCompletedItems.add({
@@ -1075,7 +1078,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               'last Visit date': _formatDateOnly(
                 row['created_date_time']?.toString(),
               ),
-              'Current ANC last due date': 'currentAncLastDueDateText',
               'mobile': fields['mobile'],
               'badge': 'RI',
 
@@ -3299,7 +3301,16 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                           return _last11(item['beneficiaryId']?.toString());
                         }
 
-                        // Prefer beneficiary/unique identifiers over household_ref_key
+                        // For RI (Routine Immunization), show household reference key
+                        if (badge == 'RI') {
+                          final householdRefKey = item['household_ref_key']?.toString() ?? 
+                                                item['hhId']?.toString();
+                          if (householdRefKey != null && householdRefKey.isNotEmpty) {
+                            return _last11(householdRefKey);
+                          }
+                        }
+
+                        // Prefer beneficiary/unique identifiers over household_ref_key for other badges
                         final beneficiaryId = item['BeneficiaryID']?.toString();
                         if (beneficiaryId != null && beneficiaryId.isNotEmpty) {
                           return _last11(beneficiaryId);
@@ -3412,7 +3423,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                               }
                             },
                           ),
-                        ] else if (item['last Visit date'] != null) ...[
+                        ] else if (badge != 'HBNC' && item['last Visit date'] != null) ...[
                           Text(
                             '${ "Last visit date"}: ${item['last Visit date']}',
                             style: TextStyle(

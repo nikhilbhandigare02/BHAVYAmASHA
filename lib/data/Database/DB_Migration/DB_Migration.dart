@@ -38,6 +38,27 @@ class DbMigration {
   }
 
 
+
+  static String toSeparatedValue(dynamic value) {
+    if (value == null) return '';
+
+    final text = value.toString().trim();
+    if (text.isEmpty) return text;
+
+    // Skip numbers, dates, ids
+    if (RegExp(r'^[0-9\-/.]+$').hasMatch(text)) {
+      return text;
+    }
+
+    // Apply only if fully lowercase
+    if (text == text.toLowerCase()) {
+      // Replace underscore(s) with single space
+      return text.replaceAll(RegExp(r'_+'), ' ');
+    }
+
+    return text;
+  }
+
   final Map<String, String> keyMapping = {
     "beneficiaryType": "type_of_beneficiary",
 
@@ -126,6 +147,11 @@ class DbMigration {
     "youngestGender": "age_of_youngest_child_unit",
     "death_place":"death_place",
     "age_by":"age_by",
+    "rch_id":"rch_id",
+    "birthCertificate":"is_birth_certificate_issued",
+    "weight":"weight_at_birth",
+    "childSchool":"weight",
+    "birthWeight":"is_school_going_child",
 
   };
   static Future<void> runBeneficiaryTableMigration(Database db) async {
@@ -256,7 +282,8 @@ class DbMigration {
           if (form[key] != null &&
               form[key].toString().isNotEmpty &&
               form[key].toString() != "null") {
-            finalJson[key] = form[key];
+
+            finalJson[key] = toSeparatedValue(form[key]);
             continue;
           }
 
@@ -265,10 +292,12 @@ class DbMigration {
             if (form[mapped] != null &&
                 form[mapped].toString().isNotEmpty &&
                 form[mapped].toString() != "null") {
-              finalJson[key] = form[mapped];
+
+              finalJson[key] = toSeparatedValue(form[mapped]);
             }
           }
         }
+
 
         int isDeath = (row["is_death"] == 1) ? 1 : 0;
         int isMigrated = (row["is_migrated"] == 1) ? 1 : 0;
