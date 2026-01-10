@@ -968,28 +968,77 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
       if (ecFormKey.isEmpty) return;
 
+      // Get current date and 1 month ago date
+      final now = DateTime.now();
+      final oneMonthAgo = now.subtract(const Duration(days: 30));
+      final oneMonthAgoStr = oneMonthAgo.toIso8601String().split('T')[0];
+      final todayStr = now.toIso8601String().split('T')[0];
+
+      // Step 1: Get all eligible_couple records with state = 'eligible_couple'
+      // and created/modified before 1 month ago
       String whereClause =
           'eligible_couple_state = ? AND (is_deleted IS NULL OR is_deleted = 0)';
-      List<dynamic> whereArgs = ['tracking_due'];
+      List<dynamic> whereArgs = ['eligible_couple'];
 
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         whereClause += ' AND current_user_key = ?';
         whereArgs.add(ashaUniqueKey);
       }
 
-      final trackingDueRows = await db.query(
+      final eligibleCoupleRows = await db.query(
         'eligible_couple_activities',
-        columns: ['beneficiary_ref_key'],
+        columns: [
+          'beneficiary_ref_key',
+          'created_date_time',
+          'modified_date_time',
+        ],
         where: whereClause,
         whereArgs: whereArgs,
       );
 
-      final trackingDueBeneficiaryKeys = trackingDueRows
-          .map((row) => row['beneficiary_ref_key']?.toString())
-          .whereType<String>()
-          .toSet();
+      // Filter records where created_date_time or modified_date_time is before 1 month ago
+      final eligibleBeneficiaryKeys = <String>{};
+      for (final row in eligibleCoupleRows) {
+        final beneficiaryKey = row['beneficiary_ref_key']?.toString();
+        if (beneficiaryKey == null || beneficiaryKey.isEmpty) continue;
 
-      if (trackingDueBeneficiaryKeys.isEmpty) {
+        final createdDateStr = row['created_date_time']?.toString();
+        final modifiedDateStr = row['modified_date_time']?.toString();
+
+        bool isOldEnough = false;
+
+        // Check created_date_time
+        if (createdDateStr != null && createdDateStr.isNotEmpty) {
+          try {
+            final createdDate = DateTime.parse(createdDateStr);
+            if (createdDate.isBefore(oneMonthAgo)) {
+              isOldEnough = true;
+            }
+          } catch (e) {
+            print('Error parsing created_date_time: $e');
+          }
+        }
+
+        // Check modified_date_time if created_date_time is not old enough
+        if (!isOldEnough &&
+            modifiedDateStr != null &&
+            modifiedDateStr.isNotEmpty) {
+          try {
+            final modifiedDate = DateTime.parse(modifiedDateStr);
+            if (modifiedDate.isBefore(oneMonthAgo)) {
+              isOldEnough = true;
+            }
+          } catch (e) {
+            print('Error parsing modified_date_time: $e');
+          }
+        }
+
+        if (isOldEnough) {
+          eligibleBeneficiaryKeys.add(beneficiaryKey);
+        }
+      }
+
+      if (eligibleBeneficiaryKeys.isEmpty) {
         _eligibleCoupleItems.clear();
         if (mounted) {
           setState(() {});
@@ -999,33 +1048,31 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       }
 
       final placeholders = List.filled(
-        trackingDueBeneficiaryKeys.length,
+        eligibleBeneficiaryKeys.length,
         '?',
       ).join(',');
 
-      final recentForms = await db.rawQuery(
+      // Step 2: Check followup_form_table for entries created TODAY only
+      final todayForms = await db.rawQuery(
         '''
         SELECT DISTINCT beneficiary_ref_key
         FROM ${FollowupFormDataTable.table}
         WHERE forms_ref_key = ?
         AND beneficiary_ref_key IN ($placeholders)
         AND (is_deleted IS NULL OR is_deleted = 0)
-        AND (
-          DATE(created_date_time) >= DATE('now', '-1 month')
-          OR (modified_date_time IS NOT NULL AND DATE(modified_date_time) >= DATE('now', '-1 month'))
-        )
+        AND DATE(created_date_time) = DATE(?)
         ''',
-        [ecFormKey, ...trackingDueBeneficiaryKeys],
+        [ecFormKey, ...eligibleBeneficiaryKeys, todayStr],
       );
 
-      final recentlyTrackedKeys = recentForms
+      // Create a set of beneficiaries with today's followup forms
+      final beneficiariesWithTodayForms = todayForms
           .map((row) => row['beneficiary_ref_key']?.toString())
           .whereType<String>()
           .toSet();
 
-      final keysToShow = trackingDueBeneficiaryKeys.difference(
-        recentlyTrackedKeys,
-      );
+      // Step 3: Only show beneficiaries that have today's followup forms
+      final keysToShow = beneficiariesWithTodayForms;
 
       if (keysToShow.isEmpty) {
         _eligibleCoupleItems.clear();
@@ -1578,7 +1625,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      String whereClause = 'forms_ref_key = ? AND is_deleted = 0';
+      String whereClause = 'forms_ref_key = ?';
       List<dynamic> whereArgs = [deliveryOutcomeKey];
 
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
@@ -3893,4 +3940,5 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       );
       return false;
     }
-  }}
+  }
+}

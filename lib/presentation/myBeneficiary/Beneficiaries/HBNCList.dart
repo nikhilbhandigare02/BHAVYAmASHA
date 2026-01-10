@@ -39,7 +39,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
   void _onSearchChanged() {
 
   }
- 
+
   Future<List<Map<String, dynamic>>> _getDeliveryOutcomeData() async {
     try {
       final db = await DatabaseProvider.instance.database;
@@ -68,7 +68,6 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
       WHERE forms_ref_key = ? 
       AND current_user_key = ?
       AND beneficiary_ref_key IN ($placeholders)
-      AND (is_deleted IS NULL OR is_deleted = 0)
       ORDER BY created_date_time DESC
     ''';
 
@@ -192,12 +191,6 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
 
       setState(() {
         _filtered = formattedData;
-        // Sort by modified_date_time in descending order to show latest entries first
-        _filtered.sort((a, b) {
-          final dateA = a['modified_date_time']?.toString() ?? '';
-          final dateB = b['modified_date_time']?.toString() ?? '';
-          return dateB.compareTo(dateA); // Descending order (latest first)
-        });
         _isLoading = false;
       });
     } catch (e) {
@@ -210,7 +203,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context); 
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppHeader(
@@ -224,17 +217,17 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
           _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _filtered.isEmpty
-                  ? _buildNoRecordCard(context)
-                  : Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                        itemCount: _filtered.length,
-                        itemBuilder: (context, index) {
-                          final data = _filtered[index];
-                          return _householdCard(context, data);
-                        },
-                      ),
-                    ),
+              ? _buildNoRecordCard(context)
+              : Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              itemCount: _filtered.length,
+              itemBuilder: (context, index) {
+                final data = _filtered[index];
+                return _householdCard(context, data);
+              },
+            ),
+          ),
 
         ],
       ),

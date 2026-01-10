@@ -33,6 +33,7 @@ class _DeseasedListState extends State<DeseasedList> {
   }
 
   Future<void> _loadDeceasedList() async {
+    final l10n = AppLocalizations.of(context);
     try {
       setState(() {
         _isLoading = true;
@@ -68,6 +69,9 @@ class _DeseasedListState extends State<DeseasedList> {
       );
 
       final transformed = deceasedBeneficiaries.map((beneficiary) {
+        final l10n = AppLocalizations.of(context);
+        final naText = l10n?.na ?? 'N/A';
+
         final beneficiaryInfo =
         jsonDecode(beneficiary['beneficiary_info']?.toString() ?? '{}');
         final householdData =
@@ -75,24 +79,24 @@ class _DeseasedListState extends State<DeseasedList> {
         final deathDetails =
         jsonDecode(beneficiary['death_details']?.toString() ?? '{}');
 
-        String getValue(dynamic value, [String defaultValue = 'N/A']) {
+        String getValue(dynamic value, [String defaultValue = '']) {
           if (value == null ||
               (value is String && value.trim().isEmpty) ||
               value == 'null') {
-            return defaultValue;
+            return defaultValue.isEmpty ? naText : defaultValue;
           }
           return value.toString();
         }
 
-        String formatDate(dynamic dateValue, [String defaultValue = 'N/A']) {
-          if (dateValue == null) return defaultValue;
+        String formatDate(dynamic dateValue, [String defaultValue = '']) {
+          if (dateValue == null) return defaultValue.isEmpty ? naText : defaultValue;
           try {
             final date = DateTime.parse(dateValue.toString());
             return '${date.day.toString().padLeft(2, '0')}-'
                 '${date.month.toString().padLeft(2, '0')}-'
                 '${date.year}';
           } catch (_) {
-            return defaultValue;
+            return defaultValue.isEmpty ? naText : defaultValue;
           }
         }
 
@@ -114,10 +118,10 @@ class _DeseasedListState extends State<DeseasedList> {
                   (now.month == dob.month && now.day < dob.day)) {
                 age--;
               }
-              return age > 0 ? age.toString() : 'N/A';
+              return age > 0 ? age.toString() : naText;
             } catch (_) {}
           }
-          return 'N/A';
+          return naText;
         }
 
         final registrationDate =
@@ -350,7 +354,7 @@ class _DeseasedListState extends State<DeseasedList> {
                   children: [
                     _buildRow([
                       _rowText(l10n!.registrationDate, data['RegitrationDate'] ?? l10n.na),
-                      _rowText(l10n.registrationTypeLabel, data['RegitrationType'] ?? l10n.na),
+                      _rowText(l10n.registrationTypeLabel, 'Child' ?? l10n.na),
                       _rowText(l10n.beneficiaryId,
                           (data['BeneficiaryID']?.toString().length ?? 0) > 11
                               ? data['BeneficiaryID'].toString().substring(data['BeneficiaryID'].toString().length - 11)
@@ -366,7 +370,7 @@ class _DeseasedListState extends State<DeseasedList> {
                     const SizedBox(height: 8),
                     _buildRow([
                       _rowText(l10n.fatherName, data['FatherName'] ?? l10n.na),
-                      _rowText(l10n.mobileNumber, data['Mobileno.'] ?? l10n.na),
+                      _rowText(l10n.mobileNo, data['Mobileno.'] ?? l10n.na),
                       _rowText(l10n.dateOfDeathLabel, data['DateofDeath'] ?? l10n.na),
                     ]),
                     const SizedBox(height: 8),
