@@ -52,28 +52,28 @@ class _HBNCListScreenState
 
       final db = await DatabaseProvider.instance.database;
       final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
-      
+
       // Get the latest visit record to extract visit number
       final latestVisitRows = await db.query(
         FollowupFormDataTable.table,
-        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? ',
         whereArgs: [beneficiaryId, hbncVisitKey],
         orderBy: 'created_date_time DESC',
         limit: 1,
       );
-      
+
       if (latestVisitRows.isNotEmpty) {
         final result = latestVisitRows.first;
         try {
           final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
-          
+
           if (formJson.containsKey('hbyc_form')) {
             final hbycForm = formJson['hbyc_form'] as Map<String, dynamic>? ?? {};
-            
+
             if (hbycForm.containsKey('visitDetails')) {
               final visitDetails = hbycForm['visitDetails'] as Map<String, dynamic>? ?? {};
               final visitNumber = visitDetails['visitNumber']?.toString();
-              
+
               if (visitNumber != null) {
                 final number = int.tryParse(visitNumber);
                 if (number != null) {
@@ -83,14 +83,14 @@ class _HBNCListScreenState
               }
             }
           }
-          
+
           final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
-          
+
           if (formData.containsKey('visitDetails')) {
             final visitDetails = formData['visitDetails'] as Map<String, dynamic>? ?? {};
             final visitNumber = visitDetails['visitNumber']?.toString() ??
                 visitDetails['visit_number']?.toString();
-            
+
             if (visitNumber != null) {
               final number = int.tryParse(visitNumber);
               if (number != null) {
@@ -103,7 +103,7 @@ class _HBNCListScreenState
           print('❌ Error parsing visit number: $e');
         }
       }
-      
+
       // Fallback to counting total records
       final countRows = await db.query(
         FollowupFormDataTable.table,
@@ -162,7 +162,7 @@ class _HBNCListScreenState
     try {
       if (beneficiaryId.isEmpty) return 1;
       final db = await DatabaseProvider.instance.database;
-      
+
       // First try to get from ANC form
       final ancRefKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
       if (ancRefKey.isNotEmpty) {
@@ -175,7 +175,7 @@ class _HBNCListScreenState
           if (s.isNotEmpty) {
             final decoded = jsonDecode(s);
             final fd = (decoded is Map) ? Map<String, dynamic>.from(decoded['anc_form'] as Map? ?? {}) : <String, dynamic>{};
-            
+
             // Check for children_arr first (new structure)
             final childrenArr = fd['children_arr'] as List?;
             if (childrenArr != null && childrenArr.isNotEmpty) {
@@ -183,7 +183,7 @@ class _HBNCListScreenState
               print('👶 Child count from children_arr: $count for beneficiary $beneficiaryId');
               return (count > 3) ? 3 : (count < 1) ? 1 : count;
             }
-            
+
             final raw = fd['live_birth']?.toString().trim().toLowerCase() ?? '';
             if (raw.isNotEmpty) {
               if (raw == 'one' || raw == 'single' || raw == '1') return 1;
@@ -197,19 +197,19 @@ class _HBNCListScreenState
           }
         }
       }
-      
+
        final deliveryOutcomeKey = '4r7twnycml3ej1vg';
       final deliveryRows = await db.rawQuery(
         'SELECT * FROM ${FollowupFormDataTable.table} WHERE forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 ORDER BY created_date_time DESC LIMIT 1',
         [deliveryOutcomeKey, beneficiaryId],
       );
-      
+
       if (deliveryRows.isNotEmpty) {
         final s = deliveryRows.first['form_json']?.toString() ?? '';
         if (s.isNotEmpty) {
           final decoded = jsonDecode(s);
           final formData = (decoded is Map) ? Map<String, dynamic>.from(decoded['form_data'] as Map? ?? {}) : <String, dynamic>{};
-          
+
           final outcomeCount = formData['outcome_count']?.toString() ?? '';
           if (outcomeCount.isNotEmpty) {
             final n = int.tryParse(outcomeCount);
@@ -220,7 +220,7 @@ class _HBNCListScreenState
           }
         }
       }
-      
+
       return 1;
     } catch (e) {
       print('❌ Error determining child_tab_count for $beneficiaryId: $e');
@@ -360,7 +360,7 @@ class _HBNCListScreenState
               orderBy: 'created_date_time DESC',
               limit: 1,
             );
-            
+
             if (mcaResult.isNotEmpty) {
               final mcaCreatedDate = mcaResult.first['created_date_time']?.toString() ?? '';
               if (mcaCreatedDate.isNotEmpty) {
@@ -381,7 +381,7 @@ class _HBNCListScreenState
           final deliveryDate = formData['delivery_date']?.toString();
           print('📅 Passing delivery date to _getNextVisitDate: $deliveryDate');
           final nextHBNCDate = await _getNextVisitDate(beneficiaryRefKey, deliveryDate);
-          
+
           print('📊 Final values for beneficiary $beneficiaryRefKey:');
           print('  - Visit Count: $visitCount');
           print('  - Previous HBNC Date: $previousHBNCDate');
@@ -473,19 +473,19 @@ class _HBNCListScreenState
         try {
           final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
           print('🔍 Parsed form JSON successfully');
-          
+
           // Check for hbyc_form structure first (based on sample data)
           if (formJson.containsKey('hbyc_form')) {
             final hbycForm = formJson['hbyc_form'] as Map<String, dynamic>? ?? {};
             print('🔍 Found hbyc_form structure');
-            
+
             if (hbycForm.containsKey('visitDetails')) {
               final visitDetails = hbycForm['visitDetails'] as Map<String, dynamic>? ?? {};
               print('🔍 Found visitDetails in hbyc_form');
-              
+
               final visitDate = visitDetails['visitDate'];
               print('📅 Extracted visitDate from hbyc_form.visitDetails: $visitDate');
-              
+
               if (visitDate != null && visitDate.toString().isNotEmpty) {
                 final formattedDate = _formatDate(visitDate.toString());
                 print('✅ Using visit date from hbyc_form.visitDetails: $formattedDate');
@@ -499,7 +499,7 @@ class _HBNCListScreenState
           } else {
             print('⚠️ No hbyc_form found in form JSON');
           }
-          
+
           // Fallback to form_data structure
           final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
           print('🔑 Checking form_data structure');
@@ -579,10 +579,10 @@ class _HBNCListScreenState
   Future<String?> _getNextVisitDate(String beneficiaryId, String? deliveryDate) async {
     try {
       print('🔍 Calculating next visit date for beneficiary: $beneficiaryId');
-      
+
       final db = await DatabaseProvider.instance.database;
       final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
-      
+
       // Get the latest visit record to extract visit number and date
       final latestVisitRows = await db.query(
         FollowupFormDataTable.table,
@@ -591,38 +591,38 @@ class _HBNCListScreenState
         orderBy: 'created_date_time DESC',
         limit: 1,
       );
-      
+
       print('📋 Found ${latestVisitRows.length} visit records');
-      
+
       if (latestVisitRows.isNotEmpty) {
         final result = latestVisitRows.first;
         print('📋 Processing visit record ID: ${result['id']}');
         try {
           final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
           print('🔍 Parsed form JSON');
-          
+
           // Check for hbyc_form structure first (based on sample data)
           if (formJson.containsKey('hbyc_form')) {
             final hbycForm = formJson['hbyc_form'] as Map<String, dynamic>? ?? {};
             print('🔍 Found hbyc_form structure');
-            
+
             if (hbycForm.containsKey('visitDetails')) {
               final visitDetails = hbycForm['visitDetails'] as Map<String, dynamic>? ?? {};
               print('🔍 Found visitDetails in hbyc_form');
-              
+
               final visitNumber = visitDetails['visitNumber']?.toString();
               final visitDate = visitDetails['visitDate']?.toString();
-              
+
               print('📊 Visit number: $visitNumber');
               print('📅 Visit date: $visitDate');
-              
+
               if (visitNumber != null && visitDate != null) {
                 final number = int.tryParse(visitNumber);
                 final date = DateTime.tryParse(visitDate);
-                
+
                 print('🔢 Parsed visit number: $number');
                 print('📅 Parsed visit date: $date');
-                
+
                 if (number != null && date != null) {
                   // For all visits, calculate next visit based on the visit date itself
                   // The visit date becomes the base for calculating the next visit
@@ -636,25 +636,25 @@ class _HBNCListScreenState
               }
             }
           }
-          
+
           // Fallback to form_data structure
           final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
           print('🔍 Checking form_data structure');
-          
+
           if (formData.containsKey('visitDetails')) {
             final visitDetails = formData['visitDetails'] as Map<String, dynamic>? ?? {};
             final visitNumber = visitDetails['visitNumber']?.toString() ??
                 visitDetails['visit_number']?.toString();
             final visitDate = visitDetails['visitDate']?.toString() ??
                 visitDetails['visit_date']?.toString();
-            
+
             print('📊 Visit number from form_data: $visitNumber');
             print('📅 Visit date from form_data: $visitDate');
-            
+
             if (visitNumber != null && visitDate != null) {
               final number = int.tryParse(visitNumber);
               final date = DateTime.tryParse(visitDate);
-              
+
               if (number != null && date != null) {
                 // For all visits, calculate next visit based on the visit date itself
                 // The visit date becomes the base for calculating the next visit
@@ -672,7 +672,7 @@ class _HBNCListScreenState
         }
       } else {
         print('ℹ️ No visit records found - using registration date as base');
-        
+
         // For first-time beneficiaries, get registration date and calculate next visit
         final beneficiaryRows = await db.query(
           'beneficiaries_new',
@@ -680,7 +680,7 @@ class _HBNCListScreenState
           whereArgs: [beneficiaryId],
           columns: ['created_date_time'],
         );
-        
+
         if (beneficiaryRows.isNotEmpty) {
           final registrationDate = beneficiaryRows.first['created_date_time']?.toString();
           if (registrationDate != null) {
@@ -690,7 +690,7 @@ class _HBNCListScreenState
             return formatted;
           }
         }
-        
+
         // Fallback: Use current date if registration date not available
         print('⚠️ Registration date not found, using current date as fallback');
         final today = DateTime.now();
@@ -699,13 +699,13 @@ class _HBNCListScreenState
         print('📅 Default next visit date set: $formatted');
         return formatted;
       }
-      
+
     } catch (e) {
       print('❌ Error calculating next visit date: $e');
       return null;
     }
   }
-  
+
   DateTime? _calculateNextVisitDate(int currentVisitNumber, DateTime currentVisitDate) {
     switch (currentVisitNumber) {
       case 0: // Day 0 → Day 1 (within 24 hours of birth)
@@ -991,21 +991,21 @@ class _HBNCListScreenState
                         Expanded(
                           child: _rowText(
                             t!.registrationDate,
-                            data['registrationDate']?.toString() ?? 'N/A',
+                            data['registrationDate']?.toString() ??  t!.na,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _rowText(
                             t.beneficiaryId,
-                            data['beneficiaryId']?.toString() ?? 'N/A',
+                            data['beneficiaryId']?.toString() ??  t!.na,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _rowText(
                             t.rchIdLabel,
-                            data['rchId']?.toString() ?? 'N/A',
+                            data['rchId']?.toString() ?? t!.na,
                           ),
                         ),
                       ],

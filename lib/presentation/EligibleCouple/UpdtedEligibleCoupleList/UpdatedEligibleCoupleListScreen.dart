@@ -260,27 +260,37 @@ class _UpdatedEligibleCoupleListScreenState
                     return _householdCard(context, data);
                   },
                 )
-                    : Center(
-                  child: Container(
+                    : Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
                     width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
+                    height: 110, // 👈 fixed height
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                      child: Card(
+                        color: Colors.white,
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
                         ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 40, horizontal: 16),
-                    child: Text(
-                      t?.noRecordFound ?? 'No Record Found.',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(color: Colors.black54),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 20.0,
+                            horizontal: 20.0,
+                          ),
+                          child: Center(
+                            child: Text(
+                              t?.noRecordFound ?? 'No Record Found',
+                              style: TextStyle(
+                                fontSize: 17,
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),

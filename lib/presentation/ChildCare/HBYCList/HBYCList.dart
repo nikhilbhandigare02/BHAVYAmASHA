@@ -397,12 +397,13 @@ class _HBYCListState extends State<HBYCList> {
                   info['createdAt']?.toString();
 
           /* ---------- Build Card ---------- */
+          final t = AppLocalizations.of(context);
           final card = <String, dynamic>{
             'hhId': hhId,
             'RegitrationDate': _formatDate(registrationDate),
             'RegitrationType': 'Child',
             'BeneficiaryID': beneficiaryId,
-            'RchID': rchId,
+            'RchID': rchId.isNotEmpty ? t?.na : '',
             'Name': name.isNotEmpty ? name : 'Unnamed Child',
             'Age|Gender': _formatAgeGender(dob, gender),
             'DOB': _formatDate(dob),
@@ -631,7 +632,7 @@ class _HBYCListState extends State<HBYCList> {
                       _buildRow([
                         _rowText(l10n?.nameLabel ?? 'Name', data['Name']),
                         _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender']),
-                        _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RchID'] ?? l10n!.na),
+                        _rowText(l10n?.rchIdLabel ?? 'RCH ID', data['RchID'] ?? l10n?.na),
                       ]),
 
 

@@ -5929,7 +5929,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get date_of_death => 'Date of death ';
 
   @override
-  String get place_of_death => 'Place of death ';
+  String get place_of_death => 'Place ';
 
   @override
   String get migrated_out => 'Migrated Out';

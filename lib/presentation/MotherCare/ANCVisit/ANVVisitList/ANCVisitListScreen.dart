@@ -828,43 +828,37 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 4 - 15,
+                      Flexible(
                         child: _rowText(
                           l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
                           uniqueKeyDisplay.isNotEmpty ? uniqueKeyDisplay : l10n!.na,
                         ),
                       ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 4 - 55,
+                      Flexible(
                         child: _rowText(
                           l10n?.nameLabel ?? 'Name',
                           data['Name'] ?? l10n!.na,
                         ),
                       ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 4 - 50,
+                      Flexible(
                         child: _rowText(
                           l10n?.age ?? 'Age/Gender',
                           "${ageGender}",
                         ),
                       ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 4 - 40,
+                      Flexible(
                         child: _rowText(
                           l10n?.husband ?? 'Husband',
                           husbandName,
                         ),
                       ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 4 - 25,
+                      Flexible(
                         child: _rowText(
                           l10n?.registrationDateLabel ?? 'Registration Date',
                           registrationDate,
                         ),
                       ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 7 - 13,
+                      Flexible(
                         child: _rowText(
                           l10n?.rchIdLabel ?? 'RCH ID',
                           data['RCH ID'] ?? l10n?.na,
@@ -981,8 +975,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 2),
             Text(
@@ -1016,8 +1008,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
           Text(
@@ -1053,8 +1043,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
             fontWeight: FontWeight.w400,
             fontSize: 12.sp,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

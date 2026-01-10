@@ -1204,33 +1204,33 @@ class LocalStorageDao {
     final uniqueKey = (row['unique_key']?.toString() ?? '');
     final createdDate = row['created_date_time']?.toString() ?? '';
 
-    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
+    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? 'N/A';
     final dob = female['dob']?.toString() ?? '';
     final age = _calculateAge(dob);
     final gender = (female['gender']?.toString().toLowerCase() ?? 'female');
     final mobile = female['mobileNo']?.toString() ?? 'Not Available';
-    final richId = female['RichID']?.toString() ?? '';
+    final richId = female['RichID']?.toString() ?? 'N/A';
 
     final spouseName = spouse.isNotEmpty
-        ? (spouse['memberName'] ?? spouse['headName'] ?? spouse['spouseName'] ?? '').toString()
-        : (female['spouseName']?.toString() ?? '');
+        ? (spouse['memberName'] ?? spouse['headName'] ?? spouse['spouseName'] ?? 'N/A').toString()
+        : (female['spouseName']?.toString() ?? 'N/A');
 
     String last11(String s) => s.length > 11 ? s.substring(s.length - 11) : s;
 
     return {
       'hhId': last11(hhId),
       'beneficiary_ref': beneficiary_ref,
-      'RegistrationDate': _formatDate(createdDate),
+      'RegistrationDate': _formatDate(createdDate).isNotEmpty ? _formatDate(createdDate) : 'N/A',
       'RegistrationType': 'General',
       'BeneficiaryID': last11(uniqueKey),
-      'Name': name,
+      'Name': name.isNotEmpty ? name : 'N/A',
       'age': age > 0 ? '$age Y | Female' : 'N/A',
       'gender': gender,
-      'RichID': richId,
-      'mobileno': mobile,
+      'RichID': richId.isNotEmpty ? richId : 'N/A',
+      'mobileno': mobile != 'Not Available' ? mobile : 'N/A',
       'HusbandName': spouseName.isNotEmpty ? spouseName : 'Not Available',
-      'spouseName': spouseName,
-      'partnerName': spouseName,  // For backward compatibility
+      'spouseName': spouseName.isNotEmpty ? spouseName : 'N/A',
+      'partnerName': spouseName.isNotEmpty ? spouseName : 'N/A',  // For backward compatibility
       'dob': dob,
       'status': isFamilyPlanning
           ? 'Protected'
@@ -1260,13 +1260,13 @@ class LocalStorageDao {
   }
 
   String _formatDate(String dateStr) {
-    if (dateStr.isEmpty) return '';
+    if (dateStr.isEmpty) return 'N/A';
     try {
       final dt = DateTime.tryParse(dateStr);
-      if (dt == null) return '';
+      if (dt == null) return 'N/A';
       return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
     } catch (_) {
-      return '';
+      return 'N/A';
     }
   }
 
@@ -1836,10 +1836,9 @@ class LocalStorageDao {
   Future<List<Map<String, dynamic>>> getAbortionFollowupForms() async {
     final db = await _db;
 
-    // Filter by form ref key and optional JSON content check
     final forms = await db.query(
       'followup_form_data',
-      where: "is_deleted = 0 AND forms_ref_key = 'bt7gs9rl1a5d26mz' OR AND form_json LIKE '%\"is_abortion\"%'",
+      where: "is_deleted = 0 AND forms_ref_key = 'bt7gs9rl1a5d26mz'  AND form_json LIKE '%\"is_abortion\"%'",
     );
 
     final List<Map<String, dynamic>> result = [];
