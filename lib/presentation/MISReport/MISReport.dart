@@ -11,6 +11,7 @@ import 'dart:convert';
 import '../../data/Database/database_provider.dart';
 import '../../data/Database/tables/child_care_activities_table.dart';
 import '../../data/Database/tables/mother_care_activities_table.dart';
+import '../../data/Database/tables/beneficiaries_table.dart';
 import '../../data/SecureStorage/SecureStorage.dart';
 class Misreport extends StatefulWidget {
   const Misreport({super.key});
@@ -69,7 +70,7 @@ class _MisreportState extends State<Misreport> {
 
   Future<int> getCurrentMonthAncDueMotherCareCount() async {
     try {
-      print('🔍 [getCurrentMonthAncDueMotherCareCount] Querying ANC due count (unique beneficiaries)...');
+      print('🔍 [getCurrentMonthAncDueMotherCareCount] Querying ANC due count (latest state check)...');
 
       // 1. Get the current user key
       final currentUserData = await SecureStorageService.getCurrentUserData();
@@ -78,13 +79,16 @@ class _MisreportState extends State<Misreport> {
       final db = await DatabaseProvider.instance.database;
 
       String whereClause = '''
-      mother_care_state = ?
-      AND is_deleted = 0
-      AND beneficiary_ref_key IS NOT NULL
+      latest_state.mother_care_state = ?
+      AND latest_state.is_deleted = 0
+      AND latest_state.beneficiary_ref_key IS NOT NULL
+      AND latest_state.mother_care_state != 'delivery_outcome'
+      AND benef.is_migrated != 1
+      AND benef.is_death != 1
       AND (
-        strftime('%Y-%m', created_date_time) = strftime('%Y-%m', 'now')
+        strftime('%Y-%m', latest_state.created_date_time) = strftime('%Y-%m', 'now')
         OR
-        strftime('%Y-%m', modified_date_time) = strftime('%Y-%m', 'now')
+        strftime('%Y-%m', latest_state.modified_date_time) = strftime('%Y-%m', 'now')
       )
     ''';
 
@@ -92,19 +96,27 @@ class _MisreportState extends State<Misreport> {
 
       // 3. Apply the ASHA Unique Key filter if it exists
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        whereClause += ' AND current_user_key = ?';
+        whereClause += ' AND latest_state.current_user_key = ?';
         args.add(ashaUniqueKey);
       }
 
       final result = await db.rawQuery('''
-      SELECT COUNT(DISTINCT beneficiary_ref_key) AS total_count
-      FROM ${MotherCareActivitiesTable.table}
+      SELECT COUNT(DISTINCT latest_state.beneficiary_ref_key) AS total_count
+      FROM ${MotherCareActivitiesTable.table} latest_state
+      INNER JOIN (
+        SELECT beneficiary_ref_key, MAX(created_date_time) as max_created_date
+        FROM ${MotherCareActivitiesTable.table}
+        WHERE is_deleted = 0
+        GROUP BY beneficiary_ref_key
+      ) latest_records ON latest_state.beneficiary_ref_key = latest_records.beneficiary_ref_key 
+                      AND latest_state.created_date_time = latest_records.max_created_date
+      INNER JOIN ${BeneficiariesTable.table} benef ON latest_state.beneficiary_ref_key = benef.unique_key
       WHERE $whereClause
     ''', args);
 
       final int count = Sqflite.firstIntValue(result) ?? 0;
 
-      print('✅ [getCurrentMonthAncDueMotherCareCount] Unique ANC Due Count: $count');
+      print('✅ [getCurrentMonthAncDueMotherCareCount] Latest ANC Due Count: $count');
       return count;
     } catch (e, stackTrace) {
       print('❌ [getCurrentMonthAncDueMotherCareCount] Error: $e');
@@ -115,62 +127,53 @@ class _MisreportState extends State<Misreport> {
 
   Future<Map<String, int>> getCurrentMonthChildCareDueCounts() async {
     try {
-      print('🔍 [getCurrentMonthChildCareDueCounts] Querying child care due counts (state-wise total)...');
-
+      print('🔍 [getCurrentMonthChildCareDueCounts] Querying child care due counts (memberType child)...');
 
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       final db = await DatabaseProvider.instance.database;
 
-
       String whereClause = '''
-      is_deleted = 0
-      AND beneficiary_ref_key IS NOT NULL
+      benef.is_deleted = 0
+      AND benef.is_migrated != 1
+      AND benef.is_death != 1
+      AND benef.unique_key IS NOT NULL
+      AND benef.beneficiary_info LIKE '%"memberType":"Child"%'
       AND (
-        strftime('%Y-%m', created_date_time) = strftime('%Y-%m', 'now')
+        strftime('%Y-%m', benef.created_date_time) = strftime('%Y-%m', 'now')
         OR
-        strftime('%Y-%m', modified_date_time) = strftime('%Y-%m', 'now')
+        strftime('%Y-%m', benef.modified_date_time) = strftime('%Y-%m', 'now')
       )
     ''';
 
       List<dynamic> args = [];
 
-      // 3. Apply the ASHA Unique Key filter if it exists
+      // Apply the ASHA Unique Key filter if it exists
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        whereClause += ' AND current_user_key = ?';
+        whereClause += ' AND benef.current_user_key = ?';
         args.add(ashaUniqueKey);
       }
 
       final result = await db.rawQuery('''
       SELECT
-       
-
-        COUNT(DISTINCT CASE 
-          WHEN child_care_state = 'registration_due'
-          THEN beneficiary_ref_key
-        END) AS child_registration_due_count
-      FROM ${ChildCareActivitiesTable.table}
+        COUNT(DISTINCT benef.unique_key) AS newborn_count
+      FROM ${BeneficiariesTable.table} benef
       WHERE $whereClause
     ''', args);
 
       final row = result.isNotEmpty ? result.first : <String, Object?>{};
 
-      final int trackingDue = (row['tracking_due_count'] as int?) ?? 0;
-      final int registrationDue = (row['child_registration_due_count'] as int?) ?? 0;
-      final int total = trackingDue + registrationDue;
+      final int newbornCount = (row['newborn_count'] as int?) ?? 0;
 
       print(
         '✅ [getCurrentMonthChildCareDueCounts] '
-            'Tracking Due: $trackingDue, '
-            'Registration Due: $registrationDue, '
-            'TOTAL: $total',
+            'Newborn Count: $newbornCount',
       );
 
       return {
-        'tracking_due': trackingDue,
-        'child_registration_due': registrationDue,
-        'total_due': total,
+        'newborn_count': newbornCount,
+        'total_due': newbornCount,
       };
     } catch (e, stackTrace) {
       print('❌ [getCurrentMonthChildCareDueCounts] Error: $e');
