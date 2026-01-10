@@ -3567,16 +3567,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reasonLabel => 'Reason';
 
   @override
-  String get placeOfDeathLabel => 'Place of Death';
+  String get placeOfDeathLabel => 'Place of death';
 
   @override
-  String get causeOfDeathLabel => 'Cause of Death';
+  String get causeOfDeathLabel => 'Cause of death';
 
   @override
-  String get dateOfDeathLabel => 'Date of Death';
+  String get dateOfDeathLabel => 'Date of death';
 
   @override
-  String get deathDetailsLabel => 'Death Details';
+  String get deathDetailsLabel => 'Death details';
 
   @override
   String get viewLabel => 'View';
@@ -6655,7 +6655,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deathPlace => 'Death Place';
 
   @override
-  String get reasonOfDeath => 'Reason of Death';
+  String get reasonOfDeath => 'Reason of death';
 
   @override
   String get otherReasonOfDeath => 'Other reason of Death';

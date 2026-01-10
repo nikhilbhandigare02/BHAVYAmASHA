@@ -8,7 +8,6 @@ import '../../data/SecureStorage/SecureStorage.dart';
 import '../config/Constant/constant.dart';
 
 class ANCUtils {
-
   static Future<Map<String, int>> _loadAncVisitCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
@@ -45,13 +44,16 @@ class ANCUtils {
         if (isPregnant || isAncDue) {
           countedIds.add(beneficiaryId);
 
-          final syncRows = await db.rawQuery('''
+          final syncRows = await db.rawQuery(
+            '''
           SELECT 1
           FROM mother_care_activities
           WHERE beneficiary_ref_key = ?
             AND is_synced = 1
           LIMIT 1
-        ''', [beneficiaryId]);
+        ''',
+            [beneficiaryId],
+          );
 
           if (syncRows.isNotEmpty) {
             syncedCount++;
@@ -63,18 +65,11 @@ class ANCUtils {
       print('🔄 Synced ANC count: $syncedCount');
 
       // ✅ ONLY RETURN CHANGED
-      return {
-        'total': countedIds.length,
-        'synced': syncedCount,
-      };
+      return {'total': countedIds.length, 'synced': syncedCount};
     } catch (e, s) {
-      return {
-        'total': 0,
-        'synced': 0,
-      };
+      return {'total': 0, 'synced': 0};
     }
   }
-
 
   static Future<List<Map<String, dynamic>>> _getAncDueRecords() async {
     final db = await DatabaseProvider.instance.database;
@@ -118,12 +113,14 @@ class ANCUtils {
     return rows;
   }
 
-  static Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
+  static Future<Map<String, dynamic>> _getSyncStatus(
+    String beneficiaryRefKey,
+  ) async {
     try {
       final db = await DatabaseProvider.instance.database;
       final rows = await db.query(
         'mother_care_activities',
-        columns: ['is_synced',  'created_date_time'],
+        columns: ['is_synced', 'created_date_time'],
         where: 'beneficiary_ref_key = ? AND is_deleted = 0 ',
         whereArgs: [beneficiaryRefKey],
         orderBy: 'created_date_time DESC',
@@ -140,10 +137,9 @@ class ANCUtils {
       return {'is_synced': false};
     } catch (e) {
       print('Error fetching sync status: $e');
-      return {'is_synced': false,};
+      return {'is_synced': false};
     }
   }
-
 
   static Future<void> loadPregnantWomen() async {
     try {
@@ -170,11 +166,13 @@ class ANCUtils {
           final beneficiaryId = row['unique_key']?.toString() ?? '';
           if (beneficiaryId.isEmpty) continue;
 
-          final isPregnant = info['isPregnant']?.toString().toLowerCase() == 'yes';
+          final isPregnant =
+              info['isPregnant']?.toString().toLowerCase() == 'yes';
           final gender = info['gender']?.toString().toLowerCase() ?? '';
           final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
 
-          if ((isPregnant || isAncDue) && (gender == 'f' || gender == 'female')) {
+          if ((isPregnant || isAncDue) &&
+              (gender == 'f' || gender == 'female')) {
             final personData = _processPerson(row, info, isPregnant: true);
             if (personData != null) {
               final syncStatus = await _getSyncStatus(beneficiaryId);
@@ -192,7 +190,8 @@ class ANCUtils {
       // Process ANC-due only records
       for (final ancDue in ancDueRecords) {
         final beneficiaryId = ancDue['beneficiary_ref_key']?.toString() ?? '';
-        if (beneficiaryId.isEmpty || processedBeneficiaries.contains(beneficiaryId)) {
+        if (beneficiaryId.isEmpty ||
+            processedBeneficiaries.contains(beneficiaryId)) {
           continue;
         }
 
@@ -219,8 +218,12 @@ class ANCUtils {
 
       final list = byId.values.toList()
         ..sort((a, b) {
-          final d1 = DateTime.tryParse(a['_rawRow']?['created_date_time'] ?? '');
-          final d2 = DateTime.tryParse(b['_rawRow']?['created_date_time'] ?? '');
+          final d1 = DateTime.tryParse(
+            a['_rawRow']?['created_date_time'] ?? '',
+          );
+          final d2 = DateTime.tryParse(
+            b['_rawRow']?['created_date_time'] ?? '',
+          );
           return (d2 ?? DateTime(0)).compareTo(d1 ?? DateTime(0));
         });
 
@@ -248,7 +251,6 @@ class ANCUtils {
 
       print('✅ ANC Sync Count: $ancSyncCount');
       print('✅ Total Mother Care Synced: $totalSynced');
-
     } catch (e) {
       print('❌ Error in loadPregnantWomen: $e');
     }
@@ -279,16 +281,16 @@ class ANCUtils {
     }
   }
 
-
   static String _getLast11Chars(String? input) {
     if (input == null || input.isEmpty) return '';
     return input.length <= 11 ? input : input.substring(input.length - 11);
   }
+
   static Map<String, dynamic>? _processPerson(
-      Map<String, dynamic> row,
-      Map<String, dynamic> person, {
-        required bool isPregnant,
-      }) {
+    Map<String, dynamic> row,
+    Map<String, dynamic> person, {
+    required bool isPregnant,
+  }) {
     try {
       final name = person['memberName'] ?? person['headName'] ?? 'Unknown';
       final gender = person['gender']?.toString().toLowerCase() ?? '';
@@ -346,7 +348,6 @@ class ANCUtils {
     }
   }
 
-
   static Future<int> getMotherCareTotalCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
@@ -387,10 +388,7 @@ Mother Care Counts:
       forms_ref_key = ?
       AND LOWER(form_json) LIKE ?
     ''',
-      whereArgs: [
-        'bt7gs9rl1a5d26mz',
-        '%"gives_birth_to_baby":"yes"%',
-      ],
+      whereArgs: ['bt7gs9rl1a5d26mz', '%"gives_birth_to_baby":"yes"%'],
       columns: ['beneficiary_ref_key'],
       distinct: true,
     );
@@ -405,8 +403,7 @@ Mother Care Counts:
   static Future<Set<String>> _getAncDueBeneficiaryIds() async {
     final db = await DatabaseProvider.instance.database;
     final currentUserData = await SecureStorageService.getCurrentUserData();
-    final String? ashaUniqueKey =
-    currentUserData?['unique_key']?.toString();
+    final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
     final rows = await db.rawQuery(
       '''
 SELECT mca.*
@@ -451,13 +448,10 @@ ORDER BY mca.created_date_time DESC
     int syncedCount = 0;
     var processedData = <Map<String, dynamic>>[];
     try {
-
       final db = await DatabaseProvider.instance.database;
 
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey =
-      currentUserData?['unique_key']?.toString();
-
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       const ancRefKey = 'bt7gs9rl1a5d26mz';
 
@@ -512,26 +506,17 @@ LEFT JOIN LatestANC a
  AND a.rn = 1
 ORDER BY d.created_date_time DESC
 ''',
-        [
-          ashaUniqueKey,
-          ancRefKey,
-          ashaUniqueKey,
-        ],
+        [ashaUniqueKey, ancRefKey, ashaUniqueKey],
       );
 
-
       if (results.isEmpty) {
-        return {
-          'total': 0,
-          'synced': 0,
-        };
+        return {'total': 0, 'synced': 0};
       }
 
       processedData = [];
 
       for (final row in results) {
-        final beneficiaryRefKey =
-        row['beneficiary_ref_key']?.toString();
+        final beneficiaryRefKey = row['beneficiary_ref_key']?.toString();
 
         if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
           continue;
@@ -547,7 +532,7 @@ ORDER BY d.created_date_time DESC
             final fallback = await db.query(
               'beneficiaries_new',
               where:
-              'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND current_user_key = ?',
+                  'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND current_user_key = ?',
               whereArgs: [beneficiaryRefKey, ashaUniqueKey],
               limit: 1,
             );
@@ -598,19 +583,20 @@ ORDER BY d.created_date_time DESC
           }
         }
       }
-
     } catch (e) {
       print('❌ Error loading pregnancy outcome couples: $e');
-
     }
     // ✅ ONLY RETURN CHANGED
-    return {
-      'total': processedData.length,
-      'synced': syncedCount,
-    };
+    return {'total': processedData.length, 'synced': syncedCount};
   }
 
-  static Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead, Map<String, dynamic>? beneficiaryRow}) {
+  static Map<String, dynamic> _formatCoupleData(
+    Map<String, dynamic> row,
+    Map<String, dynamic> female,
+    Map<String, dynamic> headOrSpouse, {
+    required bool isHead,
+    Map<String, dynamic>? beneficiaryRow,
+  }) {
     try {
       print('🔄 Formatting couple data for row: $row');
 
@@ -619,7 +605,8 @@ ORDER BY d.created_date_time DESC
           ? jsonDecode(row['form_json'] as String)
           : (row['form_json'] ?? {}) as Map<String, dynamic>;
 
-      final formData = (formJson['form_data'] ?? formJson) as Map<String, dynamic>;
+      final formData =
+          (formJson['form_data'] ?? formJson) as Map<String, dynamic>;
       print('📋 Form data: $formData');
 
       // First try to get name from beneficiary info if available
@@ -627,19 +614,34 @@ ORDER BY d.created_date_time DESC
       if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
         try {
           final info = beneficiaryRow['beneficiary_info'] is Map
-              ? Map<String, dynamic>.from(beneficiaryRow['beneficiary_info'] as Map)
+              ? Map<String, dynamic>.from(
+                  beneficiaryRow['beneficiary_info'] as Map,
+                )
               : (beneficiaryRow['beneficiary_info'] is String
-              ? jsonDecode(beneficiaryRow['beneficiary_info'] as String)
-              : <String, dynamic>{});
+                    ? jsonDecode(beneficiaryRow['beneficiary_info'] as String)
+                    : <String, dynamic>{});
 
-          womanName = (info['headName'] ?? info['name'] ??info['memberName'] ?? info['spouseName']?? info['woman_name'] ?? 'Unknown').toString();
+          womanName =
+              (info['headName'] ??
+                      info['name'] ??
+                      info['memberName'] ??
+                      info['spouseName'] ??
+                      info['woman_name'] ??
+                      'Unknown')
+                  .toString();
         } catch (e) {
           print('⚠️ Error parsing beneficiary_info: $e');
         }
       }
 
       if (womanName == 'Unknown') {
-        womanName = (formData['woman_name'] ?? formData['name'] ?? formData['memberName'] ?? formData['headName'] ?? 'Unknown').toString();
+        womanName =
+            (formData['woman_name'] ??
+                    formData['name'] ??
+                    formData['memberName'] ??
+                    formData['headName'] ??
+                    'Unknown')
+                .toString();
       }
 
       // Try to get husband name from beneficiary info first
@@ -647,32 +649,54 @@ ORDER BY d.created_date_time DESC
       if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
         try {
           final info = beneficiaryRow['beneficiary_info'] is Map
-              ? Map<String, dynamic>.from(beneficiaryRow['beneficiary_info'] as Map)
+              ? Map<String, dynamic>.from(
+                  beneficiaryRow['beneficiary_info'] as Map,
+                )
               : (beneficiaryRow['beneficiary_info'] is String
-              ? jsonDecode(beneficiaryRow['beneficiary_info'] as String)
-              : <String, dynamic>{});
+                    ? jsonDecode(beneficiaryRow['beneficiary_info'] as String)
+                    : <String, dynamic>{});
 
-          husbandName = (info['spouseName'] ?? info['spouse_name'] ?? info['husbandName'] ?? info['husband_name'] ?? 'N/A').toString();
+          husbandName =
+              (info['spouseName'] ??
+                      info['spouse_name'] ??
+                      info['husbandName'] ??
+                      info['husband_name'] ??
+                      'N/A')
+                  .toString();
         } catch (e) {
           print('⚠️ Error parsing beneficiary_info for spouse name: $e');
         }
       }
 
       if (husbandName == 'N/A') {
-        husbandName = (formData['husband_name'] ?? formData['spouse_name'] ?? formData['spouseName'] ?? formData['husbandName'] ?? 'N/A').toString();
+        husbandName =
+            (formData['husband_name'] ??
+                    formData['spouse_name'] ??
+                    formData['spouseName'] ??
+                    formData['husbandName'] ??
+                    'N/A')
+                .toString();
       }
       final rchNumber = (formData['rch_number'] ?? '').toString();
       final lmpDate = (formData['lmp_date'] ?? '').toString();
       final eddDate = (formData['edd_date'] ?? '').toString();
-      final weeksOfPregnancy = (formData['weeks_of_pregnancy'] ?? '').toString();
-      final createdAt = (formData['created_at'] ?? row['created_date_time'] ?? '').toString();
-      final mobileNo = (formData['mobile_no'] ?? formData['phone'] ?? '').toString();
+      final weeksOfPregnancy = (formData['weeks_of_pregnancy'] ?? '')
+          .toString();
+      final createdAt =
+          (formData['created_at'] ?? row['created_date_time'] ?? '').toString();
+      final mobileNo = (formData['mobile_no'] ?? formData['phone'] ?? '')
+          .toString();
       final houseNumber = (formData['house_number'] ?? '').toString();
 
       // Get household and beneficiary info
-      final hhRefKey = (formData['household_ref_key'] ?? row['household_ref_key'] ?? '').toString();
-      final is_synced = (formData['is_synced'] ?? row['is_synced'] ?? '').toString();
-      final beneficiaryRefKey = (formData['beneficiary_ref_key'] ?? row['beneficiary_ref_key'] ?? '').toString();
+      final hhRefKey =
+          (formData['household_ref_key'] ?? row['household_ref_key'] ?? '')
+              .toString();
+      final is_synced = (formData['is_synced'] ?? row['is_synced'] ?? '')
+          .toString();
+      final beneficiaryRefKey =
+          (formData['beneficiary_ref_key'] ?? row['beneficiary_ref_key'] ?? '')
+              .toString();
 
       // Keep full household ID for data passing, will be truncated for display only
       final hhId = hhRefKey;
@@ -705,13 +729,16 @@ ORDER BY d.created_date_time DESC
 
       if (beneficiaryRow != null && beneficiaryRow.isNotEmpty) {
         try {
-          final createdDt = beneficiaryRow['created_date_time']?.toString() ?? '';
+          final createdDt =
+              beneficiaryRow['created_date_time']?.toString() ?? '';
           if (createdDt.isNotEmpty) {
             registrationDateDisplay = _formatDate(createdDt);
           }
 
           final info = beneficiaryRow['beneficiary_info'] is Map
-              ? Map<String, dynamic>.from(beneficiaryRow['beneficiary_info'] as Map)
+              ? Map<String, dynamic>.from(
+                  beneficiaryRow['beneficiary_info'] as Map,
+                )
               : <String, dynamic>{};
 
           final dob = info['dob']?.toString();
@@ -734,32 +761,50 @@ ORDER BY d.created_date_time DESC
 
           gender = 'F';
 
-          final m = (info['mobileNo']?.toString() ?? info['mobile']?.toString() ?? info['phone']?.toString() ?? '').trim();
+          final m =
+              (info['mobileNo']?.toString() ??
+                      info['mobile']?.toString() ??
+                      info['phone']?.toString() ??
+                      '')
+                  .trim();
           if (m.isNotEmpty) {
             mobileFromBeneficiary = m;
           }
         } catch (e) {
-          print('⚠️ Error extracting beneficiary_info for $beneficiaryRefKey: $e');
+          print(
+            '⚠️ Error extracting beneficiary_info for $beneficiaryRefKey: $e',
+          );
         }
       }
 
-      final ageGenderCombined = (ageYearsDisplay.isNotEmpty || gender.isNotEmpty)
+      final ageGenderCombined =
+          (ageYearsDisplay.isNotEmpty || gender.isNotEmpty)
           ? '${ageYearsDisplay.isNotEmpty ? ageYearsDisplay : 'N/A'} | ${gender.isNotEmpty ? gender : 'N/A'}'
           : 'N/A';
 
       final formattedData = {
         'hhId': hhId.isNotEmpty ? hhId : 'N/A',
         'household_id': hhRefKey,
-        'RegistrationDate': registrationDateDisplay.isNotEmpty ? registrationDateDisplay : 'N/A',
+        'RegistrationDate': registrationDateDisplay.isNotEmpty
+            ? registrationDateDisplay
+            : 'N/A',
         'BeneficiaryID': beneficiaryRefKey,
         'Name': womanName,
         'ageGender': ageGenderCombined,
         'RichID': rchNumber.isNotEmpty ? rchNumber : 'N/A',
-        'mobileno': mobileFromBeneficiary.isNotEmpty ? mobileFromBeneficiary : 'N/A',
+        'mobileno': mobileFromBeneficiary.isNotEmpty
+            ? mobileFromBeneficiary
+            : 'N/A',
         'HusbandName': husbandName,
-        'weeksOfPregnancy': weeksOfPregnancy.isNotEmpty ? weeksOfPregnancy : 'N/A',
-        'eddDate': _formatDate(eddDate).isNotEmpty ? _formatDate(eddDate) : 'N/A',
-        'lmpDate': _formatDate(lmpDate).isNotEmpty ? _formatDate(lmpDate) : 'N/A',
+        'weeksOfPregnancy': weeksOfPregnancy.isNotEmpty
+            ? weeksOfPregnancy
+            : 'N/A',
+        'eddDate': _formatDate(eddDate).isNotEmpty
+            ? _formatDate(eddDate)
+            : 'N/A',
+        'lmpDate': _formatDate(lmpDate).isNotEmpty
+            ? _formatDate(lmpDate)
+            : 'N/A',
         'houseNumber': houseNumber.isNotEmpty ? houseNumber : 'N/A',
         'is_synced': is_synced,
         '_rawRow': row,
@@ -792,6 +837,7 @@ ORDER BY d.created_date_time DESC
       };
     }
   }
+
   static String _formatDate(String dateStr) {
     if (dateStr.isEmpty || dateStr == 'null') return '';
     try {
@@ -818,8 +864,7 @@ ORDER BY d.created_date_time DESC
     final db = await DatabaseProvider.instance.database;
     const deliveryOutcomeKey = '4r7twnycml3ej1vg';
     final currentUserData = await SecureStorageService.getCurrentUserData();
-    final String? ashaUniqueKey =
-    currentUserData?['unique_key']?.toString();
+    final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
     try {
       final validBeneficiaries = await db.rawQuery(
         '''
@@ -832,53 +877,60 @@ WHERE mca.mother_care_state = 'pnc_mother'
   AND mca.current_user_key = ?      
 GROUP BY mca.beneficiary_ref_key
 ''',
-        [
-          ashaUniqueKey,
-        ],
+        [ashaUniqueKey],
       );
-
 
       if (validBeneficiaries.isEmpty) {
         print('ℹ️ No beneficiaries found with pnc_mother or pnc_mother state');
         return {'total': 0, 'synced': 0};
       }
 
-      final beneficiaryKeys = validBeneficiaries.map((e) => e['beneficiary_ref_key'] as String).toList();
+      final beneficiaryKeys = validBeneficiaries
+          .map((e) => e['beneficiary_ref_key']?.toString())
+          .where((e) => e != null)
+          .cast<String>()
+          .toList();
       final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
 
-      final deliveryOutcomeBeneficiaries = await db.rawQuery('''
-    SELECT DISTINCT beneficiary_ref_key 
+      final deliveryOutcomeBeneficiaries = await db.rawQuery(
+        '''
+    SELECT DISTINCT ffd.beneficiary_ref_key
     FROM followup_form_data ffd
     INNER JOIN beneficiaries_new bn
       ON bn.unique_key = ffd.beneficiary_ref_key
-    WHERE ffd.forms_ref_key = ? 
-    AND ffd.is_deleted = 0
+    WHERE ffd.forms_ref_key = ?
+    AND ffd.current_user_key = ?
+    AND bn.current_user_key = ?
+    AND bn.is_deleted = 0
     AND (bn.is_death = 0 OR bn.is_death IS NULL)
     AND ffd.beneficiary_ref_key IN ($placeholders)
-  ''', [deliveryOutcomeKey, ...beneficiaryKeys]);
+  ''',
+        [deliveryOutcomeKey, ashaUniqueKey, ashaUniqueKey, ...beneficiaryKeys],
+      );
 
-      // Create a set of beneficiaries with delivery outcomes
       final deliveryOutcomeBeneficiarySet = {
         for (var e in deliveryOutcomeBeneficiaries)
-          e['beneficiary_ref_key'] as String
+          if (e['beneficiary_ref_key'] != null)
+            e['beneficiary_ref_key'].toString(),
       };
 
       int syncedCount = 0;
-      for (final beneficiaryRefKey in deliveryOutcomeBeneficiarySet) {
-        final isSynced = await isHbncSynced(beneficiaryRefKey);
-        if (isSynced) {
-          syncedCount++;
+      try {
+        for (final beneficiaryRefKey in deliveryOutcomeBeneficiarySet) {
+          final isSynced = await isHbncSynced(beneficiaryRefKey);
+          if (isSynced) {
+            syncedCount++;
+          }
         }
+      } catch (e) {
+        print('⚠️ Error checking HBNC sync status: $e');
       }
 
       final totalCount = deliveryOutcomeBeneficiarySet.length;
       print('✅ HBNC total processed count: $totalCount');
       print('🔄 HBNC synced count: $syncedCount');
 
-      return {
-        'total': totalCount,
-        'synced': syncedCount,
-      };
+      return {'total': totalCount, 'synced': syncedCount};
     } catch (e) {
       print('❌ Error in _getHBNCCount: $e');
       return {'total': 0, 'synced': 0};
@@ -895,8 +947,7 @@ GROUP BY mca.beneficiary_ref_key
       final deliveryOutcomeSynced = deliveryOutcomeResult['synced'] ?? 0;
       final hbncSynced = hbncResult['synced'] ?? 0;
 
-      final totalSynced =
-          ancSynced + deliveryOutcomeSynced + hbncSynced;
+      final totalSynced = ancSynced + deliveryOutcomeSynced + hbncSynced;
 
       print('''
 Mother Care Synced Counts:
@@ -941,7 +992,8 @@ Mother Care Synced Counts:
       final motherCareResult = await db.query(
         'mother_care_activities',
         columns: ['is_synced'],
-        where: 'beneficiary_ref_key = ? AND mother_care_state = ? AND is_deleted = 0',
+        where:
+            'beneficiary_ref_key = ? AND mother_care_state = ? AND is_deleted = 0',
         whereArgs: [beneficiaryId, 'pnc_mother'],
         orderBy: 'created_date_time DESC',
         limit: 1,
@@ -950,14 +1002,15 @@ Mother Care Synced Counts:
       final followupResult = await db.query(
         'followup_form_data',
         columns: ['is_synced'],
-        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? ',
         whereArgs: [beneficiaryId, '4r7twnycml3ej1vg'],
         orderBy: 'created_date_time DESC',
         limit: 1,
       );
 
       // Return true if either record exists and is synced
-      if (motherCareResult.isNotEmpty && motherCareResult.first['is_synced'] == 1) {
+      if (motherCareResult.isNotEmpty &&
+          motherCareResult.first['is_synced'] == 1) {
         return true;
       }
 
@@ -971,6 +1024,4 @@ Mother Care Synced Counts:
       return false;
     }
   }
-
-
 }

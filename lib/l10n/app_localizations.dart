@@ -7190,25 +7190,25 @@ abstract class AppLocalizations {
   /// No description provided for @placeOfDeathLabel.
   ///
   /// In en, this message translates to:
-  /// **'Place of Death'**
+  /// **'Place of death'**
   String get placeOfDeathLabel;
 
   /// No description provided for @causeOfDeathLabel.
   ///
   /// In en, this message translates to:
-  /// **'Cause of Death'**
+  /// **'Cause of death'**
   String get causeOfDeathLabel;
 
   /// No description provided for @dateOfDeathLabel.
   ///
   /// In en, this message translates to:
-  /// **'Date of Death'**
+  /// **'Date of death'**
   String get dateOfDeathLabel;
 
   /// No description provided for @deathDetailsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Death Details'**
+  /// **'Death details'**
   String get deathDetailsLabel;
 
   /// No description provided for @viewLabel.
@@ -13358,7 +13358,7 @@ abstract class AppLocalizations {
   /// No description provided for @reasonOfDeath.
   ///
   /// In en, this message translates to:
-  /// **'Reason of Death'**
+  /// **'Reason of death'**
   String get reasonOfDeath;
 
   /// No description provided for @otherReasonOfDeath.
