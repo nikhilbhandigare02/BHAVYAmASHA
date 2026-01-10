@@ -125,7 +125,7 @@ class DbMigration {
     "ageUnit": "gender_of_younget_child",
     "youngestGender": "age_of_youngest_child_unit",
     "death_place":"death_place",
-    "date_of_death":"date_of_death",
+    "age_by":"age_by",
 
   };
   static Future<void> runBeneficiaryTableMigration(Database db) async {
@@ -146,6 +146,7 @@ class DbMigration {
         "relation_to_head",
         "gender",
         "dob",
+        "age_by",
         "approxAge",
         "years",
         "months",
@@ -199,6 +200,7 @@ class DbMigration {
         "fatherName": "father_name",
         "spouseName": "father_or_spouse_name",
         "dob": "date_of_birth",
+        "age_by": "age_by",
         "date_of_death":"date_of_death",
         "death_place":"death_place",
         "years": "dob_year",

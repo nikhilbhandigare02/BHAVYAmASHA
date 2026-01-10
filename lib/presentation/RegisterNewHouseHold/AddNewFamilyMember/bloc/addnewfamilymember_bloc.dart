@@ -338,6 +338,17 @@ class AddnewfamilymemberBloc
           normalizedMemberType = normalizedMemberType[0].toUpperCase() + normalizedMemberType.substring(1).toLowerCase();
         }
         
+        // Determine useDob based on age_by field
+        final ageBy = allData['age_by'] as String?;
+        bool useDobValue = true; // default to DOB
+        if (ageBy != null) {
+          if (ageBy == 'by_age') {
+            useDobValue = false;
+          } else if (ageBy == 'by_dob') {
+            useDobValue = true;
+          }
+        }
+        
         // Update the state with all the data
         emit(state.copyWith(
           // Map all the fields to the state
@@ -347,7 +358,7 @@ class AddnewfamilymemberBloc
           memberType: normalizedMemberType,
           relation: primaryRelation,
           otherRelation: otherRelationValue,
-          useDob: allData['useDob'] as bool? ?? true,
+          useDob: useDobValue,
           dob: loadedDob,
           approxAge: loadedApproxAge,
           children: allData['children']?.toString(),
@@ -916,6 +927,7 @@ class AddnewfamilymemberBloc
             'fatherName': state.fatherName,
             'motherName': state.motherName,
             'useDob': state.useDob,
+            'age_by': state.useDob ? 'by_dob' : 'by_age',
             'dob': state.dob?.toIso8601String(),
             'approxAge': state.approxAge,
             'updateDay': state.updateDay,
@@ -2002,6 +2014,7 @@ class AddnewfamilymemberBloc
           ..['fatherName'] = state.fatherName
           ..['motherName'] = state.motherName
           ..['useDob'] = state.useDob
+          ..['age_by'] = state.useDob ? 'by_dob' : 'by_age'
           ..['dob'] = state.dob?.toIso8601String()
           ..['approxAge'] = state.approxAge
           ..['updateDay'] = state.updateDay
