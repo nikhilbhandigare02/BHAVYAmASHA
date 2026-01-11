@@ -346,20 +346,20 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     ];
   }
   void updateDobFromAge() {
+    final now = DateTime.now();
     final y = int.tryParse(yearsCtrl.text) ?? 0;
     final m = int.tryParse(monthsCtrl.text) ?? 0;
     final d = int.tryParse(daysCtrl.text) ?? 0;
 
     setState(() {
       dob = DateTime(
-        DateTime.now().year - y,
-        DateTime.now().month - m,
-        DateTime.now().day - d,
+        now.year - y,
+        now.month - m,
+        now.day - d,
       );
     });
   }
 
-  // ✅ METHOD MUST BE HERE
   void updateAgeFromDob(DateTime date) {
     final now = DateTime.now();
 

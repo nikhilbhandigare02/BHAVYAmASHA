@@ -531,6 +531,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     }
   }
 
+
   int _calculateEcAge(dynamic dobRaw) {
     if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
     try {
@@ -595,12 +596,10 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      // 1. Fetch current user data to get the ASHA key
-      final currentUserData = await SecureStorageService.getCurrentUserData();
+       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      // 2. Mandatory Validation: If key is null/empty, stop and set count to 0
-      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
         debugPrint('Error: ASHA Unique Key is missing. Cannot load NCD forms count.');
         if (mounted) {
           setState(() {
@@ -616,7 +615,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         where: 'forms_ref_key = ? AND current_user_key = ?',
         whereArgs: [
           ffd.FollowupFormDataTable.formUniqueKeys[ffd.FollowupFormDataTable.cbac],
-          ashaUniqueKey, // Pass the valid key here
+          ashaUniqueKey,
         ],
       );
 

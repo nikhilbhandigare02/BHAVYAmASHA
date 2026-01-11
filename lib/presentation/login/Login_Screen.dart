@@ -325,6 +325,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                               ? Route_Names.profileScreen
                                               : Route_Names.homeScreen,
                                               (_) => false,
+                                          arguments: {
+                                            'fromLogin': true,
+                                          },
                                         );
                                       });
                                     }

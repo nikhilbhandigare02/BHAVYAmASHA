@@ -2057,127 +2057,124 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   ),
                                 ],
                                 _section(
-                                  IgnorePointer(
-                                    ignoring: widget.isEdit,
-                                    child: ApiDropdown<String>(
-                                      labelText: '${l.relationWithHeadLabel} *',
-                                      items: state.memberType == 'Child'
-                                          ? const [
-                                        'Father',
-                                        'Mother',
-                                        'Brother',
-                                        'Sister',
-                                        'Grand Father',
-                                        'Grand Mother',
-                                        'Other',
-                                      ]
-                                          : const [
-                                        'Self',
+                                  ApiDropdown<String>(
+                                    labelText: '${l.relationWithHeadLabel} *',
+                                    items: state.memberType == 'Child'
+                                        ? const [
+                                      'Father',
+                                      'Mother',
+                                      'Brother',
+                                      'Sister',
+                                      'Grand Father',
+                                      'Grand Mother',
+                                      'Other',
+                                    ]
+                                        : const [
+                                      'Self',
 
-                                        'Husband',
-                                        'Son',
-                                        'Daughter',
-                                        'Father',
-                                        'Mother',
-                                        'Brother',
-                                        'Sister',
-                                        'Wife',
-                                        'Nephew',
-                                        'Niece',
-                                        'Grand Father',
-                                        'Grand Mother',
-                                        'Father In Law',
-                                        'Mother In Low',
-                                        'Grand Son',
-                                        'Grand Daughter',
-                                        'Son In Law',
-                                        'Daughter In Law',
-                                        'Other',
-                                      ],
-                                      getLabel: (s) {
-                                        switch (s) {
-                                          case 'Self':
-                                            return l.self;
+                                      'Husband',
+                                      'Son',
+                                      'Daughter',
+                                      'Father',
+                                      'Mother',
+                                      'Brother',
+                                      'Sister',
+                                      'Wife',
+                                      'Nephew',
+                                      'Niece',
+                                      'Grand Father',
+                                      'Grand Mother',
+                                      'Father In Law',
+                                      'Mother In Low',
+                                      'Grand Son',
+                                      'Grand Daughter',
+                                      'Son In Law',
+                                      'Daughter In Law',
+                                      'Other',
+                                    ],
+                                    getLabel: (s) {
+                                      switch (s) {
+                                        case 'Self':
+                                          return l.self;
 
-                                          case 'Husband':
-                                            return l.husbandLabel;
-                                          case 'Wife':
-                                            return l.wife;
-                                          case 'Son':
-                                            return l.relationSon;
-                                          case 'Daughter':
-                                            return l.relationDaughter;
-                                          case 'Father':
-                                            return l.relationFather;
-                                          case 'Mother':
-                                            return l.mother;
-                                          case 'Brother':
-                                            return l.relationBrother;
-                                          case 'Sister':
-                                            return l.relationSister;
-                                          case 'Nephew':
-                                            return l.relationNephew;
-                                          case 'Niece':
-                                            return l.relationNiece;
-                                          case 'Grand Father':
-                                            return l.relationGrandFather;
-                                          case 'Grand Mother':
-                                            return l.relationGrandMother;
-                                          case 'Father In Law':
-                                            return l.relationFatherInLaw;
-                                          case 'Mother In Low': // check spelling Low → Law
-                                            return l.relationMotherInLaw;
-                                          case 'Grand Son':
-                                            return l.relationGrandSon;
-                                          case 'Grand Daughter':
-                                            return l.relationGrandDaughter;
-                                          case 'Son In Law':
-                                            return l.relationSonInLaw;
-                                          case 'Daughter In Law':
-                                            return l.relationDaughterInLaw;
-                                          case 'Other':
-                                            return l.relationOther;
-                                          default:
-                                            return s;
-                                        }
-                                      },
+                                        case 'Husband':
+                                          return l.husbandLabel;
+                                        case 'Wife':
+                                          return l.wife;
+                                        case 'Son':
+                                          return l.relationSon;
+                                        case 'Daughter':
+                                          return l.relationDaughter;
+                                        case 'Father':
+                                          return l.relationFather;
+                                        case 'Mother':
+                                          return l.mother;
+                                        case 'Brother':
+                                          return l.relationBrother;
+                                        case 'Sister':
+                                          return l.relationSister;
+                                        case 'Nephew':
+                                          return l.relationNephew;
+                                        case 'Niece':
+                                          return l.relationNiece;
+                                        case 'Grand Father':
+                                          return l.relationGrandFather;
+                                        case 'Grand Mother':
+                                          return l.relationGrandMother;
+                                        case 'Father In Law':
+                                          return l.relationFatherInLaw;
+                                        case 'Mother In Low': // check spelling Low → Law
+                                          return l.relationMotherInLaw;
+                                        case 'Grand Son':
+                                          return l.relationGrandSon;
+                                        case 'Grand Daughter':
+                                          return l.relationGrandDaughter;
+                                        case 'Son In Law':
+                                          return l.relationSonInLaw;
+                                        case 'Daughter In Law':
+                                          return l.relationDaughterInLaw;
+                                        case 'Other':
+                                          return l.relationOther;
+                                        default:
+                                          return s;
+                                      }
+                                    },
 
-                                      value: state.relation,
-                                      onChanged: (v) {
-                                        final relation = v ?? '';
-                                        context
-                                            .read<AddnewfamilymemberBloc>()
-                                            .add(AnmUpdateRelation(relation));
+                                    value: state.relation,
+                                    onChanged: (v) {
+                                      final relation = v ?? '';
+                                      context
+                                          .read<AddnewfamilymemberBloc>()
+                                          .add(AnmUpdateRelation(relation));
 
-                                        if (v == 'Father') {
-                                          try {
-                                            final match = _adultSummaries.firstWhere(
-                                                    (m) => (m['Relation'] ?? '').toString() == 'Self' &&
-                                                    (m['Gender'] ?? '').toString().toLowerCase() == 'male');
-                                            final name = (match['Name'] ?? '').toString();
-                                            if (name.isNotEmpty) {
-                                              setState(() => _fatherOption = name);
-                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(name));
-                                            }
-                                          } catch (_) {}
-                                        } else if (v == 'Mother') {
-                                          try {
-                                            final match = _adultSummaries.firstWhere(
-                                                    (m) => (m['Relation'] ?? '').toString() == 'Self' &&
-                                                    (m['Gender'] ?? '').toString().toLowerCase() == 'female');
-                                            final name = (match['Name'] ?? '').toString();
-                                            if (name.isNotEmpty) {
-                                              setState(() => _motherOption = name);
-                                              context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(name));
-                                            }
-                                          } catch (_) {}
-                                        }
-                                      },
-                                      validator: (value) => _captureAnmError(
-                                        Validations.validateFamilyHeadRelation(
-                                          l,
-                                          value,
-                                        ),
+                                      if (v == 'Father') {
+                                        try {
+                                          final match = _adultSummaries.firstWhere(
+                                                  (m) => (m['Relation'] ?? '').toString() == 'Self' &&
+                                                  (m['Gender'] ?? '').toString().toLowerCase() == 'male');
+                                          final name = (match['Name'] ?? '').toString();
+                                          if (name.isNotEmpty) {
+                                            setState(() => _fatherOption = name);
+                                            context.read<AddnewfamilymemberBloc>().add(AnmUpdateFatherName(name));
+                                          }
+                                        } catch (_) {}
+                                      } else if (v == 'Mother') {
+                                        try {
+                                          final match = _adultSummaries.firstWhere(
+                                                  (m) => (m['Relation'] ?? '').toString() == 'Self' &&
+                                                  (m['Gender'] ?? '').toString().toLowerCase() == 'female');
+                                          final name = (match['Name'] ?? '').toString();
+                                          if (name.isNotEmpty) {
+                                            setState(() => _motherOption = name);
+                                            context.read<AddnewfamilymemberBloc>().add(AnmUpdateMotherName(name));
+                                          }
+                                        } catch (_) {}
+                                      }
+                                    },
+                                    validator: (value) => _captureAnmError(
+                                      Validations.validateFamilyHeadRelation(
+                                        l,
+                                        value,
                                       ),
                                     ),
                                   )
