@@ -357,7 +357,35 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         errors.add('Please enter valid mobile number');
       // if (state.mobileOwner == null || state.mobileOwner!.trim().length < 10)
       //   errors.add('Please select whose mobile number');
+      if (state.useDob) {
+        if (state.dob == null) {
+          errors.add('Please enter valid Date of Birth');
+        }
+      } else {
+        final years = int.tryParse(state.years ?? '');
+        final months = int.tryParse(state.months ?? '');
+        final days = int.tryParse(state.days ?? '');
 
+        if (years == null || months == null || days == null) {
+          errors.add('Please enter age');
+        }
+        else if (years < 15 || years > 110) {
+          errors.add('Age in years should be between 0 and 110');
+        }
+        else if (months < 0 || months > 11) {
+          errors.add('Months should be between 0 and 11');
+        }
+        else if (days < 0 || days > 30) {
+          errors.add('Days should be between 0 and 30');
+        }
+        else {
+          final totalAge = years + (months / 12) + (days / 365);
+
+          if (totalAge < 15 || totalAge > 110) {
+            errors.add('Age should be between 15 and 110 years');
+          }
+      }
+      }
       if (state.gender == null || state.gender!.isEmpty)
         errors.add('Please select gender');
       if (state.maritalStatus == null || state.maritalStatus!.isEmpty) {
