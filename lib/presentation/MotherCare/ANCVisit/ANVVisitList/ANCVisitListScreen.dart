@@ -841,54 +841,40 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      SizedBox(
+                      Flexible(
                         child: _rowText(
                           l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
                           uniqueKeyDisplay.isNotEmpty ? uniqueKeyDisplay : l10n!.na,
                         ),
                       ),
-                      SizedBox(
+                      Flexible(
                         child: _rowText(
                           l10n?.nameLabel ?? 'Name',
                           data['Name'] ?? l10n!.na,
                         ),
                       ),
-                      SizedBox(
+                      Flexible(
                         child: _rowText(
                           l10n?.age ?? 'Age/Gender',
                           "${ageGender}",
                         ),
                       ),
-                      SizedBox(
+                      Flexible(
                         child: _rowText(
                           l10n?.husband ?? 'Husband',
                           husbandName,
                         ),
                       ),
-                      SizedBox(
+                      Flexible(
                         child: _rowText(
                           l10n?.registrationDateLabel ?? 'Registration Date',
                           registrationDate,
                         ),
                       ),
-                      SizedBox(
+                      Flexible(
                         child: _rowText(
                           l10n?.rchIdLabel ?? 'RCH ID',
                           data['RCH ID'] ?? l10n?.na,
-                        ),
-                      ),
-                      SizedBox(
-                        child: FutureBuilder<String?>(
-                          future: beneficiaryId.isNotEmpty
-                              ? _getLastANCVisitDate(beneficiaryId)
-                              : Future.value(null),
-                          builder: (context, snapshot) {
-                            final lastVisitDate = snapshot.data;
-                            return _rowText(
-                              'Last Visit Date',
-                              lastVisitDate ?? 'No visit Yet',
-                            );
-                          },
                         ),
                       ),
                     ],
