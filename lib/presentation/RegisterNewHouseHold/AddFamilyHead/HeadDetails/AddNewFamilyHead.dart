@@ -480,6 +480,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       updateAgeFromDob(date);
                     }
                   },
+                  validator: (date) {
+                    final error = Validations.validateDOB(l, date);
+                    if (error != null) {
+                      _captureError(error);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          showAppSnackBar(context, error);
+                        }
+                      });
+                    }
+                    return null; // Don't show red error message
+                  },
                 )
               )
             else
@@ -523,6 +535,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               MaxValueFormatter(110),
                             ],
                             onChanged: (_) => updateDobFromAge(),
+                            validator: (value) {
+                              final error = Validations.validateApproxAge(l, value, monthsCtrl.text, daysCtrl.text);
+                              if (error != null) {
+                                _captureError(error);
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  if (mounted) {
+                                    showAppSnackBar(context, error);
+                                  }
+                                });
+                              }
+                              return null; // Don't show red error message
+                            },
                           ),
                         ),
 
@@ -539,6 +563,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               MaxValueFormatter(11),
                             ],
                             onChanged: (_) => updateDobFromAge(),
+                            validator: (value) {
+                              final error = Validations.validateApproxAge(l, yearsCtrl.text, value, daysCtrl.text);
+                              if (error != null) {
+                                _captureError(error);
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  if (mounted) {
+                                    showAppSnackBar(context, error);
+                                  }
+                                });
+                              }
+                              return null; // Don't show red error message
+                            },
                           ),
                         ),
 
@@ -555,6 +591,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               MaxValueFormatter(30),
                             ],
                             onChanged: (_) => updateDobFromAge(),
+                            validator: (value) {
+                              final error = Validations.validateApproxAge(l, yearsCtrl.text, monthsCtrl.text, value);
+                              if (error != null) {
+                                _captureError(error);
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  if (mounted) {
+                                    showAppSnackBar(context, error);
+                                  }
+                                });
+                              }
+                              return null; // Don't show red error message
+                            },
                           ),
                         ),
                       ],

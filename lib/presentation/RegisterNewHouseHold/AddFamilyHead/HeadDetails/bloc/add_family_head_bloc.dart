@@ -353,6 +353,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
           }
         }
       }
+
       if (state.mobileNo == null || state.mobileNo!.trim().length < 10)
         errors.add('Please enter valid mobile number');
       // if (state.mobileOwner == null || state.mobileOwner!.trim().length < 10)

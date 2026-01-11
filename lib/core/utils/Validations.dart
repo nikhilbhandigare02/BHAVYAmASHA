@@ -128,7 +128,6 @@ class Validations {
       months += 12;
       if (days < 0) {
         months--;
-        // Get the number of days in the previous month
         final lastMonth = today.month == 1 ? 12 : today.month - 1;
         final lastYear = today.month == 1 ? today.year - 1 : today.year;
         final daysInLastMonth = DateTime(lastYear, lastMonth + 1, 0).day;
@@ -152,7 +151,7 @@ class Validations {
     const int minAgeYears = 15;
     const int maxAgeYears = 110;
     const int maxMonths = 11;
-    const int maxDays = 30; // Using 30 as an average month length for validation
+    const int maxDays = 30;
 
     // Check if all fields are empty
     if ((years?.trim().isEmpty ?? true) &&
@@ -165,7 +164,7 @@ class Validations {
     final m = int.tryParse((months ?? '').trim()) ?? 0;
     final d = int.tryParse((days ?? '').trim()) ?? 0;
 
-    if (y < 0 || y > 110) {
+    if (y < 15 || y > 110) {
       return l10n.yearsBetween0And110;
     }
     if (m < 0 || m > maxMonths) {

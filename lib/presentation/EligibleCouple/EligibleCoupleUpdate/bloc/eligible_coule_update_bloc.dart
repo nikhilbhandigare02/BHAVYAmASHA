@@ -318,7 +318,6 @@ class EligibleCouleUpdateBloc
             womanDetails['otherCategory']?.toString() ??
             headDetails['otherCategory']?.toString() ?? state.otherCategory,
 
-        // Children details - prioritize direct level data, fallback to nested
         totalChildrenBorn: beneficiaryInfo['totalBorn']?.toString() ?? childrenDetails['totalBorn']?.toString() ?? totalBorn,
         totalLiveChildren: beneficiaryInfo['totalLive']?.toString() ?? childrenDetails['totalLive']?.toString() ?? totalLive,
         totalMaleChildren: beneficiaryInfo['totalMale']?.toString() ?? childrenDetails['totalMale']?.toString() ?? totalMale,
