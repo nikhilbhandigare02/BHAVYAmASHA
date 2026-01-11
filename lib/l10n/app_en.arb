@@ -2614,5 +2614,7 @@
   "deathDocumentation": "Documentation",
   "deathNotification": "Notification",
   "deathOther": "Other",
-  "discussionTopic":"discussion topic/program"
+  "discussionTopic":"discussion topic/program",
+  "userFound": "User found.",
+  "invalidLoginCredentials": "Please enter valid user credentials."
 }
