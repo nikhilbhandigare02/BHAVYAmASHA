@@ -854,6 +854,7 @@ class _HouseHold_BeneficiaryScreenState
                           data['HusbandName']?.toString().isEmpty == true &&
                           data['WifeName']?.toString().isEmpty == true &&
                           !isChild)
+                        SizedBox(width: 120),
                         Expanded(
                           child: _rowText(
                             isFemale
