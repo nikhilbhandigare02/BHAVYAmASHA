@@ -326,7 +326,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                               children: [
                                 Expanded(
                                   child: RoundButton(
-                                    title: t.previousButton,
+                                    title: t.prevButton,
                                     height: 34,
                                     onPress: () {
                                       final newIndex = idx - 1;
@@ -355,6 +355,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
                                             setState(() {
                                               _navigationTriggered = false;
                                             });
+
 
                                             final isValid = _formKey.currentState?.validate() ?? true;
                                             if (!isValid) {

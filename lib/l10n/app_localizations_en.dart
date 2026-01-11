@@ -2526,6 +2526,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get previousButton => 'PREVIOUS';
 
   @override
+  String get prevButton => 'PREV';
+
+  @override
   String get youngestChildAgeLabel => 'Age of youngest child';
 
   @override
