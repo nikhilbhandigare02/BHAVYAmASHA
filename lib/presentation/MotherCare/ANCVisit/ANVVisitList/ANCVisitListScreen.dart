@@ -841,42 +841,43 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      Flexible(
+                      SizedBox(
                         child: _rowText(
                           l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
                           uniqueKeyDisplay.isNotEmpty ? uniqueKeyDisplay : l10n!.na,
                         ),
                       ),
-                      Flexible(
+                      SizedBox(
                         child: _rowText(
                           l10n?.nameLabel ?? 'Name',
                           data['Name'] ?? l10n!.na,
                         ),
                       ),
-                      Flexible(
+                      SizedBox(
                         child: _rowText(
                           l10n?.age ?? 'Age/Gender',
                           "${ageGender}",
                         ),
                       ),
-                      Flexible(
+                      SizedBox(
                         child: _rowText(
                           l10n?.husband ?? 'Husband',
                           husbandName,
                         ),
                       ),
-                      Flexible(
+                      SizedBox(
                         child: _rowText(
                           l10n?.registrationDateLabel ?? 'Registration Date',
                           registrationDate,
                         ),
                       ),
-                      Flexible(
+                      SizedBox(
                         child: _rowText(
                           l10n?.rchIdLabel ?? 'RCH ID',
                           data['RCH ID'] ?? l10n?.na,
                         ),
                       ),
+
                     ],
                   ),
 

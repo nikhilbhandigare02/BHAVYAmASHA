@@ -3246,10 +3246,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get loginButton => 'लॉग इन करें';
 
   @override
-  String get usernameHint => 'उपयोगकर्ता नाम दर्ज करें';
+  String get usernameHint => 'उपयोगकर्ता नाम';
 
   @override
-  String get passwordHint => 'अपना पासवर्ड दर्ज करें';
+  String get passwordHint => 'पासवर्ड';
 
   @override
   String get years => 'साल';
@@ -3609,7 +3609,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hello => 'नमस्ते';
 
   @override
-  String get welcome => 'हमारे ऐप में आपका स्वागत है';
+  String get welcome => 'स्वागत है';
 
   @override
   String get login_button => 'लॉगिन करें';
@@ -6184,7 +6184,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dob_cannot_be_future => 'जन्म तिथि भविष्य की नहीं हो सकती';
 
   @override
-  String get dob_required => 'जन्म तिथि आवश्यक है';
+  String get dob_required => 'कृपया जन्म तिथि दर्ज करें';
 
   @override
   String get enter_other_occupation => 'व्यवसाय दर्ज करें';
@@ -7027,7 +7027,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get pleaseEnterPassword => 'कृपया पासवर्ड दर्ज करें';
 
   @override
-  String get pleaseEnterValidUsername => 'कृपया मान्य उपयोगकर्ता विवरण दर्ज करें';
+  String get pleaseEnterValidUsername => 'कृपया उपयोगकर्ता का सही नाम दर्ज करें';
 
   @override
   String get pleaseEnterValidPassword => 'कृपया उपयोगकर्ता सही पासवर्ड दर्ज करें';
@@ -7568,4 +7568,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get invalidLoginCredentials => 'कृपया मान्य उपयोगकर्ता क्रेडेंशियल दर्ज करें।';
+
+  @override
+  String get userNotFound => 'उपयोगकर्ता मौजूद नहीं है। कृपया वैध क्रेडेंशियल दर्ज करें।';
 }

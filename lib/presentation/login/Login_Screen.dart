@@ -263,6 +263,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                           textInputAction: TextInputAction.next,
                                           // labelText: l10n.usernameLabel,
                                           hintText: l10n.usernameHint,
+                                          textStyle:  TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                            fontSize: 14.sp,
+                                          ),
                                           prefixIcon: Icons.person,
                                           keyboardType: TextInputType.text,
 
@@ -282,7 +287,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                       builder: (context, state) {
                                         return CustomTextField(
                                           focusNode: _passwordFocusNode,
-                                          // labelText: l10n.passwordLabel,
+                                          // labelText: l10n.passwordHint,
                                           hintText: l10n.passwordHint,
                                           prefixIcon: Icons.key,
                                           obscureText: true,
@@ -307,9 +312,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                              state.error.toLowerCase().contains('user found')
-                                                  ? l10n.userFound
-                                                  : state.error,
+                                            state.error.toLowerCase().contains('user found')
+                                                ? l10n.userFound
+                                                : state.error,
 
                                               style: const TextStyle(color: Colors.white),
                                           ),
@@ -334,9 +339,31 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                     }
 
                                     else if (state.postApiStatus == PostApiStatus.error) {
-                                      final message = state.error.isNotEmpty
-                                          ? state.error
-                                          : l10n.invalidLoginCredentials;
+                                      var message = state.error;
+                                      if(message =='User does not exists. Please enter valid credentials.'){
+                                        message =
+                                        state.error == 'User does not exists. Please enter valid credentials.'
+                                            ? l10n.userNotFound
+                                            : state.error.isNotEmpty
+                                            ? state.error
+                                            : '';
+                                      }
+                                      else if(message =='Please enter both username and password'){
+                                         message =
+                                        state.error == 'Please enter both username and password'
+                                            ? l10n.userNotFound
+                                            : state.error.isNotEmpty
+                                            ? state.error
+                                            : '';
+                                      }
+                                      else if(message =='Please enter valid user credentials.'){
+                                        message =
+                                        state.error == 'Please enter valid user credentials.'
+                                            ? l10n.invalidLoginCredentials
+                                            : state.error.isNotEmpty
+                                            ? state.error
+                                            : '';
+                                      }
 
                                       if (message.trim().isEmpty) return;
 

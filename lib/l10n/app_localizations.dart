@@ -6548,13 +6548,13 @@ abstract class AppLocalizations {
   /// No description provided for @usernameHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter username'**
+  /// **'Username'**
   String get usernameHint;
 
   /// No description provided for @passwordHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter password'**
+  /// **'Password'**
   String get passwordHint;
 
   /// No description provided for @years.
@@ -7274,7 +7274,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcome.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to our app'**
+  /// **'Welcome'**
   String get welcome;
 
   /// No description provided for @login_button.
@@ -12416,7 +12416,7 @@ abstract class AppLocalizations {
   /// No description provided for @dob_required.
   ///
   /// In en, this message translates to:
-  /// **'Date of birth is required'**
+  /// **'Please enter date of birth'**
   String get dob_required;
 
   /// No description provided for @enter_other_occupation.
@@ -15184,6 +15184,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter valid user credentials.'**
   String get invalidLoginCredentials;
+
+  /// No description provided for @userNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'User does not exist. Please enter valid credentials.'**
+  String get userNotFound;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
