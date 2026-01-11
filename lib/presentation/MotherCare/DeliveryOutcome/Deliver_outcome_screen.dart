@@ -324,8 +324,9 @@ ORDER BY d.created_date_time DESC
       if (husbandName == 'N/A') {
         husbandName = (formData['husband_name'] ?? formData['spouse_name'] ?? formData['spouseName'] ?? formData['husbandName'] ?? 'N/A').toString();
       }
-      final rchNumber = (formData['rch_number'] ?? '').toString();
-      final lmpDate = (formData['lmp_date'] ?? '').toString();
+      final t = AppLocalizations.of(context);
+      final rchNumber = (formData['rch_number'] ?? t!.na).toString();
+      final lmpDate = (formData['lmp_date'] ?? t!.na).toString();
       final eddDate = (formData['edd_date'] ?? '').toString();
       final weeksOfPregnancy = (formData['weeks_of_pregnancy'] ?? '').toString();
       final createdAt = (row['beneficiary_created_date'] ?? formData['created_at'] ?? row['created_date_time'] ?? '').toString();

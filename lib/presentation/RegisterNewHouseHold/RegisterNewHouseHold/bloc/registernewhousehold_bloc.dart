@@ -188,6 +188,7 @@ class RegisterNewHouseholdBloc
                     'fatherName': headForm['fatherName'],
                     'gender': headForm['gender'],
                     'dob': headForm['dob'],
+                    'age_by': headForm['age_by'],
                     'years': headForm['years'],
                     'months': headForm['months'],
                     'days': headForm['days'],
@@ -429,7 +430,7 @@ class RegisterNewHouseholdBloc
                         'fatherName':
                             spDetails['fatherName'] ??
                             headForm['sp_fatherName'],
-                        'useDob': spDetails['useDob'] ?? headForm['sp_useDob'],
+                        'age_by': spDetails['useDob'] ?? headForm['sp_useDob'],
                         'dob': spDetails['dob'] ?? headForm['sp_dob'],
                         'edd': spDetails['edd'] ?? headForm['sp_edd'],
                         'lmp': spDetails['lmp'] ?? headForm['sp_lmp'],

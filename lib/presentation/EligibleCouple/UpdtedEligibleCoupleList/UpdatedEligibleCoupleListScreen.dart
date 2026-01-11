@@ -61,11 +61,12 @@ class _UpdatedEligibleCoupleListScreenState
 
 
   Future<void> _loadCouples() async {
+    final t = AppLocalizations.of(context);
     setState(() { _isLoading = true; });
     print('🔍 Starting to load couples...');
 
     try {
-      final couples = await LocalStorageDao.instance.getUpdatedEligibleCouples();
+      final couples = await LocalStorageDao.instance.getUpdatedEligibleCouplesWithLocalization(t);
       
       if (mounted) {
         setState(() {

@@ -338,6 +338,17 @@ class AddnewfamilymemberBloc
           normalizedMemberType = normalizedMemberType[0].toUpperCase() + normalizedMemberType.substring(1).toLowerCase();
         }
         
+        // Determine useDob based on age_by field
+        final ageBy = allData['age_by'] as String?;
+        bool useDobValue = true; // default to DOB
+        if (ageBy != null) {
+          if (ageBy == 'by_age') {
+            useDobValue = false;
+          } else if (ageBy == 'by_dob') {
+            useDobValue = true;
+          }
+        }
+        
         // Update the state with all the data
         emit(state.copyWith(
           // Map all the fields to the state
@@ -347,14 +358,14 @@ class AddnewfamilymemberBloc
           memberType: normalizedMemberType,
           relation: primaryRelation,
           otherRelation: otherRelationValue,
-          useDob: allData['useDob'] as bool? ?? true,
+          useDob: useDobValue,
           dob: loadedDob,
           approxAge: loadedApproxAge,
           children: allData['children']?.toString(),
           birthOrder: allData['birthOrder']?.toString(),
           gender: allData['gender'] as String?,
-          bankAcc: allData['bankAcc'] as String?,
-          ifsc: allData['ifsc'] as String?,
+          bankAcc: allData['bankAcc'] as String? ?? allData['bankAccountNumber'] as String?,
+          ifsc: allData['ifsc'] as String? ?? allData['ifscCode'] as String?,
           // Handle occupation and other occupation
           occupation: occupationValue,
           otherOccupation: otherOccupationValue,
@@ -377,7 +388,7 @@ class AddnewfamilymemberBloc
                             (allData['mobile_owner_relation'] as String?),
           mobileNo: allData['mobileNo'] as String?,
           voterId: allData['voterId'] as String?,
-          rationId: allData['rationId'] as String?,
+          rationId: allData['rationId'] as String? ?? allData['rationCardId'] as String?,
           phId: allData['phId'] as String?,
           beneficiaryType: allData['beneficiaryType'] as String?,
           maritalStatus: allData['maritalStatus'] as String?,
@@ -392,8 +403,9 @@ class AddnewfamilymemberBloc
           updateYear: loadedUpdateYear,
           WeightChange: allData['weight'] as String?,
           birthWeight: allData['birthWeight']?.toString(),
-          ChildSchool: allData['childSchool'] as String?,
-          BirthCertificateChange: allData['birthCertificate'] as String?,
+          ChildSchool: allData['childSchool'] as String? ?? allData['school'] as String?,
+          BirthCertificateChange: allData[''
+              ''] as String?,
           errorMessage: null,
 
           // Additional fields from the database
@@ -916,6 +928,7 @@ class AddnewfamilymemberBloc
             'fatherName': state.fatherName,
             'motherName': state.motherName,
             'useDob': state.useDob,
+            'age_by': state.useDob ? 'by_dob' : 'by_age',
             'dob': state.dob?.toIso8601String(),
             'approxAge': state.approxAge,
             'updateDay': state.updateDay,
@@ -2002,6 +2015,7 @@ class AddnewfamilymemberBloc
           ..['fatherName'] = state.fatherName
           ..['motherName'] = state.motherName
           ..['useDob'] = state.useDob
+          ..['age_by'] = state.useDob ? 'by_dob' : 'by_age'
           ..['dob'] = state.dob?.toIso8601String()
           ..['approxAge'] = state.approxAge
           ..['updateDay'] = state.updateDay
@@ -2017,6 +2031,7 @@ class AddnewfamilymemberBloc
           ..['religion'] = state.religion == 'Other' && state.otherReligion != null && state.otherReligion!.isNotEmpty ? '${state.otherReligion}_other' : state.religion
           ..['category'] = state.category == 'Other' && state.otherCategory != null && state.otherCategory!.isNotEmpty ? '${state.otherCategory}_other' : state.category
           ..['weight'] = state.WeightChange
+          ..['birthWeight'] = state.birthWeight
           ..['childSchool'] = state.ChildSchool
           ..['birthCertificate'] = state.BirthCertificateChange
           ..['abhaAddress'] = state.abhaAddress

@@ -403,7 +403,7 @@ class _HBYCListState extends State<HBYCList> {
             'RegitrationDate': _formatDate(registrationDate),
             'RegitrationType': 'Child',
             'BeneficiaryID': beneficiaryId,
-            'RchID': rchId.isNotEmpty ? t?.na : '',
+            'RchID': rchId.isNotEmpty ? t?.na : t!.na,
             'Name': name.isNotEmpty ? name : 'Unnamed Child',
             'Age|Gender': _formatAgeGender(dob, gender),
             'DOB': _formatDate(dob),
