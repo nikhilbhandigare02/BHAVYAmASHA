@@ -3790,6 +3790,27 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                               }
                             },
                           ),
+                        ] else if (badge == 'RI') ...[
+                          // For RI items, show different labels based on whether it's in completed list or to-do list
+                          if (!todayVisitClick) ...[
+                            // Completed visits tab - show completion date
+                            Text(
+                              'Completion date: ${item['last Visit date'] ?? 'Not Available'}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                          ] else ...[
+                            // To-do visits tab - show last historical visit date
+                            Text(
+                              'Last visit date: ${item['last Visit date'] ?? 'Not Available'}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                          ],
                         ] else if (badge != 'HBNC' &&
                             item['last Visit date'] != null) ...[
                           Text(
