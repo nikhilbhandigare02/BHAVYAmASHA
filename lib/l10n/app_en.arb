@@ -2413,7 +2413,7 @@
   "youngestChildAgeYearsRange": "Please enter age of Youngest Child between Years",
   "pleaseEnterHouseNumber": "Please enter House number",
   "houseNumberValidation": "House number can only contain letters, numbers, spaces, dash or slash",
-  "pleaseEnterDateOfBirth": "Please enter Date of birth",
+  "pleaseEnterDateOfBirth": "Please select date of birth",
   "dateOfBirthFuture": "Date of birth cannot be in the future",
   "ageMustBe15Years": "Age must be 15 years or more",
   "ageCannotBeMoreThan110": "Age cannot be more than 110 years",
@@ -2458,8 +2458,6 @@
   "diseaseEpilepsy": "Epilepsy",
   "pleaseSpecifyOtherDisease": "Please specify other disease",
   "calciumVitaminD3TabletsLabel": "Number of Calcium and Vitamin D3 tablets given",
-
-
   "selectVisitTypeError": "Please select visit type",
   "protected": "Protected",
   "unprotected": "Unprotected",

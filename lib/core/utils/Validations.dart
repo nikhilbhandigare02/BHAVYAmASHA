@@ -128,7 +128,6 @@ class Validations {
       months += 12;
       if (days < 0) {
         months--;
-        // Get the number of days in the previous month
         final lastMonth = today.month == 1 ? 12 : today.month - 1;
         final lastYear = today.month == 1 ? today.year - 1 : today.year;
         final daysInLastMonth = DateTime(lastYear, lastMonth + 1, 0).day;
@@ -138,12 +137,12 @@ class Validations {
 
     // Check if age is exactly 15 years or more
     if (years < 15 || (years == 15 && (months < 0 || (months == 0 && days < 0)))) {
-      return l10n.ageMustBe15Years;
+      return l10n.pleaseEnterAgeBetween15To110;
     }
 
     // Check maximum age (110 years)
     if (years > 110 || (years == 110 && (months > 0 || days > 0))) {
-      return l10n.ageCannotBeMoreThan110;
+      return l10n.pleaseEnterAgeBetween15To110;
     }
 
     return null; // ✅ valid
@@ -152,7 +151,7 @@ class Validations {
     const int minAgeYears = 15;
     const int maxAgeYears = 110;
     const int maxMonths = 11;
-    const int maxDays = 30; // Using 30 as an average month length for validation
+    const int maxDays = 30;
 
     // Check if all fields are empty
     if ((years?.trim().isEmpty ?? true) &&
@@ -165,30 +164,30 @@ class Validations {
     final m = int.tryParse((months ?? '').trim()) ?? 0;
     final d = int.tryParse((days ?? '').trim()) ?? 0;
 
-    if (y < 0 || y > 110) {
-      return l10n.yearsBetween0And110;
+    if (y < 15 || y > 110) {
+      return l10n.pleaseEnterAgeBetween15To110;
     }
     if (m < 0 || m > maxMonths) {
-      return l10n.monthsBetween0And11;
+      return l10n.pleaseEnterAgeBetween15To110;
     }
     if (d < 0 || d > maxDays) {
-      return l10n.daysBetween0And30;
+      return l10n.pleaseEnterAgeBetween15To110;
     }
 
     // Check if all zeros
     if (y == 0 && m == 0 && d == 0) {
-      return l10n.ageCannotBeZero;
+      return l10n.pleaseEnterDateOfBirth;
     }
 
     // Calculate total years for range check
     final totalYears = y + (m / 12.0) + (d / 365.0);
 
     if (totalYears < minAgeYears) {
-      return l10n.minimumAge15Years;
+      return l10n.pleaseEnterAgeBetween15To110;
     }
 
     if (totalYears > maxAgeYears) {
-      return l10n.maximumAge110Years;
+      return l10n.pleaseEnterAgeBetween15To110;
     }
 
     return null;
