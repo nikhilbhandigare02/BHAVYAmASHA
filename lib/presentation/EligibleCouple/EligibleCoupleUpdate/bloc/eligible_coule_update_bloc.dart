@@ -139,7 +139,7 @@ class EligibleCouleUpdateBloc
         if (data['totalFemale'] != null) totalFemale = data['totalFemale'].toString();
         if (data['youngestAge'] != null) youngestAge = data['youngestAge'].toString();
         if (data['youngestAgeUnit'] != null) youngestAgeUnit = data['youngestAgeUnit'].toString();
-        if (data['youngestGender'] != null) youngestGender = data['youngestGender'].toString();
+        if (data['youngestGender'] != null) youngestGender = _normalizeGender(data['youngestGender'].toString());
       } catch (e) {
         print('⚠️ Error extracting children data: $e');
       }
@@ -150,6 +150,7 @@ class EligibleCouleUpdateBloc
       print('   📅 Age: $currentAge (from: $ageGender)');
       print('   📱 Mobile: $mobile');
       print('   🏠 HH ID: $hhId');
+      print('   👶 Youngest Child Gender: $youngestGender');
 
       // Now query the database to get full beneficiary details
       final db = await DatabaseProvider.instance.database;
@@ -210,6 +211,7 @@ class EligibleCouleUpdateBloc
       final beneficiaryInfo = jsonDecode(beneficiaryInfoJson) as Map<String, dynamic>;
 
       print('📦 Beneficiary info keys: ${beneficiaryInfo.keys.join(', ')}');
+      print('📦 Full beneficiary info: $beneficiaryInfo');
 
       // Extract nested data
       final headDetails = Map<String, dynamic>.from(beneficiaryInfo['head_details'] as Map? ?? {});
@@ -221,6 +223,9 @@ class EligibleCouleUpdateBloc
       print('👤 Head details keys: ${headDetails.keys.join(', ')}');
       print('👥 Spouse details keys: ${spouseDetails.keys.join(', ')}');
       print('👶 Children details keys: ${childrenDetails.keys.join(', ')}');
+      print('👶 Children details raw: $childrenDetails');
+      print('👶 Youngest gender from DB (children_details): ${childrenDetails['youngestGender']}');
+      print('👶 Youngest gender from DB (direct level): ${beneficiaryInfo['youngestGender']}');
 
       // Determine if we're dealing with head or spouse based on the name
       final headName = headDetails['headName']?.toString() ?? headDetails['memberName']?.toString() ?? '';
@@ -246,14 +251,16 @@ class EligibleCouleUpdateBloc
         try {
           final info = jsonDecode(beneficiaryInfoJson);
 
-          // Try to extract children data from beneficiary info
+          // Try to extract children data from beneficiary info (direct level)
           if (info['totalBorn'] != null) totalBorn = info['totalBorn'].toString();
           if (info['totalLive'] != null) totalLive = info['totalLive'].toString();
           if (info['totalMale'] != null) totalMale = info['totalMale'].toString();
           if (info['totalFemale'] != null) totalFemale = info['totalFemale'].toString();
           if (info['youngestAge'] != null) youngestAge = info['youngestAge'].toString();
           if (info['youngestAgeUnit'] != null) youngestAgeUnit = info['youngestAgeUnit'].toString();
-          if (info['youngestGender'] != null) youngestGender = info['youngestGender'].toString();
+          if (info['youngestGender'] != null) youngestGender = _normalizeGender(info['youngestGender'].toString());
+
+          print('🔍 Direct level gender extraction: ${info['youngestGender']} -> $youngestGender');
 
           // Update state with the matched beneficiary info
           emit(state.copyWith(
@@ -274,7 +281,7 @@ class EligibleCouleUpdateBloc
             totalFemaleChildren: info['totalFemale']?.toString() ?? totalFemale,
             youngestChildAge: info['youngestAge']?.toString() ?? youngestAge,
             youngestChildAgeUnit: info['youngestAgeUnit']?.toString() ?? youngestAgeUnit,
-            youngestChildGender: info['youngestGender']?.toString() ?? youngestGender,
+            youngestChildGender: youngestGender,
             clearError: true,
           ));
         } catch (e) {
@@ -311,14 +318,14 @@ class EligibleCouleUpdateBloc
             womanDetails['otherCategory']?.toString() ??
             headDetails['otherCategory']?.toString() ?? state.otherCategory,
 
-        // Children details from database
-        totalChildrenBorn: childrenDetails['totalBorn']?.toString() ?? totalBorn,
-        totalLiveChildren: childrenDetails['totalLive']?.toString() ?? totalLive,
-        totalMaleChildren: childrenDetails['totalMale']?.toString() ?? totalMale,
-        totalFemaleChildren: childrenDetails['totalFemale']?.toString() ?? totalFemale,
-        youngestChildAge: childrenDetails['youngestAge']?.toString() ?? youngestAge,
-        youngestChildAgeUnit: _capitalizeFirst(childrenDetails['ageUnit']?.toString() ?? youngestAgeUnit),
-        youngestChildGender: _capitalizeFirst(childrenDetails['youngestGender']?.toString() ?? youngestGender),
+        // Children details - prioritize direct level data, fallback to nested
+        totalChildrenBorn: beneficiaryInfo['totalBorn']?.toString() ?? childrenDetails['totalBorn']?.toString() ?? totalBorn,
+        totalLiveChildren: beneficiaryInfo['totalLive']?.toString() ?? childrenDetails['totalLive']?.toString() ?? totalLive,
+        totalMaleChildren: beneficiaryInfo['totalMale']?.toString() ?? childrenDetails['totalMale']?.toString() ?? totalMale,
+        totalFemaleChildren: beneficiaryInfo['totalFemale']?.toString() ?? childrenDetails['totalFemale']?.toString() ?? totalFemale,
+        youngestChildAge: beneficiaryInfo['youngestAge']?.toString() ?? childrenDetails['youngestAge']?.toString() ?? youngestAge,
+        youngestChildAgeUnit: _capitalizeFirst(beneficiaryInfo['youngestAgeUnit']?.toString() ?? childrenDetails['ageUnit']?.toString() ?? youngestAgeUnit),
+        youngestChildGender: _normalizeGender(beneficiaryInfo['youngestGender']?.toString() ?? childrenDetails['youngestGender']?.toString() ?? youngestGender),
 
         registrationDate: DateTime.tryParse(row['created_date_time']?.toString() ?? '') ?? DateTime.now(),
         dbRowId: dbRowId,
@@ -333,6 +340,7 @@ class EligibleCouleUpdateBloc
       print('   📅 Age: ${newState.currentAge}');
       print('   📱 Mobile: ${newState.mobileNo}');
       print('   🏠 Address: ${newState.address}');
+      print('   👶 Youngest Child Gender: ${newState.youngestChildGender}');
 
       emit(newState);
 
@@ -377,6 +385,22 @@ class EligibleCouleUpdateBloc
   String _capitalizeFirst(String text) {
     if (text.isEmpty) return '';
     return '${text[0].toUpperCase()}${text.substring(1).toLowerCase()}';
+  }
+
+  String _normalizeGender(String gender) {
+    if (gender.isEmpty) return '';
+    
+    final normalized = gender.toLowerCase().trim();
+    switch (normalized) {
+      case 'male':
+        return 'Male';
+      case 'female':
+        return 'Female';
+      case 'transgender':
+        return 'Transgender';
+      default:
+        return gender; // Return as-is if it doesn't match known values
+    }
   }
 
   Future<void> _onSubmit(

@@ -877,20 +877,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                           data['RCH ID'] ?? l10n?.na,
                         ),
                       ),
-                      Flexible(
-                        child: FutureBuilder<String?>(
-                          future: beneficiaryId.isNotEmpty
-                              ? _getLastANCVisitDate(beneficiaryId)
-                              : Future.value(null),
-                          builder: (context, snapshot) {
-                            final lastVisitDate = snapshot.data;
-                            return _rowText(
-                              'Last Visit Date',
-                              lastVisitDate ?? 'No visit Yet',
-                            );
-                          },
-                        ),
-                      ),
                     ],
                   ),
 

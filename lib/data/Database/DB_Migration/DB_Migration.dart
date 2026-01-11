@@ -39,24 +39,41 @@ class DbMigration {
 
 
 
-  static String toSeparatedValue(dynamic value) {
+  static String toCamelCaseValue(dynamic value) {
     if (value == null) return '';
 
     final text = value.toString().trim();
     if (text.isEmpty) return text;
 
-    // Skip numbers, dates, ids
-    if (RegExp(r'^[0-9\-/.]+$').hasMatch(text)) {
+    // 🔒 Date formats → return as-is
+    final dateRegex = RegExp(
+      r'^\d{4}[-/]\d{2}[-/]\d{2}'
+      r'|^\d{2}[-/]\d{2}[-/]\d{4}'
+      r'|^\d{4}-\d{2}-\d{2}T',
+    );
+    if (dateRegex.hasMatch(text)) {
       return text;
     }
 
-    // Apply only if fully lowercase
-    if (text == text.toLowerCase()) {
-      // Replace underscore(s) with single space
-      return text.replaceAll(RegExp(r'_+'), ' ');
+    // 🔒 Pure numbers → return as-is
+    if (RegExp(r'^\d+$').hasMatch(text)) {
+      return text;
     }
 
-    return text;
+    // 🔥 IFSC handling → ALWAYS UPPERCASE
+    // matches: ifsc, ifscCode, ifsc_code, SBIN0001234
+    if (RegExp(r'^[a-zA-Z]{4}0[a-zA-Z0-9]{6}$').hasMatch(text) ||
+        text.toLowerCase().contains('ifsc')) {
+      return text.toUpperCase();
+    }
+
+    final separated = text.replaceAll(RegExp(r'_+'), ' ');
+
+    return separated
+        .split(' ')
+        .where((w) => w.isNotEmpty)
+        .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
+        .join(' ');
   }
 
   final Map<String, String> keyMapping = {
@@ -143,15 +160,15 @@ class DbMigration {
     "totalMale": "total_male_children",
     "totalFemale": "total_female_children",
     "youngestAge": "age_of_youngest_child",
-    "ageUnit": "gender_of_younget_child",
-    "youngestGender": "age_of_youngest_child_unit",
+    "ageUnit": "age_of_youngest_child_unit",
+    "youngestGender": "gender_of_younget_child",
     "death_place":"death_place",
     "age_by":"age_by",
     "rch_id":"rch_id",
     "birthCertificate":"is_birth_certificate_issued",
     "weight":"weight_at_birth",
-    "childSchool":"weight",
-    "birthWeight":"is_school_going_child",
+    "childSchool":"is_school_going_child",
+    "birthWeight":"weight",
 
   };
   static Future<void> runBeneficiaryTableMigration(Database db) async {
@@ -163,9 +180,11 @@ class DbMigration {
         "headName",
         "death_place",
         "date_of_death",
+        "childSchool",
         "fatherName",
         "motherName",
         "spouseName",
+        "birthCertificate",
         "name",
         "memberName",
         "relation",
@@ -218,6 +237,7 @@ class DbMigration {
       final Map<String, String> keyMapping = {
         "beneficiaryType": "type_of_beneficiary",
         "memberType": "ben_type",
+        "birthCertificate":"is_birth_certificate_issued",
         "relation": "relaton_with_family_head",
         "relation_to_head": "relaton_with_family_head",
         "name": "member_name",
@@ -263,15 +283,17 @@ class DbMigration {
         "memberStatus": "member_status",
         "isFamilyhead": "isFamilyhead",
         "isFamilyheadWife": "isFamilyheadWife",
-        "weight": "weight",
-        "birthWeight": "weight_at_birth",
+
         "totalBorn": "total_children",
         "totalLive": "total_live_children",
         "totalMale": "total_male_children",
         "totalFemale": "total_female_children",
         "youngestAge": "age_of_youngest_child",
         "ageUnit": "age_of_youngest_child_unit",
-        "youngestGender": "gender_of_youngest_child",
+        "youngestGender": "gender_of_younget_child",
+        "weight":"weight_at_birth",
+        "childSchool":"is_school_going_child",
+        "birthWeight":"weight",
       };
 
       for (final row in oldRows) {
@@ -283,7 +305,7 @@ class DbMigration {
               form[key].toString().isNotEmpty &&
               form[key].toString() != "null") {
 
-            finalJson[key] = toSeparatedValue(form[key]);
+            finalJson[key] = toCamelCaseValue(form[key]);
             continue;
           }
 
@@ -293,7 +315,7 @@ class DbMigration {
                 form[mapped].toString().isNotEmpty &&
                 form[mapped].toString() != "null") {
 
-              finalJson[key] = toSeparatedValue(form[mapped]);
+              finalJson[key] = toCamelCaseValue(form[mapped]);
             }
           }
         }

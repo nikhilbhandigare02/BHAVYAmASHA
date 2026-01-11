@@ -188,11 +188,11 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       beneficiaries.sort((a, b) {
         final String dateStrA = (a['created_date_time'] ?? '').toString();
         final String dateStrB = (b['created_date_time'] ?? '').toString();
-        
+
         // Try to parse dates
         final DateTime? da = DateTime.tryParse(dateStrA);
         final DateTime? db = DateTime.tryParse(dateStrB);
-        
+
         // Handle different cases:
         // 1. Both dates valid - sort descending (newest first)
         if (da != null && db != null) {
@@ -220,23 +220,73 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
 
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
-    String age = 'N/A';
+    String age = 'Not Available';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
+
     if (dobRaw != null && dobRaw.toString().isNotEmpty) {
-      DateTime? dob;
       try {
-        dob = DateTime.tryParse(dobRaw.toString());
-      } catch (_) {}
-      if (dob != null) {
-        age = '${DateTime.now().difference(dob).inDays ~/ 365}';
+        String dateStr = dobRaw.toString();
+        DateTime? dob;
+
+        dob = DateTime.tryParse(dateStr);
+
+        if (dob == null) {
+          final timestamp = int.tryParse(dateStr);
+          if (timestamp != null && timestamp > 0) {
+            dob = DateTime.fromMillisecondsSinceEpoch(
+              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+              isUtc: true,
+            );
+          }
+        }
+
+        if (dob != null) {
+          final now = DateTime.now();
+          int years = now.year - dob.year;
+          int months = now.month - dob.month;
+          int days = now.day - dob.day;
+
+          if (days < 0) {
+            final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+            final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+            final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
+            days += daysInLastMonth;
+            months--;
+          }
+
+          if (months < 0) {
+            months += 12;
+            years--;
+          }
+
+          if (years > 0) {
+            age = '$years Y';
+          } else if (months > 0) {
+            age = '$months M';
+          } else {
+            age = '$days D';
+          }
+        }
+      } catch (e) {
+        debugPrint('Error parsing date of birth: $e');
       }
     }
-    String displayGender = gender == 'm' || gender == 'male'
-        ? 'Male'
-        : gender == 'f' || gender == 'female'
-        ? 'Female'
-        : 'Other';
-    return '$age Y | $displayGender';
+
+    String displayGender;
+    switch (gender) {
+      case 'm':
+      case 'male':
+        displayGender = 'Male';
+        break;
+      case 'f':
+      case 'female':
+        displayGender = 'Female';
+        break;
+      default:
+        displayGender = 'Other';
+    }
+
+    return '$age | $displayGender';
   }
 
   @override
@@ -668,7 +718,9 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                         ]),
                       ] else ...[
                         // General records: Show spouse information
-                        if (isFemale && data['HusbandName']?.toString().isNotEmpty == true)
+                        if (isFemale && 
+                            data['HusbandName']?.toString().isNotEmpty == true &&
+                            _extractAge(data['Age|Gender']?.toString() ?? '') >= 15)
                           _buildRow([
                             _rowText(
                               l10n?.husbandName ?? 'Husband Name',
@@ -711,7 +763,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                         // Show Spouse Name if available (fallback when specific husband/wife names are not available)
                         if (data['SpouseName']?.toString().isNotEmpty == true &&
                             data['HusbandName']?.toString().isEmpty == true &&
-                            data['WifeName']?.toString().isEmpty == true)
+                            data['WifeName']?.toString().isEmpty == true &&
+                            (!isFemale || _extractAge(data['Age|Gender']?.toString() ?? '') >= 15))
                           _buildRow([
                             _rowText(
                               isFemale
@@ -754,16 +807,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                             ),
                           ]),
 
-                        // Show Mother Name if available
-                        if (data['MotherName']?.toString().isNotEmpty == true)
-                          _buildRow([
-                            _rowText(
-                              l10n?.motherNameLabel ?? 'Mother Name',
-                              data['MotherName'],
-                            ),
-                            _rowText('', ''), // Empty cell for layout
-                            _rowText('', ''), // Empty cell for layout
-                          ]),
+
 
                         const SizedBox(height: 8),
 
@@ -888,6 +932,20 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         ),
       ],
     );
+  }
+
+  int _extractAge(String ageGender) {
+    try {
+      final parts = ageGender.split('|');
+      if (parts.isEmpty) return 0;
+      
+      final agePart = parts[0].trim();
+      final ageStr = agePart.split(' ').first;
+      return int.tryParse(ageStr) ?? 0;
+    } catch (e) {
+      debugPrint('Error extracting age: $e');
+      return 0;
+    }
   }
 
   bool _isEligibleForCBAC(String ageGender) {

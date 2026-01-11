@@ -216,7 +216,9 @@ class AddnewfamilymemberBloc
         // approximate age fields.
         DateTime? loadedDob = allData['dob'] != null
             ? DateTime.tryParse(allData['dob'])
-            : null;
+              : allData['date_of_birth'] != null
+                ? DateTime.tryParse(allData['date_of_birth'])
+                : null;
         String? loadedApproxAge = allData['approxAge']?.toString();
         String? loadedUpdateYear = allData['updateYear']?.toString();
         String? loadedUpdateMonth = allData['updateMonth']?.toString();
@@ -404,8 +406,7 @@ class AddnewfamilymemberBloc
           WeightChange: allData['weight'] as String?,
           birthWeight: allData['birthWeight']?.toString(),
           ChildSchool: allData['childSchool'] as String? ?? allData['school'] as String?,
-          BirthCertificateChange: allData[''
-              ''] as String?,
+          BirthCertificateChange: allData['birthCertificate'] as String?,
           errorMessage: null,
 
           // Additional fields from the database

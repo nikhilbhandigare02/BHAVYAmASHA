@@ -909,9 +909,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         print('❌ [AddNewMember] EDIT - No spouse EDD data found');
       }
 
-      // Hydrate spouse details bloc from any saved spousedetails map so that
-      // reopening a member via the spouse row shows the same spouse data
-      // that was entered when the member was first added.
       try {
         final spRaw = data['spousedetails'];
         Map<String, dynamic>? spMap;
