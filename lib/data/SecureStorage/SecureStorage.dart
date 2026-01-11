@@ -563,7 +563,9 @@ class SecureStorageService {
                 'Name': (m['Name'] ?? '').toString(),
                 'Gender': (m['Gender'] ?? '').toString(),
                 'Relation': (m['Relation'] ?? '').toString(),
-              })
+
+
+      })
           .toList();
     } catch (e) {
       print('Error reading household adults summary: $e');

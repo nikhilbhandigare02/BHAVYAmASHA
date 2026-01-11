@@ -215,7 +215,7 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
             'updated_at': now,
           };
 
-          String motherKey = '';
+          String motherKey = beneficiaryId;
           String fatherKey = '';
 
           if (beneficiaryId.isNotEmpty) {

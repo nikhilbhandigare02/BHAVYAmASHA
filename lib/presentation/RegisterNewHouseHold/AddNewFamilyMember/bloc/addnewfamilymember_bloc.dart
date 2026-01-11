@@ -240,8 +240,7 @@ class AddnewfamilymemberBloc
           loadedUpdateDay = days.toString();
         }
 
-        // Case 2: approxAge string exists but split fields are missing ->
-        // derive updateYear/updateMonth/updateDay from approxAge.
+
         if (loadedApproxAge != null && loadedApproxAge.trim().isNotEmpty &&
             (loadedUpdateYear == null || loadedUpdateYear.trim().isEmpty) &&
             (loadedUpdateMonth == null || loadedUpdateMonth.trim().isEmpty) &&

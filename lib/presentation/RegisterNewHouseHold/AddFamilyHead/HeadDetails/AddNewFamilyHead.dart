@@ -1654,7 +1654,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
       case 'transgender':
         return 'Transgender';
       default:
-        return gender; // Return as-is if it doesn't match known patterns
+        return gender;
     }
   }
 

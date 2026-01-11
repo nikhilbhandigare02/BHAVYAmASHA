@@ -498,8 +498,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
               arguments: {
                 'isBeneficiary': true,
                 'isEdit': true,
-                // This flag indicates we came from AllBeneficiary and
-                // member should be saved/updated immediately on Add.
+
                 'isMemberDetails': true,
                 'beneficiaryId': completeBeneficiaryId,
                 'hhId': data['hhId']?.toString() ?? '',
