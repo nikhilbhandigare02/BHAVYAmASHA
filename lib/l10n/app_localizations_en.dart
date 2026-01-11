@@ -926,7 +926,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentPasswordEmpty => 'Current password cannot be empty';
 
   @override
-  String get currentPasswordHint => 'Enter current password';
+  String get currentPasswordHint => 'current password';
 
   @override
   String get currentPasswordLabel => 'Current Password';
@@ -1803,7 +1803,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newPasswordEmpty => 'New password cannot be empty';
 
   @override
-  String get newPasswordHint => 'Enter new password';
+  String get newPasswordHint => 'New password';
 
   @override
   String get newPasswordLabel => 'New Password';
@@ -1941,7 +1941,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reenterPasswordHint => 'Re-enter new password';
 
   @override
-  String get reenterPasswordLabel => 'Re-Enter Password';
+  String get reenterPasswordLabel => 'Re-Enter';
 
   @override
   String get reenterPasswordTooShort => 'Password must be at least 6 characters';
@@ -6892,16 +6892,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get present => 'Present?';
 
   @override
-  String get hscNameHint => 'HSC';
+  String get hscNameHint => 'HSC Name';
 
   @override
-  String get hscNameLabel => 'HSC';
+  String get hscNameLabel => 'HSC Name';
 
   @override
-  String get hwcNameHint => 'HWC';
+  String get hwcNameHint => 'HWC Name';
 
   @override
-  String get hwcNameLabel => 'HWC';
+  String get hwcNameLabel => 'HWC Name';
 
   @override
   String get moveForward => 'Move forward?';
