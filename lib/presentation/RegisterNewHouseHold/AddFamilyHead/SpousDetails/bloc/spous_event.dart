@@ -277,6 +277,36 @@ class UpdateDaysChanged extends SpousEvent {
   List<Object?> get props => [value];
 }
 
+class SpUpdateDobControllers extends SpousEvent {
+  final TextEditingController yearsController;
+  final TextEditingController monthsController;
+  final TextEditingController daysController;
+  
+  const SpUpdateDobControllers({
+    required this.yearsController,
+    required this.monthsController,
+    required this.daysController,
+  });
+  
+  @override
+  List<Object?> get props => [yearsController, monthsController, daysController];
+}
+
+class SpUpdateDobFromControllers extends SpousEvent {
+  final TextEditingController yearsController;
+  final TextEditingController monthsController;
+  final TextEditingController daysController;
+  
+  const SpUpdateDobFromControllers({
+    required this.yearsController,
+    required this.monthsController,
+    required this.daysController,
+  });
+  
+  @override
+  List<Object?> get props => [yearsController, monthsController, daysController];
+}
+
 class SpLMPChange extends SpousEvent {
   final DateTime? value;
   const SpLMPChange(this.value);

@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
-import 'package:medixcel_new/core/widgets/ConfirmationDialogue/ConfirmationDialogue.dart';
+import 'package:medixcel_new/core/widgets/SuccessDialogbox/SuccessDialogbox.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/core/widgets/DatePicker/DatePicker.dart';
 import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
@@ -55,21 +55,17 @@ class TrackEligibleCoupleScreen extends StatelessWidget {
         listener: (context, state) {
           if (state.status == FormStatus.success) {
             if (state.isPregnant == true) {
-              showConfirmationDialog(
-                context: context,
-                title:l10n?.formSavedSuccessfully ?? 'Form has been saved successfully',
-                message:
-               l10n?.pregnantAddedToAnc ?? 'Pregnant beneficiary has been added to antenatal care (ANC) list.',
-                yesText:l10n?.okay ??  'Okay',
-                onYes: () => Navigator.pop(context),
-                titleBackgroundColor: AppColors.background,
-                titleTextColor: AppColors.primary,
-                messageTextColor: Colors.black87,
-                yesButtonColor: AppColors.primary,
-                dialogBackgroundColor: Colors.white,
+              CustomDialog.show(
+                context,
+                title: l10n?.formSavedSuccessfully ?? 'Form has been saved successfully',
+                message: l10n?.pregnantAddedToAnc ?? 'Pregnant beneficiary has been added to antenatal care (ANC) list.',
+                onOkPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(true);
+                },
               );
             } else {
-              showAppSnackBar(context,l10n?.formSavedSuccess ??  'Form saved successfully');
+              showAppSnackBar(context,l10n?.formSavedSuccess ??  'Form submitted successfully');
               Navigator.of(context).pop(true);
             }
           }

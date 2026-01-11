@@ -424,6 +424,53 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         if (args['isBeneficiary'] == true && args['beneficiaryId'] != null) {
           await _loadBeneficiaryData(args['beneficiaryId']);
         }
+
+        final hhIdArg = args['hhId']?.toString() ?? '';
+        if (_isMemberDetails && hhIdArg.isNotEmpty) {
+          try {
+            final rc = await LocalStorageDao.instance
+                .getHeadReligionAndCategory(hhIdArg);
+            if (rc != null) {
+              String _mapCategoryToMember(String? c) {
+                switch ((c ?? '').trim()) {
+                  case 'Not Disclosed':
+                    return 'NotDisclosed';
+                  case 'Do not Know':
+                    return 'DontKnow';
+                  case 'Pichda Varg 1':
+                    return 'PichdaVarg1';
+                  case 'Pichda Varg 2':
+                    return 'PichdaVarg2';
+                  case 'Atyant Pichda Varg':
+                    return 'AtyantPichdaVarg';
+                  default:
+                    return (c ?? '').trim();
+                }
+              }
+              final headReligion = (rc['religion'] ?? '').toString();
+              final headOtherReligion =
+                  (rc['other_religion'] ?? '').toString();
+              final headCategory = (rc['category'] ?? '').toString();
+              final headOtherCategory =
+                  (rc['other_category'] ?? '').toString();
+
+              if (headReligion.isNotEmpty &&
+                  ((_bloc.state.religion ?? '').isEmpty)) {
+                _bloc.add(AnmUpdateReligion(headReligion));
+                if (headReligion == 'Other' && headOtherReligion.isNotEmpty) {
+                  _bloc.add(AnmUpdateOtherReligion(headOtherReligion));
+                }
+              }
+              if (headCategory.isNotEmpty &&
+                  ((_bloc.state.category ?? '').isEmpty)) {
+                _bloc.add(AnmUpdateCategory(_mapCategoryToMember(headCategory)));
+                if (headCategory == 'Other' && headOtherCategory.isNotEmpty) {
+                  _bloc.add(AnmUpdateOtherCategory(headOtherCategory));
+                }
+              }
+            }
+          } catch (_) {}
+        }
       }
 
       if (_fatherOption != 'Other') {
@@ -797,9 +844,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
       final religion = (data['religion'] ?? '') as String;
       if (religion.isNotEmpty) b.add(AnmUpdateReligion(religion));
+      final otherReligion = (data['otherReligion'] ?? '') as String;
+      if (otherReligion.isNotEmpty) b.add(AnmUpdateOtherReligion(otherReligion));
 
       final category = (data['category'] ?? '') as String;
       if (category.isNotEmpty) b.add(AnmUpdateCategory(category));
+      final otherCategory = (data['otherCategory'] ?? '') as String;
+      if (otherCategory.isNotEmpty) b.add(AnmUpdateOtherCategory(otherCategory));
 
       // Banking / IDs / ABHA
       final bankAcc = (data['bankAcc'] ?? data['bankAccountNumber'] ?? '') as String;
@@ -1196,6 +1247,58 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                           (spBloc.state.memberName ?? '').trim() !=
                               spouseName) {
                         spBloc.add(SpUpdateMemberName(spouseName));
+                      }
+                    },
+                  ),
+                  BlocListener<AddnewfamilymemberBloc, AddnewfamilymemberState>(
+                    listenWhen: (p, c) =>
+                        p.religion != c.religion ||
+                        p.otherReligion != c.otherReligion ||
+                        p.category != c.category ||
+                        p.otherCategory != c.otherCategory,
+                    listener: (context, st) {
+                      final spBloc = context.read<SpousBloc>();
+                      String mapCategoryToSpouse(String? v) {
+                        final s = (v ?? '').trim();
+                        switch (s) {
+                          case 'NotDisclosed':
+                            return 'Not Disclosed';
+                          case 'DontKnow':
+                            return 'Do not Know';
+                          case 'PichdaVarg1':
+                            return 'Pichda Varg 1';
+                          case 'PichdaVarg2':
+                            return 'Pichda Varg 2';
+                          case 'AtyantPichdaVarg':
+                            return 'Atyant Pichda Varg';
+                          default:
+                            return s;
+                        }
+                      }
+                      final relig = (st.religion ?? '').trim();
+                      if (relig.isNotEmpty) {
+                        spBloc.add(SpUpdateReligion(relig));
+                        if (relig == 'Other') {
+                          final or = (st.otherReligion ?? '').trim();
+                          if (or.isNotEmpty) {
+                            spBloc.add(SpUpdateOtherReligion(or));
+                          }
+                        } else {
+                          spBloc.add(SpUpdateOtherReligion(''));
+                        }
+                      }
+                      final cat = (st.category ?? '').trim();
+                      if (cat.isNotEmpty) {
+                        final mapped = mapCategoryToSpouse(cat);
+                        spBloc.add(SpUpdateCategory(mapped));
+                        if (cat == 'Other') {
+                          final oc = (st.otherCategory ?? '').trim();
+                          if (oc.isNotEmpty) {
+                            spBloc.add(SpUpdateOtherCategory(oc));
+                          }
+                        } else {
+                          spBloc.add(SpUpdateOtherCategory(''));
+                        }
                       }
                     },
                   ),

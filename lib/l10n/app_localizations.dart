@@ -12974,7 +12974,7 @@ abstract class AppLocalizations {
   /// No description provided for @deceased.
   ///
   /// In en, this message translates to:
-  /// **'Deceased'**
+  /// **'Decease'**
   String get deceased;
 
   /// No description provided for @noHbycChildrenFound.
@@ -13832,25 +13832,25 @@ abstract class AppLocalizations {
   /// No description provided for @hscNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HSC Name'**
+  /// **'HSC'**
   String get hscNameHint;
 
   /// No description provided for @hscNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HSC Name'**
+  /// **'HSC'**
   String get hscNameLabel;
 
   /// No description provided for @hwcNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HWC Name'**
+  /// **'HWC'**
   String get hwcNameHint;
 
   /// No description provided for @hwcNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HWC Name'**
+  /// **'HWC'**
   String get hwcNameLabel;
 
   /// No description provided for @moveForward.

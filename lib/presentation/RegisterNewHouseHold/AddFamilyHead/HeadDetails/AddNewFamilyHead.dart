@@ -226,6 +226,38 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   final TextEditingController monthsCtrl = TextEditingController();
   final TextEditingController daysCtrl = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with BLoC state after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final bloc = context.read<AddFamilyHeadBloc>();
+        final state = bloc.state;
+        
+        // Update controllers with current state values
+        if (state.years != null) yearsCtrl.text = state.years!;
+        if (state.months != null) monthsCtrl.text = state.months!;
+        if (state.days != null) daysCtrl.text = state.days!;
+        
+        // Pass controllers to BLoC
+        bloc.add(AfhUpdateDobControllers(
+          yearsController: yearsCtrl,
+          monthsController: monthsCtrl,
+          daysController: daysCtrl,
+        ));
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    yearsCtrl.dispose();
+    monthsCtrl.dispose();
+    daysCtrl.dispose();
+    super.dispose();
+  }
+
   String? _validateYoungestChild(ChildrenState s, AppLocalizations l) {
     // Check if age unit is selected but age is empty
     if ((s.ageUnit != null && s.ageUnit!.isNotEmpty) &&
@@ -399,6 +431,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     yearsCtrl.text = years.toString();
     monthsCtrl.text = months.toString();
     daysCtrl.text = days.toString();
+    
+    // Also update BLoC state
+    context.read<AddFamilyHeadBloc>().add(AfhUpdateDobFromControllers(
+      yearsController: yearsCtrl,
+      monthsController: monthsCtrl,
+      daysController: daysCtrl,
+    ));
   }
   Widget _buildFamilyHeadForm(
     BuildContext context,
@@ -496,6 +535,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       setState(() {
                         dob = date;
                       });
+                      context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(date));
+                      // Update text controllers with calculated age
                       updateAgeFromDob(date);
                     }
                   },
@@ -553,7 +594,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               FilteringTextInputFormatter.digitsOnly,
                               MaxValueFormatter(110),
                             ],
-                            onChanged: (_) => updateDobFromAge(),
+                            onChanged: (_) => context.read<AddFamilyHeadBloc>().add(
+                              AfhUpdateDobFromControllers(
+                                yearsController: yearsCtrl,
+                                monthsController: monthsCtrl,
+                                daysController: daysCtrl,
+                              ),
+                            ),
                           ),
                         ),
 
@@ -567,9 +614,15 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                             maxLength: 2,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
-                              MaxValueFormatter(99), // Allow up to 99 for rollover calculation
+                              MaxValueFormatter(99),
                             ],
-                            onChanged: (_) => updateDobFromAge(),
+                            onChanged: (_) => context.read<AddFamilyHeadBloc>().add(
+                              AfhUpdateDobFromControllers(
+                                yearsController: yearsCtrl,
+                                monthsController: monthsCtrl,
+                                daysController: daysCtrl,
+                              ),
+                            ),
                           ),
                         ),
 
@@ -585,7 +638,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               FilteringTextInputFormatter.digitsOnly,
                               MaxValueFormatter(99), // Allow up to 99 for rollover calculation
                             ],
-                            onChanged: (_) => updateDobFromAge(),
+                            onChanged: (_) => context.read<AddFamilyHeadBloc>().add(
+                              AfhUpdateDobFromControllers(
+                                yearsController: yearsCtrl,
+                                monthsController: monthsCtrl,
+                                daysController: daysCtrl,
+                              ),
+                            ),
                           ),
                         ),
                       ],

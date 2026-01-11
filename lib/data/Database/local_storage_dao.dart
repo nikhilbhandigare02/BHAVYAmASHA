@@ -2511,6 +2511,103 @@ class LocalStorageDao {
   }
 
 
+  Future<Map<String, String?>?> getHeadReligionAndCategory(String householdRefKey) async {
+    print('🔍 [getHeadReligionAndCategory] Fetching religion/category for household: $householdRefKey');
+    try {
+      final db = await _db;
+
+      final beneficiaries = await db.query(
+        'beneficiaries_new',
+        where: 'household_ref_key = ? AND is_deleted = 0',
+        whereArgs: [householdRefKey],
+      );
+
+      if (beneficiaries.isEmpty) {
+        print('❌ [getHeadReligionAndCategory] No beneficiaries found for household: $householdRefKey');
+        return null;
+      }
+
+      // 1. Try to find by relation ('self' or 'head')
+      for (final beneficiary in beneficiaries) {
+        final beneficiaryInfo = beneficiary['beneficiary_info'] as String?;
+        if (beneficiaryInfo == null || beneficiaryInfo.isEmpty) continue;
+
+        try {
+          final infoMap = jsonDecode(beneficiaryInfo) as Map<String, dynamic>?;
+          if (infoMap == null) continue;
+
+          final relation = infoMap['relation']?.toString().toLowerCase();
+
+          // CHECK 1: Relation Condition
+          if (relation == 'self' || relation == 'head') {
+            // Extract the specific keys you requested
+            final religion = infoMap['religion']?.toString();
+            final otherReligion = infoMap['other_religion']?.toString();
+            final category = infoMap['category']?.toString();
+            final otherCategory = infoMap['other_category']?.toString();
+
+            // Condition: Check if at least one of the main fields has data (mirroring your mobile check)
+            if ((religion != null && religion.isNotEmpty) ||
+                (category != null && category.isNotEmpty) ||
+                (otherReligion != null && otherReligion.isNotEmpty) ||
+                (otherCategory != null && otherCategory.isNotEmpty)) {
+
+              print('✅ [getHeadReligionAndCategory] Found head data via relation');
+              return {
+                'religion': religion,
+                'other_religion': otherReligion,
+                'category': category,
+                'other_category': otherCategory,
+              };
+            }
+          }
+        } catch (e) {
+          print('❌ [getHeadReligionAndCategory] Error parsing beneficiary info: $e');
+        }
+      }
+
+      // 2. Fallback: Try to find by headName presence
+      for (final beneficiary in beneficiaries) {
+        final beneficiaryInfo = beneficiary['beneficiary_info'] as String?;
+        if (beneficiaryInfo == null || beneficiaryInfo.isEmpty) continue;
+
+        try {
+          final infoMap = jsonDecode(beneficiaryInfo) as Map<String, dynamic>?;
+          if (infoMap == null) continue;
+
+
+          if (infoMap['headName'] != null) {
+            final religion = infoMap['religion']?.toString();
+            final otherReligion = infoMap['other_religion']?.toString();
+            final category = infoMap['category']?.toString();
+            final otherCategory = infoMap['other_category']?.toString();
+
+            if ((religion != null && religion.isNotEmpty) ||
+                (category != null && category.isNotEmpty) ||
+                (otherReligion != null && otherReligion.isNotEmpty) ||
+                (otherCategory != null && otherCategory.isNotEmpty)) {
+
+              print('✅ [getHeadReligionAndCategory] Found head data via headName');
+              return {
+                'religion': religion,
+                'other_religion': otherReligion,
+                'category': category,
+                'other_category': otherCategory,
+              };
+            }
+          }
+        } catch (e) {
+          print('❌ [getHeadReligionAndCategory] Error parsing beneficiary info (fallback): $e');
+        }
+      }
+
+      print('ℹ️ [getHeadReligionAndCategory] No religion/category found in any beneficiary');
+      return null;
+    } catch (e) {
+      print('❌ [getHeadReligionAndCategory] Error: $e');
+      return null;
+    }
+  }
 
   Future<String?> getHeadMobileNumber(String householdRefKey) async {
     print('🔍 [getHeadMobileNumber] Fetching head mobile for household: $householdRefKey');
@@ -2549,7 +2646,7 @@ class LocalStorageDao {
         }
       }
 
-      // 3. If no head found by relation, try to find by headName
+
       for (final beneficiary in beneficiaries) {
         final beneficiaryInfo = beneficiary['beneficiary_info'] as String?;
         if (beneficiaryInfo == null || beneficiaryInfo.isEmpty) continue;
@@ -2713,28 +2810,6 @@ class LocalStorageDao {
       rethrow;
     }
   }
-  // Future<int> updateBeneficiaryDeleteAndSyncFlagByUniqueKey({
-  //   required String uniqueKey,
-  //   required int isDeleted,
-  // }) async {
-  //   try {
-  //     final db = await _db;
-  //     final changes = await db.update(
-  //       'beneficiaries_new',
-  //       {
-  //         'is_deleted': isDeleted,
-  //         'is_synced': 0,
-  //         'modified_date_time': DateTime.now().toIso8601String(),
-  //       },
-  //       where: 'unique_key = ?',
-  //       whereArgs: [uniqueKey],
-  //     );
-  //     return changes;
-  //   } catch (e) {
-  //     print('Error updating beneficiary delete/sync flags by unique_key: $e');
-  //     rethrow;
-  //   }
-  // }
 
   Future<String> getLatestHouseholdServerId() async {
     try {

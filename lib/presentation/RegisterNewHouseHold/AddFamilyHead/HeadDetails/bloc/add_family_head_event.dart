@@ -102,6 +102,30 @@ final class UpdateDays extends AddFamilyHeadEvent {
   UpdateDays(this.value);
 }
 
+final class AfhUpdateDobControllers extends AddFamilyHeadEvent {
+  final TextEditingController yearsController;
+  final TextEditingController monthsController;
+  final TextEditingController daysController;
+  
+  AfhUpdateDobControllers({
+    required this.yearsController,
+    required this.monthsController,
+    required this.daysController,
+  });
+}
+
+final class AfhUpdateDobFromControllers extends AddFamilyHeadEvent {
+  final TextEditingController yearsController;
+  final TextEditingController monthsController;
+  final TextEditingController daysController;
+  
+  AfhUpdateDobFromControllers({
+    required this.yearsController,
+    required this.monthsController,
+    required this.daysController,
+  });
+}
+
 final class AfhUpdateGender extends AddFamilyHeadEvent {
   final String? value;
   AfhUpdateGender(this.value);

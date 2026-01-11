@@ -609,7 +609,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         }
 
         if (mounted) {
-          showAppSnackBar(context, "Form saved successfully");
+          showAppSnackBar(context, "Form submitted successfully");
 
           // Pop with result to refresh the list
           Navigator.pop(context, {

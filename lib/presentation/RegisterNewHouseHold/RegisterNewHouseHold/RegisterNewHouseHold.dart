@@ -955,6 +955,42 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         print('Error parsing spouse details: $e');
       }
 
+      Map<String, dynamic> initial = {};
+      final String? headReligion = _headForm?['religion']?.toString();
+      final String? headOtherReligion = _headForm?['otherReligion']?.toString();
+      final String? headCategory = _headForm?['category']?.toString();
+      final String? headOtherCategory = _headForm?['otherCategory']?.toString();
+      String _mapCategoryToMember(String? c) {
+        switch ((c ?? '').trim()) {
+          case 'Not Disclosed':
+            return 'NotDisclosed';
+          case 'Do not Know':
+            return 'DontKnow';
+          case 'Pichda Varg 1':
+            return 'PichdaVarg1';
+          case 'Pichda Varg 2':
+            return 'PichdaVarg2';
+          case 'Atyant Pichda Varg':
+            return 'AtyantPichdaVarg';
+          default:
+            return (c ?? '').trim();
+        }
+      }
+      if (headReligion != null && headReligion.isNotEmpty) {
+        initial['religion'] = headReligion;
+      }
+      if (headOtherReligion != null && headOtherReligion.isNotEmpty) {
+        initial['otherReligion'] = headOtherReligion;
+      }
+      if (headCategory != null && headCategory.isNotEmpty) {
+        initial['category'] = _mapCategoryToMember(headCategory);
+      }
+      if (headCategory == 'Other' &&
+          headOtherCategory != null &&
+          headOtherCategory.isNotEmpty) {
+        initial['otherCategory'] = headOtherCategory;
+      }
+
       final result = await Navigator.of(context).push<Map<String, dynamic>>(
         MaterialPageRoute(
           builder: (_) => AddNewFamilyMemberScreen(
@@ -967,6 +1003,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             headSpouseMobile: spouseMobileNumber, // Add this line
             spouseName: spouse['Name'] ?? '',
             spouseGender: spouse['Gender'] ?? '',
+            inlineEdit: true,
+            initial: initial.isEmpty ? null : initial,
           ),
         ),
       );

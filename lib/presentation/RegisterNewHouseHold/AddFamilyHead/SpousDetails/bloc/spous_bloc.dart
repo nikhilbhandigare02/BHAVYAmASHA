@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 part 'spous_event.dart';
@@ -133,6 +134,55 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
       emit(
         state.copyWith(
           UpdateDays: daysStr,
+          approxAge: approx,
+          dob: dob ?? state.dob,
+        ),
+      );
+    });
+
+    on<SpUpdateDobControllers>((event, emit) {
+      // Store controllers reference for later use
+      emit(state.copyWith(
+        UpdateYears: event.yearsController.text,
+        UpdateMonths: event.monthsController.text,
+        UpdateDays: event.daysController.text,
+      ));
+    });
+
+    on<SpUpdateDobFromControllers>((event, emit) {
+      final yearsStr = event.yearsController.text;
+      final monthsStr = event.monthsController.text;
+      final daysStr = event.daysController.text;
+
+      // Calculate total days with rollover
+      int totalMonths = int.tryParse(monthsStr) ?? 0;
+      int totalDays = int.tryParse(daysStr) ?? 0;
+      
+      // Handle day rollover (30 days = 1 month)
+      if (totalDays >= 30) {
+        totalMonths += (totalDays / 30).floor();
+        totalDays = 0; // Always make days 0 after rollover
+      }
+      
+      // Handle month rollover (12 months = 1 year)
+      int totalYears = int.tryParse(yearsStr) ?? 0;
+      totalYears += (totalMonths / 12).floor();
+      totalMonths = totalMonths % 12;
+
+      // Update controllers with calculated values
+      event.yearsController.text = totalYears.toString();
+      event.monthsController.text = totalMonths.toString();
+      event.daysController.text = totalDays.toString();
+
+      // Calculate DOB from age parts
+      final dob = _dobFromAgeParts(totalYears, totalMonths, totalDays);
+      final approx = '$totalYears years $totalMonths months $totalDays days'.trim();
+
+      emit(
+        state.copyWith(
+          UpdateYears: totalYears.toString(),
+          UpdateMonths: totalMonths.toString(),
+          UpdateDays: totalDays.toString(),
           approxAge: approx,
           dob: dob ?? state.dob,
         ),

@@ -136,7 +136,7 @@ class Validations {
     }
 
     // Check if age is exactly 15 years or more
-    if (years < 15 || (years == 15 && (months < 0 || (months == 0 && days < 0)))) {
+    if (years < 15 || (years == 15 && (months < 0 || days < 0))) {
       return l10n.pleaseEnterAgeBetween15To110;
     }
 

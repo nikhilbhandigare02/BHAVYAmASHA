@@ -485,10 +485,21 @@ class AddnewfamilymemberBloc
       // TODO: implement event handler
     });
     on<AnmClearAllData>((e, emit) {
-      print('🧹 [Bloc] ClearAllData event received - resetting state to default');
+      print('🧹 [Bloc] ClearAllData event received - resetting state to default (preserving religion/category)');
       _dataClearedByTypeChange = true; // Set flag to prevent data reloading
-      emit(const AddnewfamilymemberState());
-      print('🧹 [Bloc] State cleared - MemberType: ${state.memberType}, Name: ${state.name}');
+      final preservedReligion = state.religion;
+      final preservedOtherReligion = state.otherReligion;
+      final preservedCategory = state.category;
+      final preservedOtherCategory = state.otherCategory;
+      final cleared = const AddnewfamilymemberState();
+      final next = cleared.copyWith(
+        religion: preservedReligion,
+        otherReligion: preservedOtherReligion,
+        category: preservedCategory,
+        otherCategory: preservedOtherCategory,
+      );
+      emit(next);
+      print('🧹 [Bloc] State cleared with preserved fields - religion: ${next.religion}, category: ${next.category}');
     });
     on<AnmResetDataClearedFlag>((e, emit) {
       print('🔄 [Bloc] Resetting data cleared flag');
