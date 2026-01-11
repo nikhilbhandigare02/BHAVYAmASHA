@@ -113,7 +113,7 @@ class _HBNCListScreenState
 
           // Check for both pnc_mother_form and pnc_infant_form structures
           List<String> formKeysToCheck = ['pnc_mother_form', 'pnc_infant_form'];
-          
+
           for (final formKey in formKeysToCheck) {
             if (formJson.containsKey(formKey)) {
               final formData = formJson[formKey] as Map<String, dynamic>? ?? {};
@@ -240,7 +240,7 @@ class _HBNCListScreenState
         }
       }
 
-       final deliveryOutcomeKey = '4r7twnycml3ej1vg';
+      final deliveryOutcomeKey = '4r7twnycml3ej1vg';
       final deliveryRows = await db.rawQuery(
         'SELECT * FROM ${FollowupFormDataTable.table} WHERE forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0 ORDER BY created_date_time DESC LIMIT 1',
         [deliveryOutcomeKey, beneficiaryId],
@@ -283,12 +283,11 @@ class _HBNCListScreenState
       WHERE mca.mother_care_state ='pnc_mother'
       AND mca.is_deleted = 0
       AND mca.current_user_key = ?
-  
     ''', [ashaUniqueKey]);
 
 
 
-    if (validBeneficiaries.isEmpty) {
+      if (validBeneficiaries.isEmpty) {
         print('No beneficiaries found with pnc_mother or hbnc_visit state');
         return [];
       }
@@ -300,8 +299,8 @@ class _HBNCListScreenState
       final query = '''
       SELECT * FROM followup_form_data 
       WHERE forms_ref_key = ? 
-      AND beneficiary_ref_key IN ($placeholders)
       AND current_user_key = ?
+      AND beneficiary_ref_key IN ($placeholders)
       ORDER BY created_date_time DESC
     ''';
 
@@ -515,7 +514,7 @@ class _HBNCListScreenState
       if (results.isNotEmpty) {
         final result = results.first;
         print('📋 Found HBNC visit record with ID: ${result['id']}');
-        
+
         // Directly use created_date_time as the previous HBNC date
         final createdDate = result['created_date_time'];
         if (createdDate != null && createdDate.toString().isNotEmpty) {
@@ -553,7 +552,7 @@ class _HBNCListScreenState
       // For visit count >= 1, get the latest record's created_date_time as base date
       // Query for any HBNC/PNC related form records to get the latest one
       final db = await DatabaseProvider.instance.database;
-      
+
       // Try multiple possible form reference keys for HBNC visits
       final possibleFormKeys = [
         FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother], // bu30k62jao9qesri
@@ -579,7 +578,7 @@ class _HBNCListScreenState
         final formRefKey = result['forms_ref_key']?.toString();
         print('📅 Using created_date_time as base: $createdDateTime');
         print('🔑 From form reference key: $formRefKey');
-        
+
         if (createdDateTime != null && createdDateTime.isNotEmpty) {
           baseDate = DateTime.tryParse(createdDateTime) ?? DateTime.now();
           print('📅 Parsed base date from created_date_time: $baseDate');
@@ -593,14 +592,14 @@ class _HBNCListScreenState
       }
 
       print('📅 Calculating next visit for visit count: $visitCount from base date: $baseDate');
-      
+
       if (visitCount == 1) {
         final nextVisitDate = baseDate.add(const Duration(days: 2));
         final formatted = _formatDate(nextVisitDate.toString());
         print('🎯 Visit count 1: +2 days → $formatted');
         return formatted;
       }
-      
+
       final nextVisitDate = _calculateNextVisitDate(visitCount, baseDate);
       if (nextVisitDate != null) {
         final formatted = _formatDate(nextVisitDate.toString());
@@ -633,7 +632,7 @@ class _HBNCListScreenState
       case 28: // Day 28 → Day 42 (after 14 days)
         return currentVisitDate.add(const Duration(days: 14));
       default:
-        // For any other visit number, add 7 days as default
+      // For any other visit number, add 7 days as default
         return currentVisitDate.add(const Duration(days: 7));
     }
   }
@@ -714,47 +713,47 @@ class _HBNCListScreenState
         ),
 
         body: Column(
-        children: [
-          // Search Field
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: TextField(
-              controller: _searchCtrl,
-              decoration: InputDecoration(
-                hintText: l10n?.searchHBNC ?? 'search Eligible Couple',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding:
-                const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.outlineVariant),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+          children: [
+            // Search Field
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: TextField(
+                controller: _searchCtrl,
+                decoration: InputDecoration(
+                  hintText: l10n?.searchHBNC ?? 'search Eligible Couple',
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: AppColors.background,
+                  contentPadding:
+                  const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.outlineVariant),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                  ),
                 ),
               ),
             ),
-          ),
 
-          // Household List
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
+            // Household List
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                itemCount: _filtered.length,
+                itemBuilder: (context, index) {
+                  final data = _filtered[index];
+                  return _householdCard(context, data);
+                },
+              ),
             ),
-          ),
 
-        ],
+          ],
         ),
       ),
     );

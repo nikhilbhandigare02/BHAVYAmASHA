@@ -2003,7 +2003,7 @@ class LocalStorageDao {
 
     final forms = await db.query(
       'followup_form_data',
-      where: "is_deleted = 0 AND forms_ref_key = 'bt7gs9rl1a5d26mz'  AND form_json LIKE '%\"is_abortion\"%'",
+      where: "forms_ref_key = 'bt7gs9rl1a5d26mz'  AND form_json LIKE '%\"is_abortion\"%'",
     );
 
     final List<Map<String, dynamic>> result = [];
