@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 part 'spous_event.dart';
@@ -45,6 +44,8 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
     };
   }
 
+
+
   DateTime? _dobFromAgeParts(int years, int months, int days) {
     if (years < 0 || months < 0 || days < 0) return null;
     if (years == 0 && months == 0 && days == 0) return null;
@@ -85,15 +86,36 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
       final monthsStr = state.UpdateMonths ?? '0';
       final daysStr = state.UpdateDays ?? '0';
 
-      final years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
-      final months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
-      final days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+      int years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
+      int months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
+      int days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+
+      // Handle day rollover (30 days = 1 month)
+      if (days >= 30) {
+        final additionalMonths = (days / 30).floor();
+        months += additionalMonths;
+        days = 0; // Always make days 0 after rollover, no remainder
+      }
+
+      // Handle month rollover (12 months = 1 year)
+      if (months >= 12) {
+        final additionalYears = (months / 12).floor();
+        years += additionalYears;
+        months = 0; // Always make months 0 after rollover
+      }
+
+      // Update the string values with calculated rollover
+      final newYearStr = years.toString();
+      final newMonthStr = months == 0 ? '' : months.toString();
+      final newDayStr = days == 0 ? '' : days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
       emit(
         state.copyWith(
-          UpdateYears: yearsStr,
+          UpdateYears: newYearStr,
+          UpdateMonths: newMonthStr,
+          UpdateDays: newDayStr,
           approxAge: approx,
           dob: dob ?? state.dob,
         ),
@@ -104,16 +126,37 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
       final yearsStr = state.UpdateYears ?? '0';
       final daysStr = state.UpdateDays ?? '0';
 
-      final years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
-      final months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
-      final days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+      int years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
+      int months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
+      int days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+
+      // Handle day rollover (30 days = 1 month)
+      if (days >= 30) {
+        final additionalMonths = (days / 30).floor();
+        months += additionalMonths;
+        days = 0; // Always make days 0 after rollover, no remainder
+      }
+
+      // Handle month rollover (12 months = 1 year)
+      if (months >= 12) {
+        final additionalYears = (months / 12).floor();
+        years += additionalYears;
+        months = 0; // Always make months 0 after rollover
+      }
+
+      // Update the string values with calculated rollover
+      final newYearStr = years.toString();
+      final newMonthStr = months == 0 ? '' : months.toString();
+      final newDayStr = days == 0 ? '' : days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
 
       emit(
         state.copyWith(
-          UpdateMonths: monthsStr,
+          UpdateYears: newYearStr,
+          UpdateMonths: newMonthStr,
+          UpdateDays: newDayStr,
           approxAge: approx,
           dob: dob ?? state.dob,
         ),
@@ -124,65 +167,37 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
       final yearsStr = state.UpdateYears ?? '0';
       final monthsStr = state.UpdateMonths ?? '0';
 
-      final years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
-      final months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
-      final days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+      int years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
+      int months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
+      int days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+
+      // Handle day rollover (30 days = 1 month)
+      if (days >= 30) {
+        final additionalMonths = (days / 30).floor();
+        months += additionalMonths;
+        days = 0; // Always make days 0 after rollover, no remainder
+      }
+
+      // Handle month rollover (12 months = 1 year)
+      if (months >= 12) {
+        final additionalYears = (months / 12).floor();
+        years += additionalYears;
+        months = 0; // Always make months 0 after rollover
+      }
+
+      // Update the string values with calculated rollover
+      final newYearStr = years.toString();
+      final newMonthStr = months == 0 ? '' : months.toString();
+      final newDayStr = days == 0 ? '' : days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
 
       emit(
         state.copyWith(
-          UpdateDays: daysStr,
-          approxAge: approx,
-          dob: dob ?? state.dob,
-        ),
-      );
-    });
-
-    on<SpUpdateDobControllers>((event, emit) {
-      // Store controllers reference for later use
-      emit(state.copyWith(
-        UpdateYears: event.yearsController.text,
-        UpdateMonths: event.monthsController.text,
-        UpdateDays: event.daysController.text,
-      ));
-    });
-
-    on<SpUpdateDobFromControllers>((event, emit) {
-      final yearsStr = event.yearsController.text;
-      final monthsStr = event.monthsController.text;
-      final daysStr = event.daysController.text;
-
-      // Calculate total days with rollover
-      int totalMonths = int.tryParse(monthsStr) ?? 0;
-      int totalDays = int.tryParse(daysStr) ?? 0;
-      
-      // Handle day rollover (30 days = 1 month)
-      if (totalDays >= 30) {
-        totalMonths += (totalDays / 30).floor();
-        totalDays = 0; // Always make days 0 after rollover
-      }
-      
-      // Handle month rollover (12 months = 1 year)
-      int totalYears = int.tryParse(yearsStr) ?? 0;
-      totalYears += (totalMonths / 12).floor();
-      totalMonths = totalMonths % 12;
-
-      // Update controllers with calculated values
-      event.yearsController.text = totalYears.toString();
-      event.monthsController.text = totalMonths.toString();
-      event.daysController.text = totalDays.toString();
-
-      // Calculate DOB from age parts
-      final dob = _dobFromAgeParts(totalYears, totalMonths, totalDays);
-      final approx = '$totalYears years $totalMonths months $totalDays days'.trim();
-
-      emit(
-        state.copyWith(
-          UpdateYears: totalYears.toString(),
-          UpdateMonths: totalMonths.toString(),
-          UpdateDays: totalDays.toString(),
+          UpdateYears: newYearStr,
+          UpdateMonths: newMonthStr,
+          UpdateDays: newDayStr,
           approxAge: approx,
           dob: dob ?? state.dob,
         ),

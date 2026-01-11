@@ -74,7 +74,7 @@ class _ResetpasswordState extends State<Resetpassword> {
                             builder: (context, state) {
                               return CustomTextField(
                                 labelText: l10n.currentPasswordLabel,
-                                hintText: l10n.currentPasswordHint,
+                                hintText: l10n.currentPasswordLabel,
                                 keyboardType: TextInputType.text,
                                 //validator: (value) => Validations.validateCurrentPassword(l10n, value),
                                 obscureText: false,
@@ -97,7 +97,7 @@ class _ResetpasswordState extends State<Resetpassword> {
                             builder: (context, state) {
                               return CustomTextField(
                                 labelText: l10n.newPasswordLabel,
-                                hintText: l10n.newPasswordHint,
+                                hintText: l10n.newPasswordLabel,
                                 keyboardType: TextInputType.text,
                                 //validator: (value) => Validations.validateNewPassword(l10n, value),
                                 obscureText: false,
@@ -119,7 +119,7 @@ class _ResetpasswordState extends State<Resetpassword> {
                             builder: (context, state) {
                               return CustomTextField(
                                 labelText: l10n.reenterPasswordLabel,
-                                hintText: l10n.reenterPasswordHint,
+                                hintText: l10n.reenterPasswordLabel,
                                 keyboardType: TextInputType.text,
                                 /*validator: (value) =>
                                     Validations.validateReEnterPassword(

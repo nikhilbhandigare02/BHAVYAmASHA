@@ -1916,7 +1916,7 @@ abstract class AppLocalizations {
   /// No description provided for @currentPasswordHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter current password'**
+  /// **'current password'**
   String get currentPasswordHint;
 
   /// No description provided for @currentPasswordLabel.
@@ -3662,7 +3662,7 @@ abstract class AppLocalizations {
   /// No description provided for @newPasswordHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter new password'**
+  /// **'New password'**
   String get newPasswordHint;
 
   /// No description provided for @newPasswordLabel.
@@ -3938,7 +3938,7 @@ abstract class AppLocalizations {
   /// No description provided for @reenterPasswordLabel.
   ///
   /// In en, this message translates to:
-  /// **'Re-Enter Password'**
+  /// **'Re-Enter'**
   String get reenterPasswordLabel;
 
   /// No description provided for @reenterPasswordTooShort.
@@ -13832,25 +13832,25 @@ abstract class AppLocalizations {
   /// No description provided for @hscNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HSC'**
+  /// **'HSC Name'**
   String get hscNameHint;
 
   /// No description provided for @hscNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HSC'**
+  /// **'HSC Name'**
   String get hscNameLabel;
 
   /// No description provided for @hwcNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HWC'**
+  /// **'HWC Name'**
   String get hwcNameHint;
 
   /// No description provided for @hwcNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HWC'**
+  /// **'HWC Name'**
   String get hwcNameLabel;
 
   /// No description provided for @moveForward.
