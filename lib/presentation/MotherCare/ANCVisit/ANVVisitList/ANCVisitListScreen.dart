@@ -491,22 +491,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     }
   }
 
-  Future<String?> _getLastANCVisitDate(String beneficiaryId) async {
-    try {
-      if (beneficiaryId.isEmpty) {
-        print('⚠️ Empty beneficiary ID provided to _getLastANCVisitDate');
-        return null;
-      }
-
-      print('🔍 Fetching last ANC visit date for beneficiary: $beneficiaryId');
-      final result = await LocalStorageDao.instance.getLastANCVisitDate(beneficiaryId);
-      print('✅ Last visit date for $beneficiaryId: $result');
-      return result;
-    } catch (e) {
-      print('❌ Error in _getLastANCVisitDate for $beneficiaryId: $e');
-      return null;
-    }
-  }
 
   @override
   void initState() {

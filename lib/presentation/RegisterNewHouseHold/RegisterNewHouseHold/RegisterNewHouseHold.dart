@@ -756,8 +756,21 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
   Future<void> _openAddHead() async {
     try {
+      // Convert Map<String, dynamic>? to Map<String, String>? 
+      Map<String, String>? initialData;
+      if (_headForm != null) {
+        initialData = <String, String>{};
+        _headForm!.forEach((key, value) {
+          if (value != null) {
+            initialData![key] = value.toString();
+          }
+        });
+      }
+      
       final result = await Navigator.of(context).push<Map<String, dynamic>>(
-        MaterialPageRoute(builder: (_) => AddNewFamilyHeadScreen()),
+        MaterialPageRoute(builder: (_) => AddNewFamilyHeadScreen(
+          initial: initialData,
+        )),
       );
 
       if (result != null) {

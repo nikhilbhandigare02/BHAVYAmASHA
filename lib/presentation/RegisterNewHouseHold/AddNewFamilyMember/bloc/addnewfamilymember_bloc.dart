@@ -343,9 +343,9 @@ class AddnewfamilymemberBloc
         final ageBy = allData['age_by'] as String?;
         bool useDobValue = true; // default to DOB
         if (ageBy != null) {
-          if (ageBy == 'by_age') {
+          if (ageBy == 'By Age') {
             useDobValue = false;
-          } else if (ageBy == 'by_dob') {
+          } else if (ageBy == 'By Dob') {
             useDobValue = true;
           }
         }
@@ -991,7 +991,7 @@ class AddnewfamilymemberBloc
             'fatherName': state.fatherName,
             'motherName': state.motherName,
             'useDob': state.useDob,
-            'age_by': state.useDob ? 'by_dob' : 'by_age',
+            'age_by': state.useDob ? 'By Dob' : 'By Age"',
             'dob': state.dob?.toIso8601String(),
             'approxAge': state.approxAge,
             'updateDay': state.updateDay,
@@ -2078,7 +2078,7 @@ class AddnewfamilymemberBloc
           ..['fatherName'] = state.fatherName
           ..['motherName'] = state.motherName
           ..['useDob'] = state.useDob
-          ..['age_by'] = state.useDob ? 'by_dob' : 'by_age'
+          ..['age_by'] = state.useDob ? 'By Dob' : 'By Age'
           ..['dob'] = state.dob?.toIso8601String()
           ..['approxAge'] = state.approxAge
           ..['updateDay'] = state.updateDay
@@ -2100,7 +2100,6 @@ class AddnewfamilymemberBloc
           ..['abhaAddress'] = state.abhaAddress
           ..['mobileOwner'] = state.mobileOwner
           ..['mobileOwnerRelation'] = state.mobileOwnerRelation == 'Other' && state.otherRelation != null && state.otherRelation!.isNotEmpty ? '${state.otherRelation}_other' : state.mobileOwnerRelation
-          // Add other_* fields for proper prefill
           ..['other_religion'] = state.religion == 'Other' ? state.otherReligion : null
           ..['other_category'] = state.category == 'Other' ? state.otherCategory : null
           ..['other_occupation'] = state.occupation == 'Other' ? state.otherOccupation : null
