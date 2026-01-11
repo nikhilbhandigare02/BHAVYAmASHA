@@ -288,11 +288,6 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
               });
             }
           }
-          if (state is MigrationSplitUpdated &&
-              state.error == null &&
-              state.updatedCount > 0) {
-            _navigateToHomeDashboard();
-          }
         },
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -976,7 +971,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         ),
       );
 
-      // UI refresh and success handling moved to BlocListener on MigrationSplitBloc
+      _navigateToHomeDashboard();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

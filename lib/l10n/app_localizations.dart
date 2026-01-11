@@ -5105,6 +5105,12 @@ abstract class AppLocalizations {
   /// **'PREVIOUS'**
   String get previousButton;
 
+  /// No description provided for @prevButton.
+  ///
+  /// In en, this message translates to:
+  /// **'PREV'**
+  String get prevButton;
+
   /// No description provided for @youngestChildAgeLabel.
   ///
   /// In en, this message translates to:

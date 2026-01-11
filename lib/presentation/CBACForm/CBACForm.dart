@@ -13,6 +13,7 @@ import 'package:medixcel_new/core/widgets/SnackBar/app_snackbar.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 import 'package:sizer/sizer.dart';
 import 'bloc/cbac_form_bloc.dart';
+import '../HomeScreen/HomeScreen.dart';
 
 class Cbacform extends StatefulWidget {
   final String? beneficiaryId;
@@ -59,8 +60,16 @@ class _CbacformState extends State<Cbacform> {
               if (state.isSuccess) {
                 showAppSnackBar(context, 'form submitted successfully');
 
-                Future.delayed(const Duration(milliseconds: 500), () {
-                  Navigator.of(context).pop();
+                Future.delayed(const Duration(milliseconds: 400), () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (_) => const HomeScreen(initialTabIndex: 1),
+                      ),
+                      (route) => false,
+                    );
+                  });
                 });
               }
 
@@ -426,7 +435,6 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
     }
   }
 
-  // Alternative parsing method using string manipulation
   void _tryAlternativeParsing(String detailsString) {
     try {
       debugPrint('🔄 Trying alternative parsing...');
@@ -479,8 +487,7 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
     }
   }
 
-  // Method to update bloc with form fields
-  void _updateFormFields(BuildContext context) {
+   void _updateFormFields(BuildContext context) {
     if (_fieldsInitialized || _isLoading) return;
 
     final bloc = BlocProvider.of<CbacFormBloc>(context);
@@ -510,7 +517,6 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
 
     _fieldsInitialized = true;
   }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -532,8 +538,8 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
             // ASHA Name Field - Should show "Sita Kumari"
             CustomTextField(
               key: ValueKey('ashaName_${_ashaName}'),
-              hintText: l10n.ashaNameLabel,
-              labelText: l10n.ashaNameLabel,
+              hintText: l10n.ashaNameHint,
+              labelText: l10n.ashaNameHint,
               initialValue: _ashaName,
               readOnly: _ashaName.isNotEmpty,
               onChanged: (v) {
@@ -566,7 +572,6 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
             ),
             const Divider(height: 0.5),
 
-            // Village/Block Field - Should show "Bandra"
             CustomTextField(
               key: ValueKey('village_${_block}'),
               hintText: l10n.villageLabel,
@@ -927,8 +932,17 @@ class _PartATab extends StatelessWidget {
     return BlocBuilder<CbacFormBloc, CbacFormState>(
       builder: (context, state) {
         final bloc = BlocProvider.of<CbacFormBloc>(context);
+        final l10n = AppLocalizations.of(context)!;
 
+        // --- 1. Load Data ---
         final age = state.data['partA.age'] as String?;
+        final tobacco = state.data['partA.tobacco'] as String?;
+        final alcohol = state.data['partA.alcohol'] as String?;
+        final activity = state.data['partA.activity'] as String?;
+        final waist = state.data['partA.waist'] as String?;
+        final familyHx = state.data['partA.familyHistory'] as String?;
+
+        // --- 2. Auto-calculate Age Logic ---
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if ((age == null || age.isEmpty)) {
             final personalAgeTxt = state.data['personal.age']
@@ -959,18 +973,14 @@ class _PartATab extends StatelessWidget {
             }
           }
         });
-        final tobacco = state.data['partA.tobacco'] as String?;
-        final alcohol = state.data['partA.alcohol'] as String?;
-        final activity = state.data['partA.activity'] as String?;
-        final waist = state.data['partA.waist'] as String?;
-        final familyHx = state.data['partA.familyHistory'] as String?;
-        final l10n = AppLocalizations.of(context)!;
+
+        // --- 3. Helper Widget for Rows ---
         TableRow buildQRow({
           required String question,
           required List<String> items,
           required String? value,
           required void Function(String?) onChanged,
-          required int score,
+          required int? score,
           bool readOnly = false,
         }) {
           return TableRow(
@@ -991,7 +1001,7 @@ class _PartATab extends StatelessWidget {
               ),
               Center(
                 child: Text(
-                  '$score',
+                  score?.toString() ?? '-',
                   style: TextStyle(color: Colors.black87, fontSize: 15.sp),
                 ),
               ),
@@ -999,6 +1009,7 @@ class _PartATab extends StatelessWidget {
           );
         }
 
+        // --- 4. Define Lists & Codes ---
         final itemsAge = <String>[
           '0 to 29 ${l10n.years}',
           '30 to 39  ${l10n.years}',
@@ -1011,21 +1022,25 @@ class _PartATab extends StatelessWidget {
           l10n.cbacA_tobSometimes,
           l10n.cbacA_tobDaily,
         ];
+        // itemsYesNo: [0: No, 1: Yes]
         final itemsYesNo = <String>[l10n.no, l10n.yes];
+
         final itemsActivity = <String>[
           l10n.cbacA_actLT150,
           l10n.cbacA_actGT150,
         ];
+
         final genderCode = state.data['personal.gender_code']?.toString();
         final isFemale =
             genderCode == 'F' ||
-            state.data['personal.gender'] == l10n.genderFemale;
+                state.data['personal.gender'] == l10n.genderFemale;
+
         final itemsWaist = isFemale
             ? <String>[
-                l10n.cbacA_waistLE80,
-                l10n.cbacA_waist81to90,
-                l10n.cbacA_waistGT90,
-              ]
+          l10n.cbacA_waistLE80,
+          l10n.cbacA_waist81to90,
+          l10n.cbacA_waistGT90,
+        ]
             : <String>['90 cm or less', '91 to 100 cm', 'More than 100 cm'];
 
         final codeAge = <String>[
@@ -1042,6 +1057,7 @@ class _PartATab extends StatelessWidget {
             ? <String>['WAIST_LE80', 'WAIST_81_90', 'WAIST_GT90']
             : <String>['WAIST_LE90', 'WAIST_91_100', 'WAIST_GT100'];
 
+        // --- 5. Auto-populate Codes ---
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (state.data['partA.age_code'] == null && age != null) {
             final idx = itemsAge.indexOf(age);
@@ -1086,8 +1102,10 @@ class _PartATab extends StatelessWidget {
           }
         });
 
+        // --- 6. Calculate Scores ---
         final ageCodeVal = state.data['partA.age_code']?.toString();
-        final scoreAge = switch (ageCodeVal) {
+
+        final int? scoreAge = ageCodeVal == null ? null : switch (ageCodeVal) {
           'AGE_30_39' => 1,
           'AGE_40_49' => 2,
           'AGE_50_59' => 3,
@@ -1095,31 +1113,40 @@ class _PartATab extends StatelessWidget {
           'AGE_GE60' => 4,
           _ => 0,
         };
-        final idxTob = tobacco == null ? -1 : itemsTobacco.indexOf(tobacco);
 
-        final scoreTobacco = idxTob <= 0 ? 0 : idxTob;
+        final int? scoreTobacco = tobacco == null
+            ? null
+            : (itemsTobacco.indexOf(tobacco) <= 0 ? 0 : itemsTobacco.indexOf(tobacco));
 
-        final idxAlcohol = alcohol == null ? -1 : itemsYesNo.indexOf(alcohol);
-        final scoreAlcohol = idxAlcohol == 0 ? 1 : 0;
-        final idxActivity = activity == null
-            ? -1
-            : itemsActivity.indexOf(activity);
-        final scoreActivity = idxActivity == 0 ? 1 : 0;
-        final idxWaist = waist == null ? -1 : itemsWaist.indexOf(waist);
-        final scoreWaist = switch (idxWaist) {
+        // UPDATED ALCOHOL: Index 1 (Yes) = 1, Index 0 (No) = 0
+        final int? scoreAlcohol = alcohol == null
+            ? null
+            : (itemsYesNo.indexOf(alcohol) == 1 ? 1 : 0);
+
+        final int? scoreActivity = activity == null
+            ? null
+            : (itemsActivity.indexOf(activity) == 0 ? 1 : 0);
+
+        final int? scoreWaist = waist == null
+            ? null
+            : switch (itemsWaist.indexOf(waist)) {
           1 => 1,
           2 => 2,
           _ => 0,
         };
-        final idxFamily = familyHx == null ? -1 : itemsYesNo.indexOf(familyHx);
-        final scoreFamily = idxFamily == 0 ? 2 : 0;
+
+        // UPDATED FAMILY HISTORY: Index 1 (Yes) = 2, Index 0 (No) = 0
+        final int? scoreFamily = familyHx == null
+            ? null
+            : (itemsYesNo.indexOf(familyHx) == 1 ? 2 : 0);
+
         final total =
-            scoreAge +
-            scoreTobacco +
-            scoreAlcohol +
-            scoreActivity +
-            scoreWaist +
-            scoreFamily;
+            (scoreAge ?? 0) +
+                (scoreTobacco ?? 0) +
+                (scoreAlcohol ?? 0) +
+                (scoreActivity ?? 0) +
+                (scoreWaist ?? 0) +
+                (scoreFamily ?? 0);
 
         return ListView(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
@@ -1130,7 +1157,7 @@ class _PartATab extends StatelessWidget {
                 1: IntrinsicColumnWidth(),
               },
               defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              border: TableBorder(
+              border: const TableBorder(
                 horizontalInside: BorderSide(
                   width: 0.5,
                   color: Colors.black12,
@@ -1444,7 +1471,7 @@ class _PartCTab extends StatefulWidget {
   State<_PartCTab> createState() => _PartCTabState();
 }
 
-// In CBACForm.dart, replace the existing _PartCTabState class with this:
+
 
 class _PartCTabState extends State<_PartCTab> {
   Future<void> _showMultiSelectDialog({

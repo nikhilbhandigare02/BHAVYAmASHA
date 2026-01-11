@@ -346,7 +346,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                               TextSpan(
                                 text: t.infantTemperatureUnitLabel,
                                 style: const TextStyle(
-                                  fontSize: 9,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
                                   color: Colors.black, // label color
                                 ),
                               ),
@@ -355,7 +356,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w500,
-                                  color: Colors.red, // 🔴 red asterisk
+                                  color: Colors.red,
                                 ),
                               ),
                             ],
