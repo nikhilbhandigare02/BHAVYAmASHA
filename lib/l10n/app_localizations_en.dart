@@ -7562,4 +7562,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discussionTopic => 'discussion topic/program';
+
+  @override
+  String get userFound => 'User found.';
+
+  @override
+  String get invalidLoginCredentials => 'Please enter valid user credentials.';
 }

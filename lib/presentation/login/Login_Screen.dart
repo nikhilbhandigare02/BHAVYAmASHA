@@ -307,10 +307,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                            state.error.isNotEmpty
-                                                ? state.error
-                                                : l10n.loginSuccess,
-                                            style: const TextStyle(color: Colors.white),
+                                              state.error.toLowerCase().contains('user found')
+                                                  ? l10n.userFound
+                                                  : state.error,
+
+                                              style: const TextStyle(color: Colors.white),
                                           ),
                                           backgroundColor: Colors.black,
                                         ),
@@ -335,7 +336,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                     else if (state.postApiStatus == PostApiStatus.error) {
                                       final message = state.error.isNotEmpty
                                           ? state.error
-                                          : 'Please enter valid user credentials.';
+                                          : l10n.invalidLoginCredentials;
 
                                       if (message.trim().isEmpty) return;
 
