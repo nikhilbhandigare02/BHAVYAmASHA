@@ -538,7 +538,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 child: CustomDatePicker(
                   labelText: '${l.dobLabel} *',
                   hintText: l.dateHint,
-                  initialDate: state.dob,
+                  initialDate: dob,
                   firstDate: DateTime.now().subtract(const Duration(days: 365 * 110)),
                   lastDate: DateTime.now().subtract(const Duration(days: 365 * 15)),
                   onDateChanged: (date) {
@@ -2291,33 +2291,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       builder: (context, state) {
                         final tabs = [Tab(text: l.familyHeadDetailsTitle)];
                         final views = <Widget>[
-                          BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
-                            listenWhen: (prev, curr) =>
-                                prev.dob != curr.dob ||
-                                prev.years != curr.years ||
-                                prev.months != curr.months ||
-                                prev.days != curr.days ||
-                                prev.useDob != curr.useDob,
-                            listener: (ctx, st) {
-                              if (st.dob != null) {
-                                setState(() {
-                                  dob = st.dob;
-                                });
-                              }
-                              if (st.years != null) {
-                                yearsCtrl.text = st.years!;
-                              }
-                              if (st.months != null) {
-                                monthsCtrl.text = st.months!;
-                              }
-                              if (st.days != null) {
-                                daysCtrl.text = st.days!;
-                              }
-                            },
-                            child: Form(
-                              key: _formKey,
-                              child: _buildFamilyHeadForm(context, state, l),
-                            ),
+                          Form(
+                            key: _formKey,
+                            child: _buildFamilyHeadForm(context, state, l),
                           ),
                         ];
 
