@@ -107,6 +107,30 @@ bool validateAllSpousFields(
     }
   }
 
+  // DOB validation
+  if (state.useDob && state.dob == null) {
+    spousLastFormError = l.dob_required ?? 'Date of birth is required';
+    if (isValid) {
+      scrollToFirstError();
+    }
+    isValid = false;
+  }
+
+  // Approximate age validation when not using DOB
+  if (!state.useDob) {
+    final years = int.tryParse(state.UpdateYears ?? '') ?? 0;
+    final months = int.tryParse(state.UpdateMonths ?? '') ?? 0;
+    final days = int.tryParse(state.UpdateDays ?? '') ?? 0;
+    
+    if (years == 0 && months == 0 && days == 0) {
+      spousLastFormError = l.dob_required ?? 'Age is required';
+      if (isValid) {
+        scrollToFirstError();
+      }
+      isValid = false;
+    }
+  }
+
   return isValid;
 }
 

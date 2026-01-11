@@ -351,11 +351,30 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     final m = int.tryParse(monthsCtrl.text) ?? 0;
     final d = int.tryParse(daysCtrl.text) ?? 0;
 
+    // Calculate total days with rollover
+    int totalMonths = m;
+    int totalDays = d;
+    
+    // Handle day rollover (30 days = 1 month)
+    if (totalDays >= 30) {
+      totalMonths += (totalDays / 30).floor();
+      totalDays = 0; // Always make days 0 after rollover
+    }
+    
+    // Handle month rollover (12 months = 1 year)
+    int totalYears = y + (totalMonths / 12).floor();
+    totalMonths = totalMonths % 12;
+
+    // Update text controllers with calculated values
+    yearsCtrl.text = totalYears.toString();
+    monthsCtrl.text = totalMonths.toString();
+    daysCtrl.text = totalDays.toString();
+
     setState(() {
       dob = DateTime(
-        now.year - y,
-        now.month - m,
-        now.day - d,
+        now.year - totalYears,
+        now.month - totalMonths,
+        now.day - totalDays,
       );
     });
   }
@@ -548,7 +567,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                             maxLength: 2,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
-                              MaxValueFormatter(11),
+                              MaxValueFormatter(99), // Allow up to 99 for rollover calculation
                             ],
                             onChanged: (_) => updateDobFromAge(),
                           ),
@@ -564,7 +583,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                             maxLength: 2,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
-                              MaxValueFormatter(30),
+                              MaxValueFormatter(99), // Allow up to 99 for rollover calculation
                             ],
                             onChanged: (_) => updateDobFromAge(),
                           ),
