@@ -503,9 +503,15 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     groupValue: state.useDob,
                     onChanged: widget.isEdit
                         ? null
-                        : (_) => context.read<AddFamilyHeadBloc>().add(
-                            AfhToggleUseDob(),
-                          ),
+                        : (_) {
+                            context.read<AddFamilyHeadBloc>().add(
+                              AfhToggleUseDob(),
+                            );
+                            // When switching to DOB mode, update DOB from age fields
+                            if (!state.useDob) {
+                              updateDobFromAge();
+                            }
+                          },
                   ),
                   Text(l.dobShort, style: TextStyle(fontSize: 14.sp)),
                   SizedBox(width: 2.w),
@@ -514,9 +520,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     groupValue: state.useDob,
                     onChanged: widget.isEdit
                         ? null
-                        : (_) => context.read<AddFamilyHeadBloc>().add(
-                            AfhToggleUseDob(),
-                          ),
+                        : (_) {
+                            context.read<AddFamilyHeadBloc>().add(
+                              AfhToggleUseDob(),
+                            );
+                            if (!state.useDob) {
+                              updateDobFromAge();
+                            }
+                          },
                   ),
                   Text(l.ageApproximate, style: TextStyle(fontSize: 14.sp)),
                 ],
