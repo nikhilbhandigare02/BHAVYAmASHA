@@ -27,11 +27,11 @@ class ResponsiveFont {
   static double getHintFontSize(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     if (screenWidth < 360) {
-      return 14.0.sp; // Small screens
+      return 13.0.sp; // Small screens
     } else if (screenWidth < 600) {
-      return 16.0.sp; // Medium screens
+      return 15.0.sp; // Medium screens
     } else {
-      return 18.0.sp; // Large screens
+      return 17.0.sp; // Large screens
     }
   }
 

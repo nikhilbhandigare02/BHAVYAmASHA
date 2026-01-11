@@ -72,6 +72,7 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
             fontSize: ResponsiveFont.getLabelFontSize(context),
             color: AppColors.onSurface,
             fontWeight: FontWeight.w500,
+
           ),
           children: [
             TextSpan(text: base),
