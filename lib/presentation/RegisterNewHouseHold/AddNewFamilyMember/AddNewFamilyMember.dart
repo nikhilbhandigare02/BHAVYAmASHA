@@ -3029,10 +3029,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           },
                                           validator: (date) {
                                             if (date == null) {
-                                              return _captureAnmError(
-                                                l?.dob_required ?? 'Date of birth is required',
-
-                                              );
+                                              final error = l?.dob_required ?? 'Date of birth is required';
+                                              _captureAnmError(error);
+                                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                if (mounted) {
+                                                  showAppSnackBar(context, error);
+                                                }
+                                              });
+                                              return null; // Don't show red error message
                                             }
 
                                             final today = DateTime.now();
@@ -3048,9 +3052,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             );
 
                                             if (dobDate.isAfter(todayDate)) {
-                                              return _captureAnmError(
-                                                l?.dob_cannot_be_future ?? 'Date of birth cannot be in the future',
-                                              );
+                                              final error = l?.dob_cannot_be_future ?? 'Date of birth cannot be in the future';
+                                              _captureAnmError(error);
+                                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                if (mounted) {
+                                                  showAppSnackBar(context, error);
+                                                }
+                                              });
+                                              return null; // Don't show red error message
                                             }
 
                                             // Apply the 1 day–15 years rule only when member type is Child
@@ -3068,9 +3077,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
                                               if (diffDays < minDays ||
                                                   diffDays > maxDays) {
-                                                return _captureAnmError(
-                                                  l?.child_age_validation ?? 'For Child: Age should be between 1 day to 15 years.',
-                                                );
+                                                final error = l?.child_age_validation ?? 'For Child: Age should be between 1 day to 15 years.';
+                                                _captureAnmError(error);
+                                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                  if (mounted) {
+                                                    showAppSnackBar(context, error);
+                                                  }
+                                                });
+                                                return null; // Don't show red error message
                                               }
                                             }
 
@@ -3132,23 +3146,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     v.trim(),
                                                   ),
                                                 ),
-                                                validator: (value) => _captureAnmError(
-                                                  (state.memberType
-                                                      .toLowerCase() ==
-                                                      'child')
-                                                      ? Validations.validateApproxAgeChild(
-                                                    l,
-                                                    value,
-                                                    state.updateMonth,
-                                                    state.updateDay,
-                                                  )
-                                                      : Validations.validateApproxAge(
-                                                    l,
-                                                    value,
-                                                    state.updateMonth,
-                                                    state.updateDay,
-                                                  ),
-                                                ),
                                               ),
                                             ),
 
@@ -3179,23 +3176,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     v.trim(),
                                                   ),
                                                 ),
-                                                validator: (value) => _captureAnmError(
-                                                  (state.memberType
-                                                      .toLowerCase() ==
-                                                      'child')
-                                                      ? Validations.validateApproxAgeChild(
-                                                    l,
-                                                    state.updateYear,
-                                                    value,
-                                                    state.updateDay,
-                                                  )
-                                                      : Validations.validateApproxAge(
-                                                    l,
-                                                    state.updateYear,
-                                                    value,
-                                                    state.updateDay,
-                                                  ),
-                                                ),
                                               ),
                                             ),
 
@@ -3222,23 +3202,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     .add(
                                                   UpdateDayChanged(
                                                     v.trim(),
-                                                  ),
-                                                ),
-                                                validator: (value) => _captureAnmError(
-                                                  (state.memberType
-                                                      .toLowerCase() ==
-                                                      'child')
-                                                      ? Validations.validateApproxAgeChild(
-                                                    l,
-                                                    state.updateYear,
-                                                    state.updateMonth,
-                                                    value,
-                                                  )
-                                                      : Validations.validateApproxAge(
-                                                    l,
-                                                    state.updateYear,
-                                                    state.updateMonth,
-                                                    value,
                                                   ),
                                                 ),
                                               ),
@@ -4968,6 +4931,31 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         onPress: () async {
                                           _clearAnmFormError();
                                           clearSpousFormError();
+
+                                          // Manual validation for approximate age fields
+                                          final state = context.read<AddnewfamilymemberBloc>().state;
+                                          if (!state.useDob) {
+                                            String? ageError;
+                                            if (state.memberType.toLowerCase() == 'child') {
+                                              ageError = Validations.validateApproxAgeChild(
+                                                l,
+                                                state.updateYear,
+                                                state.updateMonth,
+                                                state.updateDay,
+                                              );
+                                            } else {
+                                              ageError = Validations.validateApproxAge(
+                                                l,
+                                                state.updateYear,
+                                                state.updateMonth,
+                                                state.updateDay,
+                                              );
+                                            }
+                                            if (ageError != null) {
+                                              showAppSnackBar(context, ageError);
+                                              return;
+                                            }
+                                          }
 
                                           final bool showSpouse =
                                               state.memberType != 'Child' &&

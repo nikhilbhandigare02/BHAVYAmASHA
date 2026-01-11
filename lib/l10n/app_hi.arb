@@ -2342,7 +2342,7 @@
   "youngestChildAgeYearsRange": "कृपया सबसे छोटे बच्चे की आयु वर्षों में दर्ज करें ",
   "pleaseEnterHouseNumber": "कृपया मकान नंबर दर्ज करें",
   "houseNumberValidation": "मकान नंबर में केवल अक्षर, संख्या, स्पेस, डैश (-) या स्लैश (/) हो सकते हैं",
-  "pleaseEnterDateOfBirth": "कृपया जन्म तिथि दर्ज करें",
+  "pleaseEnterDateOfBirth": "कृपया जन्म तिथि चुनें",
   "dateOfBirthFuture": "जन्म तिथि भविष्य की नहीं हो सकती",
   "ageMustBe15Years": "आयु कम से कम 15 वर्ष होनी चाहिए",
   "ageCannotBeMoreThan110": "आयु 110 वर्ष से अधिक नहीं हो सकती",

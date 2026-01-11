@@ -535,18 +535,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               MaxValueFormatter(110),
                             ],
                             onChanged: (_) => updateDobFromAge(),
-                            validator: (value) {
-                              final error = Validations.validateApproxAge(l, value, monthsCtrl.text, daysCtrl.text);
-                              if (error != null) {
-                                _captureError(error);
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  if (mounted) {
-                                    showAppSnackBar(context, error);
-                                  }
-                                });
-                              }
-                              return null; // Don't show red error message
-                            },
                           ),
                         ),
 
@@ -563,18 +551,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               MaxValueFormatter(11),
                             ],
                             onChanged: (_) => updateDobFromAge(),
-                            validator: (value) {
-                              final error = Validations.validateApproxAge(l, yearsCtrl.text, value, daysCtrl.text);
-                              if (error != null) {
-                                _captureError(error);
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  if (mounted) {
-                                    showAppSnackBar(context, error);
-                                  }
-                                });
-                              }
-                              return null; // Don't show red error message
-                            },
                           ),
                         ),
 
@@ -591,18 +567,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               MaxValueFormatter(30),
                             ],
                             onChanged: (_) => updateDobFromAge(),
-                            validator: (value) {
-                              final error = Validations.validateApproxAge(l, yearsCtrl.text, monthsCtrl.text, value);
-                              if (error != null) {
-                                _captureError(error);
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  if (mounted) {
-                                    showAppSnackBar(context, error);
-                                  }
-                                });
-                              }
-                              return null; // Don't show red error message
-                            },
                           ),
                         ),
                       ],
@@ -2472,6 +2436,22 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                       isLoading: isLoading,
                                                       onPress: () {
                                                         _clearFormError();
+                                                        
+                                                        // Manual validation for approximate age fields
+                                                        final state = context.read<AddFamilyHeadBloc>().state;
+                                                        if (!state.useDob) {
+                                                          final ageError = Validations.validateApproxAge(
+                                                            AppLocalizations.of(context)!,
+                                                            yearsCtrl.text,
+                                                            monthsCtrl.text,
+                                                            daysCtrl.text,
+                                                          );
+                                                          if (ageError != null) {
+                                                            showAppSnackBar(context, ageError);
+                                                            return;
+                                                          }
+                                                        }
+                                                        
                                                         final formState =
                                                             _formKey
                                                                 .currentState;

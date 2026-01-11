@@ -14186,7 +14186,7 @@ abstract class AppLocalizations {
   /// No description provided for @pleaseEnterDateOfBirth.
   ///
   /// In en, this message translates to:
-  /// **'Please enter Date of birth'**
+  /// **'Please select date of birth'**
   String get pleaseEnterDateOfBirth;
 
   /// No description provided for @dateOfBirthFuture.

@@ -137,12 +137,12 @@ class Validations {
 
     // Check if age is exactly 15 years or more
     if (years < 15 || (years == 15 && (months < 0 || (months == 0 && days < 0)))) {
-      return l10n.ageMustBe15Years;
+      return l10n.pleaseEnterAgeBetween15To110;
     }
 
     // Check maximum age (110 years)
     if (years > 110 || (years == 110 && (months > 0 || days > 0))) {
-      return l10n.ageCannotBeMoreThan110;
+      return l10n.pleaseEnterAgeBetween15To110;
     }
 
     return null; // ✅ valid
@@ -165,29 +165,29 @@ class Validations {
     final d = int.tryParse((days ?? '').trim()) ?? 0;
 
     if (y < 15 || y > 110) {
-      return l10n.yearsBetween0And110;
+      return l10n.pleaseEnterAgeBetween15To110;
     }
     if (m < 0 || m > maxMonths) {
-      return l10n.monthsBetween0And11;
+      return l10n.pleaseEnterAgeBetween15To110;
     }
     if (d < 0 || d > maxDays) {
-      return l10n.daysBetween0And30;
+      return l10n.pleaseEnterAgeBetween15To110;
     }
 
     // Check if all zeros
     if (y == 0 && m == 0 && d == 0) {
-      return l10n.ageCannotBeZero;
+      return l10n.pleaseEnterDateOfBirth;
     }
 
     // Calculate total years for range check
     final totalYears = y + (m / 12.0) + (d / 365.0);
 
     if (totalYears < minAgeYears) {
-      return l10n.minimumAge15Years;
+      return l10n.pleaseEnterAgeBetween15To110;
     }
 
     if (totalYears > maxAgeYears) {
-      return l10n.maximumAge110Years;
+      return l10n.pleaseEnterAgeBetween15To110;
     }
 
     return null;
