@@ -252,16 +252,30 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       final monthsStr = state.months ?? '0';
       final daysStr = state.days ?? '0';
 
-      final years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
-      final months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
-      final days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+      int years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
+      int months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
+      int days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+
+      // Handle day rollover (30 days = 1 month)
+      if (days >= 30) {
+        months += (days / 30).floor();
+        days = 0; // Always make days 0 after rollover
+      }
+
+      // Handle month rollover (12 months = 1 year)
+      if (months >= 12) {
+        years += (months / 12).floor();
+        months = 0; // Make months 0 after rollover
+      }
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
 
       emit(
         state.copyWith(
-          years: yearsStr,
+          years: years.toString(),
+          months: months == 0 ? '' : months.toString(), // Make months empty when 0
+          days: days == 0 ? '' : days.toString(), // Make days empty when 0
           approxAge: approx,
           dob: dob ?? state.dob,
         ),
@@ -273,16 +287,30 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       final yearsStr = state.years ?? '0';
       final daysStr = state.days ?? '0';
 
-      final years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
-      final months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
-      final days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+      int years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
+      int months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
+      int days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+
+      // Handle day rollover (30 days = 1 month)
+      if (days >= 30) {
+        months += (days / 30).floor();
+        days = 0; // Always make days 0 after rollover
+      }
+
+      // Handle month rollover (12 months = 1 year)
+      if (months >= 12) {
+        years += (months / 12).floor();
+        months = 0; // Make months 0 after rollover
+      }
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
 
       emit(
         state.copyWith(
-          months: monthsStr,
+          years: years.toString(),
+          months: months == 0 ? '' : months.toString(), // Make months empty when 0
+          days: days == 0 ? '' : days.toString(), // Make days empty when 0
           approxAge: approx,
           dob: dob ?? state.dob,
         ),
@@ -294,69 +322,36 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       final yearsStr = state.years ?? '0';
       final monthsStr = state.months ?? '0';
 
-      final years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
-      final months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
-      final days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+      int years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
+      int months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
+      int days = int.tryParse(daysStr.isEmpty ? '0' : daysStr) ?? 0;
+
+      // Handle day rollover (30 days = 1 month)
+      if (days >= 30) {
+        months += (days / 30).floor();
+        days = 0; // Always make days 0 after rollover
+      }
+
+      // Handle month rollover (12 months = 1 year)
+      if (months >= 12) {
+        years += (months / 12).floor();
+        months = 0; // Make months 0 after rollover
+      }
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
 
       emit(
         state.copyWith(
-          days: daysStr,
+          years: years.toString(),
+          months: months == 0 ? '' : months.toString(), // Make months empty when 0
+          days: days == 0 ? '' : days.toString(), // Make days empty when 0
           approxAge: approx,
           dob: dob ?? state.dob,
         ),
       );
     });
 
-    on<AfhUpdateDobControllers>((event, emit) {
-      // Store controllers reference for later use
-      emit(state.copyWith(
-        years: event.yearsController.text,
-        months: event.monthsController.text,
-        days: event.daysController.text,
-      ));
-    });
-
-    on<AfhUpdateDobFromControllers>((event, emit) {
-      final yearsStr = event.yearsController.text;
-      final monthsStr = event.monthsController.text;
-      final daysStr = event.daysController.text;
-
-      // Calculate total days with rollover
-      int totalMonths = int.tryParse(monthsStr) ?? 0;
-      int totalDays = int.tryParse(daysStr) ?? 0;
-      
-      // Handle day rollover (30 days = 1 month)
-      if (totalDays >= 30) {
-        totalMonths += (totalDays / 30).floor();
-        totalDays = 0; // Always make days 0 after rollover
-      }
-      
-      // Handle month rollover (12 months = 1 year)
-      int totalYears = int.tryParse(yearsStr) ?? 0;
-      totalYears += (totalMonths / 12).floor();
-      totalMonths = totalMonths % 12;
-
-      event.yearsController.text = totalYears.toString();
-      event.monthsController.text = totalMonths.toString();
-      event.daysController.text = totalDays.toString();
-
-      // Calculate DOB from age parts
-      final dob = _dobFromAgeParts(totalYears, totalMonths, totalDays);
-      final approx = '$totalYears years $totalMonths months $totalDays days'.trim();
-
-      emit(
-        state.copyWith(
-          years: totalYears.toString(),
-          months: totalMonths.toString(),
-          days: totalDays.toString(),
-          approxAge: approx,
-          dob: dob ?? state.dob,
-        ),
-      );
-    });
 
     on<EDDChange>((event, emit) {
       emit(state.copyWith(edd: event.value));
