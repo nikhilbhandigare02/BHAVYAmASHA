@@ -339,7 +339,6 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       totalYears += (totalMonths / 12).floor();
       totalMonths = totalMonths % 12;
 
-      // Update controllers with calculated values
       event.yearsController.text = totalYears.toString();
       event.monthsController.text = totalMonths.toString();
       event.daysController.text = totalDays.toString();

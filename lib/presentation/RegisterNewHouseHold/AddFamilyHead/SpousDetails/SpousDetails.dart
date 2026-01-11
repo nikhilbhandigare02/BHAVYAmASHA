@@ -16,7 +16,6 @@ import '../../../../data/Database/local_storage_dao.dart';
 import '../../../../data/repositories/RegisterNewHouseHoldController/register_new_house_hold.dart';
 import '../../AddNewFamilyMember/bloc/addnewfamilymember_bloc.dart';
 import 'bloc/spous_bloc.dart';
-
 class MaxValueFormatter extends TextInputFormatter {
   final int max;
 
@@ -36,6 +35,7 @@ class MaxValueFormatter extends TextInputFormatter {
     return newValue;
   }
 }
+
 
 final GlobalKey<FormState> spousFormKey = GlobalKey<FormState>();
 String? spousLastFormError;
@@ -128,22 +128,30 @@ bool validateAllSpousFields(
   }
 
   // DOB validation
-  if (state.useDob && state.dob == null) {
-    spousLastFormError = l.dob_required ?? 'Date of birth is required';
-    if (isValid) {
-      scrollToFirstError();
+  if (state.useDob) {
+    final dobError = Validations.validateDOB(l, state.dob);
+    if (dobError != null) {
+      print('🔍 [SpousDetails] DOB validation error: $dobError');
+      spousLastFormError = dobError;
+      if (isValid) {
+        scrollToFirstError();
+      }
+      isValid = false;
+    } else {
+      print('✅ [SpousDetails] DOB validation passed');
     }
-    isValid = false;
   }
 
   // Approximate age validation when not using DOB
   if (!state.useDob) {
-    final years = int.tryParse(state.UpdateYears ?? '') ?? 0;
-    final months = int.tryParse(state.UpdateMonths ?? '') ?? 0;
-    final days = int.tryParse(state.UpdateDays ?? '') ?? 0;
-    
-    if (years == 0 && months == 0 && days == 0) {
-      spousLastFormError = l.dob_required ?? 'Age is required';
+    final ageError = Validations.validateApproxAge(
+      l,
+      state.UpdateYears,
+      state.UpdateMonths,
+      state.UpdateDays,
+    );
+    if (ageError != null) {
+      spousLastFormError = ageError;
       if (isValid) {
         scrollToFirstError();
       }
@@ -313,58 +321,52 @@ List<String> _getMobileOwnerList(String gender) {
 class _SpousdetailsState extends State<Spousdetails>
     with AutomaticKeepAliveClientMixin {
   
-  final TextEditingController yearsCtrl = TextEditingController();
-  final TextEditingController monthsCtrl = TextEditingController();
-  final TextEditingController daysCtrl = TextEditingController();
-
-  @override
-  void dispose() {
-    yearsCtrl.dispose();
-    monthsCtrl.dispose();
-    daysCtrl.dispose();
-    super.dispose();
-  }
+  // Controllers for age fields to handle dynamic updates
+  final yearsController = TextEditingController();
+  final monthsController = TextEditingController();
+  final daysController = TextEditingController();
+  
   void _updateDobFromAge(String years, String months, String days) {
-    // Update controllers with new values
-    yearsCtrl.text = years;
-    monthsCtrl.text = months;
-    daysCtrl.text = days;
-    
-    // Use BLoC event to handle DOB calculation with rollover logic
-    context.read<SpousBloc>().add(SpUpdateDobFromControllers(
-      yearsController: yearsCtrl,
-      monthsController: monthsCtrl,
-      daysController: daysCtrl,
-    ));
-  }
+    // If any field is empty, clear the DOB and return
+    if (years.trim().isEmpty || months.trim().isEmpty || days.trim().isEmpty) {
+      context.read<SpousBloc>().add(SpUpdateDob(null));
+      return;
+    }
 
-  void _updateAgeFromDob(DateTime date) {
+    // If all fields are empty, clear the DOB and return
+    if (years.trim().isEmpty && months.trim().isEmpty && days.trim().isEmpty) {
+      context.read<SpousBloc>().add(SpUpdateDob(null));
+      return;
+    }
+
+    // Parse the values, defaulting to 0 if parsing fails
+    final y = int.tryParse(years.trim()) ?? 0;
+    final m = int.tryParse(months.trim()) ?? 0;
+    final d = int.tryParse(days.trim()) ?? 0;
+
+    // If all values are 0, clear the DOB
+    if (y == 0 && m == 0 && d == 0) {
+      context.read<SpousBloc>().add(SpUpdateDob(null));
+      return;
+    }
+
     final now = DateTime.now();
+    var calculatedDob = DateTime(now.year - y, now.month - m, now.day - d);
 
-    int years = now.year - date.year;
-    int months = now.month - date.month;
-    int days = now.day - date.day;
-
-    if (days < 0) {
-      months--;
-      days += 30;
+    // Handle month overflow
+    if (calculatedDob.day != now.day) {
+      // Adjust for months with different number of days
+      calculatedDob = DateTime(calculatedDob.year, calculatedDob.month + 1, 0);
     }
 
-    if (months < 0) {
-      years--;
-      months += 12;
+    // Update the DOB in the state if it's different
+    final currentDob = context.read<SpousBloc>().state.dob;
+    if (currentDob == null ||
+        currentDob.year != calculatedDob.year ||
+        currentDob.month != calculatedDob.month ||
+        currentDob.day != calculatedDob.day) {
+      context.read<SpousBloc>().add(SpUpdateDob(calculatedDob));
     }
-
-    yearsCtrl.text = years.toString();
-    monthsCtrl.text = months.toString();
-    daysCtrl.text = days.toString();
-    
-    // Also update BLoC state
-    context.read<SpousBloc>().add(SpUpdateDobFromControllers(
-      yearsController: yearsCtrl,
-      monthsController: monthsCtrl,
-      daysController: daysCtrl,
-    ));
   }
 
   final GlobalKey<FormState> _formKey = spousFormKey;
@@ -402,27 +404,6 @@ class _SpousdetailsState extends State<Spousdetails>
   @override
   void initState() {
     super.initState();
-    
-    // Initialize controllers with BLoC state after first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final bloc = context.read<SpousBloc>();
-        final state = bloc.state;
-        
-        // Update controllers with current state values
-        if (state.UpdateYears != null) yearsCtrl.text = state.UpdateYears!;
-        if (state.UpdateMonths != null) monthsCtrl.text = state.UpdateMonths!;
-        if (state.UpdateDays != null) daysCtrl.text = state.UpdateDays!;
-        
-        // Pass controllers to BLoC
-        bloc.add(SpUpdateDobControllers(
-          yearsController: yearsCtrl,
-          monthsController: monthsCtrl,
-          daysController: daysCtrl,
-        ));
-      }
-    });
-    
     if (widget.isAddMember && widget.headMobileNo != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -799,6 +780,17 @@ class _SpousdetailsState extends State<Spousdetails>
         builder: (context, state) {
           final spBloc = context.read<SpousBloc>();
 
+          // Update age controllers when state changes
+          if (yearsController.text != state.UpdateYears) {
+            yearsController.text = state.UpdateYears ?? '';
+          }
+          if (monthsController.text != state.UpdateMonths) {
+            monthsController.text = state.UpdateMonths ?? '';
+          }
+          if (daysController.text != state.UpdateDays) {
+            daysController.text = state.UpdateDays ?? '';
+          }
+
           // Debug logging for LMP state
           print(
             '🔄 [SpousDetails] BlocBuilder called - LMP: ${state.lmp}, EDD: ${state.edd}, isPregnant: ${state.isPregnant}',
@@ -1006,8 +998,17 @@ class _SpousdetailsState extends State<Spousdetails>
                       groupValue: state.useDob,
                       onChanged: widget.isEdit
                           ? null
-                          : (_) =>
-                                context.read<SpousBloc>().add(SpToggleUseDob()),
+                          : (_) {
+                                context.read<SpousBloc>().add(SpToggleUseDob());
+                                // When switching to DOB mode, update DOB from age fields
+                                if (!state.useDob) {
+                                  _updateDobFromAge(
+                                    yearsController.text,
+                                    monthsController.text,
+                                    daysController.text,
+                                  );
+                                }
+                              },
                     ),
                     Text(l.dobShort, style: TextStyle(fontSize: 14.sp)),
                     SizedBox(width: 4.w),
@@ -1016,8 +1017,17 @@ class _SpousdetailsState extends State<Spousdetails>
                       groupValue: state.useDob,
                       onChanged: widget.isEdit
                           ? null
-                          : (_) =>
-                                context.read<SpousBloc>().add(SpToggleUseDob()),
+                          : (_) {
+                                context.read<SpousBloc>().add(SpToggleUseDob());
+                                // When switching to DOB mode, update DOB from age fields
+                                if (!state.useDob) {
+                                  _updateDobFromAge(
+                                    yearsController.text,
+                                    monthsController.text,
+                                    daysController.text,
+                                  );
+                                }
+                              },
                     ),
                     Text(l.ageApproximate, style: TextStyle(fontSize: 14.sp)),
                   ],
@@ -1037,22 +1047,12 @@ class _SpousdetailsState extends State<Spousdetails>
                       onDateChanged: (date) {
                         if (date != null) {
                           context.read<SpousBloc>().add(SpUpdateDob(date));
-                          // Update controllers with calculated age from DOB
-                          _updateAgeFromDob(date);
                         }
                       },
                       validator: (date) {
-                    final error = Validations.validateDOB(l, date);
-                    if (error != null) {
-                      captureSpousError(error);
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) {
-                          showAppSnackBar(context, error);
-                        }
-                      });
-                    }
-                    return null; // Don't show red error message
-                  },
+                        // Don't show red validation message, only snackbar
+                        return null;
+                      },
                       readOnly: widget.isEdit,
                     ),
                   )
@@ -1089,22 +1089,29 @@ class _SpousdetailsState extends State<Spousdetails>
                                 labelText: l.years,
                                 hintText: '0',
                                 maxLength: 3,
-                                controller: yearsCtrl,
+                                controller: yearsController,
                                 keyboardType: TextInputType.number,
+                                readOnly: widget.isEdit,
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
                                   MaxValueFormatter(110),
                                 ],
-                                readOnly: widget.isEdit,
                                 onChanged: widget.isEdit
                                     ? null
-                                    : (_) => context.read<SpousBloc>().add(
-                                      SpUpdateDobFromControllers(
-                                        yearsController: yearsCtrl,
-                                        monthsController: monthsCtrl,
-                                        daysController: daysCtrl,
-                                      ),
-                                    ),
+                                    : (v) {
+                                        context.read<SpousBloc>().add(
+                                          UpdateYearsChanged(v.trim()),
+                                        );
+                                        _updateDobFromAge(
+                                          yearsController.text,
+                                          monthsController.text,
+                                          daysController.text,
+                                        );
+                                      },
+                                validator: (value) {
+                                  // Don't show red validation message, only snackbar
+                                  return null;
+                                },
                               ),
                             ),
 
@@ -1121,22 +1128,29 @@ class _SpousdetailsState extends State<Spousdetails>
                                 labelText: l.months,
                                 hintText: '0',
                                 maxLength: 2,
-                                controller: monthsCtrl,
+                                controller: monthsController,
                                 keyboardType: TextInputType.number,
+                                readOnly: widget.isEdit,
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
-                                  MaxValueFormatter(99), // Allow up to 99 for rollover calculation
+                                  MaxValueFormatter(99),
                                 ],
-                                readOnly: widget.isEdit,
                                 onChanged: widget.isEdit
                                     ? null
-                                    : (_) => context.read<SpousBloc>().add(
-                                      SpUpdateDobFromControllers(
-                                        yearsController: yearsCtrl,
-                                        monthsController: monthsCtrl,
-                                        daysController: daysCtrl,
-                                      ),
-                                    ),
+                                    : (v) {
+                                        context.read<SpousBloc>().add(
+                                          UpdateMonthsChanged(v.trim()),
+                                        );
+                                        _updateDobFromAge(
+                                          yearsController.text,
+                                          monthsController.text,
+                                          daysController.text,
+                                        );
+                                      },
+                                validator: (value) {
+                                  // Don't show red validation message, only snackbar
+                                  return null;
+                                },
                               ),
                             ),
 
@@ -1153,23 +1167,30 @@ class _SpousdetailsState extends State<Spousdetails>
                               child: CustomTextField(
                                 labelText: l.days,
                                 hintText: '0',
-                                maxLength: 2,
-                                controller: daysCtrl,
+                                maxLength: 3,
+                                controller: daysController,
                                 keyboardType: TextInputType.number,
+                                readOnly: widget.isEdit,
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
-                                  MaxValueFormatter(99), // Allow up to 99 for rollover calculation
+                                  MaxValueFormatter(365), // Allow up to 365 for rollover calculation
                                 ],
-                                readOnly: widget.isEdit,
                                 onChanged: widget.isEdit
                                     ? null
-                                    : (_) => context.read<SpousBloc>().add(
-                                      SpUpdateDobFromControllers(
-                                        yearsController: yearsCtrl,
-                                        monthsController: monthsCtrl,
-                                        daysController: daysCtrl,
-                                      ),
-                                    ),
+                                    : (v) {
+                                        context.read<SpousBloc>().add(
+                                          UpdateDaysChanged(v.trim()),
+                                        );
+                                        _updateDobFromAge(
+                                          yearsController.text,
+                                          monthsController.text,
+                                          daysController.text,
+                                        );
+                                      },
+                                validator: (value) {
+                                  // Don't show red validation message, only snackbar
+                                  return null;
+                                },
                               ),
                             ),
                           ],
