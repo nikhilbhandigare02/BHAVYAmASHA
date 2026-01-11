@@ -1016,7 +1016,7 @@
   "patientFullName": "मरीज़ का पूरा नाम",
   "enterPatientFullName": "कृपया मरीज़ का पूरा नाम दर्ज करें",
   "dob": "जन्म तिथि",
-  "enterDob": "कृपया जन्म तिथि दर्ज करें",
+  "enterDob": "कृपया जन्म तिथि चुनें",
   "age": "आयु",
   "enterAge": "कृपया आयु दर्ज करें",
   "mobileNumber": "मोबाइल नंबर",
@@ -2329,12 +2329,12 @@
   "loadData": "डेटा लोड किया जा रहा है",
   "loadDataComplete": "डेटा प्राप्त करना पूर्ण हुआ",
   "dataNotFound": "उपयोगकर्ता डेटा उपलब्ध नहीं है",
-  "invalidCredentials": "कृपया वैध उपयोगकर्ता प्रमाण-पत्र दर्ज करें",
+  "invalidCredentials": "कृपया मान्य उपयोगकर्ता प्रमाण-पत्र दर्ज करें",
   "authenticationFailed": "प्रमाणीकरण विफल हुआ। कृपया अपने प्रमाण-पत्र जांचें",
   "pleaseEnterUsername": "कृपया उपयोगकर्ता नाम दर्ज करें",
   "pleaseEnterPassword": "कृपया पासवर्ड दर्ज करें",
-  "pleaseEnterValidUsername": "कृपया वैध उपयोगकर्ता नाम दर्ज करें",
-  "pleaseEnterValidPassword": "कृपया वैध पासवर्ड दर्ज करें",
+  "pleaseEnterValidUsername": "कृपया मान्य उपयोगकर्ता विवरण दर्ज करें",
+  "pleaseEnterValidPassword": "कृपया उपयोगकर्ता सही पासवर्ड दर्ज करें",
   "enterValidNumber": "कृपया वैध संख्या दर्ज करें",
   "selectAgeUnit": "कृपया आयु की इकाई चुनें",
   "youngestChildAgeDaysRange": "कृपया सबसे छोटे बच्चे की आयु दिनों में दर्ज करें ",
@@ -2472,7 +2472,9 @@
   "deathNotification": "अधिसूचना",
   "deathOther": "अन्य",
   "otherDiscussionSubTopicProgram": "चर्चा का उप विषय/कार्यक्रम",
-  "discussionTopic":"चर्चा का उप विषय/कार्यक्रम"
+  "discussionTopic":"चर्चा का उप विषय/कार्यक्रम",
+  "userFound": "उपयोगकर्ता लॉगिन सफलतापूर्वक.",
+  "invalidLoginCredentials": "कृपया मान्य उपयोगकर्ता क्रेडेंशियल दर्ज करें।"
 }
 
 

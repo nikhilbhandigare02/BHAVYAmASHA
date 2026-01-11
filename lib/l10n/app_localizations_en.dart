@@ -7069,7 +7069,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get houseNumberValidation => 'House number can only contain letters, numbers, spaces, dash or slash';
 
   @override
-  String get pleaseEnterDateOfBirth => 'Please enter Date of birth';
+  String get pleaseEnterDateOfBirth => 'Please select date of birth';
 
   @override
   String get dateOfBirthFuture => 'Date of birth cannot be in the future';
@@ -7562,4 +7562,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discussionTopic => 'discussion topic/program';
+
+  @override
+  String get userFound => 'User found.';
+
+  @override
+  String get invalidLoginCredentials => 'Please enter valid user credentials.';
 }

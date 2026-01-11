@@ -7015,7 +7015,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get successUpdatePassMsg => 'आपका पासवर्ड सफलतापूर्वक बदल दिया गया है।';
 
   @override
-  String get invalidCredentials => 'कृपया वैध उपयोगकर्ता प्रमाण-पत्र दर्ज करें';
+  String get invalidCredentials => 'कृपया मान्य उपयोगकर्ता प्रमाण-पत्र दर्ज करें';
 
   @override
   String get authenticationFailed => 'प्रमाणीकरण विफल हुआ। कृपया अपने प्रमाण-पत्र जांचें';
@@ -7027,10 +7027,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get pleaseEnterPassword => 'कृपया पासवर्ड दर्ज करें';
 
   @override
-  String get pleaseEnterValidUsername => 'कृपया वैध उपयोगकर्ता नाम दर्ज करें';
+  String get pleaseEnterValidUsername => 'कृपया मान्य उपयोगकर्ता विवरण दर्ज करें';
 
   @override
-  String get pleaseEnterValidPassword => 'कृपया वैध पासवर्ड दर्ज करें';
+  String get pleaseEnterValidPassword => 'कृपया उपयोगकर्ता सही पासवर्ड दर्ज करें';
 
   @override
   String get pleaseEnterCorrectCurrentPassword => 'कृपया सही वर्तमान पासवर्ड दर्ज करें';
@@ -7069,7 +7069,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get houseNumberValidation => 'मकान नंबर में केवल अक्षर, संख्या, स्पेस, डैश (-) या स्लैश (/) हो सकते हैं';
 
   @override
-  String get pleaseEnterDateOfBirth => 'कृपया जन्म तिथि दर्ज करें';
+  String get pleaseEnterDateOfBirth => 'कृपया जन्म तिथि चुनें';
 
   @override
   String get dateOfBirthFuture => 'जन्म तिथि भविष्य की नहीं हो सकती';
@@ -7562,4 +7562,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get discussionTopic => 'चर्चा का उप विषय/कार्यक्रम';
+
+  @override
+  String get userFound => 'उपयोगकर्ता लॉगिन सफलतापूर्वक.';
+
+  @override
+  String get invalidLoginCredentials => 'कृपया मान्य उपयोगकर्ता क्रेडेंशियल दर्ज करें।';
 }

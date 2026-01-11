@@ -14186,7 +14186,7 @@ abstract class AppLocalizations {
   /// No description provided for @pleaseEnterDateOfBirth.
   ///
   /// In en, this message translates to:
-  /// **'Please enter Date of birth'**
+  /// **'Please select date of birth'**
   String get pleaseEnterDateOfBirth;
 
   /// No description provided for @dateOfBirthFuture.
@@ -15172,6 +15172,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'discussion topic/program'**
   String get discussionTopic;
+
+  /// No description provided for @userFound.
+  ///
+  /// In en, this message translates to:
+  /// **'User found.'**
+  String get userFound;
+
+  /// No description provided for @invalidLoginCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter valid user credentials.'**
+  String get invalidLoginCredentials;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

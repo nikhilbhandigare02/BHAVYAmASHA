@@ -2588,6 +2588,29 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             continue;
           }
 
+          // Check if there's a followup record with form_ref_key "30bycxe4gv7fqnt6" created today
+          final now = DateTime.now();
+          final todayStr =
+              '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+          
+          final followupQuery = '''
+            SELECT * FROM ${FollowupFormDataTable.table}
+            WHERE forms_ref_key = ?
+            AND beneficiary_ref_key = ?
+            AND (is_deleted IS NULL OR is_deleted = 0)
+            AND DATE(created_date_time) = DATE(?)
+            ORDER BY created_date_time DESC
+            LIMIT 1
+          ''';
+          
+          final followupRecords = await db.rawQuery(followupQuery, ['30bycxe4gv7fqnt6', beneficiaryRefKey, todayStr]);
+          
+          // If there's a record created today, exclude this beneficiary from the to-do list
+          if (followupRecords.isNotEmpty) {
+            print('Excluding beneficiary $beneficiaryRefKey from RI to-do list - followup record created today');
+            continue;
+          }
+
           // Check for case closure (deceased)
           String ccWhere =
               'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0';

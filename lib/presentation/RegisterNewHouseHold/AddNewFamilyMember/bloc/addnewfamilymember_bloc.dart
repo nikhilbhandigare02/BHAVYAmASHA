@@ -552,16 +552,33 @@ class AddnewfamilymemberBloc
       final yearStr = state.updateYear ?? '0';
       final monthStr = state.updateMonth ?? '0';
 
-      final years = int.tryParse(yearStr.isEmpty ? '0' : yearStr) ?? 0;
-      final months = int.tryParse(monthStr.isEmpty ? '0' : monthStr) ?? 0;
-      final days = int.tryParse(dayStr.isEmpty ? '0' : dayStr) ?? 0;
+      int years = int.tryParse(yearStr.isEmpty ? '0' : yearStr) ?? 0;
+      int months = int.tryParse(monthStr.isEmpty ? '0' : monthStr) ?? 0;
+      int days = int.tryParse(dayStr.isEmpty ? '0' : dayStr) ?? 0;
+
+      // Handle day rollover (30 days = 1 month)
+      if (days >= 30) {
+        months += (days / 30).floor();
+        days = 0; // Always make days 0 after rollover
+      }
+
+      // Handle month rollover (12 months = 1 year)
+      years += (months / 12).floor();
+      months = months % 12;
+
+      // Update the string values with calculated rollover
+      final newYearStr = years.toString();
+      final newMonthStr = months.toString();
+      final newDayStr = days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
 
       emit(
         state.copyWith(
-          updateDay: dayStr,
+          updateYear: newYearStr,
+          updateMonth: newMonthStr,
+          updateDay: newDayStr,
           approxAge: approx,
           dob: dob ?? state.dob,
         ),
@@ -572,16 +589,33 @@ class AddnewfamilymemberBloc
       final yearStr = state.updateYear ?? '0';
       final dayStr = state.updateDay ?? '0';
 
-      final years = int.tryParse(yearStr.isEmpty ? '0' : yearStr) ?? 0;
-      final months = int.tryParse(monthStr.isEmpty ? '0' : monthStr) ?? 0;
-      final days = int.tryParse(dayStr.isEmpty ? '0' : dayStr) ?? 0;
+      int years = int.tryParse(yearStr.isEmpty ? '0' : yearStr) ?? 0;
+      int months = int.tryParse(monthStr.isEmpty ? '0' : monthStr) ?? 0;
+      int days = int.tryParse(dayStr.isEmpty ? '0' : dayStr) ?? 0;
+
+      // Handle day rollover (30 days = 1 month)
+      if (days >= 30) {
+        months += (days / 30).floor();
+        days = 0; // Always make days 0 after rollover
+      }
+
+      // Handle month rollover (12 months = 1 year)
+      years += (months / 12).floor();
+      months = months % 12;
+
+      // Update the string values with calculated rollover
+      final newYearStr = years.toString();
+      final newMonthStr = months.toString();
+      final newDayStr = days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
 
       emit(
         state.copyWith(
-          updateMonth: monthStr,
+          updateYear: newYearStr,
+          updateMonth: newMonthStr,
+          updateDay: newDayStr,
           approxAge: approx,
           dob: dob ?? state.dob,
         ),
@@ -591,16 +625,34 @@ class AddnewfamilymemberBloc
       final yearStr = e.value;
       final monthStr = state.updateMonth ?? '0';
       final dayStr = state.updateDay ?? '0';
-      final years = int.tryParse(yearStr.isEmpty ? '0' : yearStr) ?? 0;
-      final months = int.tryParse(monthStr.isEmpty ? '0' : monthStr) ?? 0;
-      final days = int.tryParse(dayStr.isEmpty ? '0' : dayStr) ?? 0;
+      
+      int years = int.tryParse(yearStr.isEmpty ? '0' : yearStr) ?? 0;
+      int months = int.tryParse(monthStr.isEmpty ? '0' : monthStr) ?? 0;
+      int days = int.tryParse(dayStr.isEmpty ? '0' : dayStr) ?? 0;
+
+      // Handle day rollover (30 days = 1 month)
+      if (days >= 30) {
+        months += (days / 30).floor();
+        days = 0; // Always make days 0 after rollover
+      }
+
+      // Handle month rollover (12 months = 1 year)
+      years += (months / 12).floor();
+      months = months % 12;
+
+      // Update the string values with calculated rollover
+      final newYearStr = years.toString();
+      final newMonthStr = months.toString();
+      final newDayStr = days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
 
       emit(
         state.copyWith(
-          updateYear: yearStr,
+          updateYear: newYearStr,
+          updateMonth: newMonthStr,
+          updateDay: newDayStr,
           approxAge: approx,
           dob: dob ?? state.dob,
         ),
