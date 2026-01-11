@@ -3246,10 +3246,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginButton => 'Login';
 
   @override
-  String get usernameHint => 'Enter username';
+  String get usernameHint => 'Username';
 
   @override
-  String get passwordHint => 'Enter password';
+  String get passwordHint => 'Password';
 
   @override
   String get years => 'Year';
@@ -3609,7 +3609,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hello => 'Hello';
 
   @override
-  String get welcome => 'Welcome to our app';
+  String get welcome => 'Welcome';
 
   @override
   String get login_button => 'Login';
@@ -6184,7 +6184,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dob_cannot_be_future => 'Date of birth cannot be in the future';
 
   @override
-  String get dob_required => 'Date of birth is required';
+  String get dob_required => 'Please enter date of birth';
 
   @override
   String get enter_other_occupation => 'Enter occupation';
@@ -7568,4 +7568,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidLoginCredentials => 'Please enter valid user credentials.';
+
+  @override
+  String get userNotFound => 'User does not exist. Please enter valid credentials.';
 }

@@ -507,7 +507,7 @@
   "panchayatLabel": "पंचायत",
   "passwordComplexity": "पासवर्ड में अक्षर, अंक और विशेष वर्ण होने चाहिए",
   "passwordEmpty": "पासवर्ड खाली नहीं हो सकता",
-  "passwordHint": "अपना पासवर्ड दर्ज करें",
+  "passwordHint": "पासवर्ड",
   "passwordLabel": "पासवर्ड",
   "passwordTooShort": "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए",
   "passwordsDoNotMatch": "पासवर्ड मेल नहीं खाते",
@@ -875,7 +875,7 @@
   "loginSuccess": "लॉगिन सफल!",
   "loginFailed": "लॉगिन विफल। कृपया पुनः प्रयास करें।",
   "dismiss": "बंद करें",
-  "usernameHint": "उपयोगकर्ता नाम दर्ज करें",
+  "usernameHint": "उपयोगकर्ता नाम",
   "months": "महीना",
   "years": "साल",
   "days": "दिन",
@@ -955,7 +955,7 @@
   "dataSavedSuccessfullyFamily": "नया घर सफलतापूर्वक जोड़ दिया गया है",
   "abpmjayDataSaved": "आयुष्मान भारत-पीएमजेएवाई डेटा सफलतापूर्वक सहेजा गया!",
   "hello": "नमस्ते",
-  "welcome": "हमारे ऐप में आपका स्वागत है",
+  "welcome": "स्वागत है",
   "login_button": "लॉगिन करें",
   "logout": "लॉग आउट करें",
   "cancel": "रद्द करें",
@@ -1833,7 +1833,7 @@
   "no_mobile_found_for_head": "परिवार प्रमुख के लिए कोई मोबाइल नंबर नहीं मिला",
   "child_age_validation": "बच्चे के लिए: आयु 1 दिन से 15 वर्ष के बीच होनी चाहिए।",
   "dob_cannot_be_future": "जन्म तिथि भविष्य की नहीं हो सकती",
-  "dob_required": "जन्म तिथि आवश्यक है",
+  "dob_required": "कृपया जन्म तिथि दर्ज करें",
   "enter_other_occupation": "व्यवसाय दर्ज करें",
   "enter_valid_weight": "कृपया सही वजन दर्ज करें",
   "weight_range_validation": "वजन 1.2 से 90 किलोग्राम के बीच होना चाहिए",
@@ -2333,7 +2333,7 @@
   "authenticationFailed": "प्रमाणीकरण विफल हुआ। कृपया अपने प्रमाण-पत्र जांचें",
   "pleaseEnterUsername": "कृपया उपयोगकर्ता नाम दर्ज करें",
   "pleaseEnterPassword": "कृपया पासवर्ड दर्ज करें",
-  "pleaseEnterValidUsername": "कृपया मान्य उपयोगकर्ता विवरण दर्ज करें",
+  "pleaseEnterValidUsername": "कृपया उपयोगकर्ता का सही नाम दर्ज करें",
   "pleaseEnterValidPassword": "कृपया उपयोगकर्ता सही पासवर्ड दर्ज करें",
   "enterValidNumber": "कृपया वैध संख्या दर्ज करें",
   "selectAgeUnit": "कृपया आयु की इकाई चुनें",
@@ -2474,7 +2474,8 @@
   "otherDiscussionSubTopicProgram": "चर्चा का उप विषय/कार्यक्रम",
   "discussionTopic":"चर्चा का उप विषय/कार्यक्रम",
   "userFound": "उपयोगकर्ता लॉगिन सफलतापूर्वक.",
-  "invalidLoginCredentials": "कृपया मान्य उपयोगकर्ता क्रेडेंशियल दर्ज करें।"
+  "invalidLoginCredentials": "कृपया मान्य उपयोगकर्ता क्रेडेंशियल दर्ज करें।",
+  "userNotFound": "उपयोगकर्ता मौजूद नहीं है। कृपया वैध क्रेडेंशियल दर्ज करें।"
 }
 
 
