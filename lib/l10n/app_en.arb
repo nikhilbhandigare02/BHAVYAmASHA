@@ -1083,10 +1083,11 @@
   "loginFailed": "Login failed. Please try again.",
   "dismiss": "Dismiss",
   "loginButton": "Login",
-  "usernameHint": "Enter username",
-  "passwordHint": "Enter password",
+  "usernameHint": "Username",
+  "passwordHint": "Password",
   "years": "Year",
   "yearsHint": "Year",
+  "months": "Month",
   "months": "Month",
   "monthsHint": "Month",
   "days": "Day",
@@ -1209,7 +1210,7 @@
   "childDetails": "Child Details",
   "memberDetails": "Member Details",
   "hello": "Hello",
-  "welcome": "Welcome to our app",
+  "welcome": "Welcome",
   "login_button": "Login",
   "logout": "Logout",
 
@@ -2110,7 +2111,7 @@
   "no_mobile_found_for_head": "No mobile number found for the head of family",
   "child_age_validation": "For Child: Age should be between 1 day to 15 years.",
   "dob_cannot_be_future": "Date of birth cannot be in the future",
-  "dob_required": "Date of birth is required",
+  "dob_required": "Please enter date of birth",
   "enter_other_occupation": "Enter occupation",
   "enter_valid_weight": "Please enter a valid weight",
   "weight_range_validation": "Weight must be between 1.2 and 90 Kg",
@@ -2351,10 +2352,10 @@
   "sr_No": "Sr.No.",
   "present": "Present?",
 
-  "hscNameHint": "HSC Name",
-  "hscNameLabel": "HSC Name",
-  "hwcNameHint": "HWC Name",
-  "hwcNameLabel": "HWC Name",
+  "hscNameHint": "HSC",
+  "hscNameLabel": "HSC",
+  "hwcNameHint": "HWC",
+  "hwcNameLabel": "HWC",
 
   "moveForward": "Move forward?",
   "lastVisit": "Last Visit",
@@ -2616,5 +2617,6 @@
   "deathOther": "Other",
   "discussionTopic":"discussion topic/program",
   "userFound": "User found.",
-  "invalidLoginCredentials": "Please enter valid user credentials."
+  "invalidLoginCredentials": "Please enter valid user credentials.",
+  "userNotFound": "User does not exist. Please enter valid credentials."
 }

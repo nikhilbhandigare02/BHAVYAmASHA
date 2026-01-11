@@ -3246,10 +3246,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginButton => 'Login';
 
   @override
-  String get usernameHint => 'Enter username';
+  String get usernameHint => 'Username';
 
   @override
-  String get passwordHint => 'Enter password';
+  String get passwordHint => 'Password';
 
   @override
   String get years => 'Year';
@@ -3609,7 +3609,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hello => 'Hello';
 
   @override
-  String get welcome => 'Welcome to our app';
+  String get welcome => 'Welcome';
 
   @override
   String get login_button => 'Login';
@@ -6184,7 +6184,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dob_cannot_be_future => 'Date of birth cannot be in the future';
 
   @override
-  String get dob_required => 'Date of birth is required';
+  String get dob_required => 'Please enter date of birth';
 
   @override
   String get enter_other_occupation => 'Enter occupation';
@@ -6463,7 +6463,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noChildBeneficiaries => 'No child beneficiaries found. Add a new child to get started.';
 
   @override
-  String get deceased => 'Deceased';
+  String get deceased => 'Decease';
 
   @override
   String get noHbycChildrenFound => 'No HBYC children found';
@@ -6892,16 +6892,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get present => 'Present?';
 
   @override
-  String get hscNameHint => 'HSC Name';
+  String get hscNameHint => 'HSC';
 
   @override
-  String get hscNameLabel => 'HSC Name';
+  String get hscNameLabel => 'HSC';
 
   @override
-  String get hwcNameHint => 'HWC Name';
+  String get hwcNameHint => 'HWC';
 
   @override
-  String get hwcNameLabel => 'HWC Name';
+  String get hwcNameLabel => 'HWC';
 
   @override
   String get moveForward => 'Move forward?';
@@ -7568,4 +7568,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidLoginCredentials => 'Please enter valid user credentials.';
+
+  @override
+  String get userNotFound => 'User does not exist. Please enter valid credentials.';
 }

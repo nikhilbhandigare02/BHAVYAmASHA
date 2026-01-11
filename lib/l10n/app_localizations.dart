@@ -6548,13 +6548,13 @@ abstract class AppLocalizations {
   /// No description provided for @usernameHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter username'**
+  /// **'Username'**
   String get usernameHint;
 
   /// No description provided for @passwordHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter password'**
+  /// **'Password'**
   String get passwordHint;
 
   /// No description provided for @years.
@@ -7274,7 +7274,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcome.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to our app'**
+  /// **'Welcome'**
   String get welcome;
 
   /// No description provided for @login_button.
@@ -12416,7 +12416,7 @@ abstract class AppLocalizations {
   /// No description provided for @dob_required.
   ///
   /// In en, this message translates to:
-  /// **'Date of birth is required'**
+  /// **'Please enter date of birth'**
   String get dob_required;
 
   /// No description provided for @enter_other_occupation.
@@ -12974,7 +12974,7 @@ abstract class AppLocalizations {
   /// No description provided for @deceased.
   ///
   /// In en, this message translates to:
-  /// **'Deceased'**
+  /// **'Decease'**
   String get deceased;
 
   /// No description provided for @noHbycChildrenFound.
@@ -13832,25 +13832,25 @@ abstract class AppLocalizations {
   /// No description provided for @hscNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HSC Name'**
+  /// **'HSC'**
   String get hscNameHint;
 
   /// No description provided for @hscNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HSC Name'**
+  /// **'HSC'**
   String get hscNameLabel;
 
   /// No description provided for @hwcNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HWC Name'**
+  /// **'HWC'**
   String get hwcNameHint;
 
   /// No description provided for @hwcNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HWC Name'**
+  /// **'HWC'**
   String get hwcNameLabel;
 
   /// No description provided for @moveForward.
@@ -15184,6 +15184,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter valid user credentials.'**
   String get invalidLoginCredentials;
+
+  /// No description provided for @userNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'User does not exist. Please enter valid credentials.'**
+  String get userNotFound;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

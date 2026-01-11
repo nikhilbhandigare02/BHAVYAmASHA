@@ -57,6 +57,8 @@ class CustomTextField extends StatefulWidget {
   final String? unitLetterSuffix;
   final AutovalidateMode? autovalidateMode;
   final TextStyle? textStyle;
+  final TextStyle? hintStyle;
+
 
   const CustomTextField({
     super.key,
@@ -82,6 +84,7 @@ class CustomTextField extends StatefulWidget {
     this.unitLetterSuffix,
     this.autovalidateMode,
     this.textStyle,
+    this.hintStyle,
   });
 
   @override
