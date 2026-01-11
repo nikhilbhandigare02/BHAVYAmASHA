@@ -310,6 +310,55 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       );
     });
 
+    on<AfhUpdateDobControllers>((event, emit) {
+      // Store controllers reference for later use
+      emit(state.copyWith(
+        years: event.yearsController.text,
+        months: event.monthsController.text,
+        days: event.daysController.text,
+      ));
+    });
+
+    on<AfhUpdateDobFromControllers>((event, emit) {
+      final yearsStr = event.yearsController.text;
+      final monthsStr = event.monthsController.text;
+      final daysStr = event.daysController.text;
+
+      // Calculate total days with rollover
+      int totalMonths = int.tryParse(monthsStr) ?? 0;
+      int totalDays = int.tryParse(daysStr) ?? 0;
+      
+      // Handle day rollover (30 days = 1 month)
+      if (totalDays >= 30) {
+        totalMonths += (totalDays / 30).floor();
+        totalDays = 0; // Always make days 0 after rollover
+      }
+      
+      // Handle month rollover (12 months = 1 year)
+      int totalYears = int.tryParse(yearsStr) ?? 0;
+      totalYears += (totalMonths / 12).floor();
+      totalMonths = totalMonths % 12;
+
+      // Update controllers with calculated values
+      event.yearsController.text = totalYears.toString();
+      event.monthsController.text = totalMonths.toString();
+      event.daysController.text = totalDays.toString();
+
+      // Calculate DOB from age parts
+      final dob = _dobFromAgeParts(totalYears, totalMonths, totalDays);
+      final approx = '$totalYears years $totalMonths months $totalDays days'.trim();
+
+      emit(
+        state.copyWith(
+          years: totalYears.toString(),
+          months: totalMonths.toString(),
+          days: totalDays.toString(),
+          approxAge: approx,
+          dob: dob ?? state.dob,
+        ),
+      );
+    });
+
     on<EDDChange>((event, emit) {
       emit(state.copyWith(edd: event.value));
     });
