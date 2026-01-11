@@ -6463,7 +6463,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noChildBeneficiaries => 'No child beneficiaries found. Add a new child to get started.';
 
   @override
-  String get deceased => 'Deceased';
+  String get deceased => 'Decease';
 
   @override
   String get noHbycChildrenFound => 'No HBYC children found';
@@ -6892,16 +6892,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get present => 'Present?';
 
   @override
-  String get hscNameHint => 'HSC Name';
+  String get hscNameHint => 'HSC';
 
   @override
-  String get hscNameLabel => 'HSC Name';
+  String get hscNameLabel => 'HSC';
 
   @override
-  String get hwcNameHint => 'HWC Name';
+  String get hwcNameHint => 'HWC';
 
   @override
-  String get hwcNameLabel => 'HWC Name';
+  String get hwcNameLabel => 'HWC';
 
   @override
   String get moveForward => 'Move forward?';

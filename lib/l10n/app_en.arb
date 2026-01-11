@@ -2352,10 +2352,10 @@
   "sr_No": "Sr.No.",
   "present": "Present?",
 
-  "hscNameHint": "HSC Name",
-  "hscNameLabel": "HSC Name",
-  "hwcNameHint": "HWC Name",
-  "hwcNameLabel": "HWC Name",
+  "hscNameHint": "HSC",
+  "hscNameLabel": "HSC",
+  "hwcNameHint": "HWC",
+  "hwcNameLabel": "HWC",
 
   "moveForward": "Move forward?",
   "lastVisit": "Last Visit",

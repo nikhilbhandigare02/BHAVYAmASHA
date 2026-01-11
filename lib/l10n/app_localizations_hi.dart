@@ -3774,7 +3774,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dob => 'जन्म तिथि';
 
   @override
-  String get enterDob => 'कृपया जन्म तिथि दर्ज करें';
+  String get enterDob => 'कृपया जन्म तिथि चुनें';
 
   @override
   String get enterAge => 'कृपया आयु दर्ज करें';
@@ -7069,7 +7069,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get houseNumberValidation => 'मकान नंबर में केवल अक्षर, संख्या, स्पेस, डैश (-) या स्लैश (/) हो सकते हैं';
 
   @override
-  String get pleaseEnterDateOfBirth => 'कृपया जन्म तिथि चुनें';
+  String get pleaseEnterDateOfBirth => 'कृपया जन्म तिथि दर्ज करें';
 
   @override
   String get dateOfBirthFuture => 'जन्म तिथि भविष्य की नहीं हो सकती';
