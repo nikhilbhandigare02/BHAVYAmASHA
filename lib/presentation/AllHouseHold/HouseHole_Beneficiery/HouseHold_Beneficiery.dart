@@ -865,10 +865,6 @@ class _HouseHold_BeneficiaryScreenState
                         ),
                     ],
                   ),
-
-
-
-
                 ],
               ),
             ),
