@@ -777,16 +777,16 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
       if (category.isNotEmpty) b.add(AnmUpdateCategory(category));
 
       // Banking / IDs / ABHA
-      final bankAcc = (data['bankAcc'] ?? '') as String;
+      final bankAcc = (data['bankAcc'] ?? data['bankAccountNumber'] ?? '') as String;
       if (bankAcc.isNotEmpty) b.add(AnmUpdateBankAcc(bankAcc));
 
-      final ifsc = (data['ifsc'] ?? '') as String;
+      final ifsc = (data['ifsc'] ?? data['ifscCode'] ?? '') as String;
       if (ifsc.isNotEmpty) b.add(AnmUpdateIfsc(ifsc));
 
       final voterId = (data['voterId'] ?? '') as String;
       if (voterId.isNotEmpty) b.add(AnmUpdateVoterId(voterId));
 
-      final rationId = (data['rationId'] ?? '') as String;
+      final rationId = (data['rationId'] ?? data['rationCardId'] ?? '') as String;
       if (rationId.isNotEmpty) b.add(AnmUpdateRationId(rationId));
 
       final phId = (data['phId'] ?? '') as String;
@@ -808,7 +808,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
       final birthWeight = (data['birthWeight'] ?? '') as String;
       if (birthWeight.isNotEmpty) b.add(BirthWeightChange(birthWeight));
 
-      final school = (data['school'] ?? '') as String;
+      final school = (data['school'] ?? data['childSchool'] ?? '') as String;
       if (school.isNotEmpty) b.add(ChildSchoolChange(school));
 
 
@@ -909,9 +909,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         print('❌ [AddNewMember] EDIT - No spouse EDD data found');
       }
 
-      // Hydrate spouse details bloc from any saved spousedetails map so that
-      // reopening a member via the spouse row shows the same spouse data
-      // that was entered when the member was first added.
       try {
         final spRaw = data['spousedetails'];
         Map<String, dynamic>? spMap;

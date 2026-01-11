@@ -2614,7 +2614,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                                     ?.validate() ??
                                                                 false;
 
-                                                            // Then validate all fields including custom validations
                                                             final areAllFieldsValid =
                                                                 validateAllSpousFields(
                                                                   spousState,

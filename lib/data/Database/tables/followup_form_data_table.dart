@@ -36,7 +36,7 @@ class FollowupFormDataTable {
     eligibleCoupleReregistration: 'p1dm48g56h72txya',
     ancDueRegistration: 'bt7gs9rl1a5d26mz',
     deliveryOutcome: '4r7twnycml3ej1vg',
-    pncMother: 'bu30k62jao9qesri',
+      pncMother: 'bu30k62jao9qesri',
     infantDetails: 'o6v4qlzrc7w8bahx',
     infantPnc: 'c7hmuxsli2nj6atq',
     childRegistrationDue: '2ol35gbp7rczyvn6',
