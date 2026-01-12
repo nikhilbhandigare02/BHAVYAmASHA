@@ -1470,8 +1470,6 @@
   "consultationAboutToComplete": "It is about to complete the consultation",
   "consultationDataGathered": "We have almost gathered your consultation data",
   "analysingData": "Analysing Data",
-
-
   "transcribedNote": "Transcribed Note",
   "totalUsageTime": "Total Usage Time",
   "analysedNotedSummary": "Analysed Noted Summary",
@@ -1482,7 +1480,6 @@
   "noDiagnosisAvailable": "No diagnosis available",
   "noVitalsAvailable": "No vitals available",
   "value": "Value",
-
   "fillBelowDetailsToAddPatient": "Fill below details to add patient",
   "patientsFullName": "Patient's Full Name",
   "pleaseEnterPatientsFullName": "Please enter the patient's full name",
@@ -1512,10 +1509,8 @@
   "fri": "Fri",
   "sat": "Sat",
   "sun": "Sun",
-
   "bookNow": "Book Now",
   "bookWithAbha": "Book With ABHA",
-
   "appointmentActions": "Appointment Actions",
   "rxUploadAndSave": "Rx upload and save",
   "upload": "Upload",
@@ -1527,17 +1522,15 @@
   "uploadRx": "Upload Rx",
   "useCamera": "Use Camera",
   "chooseFromGallery": "Choose from Gallery",
-
   "healthIdAbhaAddress": "Health ID (ABHA Address)",
   "healthId": "Health ID",
   "verify": "Verify",
   "createAbha": "Create ABHA",
-
   "igree1": "I intend to create Ayushman Bharat Health Account Number (“ABHA number”) and Ayushman Bharat Health Account address (“ABHA Address”) using a document other than Aadhaar. (Click here to proceed further)",
   "igree2": "I consent to the usage of my ABHA address and ABHA number for linking my legacy (past) government health records and those which will be generated during this encounter.",
   "igree3": "I authorize the sharing of all my health records with healthcare provider(s) for the purpose of providing healthcare services to me during this encounter.",
   "igree4": "I consent to the anonymization and subsequent use of my government health records for public health purposes.",
-   "igree6": "I have been explained about the consent as stated above and hereby provide my consent for the aforementioned purposes.",
+  "igree6": "I have been explained about the consent as stated above and hereby provide my consent for the aforementioned purposes.",
   "checkAvailableAbhaAddress": "Check Available ABHA Address",
   "abhaNumber": "ABHA Number",
   "linkExisting": "Link Existing",
@@ -1546,7 +1539,6 @@
   "aadhaarNumber": "Aadhaar Number",
   "iHerebyDeclareThat": "I hereby declare that",
   "agreeAll": "Agree All",
-
   "enterOtp": "Enter OTP",
   "useExisting": "Use Existing",
   "createAbhaAddress": "Create ABHA Address",
