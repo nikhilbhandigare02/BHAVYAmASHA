@@ -258,24 +258,31 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
 
       // Handle day rollover (30 days = 1 month)
       if (days >= 30) {
-        months += (days / 30).floor();
-        days = 0; // Always make days 0 after rollover
+        final additionalMonths = (days / 30).floor();
+        months += additionalMonths;
+        days = days % 30; // Keep remainder days
       }
 
       // Handle month rollover (12 months = 1 year)
       if (months >= 12) {
-        years += (months / 12).floor();
-        months = 0; // Make months 0 after rollover
+        final additionalYears = (months / 12).floor();
+        years += additionalYears;
+        months = months % 12; // Keep remainder months
       }
+
+      // Update the string values with calculated rollover
+      final newYearStr = years.toString();
+      final newMonthStr = months.toString();
+      final newDayStr = days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
 
       emit(
         state.copyWith(
-          years: years.toString(),
-          months: months == 0 ? '' : months.toString(), // Make months empty when 0
-          days: days == 0 ? '' : days.toString(), // Make days empty when 0
+          years: newYearStr,
+          months: newMonthStr,
+          days: newDayStr,
           approxAge: approx,
           dob: dob ?? state.dob,
         ),
@@ -293,24 +300,31 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
 
       // Handle day rollover (30 days = 1 month)
       if (days >= 30) {
-        months += (days / 30).floor();
-        days = 0; // Always make days 0 after rollover
+        final additionalMonths = (days / 30).floor();
+        months += additionalMonths;
+        days = days % 30; // Keep remainder days
       }
 
       // Handle month rollover (12 months = 1 year)
       if (months >= 12) {
-        years += (months / 12).floor();
-        months = 0; // Make months 0 after rollover
+        final additionalYears = (months / 12).floor();
+        years += additionalYears;
+        months = months % 12; // Keep remainder months
       }
+
+      // Update the string values with calculated rollover
+      final newYearStr = years.toString();
+      final newMonthStr = months.toString();
+      final newDayStr = days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
 
       emit(
         state.copyWith(
-          years: years.toString(),
-          months: months == 0 ? '' : months.toString(), // Make months empty when 0
-          days: days == 0 ? '' : days.toString(), // Make days empty when 0
+          years: newYearStr,
+          months: newMonthStr,
+          days: newDayStr,
           approxAge: approx,
           dob: dob ?? state.dob,
         ),
@@ -328,24 +342,31 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
 
       // Handle day rollover (30 days = 1 month)
       if (days >= 30) {
-        months += (days / 30).floor();
-        days = 0; // Always make days 0 after rollover
+        final additionalMonths = (days / 30).floor();
+        months += additionalMonths;
+        days = days % 30; // Keep remainder days
       }
 
       // Handle month rollover (12 months = 1 year)
       if (months >= 12) {
-        years += (months / 12).floor();
-        months = 0; // Make months 0 after rollover
+        final additionalYears = (months / 12).floor();
+        years += additionalYears;
+        months = months % 12; // Keep remainder months
       }
+
+      // Update the string values with calculated rollover
+      final newYearStr = years.toString();
+      final newMonthStr = months.toString();
+      final newDayStr = days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
 
       emit(
         state.copyWith(
-          years: years.toString(),
-          months: months == 0 ? '' : months.toString(), // Make months empty when 0
-          days: days == 0 ? '' : days.toString(), // Make days empty when 0
+          years: newYearStr,
+          months: newMonthStr,
+          days: newDayStr,
           approxAge: approx,
           dob: dob ?? state.dob,
         ),

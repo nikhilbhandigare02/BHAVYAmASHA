@@ -340,7 +340,6 @@ class BeneficiaryRepository {
       return info;
     }
 
-    // Map API fields to local structure
     final nameMap = info['name'] is Map
         ? Map<String, dynamic>.from(info['name'] as Map)
         : <String, dynamic>{};

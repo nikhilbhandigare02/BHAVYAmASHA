@@ -569,13 +569,17 @@ class AddnewfamilymemberBloc
 
       // Handle day rollover (30 days = 1 month)
       if (days >= 30) {
-        months += (days / 30).floor();
-        days = 0; // Always make days 0 after rollover
+        final additionalMonths = (days / 30).floor();
+        months += additionalMonths;
+        days = days % 30; // Keep remainder days
       }
 
       // Handle month rollover (12 months = 1 year)
-      years += (months / 12).floor();
-      months = months % 12;
+      if (months >= 12) {
+        final additionalYears = (months / 12).floor();
+        years += additionalYears;
+        months = months % 12; // Keep remainder months
+      }
 
       // Update the string values with calculated rollover
       final newYearStr = years.toString();
@@ -606,13 +610,17 @@ class AddnewfamilymemberBloc
 
       // Handle day rollover (30 days = 1 month)
       if (days >= 30) {
-        months += (days / 30).floor();
-        days = 0; // Always make days 0 after rollover
+        final additionalMonths = (days / 30).floor();
+        months += additionalMonths;
+        days = days % 30; // Keep remainder days
       }
 
       // Handle month rollover (12 months = 1 year)
-      years += (months / 12).floor();
-      months = months % 12;
+      if (months >= 12) {
+        final additionalYears = (months / 12).floor();
+        years += additionalYears;
+        months = months % 12; // Keep remainder months
+      }
 
       // Update the string values with calculated rollover
       final newYearStr = years.toString();
@@ -643,13 +651,17 @@ class AddnewfamilymemberBloc
 
       // Handle day rollover (30 days = 1 month)
       if (days >= 30) {
-        months += (days / 30).floor();
-        days = 0; // Always make days 0 after rollover
+        final additionalMonths = (days / 30).floor();
+        months += additionalMonths;
+        days = days % 30; // Keep remainder days
       }
 
       // Handle month rollover (12 months = 1 year)
-      years += (months / 12).floor();
-      months = months % 12;
+      if (months >= 12) {
+        final additionalYears = (months / 12).floor();
+        years += additionalYears;
+        months = months % 12; // Keep remainder months
+      }
 
       // Update the string values with calculated rollover
       final newYearStr = years.toString();

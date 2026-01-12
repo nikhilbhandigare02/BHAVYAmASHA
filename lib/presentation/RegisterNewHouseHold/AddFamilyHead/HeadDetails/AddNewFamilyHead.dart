@@ -1771,7 +1771,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     fatherName: m['fatherName'],
                     AfhABHAChange: m['AfhABHAChange'],
                     children: m['children'],
-                    useDob: m['useDob'] == 'true' || m['useDob'] == true,
+                    useDob: m.containsKey('age_by')
+                        ? m['age_by'] == 'By Dob'
+                        : (m['useDob'] == 'true' || m['useDob'] == true),
                     dob: _parseDate(m['dob'] as String?),
                     edd: _parseDate(m['edd'] as String?),
                     lmp: _parseDate(m['lmp'] as String?),

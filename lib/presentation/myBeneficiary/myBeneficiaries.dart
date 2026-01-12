@@ -496,19 +496,53 @@ ORDER BY d.created_date_time DESC
     final num? v = num.tryParse(value.toString());
     if (v == null || v <= 0) return null;
 
-    // ✅ Convert ONLY newborn-range kg values (≤ 3 kg)
     if (v > 0 && v <= 3) {
       return (v * 1000).round(); // kg → grams
     }
-
-    // ✅ Already grams (typical gram range)
     if (v > 100) {
       return v.round();
     }
 
-    // ❌ Ignore values like 8, 10, etc. (kg for older child)
     return null;
   }
+
+  bool _isBelowOrEqualTwoYears(
+      Map<String, dynamic> info, dynamic dobRaw) {
+    final years = int.tryParse(info['years']?.toString() ?? '');
+    final months = int.tryParse(info['months']?.toString() ?? '');
+
+    if (years != null) {
+      if (years > 2) return false;
+      if (years < 2) return true;
+      if (months != null && months > 0) return false;
+      return true;
+    }
+
+    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
+      try {
+        DateTime? dob = DateTime.tryParse(dobRaw.toString());
+        if (dob == null) {
+          final ts = int.tryParse(dobRaw.toString());
+          if (ts != null) {
+            dob = DateTime.fromMillisecondsSinceEpoch(
+              ts > 1000000000000 ? ts : ts * 1000,
+              isUtc: true,
+            );
+          }
+        }
+
+        if (dob != null) {
+          final now = DateTime.now();
+          final ageInMonths =
+              (now.year - dob.year) * 12 + (now.month - dob.month);
+          return ageInMonths <= 24;
+        }
+      } catch (_) {}
+    }
+
+    return false;
+  }
+
 
   Future<int> _getLBWReferredCount() async {
     try {
@@ -517,14 +551,16 @@ ORDER BY d.created_date_time DESC
       final String? ashaUniqueKey =
       currentUserData?['unique_key']?.toString();
 
-      print('🔍 Calculating LBW children count');
+      print('🔍 Calculating LBW children count (≤2 years only)');
 
       final rows = await db.query(
         'beneficiaries_new',
         where:
-        'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL) '
+        'is_deleted = 0 '
+            'AND (is_adult = 0 OR is_adult IS NULL) '
             'AND current_user_key = ? '
-            'AND is_death = 0 AND is_migrated = 0',
+            'AND is_death = 0 '
+            'AND is_migrated = 0',
         whereArgs: [ashaUniqueKey],
       );
 
@@ -541,14 +577,17 @@ ORDER BY d.created_date_time DESC
           final Map<String, dynamic> info =
           jsonDecode(infoStr) as Map<String, dynamic>;
 
-          // ---------- SAME normalization ----------
+          // 🚫 Skip if child age > 2 years
+          final bool isUnderTwo =
+          _isBelowOrEqualTwoYears(info, info['dob'] ?? info['dateOfBirth']);
+          if (!isUnderTwo) continue;
+
+          // ---------- LBW check ----------
           final int? weightGm = normalizeToGrams(info['weight']);
           final int? birthWeightGm =
           normalizeToGrams(info['birthWeight']);
 
           bool isLbw = false;
-
-          // ---------- SAME LBW condition ----------
           if (weightGm != null && weightGm <= 1600) isLbw = true;
           if (birthWeightGm != null && birthWeightGm <= 1600) isLbw = true;
 
@@ -560,7 +599,7 @@ ORDER BY d.created_date_time DESC
         }
       }
 
-      print('✅ Final LBW children count: $lbwCount');
+      print('✅ Final LBW children count (≤2 years): $lbwCount');
       return lbwCount;
     } catch (e, st) {
       print('❌ LBW count error: $e');
