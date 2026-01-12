@@ -1675,15 +1675,15 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       // Get all beneficiaries with anc_due state that are not in excluded states
       String query =
       '''
-  SELECT 
-    mca.*, 
-    bn.*, 
-    bn.id AS beneficiary_id, 
+  SELECT
+    mca.*,
+    bn.*,
+    bn.id AS beneficiary_id,
     mca.id AS mca_id
   FROM mother_care_activities mca
-  INNER JOIN beneficiaries_new bn 
+  INNER JOIN beneficiaries_new bn
       ON mca.beneficiary_ref_key = bn.unique_key
-  WHERE (mca.mother_care_state = 'anc_due' 
+  WHERE (mca.mother_care_state = 'anc_due'
          OR mca.mother_care_state = 'anc_due')
     AND bn.is_deleted = 0
     ${excludedBeneficiaryIds.isNotEmpty ? 'AND mca.beneficiary_ref_key NOT IN (${excludedBeneficiaryIds.map((_) => '?').join(',')})' : ''}
@@ -2826,10 +2826,10 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       // Get all child beneficiaries (same logic as RoutineScreen)
       final List<Map<String, dynamic>> rows = await db.rawQuery(
         '''
-        SELECT 
+        SELECT
           B.*
         FROM beneficiaries_new B
-        WHERE 
+        WHERE
           B.is_deleted = 0
           AND B.is_adult = 0
           AND B.is_migrated = 0
@@ -2842,11 +2842,11 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       // Get last visit dates from child_care_activities (same logic as RoutineScreen)
       final lastVisitDates = <String, String>{};
       final childCareRecords = await db.rawQuery('''
-        SELECT 
-          beneficiary_ref_key, 
+        SELECT
+          beneficiary_ref_key,
           created_date_time,
           child_care_state
-        FROM child_care_activities 
+        FROM child_care_activities
         ORDER BY created_date_time DESC
       ''');
 

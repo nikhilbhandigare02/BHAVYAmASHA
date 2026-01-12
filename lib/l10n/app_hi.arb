@@ -2221,6 +2221,7 @@
   "calciumVitaminD3TabletsLabel": "कैल्शियम और विटामिन डी3 की दी गई गोलियों की संख्या",
   "beneficiaryAbsentLabel": "क्या लाभार्थी अनुपस्थिति है?",
   "previousVisitsButton": "पिछली विज़िट्स",
+  "previousVisitsButtonS": "पिछली विज़िट्स",
   "selectVisitTypeError": "कृपया विज़िट का प्रकार चुनें",
   "updateButton": "अपडेट करें",
   "protected": "सुरक्षित",
@@ -2474,6 +2475,7 @@
   "otherDiscussionSubTopicProgram": "चर्चा का उप विषय/कार्यक्रम",
   "discussionTopic":"चर्चा का उप विषय/कार्यक्रम",
   "userFound": "उपयोगकर्ता लॉगिन सफलतापूर्वक.",
+  "userLoginSuccses":"उपयोगकर्ता लॉगिन सफलतापूर्वक.",
   "invalidLoginCredentials": "कृपया मान्य उपयोगकर्ता क्रेडेंशियल दर्ज करें।",
   "userNotFound": "उपयोगकर्ता मौजूद नहीं है। कृपया वैध क्रेडेंशियल दर्ज करें।",
   "toDoVisit": "निर्धारित कार्य"

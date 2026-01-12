@@ -1908,6 +1908,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get previousVisitsButton => 'PREVIOUS VISITS';
 
   @override
+  String get previousVisitsButtonS => 'Previous Visits';
+
+  @override
   String get primaryWaterSourceLabel => 'Primary source of water';
 
   @override
@@ -7568,6 +7571,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get userFound => 'User found.';
+
+  @override
+  String get userLoginSuccses => 'user login successfully';
 
   @override
   String get invalidLoginCredentials => 'Please enter valid user credentials.';
