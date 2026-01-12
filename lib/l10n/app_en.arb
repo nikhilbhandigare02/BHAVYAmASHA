@@ -762,6 +762,7 @@
   "thType": "Type",
   "thirdAncLabel": "Third ANC",
   "toDoVisits": "To do visits",
+  "toDoVisit":"To do visits",
   "todayWorkCompleted": "Completed visits :",
   "todayWorkPending": "Pending visits :",
   "todayWorkProgress": "Progress :",

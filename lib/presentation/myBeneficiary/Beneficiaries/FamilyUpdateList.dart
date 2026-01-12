@@ -610,7 +610,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                       Expanded(
                         child: _infoRow(
                           "${l10n?.mobileNo} : ",
-                          data['mobile']?.toString() ?? 'N/A',
+                          data['mobile']?.toString() ?? l10n!.na,
                           isWrappable: true,
                         ),
                       ),
@@ -618,7 +618,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                       Expanded(
                         child: _infoRow(
                           "${l10n?.mohalla} : ",
-                          data['mohalla']?.toString() ?? data['mohallaTola']?.toString() ?? 'N/A',
+                          data['mohalla']?.toString() ?? data['mohallaTola']?.toString() ?? l10n!.na,
                           isWrappable: true,
                         ),
                       ),
@@ -634,6 +634,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
   }
 
   Widget _infoRow(String? title, String value,{bool isWrappable = false}) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -648,7 +649,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           ),
           Expanded(
             child: Text(
-              value.isEmpty ? 'N/A' : value,
+              value.isEmpty ? l10n!.na : value,
               style:  TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w400,

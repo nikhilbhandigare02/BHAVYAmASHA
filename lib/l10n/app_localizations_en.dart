@@ -2301,6 +2301,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toDoVisits => 'To do visits';
 
   @override
+  String get toDoVisit => 'To do visits';
+
+  @override
   String get todayWorkCompleted => 'Completed visits :';
 
   @override

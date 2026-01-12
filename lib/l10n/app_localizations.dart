@@ -4655,6 +4655,12 @@ abstract class AppLocalizations {
   /// **'To do visits'**
   String get toDoVisits;
 
+  /// No description provided for @toDoVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'To do visits'**
+  String get toDoVisit;
+
   /// No description provided for @todayWorkCompleted.
   ///
   /// In en, this message translates to:
