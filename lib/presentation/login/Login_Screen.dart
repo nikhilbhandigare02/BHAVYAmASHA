@@ -313,7 +313,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         SnackBar(
                                           content: Text(
                                             state.error.toLowerCase().contains('user found')
-                                                ? l10n.userFound
+                                                ? l10n.userLoginSuccses
                                                 : state.error,
 
                                               style: const TextStyle(color: Colors.white),

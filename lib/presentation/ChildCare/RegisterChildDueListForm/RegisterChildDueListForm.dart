@@ -827,9 +827,9 @@ class _RegisterChildDueListFormScreen
                             CustomTextField(
                               labelText: l10n?.rchChildSerialHint ??
                                   'Register Serial Number',
-                              hintText: l10n?.rchChildSerialHint,
-                              initialValue: state.registerSerialNumber,
-                              onChanged: (v) =>
+                               hintText: l10n?.rchChildSerialHint,
+                               initialValue: state.registerSerialNumber,
+                               onChanged: (v) =>
                                   bloc.add(SerialNumberOFRegister(v)),
                             ),
                             Divider(

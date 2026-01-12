@@ -511,6 +511,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   labelText: '${l.dobLabel} *',
                   hintText: l.dateHint,
                   initialDate: state.dob,
+                  isEditable: !widget.isEdit,
+                  readOnly: widget.isEdit,
                   firstDate: DateTime.now().subtract(const Duration(days: 365 * 110)),
                   lastDate: DateTime.now().subtract(const Duration(days: 365 * 15)),
                   onDateChanged: (date) {
@@ -572,13 +574,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               hintText: l.years,
                               keyboardType: TextInputType.number,
                               maxLength: 3,
+                              readOnly: widget.isEdit,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
                                 MaxValueFormatter(110),
                               ],
-                              onChanged: (value) => context.read<AddFamilyHeadBloc>().add(
-                                UpdateYears(value),
-                              ),
+                              onChanged: widget.isEdit
+                                  ? null
+                                  : (value) => context.read<AddFamilyHeadBloc>().add(
+                                        UpdateYears(value),
+                                      ),
                             ),
                           ),
                         ),
@@ -593,13 +598,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               hintText: l.months,
                               keyboardType: TextInputType.number,
                               maxLength: 2,
+                              readOnly: widget.isEdit,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
                                 MaxValueFormatter(99),
                               ],
-                              onChanged: (value) => context.read<AddFamilyHeadBloc>().add(
-                                UpdateMonths(value),
-                              ),
+                              onChanged: widget.isEdit
+                                  ? null
+                                  : (value) => context.read<AddFamilyHeadBloc>().add(
+                                        UpdateMonths(value),
+                                      ),
                             ),
                           ),
                         ),
@@ -614,13 +622,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               hintText: l.days,
                               keyboardType: TextInputType.number,
                               maxLength: 2,
+                              readOnly: widget.isEdit,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
                                 MaxValueFormatter(99), // Allow up to 99 for rollover calculation
                               ],
-                              onChanged: (value) => context.read<AddFamilyHeadBloc>().add(
-                                UpdateDays(value),
-                              ),
+                              onChanged: widget.isEdit
+                                  ? null
+                                  : (value) => context.read<AddFamilyHeadBloc>().add(
+                                        UpdateDays(value),
+                                      ),
                             ),
                           ),
                         ),
