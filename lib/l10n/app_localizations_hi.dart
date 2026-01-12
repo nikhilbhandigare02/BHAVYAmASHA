@@ -2304,6 +2304,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get toDoVisits => 'दौरा करना';
 
   @override
+  String get toDoVisit => 'निर्धारित कार्य';
+
+  @override
   String get todayWorkCompleted => 'Completed visits :';
 
   @override

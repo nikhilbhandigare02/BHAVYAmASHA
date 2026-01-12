@@ -470,6 +470,13 @@ class EligibleCouleUpdateBloc
           beneficiaryInfo['head_details'] = headDetails;
         }
       }
+      beneficiaryInfo['totalBorn'] = state.totalChildrenBorn;
+      beneficiaryInfo['totalLive'] = state.totalLiveChildren;
+      beneficiaryInfo['totalMale'] = state.totalMaleChildren;
+      beneficiaryInfo['totalFemale'] = state.totalFemaleChildren;
+      beneficiaryInfo['youngestAge'] = state.youngestChildAge;
+      beneficiaryInfo['youngestAgeUnit'] = state.youngestChildAgeUnit;
+      beneficiaryInfo['youngestGender'] = state.youngestChildGender;
 
       print('✅ Updated children details: $updatedChildrenDetails');
 

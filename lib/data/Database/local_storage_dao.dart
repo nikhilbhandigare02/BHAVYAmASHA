@@ -2003,7 +2003,7 @@ class LocalStorageDao {
 
     final forms = await db.query(
       'followup_form_data',
-      where: "forms_ref_key = 'bt7gs9rl1a5d26mz'  AND form_json LIKE '%\"is_abortion\"%'",
+      where: "is_deleted = 0 AND forms_ref_key = 'bt7gs9rl1a5d26mz'  AND form_json LIKE '%\"is_abortion\"%'",
     );
 
     final List<Map<String, dynamic>> result = [];
@@ -2750,19 +2750,29 @@ class LocalStorageDao {
 
   Future<List<Map<String, dynamic>>> getMigratedBeneficiaries() async {
     try {
-      print('🔍 [getMIGRecords] Querying  mig records...');
+      print('🔍 [getMigratedRecords] Querying migrated records...');
       final db = await _db;
 
+      // Get current user's unique key
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      if (ashaUniqueKey == null) {
+        print('⚠️ [getMigratedRecords] No user unique key found');
+        return [];
+      }
+
       final debugInfo = await debugDeathRecords();
-      print('🔍 [getMIGRecords] Debug Info: $debugInfo');
+      print('🔍 [getMigratedRecords] Debug Info: $debugInfo');
 
       final rows = await db.query(
         BeneficiariesTable.table,
-        where: 'is_migrated = 1 AND is_deleted = 0',
+        where: 'is_migrated = 1 AND is_deleted = 0 AND current_user_key = ?',
+        whereArgs: [ashaUniqueKey],
         orderBy: 'created_date_time DESC',
       );
 
-      print('✅ [getDeathRecords] Found ${rows.length} death records');
+      print('✅ [getMigratedRecords] Found ${rows.length} migrated records for user $ashaUniqueKey');
 
       return rows.map((row) {
         try {
@@ -2780,7 +2790,7 @@ class LocalStorageDao {
         }
       }).where((map) => map.isNotEmpty).toList(); // Filter out any empty maps from failed parses
     } catch (e, stackTrace) {
-      print('❌ [getDeathRecords] Error: $e');
+      print('❌ [getMigratedRecords] Error: $e');
       print('Stack trace: $stackTrace');
       rethrow;
     }
