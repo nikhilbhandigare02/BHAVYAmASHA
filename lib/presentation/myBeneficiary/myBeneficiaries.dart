@@ -489,6 +489,7 @@ ORDER BY d.created_date_time DESC
       return 0;
     }
   }
+
   int? normalizeToGrams(dynamic value) {
     if (value == null) return null;
 
@@ -513,49 +514,61 @@ ORDER BY d.created_date_time DESC
     try {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
+
+      print('🔍 Calculating LBW children count');
 
       final rows = await db.query(
-        BeneficiariesTable.table,
-        where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL) AND current_user_key = ?',
+        'beneficiaries_new',
+        where:
+        'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL) '
+            'AND current_user_key = ? '
+            'AND is_death = 0 AND is_migrated = 0',
         whereArgs: [ashaUniqueKey],
       );
 
-      int count = 0;
+      print('📦 Total child beneficiaries fetched: ${rows.length}');
+
+      int lbwCount = 0;
 
       for (final row in rows) {
         try {
+          // ---------- Parse beneficiary_info ----------
           final infoStr = row['beneficiary_info']?.toString();
           if (infoStr == null || infoStr.isEmpty) continue;
 
-          final Map<String, dynamic>? info =
-          (jsonDecode(infoStr) as Map?)?.cast<String, dynamic>();
-          if (info == null) continue;
+          final Map<String, dynamic> info =
+          jsonDecode(infoStr) as Map<String, dynamic>;
 
-          // Normalize both weight and birthWeight to grams
+          // ---------- SAME normalization ----------
           final int? weightGm = normalizeToGrams(info['weight']);
-          final int? birthWeightGm = normalizeToGrams(info['birthWeight']);
+          final int? birthWeightGm =
+          normalizeToGrams(info['birthWeight']);
 
           bool isLbw = false;
 
-          // LBW if either weight or birthWeight <= 1600g
-          if ((weightGm != null && weightGm <= 1600) ||
-              (birthWeightGm != null && birthWeightGm <= 1600)) {
-            isLbw = true;
-          }
+          // ---------- SAME LBW condition ----------
+          if (weightGm != null && weightGm <= 1600) isLbw = true;
+          if (birthWeightGm != null && birthWeightGm <= 1600) isLbw = true;
 
-          if (isLbw) count++;
+          if (!isLbw) continue;
+
+          lbwCount++;
         } catch (e) {
-          print('⚠️ Error processing LBW row for count: $e');
+          print('⚠️ Error processing LBW count row: $e');
         }
       }
 
-      return count;
-    } catch (e) {
-      print('❌ Error loading LBW count: $e');
+      print('✅ Final LBW children count: $lbwCount');
+      return lbwCount;
+    } catch (e, st) {
+      print('❌ LBW count error: $e');
+      print(st);
       return 0;
     }
   }
+
 
   Future<int> _getAbortionListCount() async {
     try {

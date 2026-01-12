@@ -1,12 +1,9 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
-import 'package:medixcel_new/core/widgets/RoundButton/RoundButton.dart';
 import 'package:sizer/sizer.dart';
-import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
 
@@ -14,7 +11,6 @@ import '../../../data/Database/database_provider.dart';
 import '../../../data/Database/local_storage_dao.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
 import '../../AllHouseHold/HouseHole_Beneficiery/HouseHold_Beneficiery.dart';
-import '../../RegisterNewHouseHold/AddFamilyHead/HeadDetails/AddNewFamilyHead.dart';
 
 class FamliyUpdate extends StatefulWidget {
   const FamliyUpdate({super.key});
@@ -79,35 +75,17 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
     }
 
     try {
-      // Use same data fetching logic as AllHouseHold_Screen.dart
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
 
-      if (currentUserKey.isEmpty) {
-        print('Error: Current user key not found');
-        if (mounted) {
-          setState(() {
-            _items = [];
-            _filtered = [];
-            _isLoading = false;
-          });
-        }
-        return;
-      }
-
-      // Same query as AllHouseHold_Screen.dart
-      final households = await db.rawQuery(
-        '''
-        SELECT h.* FROM households h
-        INNER JOIN beneficiaries_new b ON h.head_id = b.unique_key
-        WHERE h.is_deleted = 0 
-          AND h.current_user_key = ?
-          AND b.current_user_key = ?
-          AND b.is_deleted = 0
-        ORDER BY h.created_date_time DESC
-      ''',
-        [currentUserKey, currentUserKey],
+      final households = await db.query(
+        'households',
+        where: 'is_deleted = 0 AND current_user_key = ?',
+        whereArgs: [currentUserKey],
+        orderBy: 'created_date_time DESC',
       );
 
       // Query database directly to get eligible couple activities records for eligible_couple and tracking_due states
@@ -166,7 +144,8 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
 
       // Convert sets to counts
       for (final hhKey in eligibleCoupleUniqueSet.keys) {
-        eligibleCoupleTrackingDueCountMap[hhKey] = eligibleCoupleUniqueSet[hhKey]!.length;
+        eligibleCoupleTrackingDueCountMap[hhKey] =
+            eligibleCoupleUniqueSet[hhKey]!.length;
       }
 
       /// --------- ANC DUE COUNTS (PREGNANT WOMEN) ----------
@@ -181,7 +160,6 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
       }
 
       /// --------- AGGREGATE COUNTS ----------
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       for (final row in rows) {
         try {
           final info = Map<String, dynamic>.from(
@@ -195,7 +173,8 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           // Check if this is a child record (same logic as RegisterChildListScreen)
           final memberType = info['memberType']?.toString().toLowerCase() ?? '';
           final relation = info['relation']?.toString().toLowerCase() ?? '';
-          final isChild = memberType == 'child' ||
+          final isChild =
+              memberType == 'child' ||
               relation == 'child' ||
               memberType == 'Child' ||
               relation == 'daughter';
@@ -203,14 +182,15 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           // Pregnant
           final isPregnant =
               info['isPregnant']?.toString().toLowerCase() == 'yes' ||
-                  info['isPregnant'] == true;
+              info['isPregnant'] == true;
 
           if (isPregnant) {
             pregnantCountMap[householdRefKey] =
                 (pregnantCountMap[householdRefKey] ?? 0) + 1;
           }
 
-          final dob = info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
+          final dob =
+              info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
           if (dob != null && dob.toString().isNotEmpty) {
             DateTime? birthDate;
 
@@ -255,7 +235,9 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
 
               // Convert to total months for easier categorization
               int totalMonths = years * 12 + months;
-              if (days < 0) totalMonths--; // Adjust if not yet reached birthday this month
+              if (days < 0) {
+                totalMonths--; // Adjust if not yet reached birthday this month
+              }
 
               // Only categorize as child if memberType indicates it's a child
               if (isChild) {
@@ -293,12 +275,33 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           // Exclude migrated & death
           if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
 
+          final rawInfo = r['beneficiary_info'];
+          Map<String, dynamic> info;
+          if (rawInfo is Map) {
+            info = Map<String, dynamic>.from(rawInfo);
+          } else if (rawInfo is String && rawInfo.isNotEmpty) {
+            info = Map<String, dynamic>.from(jsonDecode(rawInfo));
+          } else {
+            info = {};
+          }
+
           final configuredHeadKey = headKeyByHousehold[householdRefKey];
 
           final bool isConfiguredHead =
               configuredHeadKey != null && configuredHeadKey == uniqueKey;
 
-          return isConfiguredHead;
+          final relation = (info['relation_to_head'] ?? info['relation'] ?? '')
+              .toString()
+              .toLowerCase();
+
+          final bool isHeadByRelation =
+              relation == 'head' || relation == 'self';
+
+          final bool isFamilyHead =
+              info['isFamilyHead'] == true ||
+              info['isFamilyHead']?.toString().toLowerCase() == 'true';
+
+          return isConfiguredHead || isHeadByRelation || isFamilyHead;
         } catch (_) {
           return false;
         }
@@ -320,7 +323,8 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
 
         int totalExpectedChildren = 0;
         final Set<String> parentNames = <String>{};
-        final Set<int> childrenCounts = <int>{}; // Use Set to avoid duplicate counts
+        final Set<int> childrenCounts =
+            <int>{}; // Use Set to avoid duplicate counts
 
         for (final b in membersForHousehold) {
           final rawInfo = b['beneficiary_info'];
@@ -334,7 +338,8 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           }
 
           final hasChildrenRaw = bi['hasChildren'] ?? bi['have_children'];
-          final hasChildren = hasChildrenRaw == true ||
+          final hasChildren =
+              hasChildrenRaw == true ||
               hasChildrenRaw?.toString().toLowerCase() == 'yes';
           if (hasChildren) {
             // Check for children field first (from your data format), then fallback to totalLive fields
@@ -357,14 +362,14 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
             }
 
             final pname =
-            (bi['headName'] ??
-                bi['name'] ??
-                bi['memberName'] ??
-                bi['member_name'] ??
-                '')
-                .toString()
-                .trim()
-                .toLowerCase();
+                (bi['headName'] ??
+                        bi['name'] ??
+                        bi['memberName'] ??
+                        bi['member_name'] ??
+                        '')
+                    .toString()
+                    .trim()
+                    .toLowerCase();
             if (pname.isNotEmpty) {
               parentNames.add(pname);
             }
@@ -374,7 +379,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         // Sum unique children counts (avoiding duplicates from head/spouse)
         totalExpectedChildren = childrenCounts.fold(
           0,
-              (sum, count) => sum + count,
+          (sum, count) => sum + count,
         );
 
         int recordedChildren = 0;
@@ -420,8 +425,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
             : uniqueKey;
 
         return {
-          'name':
-          (info['headName'] ?? info['memberName'] ?? info['name'] ?? '')
+          'name': (info['headName'] ?? info['memberName'] ?? info['name'] ?? '')
               .toString(),
           'mobile': (info['mobileNo'] ?? '').toString(),
           'hhId': headId,
@@ -431,7 +435,8 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           'totalMembers': membersForHousehold.length,
           'elderly': elderlyCountMap[householdRefKey] ?? 0,
           'pregnantWomen': ancDueCountMap[householdRefKey] ?? 0,
-          'eligibleCouples': eligibleCoupleTrackingDueCountMap[householdRefKey] ?? 0,
+          'eligibleCouples':
+              eligibleCoupleTrackingDueCountMap[householdRefKey] ?? 0,
           'child0to1': child0to1Map[householdRefKey] ?? 0,
           'child1to2': child1to2Map[householdRefKey] ?? 0,
           'child2to5': child2to5Map[householdRefKey] ?? 0,
@@ -441,8 +446,116 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         };
       }).toList();
 
+      final Set<String> hhWithBeneficiaries = rows
+          .map((e) => (e['household_ref_key'] ?? '').toString())
+          .where((k) => k.isNotEmpty)
+          .toSet();
+
+      final List<Map<String, dynamic>> fallbackMapped = [];
+      for (final hh in households) {
+        final hhRefKey = (hh['unique_key'] ?? '').toString();
+        if (hhRefKey.isEmpty) continue;
+        if (hhWithBeneficiaries.contains(hhRefKey)) continue;
+
+        Map<String, dynamic> hhInfo;
+        final rawHhInfo = hh['household_info'];
+        if (rawHhInfo is Map) {
+          hhInfo = Map<String, dynamic>.from(rawHhInfo);
+        } else if (rawHhInfo is String && rawHhInfo.isNotEmpty) {
+          try {
+            hhInfo = Map<String, dynamic>.from(jsonDecode(rawHhInfo));
+          } catch (_) {
+            hhInfo = <String, dynamic>{};
+          }
+        } else {
+          hhInfo = <String, dynamic>{};
+        }
+
+        final headInfoRaw = hhInfo['family_head_details'];
+        Map<String, dynamic> headInfo = {};
+        if (headInfoRaw is Map) {
+          headInfo = Map<String, dynamic>.from(headInfoRaw);
+        } else if (headInfoRaw is String && headInfoRaw.isNotEmpty) {
+          try {
+            headInfo = Map<String, dynamic>.from(jsonDecode(headInfoRaw));
+          } catch (_) {}
+        }
+
+        final isHeadA =
+            headInfo['isFamilyHead'] == true ||
+            (headInfo['isFamilyHead']?.toString().toLowerCase() == 'true');
+        final isHeadB =
+            headInfo['isFamilyhead'] == true ||
+            (headInfo['isFamilyhead']?.toString().toLowerCase() == 'true');
+        final isHead = isHeadA || isHeadB;
+        if (!isHead) continue;
+
+        String name =
+            (headInfo['name_of_family_head'] ??
+                    headInfo['headName'] ??
+                    headInfo['memberName'] ??
+                    headInfo['name'] ??
+                    '')
+                .toString();
+        String mobile =
+            (headInfo['mobile_no_of_family_head'] ?? headInfo['mobileNo'] ?? '')
+                .toString();
+        String houseNo =
+            (headInfo['house_no'] ?? headInfo['houseNo'] ?? hh['address'] ?? '')
+                .toString();
+        String mohalla = (headInfo['mohalla_name'] ?? headInfo['mohalla'] ?? '')
+            .toString();
+        String mohallaTola =
+            (headInfo['ward_name'] ?? headInfo['ward_no'] ?? '').toString();
+
+        int totalMembers = 1;
+        final allMembersRaw = hhInfo['all_members'];
+        if (allMembersRaw is List) {
+          totalMembers = allMembersRaw.length;
+        } else if (allMembersRaw is String && allMembersRaw.isNotEmpty) {
+          try {
+            final parsed = jsonDecode(allMembersRaw);
+            if (parsed is List) {
+              totalMembers = parsed.length;
+            }
+          } catch (_) {}
+        }
+
+        final headId = hhRefKey.length > 11
+            ? hhRefKey.substring(hhRefKey.length - 11)
+            : hhRefKey;
+
+        fallbackMapped.add({
+          'name': name,
+          'mobile': mobile,
+          'hhId': headId,
+          'houseNo': houseNo,
+          'mohalla': mohalla,
+          'mohallaTola': mohallaTola,
+          'totalMembers': totalMembers,
+          'elderly': 0,
+          'pregnantWomen': 0,
+          'eligibleCouples': 0,
+          'child0to1': 0,
+          'child1to2': 0,
+          'child2to5': 0,
+          'hasChildrenTarget': false,
+          'remainingChildren': 0,
+          '_raw': {
+            'household_ref_key': hhRefKey,
+            'created_date_time': hh['created_date_time']?.toString(),
+            'unique_key': hh['head_id']?.toString(),
+          },
+        });
+      }
+
+      final List<Map<String, dynamic>> combined = [
+        ...mapped,
+        ...fallbackMapped,
+      ];
+
       /// --------- SORT ----------
-      mapped.sort((a, b) {
+      combined.sort((a, b) {
         final ra = a['_raw'] as Map<String, dynamic>;
         final rb = b['_raw'] as Map<String, dynamic>;
 
@@ -455,13 +568,12 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
 
       if (mounted) {
         setState(() {
-          _items = mapped;
-          _filtered = List<Map<String, dynamic>>.from(mapped);
+          _items = combined;
+          _filtered = List<Map<String, dynamic>>.from(combined);
           _isLoading = false;
         });
       }
     } catch (e) {
-      print('Error in _loadData: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -470,46 +582,38 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppHeader(
-        screenTitle: l10n!.familyUpdate,
-        showBack: true,
-      ),
+      appBar: AppHeader(screenTitle: l10n!.familyUpdate, showBack: true),
       drawer: const CustomDrawer(),
       body: _isLoading
-          ? const Center(
-        child: CircularProgressIndicator(),
-      )
+          ? const Center(child: CircularProgressIndicator())
           : Column(
-        children: [
-
-          Expanded(
-            child: _filtered.isEmpty
-                ? Center(
-              child: Text(
-                (l10n?.noDataFound ?? 'No data found'),
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontWeight: FontWeight.w600,
+              children: [
+                Expanded(
+                  child: _filtered.isEmpty
+                      ? Center(
+                          child: Text(
+                            (l10n?.noDataFound ?? 'No data found'),
+                            style: const TextStyle(
+                              color: Colors.black54,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                          itemCount: _filtered.length,
+                          itemBuilder: (context, index) {
+                            final data = _filtered[index];
+                            return _householdCard(context, data);
+                          },
+                        ),
                 ),
-              ),
-            )
-                : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              itemCount: _filtered.length,
-              itemBuilder: (context, index) {
-                final data = _filtered[index];
-                return _householdCard(context, data);
-              },
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -560,10 +664,26 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.home, color:AppColors.primary, size: 18),
+                      const Icon(
+                        Icons.home,
+                        color: AppColors.primary,
+                        size: 18,
+                      ),
                       const SizedBox(width: 6),
                       Text(
-                        (data['_raw']['household_ref_key']?.toString().length ?? 0) > 11 ? data['_raw']['household_ref_key'].toString().substring(data['_raw']['household_ref_key'].toString().length - 11) : (data['_raw']['household_ref_key']?.toString() ?? ''),
+                        (data['_raw']['household_ref_key']?.toString().length ??
+                                    0) >
+                                11
+                            ? data['_raw']['household_ref_key']
+                                  .toString()
+                                  .substring(
+                                    data['_raw']['household_ref_key']
+                                            .toString()
+                                            .length -
+                                        11,
+                                  )
+                            : (data['_raw']['household_ref_key']?.toString() ??
+                                  ''),
                         style: TextStyle(
                           color: primary,
                           fontWeight: FontWeight.w600,
@@ -572,15 +692,15 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                       ),
                     ],
                   ),
-
                 ],
               ),
             ),
             Container(
               decoration: BoxDecoration(
                 color: primary.withOpacity(0.95),
-                borderRadius:
-                const BorderRadius.vertical(bottom: Radius.circular(8)),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(8),
+                ),
               ),
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -618,12 +738,14 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                       Expanded(
                         child: _infoRow(
                           "${l10n?.mohalla} : ",
-                          data['mohalla']?.toString() ?? data['mohallaTola']?.toString() ?? l10n!.na,
+                          data['mohalla']?.toString() ??
+                              data['mohallaTola']?.toString() ??
+                              l10n!.na,
                           isWrappable: true,
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
@@ -633,7 +755,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
     );
   }
 
-  Widget _infoRow(String? title, String value,{bool isWrappable = false}) {
+  Widget _infoRow(String? title, String value, {bool isWrappable = false}) {
     final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
@@ -641,7 +763,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         children: [
           Text(
             '$title ',
-            style:  TextStyle(
+            style: TextStyle(
               color: AppColors.background,
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
@@ -650,7 +772,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           Expanded(
             child: Text(
               value.isEmpty ? l10n!.na : value,
-              style:  TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w400,
                 fontSize: 13.sp,
