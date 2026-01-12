@@ -489,18 +489,34 @@ ORDER BY d.created_date_time DESC
       return 0;
     }
   }
+  int? normalizeToGrams(dynamic value) {
+    if (value == null) return null;
+
+    final num? v = num.tryParse(value.toString());
+    if (v == null || v <= 0) return null;
+
+    // ✅ Convert ONLY newborn-range kg values (≤ 3 kg)
+    if (v > 0 && v <= 3) {
+      return (v * 1000).round(); // kg → grams
+    }
+
+    // ✅ Already grams (typical gram range)
+    if (v > 100) {
+      return v.round();
+    }
+
+    // ❌ Ignore values like 8, 10, etc. (kg for older child)
+    return null;
+  }
 
   Future<int> _getLBWReferredCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
-
-
       final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       final rows = await db.query(
         BeneficiariesTable.table,
-        // 2. Add current_user_key condition
         where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL) AND current_user_key = ?',
         whereArgs: [ashaUniqueKey],
       );
@@ -509,48 +525,34 @@ ORDER BY d.created_date_time DESC
 
       for (final row in rows) {
         try {
-          final hhId = row['household_ref_key']?.toString() ?? '';
-          if (hhId.isEmpty) continue;
-
           final infoStr = row['beneficiary_info']?.toString();
           if (infoStr == null || infoStr.isEmpty) continue;
 
-          Map<String, dynamic>? info;
-          try {
-            final decoded = jsonDecode(infoStr);
-            if (decoded is Map) info = Map<String, dynamic>.from(decoded);
-          } catch (_) {}
+          final Map<String, dynamic>? info =
+          (jsonDecode(infoStr) as Map?)?.cast<String, dynamic>();
+          if (info == null) continue;
 
-          if (info == null || info.isEmpty) continue;
+          // Normalize both weight and birthWeight to grams
+          final int? weightGm = normalizeToGrams(info['weight']);
+          final int? birthWeightGm = normalizeToGrams(info['birthWeight']);
 
-          var weight = _parseNumFlexible(info['weight'])?.toDouble();
-          var birthWeight = _parseNumFlexible(info['birthWeight'])?.toDouble();
-
-          // Flexible LBW condition logic - matches _loadLbwChildren()
           bool isLbw = false;
 
-          if (weight != null && birthWeight != null) {
-            // Both present: BOTH must satisfy their conditions
-            isLbw = (weight <= 1.6 && birthWeight <= 1600);
-          } else if (weight != null && birthWeight == null) {
-            // Only weight present: check weight condition only
-            isLbw = (weight <= 1.6);
-          } else if (weight == null && birthWeight != null) {
-            // Only birthWeight present: check birthWeight condition only
-            isLbw = (birthWeight <= 1600);
+          // LBW if either weight or birthWeight <= 1600g
+          if ((weightGm != null && weightGm <= 1600) ||
+              (birthWeightGm != null && birthWeightGm <= 1600)) {
+            isLbw = true;
           }
-          // If both are null, isLbw remains false
 
           if (isLbw) count++;
-
         } catch (e) {
-          print('Error processing beneficiary LBW row in count: $e');
+          print('⚠️ Error processing LBW row for count: $e');
         }
       }
 
       return count;
     } catch (e) {
-      print('Error loading LBW count: $e');
+      print('❌ Error loading LBW count: $e');
       return 0;
     }
   }

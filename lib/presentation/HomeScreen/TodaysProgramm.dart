@@ -594,22 +594,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     }
   }
 
-  Future<bool> _hasTrackingDueStatus(String beneficiaryRefKey) async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-      final rows = await db.query(
-        'child_care_activities',
-        where:
-        'beneficiary_ref_key = ? AND child_care_state = ? AND is_deleted = 0',
-        whereArgs: [beneficiaryRefKey, 'tracking_due'],
-        limit: 1,
-      );
-      return rows.isNotEmpty;
-    } catch (e) {
-      print('Error checking tracking_due status for $beneficiaryRefKey: $e');
-      return false;
-    }
-  }
 
   String _formatDateFromString(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return 'Not Available';
@@ -2817,241 +2801,189 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     }
   }
 
+  Future<bool> _hasTrackingDueStatus(String beneficiaryKey) async {
+    final db = await DatabaseProvider.instance.database;
+
+    final result = await db.rawQuery(
+      '''
+    SELECT 1
+    FROM child_care_activities
+    WHERE beneficiary_ref_key = ?
+      AND child_care_state = 'tracking_due'
+      AND is_deleted = 0
+    LIMIT 1
+    ''',
+      [beneficiaryKey],
+    );
+
+    return result.isNotEmpty;
+  }
+
+  Future<bool> _hasFollowupWithinSixMonths({
+    required String beneficiaryKey,
+    required DateTime trackingDueDate,
+  }) async {
+    final db = await DatabaseProvider.instance.database;
+
+    final sixMonthEnd = DateTime(
+      trackingDueDate.year,
+      trackingDueDate.month + 6,
+      trackingDueDate.day,
+    );
+
+    print('🟢 ENTERED _hasFollowupWithinSixMonths for $beneficiaryKey');
+    print('📅 Window: $trackingDueDate → $sixMonthEnd');
+
+    final result = await db.rawQuery(
+      '''
+    SELECT 1
+    FROM followup_form_data
+    WHERE forms_ref_key = ?
+      AND beneficiary_ref_key = ?
+      AND is_deleted = 0
+      AND datetime(created_date_time)
+          BETWEEN datetime(?) AND datetime(?)
+    LIMIT 1
+    ''',
+      [
+        FollowupFormDataTable
+            .formUniqueKeys[FollowupFormDataTable.childTrackingDue],
+        beneficiaryKey,
+        trackingDueDate.toIso8601String(),
+        sixMonthEnd.toIso8601String(),
+      ],
+    );
+
+    return result.isNotEmpty;
+  }
+
+  Future<DateTime?> _getLatestTrackingDueDate(
+      String beneficiaryKey,
+      ) async {
+    final db = await DatabaseProvider.instance.database;
+
+    final result = await db.rawQuery(
+      '''
+    SELECT created_date_time
+    FROM child_care
+    WHERE beneficiaries_registration_ref_key = ?
+      AND child_care_type = 'tracking_due'
+      AND is_deleted = 0
+    ORDER BY datetime(created_date_time) DESC
+    LIMIT 1
+    ''',
+      [beneficiaryKey],
+    );
+
+    if (result.isEmpty) {
+      print('❌ No tracking_due for $beneficiaryKey');
+      return null;
+    }
+
+    print('✅ tracking_due found for $beneficiaryKey → ${result.first['created_date_time']}');
+
+    return DateTime.parse(result.first['created_date_time'] as String);
+  }
+
+
   Future<void> _loadRoutineImmunizationItems() async {
     try {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
 
-      // Get all child beneficiaries (same logic as RoutineScreen)
-      final List<Map<String, dynamic>> rows = await db.rawQuery(
+      final rows = await db.rawQuery(
         '''
-        SELECT 
-          B.*
-        FROM beneficiaries_new B
-        WHERE 
-          B.is_deleted = 0
-          AND B.is_adult = 0
-          AND B.is_migrated = 0
-          AND B.current_user_key = ?
-        ORDER BY B.created_date_time DESC
+      SELECT *
+      FROM beneficiaries_new
+      WHERE is_deleted = 0
+        AND is_adult = 0
+        AND is_migrated = 0
+        AND current_user_key = ?
+      ORDER BY created_date_time DESC
       ''',
         [ashaUniqueKey],
       );
 
-      // Get last visit dates from child_care_activities (same logic as RoutineScreen)
-      final lastVisitDates = <String, String>{};
-      final childCareRecords = await db.rawQuery('''
-        SELECT 
-          beneficiary_ref_key, 
-          created_date_time,
-          child_care_state
-        FROM child_care_activities 
-        ORDER BY created_date_time DESC
-      ''');
-
-      final Map<String, Map<String, dynamic>> latestRecordsByBeneficiary = {};
-      for (var record in childCareRecords) {
-        final beneficiaryKey = record['beneficiary_ref_key']?.toString();
-        if (beneficiaryKey != null &&
-            !latestRecordsByBeneficiary.containsKey(beneficiaryKey)) {
-          latestRecordsByBeneficiary[beneficiaryKey] = record;
-        }
-      }
-
-      // Extract latest dates from records
-      for (var entry in latestRecordsByBeneficiary.entries) {
-        final beneficiaryKey = entry.key;
-        final record = entry.value;
-        final createdDate = record['created_date_time']?.toString();
-        if (createdDate != null) {
-          lastVisitDates[beneficiaryKey] = createdDate;
-        }
-      }
-
       final List<Map<String, dynamic>> items = [];
-      final Set<String> seenBeneficiaries = <String>{};
+      final Set<String> seenBeneficiaries = {};
 
       for (final row in rows) {
         try {
           final beneficiaryRefKey = row['unique_key']?.toString() ?? '';
-
           if (beneficiaryRefKey.isEmpty) continue;
-          if (seenBeneficiaries.contains(beneficiaryRefKey)) continue;
-          seenBeneficiaries.add(beneficiaryRefKey);
+          if (!seenBeneficiaries.add(beneficiaryRefKey)) continue;
 
-          // Get beneficiary info
-          final info = row['beneficiary_info'] is String
+          final Map<String, dynamic>? info =
+          row['beneficiary_info'] is String
               ? jsonDecode(row['beneficiary_info'] as String)
-              : row['beneficiary_info'];
+          as Map<String, dynamic>?
+              : row['beneficiary_info'] as Map<String, dynamic>?;
 
-          if (info is! Map) continue;
 
-          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
-          final relation = info['relation']?.toString().toLowerCase() ?? '';
+          if (info == null) continue;
 
-          // Only include children
+          final memberType =
+              info['memberType']?.toString().toLowerCase() ?? '';
+          final relation =
+              info['relation']?.toString().toLowerCase() ?? '';
+
           if (!(memberType == 'child' ||
               relation == 'child' ||
-              memberType == 'Child' ||
               relation == 'daughter')) {
             continue;
           }
 
-          // Check if child has tracking_due status in child_care_activities
-          final hasTrackingDue = await _hasTrackingDueStatus(beneficiaryRefKey);
-          if (!hasTrackingDue) {
-            continue;
-          }
+          // 🔹 Must have tracking_due
+          final hasTrackingDue =
+          await _hasTrackingDueStatus(beneficiaryRefKey);
+          if (!hasTrackingDue) continue;
 
-          // Check if there's a followup record with form_ref_key "30bycxe4gv7fqnt6"
-          // If any record exists (created today or before based on created_date_time), exclude this beneficiary from the to-do list
+          // 🔹 6 MONTH EXCLUSION LOGIC
+          final trackingDueDate =
+          await _getLatestTrackingDueDate(beneficiaryRefKey);
 
-          // First check if this beneficiary is already in the completed RI list
-          final bool isInCompletedList = _riCompletedItems.any(
-                (item) =>
-            item['BeneficiaryID']?.toString() == beneficiaryRefKey ||
-                item['unique_key']?.toString() == beneficiaryRefKey,
-          );
-
-          if (isInCompletedList) {
-            print(
-              'Excluding beneficiary $beneficiaryRefKey from RI to-do list - already in completed list',
+          if (trackingDueDate != null) {
+            final hasFollowupIn6Months =
+            await _hasFollowupWithinSixMonths(
+              beneficiaryKey: beneficiaryRefKey,
+              trackingDueDate: trackingDueDate,
             );
-            continue;
-          }
 
-          final followupQuery =
-          '''
-            SELECT * FROM ${FollowupFormDataTable.table}
-            WHERE forms_ref_key = ?
-            AND beneficiary_ref_key = ?
-            AND (is_deleted IS NULL OR is_deleted = 0)
-            AND DATE(created_date_time) <= DATE('now', 'localtime')
-            ORDER BY created_date_time DESC
-            LIMIT 1
-          ''';
-
-          print('Query: $followupQuery');
-          print(
-            'Params: ["30bycxe4gv7fqnt6", "$beneficiaryRefKey"]',
-          );
-
-          final followupRecords = await db.rawQuery(followupQuery, [
-            '30bycxe4gv7fqnt6',
-            beneficiaryRefKey,
-          ]);
-
-          print('Found ${followupRecords.length} followup records for today or before (based on created_date_time)');
-          if (followupRecords.isNotEmpty) {
-            final record = followupRecords.first;
-            print('Record details:');
-            print('  ID: ${record['id']}');
-            print('  forms_ref_key: ${record['forms_ref_key']}');
-            print('  beneficiary_ref_key: ${record['beneficiary_ref_key']}');
-            print('  created_date_time: ${record['created_date_time']}');
-            print('  current_user_key: ${record['current_user_key']}');
-          }
-          print('====================');
-
-          // If there's any record created today or before (based on created_date_time), exclude this beneficiary from the to-do list
-          if (followupRecords.isNotEmpty) {
-            print(
-              'Excluding beneficiary $beneficiaryRefKey from RI to-do list - followup record exists (created today or before based on created_date_time)',
-            );
-            continue;
-          }
-
-          // Check for case closure (deceased)
-          String ccWhere =
-              'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0';
-          List<dynamic> ccArgs = [beneficiaryRefKey, '%case_closure%'];
-
-          if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-            ccWhere += ' AND current_user_key = ?';
-            ccArgs.add(ashaUniqueKey);
-          }
-
-          final caseClosureRecords = await db.query(
-            FollowupFormDataTable.table,
-            where: ccWhere,
-            whereArgs: ccArgs,
-          );
-
-          if (caseClosureRecords.isNotEmpty) {
-            bool hasCaseClosure = false;
-            for (final ccRecord in caseClosureRecords) {
-              try {
-                final ccFormJson = ccRecord['form_json'] as String?;
-                if (ccFormJson != null) {
-                  final ccDecoded = jsonDecode(ccFormJson);
-                  final ccFormDataMap =
-                      ccDecoded['form_data'] as Map<String, dynamic>? ?? {};
-                  final caseClosure =
-                      ccFormDataMap['case_closure'] as Map<String, dynamic>? ??
-                          {};
-                  if (caseClosure['is_case_closure'] == true) {
-                    hasCaseClosure = true;
-                    break;
-                  }
-                }
-              } catch (_) {}
-            }
-
-            if (hasCaseClosure) {
+            if (hasFollowupIn6Months) {
+              print('❌ Excluding $beneficiaryRefKey → RI done within 6 months');
               continue;
             }
           }
 
-          // Extract child information
+
+          // 🔹 Extract display data
           final name =
-              info['name']?.toString() ??
-                  info['memberName']?.toString() ??
-                  info['member_name']?.toString() ??
+              info['name'] ??
+                  info['memberName'] ??
+                  info['member_name'] ??
                   '';
 
-          final mobileNo =
-              info['mobileNo']?.toString() ??
-                  info['mobile']?.toString() ??
-                  info['mobile_number']?.toString() ??
-                  '';
-
-          final richId =
-              info['RichIDChanged']?.toString() ??
-                  info['richIdChanged']?.toString() ??
-                  info['richId']?.toString() ??
-                  '';
+          final mobile =
+              info['mobileNo'] ??
+                  info['mobile'] ??
+                  info['mobile_number'] ??
+                  '-';
 
           final dob =
               info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
-          final gender = info['gender'] ?? info['sex'];
 
-          // Calculate age using same logic as RegisterChildListScreen
-          String ageText = _formatAgeOnly(dob);
-          final genderRaw = gender?.toString().toLowerCase() ?? '';
-          String displayGender;
-          switch (genderRaw) {
-            case 'm':
-            case 'male':
-              displayGender = 'Male';
-              break;
-            case 'f':
-            case 'female':
-              displayGender = 'Female';
-              break;
-            default:
-              displayGender = 'Other';
-          }
+          final genderRaw =
+              info['gender']?.toString().toLowerCase() ?? '';
 
-          // Get last visit date from child_care_activities (same logic as RoutineScreen)
-          String lastVisitDate;
-          if (lastVisitDates.containsKey(beneficiaryRefKey)) {
-            lastVisitDate = _formatDateFromString(
-              lastVisitDates[beneficiaryRefKey],
-            );
-          } else {
-            lastVisitDate = 'Not Available';
-          }
+          final gender = genderRaw == 'male' || genderRaw == 'm'
+              ? 'Male'
+              : genderRaw == 'female' || genderRaw == 'f'
+              ? 'Female'
+              : 'Other';
+
+          final age = _formatAgeOnly(dob);
 
           final hhId = row['household_ref_key']?.toString() ?? '';
 
@@ -3061,25 +2993,23 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             'hhId': hhId,
             'BeneficiaryID': beneficiaryRefKey,
             'name': name,
-            'age': ageText,
-            'gender': displayGender,
-            'last Visit date': lastVisitDate,
-            'mobile': mobileNo.isNotEmpty ? mobileNo : '-',
+            'age': age,
+            'gender': gender,
+            'mobile': mobile,
             'badge': 'RI',
           });
         } catch (e) {
-          print('⚠️ Error processing beneficiary record: $e');
-          continue;
+          print('⚠️ Beneficiary error: $e');
         }
       }
 
       if (mounted) {
-        setState(() {
-          _riItems = items;
-        });
+        setState(() => _riItems = items);
         _saveTodayWorkCountsToStorage();
       }
-    } catch (_) {}
+    } catch (e) {
+      print('❌ RI load error: $e');
+    }
   }
 
   Future<void> _loadFamilySurveyItems() async {

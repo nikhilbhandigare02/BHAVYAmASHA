@@ -915,7 +915,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
                           l10n?.mobileLabelSimple ?? 'Mobile No.',
                           data['Mobileno.']?.isNotEmpty == true
                               ? data['Mobileno.']
-                              : 'N/A',
+                              : l10n!.na,
                         ),
                       ),
                       const SizedBox(width: 8),

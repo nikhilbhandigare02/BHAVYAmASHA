@@ -827,7 +827,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               child: ApiDropdown<String>(
                 labelText: l.categoryLabel,
                 items: const [
-                  'Not Disclosed',
+                  'Do not want to disclose',
                   'General',
                   'OBC',
                   'SC',
@@ -840,7 +840,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 ],
                 getLabel: (s) {
                   switch (s) {
-                    case 'Not Disclosed':
+                    case 'Do not want to disclose':
                       return l.categoryNotDisclosed;
                     case 'General':
                       return l.categoryGeneral;

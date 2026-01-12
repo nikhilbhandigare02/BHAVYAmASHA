@@ -542,6 +542,49 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   @override
   bool get wantKeepAlive => widget.maintainState;
 
+  void updateDobFromAge() {
+    final bloc = context.read<AddnewfamilymemberBloc>();
+    final state = bloc.state;
+    
+    final y = int.tryParse(state.updateYear ?? '0') ?? 0;
+    final m = int.tryParse(state.updateMonth ?? '0') ?? 0;
+    final d = int.tryParse(state.updateDay ?? '0') ?? 0;
+
+    // Calculate DOB and update BLoC state (rollover logic is handled in BLoC)
+    final now = DateTime.now();
+    final calculatedDob = DateTime(
+      now.year - y,
+      now.month - m,
+      now.day - d,
+    );
+    
+    bloc.add(AnmUpdateDob(calculatedDob));
+  }
+
+  void updateAgeFromDob(DateTime date) {
+    final now = DateTime.now();
+
+    int years = now.year - date.year;
+    int months = now.month - date.month;
+    int days = now.day - date.day;
+
+    if (days < 0) {
+      months--;
+      days += 30;
+    }
+
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    
+    // Update BLoC state with calculated age values
+    final bloc = context.read<AddnewfamilymemberBloc>();
+    bloc.add(UpdateYearChanged(years.toString()));
+    bloc.add(UpdateMonthChanged(months.toString()));
+    bloc.add(UpdateDayChanged(days.toString()));
+  }
+
 
 
   List<String> _getMobileOwnerList(String gender) {
@@ -3119,18 +3162,29 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       Radio<bool>(
                                         value: true,
                                         groupValue: state.useDob,
-                                        onChanged: widget.isEdit ? null :(_) => context
-                                            .read<AddnewfamilymemberBloc>()
-                                            .add(AnmToggleUseDob()),
+                                        onChanged: widget.isEdit ? null :(_) {
+                                          context
+                                              .read<AddnewfamilymemberBloc>()
+                                              .add(AnmToggleUseDob());
+                                          // When switching to DOB mode, update DOB from age fields
+                                          if (!state.useDob) {
+                                            updateDobFromAge();
+                                          }
+                                        },
                                       ),
                                       Text(l.dobShort),
                                       const SizedBox(width: 16),
                                       Radio<bool>(
                                         value: false,
                                         groupValue: state.useDob,
-                                        onChanged: widget.isEdit ? null :(_) => context
-                                            .read<AddnewfamilymemberBloc>()
-                                            .add(AnmToggleUseDob()),
+                                        onChanged: widget.isEdit ? null :(_) {
+                                          context
+                                              .read<AddnewfamilymemberBloc>()
+                                              .add(AnmToggleUseDob());
+                                          if (!state.useDob) {
+                                            updateDobFromAge();
+                                          }
+                                        },
                                       ),
                                       Text("${l.ageApproximate}"),
                                     ],
@@ -3162,6 +3216,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               context
                                                   .read<AddnewfamilymemberBloc>()
                                                   .add(AnmUpdateDob(date));
+                                              // Update text controllers with calculated age
+                                              updateAgeFromDob(date);
                                             }
                                           },
                                           validator: (date) {
@@ -3816,20 +3872,20 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   ApiDropdown<String>(
                                     labelText: l.categoryLabel,
                                     items: const [
-                                      'NotDisclosed',
+                                      'Do not want to disclose',
                                       'General',
                                       'OBC',
                                       'SC',
                                       'ST',
-                                      'PichdaVarg1',
-                                      'PichdaVarg2',
-                                      'AtyantPichdaVarg',
-                                      'DontKnow',
+                                      'Pichda Varg1',
+                                      'Pichda Varg2',
+                                      'Atyant PichdaVarg',
+                                      'Dont Know',
                                       'Other',
                                     ],
                                     getLabel: (s) {
                                       switch (s) {
-                                        case 'NotDisclosed':
+                                        case 'Do not want to disclose':
                                           return l.categoryNotDisclosed;
                                         case 'General':
                                           return l.categoryGeneral;
@@ -3839,13 +3895,13 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           return l.categorySC;
                                         case 'ST':
                                           return l.categoryST;
-                                        case 'PichdaVarg1':
+                                        case 'Pichda Varg1':
                                           return l.categoryPichdaVarg1;
-                                        case 'PichdaVarg2':
+                                        case 'Pichda Varg2':
                                           return l.categoryPichdaVarg2;
-                                        case 'AtyantPichdaVarg':
+                                        case 'Atyant PichdaVarg':
                                           return l.categoryAtyantPichdaVarg;
-                                        case 'DontKnow':
+                                        case 'Dont Know':
                                           return l.categoryDontKnow;
                                         case 'Other':
                                           return l.religionOther;
@@ -4329,14 +4385,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                   ApiDropdown<String>(
                                     labelText: l.beneficiaryTypeLabel,
                                     items: const [
-                                      'StayingInHouse',
-                                      'SeasonalMigrant',
+                                      'Staying In House',
+                                      'Seasonal Migrant',
                                     ],
                                     getLabel: (s) {
                                       switch (s) {
-                                        case 'StayingInHouse':
+                                        case 'Staying In House':
                                           return l.migrationStayingInHouse;
-                                        case 'SeasonalMigrant':
+                                        case 'Seasonal Migrant':
                                           return l.migrationSeasonalMigrant;
                                         default:
                                           return s;
