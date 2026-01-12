@@ -436,7 +436,6 @@ class DbMigration {
           continue;
         }
 
-        // ---------- Skip if already exists ----------
         final existing = await db.query(
           "households",
           where: "unique_key = ?",
@@ -516,7 +515,7 @@ class DbMigration {
   static Future<void> runFollowUpTableMigration(Database db) async {
     try {
       await db.rawInsert('''
-      INSERT INTO followup_form_data (     
+      INSERT INTO followup_form_data (
         server_id,
         forms_ref_key,
         form_json,
@@ -529,7 +528,6 @@ class DbMigration {
         parent_user,
         is_deleted,
         facility_id
-        
       )
       SELECT 
         a._id,
@@ -541,9 +539,6 @@ class DbMigration {
         a.created_date_time,
         a.created_by,
         a.modified_date_time,
-        a.hsc_id,
-
-        -- JSON object for parent_user
         ('{' ||
           '"app_role_id":' || ifnull(a.app_role_id, 0) ||
           ',"is_guest":' || ifnull(a.is_guest, 0) ||
@@ -551,8 +546,8 @@ class DbMigration {
           ',"created_by":"' || ifnull(a.created_by, '') || '"' ||
           ',"modified_by":"' || ifnull(a.modified_by, '') || '"' ||
         '}'),
-        a.is_deleted
-
+        a.is_deleted,
+        a.hsc_id
       FROM followup_forms_data a
       WHERE NOT EXISTS (
         SELECT 1 

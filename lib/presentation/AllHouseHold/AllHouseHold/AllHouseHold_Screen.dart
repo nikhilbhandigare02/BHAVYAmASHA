@@ -85,21 +85,15 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
 
-      // Query households directly with JOIN to only get households where head_id matches a beneficiary
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
 
-      final households = await db.rawQuery(
-        '''
-        SELECT h.* FROM households h
-        INNER JOIN beneficiaries_new b ON h.head_id = b.unique_key
-        WHERE h.is_deleted = 0 
-          AND h.current_user_key = ?
-          AND b.is_deleted = 0
-        ORDER BY h.created_date_time DESC
-      ''',
-        [currentUserKey],
+      final households = await db.query(
+        'households',
+        where: 'is_deleted = 0 AND current_user_key = ?',
+        whereArgs: [currentUserKey],
+        orderBy: 'created_date_time DESC',
       );
 
       // Query database directly to get eligible couple activities records for eligible_couple and tracking_due states
@@ -457,8 +451,110 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         };
       }).toList();
 
+      final Set<String> hhWithBeneficiaries = rows
+          .map((e) => (e['household_ref_key'] ?? '').toString())
+          .where((k) => k.isNotEmpty)
+          .toSet();
+
+      final List<Map<String, dynamic>> fallbackMapped = [];
+      for (final hh in households) {
+        final hhRefKey = (hh['unique_key'] ?? '').toString();
+        if (hhRefKey.isEmpty) continue;
+        if (hhWithBeneficiaries.contains(hhRefKey)) continue;
+
+        Map<String, dynamic> hhInfo;
+        final rawHhInfo = hh['household_info'];
+        if (rawHhInfo is Map) {
+          hhInfo = Map<String, dynamic>.from(rawHhInfo);
+        } else if (rawHhInfo is String && rawHhInfo.isNotEmpty) {
+          try {
+            hhInfo = Map<String, dynamic>.from(jsonDecode(rawHhInfo));
+          } catch (_) {
+            hhInfo = <String, dynamic>{};
+          }
+        } else {
+          hhInfo = <String, dynamic>{};
+        }
+
+        final headInfoRaw = hhInfo['family_head_details'];
+        Map<String, dynamic> headInfo = {};
+        if (headInfoRaw is Map) {
+          headInfo = Map<String, dynamic>.from(headInfoRaw);
+        } else if (headInfoRaw is String && headInfoRaw.isNotEmpty) {
+          try {
+            headInfo = Map<String, dynamic>.from(jsonDecode(headInfoRaw));
+          } catch (_) {}
+        }
+
+        final isHeadA =
+            headInfo['isFamilyHead'] == true ||
+            (headInfo['isFamilyHead']?.toString().toLowerCase() == 'true');
+        final isHeadB =
+            headInfo['isFamilyhead'] == true ||
+            (headInfo['isFamilyhead']?.toString().toLowerCase() == 'true');
+        final isHead = isHeadA || isHeadB;
+        if (!isHead) continue;
+
+        String name =
+            (headInfo['name_of_family_head'] ??
+                    headInfo['headName'] ??
+                    headInfo['memberName'] ??
+                    headInfo['name'] ??
+                    '')
+                .toString();
+        String mobile =
+            (headInfo['mobile_no_of_family_head'] ?? headInfo['mobileNo'] ?? '')
+                .toString();
+        String houseNo =
+            (headInfo['house_no'] ?? headInfo['houseNo'] ?? hh['address'] ?? '')
+                .toString();
+
+        int totalMembers = 1;
+        final allMembersRaw = hhInfo['all_members'];
+        if (allMembersRaw is List) {
+          totalMembers = allMembersRaw.length;
+        } else if (allMembersRaw is String && allMembersRaw.isNotEmpty) {
+          try {
+            final parsed = jsonDecode(allMembersRaw);
+            if (parsed is List) {
+              totalMembers = parsed.length;
+            }
+          } catch (_) {}
+        }
+
+        final headId = hhRefKey.length > 11
+            ? hhRefKey.substring(hhRefKey.length - 11)
+            : hhRefKey;
+
+        fallbackMapped.add({
+          'name': name,
+          'mobile': mobile,
+          'hhId': headId,
+          'houseNo': houseNo,
+          'totalMembers': totalMembers,
+          'elderly': 0,
+          'pregnantWomen': 0,
+          'eligibleCouples': 0,
+          'child0to1': 0,
+          'child1to2': 0,
+          'child2to5': 0,
+          'hasChildrenTarget': false,
+          'remainingChildren': 0,
+          '_raw': {
+            'household_ref_key': hhRefKey,
+            'created_date_time': hh['created_date_time']?.toString(),
+            'unique_key': hh['head_id']?.toString(),
+          },
+        });
+      }
+
+      final List<Map<String, dynamic>> combined = [
+        ...mapped,
+        ...fallbackMapped,
+      ];
+
       /// --------- SORT ----------
-      mapped.sort((a, b) {
+      combined.sort((a, b) {
         final ra = a['_raw'] as Map<String, dynamic>;
         final rb = b['_raw'] as Map<String, dynamic>;
 
@@ -471,8 +567,8 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
       if (mounted) {
         setState(() {
-          _items = mapped;
-          _filtered = List<Map<String, dynamic>>.from(mapped);
+          _items = combined;
+          _filtered = List<Map<String, dynamic>>.from(combined);
           _isLoading = false;
         });
       }
