@@ -5,6 +5,8 @@ import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 class PreviousVisitsScreenHBYC extends StatefulWidget {
   final String beneficiaryId;
   
@@ -26,6 +28,7 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreenHBYC> {
     super.initState();
     _loadVisitData();
   }
+  late final l10n = AppLocalizations.of(context);
 
   Future<void> _loadVisitData() async {
     try {
@@ -124,7 +127,7 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreenHBYC> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: 'Previous Visits',
+        screenTitle: l10n?.previousVisitsButtonS ?? '',
         showBack: true,
       ),
       body: Padding(
@@ -145,7 +148,7 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreenHBYC> {
                   Expanded(
                     flex: 1,
                     child: Text(
-                      'Sr No.',
+                      l10n!.srNo,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14.sp,
@@ -155,7 +158,7 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreenHBYC> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      'Visit Date',
+                      l10n!.previousVisitsButtonS,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14.sp,
@@ -174,7 +177,7 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreenHBYC> {
                         child: Padding(
                           padding: EdgeInsets.all(4.w),
                           child: Text(
-                            'No previous visits found',
+                            l10n!.noPreviousVisits,
                             style: TextStyle(fontSize: 14.sp),
                           ),
                         ),

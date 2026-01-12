@@ -2796,7 +2796,7 @@ class _TodayworkState extends State<Todaywork> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _kv("Total Visits:", "${state.completed + state.pending}"),
+                            _kv('${l10n!.toDoVisit} :', "${state.completed + state.pending}"),
                             _kv(
                               '${l10n!.completedVisits} :',
                               state.completed.toString(),

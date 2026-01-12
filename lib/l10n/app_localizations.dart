@@ -3869,6 +3869,12 @@ abstract class AppLocalizations {
   /// **'PREVIOUS VISITS'**
   String get previousVisitsButton;
 
+  /// No description provided for @previousVisitsButtonS.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Visits'**
+  String get previousVisitsButtonS;
+
   /// No description provided for @primaryWaterSourceLabel.
   ///
   /// In en, this message translates to:
@@ -4654,6 +4660,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'To do visits'**
   String get toDoVisits;
+
+  /// No description provided for @toDoVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'To do visits'**
+  String get toDoVisit;
 
   /// No description provided for @todayWorkCompleted.
   ///
@@ -15178,6 +15190,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'User found.'**
   String get userFound;
+
+  /// No description provided for @userLoginSuccses.
+  ///
+  /// In en, this message translates to:
+  /// **'user login successfully'**
+  String get userLoginSuccses;
 
   /// No description provided for @invalidLoginCredentials.
   ///

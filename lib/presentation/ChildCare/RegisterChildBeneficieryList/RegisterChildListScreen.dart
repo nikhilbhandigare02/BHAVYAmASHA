@@ -693,7 +693,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        'Deceased',
+                        'Decease',
                         style: TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.bold,

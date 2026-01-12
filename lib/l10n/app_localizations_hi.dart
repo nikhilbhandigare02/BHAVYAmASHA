@@ -1908,6 +1908,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get previousVisitsButton => 'पिछली विज़िट्स';
 
   @override
+  String get previousVisitsButtonS => 'पिछली विज़िट्स';
+
+  @override
   String get primaryWaterSourceLabel => 'पानी का मुख्य स्रोत';
 
   @override
@@ -2299,6 +2302,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get toDoVisits => 'दौरा करना';
+
+  @override
+  String get toDoVisit => 'निर्धारित कार्य';
 
   @override
   String get todayWorkCompleted => 'Completed visits :';
@@ -7565,6 +7571,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get userFound => 'उपयोगकर्ता लॉगिन सफलतापूर्वक.';
+
+  @override
+  String get userLoginSuccses => 'उपयोगकर्ता लॉगिन सफलतापूर्वक.';
 
   @override
   String get invalidLoginCredentials => 'कृपया मान्य उपयोगकर्ता क्रेडेंशियल दर्ज करें।';
