@@ -35,6 +35,7 @@ class _TodayworkState extends State<Todaywork> {
   List<Map<String, dynamic>> _eligibleCompletedCoupleItems = [];
   List<Map<String, dynamic>> _hbncCompletedItems = [];
   int _completedVisitsCount = 0;
+  int _pendingCountVisitsCount = 0;
   int _toDoVisitsCount = 0;
   @override
   void initState() {
@@ -240,7 +241,7 @@ class _TodayworkState extends State<Todaywork> {
         setState(() {
           _familySurveyItems = items;
         });
-        _saveTodayWorkCountsToStorage();
+      //  _saveTodayWorkCountsToStorage();
       }
     } catch (_) {}
   }
@@ -333,7 +334,7 @@ class _TodayworkState extends State<Todaywork> {
         _eligibleCoupleItems.clear();
         if (mounted) {
           setState(() {});
-          _saveTodayWorkCountsToStorage();
+         // _saveTodayWorkCountsToStorage();
         }
         return;
       }
@@ -369,7 +370,7 @@ class _TodayworkState extends State<Todaywork> {
         _eligibleCoupleItems.clear();
         if (mounted) {
           setState(() {});
-          _saveTodayWorkCountsToStorage();
+         // _saveTodayWorkCountsToStorage();
         }
         return;
       }
@@ -501,7 +502,7 @@ class _TodayworkState extends State<Todaywork> {
 
       if (mounted) {
         setState(() {});
-        _saveTodayWorkCountsToStorage();
+        //_saveTodayWorkCountsToStorage();
       }
     } catch (e) {
       debugPrint('EC load error: $e');
@@ -588,6 +589,40 @@ class _TodayworkState extends State<Todaywork> {
           final isMigrated = row['is_migrated'] == 1;
           if (isDeath || isMigrated) continue;
 
+          // Check if beneficiary has abortion followup form with is_abortion = 'yes'
+          final abortionForms = await db.query(
+            'followup_form_data',
+            where: "forms_ref_key = 'bt7gs9rl1a5d26mz' AND beneficiary_ref_key = ? AND form_json LIKE '%\"is_abortion\"%'",
+            whereArgs: [beneficiaryId],
+          );
+
+          bool hasAbortion = false;
+          for (final form in abortionForms) {
+            try {
+              final formJson = form['form_json']?.toString();
+              if (formJson != null && formJson.isNotEmpty) {
+                final decoded = jsonDecode(formJson);
+                if (decoded is Map<String, dynamic>) {
+                  final ancForm = decoded['anc_form'];
+                  if (ancForm is Map<String, dynamic>) {
+                    final isAbortion = ancForm['is_abortion']?.toString().toLowerCase();
+                    if (isAbortion == 'yes' || isAbortion == 'true' || isAbortion == '1') {
+                      hasAbortion = true;
+                      break;
+                    }
+                  }
+                }
+              }
+            } catch (e) {
+              debugPrint('Error checking abortion form: $e');
+            }
+          }
+
+          if (hasAbortion) {
+            debugPrint('Excluding beneficiary $beneficiaryId - has abortion record');
+            continue;
+          }
+
           // Parse beneficiary_info
           final infoRaw = row['beneficiary_info'];
           if (infoRaw == null) continue;
@@ -635,8 +670,14 @@ class _TodayworkState extends State<Todaywork> {
 
                 if (days < 0) {
                   final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
-                  final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
-                  final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
+                  final lastMonthYear = now.month - 1 < 1
+                      ? now.year - 1
+                      : now.year;
+                  final daysInLastMonth = DateTime(
+                    lastMonthYear,
+                    lastMonth + 1,
+                    0,
+                  ).day;
                   days += daysInLastMonth;
                   months--;
                 }
@@ -772,7 +813,6 @@ class _TodayworkState extends State<Todaywork> {
             );
           }
 
-          // Determine if any ANC visit (1st–4th) is currently due
           DateTime? dueVisitStartDate;
           DateTime? dueVisitEndDate;
           String? currentAncVisitName;
@@ -836,20 +876,44 @@ class _TodayworkState extends State<Todaywork> {
             }
           }
 
-          // If no ANC visit is currently due (or all have forms in their windows), skip this beneficiary
-          if (!hasDueVisit || dueVisitStartDate == null || dueVisitEndDate == null) {
+          if (!hasDueVisit ||
+              dueVisitStartDate == null ||
+              dueVisitEndDate == null) {
             continue;
           }
 
-          // For display, use the start and end date of currently due visit window in "TO" format
-          DateTime displayEndDate = dueVisitEndDate;
+          final visitCount = await _getVisitCountFromFollowupForm(uniqueKeyFull);
+          print('🔍 Visit count for beneficiary $uniqueKeyFull: $visitCount');
 
-          // Special handling for 4th ANC - show 15 days window from start date
-          if (currentAncVisitName == '4th ANC') {
-            displayEndDate = dueVisitStartDate!.add(const Duration(days: 15));
+          String currentAncLastDueDateText = '';
+          DateTime? displayEndDate;
+
+          if (visitCount >= 1 && firstEnd != null) {
+            displayEndDate = firstEnd;
+          }
+          if (visitCount >= 2 && secondEnd != null) {
+            displayEndDate = secondEnd;
+          }
+          if (visitCount >= 3 && thirdEnd != null) {
+            displayEndDate = thirdEnd;
+          }
+          if (visitCount >= 4 && fourthEnd != null) {
+            displayEndDate = fourthEnd;
           }
 
-          final currentAncLastDueDateText = '${_formatDate(dueVisitStartDate!)} TO ${_formatDate(displayEndDate)}';
+          if (displayEndDate != null) {
+            currentAncLastDueDateText = _formatDate(displayEndDate);
+            print('✅ ANC end date for visit count $visitCount: $currentAncLastDueDateText');
+          } else {
+            DateTime displayEndDate = dueVisitEndDate;
+
+            if (currentAncVisitName == '4th ANC') {
+              displayEndDate = dueVisitStartDate!.add(const Duration(days: 15));
+            }
+
+            currentAncLastDueDateText =
+            '${_formatDate(dueVisitStartDate!)} TO ${_formatDate(displayEndDate)}';
+          }
 
           final householdRefKey = row['household_ref_key']?.toString() ?? '';
 
@@ -861,10 +925,10 @@ class _TodayworkState extends State<Todaywork> {
           final uniqueKey = row['unique_key']?.toString() ?? '';
 
           items.add({
-            'id': rawId, // trimmed for display
+            'id': rawId,
             'household_ref_key': householdRefKey, // full household key
-            'hhId': householdRefKey, // explicit for ANCVisitForm
-            'unique_key': uniqueKey, // full beneficiary key
+            'hhId': householdRefKey,
+            'unique_key': uniqueKey,
             'BeneficiaryID': uniqueKey,
             'name': name,
             'age': ageText,
@@ -888,11 +952,89 @@ class _TodayworkState extends State<Todaywork> {
         setState(() {
           _ancItems = items; // Use the already filtered items list
         });
-        _saveTodayWorkCountsToStorage();
+      //  _saveTodayWorkCountsToStorage();
         debugPrint('Updated _ancItems with ${items.length} filtered records');
       }
     } catch (_) {}
   }
+
+  Future<int> _getVisitCountFromFollowupForm(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiary ID provided to _getVisitCountFromFollowupForm');
+        return 0;
+      }
+
+      final db = await DatabaseProvider.instance.database;
+      final ancFormKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+
+      if (ancFormKey.isEmpty) {
+        print('⚠️ ANC form key is empty');
+        return 0;
+      }
+
+      // Get the most recent ANC form for this beneficiary
+      final result = await db.query(
+        FollowupFormDataTable.table,
+        where: 'forms_ref_key = ? AND beneficiary_ref_key = ? ',
+        whereArgs: [ancFormKey, beneficiaryId],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      if (result.isEmpty) {
+        print('ℹ️ No ANC followup forms found for beneficiary: $beneficiaryId');
+        return 0;
+      }
+
+      final formJsonStr = result.first['form_json']?.toString();
+      if (formJsonStr == null || formJsonStr.isEmpty) {
+        print('⚠️ No form_json found in followup form for beneficiary: $beneficiaryId');
+        return 0;
+      }
+
+      try {
+        final formJson = jsonDecode(formJsonStr) as Map<String, dynamic>;
+
+        // Try to get visit_count from anc_form structure
+        final ancForm = formJson['anc_form'] as Map<String, dynamic>?;
+        if (ancForm != null) {
+          final visitCount = ancForm['anc_visit'] as int?;
+          if (visitCount != null) {
+            print('✅ Found visit count $visitCount in anc_form for beneficiary: $beneficiaryId');
+            return visitCount;
+          }
+        }
+
+        // Try alternative structure (form_data)
+        final formData = formJson['form_data'] as Map<String, dynamic>?;
+        if (formData != null) {
+          final visitCount = formData['anc_visit'] as int?;
+          if (visitCount != null) {
+            print('✅ Found visit count $visitCount in form_data for beneficiary: $beneficiaryId');
+            return visitCount;
+          }
+        }
+
+        // Try top level
+        final visitCount = formJson['anc_visit'] as int?;
+        if (visitCount != null) {
+          print('✅ Found visit count $visitCount at top level for beneficiary: $beneficiaryId');
+          return visitCount;
+        }
+
+        print('⚠️ No visit count found in followup form for beneficiary: $beneficiaryId');
+        return 0;
+      } catch (e) {
+        print('❌ Error parsing followup form JSON for beneficiary $beneficiaryId: $e');
+        return 0;
+      }
+    } catch (e) {
+      print('❌ Error in _getVisitCountFromFollowupForm for $beneficiaryId: $e');
+      return 0;
+    }
+  }
+
 
   String _formatAncDateOnly(String? dateTime) {
     if (dateTime == null || dateTime.isEmpty) return '-';
@@ -1958,7 +2100,7 @@ class _TodayworkState extends State<Todaywork> {
         setState(() {
           _riItems = items;
         });
-        _saveTodayWorkCountsToStorage();
+       // _saveTodayWorkCountsToStorage();
       }
     } catch (_) {}
   }
@@ -2082,20 +2224,32 @@ class _TodayworkState extends State<Todaywork> {
         print('============================================');
 
         // Debug: Check all records in followup_form_data for today only
-        final debugQuery = 'SELECT * FROM ${FollowupFormDataTable.table} WHERE DATE(created_date_time) = DATE(?) AND (is_deleted IS NULL OR is_deleted = 0)';
+        final debugQuery =
+            'SELECT * FROM ${FollowupFormDataTable.table} WHERE DATE(created_date_time) = DATE(?) AND (is_deleted IS NULL OR is_deleted = 0)';
         final debugRows = await db.rawQuery(debugQuery, [todayStr]);
         print('=== DEBUG: All followup_form_data records for today ===');
         print('Total records found: ${debugRows.length}');
         for (final row in debugRows) {
-          print('ID: ${row['id']}, forms_ref_key: ${row['forms_ref_key']}, beneficiary_ref_key: ${row['beneficiary_ref_key']}, created_date_time: ${row['created_date_time']}, current_user_key: ${row['current_user_key']}');
+          print(
+            'ID: ${row['id']}, forms_ref_key: ${row['forms_ref_key']}, beneficiary_ref_key: ${row['beneficiary_ref_key']}, created_date_time: ${row['created_date_time']}, current_user_key: ${row['current_user_key']}',
+          );
         }
         print('================================================');
 
         // Debug: Check what form keys we're looking for
         print('=== DEBUG: Form Keys We Are Looking For ===');
-        final ancFormKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
-        final ecFormKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
-        final hbncFormKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother] ?? '';
+        final ancFormKey =
+            FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+                .ancDueRegistration] ??
+                '';
+        final ecFormKey =
+            FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+                .eligibleCoupleTrackingDue] ??
+                '';
+        final hbncFormKey =
+            FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+                .pncMother] ??
+                '';
         print('ANC Form Key: $ancFormKey');
         print('EC Form Key: $ecFormKey');
         print('HBNC Form Key: $hbncFormKey');
@@ -2116,11 +2270,7 @@ class _TodayworkState extends State<Todaywork> {
               'AND f.current_user_key = ? '
               'AND (b.is_death IS NULL OR b.is_death = 0)';
 
-          List<dynamic> args = [
-            ancFormKey,
-            todayStr,
-            ashaUniqueKey ?? '',
-          ];
+          List<dynamic> args = [ancFormKey, todayStr, ashaUniqueKey ?? ''];
 
           print('=== ANC Completed Query ===');
           print('Query: $query');
@@ -2167,7 +2317,7 @@ class _TodayworkState extends State<Todaywork> {
               'last Visit date': _formatAncDateOnly(
                 row['created_date_time']?.toString(),
               ),
-              'Current ANC last due date': 'currentAncLastDueDateText',
+              'Current ANC last due date': '',
               'mobile': fields['mobile'],
               'badge': 'ANC',
               '_rawRow': row,
@@ -2176,7 +2326,6 @@ class _TodayworkState extends State<Todaywork> {
         } catch (e) {
           print('Error in ANC query: $e');
         }
-
         try {
           _eligibleCompletedCoupleItems = [];
 
@@ -2269,7 +2418,8 @@ class _TodayworkState extends State<Todaywork> {
                   ? jsonDecode(row['form_json'] as String)
                   : {};
 
-              final Map<String, dynamic> ecForm = formJson['eligible_couple_tracking_due_from'] ?? {};
+              final Map<String, dynamic> ecForm =
+                  formJson['eligible_couple_tracking_due_from'] ?? {};
 
               final fields = await _getBeneficiaryFields(beneficiaryId);
 
@@ -2287,7 +2437,7 @@ class _TodayworkState extends State<Todaywork> {
                 'last Visit date': _formatDateOnly(
                   row['created_date_time']?.toString(),
                 ),
-                'Current ANC last due date': 'currentAncLastDueDateText',
+                'Current ANC last due date': '',
                 'mobile': fields['mobile'],
                 'badge': 'EligibleCouple',
                 '_rawRow': row,
@@ -2318,8 +2468,8 @@ class _TodayworkState extends State<Todaywork> {
               'SELECT * FROM ${FollowupFormDataTable.table} '
               'WHERE forms_ref_key IN ($placeholdersHBNC) '
               'AND (is_deleted IS NULL OR is_deleted = 0) '
-              'AND DATE(created_date_time) = DATE(?)';
-          List<dynamic> argsHBNC = [...formKeysHBNC, todayStr];
+              'AND created_date_time LIKE ?';
+          List<dynamic> argsHBNC = [...formKeysHBNC, '$todayStr%'];
 
           if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
             queryHBNC += ' AND current_user_key = ?';
@@ -2336,7 +2486,9 @@ class _TodayworkState extends State<Todaywork> {
           print('=== HBNC Query Results ===');
           print('HBNC Records Found: ${rowsHBNC.length}');
           for (final row in rowsHBNC) {
-            print('HBNC Row: ID=${row['id']}, forms_ref_key=${row['forms_ref_key']}, beneficiary=${row['beneficiary_ref_key']}');
+            print(
+              'HBNC Row: ID=${row['id']}, forms_ref_key=${row['forms_ref_key']}, beneficiary=${row['beneficiary_ref_key']}',
+            );
           }
           print('==========================');
 
@@ -2395,10 +2547,10 @@ class _TodayworkState extends State<Todaywork> {
               'SELECT f.* FROM ${FollowupFormDataTable.table} f '
               'JOIN beneficiaries_new b ON f.beneficiary_ref_key = b.unique_key '
               'WHERE f.forms_ref_key = ? '
-              'AND DATE(f.created_date_time) = DATE(?) '
+              'AND f.created_date_time LIKE ? '
               'AND (b.is_death IS NULL OR b.is_death = 0)';
 
-          List<dynamic> argsRI = ['30bycxe4gv7fqnt6', todayStr];
+          List<dynamic> argsRI = ['30bycxe4gv7fqnt6', '$todayStr%'];
 
           if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
             queryRI += ' AND f.current_user_key = ?';
@@ -2417,7 +2569,9 @@ class _TodayworkState extends State<Todaywork> {
           print('=== RI Query Results ===');
           print('RI Records Found: ${resulrowsRI.length}');
           for (final row in resulrowsRI) {
-            print('RI Row: ID=${row['id']}, forms_ref_key=${row['forms_ref_key']}, beneficiary=${row['beneficiary_ref_key']}');
+            print(
+              'RI Row: ID=${row['id']}, forms_ref_key=${row['forms_ref_key']}, beneficiary=${row['beneficiary_ref_key']}',
+            );
           }
           print('=========================');
 
@@ -2436,23 +2590,85 @@ class _TodayworkState extends State<Todaywork> {
                     formJson['form_data'] ??
                     {};
 
-            // Extract child information directly from RI form data
-            final childName = riForm['child_name']?.toString() ??
-                riForm['name']?.toString() ?? '';
-            final childAge = riForm['age']?.toString() ?? '';
-            final childGender = riForm['gender']?.toString() ?? '';
-            final mobile = riForm['mobile']?.toString() ??
-                riForm['mother_mobile']?.toString() ?? '-';
+            // Get beneficiary data to extract DOB for proper age calculation
+            final beneficiaryData = beneficiaryId.isNotEmpty
+                ? await LocalStorageDao.instance.getBeneficiaryByUniqueKey(
+              beneficiaryId,
+            )
+                : null;
 
-            // Fallback to beneficiary fields if form data doesn't have child info
-            final fields = (beneficiaryId.isNotEmpty && (childName.isEmpty || childAge.isEmpty))
-                ? await _getBeneficiaryFields(beneficiaryId)
-                : {
-              'name': childName.isNotEmpty ? childName : riForm['mother_name']?.toString() ?? '',
-              'age': childAge.isNotEmpty ? childAge : '',
-              'gender': childGender.isNotEmpty ? childGender : 'Female',
-              'mobile': mobile,
-            };
+            String childName = '';
+            String childDob = '';
+            String childGender = '';
+            String mobile = '';
+
+            // Try to get child info from form data first
+            childName =
+                riForm['child_name']?.toString() ??
+                    riForm['name']?.toString() ??
+                    '';
+            childGender = riForm['gender']?.toString() ?? '';
+            mobile =
+                riForm['mobile']?.toString() ??
+                    riForm['mother_mobile']?.toString() ??
+                    '-';
+
+            // Extract DOB from beneficiary data if available
+            if (beneficiaryData != null) {
+              dynamic info = beneficiaryData['beneficiary_info'];
+              Map<String, dynamic> beneficiaryInfo = {};
+
+              if (info is Map) {
+                beneficiaryInfo = Map<String, dynamic>.from(info);
+              } else if (info is String && info.isNotEmpty) {
+                try {
+                  beneficiaryInfo = Map<String, dynamic>.from(jsonDecode(info));
+                } catch (_) {}
+              }
+
+              // Use beneficiary name if form name is empty
+              if (childName.isEmpty) {
+                childName =
+                    beneficiaryInfo['name']?.toString() ??
+                        beneficiaryInfo['memberName']?.toString() ??
+                        '';
+              }
+
+              // Extract DOB from beneficiary info
+              childDob =
+                  beneficiaryInfo['dob']?.toString() ??
+                      beneficiaryInfo['dateOfBirth']?.toString() ??
+                      beneficiaryInfo['date_of_birth']?.toString() ??
+                      '';
+
+              // Use beneficiary gender if form gender is empty
+              if (childGender.isEmpty) {
+                childGender =
+                    beneficiaryInfo['gender']?.toString() ??
+                        beneficiaryInfo['sex']?.toString() ??
+                        'Female';
+              }
+
+              // Use beneficiary mobile if form mobile is empty
+              if (mobile == '-' || mobile.isEmpty) {
+                mobile =
+                    beneficiaryInfo['mobileNo']?.toString() ??
+                        beneficiaryInfo['mobile']?.toString() ??
+                        beneficiaryInfo['phone']?.toString() ??
+                        '-';
+              }
+            }
+
+            // Calculate age using DOB with same logic as RegisterChildListScreen
+            String calculatedAgeGender = _formatAgeGenderFromDob(
+              childDob,
+              childGender,
+            );
+
+            // Extract only the age part (before the |) to avoid duplication in UI
+            String calculatedAge = calculatedAgeGender.contains('|')
+                ? calculatedAgeGender.split('|')[0].trim()
+                : calculatedAgeGender;
 
             _riCompletedItems.add({
               'id': row['id'] ?? '',
@@ -2461,15 +2677,13 @@ class _TodayworkState extends State<Todaywork> {
               'unique_key': row['beneficiary_ref_key']?.toString() ?? '',
               'BeneficiaryID': row['beneficiary_ref_key']?.toString() ?? '',
 
-              'name': fields['name'],
-              'age': fields['age'],
-              'gender': fields['gender']?.isNotEmpty == true
-                  ? fields['gender']
-                  : 'Female',
+              'name': childName.isNotEmpty ? childName : 'Unknown',
+              'age': calculatedAge,
+              'gender': childGender.isNotEmpty ? childGender : 'Female',
               'last Visit date': _formatDateOnly(
                 row['created_date_time']?.toString(),
               ),
-              'mobile': fields['mobile'],
+              'mobile': mobile,
               'badge': 'RI',
 
               '_rawRow': row,
@@ -2492,11 +2706,11 @@ class _TodayworkState extends State<Todaywork> {
                 (_eligibleCompletedCoupleItems.length ?? 0) +
                 (_hbncCompletedItems.length ?? 0) +
                 (_riCompletedItems.length ?? 0);
-        if (mounted && count > _completedVisitsCount) {
+        if (mounted) {
           setState(() {
             _completedVisitsCount = count;
           });
-          await _saveTodayWorkCountsToStorage();
+          //await _saveTodayWorkCountsToStorage();
         }
 
         // Print completed items count to console
@@ -2512,6 +2726,81 @@ class _TodayworkState extends State<Todaywork> {
       }
     }
   }
+
+  String _formatAgeGenderFromDob(dynamic dobRaw, dynamic genderRaw) {
+    String age = 'Not Available';
+    String gender = (genderRaw?.toString().toLowerCase() ?? '');
+
+    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
+      try {
+        String dateStr = dobRaw.toString();
+        DateTime? dob;
+
+        dob = DateTime.tryParse(dateStr);
+
+        if (dob == null) {
+          final timestamp = int.tryParse(dateStr);
+          if (timestamp != null && timestamp > 0) {
+            dob = DateTime.fromMillisecondsSinceEpoch(
+              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+              isUtc: true,
+            );
+          }
+        }
+
+        if (dob != null) {
+          final now = DateTime.now();
+          int years = now.year - dob.year;
+          int months = now.month - dob.month;
+          int days = now.day - dob.day;
+
+          if (days < 0) {
+            final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+            final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+            final daysInLastMonth = DateTime(
+              lastMonthYear,
+              lastMonth + 1,
+              0,
+            ).day;
+            days += daysInLastMonth;
+            months--;
+          }
+
+          if (months < 0) {
+            months += 12;
+            years--;
+          }
+
+          if (years > 0) {
+            age = '$years Y';
+          } else if (months > 0) {
+            age = '$months M';
+          } else {
+            age = '$days D';
+          }
+        }
+      } catch (e) {
+        debugPrint('Error parsing date of birth: $e');
+      }
+    }
+
+    String displayGender;
+    switch (gender) {
+      case 'm':
+      case 'male':
+        displayGender = 'Male';
+        break;
+      case 'f':
+      case 'female':
+        displayGender = 'Female';
+        break;
+      default:
+        displayGender = 'Other';
+    }
+
+    return '$age | $displayGender';
+  }
+
 
   Future<Map<String, String>> _getBeneficiaryFields(String uniqueKey) async {
     final rec = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(
@@ -2582,6 +2871,7 @@ class _TodayworkState extends State<Todaywork> {
       final totalToDoCount =
           familyCount + eligibleCoupleCount + ancCount + hbncCount + riCount;
 
+      print('Completed Count: $_completedVisitsCount');
       // Ensure we don't have negative counts
       final toDoCount = totalToDoCount >= 0 ? totalToDoCount : 0;
       final completedCount = _completedVisitsCount >= 0
@@ -2594,13 +2884,23 @@ class _TodayworkState extends State<Todaywork> {
       print('Completed Count: $completedCount');
       print('====================================');
 
+      _pendingCountVisitsCount = toDoCount;
+      _toDoVisitsCount = _pendingCountVisitsCount +_completedVisitsCount;
+
+      setState(() {
+        _pendingCountVisitsCount;
+        _toDoVisitsCount;
+        _completedVisitsCount;
+
+      });
+
       // 5. Update the Bloc DIRECTLY (This stops the flickering)
-      if (mounted && _bloc != null) {
+     // if (mounted && _bloc != null) {
         _bloc.add(TwUpdateCounts(
             toDo: toDoCount,
             completed: completedCount
         ));
-      }
+    //  }
 
       /*await SecureStorageService.saveTodayWorkCounts(
         toDo: toDoCount,
@@ -2768,14 +3068,14 @@ class _TodayworkState extends State<Todaywork> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _kv(l10n!.todayWorkToDo, "${state.completed + state.pending}"),
+                            _kv("Total Visits:", "${_toDoVisitsCount.toString()}"),
                             _kv(
                               '${l10n!.completedVisits} :',
-                              state.completed.toString(),
+                              _completedVisitsCount.toString(),
                             ),
                             _kv(
                               '${l10n.pendingVisits}:',
-                              state.pending.toString(),
+                              _pendingCountVisitsCount.toString(),
                             ),
                             _kv('${l10n.progress} :', '$percent%'),
                             const SizedBox(height: 8),
@@ -2885,7 +3185,7 @@ class _TodayworkState extends State<Todaywork> {
           Expanded(
             child: Text(
               k,
-              style: TextStyle(fontSize: 15.sp, color: AppColors.primary, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 15.sp, color: AppColors.primary),
             ),
           ),
           Text(
