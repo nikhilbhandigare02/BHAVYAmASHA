@@ -265,7 +265,7 @@ class _CbacformState extends State<Cbacform> {
                                       'PREV',
                                       style: const TextStyle(
                                         color: Colors.white,
-                                        fontWeight: FontWeight.bold
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
@@ -487,7 +487,7 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
     }
   }
 
-   void _updateFormFields(BuildContext context) {
+  void _updateFormFields(BuildContext context) {
     if (_fieldsInitialized || _isLoading) return;
 
     final bloc = BlocProvider.of<CbacFormBloc>(context);
@@ -517,6 +517,7 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
 
     _fieldsInitialized = true;
   }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -910,10 +911,16 @@ class _PersonalInfoTab extends StatelessWidget {
                 const Divider(height: 0.5),
                 if (selected.isNotEmpty) ...[
                   CustomTextField(
-                    hintText: 'Details (if any selected from above list, give details)',
-                    labelText: 'Details (if any selected from above list, give details)',
-                    initialValue: state.data['personal.disabilityDetails']?.toString() ?? '',
-                    onChanged: (v) => bloc.add(CbacFieldChanged('personal.disabilityDetails', v.trim()),),
+                    hintText:
+                        'Details (if any selected from above list, give details)',
+                    labelText:
+                        'Details (if any selected from above list, give details)',
+                    initialValue:
+                        state.data['personal.disabilityDetails']?.toString() ??
+                        '',
+                    onChanged: (v) => bloc.add(
+                      CbacFieldChanged('personal.disabilityDetails', v.trim()),
+                    ),
                   ),
                   const Divider(height: 0.5),
                 ],
@@ -1033,14 +1040,14 @@ class _PartATab extends StatelessWidget {
         final genderCode = state.data['personal.gender_code']?.toString();
         final isFemale =
             genderCode == 'F' ||
-                state.data['personal.gender'] == l10n.genderFemale;
+            state.data['personal.gender'] == l10n.genderFemale;
 
         final itemsWaist = isFemale
             ? <String>[
-          l10n.cbacA_waistLE80,
-          l10n.cbacA_waist81to90,
-          l10n.cbacA_waistGT90,
-        ]
+                l10n.cbacA_waistLE80,
+                l10n.cbacA_waist81to90,
+                l10n.cbacA_waistGT90,
+              ]
             : <String>['90 cm or less', '91 to 100 cm', 'More than 100 cm'];
 
         final codeAge = <String>[
@@ -1105,18 +1112,22 @@ class _PartATab extends StatelessWidget {
         // --- 6. Calculate Scores ---
         final ageCodeVal = state.data['partA.age_code']?.toString();
 
-        final int? scoreAge = ageCodeVal == null ? null : switch (ageCodeVal) {
-          'AGE_30_39' => 1,
-          'AGE_40_49' => 2,
-          'AGE_50_59' => 3,
-          'AGE_50_69' => 3,
-          'AGE_GE60' => 4,
-          _ => 0,
-        };
+        final int? scoreAge = ageCodeVal == null
+            ? null
+            : switch (ageCodeVal) {
+                'AGE_30_39' => 1,
+                'AGE_40_49' => 2,
+                'AGE_50_59' => 3,
+                'AGE_50_69' => 3,
+                'AGE_GE60' => 4,
+                _ => 0,
+              };
 
         final int? scoreTobacco = tobacco == null
             ? null
-            : (itemsTobacco.indexOf(tobacco) <= 0 ? 0 : itemsTobacco.indexOf(tobacco));
+            : (itemsTobacco.indexOf(tobacco) <= 0
+                  ? 0
+                  : itemsTobacco.indexOf(tobacco));
 
         // UPDATED ALCOHOL: Index 1 (Yes) = 1, Index 0 (No) = 0
         final int? scoreAlcohol = alcohol == null
@@ -1130,10 +1141,10 @@ class _PartATab extends StatelessWidget {
         final int? scoreWaist = waist == null
             ? null
             : switch (itemsWaist.indexOf(waist)) {
-          1 => 1,
-          2 => 2,
-          _ => 0,
-        };
+                1 => 1,
+                2 => 2,
+                _ => 0,
+              };
 
         // UPDATED FAMILY HISTORY: Index 1 (Yes) = 2, Index 0 (No) = 0
         final int? scoreFamily = familyHx == null
@@ -1142,11 +1153,11 @@ class _PartATab extends StatelessWidget {
 
         final total =
             (scoreAge ?? 0) +
-                (scoreTobacco ?? 0) +
-                (scoreAlcohol ?? 0) +
-                (scoreActivity ?? 0) +
-                (scoreWaist ?? 0) +
-                (scoreFamily ?? 0);
+            (scoreTobacco ?? 0) +
+            (scoreAlcohol ?? 0) +
+            (scoreActivity ?? 0) +
+            (scoreWaist ?? 0) +
+            (scoreFamily ?? 0);
 
         return ListView(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
@@ -1158,10 +1169,7 @@ class _PartATab extends StatelessWidget {
               },
               defaultVerticalAlignment: TableCellVerticalAlignment.middle,
               border: const TableBorder(
-                horizontalInside: BorderSide(
-                  width: 0.5,
-                  color: Colors.black12,
-                ),
+                horizontalInside: BorderSide(width: 0.5, color: Colors.black12),
               ),
               children: [
                 TableRow(
@@ -1195,7 +1203,9 @@ class _PartATab extends StatelessWidget {
                     bloc.add(CbacFieldChanged('partA.age', v));
                     final idx = v == null ? -1 : itemsAge.indexOf(v);
                     if (idx >= 0) {
-                      bloc.add(CbacFieldChanged('partA.age_code', codeAge[idx]));
+                      bloc.add(
+                        CbacFieldChanged('partA.age_code', codeAge[idx]),
+                      );
                     }
                   },
                   score: scoreAge,
@@ -1255,7 +1265,10 @@ class _PartATab extends StatelessWidget {
                     final idx = v == null ? -1 : itemsActivity.indexOf(v);
                     if (idx >= 0) {
                       bloc.add(
-                        CbacFieldChanged('partA.activity_code', codeActivity[idx]),
+                        CbacFieldChanged(
+                          'partA.activity_code',
+                          codeActivity[idx],
+                        ),
                       );
                     }
                   },
@@ -1348,7 +1361,7 @@ class _PartBTab extends StatelessWidget {
                   labelText: question,
                   hintText: l10n.select,
                   labelFontSize: 15.sp,
-                  items: [l10n.no,l10n.yes],
+                  items: [l10n.no, l10n.yes],
                   getLabel: (s) => s,
                   value: state.data[keyPath],
                   onChanged: (v) => bloc.add(CbacFieldChanged(keyPath, v)),
@@ -1470,8 +1483,6 @@ class _PartCTab extends StatefulWidget {
   @override
   State<_PartCTab> createState() => _PartCTabState();
 }
-
-
 
 class _PartCTabState extends State<_PartCTab> {
   Future<void> _showMultiSelectDialog({
@@ -1650,12 +1661,7 @@ class _PartCTabState extends State<_PartCTab> {
               ),
             ],
           ),
-          child: Center(
-            child: Text(
-              l10n.cbacHeaderLungRisk,
-
-            ),
-          ),
+          child: Center(child: Text(l10n.cbacHeaderLungRisk)),
         ),
         const SizedBox(height: 16),
 
@@ -1955,10 +1961,7 @@ class _PartDTab extends StatelessWidget {
               },
               defaultVerticalAlignment: TableCellVerticalAlignment.middle,
               border: TableBorder(
-                horizontalInside: BorderSide(
-                  width: 0.5,
-                  color: Colors.black12,
-                ),
+                horizontalInside: BorderSide(width: 0.5, color: Colors.black12),
               ),
               children: [
                 TableRow(
@@ -1967,13 +1970,19 @@ class _PartDTab extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Text(
                         l10n.cbacQuestions,
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15.sp),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15.sp,
+                        ),
                       ),
                     ),
                     Center(
                       child: Text(
                         l10n.cbacScore,
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15.sp),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15.sp,
+                        ),
                       ),
                     ),
                   ],
@@ -1985,7 +1994,9 @@ class _PartDTab extends StatelessWidget {
                     bloc.add(CbacFieldChanged('partD.q1', v));
                     final idx = v == null ? -1 : options.indexOf(v);
                     if (idx >= 0) {
-                      bloc.add(CbacFieldChanged('partD.q1_code', codeOptions[idx]));
+                      bloc.add(
+                        CbacFieldChanged('partD.q1_code', codeOptions[idx]),
+                      );
                     }
                   },
                 ),
@@ -1996,7 +2007,9 @@ class _PartDTab extends StatelessWidget {
                     bloc.add(CbacFieldChanged('partD.q2', v));
                     final idx = v == null ? -1 : options.indexOf(v);
                     if (idx >= 0) {
-                      bloc.add(CbacFieldChanged('partD.q2_code', codeOptions[idx]));
+                      bloc.add(
+                        CbacFieldChanged('partD.q2_code', codeOptions[idx]),
+                      );
                     }
                   },
                 ),

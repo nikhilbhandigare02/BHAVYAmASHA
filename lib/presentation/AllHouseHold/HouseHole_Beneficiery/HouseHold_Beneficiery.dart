@@ -212,6 +212,28 @@ class _HouseHold_BeneficiaryScreenState
 
         beneficiaries.add(card);
 
+        // 🔃 Sort beneficiaries by created_date_time (latest first)
+        beneficiaries.sort((a, b) {
+          DateTime parseDate(dynamic value) {
+            if (value == null) {
+              return DateTime.fromMillisecondsSinceEpoch(0);
+            }
+
+            try {
+              final dt = DateTime.parse(value.toString());
+              return dt.toLocal(); // handle UTC "Z"
+            } catch (_) {
+              return DateTime.fromMillisecondsSinceEpoch(0);
+            }
+          }
+
+          final DateTime dateA = parseDate(a['RegitrationDate']);
+          final DateTime dateB = parseDate(b['RegitrationDate']);
+
+          return dateB.compareTo(dateA);
+        });
+
+
         headerVillage ??= info['village']?.toString();
         headerMohalla ??= info['mohalla']?.toString();
       }
@@ -595,6 +617,9 @@ class _HouseHold_BeneficiaryScreenState
 
     final bool isChild = (data['_memberData']?['memberType']?.toString().toLowerCase() == 'child');
 
+    // Check if beneficiary is deceased
+    final bool isDeceased = (data['_raw']?['is_death'] == 1 || data['_raw']?['is_death'] == '1');
+
     // Compute complete beneficiary ID from raw row (unique_key) if available
     final Map<String, dynamic>? raw = (data['_raw'] is Map<String, dynamic>)
         ? data['_raw'] as Map<String, dynamic>
@@ -703,6 +728,31 @@ class _HouseHold_BeneficiaryScreenState
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (isDeceased) ...[
+                        Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            // border: Border.all(
+                            //   color: Colors.red.withOpacity(0.5),
+                            //   width: 0.5,
+                            // ),
+                          ),
+                          child: Text(
+                            l10n!.deceased,
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(width: 8),
                       Image.asset(
                         'assets/images/sync.png',
@@ -772,7 +822,14 @@ class _HouseHold_BeneficiaryScreenState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _rowText(l10n?.nameLabel ?? 'Name', data['Name'] ?? ''),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _rowText(l10n?.nameLabel ?? 'Name', data['Name'] ?? ''),
+                                ),
+
+                              ],
+                            ),
                           ],
                         ),
                       ),

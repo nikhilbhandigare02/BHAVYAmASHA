@@ -185,30 +185,28 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       print('=== End Processing ===\n');
 
       // 🔃 Sort by created_date_time (latest first) - using original database field
+      // 🔃 Sort by created_date_time (latest first – date + time)
       beneficiaries.sort((a, b) {
-        final String dateStrA = (a['created_date_time'] ?? '').toString();
-        final String dateStrB = (b['created_date_time'] ?? '').toString();
+        DateTime parseDate(dynamic value) {
+          if (value == null) {
+            return DateTime.fromMillisecondsSinceEpoch(0);
+          }
 
-        // Try to parse dates
-        final DateTime? da = DateTime.tryParse(dateStrA);
-        final DateTime? db = DateTime.tryParse(dateStrB);
+          try {
+            final dt = DateTime.parse(value.toString());
+            return dt.toLocal(); // IMPORTANT: handle Z (UTC)
+          } catch (_) {
+            return DateTime.fromMillisecondsSinceEpoch(0);
+          }
+        }
 
-        // Handle different cases:
-        // 1. Both dates valid - sort descending (newest first)
-        if (da != null && db != null) {
-          return db.compareTo(da); // descending order
-        }
-        // 2. Only A has valid date - A comes first
-        if (da != null && db == null) {
-          return -1;
-        }
-        // 3. Only B has valid date - B comes first
-        if (da == null && db != null) {
-          return 1;
-        }
-        // 4. Both dates invalid - maintain original order or sort by ID
-        return 0;
+        final DateTime dateA = parseDate(a['created_date_time']);
+        final DateTime dateB = parseDate(b['created_date_time']);
+
+        // Latest first
+        return dateB.compareTo(dateA);
       });
+
 
       setState(() {
         _allBeneficiaries = beneficiaries;
@@ -538,7 +536,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                             // ),
                           ),
                           child: Text(
-                            'Deceased',
+                            l10n!.deceased,
                             style: TextStyle(
                               color: Colors.red,
                               fontSize: 12.sp,

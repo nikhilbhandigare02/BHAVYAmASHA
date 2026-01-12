@@ -6758,7 +6758,7 @@ abstract class AppLocalizations {
   /// No description provided for @cbac.
   ///
   /// In en, this message translates to:
-  /// **'CBAC'**
+  /// **'CBAC FORM'**
   String get cbac;
 
   /// No description provided for @videoTutorialList.
@@ -9920,7 +9920,7 @@ abstract class AppLocalizations {
   /// No description provided for @tolaMohalla.
   ///
   /// In en, this message translates to:
-  /// **'Mohalla/Tola'**
+  /// **'Tola/Mohalla'**
   String get tolaMohalla;
 
   /// No description provided for @noHouseholdsFound.

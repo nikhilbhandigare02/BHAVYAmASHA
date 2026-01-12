@@ -335,6 +335,23 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     _dummyHeadBloc = AddFamilyHeadBloc();
     _loadAdultsFromSecureStorage();
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_isEdit) {
+        final st = _bloc.state;
+        if (st.useDob == true && st.dob != null) {
+          _bloc.add(AnmUpdateDob(st.dob!));
+        } else {
+          final y = st.updateYear ?? '';
+          final m = st.updateMonth ?? '';
+          final d = st.updateDay ?? '';
+          if (y.isNotEmpty || m.isNotEmpty || d.isNotEmpty) {
+            updateDobFromAge();
+          }
+        }
+      }
+    });
+
     print('HHID passed to AddNewFamilyMember: ${widget.hhId}');
 
     _fatherOption = '';

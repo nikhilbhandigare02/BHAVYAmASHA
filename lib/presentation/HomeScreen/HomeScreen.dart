@@ -344,13 +344,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   Future<void> _loadHouseholdCount() async {
     householdCount = 0;
+
     try {
-      // Use same logic as AllHouseHold_Screen.dart for household count
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
 
       if (currentUserKey.isEmpty) {
-        print('Error: Current user key not found');
         if (mounted) {
           setState(() {
             householdCount = 0;
@@ -361,19 +360,33 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         return;
       }
 
-      List<Map<String, dynamic>> beneficiaries;
-      try {
-        beneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
-      } catch (_) {
-        beneficiaries = <Map<String, dynamic>>[];
+      final db = await DatabaseProvider.instance.database;
+
+      final beneficiaries =
+      await LocalStorageDao.instance.getAllBeneficiaries();
+
+      final households = await db.query(
+        'households',
+        where: 'is_deleted = 0 AND current_user_key = ?',
+        whereArgs: [currentUserKey],
+      );
+
+      /// ---------- MAP HOUSEHOLD -> CONFIGURED HEAD ----------
+      final Map<String, String> headKeyByHousehold = {};
+      for (final hh in households) {
+        final hhKey = (hh['unique_key'] ?? '').toString();
+        final headId = (hh['head_id'] ?? '').toString();
+        if (hhKey.isNotEmpty && headId.isNotEmpty) {
+          headKeyByHousehold[hhKey] = headId;
+        }
       }
 
-      final households = await LocalStorageDao.instance.getAllHouseholds();
-
-      final familyHeads = beneficiaries.where((r) {
+      /// ---------- FAMILY HEAD FROM BENEFICIARIES ----------
+      final Set<String> householdKeysFromBeneficiaries = beneficiaries.where((r) {
         try {
           final householdRefKey = (r['household_ref_key'] ?? '').toString();
-          if (householdRefKey.isEmpty) return false;
+          final uniqueKey = (r['unique_key'] ?? '').toString();
+          if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
 
           if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
 
@@ -387,57 +400,111 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             info = {};
           }
 
-          return info['isFamilyHead'] == true ||
-              info['isFamilyHead']?.toString().toLowerCase() == 'true';
+          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+
+          final bool isConfiguredHead =
+              configuredHeadKey != null && configuredHeadKey == uniqueKey;
+
+          final relation =
+          (info['relation_to_head'] ?? info['relation'] ?? '')
+              .toString()
+              .toLowerCase();
+
+          final bool isHeadByRelation =
+              relation == 'head' || relation == 'self';
+
+          final bool isFamilyHead =
+              info['isFamilyHead'] == true ||
+                  info['isFamilyHead']?.toString().toLowerCase() == 'true';
+
+          return isConfiguredHead || isHeadByRelation || isFamilyHead;
         } catch (_) {
           return false;
         }
-      }).toList();
+      }).map((r) {
+        return (r['household_ref_key'] ?? '').toString();
+      }).where((k) => k.isNotEmpty).toSet();
 
-      final int computedTotal;
-      final int syncedCount;
+      /// ---------- FALLBACK HOUSEHOLDS (SAME AS _loadData) ----------
+      final Set<String> householdKeysWithBeneficiaries = beneficiaries
+          .map((e) => (e['household_ref_key'] ?? '').toString())
+          .where((k) => k.isNotEmpty)
+          .toSet();
 
-      if (familyHeads.isNotEmpty) {
-        final householdKeys = familyHeads
-            .map((e) => (e['household_ref_key'] ?? '').toString())
-            .where((e) => e.isNotEmpty)
-            .toSet();
+      final Set<String> fallbackHouseholdKeys = {};
 
-        computedTotal = householdKeys.length;
+      for (final hh in households) {
+        final hhRefKey = (hh['unique_key'] ?? '').toString();
+        if (hhRefKey.isEmpty) continue;
 
-        final householdByKey = <String, Map<String, dynamic>>{};
-        for (final hh in households) {
-          final k = (hh['unique_key'] ?? '').toString();
-          if (k.isEmpty) continue;
-          householdByKey[k] = hh;
+        // Already counted via beneficiaries
+        if (householdKeysWithBeneficiaries.contains(hhRefKey)) continue;
+
+        Map<String, dynamic> hhInfo = {};
+        final raw = hh['household_info'];
+
+        if (raw is Map) {
+          hhInfo = Map<String, dynamic>.from(raw);
+        } else if (raw is String && raw.isNotEmpty) {
+          try {
+            hhInfo = Map<String, dynamic>.from(jsonDecode(raw));
+          } catch (_) {}
         }
 
-        int synced = 0;
-        for (final k in householdKeys) {
-          final hh = householdByKey[k];
-          if (hh == null) continue;
-          final s = hh['is_synced'];
-          if (s == 1 || s == '1') synced++;
+        final headRaw = hhInfo['family_head_details'];
+        Map<String, dynamic> headInfo = {};
+
+        if (headRaw is Map) {
+          headInfo = Map<String, dynamic>.from(headRaw);
+        } else if (headRaw is String && headRaw.isNotEmpty) {
+          try {
+            headInfo = Map<String, dynamic>.from(jsonDecode(headRaw));
+          } catch (_) {}
         }
-        syncedCount = synced;
-      } else {
-        computedTotal = households.length;
-        syncedCount = households.where((r) {
-          final s = r['is_synced'];
-          return s == 1 || s == '1';
-        }).length;
+
+        final bool isHead =
+            headInfo['isFamilyHead'] == true ||
+                headInfo['isFamilyHead']?.toString().toLowerCase() == 'true' ||
+                headInfo['isFamilyhead'] == true ||
+                headInfo['isFamilyhead']?.toString().toLowerCase() == 'true';
+
+        if (isHead) {
+          fallbackHouseholdKeys.add(hhRefKey);
+        }
+      }
+
+      /// ---------- FINAL HOUSEHOLD SET ----------
+      final Set<String> finalHouseholdKeys = {
+        ...householdKeysFromBeneficiaries,
+        ...fallbackHouseholdKeys,
+      };
+
+      /// ---------- SYNC COUNT ----------
+      final Map<String, Map<String, dynamic>> householdByKey = {};
+      for (final hh in households) {
+        final k = (hh['unique_key'] ?? '').toString();
+        if (k.isNotEmpty) householdByKey[k] = hh;
+      }
+
+      int syncedCount = 0;
+      for (final k in finalHouseholdKeys) {
+        final hh = householdByKey[k];
+        if (hh == null) continue;
+        final s = hh['is_synced'];
+        if (s == 1 || s == '1') syncedCount++;
       }
 
       if (mounted) {
         setState(() {
-          householdCount = computedTotal;
+          householdCount = finalHouseholdKeys.length;
           Constant.householdTotal = householdCount;
           Constant.householdTotalSync = syncedCount;
         });
       }
-      print('Household count: $householdCount');
+
+      print('✅ FINAL household count (exact match): $householdCount');
     } catch (e) {
-      print('Error loading household count: $e');
+      print('❌ Error loading household count: $e');
       if (mounted) {
         setState(() {
           householdCount = 0;

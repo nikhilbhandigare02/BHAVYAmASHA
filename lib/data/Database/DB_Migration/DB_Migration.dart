@@ -151,8 +151,8 @@ class DbMigration {
         "voterId": "voter_id",
         "rationCardId": "ration_card_id",
         "memberStatus": "member_status",
-        "weight": "weight_at_birth",
-        "birthWeight": "weight",
+        "weight": "weight",
+        "birthWeight": "weight_at_birth",
       };
 
       for (final row in oldRows) {
@@ -185,7 +185,7 @@ class DbMigration {
         int isMigrated = row["is_migrated"] == 1 ? 1 : 0;
 
         final dynamic resolvedDeathDate =
-            row["date_of_death"] ?? form["date_of_death"] ?? row["created_date_time"];
+            row["date_of_death"] ?? form["date_of_death"];
 
         Map<String, dynamic>? deathDetailsMap;
 

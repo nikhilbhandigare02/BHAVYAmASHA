@@ -16,6 +16,7 @@ import '../../../../data/Database/local_storage_dao.dart';
 import '../../../../data/repositories/RegisterNewHouseHoldController/register_new_house_hold.dart';
 import '../../AddNewFamilyMember/bloc/addnewfamilymember_bloc.dart';
 import 'bloc/spous_bloc.dart';
+
 class MaxValueFormatter extends TextInputFormatter {
   final int max;
 
@@ -23,9 +24,9 @@ class MaxValueFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) return newValue;
 
     final value = int.tryParse(newValue.text);
@@ -35,7 +36,6 @@ class MaxValueFormatter extends TextInputFormatter {
     return newValue;
   }
 }
-
 
 final GlobalKey<FormState> spousFormKey = GlobalKey<FormState>();
 String? spousLastFormError;
@@ -320,12 +320,11 @@ List<String> _getMobileOwnerList(String gender) {
 
 class _SpousdetailsState extends State<Spousdetails>
     with AutomaticKeepAliveClientMixin {
-  
   // Controllers for age fields to handle dynamic updates
   final yearsController = TextEditingController();
   final monthsController = TextEditingController();
   final daysController = TextEditingController();
-  
+
   void _updateDobFromAge(String years, String months, String days) {
     // If any field is empty, clear the DOB and return
     if (years.trim().isEmpty || months.trim().isEmpty || days.trim().isEmpty) {
@@ -404,6 +403,25 @@ class _SpousdetailsState extends State<Spousdetails>
   @override
   void initState() {
     super.initState();
+
+    if (widget.isEdit) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final bloc = context.read<SpousBloc>();
+        final state = bloc.state;
+        if (state.useDob == true && state.dob != null) {
+          bloc.add(SpUpdateDob(state.dob));
+        } else {
+          final y = state.UpdateYears ?? '';
+          final m = state.UpdateMonths ?? '';
+          final d = state.UpdateDays ?? '';
+          if (y.isNotEmpty || m.isNotEmpty || d.isNotEmpty) {
+            _updateDobFromAge(y, m, d);
+          }
+        }
+      });
+    }
+
     if (widget.isAddMember && widget.headMobileNo != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -891,7 +909,7 @@ class _SpousdetailsState extends State<Spousdetails>
 
                       value: widget.isMemberDetails
                           ? ((state.relation == null ||
-                                  state.relation!.trim().isEmpty)
+                                    state.relation!.trim().isEmpty)
                                 ? null
                                 : state.relation)
                           : (state.relation == 'Spouse'
@@ -915,7 +933,7 @@ class _SpousdetailsState extends State<Spousdetails>
 
                 _section(
                   CustomTextField(
-                    key:   ValueKey('member_name'),
+                    key: ValueKey('member_name'),
                     labelText: '${l.nameOfMemberLabel} *',
                     hintText: l.nameOfMemberHint,
                     initialValue: state.memberName,
@@ -956,7 +974,7 @@ class _SpousdetailsState extends State<Spousdetails>
                     key: const ValueKey('spouse_name'),
                     labelText: '${l.spouseNameLabel} *',
                     hintText: l.spouseNameHint,
-                    readOnly :true,
+                    readOnly: true,
                     initialValue: state.spouseName,
                     //readOnly: widget.isEdit,
                     // validator: (value) => captureSpousError(
@@ -999,16 +1017,16 @@ class _SpousdetailsState extends State<Spousdetails>
                       onChanged: widget.isEdit
                           ? null
                           : (_) {
-                                context.read<SpousBloc>().add(SpToggleUseDob());
-                                // When switching to DOB mode, update DOB from age fields
-                                if (!state.useDob) {
-                                  _updateDobFromAge(
-                                    yearsController.text,
-                                    monthsController.text,
-                                    daysController.text,
-                                  );
-                                }
-                              },
+                              context.read<SpousBloc>().add(SpToggleUseDob());
+                              // When switching to DOB mode, update DOB from age fields
+                              if (!state.useDob) {
+                                _updateDobFromAge(
+                                  yearsController.text,
+                                  monthsController.text,
+                                  daysController.text,
+                                );
+                              }
+                            },
                     ),
                     Text(l.dobShort, style: TextStyle(fontSize: 14.sp)),
                     SizedBox(width: 4.w),
@@ -1018,16 +1036,16 @@ class _SpousdetailsState extends State<Spousdetails>
                       onChanged: widget.isEdit
                           ? null
                           : (_) {
-                                context.read<SpousBloc>().add(SpToggleUseDob());
-                                // When switching to DOB mode, update DOB from age fields
-                                if (!state.useDob) {
-                                  _updateDobFromAge(
-                                    yearsController.text,
-                                    monthsController.text,
-                                    daysController.text,
-                                  );
-                                }
-                              },
+                              context.read<SpousBloc>().add(SpToggleUseDob());
+                              // When switching to DOB mode, update DOB from age fields
+                              if (!state.useDob) {
+                                _updateDobFromAge(
+                                  yearsController.text,
+                                  monthsController.text,
+                                  daysController.text,
+                                );
+                              }
+                            },
                     ),
                     Text(l.ageApproximate, style: TextStyle(fontSize: 14.sp)),
                   ],
@@ -1173,7 +1191,9 @@ class _SpousdetailsState extends State<Spousdetails>
                                 readOnly: widget.isEdit,
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
-                                  MaxValueFormatter(365), // Allow up to 365 for rollover calculation
+                                  MaxValueFormatter(
+                                    365,
+                                  ), // Allow up to 365 for rollover calculation
                                 ],
                                 onChanged: widget.isEdit
                                     ? null
