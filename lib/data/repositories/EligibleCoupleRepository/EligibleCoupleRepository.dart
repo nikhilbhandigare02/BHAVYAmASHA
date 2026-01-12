@@ -88,21 +88,21 @@ class EligibleCoupleRepository {
     int limit = 20,
   }) async {
     final currentUser = await UserInfo.getCurrentUser();
+
     final userDetails = currentUser?['details'] is String
         ? jsonDecode(currentUser?['details'] ?? '{}')
         : currentUser?['details'] ?? {};
 
     String? token = await SecureStorageService.getToken();
     if ((token == null || token.isEmpty) && userDetails is Map) {
-      try {
-        token = userDetails['token']?.toString();
-      } catch (_) {}
+      token = userDetails['token']?.toString();
     }
 
     final headers = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+      if (token != null && token.isNotEmpty)
+        'Authorization': 'Bearer $token',
     };
 
     final body = {
@@ -119,19 +119,37 @@ class EligibleCoupleRepository {
     );
 
     final dataList = (response is Map && response['data'] is List)
-        ? List<Map<String, dynamic>>.from(response['data'] as List)
+        ? List<Map<String, dynamic>>.from(response['data'])
         : <Map<String, dynamic>>[];
 
     final Database db = await DatabaseProvider.instance.database;
 
     int inserted = 0;
     int updated = 0;
+    int skipped = 0;
 
     for (final rec in dataList) {
       final serverId = rec['_id']?.toString();
-      if (serverId == null) continue;
+      final beneficiaryRefKey =
+      rec['beneficiaries_registration_ref_key']?.toString();
 
-      final existing = await db.query(
+      if (serverId == null || beneficiaryRefKey == null) continue;
+
+      /// 🔴 CHECK: beneficiary_ref_key already exists?
+      final existingByBeneficiary = await db.query(
+        'eligible_couple_activities',
+        where: 'beneficiary_ref_key = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryRefKey],
+        limit: 1,
+      );
+
+      if (existingByBeneficiary.isNotEmpty) {
+        skipped++;
+        continue; // ❌ EXCLUDE THIS RECORD
+      }
+
+      /// Existing check by server_id (normal sync logic)
+      final existingByServer = await db.query(
         'eligible_couple_activities',
         where: 'server_id = ?',
         whereArgs: [serverId],
@@ -141,7 +159,7 @@ class EligibleCoupleRepository {
       final deviceDetails = jsonEncode(rec['device_details'] ?? {});
       final appDetails = jsonEncode(rec['app_details'] ?? {});
 
-      final parentUser = <String, dynamic>{
+      final parentUser = {
         'app_role_id': rec['app_role_id'],
         'is_guest': rec['is_guest'],
         'parent_added_by': rec['parent_added_by'],
@@ -151,9 +169,12 @@ class EligibleCoupleRepository {
         'modified_date_time': rec['modified_date_time'],
         'added_by': rec['added_by'],
         'added_date_time': rec['added_date_time'],
-        'modified_by_added_on_server': rec['modified_by_added_on_server'],
-        'modified_date_time_added_on_server': rec['modified_date_time_added_on_server'],
-        'is_member_details_processed': rec['is_member_details_processed'],
+        'modified_by_added_on_server':
+        rec['modified_by_added_on_server'],
+        'modified_date_time_added_on_server':
+        rec['modified_date_time_added_on_server'],
+        'is_member_details_processed':
+        rec['is_member_details_processed'],
         'is_death': rec['is_death'],
         'is_deleted': rec['is_deleted'],
         'is_disabled': rec['is_disabled'],
@@ -166,22 +187,24 @@ class EligibleCoupleRepository {
 
       final row = {
         'server_id': serverId,
-        // Assuming unique_key refers to household reference. If different, adjust mapping accordingly.
         'household_ref_key': rec['unique_key']?.toString(),
-        'beneficiary_ref_key': rec['beneficiaries_registration_ref_key']?.toString(),
-        'eligible_couple_state': rec['eligible_couple_type']?.toString(),
+        'beneficiary_ref_key': beneficiaryRefKey,
+        'eligible_couple_state':
+        rec['eligible_couple_type']?.toString(),
         'device_details': deviceDetails,
         'app_details': appDetails,
         'parent_user': jsonEncode(parentUser),
         'current_user_key': ashaId,
-        'facility_id': int.tryParse(rec['facility_id']?.toString() ?? facilityId) ?? 0,
+        'facility_id':
+        int.tryParse(rec['facility_id']?.toString() ?? facilityId) ??
+            0,
         'created_date_time': rec['created_date_time']?.toString(),
         'modified_date_time': rec['modified_date_time']?.toString(),
         'is_synced': 1,
         'is_deleted': rec['is_deleted'] is num ? rec['is_deleted'] : 0,
       };
 
-      if (existing.isEmpty) {
+      if (existingByServer.isEmpty) {
         await db.insert('eligible_couple_activities', row);
         inserted++;
       } else {
@@ -198,9 +221,11 @@ class EligibleCoupleRepository {
     return {
       'inserted': inserted,
       'updated': updated,
+      'skipped_existing_beneficiary': skipped,
       'fetched': dataList.length,
     };
   }
+
 
   void startAutoSyncEligibleCoupleActivities({
     required String facilityId,
@@ -218,7 +243,6 @@ class EligibleCoupleRepository {
           limit: limit,
         );
       } catch (e) {
-        // Avoid throwing in periodic timer; just log
         print('EC auto-sync error: $e');
       }
     });
@@ -236,22 +260,28 @@ class EligibleCoupleRepository {
     final currentUser = await UserInfo.getCurrentUser();
     if (currentUser == null) return;
 
-    Map<String, dynamic> details;
-    if (currentUser['details'] is String) {
-      try {
-        details = jsonDecode(currentUser['details']);
-      } catch (_) {
-        details = {};
-      }
-    } else if (currentUser['details'] is Map) {
-      details = Map<String, dynamic>.from(currentUser['details']);
-    } else {
-      details = {};
-    }
+    Map<String, dynamic> details = {};
+    try {
+      details = currentUser['details'] is String
+          ? jsonDecode(currentUser['details'])
+          : Map<String, dynamic>.from(currentUser['details']);
+    } catch (_) {}
 
     final working = details['working_location'] ?? {};
-    final ashaId = (working['asha_id'] ?? details['unique_key'] ?? details['user_id'] ?? '').toString();
-    final facilityId = (working['asha_associated_with_facility_id'] ?? working['hsc_id'] ?? details['facility_id'] ?? details['hsc_id'] ?? '').toString();
+
+    final ashaId = (working['asha_id'] ??
+        details['unique_key'] ??
+        details['user_id'] ??
+        '')
+        .toString();
+
+    final facilityId = (working['asha_associated_with_facility_id'] ??
+        working['hsc_id'] ??
+        details['facility_id'] ??
+        details['hsc_id'] ??
+        '')
+        .toString();
+
     if (ashaId.isEmpty || facilityId.isEmpty) return;
 
     startAutoSyncEligibleCoupleActivities(
@@ -261,4 +291,5 @@ class EligibleCoupleRepository {
       limit: limit,
     );
   }
+
 }

@@ -595,7 +595,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
                   child: _filtered.isEmpty
                       ? Center(
                           child: Text(
-                            (l10n?.noDataFound ?? 'No data found'),
+                            l10n.noDataFound,
                             style: const TextStyle(
                               color: Colors.black54,
                               fontWeight: FontWeight.w600,

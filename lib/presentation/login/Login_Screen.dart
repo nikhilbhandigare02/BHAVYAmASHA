@@ -10,6 +10,7 @@ import 'package:medixcel_new/core/utils/Validations.dart';
 import 'package:medixcel_new/core/utils/app_version.dart';
 import '../../core/utils/enums.dart';
 import '../../core/widgets/Loader/Loader.dart';
+import '../../core/widgets/Loader/Loader_login.dart';
 import '../../core/widgets/RoundButton/RoundButton.dart';
 import '../../core/widgets/TextField/TextField.dart';
 import '../../l10n/app_localizations.dart';
@@ -454,7 +455,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       BlocBuilder<LoginBloc, LoginState>(
                         builder: (context, state) {
                           if (state.postApiStatus == PostApiStatus.loading) {
-                            return const CenterBoxLoader();
+                            return const CenterBoxLoaderLogin();
                           }
                           return const SizedBox.shrink();
                         },

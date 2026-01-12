@@ -72,7 +72,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
     // Must be exactly 10 digits
     if (value.length != 10) {
-     // return "Please enter a valid 10-digit mobile number";
+      // return "Please enter a valid 10-digit mobile number";
       return "Please enter a valid Mobile Number";
     }
 
@@ -946,56 +946,56 @@ class _ABHAScreenState extends State<ABHAScreen> {
                 if (availableAbhaNumbers != null &&
                     availableAbhaNumbers.length != 0 &&
                     enableAbhaClick)
-                Container(
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: 200, // your max height
-                      ), // set your max height here
-                      child: Scrollbar(
-                        thumbVisibility: true, // always show scrollbar
-                        thickness: 6,
-                        radius: Radius.circular(10),
+                  Container(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: 200, // your max height
+                        ), // set your max height here
+                        child: Scrollbar(
+                          thumbVisibility: true, // always show scrollbar
+                          thickness: 6,
+                          radius: Radius.circular(10),
 
-                        child: ListView(
-                          shrinkWrap: true,
-                          children: List.generate(
-                            availableAbhaNumbers.length,
-                                (index) => Padding(
-                              padding: EdgeInsets.only(bottom: 10),
-                              child: InkWell(
-                                onTap: () {
-                                  if (enableAbhaClick) {
-                                    setState(() {
-                                      availableAbhaNumbersSelectedIndex = index;
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.all(15),
-                                  //width: 240.w,
-                                  //height: 50.h,
-                                  //padding: EdgeInsets.all(6.w),
-                                  decoration: BoxDecoration(
-                                    color: (availableAbhaNumbersSelectedIndex ==
-                                        index)
-                                        ? AppColors.bgColorScreen
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    border: Border.all(
-                                        color:
-                                        (availableAbhaNumbersSelectedIndex ==
-                                            index)
-                                            ? AppColors.blueApp
-                                            : Colors.grey,
-                                        width:
-                                        (availableAbhaNumbersSelectedIndex ==
-                                            index)
-                                            ? 1.5.w
-                                            : 1.w),
-                                  ),
-                                  child:Container(
-                                    /* margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: ListView(
+                            shrinkWrap: true,
+                            children: List.generate(
+                              availableAbhaNumbers.length,
+                                  (index) => Padding(
+                                padding: EdgeInsets.only(bottom: 10),
+                                child: InkWell(
+                                  onTap: () {
+                                    if (enableAbhaClick) {
+                                      setState(() {
+                                        availableAbhaNumbersSelectedIndex = index;
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(15),
+                                    //width: 240.w,
+                                    //height: 50.h,
+                                    //padding: EdgeInsets.all(6.w),
+                                    decoration: BoxDecoration(
+                                      color: (availableAbhaNumbersSelectedIndex ==
+                                          index)
+                                          ? AppColors.bgColorScreen
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      border: Border.all(
+                                          color:
+                                          (availableAbhaNumbersSelectedIndex ==
+                                              index)
+                                              ? AppColors.blueApp
+                                              : Colors.grey,
+                                          width:
+                                          (availableAbhaNumbersSelectedIndex ==
+                                              index)
+                                              ? 1.5.w
+                                              : 1.w),
+                                    ),
+                                    child:Container(
+                                      /* margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
@@ -1008,64 +1008,64 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                         ),
                                       ],
                                     ),*/
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        // 🔵 Avatar
-                                        CircleAvatar(
-                                          radius: 22,
-                                          backgroundColor: AppColors.primary,
-                                          child: Text(
-                                            availableAbhaNumbers[index].name
-                                                ?.substring(0, 1)
-                                                .toUpperCase() ??
-                                                '',
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          // 🔵 Avatar
+                                          CircleAvatar(
+                                            radius: 22,
+                                            backgroundColor: AppColors.primary,
+                                            child: Text(
+                                              availableAbhaNumbers[index].name
+                                                  ?.substring(0, 1)
+                                                  .toUpperCase() ??
+                                                  '',
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
                                             ),
                                           ),
-                                        ),
 
-                                        const SizedBox(width: 12),
+                                          const SizedBox(width: 12),
 
-                                        // 📄 Details
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              // 👤 Name + Gender
-                                              Text(
-                                                '${availableAbhaNumbers[index].name ?? ''}'
-                                                    '${availableAbhaNumbers[index].gender != null ? ' (${availableAbhaNumbers[index].gender})' : ''}',
-                                                style: TextStyle(
-                                                  fontSize: 13.sp,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.black,
+                                          // 📄 Details
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                // 👤 Name + Gender
+                                                Text(
+                                                  '${availableAbhaNumbers[index].name ?? ''}'
+                                                      '${availableAbhaNumbers[index].gender != null ? ' (${availableAbhaNumbers[index].gender})' : ''}',
+                                                  style: TextStyle(
+                                                    fontSize: 13.sp,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.black,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
                                                 ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
 
-                                              const SizedBox(height: 6),
+                                                const SizedBox(height: 6),
 
-                                              // 🆔 ABHA Number
-                                              Text(
-                                                '${localText.abhaNumber}: '
-                                                    '${availableAbhaNumbers[index].abhaNumber ?? ''}',
-                                                style: TextStyle(
-                                                  fontSize: 11.sp,
-                                                  color: Colors.grey.shade700,
+                                                // 🆔 ABHA Number
+                                                Text(
+                                                  '${localText.abhaNumber}: '
+                                                      '${availableAbhaNumbers[index].abhaNumber ?? ''}',
+                                                  style: TextStyle(
+                                                    fontSize: 11.sp,
+                                                    color: Colors.grey.shade700,
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  /*Column(
+                                    /*Column(
                                     children: [
                                       Row(
                                         children: [
@@ -1156,15 +1156,15 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
                                     ],
                                   )*/
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    )
+                      )
 
-                  /*ListView.builder(
+                    /*ListView.builder(
                   // primary: false,
                     shrinkWrap: true,
                     itemCount: availableAbhaNumbers.length ?? 0,
@@ -1379,7 +1379,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                         ),
                       );
                     }),*/
-                ),
+                  ),
                 Padding(
                   padding: EdgeInsets.only(top: 20),
                   child: Row(
@@ -2169,7 +2169,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
                                   'Please enter a valid Aadhaar Number');
                             }
                           } else  {
-                              _sendOTPLinkExisting();
+                            _sendOTPLinkExisting();
 
                           }
                         }
@@ -3489,6 +3489,7 @@ class _ABHAScreenState extends State<ABHAScreen> {
 
               createViaAbha = true;
               termCondFlag = true;
+              showAadhaarNumber = true;
               /*createViaAbha =false;
               termCondFlag =false;*/
             });

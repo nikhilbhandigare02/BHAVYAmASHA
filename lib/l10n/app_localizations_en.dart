@@ -7573,7 +7573,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userFound => 'User found.';
 
   @override
-  String get userLoginSuccses => 'User Login Successfully';
+  String get userLoginSuccses => 'user login successfully';
 
   @override
   String get invalidLoginCredentials => 'Please enter valid user credentials.';
