@@ -1401,7 +1401,7 @@ class _SpousdetailsState extends State<Spousdetails>
                   ApiDropdown<String>(
                     labelText: l.categoryLabel,
                     items: const [
-                      'Not Disclosed',
+                      'Do not want to disclose',
                       'General',
                       'OBC',
                       'SC',
@@ -1414,7 +1414,7 @@ class _SpousdetailsState extends State<Spousdetails>
                     ],
                     getLabel: (s) {
                       switch (s) {
-                        case 'Not Disclosed':
+                        case 'Do not want to disclose':
                           return l.categoryNotDisclosed;
                         case 'General':
                           return l.categoryGeneral;
