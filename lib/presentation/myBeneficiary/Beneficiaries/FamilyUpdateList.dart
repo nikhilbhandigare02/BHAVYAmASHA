@@ -170,7 +170,6 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
 
           final householdRefKey = (row['household_ref_key'] ?? '').toString();
 
-          // Check if this is a child record (same logic as RegisterChildListScreen)
           final memberType = info['memberType']?.toString().toLowerCase() ?? '';
           final relation = info['relation']?.toString().toLowerCase() ?? '';
           final isChild =

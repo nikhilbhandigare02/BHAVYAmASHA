@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/bloc/add_family_head_bloc.dart';
-import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/HeadDetails/bloc/add_family_head_state.dart';
 
 void main() {
   group('HeadDetails Age Rollover Logic', () {
@@ -23,7 +22,7 @@ void main() {
       );
       
       // Simulate entering 35 days
-      bloc.add(const UpdateDays('35'));
+      bloc.add(  UpdateDays('35'));
       // Wait for state to update
       expectLater(
         bloc.stream,
@@ -43,7 +42,7 @@ void main() {
       ));
       
       // Trigger a change to activate rollover logic
-      bloc.add(const UpdateYears('0'));
+      bloc.add(  UpdateYears('0'));
       
       expectLater(
         bloc.stream,
@@ -56,7 +55,7 @@ void main() {
 
     test('should make both months and days empty when they are 0 after rollover', () {
       // Test multiple rollovers: 45 days should become 1 month 15 days, then 15 months should become 1 year 3 months
-      bloc.add(const UpdateDays('45'));
+      bloc.add(  UpdateDays('45'));
       
       expectLater(
         bloc.stream,
@@ -76,7 +75,7 @@ void main() {
       ));
       
       // Trigger change to activate rollover
-      bloc.add(const UpdateYears('0'));
+      bloc.add(  UpdateYears('0'));
       
       expectLater(
         bloc.stream,

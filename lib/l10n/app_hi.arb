@@ -2429,14 +2429,11 @@
   "immunizationImmunizationInPrivate": "निजी taur par टीकाकरण",
   "immunizationDocumentation": "दस्तावेज़ीकरण",
   "immunizationOther": "अन्य",
-
   "pregnantWomenANC": "ए.एन.सी",
   "pregnantWomenRegistartionForANC": "एएनसी के लिए पंजीकरण",
   "pregnantWomenDangerSigns": "खतरे के संकेत",
   "pregnantWomenOther": "अन्य",
-
   "familyPlanningEligibleCouple": "योग्य दम्पत्ति",
-
   "otherPublicHealthProgramTuberculosis": "क्षय रोग",
   "otherPublicHealthProgramLeprosy": "तपेदिक",
   "otherPublicHealthProgramMalnutrition": "कुपोषण",
@@ -2458,7 +2455,6 @@
   "administrativeCounselingMaterialFlipbooksCards": "परामर्श सामग्री (फ्लिपबुक/कार्ड)",
   "administrativeImmunizationCardsMCPCards": "टीकाकरण कार्ड (एमसीपी कार्ड)",
   "administrativeHealthPromotionalMaterial": "स्वास्थ्य प्रचार सामग्री",
-
   "trainingAndSupportTrainingSupport": "प्रशिक्षण सहयोग",
   "trainingAndSupportMentoringSupport": "मार्गदर्शन सहयोग",
   "trainingAndSupportFieldSupport": "मैदान में सहायता",

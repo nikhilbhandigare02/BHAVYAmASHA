@@ -588,40 +588,6 @@ class _TodayworkState extends State<Todaywork> {
           final isMigrated = row['is_migrated'] == 1;
           if (isDeath || isMigrated) continue;
 
-          // Check if beneficiary has abortion followup form with is_abortion = 'yes'
-          final abortionForms = await db.query(
-            'followup_form_data',
-            where: "forms_ref_key = 'bt7gs9rl1a5d26mz' AND beneficiary_ref_key = ? AND form_json LIKE '%\"is_abortion\"%'",
-            whereArgs: [beneficiaryId],
-          );
-
-          bool hasAbortion = false;
-          for (final form in abortionForms) {
-            try {
-              final formJson = form['form_json']?.toString();
-              if (formJson != null && formJson.isNotEmpty) {
-                final decoded = jsonDecode(formJson);
-                if (decoded is Map<String, dynamic>) {
-                  final ancForm = decoded['anc_form'];
-                  if (ancForm is Map<String, dynamic>) {
-                    final isAbortion = ancForm['is_abortion']?.toString().toLowerCase();
-                    if (isAbortion == 'yes' || isAbortion == 'true' || isAbortion == '1') {
-                      hasAbortion = true;
-                      break;
-                    }
-                  }
-                }
-              }
-            } catch (e) {
-              debugPrint('Error checking abortion form: $e');
-            }
-          }
-
-          if (hasAbortion) {
-            debugPrint('Excluding beneficiary $beneficiaryId - has abortion record');
-            continue;
-          }
-
           // Parse beneficiary_info
           final infoRaw = row['beneficiary_info'];
           if (infoRaw == null) continue;
@@ -669,14 +635,8 @@ class _TodayworkState extends State<Todaywork> {
 
                 if (days < 0) {
                   final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
-                  final lastMonthYear = now.month - 1 < 1
-                      ? now.year - 1
-                      : now.year;
-                  final daysInLastMonth = DateTime(
-                    lastMonthYear,
-                    lastMonth + 1,
-                    0,
-                  ).day;
+                  final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+                  final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
                   days += daysInLastMonth;
                   months--;
                 }
@@ -812,6 +772,7 @@ class _TodayworkState extends State<Todaywork> {
             );
           }
 
+          // Determine if any ANC visit (1st–4th) is currently due
           DateTime? dueVisitStartDate;
           DateTime? dueVisitEndDate;
           String? currentAncVisitName;
@@ -875,12 +836,20 @@ class _TodayworkState extends State<Todaywork> {
             }
           }
 
-          if (!hasDueVisit ||
-              dueVisitStartDate == null ||
-              dueVisitEndDate == null) {
+          // If no ANC visit is currently due (or all have forms in their windows), skip this beneficiary
+          if (!hasDueVisit || dueVisitStartDate == null || dueVisitEndDate == null) {
             continue;
           }
 
+          // For display, use the start and end date of currently due visit window in "TO" format
+          DateTime displayEndDate = dueVisitEndDate;
+
+          // Special handling for 4th ANC - show 15 days window from start date
+          if (currentAncVisitName == '4th ANC') {
+            displayEndDate = dueVisitStartDate!.add(const Duration(days: 15));
+          }
+
+          final currentAncLastDueDateText = '${_formatDate(dueVisitStartDate!)} TO ${_formatDate(displayEndDate)}';
 
           final householdRefKey = row['household_ref_key']?.toString() ?? '';
 
@@ -892,18 +861,19 @@ class _TodayworkState extends State<Todaywork> {
           final uniqueKey = row['unique_key']?.toString() ?? '';
 
           items.add({
-            'id': rawId,
+            'id': rawId, // trimmed for display
             'household_ref_key': householdRefKey, // full household key
-            'hhId': householdRefKey,
-            'unique_key': uniqueKey,
+            'hhId': householdRefKey, // explicit for ANCVisitForm
+            'unique_key': uniqueKey, // full beneficiary key
             'BeneficiaryID': uniqueKey,
             'name': name,
             'age': ageText,
             'gender': 'Female',
             'last Visit date': lastVisitDate,
-            'Current ANC last due date': '',
+            'Current ANC last due date': currentAncLastDueDateText,
             'mobile': mobile ?? '-',
             'badge': 'ANC',
+            // Keep raw data for forms that expect it
             'beneficiary_info': jsonEncode(info),
             '_rawRow': row,
           });
@@ -911,6 +881,8 @@ class _TodayworkState extends State<Todaywork> {
           continue;
         }
       }
+
+      // Removed duplicate ANC due items query as we're now handling this in the main query above
 
       if (mounted) {
         setState(() {
@@ -2796,7 +2768,7 @@ class _TodayworkState extends State<Todaywork> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _kv('${l10n!.toDoVisit} :', "${state.completed + state.pending}"),
+                            _kv(l10n!.todayWorkToDo, "${state.completed + state.pending}"),
                             _kv(
                               '${l10n!.completedVisits} :',
                               state.completed.toString(),
@@ -2913,7 +2885,7 @@ class _TodayworkState extends State<Todaywork> {
           Expanded(
             child: Text(
               k,
-              style: TextStyle(fontSize: 15.sp, color: AppColors.primary),
+              style: TextStyle(fontSize: 15.sp, color: AppColors.primary, fontWeight: FontWeight.w600),
             ),
           ),
           Text(

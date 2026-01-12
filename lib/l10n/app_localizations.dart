@@ -15194,7 +15194,7 @@ abstract class AppLocalizations {
   /// No description provided for @userLoginSuccses.
   ///
   /// In en, this message translates to:
-  /// **'User login successfully'**
+  /// **'user login successfully'**
   String get userLoginSuccses;
 
   /// No description provided for @invalidLoginCredentials.
