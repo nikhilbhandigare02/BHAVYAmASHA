@@ -58,6 +58,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
 
   // Design Constants
   static const double _labelFontSize = 9.5;
+  static const double starzize = 16;
   static const double _inputFontSize = 12.0;
   static const double _buttonFontSize = 12.0;
   static const double _radioFontSize = 13.0;
@@ -105,7 +106,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
     if (_selectedChildren.isNotEmpty) {
       return _selectedChildren.join(', ');
     }
-    return l10n!.selectChild;
+    return l10n!.selectChildren;
   }
 
   bool get _isMemberTypeSelected => _selectedAdults.isNotEmpty;
@@ -215,7 +216,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
               ' *',
               style: TextStyle(
                 color: Colors.red,
-                fontSize: _labelFontSize,
+                fontSize: starzize,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -508,7 +509,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       if (_isMemberTypeSelected) ...[
         // _buildLabel('Select Child'),
         ApiDropdown<String>(
-          labelText: l10n?.selectChild ?? 'Select Child',
+          labelText: l10n?.selectChildren ?? 'Select Child',
           items: _childNames,
           getLabel: (item) => item,
           value: _selectedChild,
@@ -584,7 +585,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       Padding(
         padding: const EdgeInsets.only(left: 0),
         child: _buildLabel(
-          l10n?.selectMemberType ?? 'Select Member Type',
+          l10n?.selectMember ?? 'Select Member Type',
           isRequired: true,
         ),
       ),
@@ -620,7 +621,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
 
       if (_isMemberTypeSelected) ...[
         // Select Child (Optional)
-        _buildLabel(l10n?.selectChildOptional ?? 'Select Child (Optional)'),
+        _buildLabel(l10n?.selectChildren ?? 'Select Child (Optional)'),
         // const SizedBox(height: 12),
         GestureDetector(
           onTap: () => _showChildSelectionDialog(context),
@@ -650,11 +651,10 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         SizedBox(height: 4),
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-        // _buildLabel('', isRequired: true),
-        // const SizedBox(height: _verticalSpacing),
         ApiDropdown<String>(
-          labelText: l10n?.selectNewFamilyHead ?? 'Select New Family Head',
+          labelText:'${ l10n?.selectNewFamilyHead ?? 'Select New Family Head'} *',
           items: _selectedAdults,
+
           getLabel: (item) => item,
           value: _selectedFamilyHead,
           onChanged: (value) {
@@ -662,26 +662,14 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
               _selectedFamilyHead = value;
             });
           },
-          hintText: l10n?.selectNewFamilyHead ?? 'Select new family head',
+          hintText: l10n?.selectMember ?? 'Select new family head',
         ),
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-        // _buildLabel('House No', isRequired: true),
-        // TextField(
-        //   controller: _houseNoController,
-        //   style: const TextStyle(fontSize: _inputFontSize),
-        //   decoration: InputDecoration(
-        //     hintText: 'Enter house number',
-        //     hintStyle: TextStyle(
-        //       color: Colors.grey[600],
-        //       fontSize: _inputFontSize,
-        //     ),
-        //     border: InputBorder.none,
-        //   ),
-        // ),
+
         CustomTextField(
-          labelText: l10n?.enterHouseNumber ?? 'Enter house number',
-          hintText: l10n?.enterHouseNumber ?? 'Enter house number',
+          labelText: '${l10n?.houseNoLabel ?? 'Enter house number'} *',
+          hintText: l10n?.houseNoLabel ?? 'Enter house number',
           controller: _houseNoController,
         ),
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -1005,7 +993,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n?.selectChild ?? 'Select Child',
+                    l10n?.selectChildren ?? 'Select Child',
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w500,
@@ -1125,7 +1113,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n?.selectMemberType ?? 'Select Member Type',
+                    l10n?.selectMember ?? 'Select Member Type',
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w500,

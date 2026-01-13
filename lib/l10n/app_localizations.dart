@@ -10460,7 +10460,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectMember.
   ///
   /// In en, this message translates to:
-  /// **'Select Member'**
+  /// **'Select Members'**
   String get selectMember;
 
   /// No description provided for @selectChild.
@@ -15208,6 +15208,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'User does not exist. Please enter valid credentials.'**
   String get userNotFound;
+
+  /// No description provided for @selectChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Children'**
+  String get selectChildren;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -240,63 +240,73 @@ class _CbacformState extends State<Cbacform> {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // 👇 Keep layout stable — use SizedBox(width: 120) when hidden
-                            if (state.activeTab != 0)
-                              SizedBox(
-                                height: 34,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: TextButton(
-                                    style: TextButton.styleFrom(
-                                      shape: RoundedRectangleBorder(
+                        child: Builder(
+                          builder: (tabContext) {
+                            final currentIndex =
+                                DefaultTabController.of(tabContext)?.index ??
+                                    state.activeTab;
+                            final isLastTab = currentIndex == tabs.length - 1 ||
+                                state.activeTab == tabs.length - 1;
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // 👇 Keep layout stable — use SizedBox(width: 120) when hidden
+                                if (state.activeTab != 0)
+                                  SizedBox(
+                                    height: 34,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary,
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                    ),
-                                    onPressed: () => context
-                                        .read<CbacFormBloc>()
-                                        .add(const CbacPrevTab()),
-                                    child: Text(
-                                      'PREV',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
+                                      child: TextButton(
+                                        style: TextButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                        ),
+                                        onPressed: () => tabContext
+                                            .read<CbacFormBloc>()
+                                            .add(const CbacPrevTab()),
+                                        child: Text(
+                                          'PREV',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ),
                                     ),
+                                  )
+                                else
+                                  const SizedBox(width: 120),
+
+                                SizedBox(
+                                  height: 34,
+                                  child: RoundButton(
+                                    title: isLastTab
+                                        ? (l10n?.submit ?? 'SUBMIT')
+                                        : (l10n?.nextButton ?? 'NEXT'),
+                                    width: 100,
+                                    borderRadius: 4,
+                                    isLoading: state.submitting,
+                                    onPress: () {
+                                      if (isLastTab) {
+                                        tabContext.read<CbacFormBloc>().add(
+                                              const CbacSubmitted(),
+                                            );
+                                      } else {
+                                        tabContext.read<CbacFormBloc>().add(
+                                              const CbacNextTab(),
+                                            );
+                                      }
+                                    },
                                   ),
                                 ),
-                              )
-                            else
-                              const SizedBox(width: 120),
-
-                            SizedBox(
-                              height: 34,
-                              child: RoundButton(
-                                title: state.activeTab == tabs.length - 1
-                                    ? (l10n?.submit ?? 'SUBMIT')
-                                    : (l10n?.nextButton ?? 'NEXT'),
-                                width: 100,
-                                borderRadius: 4,
-                                isLoading: state.submitting,
-                                onPress: () {
-                                  if (state.activeTab == tabs.length - 1) {
-                                    context.read<CbacFormBloc>().add(
-                                      const CbacSubmitted(),
-                                    );
-                                  } else {
-                                    context.read<CbacFormBloc>().add(
-                                      const CbacNextTab(),
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -597,12 +607,16 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
             ),
             const Divider(height: 0.5),
 
-            CustomDatePicker(
-              hintText: l10n.dateLabel,
-              labelText: l10n.dateLabel,
-              initialDate: DateTime.now(),
-              isEditable: false,
-              onDateChanged: null,
+            Opacity(
+              opacity: 0.7,
+              child: CustomDatePicker(
+                hintText: l10n.dateLabel,
+                labelText: l10n.dateLabel,
+                initialDate: DateTime.now(),
+                isEditable: false,
+                readOnly: true,
+                onDateChanged: null,
+              ),
             ),
             const Divider(height: 0.5),
           ],
@@ -1754,13 +1768,18 @@ class _PartDTab extends StatelessWidget {
           }
         });
 
-        int scoreFromValue(String? v) {
-          if (v == null) return 0;
+        // --- 1. Scoring Logic Changed to return int? (nullable) ---
+        int? getScore(String? v) {
+          if (v == null) return null; // Returns null so UI shows '-'
           final idx = options.indexOf(v);
-          return idx < 0 ? 0 : idx;
+          return idx < 0 ? null : idx;
         }
 
-        final total = scoreFromValue(q1) + scoreFromValue(q2);
+        final scoreQ1 = getScore(q1);
+        final scoreQ2 = getScore(q2);
+
+        // Calculate total (treating nulls as 0 for the sum)
+        final total = (scoreQ1 ?? 0) + (scoreQ2 ?? 0);
 
         int computePartAScore() {
           final ageCode = state.data['partA.age_code'] as String?;
@@ -1827,31 +1846,31 @@ class _PartDTab extends StatelessWidget {
           final scoreTobacco = tobCode != null
               ? (tobCode == 'TOB_NEVER' ? 0 : 1)
               : (() {
-                  final v = state.data['partA.tobacco'] as String?;
-                  final itemsTobacco = ['Never consumed', 'Sometimes', 'Daily'];
-                  final idx = v == null ? -1 : itemsTobacco.indexOf(v);
-                  return idx <= 0 ? 0 : 1;
-                })();
+            final v = state.data['partA.tobacco'] as String?;
+            final itemsTobacco = ['Never consumed', 'Sometimes', 'Daily'];
+            final idx = v == null ? -1 : itemsTobacco.indexOf(v);
+            return idx <= 0 ? 0 : 1;
+          })();
 
           final scoreAlcohol = alcoholCode != null
               ? (alcoholCode == 'YES' ? 1 : 0)
               : (() {
-                  final v = state.data['partA.alcohol'] as String?;
-                  final isYes = v != null && v.toLowerCase() == 'yes';
-                  return isYes ? 1 : 0;
-                })();
+            final v = state.data['partA.alcohol'] as String?;
+            final isYes = v != null && v.toLowerCase() == 'yes';
+            return isYes ? 1 : 0;
+          })();
 
           final scoreActivity = activityCode != null
               ? (activityCode == 'ACT_LT150' ? 1 : 0)
               : (() {
-                  final v = state.data['partA.activity'] as String?;
-                  final itemsActivity = [
-                    'Less than 150 minutes per week',
-                    '150 minutes or more per week',
-                  ];
-                  final idx = v == null ? -1 : itemsActivity.indexOf(v);
-                  return idx == 0 ? 1 : 0;
-                })();
+            final v = state.data['partA.activity'] as String?;
+            final itemsActivity = [
+              'Less than 150 minutes per week',
+              '150 minutes or more per week',
+            ];
+            final idx = v == null ? -1 : itemsActivity.indexOf(v);
+            return idx == 0 ? 1 : 0;
+          })();
 
           int scoreWaist;
           if (waistCode != null) {
@@ -1896,10 +1915,10 @@ class _PartDTab extends StatelessWidget {
           final scoreFamily = familyCode != null
               ? (familyCode == 'YES' ? 2 : 0)
               : (() {
-                  final v = state.data['partA.familyHistory'] as String?;
-                  final isYes = v != null && v.toLowerCase() == 'yes';
-                  return isYes ? 2 : 0;
-                })();
+            final v = state.data['partA.familyHistory'] as String?;
+            final isYes = v != null && v.toLowerCase() == 'yes';
+            return isYes ? 2 : 0;
+          })();
 
           return scoreAge +
               scoreTobacco +
@@ -1910,10 +1929,13 @@ class _PartDTab extends StatelessWidget {
         }
 
         final partAScore = computePartAScore();
+
+        // --- 2. Update Helper Widget to accept Score ---
         TableRow buildRow({
           required String question,
           required String? value,
           required void Function(String?) onChanged,
+          required int? score, // Added score parameter
         }) {
           return TableRow(
             children: [
@@ -1932,7 +1954,8 @@ class _PartDTab extends StatelessWidget {
               ),
               Center(
                 child: Text(
-                  '${scoreFromValue(value)}',
+                  // --- 3. Display '-' if score is null ---
+                  score?.toString() ?? '-',
                   style: TextStyle(color: Colors.black87, fontSize: 15.sp),
                 ),
               ),
@@ -1949,7 +1972,7 @@ class _PartDTab extends StatelessWidget {
                 1: IntrinsicColumnWidth(),
               },
               defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              border: TableBorder(
+              border: const TableBorder(
                 horizontalInside: BorderSide(width: 0.5, color: Colors.black12),
               ),
               children: [
@@ -1979,6 +2002,7 @@ class _PartDTab extends StatelessWidget {
                 buildRow(
                   question: l10n.cbacD_q1,
                   value: q1,
+                  score: scoreQ1, // Pass computed score
                   onChanged: (v) {
                     bloc.add(CbacFieldChanged('partD.q1', v));
                     final idx = v == null ? -1 : options.indexOf(v);
@@ -1992,6 +2016,7 @@ class _PartDTab extends StatelessWidget {
                 buildRow(
                   question: l10n.cbacD_q2,
                   value: q2,
+                  score: scoreQ2, // Pass computed score
                   onChanged: (v) {
                     bloc.add(CbacFieldChanged('partD.q2', v));
                     final idx = v == null ? -1 : options.indexOf(v);

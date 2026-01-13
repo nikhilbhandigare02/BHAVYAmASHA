@@ -1771,7 +1771,7 @@
   "split": "Split",
   "failedToLoadMembers": "Failed to load members",
   "loadingMembers": "Loading members...",
-  "selectMember": "Select Member",
+  "selectMember": "Select Members",
   "selectChild": "Select Child",
   "selectAMember": "Select a member",
   "migrate": "MIGRATE",
@@ -2613,5 +2613,6 @@
   "userFound": "User found.",
   "userLoginSuccses": "User Login Successfully",
   "invalidLoginCredentials": "Please enter valid user credentials.",
-  "userNotFound": "User does not exist. Please enter valid credentials."
+  "userNotFound": "User does not exist. Please enter valid credentials.",
+  "selectChildren":"Select Children"
 }

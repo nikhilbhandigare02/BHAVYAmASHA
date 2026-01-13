@@ -7580,4 +7580,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get userNotFound => 'उपयोगकर्ता मौजूद नहीं है। कृपया वैध क्रेडेंशियल दर्ज करें।';
+
+  @override
+  String get selectChildren => 'बच्चे का चयन करें';
 }
