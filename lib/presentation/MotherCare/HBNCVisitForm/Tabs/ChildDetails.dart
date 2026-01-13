@@ -49,10 +49,30 @@ class ChildDetailsTab extends StatefulWidget {
 
 class _ChildDetailsTabState extends State<ChildDetailsTab> {
   String? _breastfeedingTime;
+  
+  // FocusNodes for text fields that need validation focus
+  final FocusNode _babyNameFocusNode = FocusNode();
+  final FocusNode _weightAtBirthFocusNode = FocusNode();
+  final FocusNode _temperatureFocusNode = FocusNode();
+  final FocusNode _firstBreastfeedCustomTimeFocusNode = FocusNode();
+  final FocusNode _firstFeedOtherFocusNode = FocusNode();
+  final FocusNode _congenitalAbnormalityOtherFocusNode = FocusNode();
+  
   @override
   void initState() {
     super.initState();
     _loadLastAncForm();
+  }
+
+  @override
+  void dispose() {
+    _babyNameFocusNode.dispose();
+    _weightAtBirthFocusNode.dispose();
+    _temperatureFocusNode.dispose();
+    _firstBreastfeedCustomTimeFocusNode.dispose();
+    _firstFeedOtherFocusNode.dispose();
+    _congenitalAbnormalityOtherFocusNode.dispose();
+    super.dispose();
   }
   void _validateTemperature({
     required BuildContext context,
@@ -202,9 +222,56 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
         return BlocConsumer<HbncVisitBloc, HbncVisitState>(
           listenWhen: (previous, current) =>
-          previous.newbornDetailsList != current.newbornDetailsList,
+          previous.newbornDetailsList != current.newbornDetailsList ||
+          previous.focusedErrorField != current.focusedErrorField ||
+          previous.validationTick != current.validationTick,
           listener: (context, state) {
             print('ChildDetails (from state): ${state.newbornDetailsList}');
+            
+            // Handle focus for text fields when validation occurs
+            if (state.focusedErrorField != null && mounted) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                
+                // Add a small delay to ensure widget tree is fully built for conditionally rendered fields
+                Future.delayed(const Duration(milliseconds: 100), () {
+                  if (!mounted) return;
+                  
+                  switch (state.focusedErrorField) {
+                    case 'babyName':
+                      if (_babyNameFocusNode.canRequestFocus) {
+                        _babyNameFocusNode.requestFocus();
+                      }
+                      break;
+                    case 'weightAtBirth':
+                      if (_weightAtBirthFocusNode.canRequestFocus) {
+                        _weightAtBirthFocusNode.requestFocus();
+                      }
+                      break;
+                    case 'temperature':
+                      if (_temperatureFocusNode.canRequestFocus) {
+                        _temperatureFocusNode.requestFocus();
+                      }
+                      break;
+                    case 'firstBreastfeedCustomTime':
+                      if (_firstBreastfeedCustomTimeFocusNode.canRequestFocus) {
+                        _firstBreastfeedCustomTimeFocusNode.requestFocus();
+                      }
+                      break;
+                    case 'firstFeedOther':
+                      if (_firstFeedOtherFocusNode.canRequestFocus) {
+                        _firstFeedOtherFocusNode.requestFocus();
+                      }
+                      break;
+                    case 'congenitalAbnormalityOther':
+                      if (_congenitalAbnormalityOtherFocusNode.canRequestFocus) {
+                        _congenitalAbnormalityOtherFocusNode.requestFocus();
+                      }
+                      break;
+                  }
+                });
+              });
+            }
           },
           builder: (context, state) {
             final condition = s(c['babyCondition']);
@@ -256,6 +323,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     hintText: t.babyNameLabel,
                     validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
                     initialValue: s(c['babyName']),
+                    focusNode: _babyNameFocusNode,
                     autofocus: state.focusedErrorField == 'babyName',
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'babyName', value: val, childIndex: widget.childIndex),
@@ -299,6 +367,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     keyboardType: TextInputType.number,
                     validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
                     initialValue: s(c['weightAtBirth']),
+                    focusNode: _weightAtBirthFocusNode,
                     autofocus: state.focusedErrorField == 'weightAtBirth',
                     onChanged: (val) => context.read<HbncVisitBloc>().add(
                       NewbornDetailsChanged(field: 'weightAtBirth', value: val, childIndex: widget.childIndex),
@@ -313,6 +382,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                     keyboardType: TextInputType.number,
                     validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
                     initialValue: s(c['temperature']),
+                    focusNode: _temperatureFocusNode,
                     autofocus: state.focusedErrorField == 'temperature',
                     onChanged: (val) {
                       context.read<HbncVisitBloc>().add(
@@ -526,8 +596,18 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       labelText: t.breastfeedingTime,
                       hintText: 'hh:mm',
                       keyboardType: TextInputType.number,
-                        initialValue: c['firstBreastfeedCustomTime'] ?? '',
-                      onChanged: (val) {}
+                      initialValue: c['firstBreastfeedCustomTime'] ?? '',
+                      focusNode: _firstBreastfeedCustomTimeFocusNode,
+                      autofocus: state.focusedErrorField == 'firstBreastfeedCustomTime',
+                      onChanged: (val) {
+                        context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(
+                            field: 'firstBreastfeedCustomTime',
+                            value: val,
+                            childIndex: widget.childIndex,
+                          ),
+                        );
+                      },
                     ),
                   const Divider(height: 0,),
 
@@ -604,7 +684,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   if (c['firstFeedGivenAfterBirth'] == 'Other')
                     CustomTextField(
                       labelText: "${t.enter_other_feeding_option} *",
-                      initialValue: t.enter_other_feeding_option,
+                      initialValue: s(c['firstFeedOther']) ?? '',
+                      focusNode: _firstFeedOtherFocusNode,
+                      autofocus: state.focusedErrorField == 'firstFeedOther',
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
                         NewbornDetailsChanged(field: 'firstFeedOther', value: val, childIndex: widget.childIndex),
                       ),
@@ -836,6 +918,8 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       labelText: "Please enter abnormality",
                       hintText: "Please enter abnormality",
                       initialValue: c['congenitalAbnormalityOther'] ?? '',
+                      focusNode: _congenitalAbnormalityOtherFocusNode,
+                      autofocus: state.focusedErrorField == 'congenitalAbnormalityOther',
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
                         NewbornDetailsChanged(
                           field: 'congenitalAbnormalityOther',
