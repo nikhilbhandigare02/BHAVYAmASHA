@@ -3606,10 +3606,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deceasedChildDetails => 'Deceased Child Details';
 
   @override
-  String get childDetails => 'Child Details';
+  String get childDetails => 'CHILD DETAILS';
 
   @override
-  String get memberDetails => 'Member Details';
+  String get memberDetails => 'MEMBER DETAILS';
 
   @override
   String get hello => 'Hello';

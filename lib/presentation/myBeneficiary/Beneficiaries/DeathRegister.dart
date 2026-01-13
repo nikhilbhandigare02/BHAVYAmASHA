@@ -283,7 +283,7 @@ class _DeathRegisterState extends State<DeathRegister> {
             deathDetails['deathPlace'] ??
             beneficiaryInfo['death_place'] ??
             beneficiaryInfo['deathPlace'] ??
-            'Not specified';
+            '';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
