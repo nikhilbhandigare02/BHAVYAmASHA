@@ -765,6 +765,18 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             initialData![key] = value.toString();
           }
         });
+        
+        // Ensure critical fields are preserved even if missing
+        if (!initialData.containsKey('houseNo') && _headForm!.containsKey('house_no')) {
+          initialData!['houseNo'] = _headForm!['house_no'].toString();
+        }
+        if (!initialData.containsKey('dob') && _headForm!.containsKey('date_of_birth')) {
+          initialData!['dob'] = _headForm!['date_of_birth'].toString();
+        }
+        
+        debugPrint('RegisterNewHouseHold: initialData keys: ${initialData?.keys.toList()}');
+        debugPrint('RegisterNewHouseHold: houseNo in initialData: ${initialData?['houseNo']}');
+        debugPrint('RegisterNewHouseHold: dob in initialData: ${initialData?['dob']}');
       }
       
       final result = await Navigator.of(context).push<Map<String, dynamic>>(
@@ -1848,6 +1860,18 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   initial[key] = value.toString();
                 }
               });
+              
+              // Ensure critical fields are preserved with alternative key names
+              if (!initial.containsKey('houseNo') && _headForm!.containsKey('house_no')) {
+                initial['houseNo'] = _headForm!['house_no'].toString();
+              }
+              if (!initial.containsKey('dob') && _headForm!.containsKey('date_of_birth')) {
+                initial['dob'] = _headForm!['date_of_birth'].toString();
+              }
+              
+              debugPrint('RegisterNewHouseHold (edit): initial keys: ${initial.keys.toList()}');
+              debugPrint('RegisterNewHouseHold (edit): houseNo in initial: ${initial['houseNo']}');
+              debugPrint('RegisterNewHouseHold (edit): dob in initial: ${initial['dob']}');
               for (final key in [
                 'hh_unique_key',
                 'head_unique_key',

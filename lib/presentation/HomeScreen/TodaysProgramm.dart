@@ -4065,9 +4065,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                 "$_totalCount",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: (!todayVisitClick)
-                                      ? AppColors.onPrimary
-                                      : AppColors.onSurface,
+                                  color: Colors.green,
                                   fontSize: 15.sp,
                                 ),
                               ),
@@ -4315,9 +4313,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                               _getCompletedCountForEntry(entry.key, l10n),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: _expandedKey == entry.key
-                                    ? Colors.blueAccent
-                                    : AppColors.onSurface,
+                                color: Colors.green,
                                 fontSize: 15.sp,
                               ),
                             ),

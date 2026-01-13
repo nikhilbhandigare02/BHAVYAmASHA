@@ -3351,7 +3351,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get memberRemainsToAdd => 'No. of members remains to be added';
 
   @override
-  String get cbac => 'CBAC';
+  String get cbac => 'CBAC FORM';
 
   @override
   String get videoTutorialList => 'Video Tutorial List';

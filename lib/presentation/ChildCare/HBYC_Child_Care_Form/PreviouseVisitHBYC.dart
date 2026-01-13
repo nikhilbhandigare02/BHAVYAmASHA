@@ -158,7 +158,7 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreenHBYC> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      l10n!.previousVisitsButtonS,
+                      l10n!.visitDateLabel,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14.sp,

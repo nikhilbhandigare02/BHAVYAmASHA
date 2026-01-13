@@ -6758,7 +6758,7 @@ abstract class AppLocalizations {
   /// No description provided for @cbac.
   ///
   /// In en, this message translates to:
-  /// **'CBAC'**
+  /// **'CBAC FORM'**
   String get cbac;
 
   /// No description provided for @videoTutorialList.

@@ -1721,20 +1721,40 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   }
 
   String? _normalizeGender(String? gender) {
-    if (gender == null || gender.isEmpty) return null;
-
-    final normalized = gender.toLowerCase().trim();
-    switch (normalized) {
-      case 'male':
-        return 'Male';
-      case 'female':
-        return 'Female';
-      case 'transgender':
-        return 'Transgender';
-      default:
-        return gender;
+      if (gender == null) return null;
+      final g = gender.toString().toLowerCase().trim();
+      if (g.startsWith('m')) return 'Male';
+      if (g.startsWith('f')) return 'Female';
+      if (g.startsWith('t')) return 'Transgender';
+      return gender;
     }
-  }
+
+    String? _normalizeCategory(String? category) {
+      if (category == null) return null;
+      final c = category.toString().toUpperCase().trim();
+      
+      debugPrint('AddNewFamilyHead: Normalizing category from "$category" to uppercase');
+      
+      // Convert common variations to standard uppercase format
+      switch (c) {
+        case 'OBC':
+        case 'OB C':
+          debugPrint('AddNewFamilyHead: Category normalized to "OBC"');
+          return 'OBC';
+        case 'SC':
+        case 'S C':
+          debugPrint('AddNewFamilyHead: Category normalized to "SC"');
+          return 'SC';
+        case 'ST':
+        case 'S T':
+          debugPrint('AddNewFamilyHead: Category normalized to "ST"');
+          return 'ST';
+        default:
+          // For other categories, preserve original case but trim
+          debugPrint('AddNewFamilyHead: Category preserved as "${category.toString().trim()}"');
+          return category.toString().trim();
+      }
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -1772,7 +1792,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     AfhABHAChange: m['AfhABHAChange'],
                     children: m['children'],
                     useDob: m.containsKey('age_by')
-                        ? m['age_by'] == 'By Dob'
+                        ? m['age_by'] == 'by_dob'
                         : (m['useDob'] == 'true' || m['useDob'] == true),
                     dob: _parseDate(m['dob'] as String?),
                     edd: _parseDate(m['edd'] as String?),
@@ -1795,10 +1815,45 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     otherReligion: m['religion'] == 'Other'
                         ? m['other_religion']
                         : null,
-                    category: m['category'] == 'Other'
+                  )));
+              
+              final normalizedCategory = _normalizeCategory(m['category']);
+              debugPrint('AddNewFamilyHead: Final category value being set: "$normalizedCategory"');
+              
+              b.add(
+                AfhHydrate(
+                  AddFamilyHeadState(
+                    houseNo: m['houseNo'] ?? m['house_no'] ?? m['houseNumber'],
+                    headName: m['headName'],
+                    fatherName: m['fatherName'],
+                    AfhABHAChange: m['AfhABHAChange'],
+                    children: m['children'],
+                    useDob: m.containsKey('age_by')
+                        ? m['age_by'] == 'by_dob'
+                        : (m['useDob'] == 'true' || m['useDob'] == true),
+                    dob: _parseDate(m['dob'] as String? ?? m['date_of_birth'] as String? ?? m['dateOfBirth'] as String?),
+                    edd: _parseDate(m['edd'] as String?),
+                    lmp: _parseDate(m['lmp'] as String?),
+                    approxAge: approx,
+                    years: years,
+                    months: months,
+                    days: days,
+                    gender: _normalizeGender(m['gender']),
+                    occupation: m['occupation'] == 'Other'
                         ? 'Other'
-                        : m['category'],
-                    otherCategory: m['category'] == 'Other'
+                        : m['occupation'],
+                    otherOccupation: m['occupation'] == 'Other'
+                        ? m['other_occupation']
+                        : null,
+                    education: m['education'],
+                    religion: m['religion'] == 'Other'
+                        ? 'Other'
+                        : m['religion'],
+                    otherReligion: m['religion'] == 'Other'
+                        ? m['other_religion']
+                        : null,
+                    category: normalizedCategory,
+                    otherCategory: normalizedCategory == 'Other'
                         ? m['other_category']
                         : null,
                     mobileOwner: m['mobileOwner'],
@@ -1960,7 +2015,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             final otherOccupation = getSpouseVal('other_occupation');
             final religion = getSpouseVal('religion');
             final otherReligion = getSpouseVal('other_religion');
-            final category = getSpouseVal('category');
+            final category = _normalizeCategory(getSpouseVal('category')?.toString());
+            debugPrint('AddNewFamilyHead: Spouse category normalized to: "$category"');
             final otherCategory = getSpouseVal('other_category');
             final mobileOwner = getSpouseVal('mobileOwner');
             final mobileOwnerOtherRelation = getSpouseVal(
@@ -2020,7 +2076,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
               // Category fields
               category: category,
-              otherCategory: otherCategory,
+              otherCategory: category == 'Other' ? getSpouseVal('other_category') : null,
 
               abhaAddress: getSpouseVal('abhaAddress'),
 

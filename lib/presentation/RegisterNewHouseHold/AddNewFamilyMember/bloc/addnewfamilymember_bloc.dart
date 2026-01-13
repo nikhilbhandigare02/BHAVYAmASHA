@@ -1003,7 +1003,7 @@ class AddnewfamilymemberBloc
             'fatherName': state.fatherName,
             'motherName': state.motherName,
             'useDob': state.useDob,
-            'age_by': state.useDob ? 'By Dob' : 'By Age"',
+            'age_by': state.useDob ? 'by_dob' : 'by_age"',
             'dob': state.dob?.toIso8601String(),
             'approxAge': state.approxAge,
             'updateDay': state.updateDay,
@@ -2090,7 +2090,7 @@ class AddnewfamilymemberBloc
           ..['fatherName'] = state.fatherName
           ..['motherName'] = state.motherName
           ..['useDob'] = state.useDob
-          ..['age_by'] = state.useDob ? 'By Dob' : 'By Age'
+          ..['age_by'] = state.useDob ? 'by_dob' : 'by_age'
           ..['dob'] = state.dob?.toIso8601String()
           ..['approxAge'] = state.approxAge
           ..['updateDay'] = state.updateDay
