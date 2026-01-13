@@ -328,13 +328,13 @@ class _DeathRegisterState extends State<DeathRegister> {
             beneficiaryInfo['deathDate'] ??
             beneficiaryInfo['dateOfDeath'] ??
             data['modified_date_time'] ??
-            '';
+            '-';
     final deathPlace =
         deathDetails['death_place'] ??
             deathDetails['deathPlace'] ??
             beneficiaryInfo['death_place'] ??
             beneficiaryInfo['deathPlace'] ??
-            '';
+            '-';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),

@@ -4936,7 +4936,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noRecordsFound => 'No records found';
 
   @override
-  String get tolaMohalla => 'Mohalla/Tola';
+  String get tolaMohalla => 'Tola/Mohalla';
 
   @override
   String get noHouseholdsFound => 'No households found';
@@ -7580,4 +7580,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get userNotFound => 'User does not exist. Please enter valid credentials.';
+
+  @override
+  String get typeofschool => 'Type of school';
+
+  @override
+  String get government => 'Government';
+
+  @override
+  String get private => 'private';
 }

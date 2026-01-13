@@ -3791,6 +3791,36 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     ),
                                   ),
                                 ],
+                                if (state.ChildSchool == 'Yes' || state.ChildSchool == "yes") ...[
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
+                                  _section(
+                                    ApiDropdown<String>(
+                                      labelText: l.typeofschool,
+                                      items: const [
+                                        'Government',
+                                        'Private',
+                                      ],
+                                      getLabel: (s) {
+                                        switch (s) {
+                                          case 'Government':
+                                            return l.government;
+                                          case 'Private':
+                                            return l.private;
+                                          default:
+                                            return s;
+                                        }
+                                      },
+                                      value: state.TypeOfSchool,
+                                      onChanged: (v) => context
+                                          .read<AddnewfamilymemberBloc>()
+                                          .add(TypeOfSchoolChange(v!)),
+                                    ),
+                                  ),
+                                ],
                                 Divider(
                                   color: AppColors.divider,
                                   thickness: 0.5,

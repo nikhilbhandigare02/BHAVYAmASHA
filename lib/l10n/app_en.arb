@@ -1681,7 +1681,7 @@
   "wifeName": "Wife Name",
   "husbandName": "Husband Name",
   "noRecordsFound": "No records found",
-  "tolaMohalla": "Mohalla/Tola",
+  "tolaMohalla": "Tola/Mohalla",
   "noHouseholdsFound": "No households found",
   "noOfASHAUnderTheFacilitator": "No. of ASHA under the facilitator",
   "ashaFacilitatorClusterMeetingList": "ASHA Facilitator Cluster Meeting List",
@@ -2613,5 +2613,8 @@
   "userFound": "User found.",
   "userLoginSuccses": "User Login Successfully",
   "invalidLoginCredentials": "Please enter valid user credentials.",
-  "userNotFound": "User does not exist. Please enter valid credentials."
+  "userNotFound": "User does not exist. Please enter valid credentials.",
+  "typeofschool": "Type of school",
+  "government": "Government",
+  "private": "private"
 }

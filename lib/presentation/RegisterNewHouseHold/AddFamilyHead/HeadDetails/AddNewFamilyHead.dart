@@ -361,7 +361,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   void updateDobFromAge() {
     final bloc = context.read<AddFamilyHeadBloc>();
     final state = bloc.state;
-    
+
     final y = int.tryParse(state.years ?? '0') ?? 0;
     final m = int.tryParse(state.months ?? '0') ?? 0;
     final d = int.tryParse(state.days ?? '0') ?? 0;
@@ -373,7 +373,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
       now.month - m,
       now.day - d,
     );
-    
+
     bloc.add(AfhUpdateDob(calculatedDob));
   }
 
@@ -393,7 +393,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
       years--;
       months += 12;
     }
-    
+
     // Update BLoC state with calculated age values
     final bloc = context.read<AddFamilyHeadBloc>();
     bloc.add(UpdateYears(years.toString()));
@@ -507,31 +507,40 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             ),
             if (state.useDob)
               _Section(
-                child: CustomDatePicker(
-                  labelText: '${l.dobLabel} *',
-                  hintText: l.dateHint,
-                  initialDate: state.dob,
-                  isEditable: !widget.isEdit,
-                  readOnly: widget.isEdit,
-                  firstDate: DateTime.now().subtract(const Duration(days: 365 * 110)),
-                  lastDate: DateTime.now().subtract(const Duration(days: 365 * 15)),
-                  onDateChanged: (date) {
-                    if (date != null) {
-                      context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(date));
-                      updateAgeFromDob(date);
-                    }
-                  },
-                  validator: (date) {
-                    final error = Validations.validateDOB(l, date);
-                    if (error != null) {
-                      _captureError(error);
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) {
-                          showAppSnackBar(context, error);
+                child: Builder(
+                  builder: (context) {
+                    final now = DateTime.now();
+                    final adultMinDate = DateTime(now.year - 110, now.month, now.day);
+                    final adultMaxDate = DateTime(now.year - 15, now.month, now.day);
+
+                    return CustomDatePicker(
+                      labelText: '${l.dobLabel} *',
+                      hintText: l.dateHint,
+                      initialDate: state.dob,
+                      isEditable: !widget.isEdit,
+                      readOnly: widget.isEdit,
+                      firstDate: adultMinDate,
+                      lastDate: adultMaxDate,
+                      onDateChanged: (date) {
+                        if (date != null) {
+                          context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(date));
+                          updateAgeFromDob(date);
                         }
-                      });
-                    }
-                    return null; // Don't show red error message
+                      },
+                      validator: (date) {
+                        if (date == null) {
+                          final error = 'Please select date of birth';
+                          _captureError(error);
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) {
+                              showAppSnackBar(context, error);
+                            }
+                          });
+                          return ' '; // Return space to trigger hasError for scrolling but hide red text
+                        }
+                        return null;
+                      },
+                    );
                   },
                 )
               )
@@ -578,6 +587,27 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                 FilteringTextInputFormatter.digitsOnly,
                                 MaxValueFormatter(110),
                               ],
+                              validator: (value) {
+                                final years = yearsController.text.trim();
+                                final months = monthsController.text.trim();
+                                final days = daysController.text.trim();
+                                // Check if all fields are empty
+                                if (years.isEmpty && months.isEmpty && days.isEmpty) {
+                                  final error = 'Please enter age between 15 to 110 years';
+                                  _captureError(error);
+                                  return ' '; // Return space to trigger hasError for scrolling but hide red text
+                                }
+                                // Additional validation for age range
+                                final y = int.tryParse(years) ?? 0;
+                                final m = int.tryParse(months) ?? 0;
+                                final d = int.tryParse(days) ?? 0;
+                                if (y < 15 || y > 110) {
+                                  final error = 'Please enter age between 15 to 110 years';
+                                  _captureError(error);
+                                  return ' '; // Return space to trigger hasError for scrolling but hide red text
+                                }
+                                return null;
+                              },
                               onChanged: widget.isEdit
                                   ? null
                                   : (value) => context.read<AddFamilyHeadBloc>().add(
@@ -602,6 +632,17 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                 FilteringTextInputFormatter.digitsOnly,
                                 MaxValueFormatter(99),
                               ],
+                              validator: (value) {
+                                final years = yearsController.text.trim();
+                                final months = monthsController.text.trim();
+                                final days = daysController.text.trim();
+                                final error = Validations.validateApproxAge(l, years, months, days);
+                                if (error != null) {
+                                  // Don't capture error here - only years field captures
+                                  return ' '; // Return space to trigger hasError for scrolling but hide red text
+                                }
+                                return null;
+                              },
                               onChanged: widget.isEdit
                                   ? null
                                   : (value) => context.read<AddFamilyHeadBloc>().add(
@@ -626,6 +667,17 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                 FilteringTextInputFormatter.digitsOnly,
                                 MaxValueFormatter(99), // Allow up to 99 for rollover calculation
                               ],
+                              validator: (value) {
+                                final years = yearsController.text.trim();
+                                final months = monthsController.text.trim();
+                                final days = daysController.text.trim();
+                                final error = Validations.validateApproxAge(l, years, months, days);
+                                if (error != null) {
+                                  // Don't capture error here - only years field captures
+                                  return ' '; // Return space to trigger hasError for scrolling but hide red text
+                                }
+                                return null;
+                              },
                               onChanged: widget.isEdit
                                   ? null
                                   : (value) => context.read<AddFamilyHeadBloc>().add(
@@ -1731,9 +1783,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     String? _normalizeCategory(String? category) {
       if (category == null) return null;
       final c = category.toString().toUpperCase().trim();
-      
+
       debugPrint('AddNewFamilyHead: Normalizing category from "$category" to uppercase');
-      
+
       // Convert common variations to standard uppercase format
       switch (c) {
         case 'OBC':
@@ -1815,10 +1867,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                         ? m['other_religion']
                         : null,
                   )));
-              
+
               final normalizedCategory = _normalizeCategory(m['category']);
               debugPrint('AddNewFamilyHead: Final category value being set: "$normalizedCategory"');
-              
+
               b.add(
                 AfhHydrate(
                   AddFamilyHeadState(
@@ -2559,7 +2611,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                       isLoading: isLoading,
                                                       onPress: () {
                                                         _clearFormError();
-                                                        
+
                                                         // Manual validation for approximate age fields
                                                         final state = context.read<AddFamilyHeadBloc>().state;
                                                         if (!state.useDob) {
@@ -2574,7 +2626,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                             return;
                                                           }
                                                         }
-                                                        
+
                                                         final formState =
                                                             _formKey
                                                                 .currentState;

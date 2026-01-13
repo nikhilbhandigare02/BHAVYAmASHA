@@ -1050,7 +1050,11 @@ class _SpousdetailsState extends State<Spousdetails>
                         }
                       },
                       validator: (date) {
-                        // Don't show red validation message, only snackbar
+                        if (date == null) {
+                          final error = 'Please select date of birth';
+                          captureSpousError(error);
+                          return ''; // Return empty string to hide red text but trigger validation
+                        }
                         return null;
                       },
                       readOnly: widget.isEdit,

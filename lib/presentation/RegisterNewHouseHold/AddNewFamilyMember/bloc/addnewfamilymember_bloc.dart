@@ -343,16 +343,15 @@ class AddnewfamilymemberBloc
         final ageBy = allData['age_by'] as String?;
         bool useDobValue = true; // default to DOB
         if (ageBy != null) {
-          if (ageBy == 'By Age') {
+          if (ageBy == 'by_age') {
             useDobValue = false;
-          } else if (ageBy == 'By Dob') {
+          } else if (ageBy == 'by_dob') {
             useDobValue = true;
           }
         }
         
         // Update the state with all the data
         emit(state.copyWith(
-          // Map all the fields to the state
           name: primaryName,
           fatherName: allData['fatherName'] as String?,
           motherName: allData['motherName'] as String?,
@@ -405,6 +404,7 @@ class AddnewfamilymemberBloc
           WeightChange: allData['weight'] as String?,
           birthWeight: allData['birthWeight']?.toString(),
           ChildSchool: allData['childSchool'] as String? ?? allData['school'] as String?,
+          TypeOfSchool: allData['typeOfSchool'] as String? ?? allData['type_of_school'] as String?,
           BirthCertificateChange: allData['birthCertificate'] as String?,
           errorMessage: null,
 
@@ -716,6 +716,9 @@ class AddnewfamilymemberBloc
     on<ChildSchoolChange>(
           (e, emit) => emit(state.copyWith(ChildSchool: e.value)),
     );
+    on<TypeOfSchoolChange>(
+          (e, emit) => emit(state.copyWith(TypeOfSchool: e.value)),
+    );
     on<BirthCertificateChange>(
           (e, emit) => emit(state.copyWith(BirthCertificateChange: e.value)),
     );
@@ -1020,6 +1023,7 @@ class AddnewfamilymemberBloc
             'category': state.category,
             'weight': state.WeightChange,
             'childSchool': state.ChildSchool,
+            'type_of_school': state.TypeOfSchool,
             'birthCertificate': state.BirthCertificateChange,
             'birthWeight': state.birthWeight,
             'abhaAddress': state.abhaAddress,
@@ -1263,6 +1267,7 @@ class AddnewfamilymemberBloc
                 'spouseName': spousState.spouseName,
                 'fatherName': spousState.fatherName,
                 'useDob': spousState.useDob,
+                'age_by': spousState.useDob,
                 'dob': spousState.dob?.toIso8601String(),
                 'edd': spousState.edd?.toIso8601String(),
                 'lmp': spousState.lmp?.toIso8601String(),
@@ -2108,6 +2113,7 @@ class AddnewfamilymemberBloc
           ..['weight'] = state.WeightChange
           ..['birthWeight'] = state.birthWeight
           ..['childSchool'] = state.ChildSchool
+          ..['type_of_school'] = state.TypeOfSchool
           ..['birthCertificate'] = state.BirthCertificateChange
           ..['abhaAddress'] = state.abhaAddress
           ..['mobileOwner'] = state.mobileOwner

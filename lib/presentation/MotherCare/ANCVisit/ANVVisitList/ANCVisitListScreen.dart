@@ -160,13 +160,20 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
       final list = byId.values.toList()
         ..sort((a, b) {
-          final d1 = DateTime.tryParse(
-              a['_rawRow']?['created_date_time'] ?? '');
-          final d2 = DateTime.tryParse(
-              b['_rawRow']?['created_date_time'] ?? '');
-          return (d2 ?? DateTime(0))
-              .compareTo(d1 ?? DateTime(0));
+          DateTime getDate(Map<String, dynamic> item) {
+            final raw = item['_rawRow'] as Map<String, dynamic>?;
+
+            final value =
+                raw?['modified_date_time'] ??
+                    raw?['created_date_time'];
+
+            final dt = DateTime.tryParse(value?.toString() ?? '');
+            return dt?.toUtc() ?? DateTime.fromMillisecondsSinceEpoch(0);
+          }
+
+          return getDate(b).compareTo(getDate(a));
         });
+
 
       setState(() {
         _allData = list;
