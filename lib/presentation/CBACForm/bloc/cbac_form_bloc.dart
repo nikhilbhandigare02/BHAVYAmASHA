@@ -303,6 +303,79 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
   Future<void> _onSubmit(CbacSubmitted event, Emitter<CbacFormState> emit) async {
     emit(state.copyWith(submitting: true, clearError: true, isSuccess: false));
 
+    bool has(String key) {
+      final v = state.data[key];
+      if (v == null) return false;
+      if (v is String) return v.trim().isNotEmpty;
+      return true;
+    }
+
+    List<String> missing = [];
+    final reqPartA = [
+      'partA.age',
+      'partA.tobacco',
+      'partA.alcohol',
+      'partA.activity',
+      'partA.waist',
+      'partA.familyHistory',
+    ];
+    for (final k in reqPartA) {
+      if (!has(k)) missing.add(k);
+    }
+
+    final reqB1 = [
+      'partB.b1.cough2w',
+      'partB.b1.bloodMucus',
+      'partB.b1.fever2w',
+      'partB.b1.weightLoss',
+      'partB.b1.nightSweat',
+      'partB.b1.druggs',
+      'partB.b1.Tuberculosis',
+      'partB.b1.history',
+    ];
+    for (final k in reqB1) {
+      if (!has(k)) missing.add(k);
+    }
+    final genderCode = state.data['personal.gender_code']?.toString();
+    final isFemale = genderCode == 'F';
+    if (isFemale) {
+      final reqB2 = [
+        'partB.b2.excessBleeding',
+        'partB.b2.depression',
+        'partB.b2.uterusProlapse',
+      ];
+      for (final k in reqB2) {
+        if (!has(k)) missing.add(k);
+      }
+    }
+
+    if (missing.isNotEmpty) {
+      int targetTab = state.activeTab;
+      final first = missing.first;
+      if (first.startsWith('partA.')) {
+        targetTab = 2;
+      } else if (first.startsWith('partB.')) {
+        targetTab = 3;
+      } else if (first.startsWith('partC.')) {
+        targetTab = 4;
+      } else if (first.startsWith('partD.')) {
+        targetTab = 5;
+      } else if (first.startsWith('personal.')) {
+        targetTab = 1;
+      } else if (first.startsWith('general.')) {
+        targetTab = 0;
+      }
+      final token = DateTime.now().microsecondsSinceEpoch.toString();
+      emit(state.copyWith(
+        submitting: false,
+        missingKeys: missing,
+        errorMessage: token,
+        activeTab: targetTab,
+        clearError: false,
+      ));
+      return;
+    }
+
     try {
       // Get database instance
       final db = await DatabaseProvider.instance.database;
