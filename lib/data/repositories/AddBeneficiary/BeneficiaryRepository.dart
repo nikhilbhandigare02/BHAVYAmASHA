@@ -377,7 +377,6 @@ class BeneficiaryRepository {
     final first = (nameMap['first_name'] ?? info['first_name'] ?? '').toString().trim();
     final middle = (nameMap['middle_name'] ?? info['middle_name'] ?? '').toString().trim();
     final last = (nameMap['last_name'] ?? info['last_name'] ?? '').toString().trim();
-    final fullNameParts = <String>[first, middle, last].where((s) => s.isNotEmpty).toList();
     final fullName = _resolveFullName(info);
 
 

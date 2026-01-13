@@ -7268,13 +7268,13 @@ abstract class AppLocalizations {
   /// No description provided for @childDetails.
   ///
   /// In en, this message translates to:
-  /// **'Child Details'**
+  /// **'CHILD DETAILS'**
   String get childDetails;
 
   /// No description provided for @memberDetails.
   ///
   /// In en, this message translates to:
-  /// **'Member Details'**
+  /// **'MEMBER DETAILS'**
   String get memberDetails;
 
   /// No description provided for @hello.

@@ -426,7 +426,12 @@ class _HBNCListScreenState
           final deliveryDate = formData['delivery_date']?.toString();
           print('📅 Passing delivery date to _getNextVisitDate: $deliveryDate');
           print('📊 Passing visit count to _getNextVisitDate: $visitCount');
-          final nextHBNCDate = await _getNextVisitDate(beneficiaryRefKey, deliveryDate, visitCount);
+          final nextHBNCDate = await _getNextVisitDate(
+            beneficiaryRefKey,
+            deliveryDate,
+            visitCount,
+            registrationDate,
+          );
 
           print('📊 Final values for beneficiary $beneficiaryRefKey:');
           print('  - Visit Count: $visitCount');
@@ -535,81 +540,79 @@ class _HBNCListScreenState
     return null;
   }
 
-  Future<String?> _getNextVisitDate(String beneficiaryId, String? deliveryDate, int visitCount) async {
+  Future<String?> _getNextVisitDate(
+      String beneficiaryId,
+      String? deliveryDate,
+      int visitCount,
+      String registrationDate,
+      ) async {
     try {
       print('🔍 Calculating next visit date for beneficiary: $beneficiaryId');
-      print('📊 Using visit count: $visitCount');
-      print('📅 Using delivery date: $deliveryDate');
+      print('📊 Visit count: $visitCount');
+      print('📅 Registration date: $registrationDate');
 
-      // If visit count is 0, show current date as next visit date
+      /// 🔹 CASE 1: No HBNC visits done yet
+      /// → Show registration date
       if (visitCount == 0) {
-        print('📅 Visit count is 0, showing current date as next visit');
-        final today = DateTime.now();
-        final formatted = _formatDate(today.toString());
-        return formatted;
+        if (registrationDate.isNotEmpty) {
+          final parsedRegDate = DateTime.tryParse(registrationDate);
+          if (parsedRegDate != null) {
+            final formatted = _formatDate(parsedRegDate.toString());
+            print('📅 Visit count 0 → Next HBNC = Registration Date: $formatted');
+            return formatted;
+          }
+        }
+
+        // Fallback safety
+        print('⚠️ Invalid registration date, using today');
+        return _formatDate(DateTime.now().toString());
       }
 
-      // For visit count >= 1, get the latest record's created_date_time as base date
-      // Query for any HBNC/PNC related form records to get the latest one
+      /// 🔹 CASE 2: Visit count >= 1
       final db = await DatabaseProvider.instance.database;
 
-      // Try multiple possible form reference keys for HBNC visits
       final possibleFormKeys = [
-        FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother], // bu30k62jao9qesri
+        FollowupFormDataTable.formUniqueKeys[
+        FollowupFormDataTable.pncMother],
         '4r7twnycml3ej1vg',
-        '695fdc026276645a01e9c800', // additional HBNC-related form key
+        '695fdc026276645a01e9c800',
       ];
 
       final latestVisitRows = await db.query(
         FollowupFormDataTable.table,
-        where: 'beneficiary_ref_key = ? AND (forms_ref_key = ? OR forms_ref_key = ? OR forms_ref_key = ?) ',
+        where:
+        'beneficiary_ref_key = ? AND (forms_ref_key = ? OR forms_ref_key = ? OR forms_ref_key = ?)',
         whereArgs: [beneficiaryId, ...possibleFormKeys],
         orderBy: 'created_date_time DESC',
         limit: 1,
       );
 
-      print('📋 Found ${latestVisitRows.length} latest visit records for base date');
-      print('🔑 Querying for form keys: $possibleFormKeys');
-
       DateTime baseDate;
-      if (latestVisitRows.isNotEmpty) {
-        final result = latestVisitRows.first;
-        final createdDateTime = result['created_date_time']?.toString();
-        final formRefKey = result['forms_ref_key']?.toString();
-        print('📅 Using created_date_time as base: $createdDateTime');
-        print('🔑 From form reference key: $formRefKey');
 
-        if (createdDateTime != null && createdDateTime.isNotEmpty) {
-          baseDate = DateTime.tryParse(createdDateTime) ?? DateTime.now();
-          print('📅 Parsed base date from created_date_time: $baseDate');
-        } else {
-          baseDate = DateTime.now();
-          print('⚠️ created_date_time is empty, using current date: $baseDate');
-        }
+      if (latestVisitRows.isNotEmpty) {
+        final createdDateTime =
+        latestVisitRows.first['created_date_time']?.toString();
+        baseDate =
+            DateTime.tryParse(createdDateTime ?? '') ?? DateTime.now();
+        print('📅 Base date from last visit: $baseDate');
       } else {
         baseDate = DateTime.now();
-        print('⚠️ No visit records found, using current date: $baseDate');
+        print('⚠️ No visit found, using today as base date');
       }
 
-      print('📅 Calculating next visit for visit count: $visitCount from base date: $baseDate');
-
+      /// Visit 1 → +2 days
       if (visitCount == 1) {
-        final nextVisitDate = baseDate.add(const Duration(days: 2));
-        final formatted = _formatDate(nextVisitDate.toString());
-        print('🎯 Visit count 1: +2 days → $formatted');
-        return formatted;
+        final nextVisit = baseDate.add(const Duration(days: 2));
+        return _formatDate(nextVisit.toString());
       }
 
-      final nextVisitDate = _calculateNextVisitDate(visitCount, baseDate);
-      if (nextVisitDate != null) {
-        final formatted = _formatDate(nextVisitDate.toString());
-        print('📅 Calculated next visit date: visit $visitCount → $formatted');
-        return formatted;
-      } else {
-        print('❌ _calculateNextVisitDate returned null');
-        return null;
-      }
+      /// Visit 2+ → use your existing rule
+      final nextVisitDate =
+      _calculateNextVisitDate(visitCount, baseDate);
 
+      return nextVisitDate != null
+          ? _formatDate(nextVisitDate.toString())
+          : null;
     } catch (e) {
       print('❌ Error calculating next visit date: $e');
       return null;

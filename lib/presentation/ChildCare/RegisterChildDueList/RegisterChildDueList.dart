@@ -266,29 +266,32 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       // 1. Modified Query: Added GROUP BY cca.beneficiary_ref_key
       final List<Map<String, dynamic>> childActivities = await db.rawQuery(
         '''
-      SELECT cca.*
-      FROM child_care_activities cca
-      INNER JOIN (
-          SELECT beneficiary_ref_key,
-                 MAX(created_date_time) AS max_date
-          FROM child_care_activities
-          WHERE is_deleted = 0
-          GROUP BY beneficiary_ref_key
-      ) latest
-        ON cca.beneficiary_ref_key = latest.beneficiary_ref_key
-       AND cca.created_date_time = latest.max_date
-      WHERE cca.child_care_state = ?
-        AND cca.is_deleted = ?
-        ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND cca.current_user_key = ?' : ''}
-      GROUP BY cca.beneficiary_ref_key 
-      ORDER BY cca.created_date_time DESC
-      ''',
+  SELECT
+      cca.*,
+      bn.created_date_time AS beneficiary_created_date_time
+  FROM child_care_activities cca
+  INNER JOIN (
+      SELECT beneficiary_ref_key,
+             MAX(datetime(created_date_time)) AS max_activity_date
+      FROM child_care_activities
+      WHERE is_deleted = 0
+      GROUP BY beneficiary_ref_key
+  ) latest
+      ON cca.beneficiary_ref_key = latest.beneficiary_ref_key
+     AND datetime(cca.created_date_time) = latest.max_activity_date
+  INNER JOIN beneficiaries_new bn
+      ON bn.unique_key = cca.beneficiary_ref_key
+  WHERE cca.child_care_state = ?
+    AND cca.is_deleted = 0
+    ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND cca.current_user_key = ?' : ''}
+  ORDER BY datetime(bn.created_date_time) DESC
+  ''',
         [
           'registration_due',
-          0,
           if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) ashaUniqueKey,
         ],
       );
+
 
       debugPrint(
         '🎯 Found ${childActivities.length} unique child care activities',

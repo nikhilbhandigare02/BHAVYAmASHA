@@ -157,7 +157,6 @@ class _HouseHold_BeneficiaryScreenState
             info['Rich_id']?.toString() ??
             '';
 
-        // Get name from multiple possible fields
         final name =
             info['memberName']?.toString() ??
             info['name']?.toString() ??
@@ -596,25 +595,21 @@ class _HouseHold_BeneficiaryScreenState
     final headGenderStr = head['Age|Gender']?.toString().toLowerCase() ?? '';
     final isHeadMale = headGenderStr.contains('male');
 
-    // Get gender and unmarried status for current beneficiary
+    // Get gender and marital status for current beneficiary
     final gender = (data['_memberData']['gender']?.toString().toLowerCase() ?? '');
     final isFemale = gender == 'female' || gender == 'f';
+    final isMale = gender == 'male' || gender == 'm';
     
     final String relation =
         data['Relation']?.toString().toLowerCase() ?? '';
 
-    final bool isUnmarried =
-        relation.isEmpty ||
-            relation == 'son' ||
-            relation == 'daughter' ||
-            relation == 'brother' ||
-            relation == 'sister' ||
-            relation == 'grandson' ||
-            relation == 'granddaughter' ||
-            relation == 'nephew' ||
-            relation == 'niece';
-
     final bool isChild = (data['_memberData']?['memberType']?.toString().toLowerCase() == 'child');
+    final maritalStatus = (data['MaritalStatus']?.toString().toLowerCase() ?? '');
+    final isUnmarried = maritalStatus == 'unmarried' || isChild; // Children are considered unmarried
+    final isMarried = maritalStatus == 'married' && !isChild; // Children cannot be married
+    
+    final registrationType = (data['RegitrationType']?.toString().toLowerCase() ?? '');
+    final isGeneralRegistration = registrationType == 'general';
 
     // Check if beneficiary is deceased
     final bool isDeceased = (data['_raw']?['is_death'] == 1 || data['_raw']?['is_death'] == '1');
@@ -776,24 +771,20 @@ class _HouseHold_BeneficiaryScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Common fields for all categories
                   Row(
                     children: [
                       Expanded(
                         child: _rowText(
                           l10n?.registrationDateLabel ?? 'Registration Date',
-                          _formatDate(
-                            data['RegitrationDate']?.toString() ?? '',
-                          ),
+                          _formatDate(data['RegitrationDate']?.toString() ?? ''),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: _rowText(
                           l10n?.registrationTypeLabel ?? 'Registration Type',
-                          (data['_memberData']?['memberType']
-                                      ?.toString()
-                                      .toLowerCase() ==
-                                  'child')
+                          (data['_memberData']?['memberType']?.toString().toLowerCase() == 'child')
                               ? 'Child'
                               : (data['RegitrationType'] ?? ''),
                         ),
@@ -802,12 +793,9 @@ class _HouseHold_BeneficiaryScreenState
                       Expanded(
                         child: _rowText(
                           l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
-                          (data['_raw']?['unique_key']?.toString().length ??
-                                      0) >
-                                  11
+                          (data['_raw']?['unique_key']?.toString().length ?? 0) > 11
                               ? data['_raw']['unique_key'].toString().substring(
-                                  data['_raw']['unique_key'].toString().length -
-                                      11,
+                                  data['_raw']['unique_key'].toString().length - 11,
                                 )
                               : (data['_raw']?['unique_key']?.toString() ?? ''),
                         ),
@@ -818,109 +806,146 @@ class _HouseHold_BeneficiaryScreenState
                   Row(
                     children: [
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _rowText(l10n?.nameLabel ?? 'Name', data['Name'] ?? ''),
-                                ),
-
-                              ],
-                            ),
-                          ],
-                        ),
+                        child: _rowText(l10n?.nameLabel ?? 'Name', data['Name'] ?? ''),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _rowText(
-                         l10n?.ageGenderLabel ?? 'Age | Gender',
-                          data['Age|Gender'] ?? '',
-                        ),
+                        child: _rowText(l10n?.ageGenderLabel ?? 'Age | Gender', data['Age|Gender'] ?? ''),
                       ),
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Show RCH ID for all children and females (same logic as AllBeneficiary)
-                            if (isChild || isFemale)
-                              _rowText(
-                                l10n?.richId ??'RCH ID',
-                                data['Rich_id']?.toString().trim().isNotEmpty == true
-                                    ? data['Rich_id'].toString()
-                                    : (l10n?.notAvailable ?? 'Not Available'),
-                              )
-                            else
-                              _rowText(l10n?.mobileLabel ?? 'Mobile no.', data['Mobileno.'] ?? ''),
-                          ],
+                      // Category-specific third field
+                      if (isChild)
+                        Expanded(
+                          child: _rowText(
+                            l10n?.richId ?? 'RCH ID',
+                            data['Rich_id']?.toString().trim().isNotEmpty == true
+                                ? data['Rich_id'].toString()
+                                : (l10n?.notAvailable ?? 'Not Available'),
+                          ),
+                        )
+                      else if (isFemale && !isChild)
+                        Expanded(
+                          child: _rowText(
+                            l10n?.richId ?? 'RCH ID',
+                            data['Rich_id']?.toString().trim().isNotEmpty == true
+                                ? data['Rich_id'].toString()
+                                : (l10n?.notAvailable ?? 'Not Available'),
+                          ),
+                        )
+                      else if (isMale && !isChild)
+                        Expanded(
+                          child: _rowText(l10n?.mobileLabel ?? 'Mobile no.', data['Mobileno.'] ?? ''),
                         ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      if ((isChild || isFemale) && data['Mobileno.']?.toString().isNotEmpty == true)
+
+                  // CATEGORY 1: Children (male/female) - show father name and mobile
+                  if (isChild) ...[
+                    Row(
+                      children: [
+                        // Father name for children - first column
+                        if ((data['FatherName']?.toString().isNotEmpty == true) || 
+                            (data['SpouseName']?.toString().isNotEmpty == true))
+                          Expanded(
+                            child: _rowText(
+                              l10n?.fatherNameLabel ?? 'Father Name',
+                              data['FatherName']?.toString().isNotEmpty == true 
+                                  ? data['FatherName'] 
+                                  : data['SpouseName'],
+                            ),
+                          ),
+                        if ((data['FatherName']?.toString().isNotEmpty == true) || 
+                            (data['SpouseName']?.toString().isNotEmpty == true))
+                          const SizedBox(width: 12),
+                        // Mobile number for children - second column
                         Expanded(
                           child: _rowText(
                             l10n?.mobileLabel ?? 'Mobile no.',
-                            data['Mobileno.'],
+                            data['Mobileno.']?.toString().isNotEmpty == true 
+                                ? data['Mobileno.'] 
+                                : (l10n?.notAvailable ?? 'NA'),
                           ),
                         ),
-                      if ((isChild || isFemale) && data['Mobileno.']?.toString().isNotEmpty == true)
                         const SizedBox(width: 12),
+                        // Empty third column
+                        const Expanded(child: SizedBox()),
+                      ],
+                    ),
+                  ],
 
-
-                      // Second available field: Father name for children, Husband name for females
-                      if (isChild && data['FatherName']?.toString().isNotEmpty == true)
-                        Expanded(
-                          child: _rowText(
-                            l10n?.fatherNameLabel ?? '',
-                            data['FatherName'],
+                  // CATEGORY 2: Married females - show husband name
+                  if (isFemale && isMarried) ...[
+                    Row(
+                      children: [
+                        if (data['HusbandName']?.toString().isNotEmpty == true)
+                          Expanded(
+                            child: _rowText(
+                              l10n?.husbandName ?? 'Husband\'s Name',
+                              data['HusbandName'],
+                            ),
+                          )
+                        else if (data['SpouseName']?.toString().isNotEmpty == true)
+                          Expanded(
+                            child: _rowText(
+                              l10n?.husbandName ?? 'Husband\'s Name',
+                              data['SpouseName'],
+                            ),
                           ),
-                        ),
-                      if (isChild && data['FatherName']?.toString().isNotEmpty == true)
-                        const SizedBox(width: 12),
+                      ],
+                    ),
+                  ],
 
-                      if (isFemale && data['HusbandName']?.toString().isNotEmpty == true)
-                        Expanded(
-                          child: _rowText(
-                            l10n?.husbandName ?? '',
-                            data['HusbandName'],
+                  // CATEGORY 3: Married males - show wife name
+                  if (isMale && isMarried) ...[
+                    Row(
+                      children: [
+                        if (data['WifeName']?.toString().isNotEmpty == true)
+                          Expanded(
+                            child: _rowText(
+                              l10n?.wifeName ?? 'Wife\'s Name',
+                              data['WifeName'],
+                            ),
+                          )
+                        else if (data['SpouseName']?.toString().isNotEmpty == true)
+                          Expanded(
+                            child: _rowText(
+                              l10n?.wifeName ?? 'Wife\'s Name',
+                              data['SpouseName'],
+                            ),
                           ),
-                        ),
-                      if (isFemale && data['HusbandName']?.toString().isNotEmpty == true)
-                        const SizedBox(width: 12),
+                      ],
+                    ),
+                  ],
 
-                      // Third available field: Wife name for males
-                      if (!isFemale && data['WifeName']?.toString().isNotEmpty == true)
-                        Expanded(
-                          child: _rowText(
-                            l10n?.wifeName ?? 'Wife\'s Name',
-                            data['WifeName'],
+                  // CATEGORY 4: Unmarried males/females with general registration - show father name
+                  if (!isChild && isUnmarried && isGeneralRegistration) ...[
+                    Row(
+                      children: [
+                        if ((data['FatherName']?.toString().isNotEmpty == true) || 
+                            (data['SpouseName']?.toString().isNotEmpty == true))
+                          Expanded(
+                            child: _rowText(
+                              l10n?.fatherNameLabel ?? 'Father Name',
+                              data['FatherName']?.toString().isNotEmpty == true 
+                                  ? data['FatherName'] 
+                                  : data['SpouseName'],
+                            ),
                           ),
-                        ),
-                      if (!isFemale && data['WifeName']?.toString().isNotEmpty == true)
-                        const SizedBox(width: 12),
-
-                      // Fourth available field: Spouse name fallback
-                      if (data['SpouseName']?.toString().isNotEmpty == true &&
-                          data['HusbandName']?.toString().isEmpty == true &&
-                          data['WifeName']?.toString().isEmpty == true &&
-                          !isChild)
-                        SizedBox(width: 120),
-                        Expanded(
-                          child: _rowText(
-                            isFemale
-                                ? (l10n?.husbandName ?? 'Husband\'s Name')
-                                : (l10n?.wifeName ?? 'Wife\'s Name'),
-                            data['SpouseName'],
+                        if (isFemale)
+                          const SizedBox(width: 12),
+                        if (isFemale)
+                          Expanded(
+                            child: _rowText(
+                              l10n?.richId ?? 'RCH ID',
+                              data['Rich_id']?.toString().trim().isNotEmpty == true
+                                  ? data['Rich_id'].toString()
+                                  : (l10n?.notAvailable ?? 'Not Available'),
+                            ),
                           ),
-                        ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
