@@ -33,12 +33,10 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreenHBYC> {
   Future<void> _loadVisitData() async {
     try {
       final db = await DatabaseProvider.instance.database;
-      
-      // First, check the table structure
+
       final tableInfo = await db.rawQuery('PRAGMA table_info(followup_form_data)');
       debugPrint('Table structure: $tableInfo');
       
-      // Try to find a date column that we can use for sorting
       String orderByClause = '';
       final possibleDateColumns = ['createdAt', 'created_date', 'date_created', 'timestamp'];
       
@@ -50,7 +48,6 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreenHBYC> {
         }
       }
       
-      // Query to get all form submissions for this beneficiary
       final query = '''
         SELECT * FROM followup_form_data 
         WHERE beneficiary_ref_key = ? AND forms_ref_key = ?
@@ -74,14 +71,11 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreenHBYC> {
           final index = entry.key + 1;
           final data = entry.value;
           
-          // Get the creation date from the database row
           String visitDate = 'N/A';
           try {
-            // First try to get the date from the database column if it exists
             if (data.containsKey('created_at') && data['created_at'] != null) {
               visitDate = data['created_at'].toString();
             } 
-            // Fallback to form data if not found in the row
             else if (data.containsKey('form_json')) {
               final formData = jsonDecode(data['form_json'] as String);
               visitDate = formData['created_at']?.toString() ?? 'N/A';

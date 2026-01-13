@@ -122,13 +122,13 @@ class EligibleCouleUpdateBloc
         }
       }
 
-      // Initialize children data variables
-      String totalBorn = '0';
-      String totalLive = '0';
-      String totalMale = '0';
-      String totalFemale = '0';
-      String youngestAge = '0';
-      String youngestAgeUnit = 'Years';
+      // Initialize children data variables (optional by default)
+      String totalBorn = '';
+      String totalLive = '';
+      String totalMale = '';
+      String totalFemale = '';
+      String youngestAge = '';
+      String youngestAgeUnit = '';
       String youngestGender = '';
 
       // Try to extract children data from the initial data
@@ -280,7 +280,7 @@ class EligibleCouleUpdateBloc
             totalMaleChildren: info['totalMale']?.toString() ?? totalMale,
             totalFemaleChildren: info['totalFemale']?.toString() ?? totalFemale,
             youngestChildAge: info['youngestAge']?.toString() ?? youngestAge,
-            youngestChildAgeUnit: info['youngestAgeUnit']?.toString() ?? youngestAgeUnit,
+            youngestChildAgeUnit: info['ageUnit']?.toString() ?? youngestAgeUnit,
             youngestChildGender: youngestGender,
             clearError: true,
           ));
@@ -323,7 +323,7 @@ class EligibleCouleUpdateBloc
         totalMaleChildren: beneficiaryInfo['totalMale']?.toString() ?? childrenDetails['totalMale']?.toString() ?? totalMale,
         totalFemaleChildren: beneficiaryInfo['totalFemale']?.toString() ?? childrenDetails['totalFemale']?.toString() ?? totalFemale,
         youngestChildAge: beneficiaryInfo['youngestAge']?.toString() ?? childrenDetails['youngestAge']?.toString() ?? youngestAge,
-        youngestChildAgeUnit: _capitalizeFirst(beneficiaryInfo['youngestAgeUnit']?.toString() ?? childrenDetails['ageUnit']?.toString() ?? youngestAgeUnit),
+        youngestChildAgeUnit: _capitalizeFirst(beneficiaryInfo['ageUnit']?.toString() ?? childrenDetails['ageUnit']?.toString() ?? youngestAgeUnit),
         youngestChildGender: _normalizeGender(beneficiaryInfo['youngestGender']?.toString() ?? childrenDetails['youngestGender']?.toString() ?? youngestGender),
 
         registrationDate: DateTime.tryParse(row['created_date_time']?.toString() ?? '') ?? DateTime.now(),
@@ -475,7 +475,7 @@ class EligibleCouleUpdateBloc
       beneficiaryInfo['totalMale'] = state.totalMaleChildren;
       beneficiaryInfo['totalFemale'] = state.totalFemaleChildren;
       beneficiaryInfo['youngestAge'] = state.youngestChildAge;
-      beneficiaryInfo['youngestAgeUnit'] = state.youngestChildAgeUnit;
+      beneficiaryInfo['ageUnit'] = state.youngestChildAgeUnit;
       beneficiaryInfo['youngestGender'] = state.youngestChildGender;
 
       print('✅ Updated children details: $updatedChildrenDetails');

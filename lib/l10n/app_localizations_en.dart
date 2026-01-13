@@ -3606,10 +3606,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deceasedChildDetails => 'Deceased Child Details';
 
   @override
-  String get childDetails => 'Child Details';
+  String get childDetails => 'CHILD DETAILS';
 
   @override
-  String get memberDetails => 'Member Details';
+  String get memberDetails => 'MEMBER DETAILS';
 
   @override
   String get hello => 'Hello';
@@ -4936,7 +4936,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noRecordsFound => 'No records found';
 
   @override
-  String get tolaMohalla => 'Tola/Mohalla';
+  String get tolaMohalla => 'Mohalla/Tola';
 
   @override
   String get noHouseholdsFound => 'No households found';
@@ -7573,7 +7573,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userFound => 'User found.';
 
   @override
-  String get userLoginSuccses => 'user login successfully';
+  String get userLoginSuccses => 'User Login Successfully';
 
   @override
   String get invalidLoginCredentials => 'Please enter valid user credentials.';

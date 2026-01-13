@@ -2717,7 +2717,6 @@ class LocalStorageDao {
         }
       }
 
-      // If no self-owned mobile found, look for any spouse with a mobile number
       for (final beneficiary in beneficiaries) {
         final beneficiaryInfo = beneficiary['beneficiary_info'] as String?;
         if (beneficiaryInfo == null || beneficiaryInfo.isEmpty) continue;

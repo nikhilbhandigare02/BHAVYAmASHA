@@ -314,6 +314,37 @@ class BeneficiaryRepository {
     }
   }
 
+  String _resolveFullName(Map<String, dynamic> info) {
+    // API scenario
+    final apiName = info['member_name']?.toString().trim();
+    if (apiName != null && apiName.isNotEmpty) return apiName;
+
+    // App name map
+    if (info['name'] is Map) {
+      final map = Map<String, dynamic>.from(info['name']);
+      final parts = [
+        map['first_name'],
+        map['middle_name'],
+        map['last_name']
+      ]
+          .where((e) => e != null && e.toString().trim().isNotEmpty)
+          .map((e) => e.toString().trim())
+          .toList();
+      if (parts.isNotEmpty) return parts.join(' ');
+    }
+
+    // Flat fields
+    final first = info['first_name']?.toString().trim() ?? '';
+    final last = info['last_name']?.toString().trim() ?? '';
+    if (first.isNotEmpty || last.isNotEmpty) return '$first $last'.trim();
+
+    // Raw fallback
+    if (info['name'] is String && info['name'].toString().trim().isNotEmpty) {
+      return info['name'].toString().trim();
+    }
+
+    return 'Unknown Member';
+  }
   Map<String, dynamic> _mapBeneficiaryInfo(Map<String, dynamic> rec) {
     dynamic rawInfo = rec['beneficiary_info'];
     Map<String, dynamic> info;
@@ -346,12 +377,8 @@ class BeneficiaryRepository {
     final first = (nameMap['first_name'] ?? info['first_name'] ?? '').toString().trim();
     final middle = (nameMap['middle_name'] ?? info['middle_name'] ?? '').toString().trim();
     final last = (nameMap['last_name'] ?? info['last_name'] ?? '').toString().trim();
-    final fullNameParts = <String>[first, middle, last].where((s) => s.isNotEmpty).toList();
-    String fullName = fullNameParts.join(' ').trim();
-    if (fullName.isEmpty) {
-      final rawName = info['name'];
-      if (rawName is String) fullName = rawName.trim();
-    }
+    final fullName = _resolveFullName(info);
+
 
     String? _genderText(String? g) {
       if (g == null) return null;
@@ -373,13 +400,15 @@ class BeneficiaryRepository {
         ? Map<String, dynamic>.from(info['address'] as Map)
         : <String, dynamic>{};
 
+
+
     final mapped = <String, dynamic>{
       // Basic info - API to local mapping
       'memberType': info['ben_type'] == 'Child' ? 'child' : 'adult',
       'relation': info['relaton_with_family_head'] ?? info['relation_to_head'] ?? '',
       'name': fullName,
+      'headName': fullName,
       
-      // Household info
       'houseNo': info['house_no'] ?? '',
       'headName': info['member_name'] ?? fullName,
       'fatherName': info['father_or_spouse_name'],

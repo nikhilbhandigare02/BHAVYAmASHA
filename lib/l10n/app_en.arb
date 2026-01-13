@@ -1209,8 +1209,8 @@
   "deleteLabel": "Delete",
   "closeLabel": "Close",
   "deceasedChildDetails": "Deceased Child Details",
-  "childDetails": "Child Details",
-  "memberDetails": "Member Details",
+  "childDetails": "CHILD DETAILS",
+  "memberDetails": "MEMBER DETAILS",
   "hello": "Hello",
   "welcome": "Welcome",
   "login_button": "Login",
@@ -1681,7 +1681,7 @@
   "wifeName": "Wife Name",
   "husbandName": "Husband Name",
   "noRecordsFound": "No records found",
-  "tolaMohalla": "Tola/Mohalla",
+  "tolaMohalla": "Mohalla/Tola",
   "noHouseholdsFound": "No households found",
   "noOfASHAUnderTheFacilitator": "No. of ASHA under the facilitator",
   "ashaFacilitatorClusterMeetingList": "ASHA Facilitator Cluster Meeting List",
@@ -2611,7 +2611,7 @@
   "deathOther": "Other",
   "discussionTopic":"discussion topic/program",
   "userFound": "User found.",
-  "userLoginSuccses": "user login successfully",
+  "userLoginSuccses": "User Login Successfully",
   "invalidLoginCredentials": "Please enter valid user credentials.",
   "userNotFound": "User does not exist. Please enter valid credentials."
 }

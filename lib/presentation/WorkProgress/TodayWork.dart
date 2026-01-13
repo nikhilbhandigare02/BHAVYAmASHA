@@ -3068,7 +3068,7 @@ class _TodayworkState extends State<Todaywork> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _kv("Total Visits:", "${_toDoVisitsCount.toString()}"),
+                            _kv("${l10n!.toDoVisits}:", "${_toDoVisitsCount.toString()}"),
                             _kv(
                               '${l10n!.completedVisits} :',
                               _completedVisitsCount.toString(),
@@ -3185,12 +3185,12 @@ class _TodayworkState extends State<Todaywork> {
           Expanded(
             child: Text(
               k,
-              style: TextStyle(fontSize: 15.sp, color: AppColors.primary),
+              style: TextStyle(fontSize: 15.sp, color: AppColors.primary,fontWeight: FontWeight.w600),
             ),
           ),
           Text(
             v,
-            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500),
           ),
         ],
       ),

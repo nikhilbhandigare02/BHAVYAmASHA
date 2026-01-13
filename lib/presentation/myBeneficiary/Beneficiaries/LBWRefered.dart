@@ -129,7 +129,6 @@ class _Lbwrefered extends State<Lbwrefered> {
           _isBelowOrEqualTwoYears(info, info['dob'] ?? info['dateOfBirth']);
           if (!isUnderTwo) continue;
 
-          // ---------- LBW check ----------
           final int? weightGm = normalizeToGrams(info['weight']);
           final int? birthWeightGm =
           normalizeToGrams(info['birthWeight']);
@@ -150,16 +149,30 @@ class _Lbwrefered extends State<Lbwrefered> {
             info: info,
           );
 
-          final dynamic rawWeight =
-              info['weight'] ?? info['birthWeight'];
+          dynamic rawWeight;
+          bool isBirthWeight = false;
 
-          String formatWeight(dynamic value) {
+          if (info['weight'] != null &&
+              info['weight'].toString().trim().isNotEmpty) {
+            rawWeight = info['weight'];
+          } else if (info['birthWeight'] != null &&
+              info['birthWeight'].toString().trim().isNotEmpty) {
+            rawWeight = info['birthWeight'];
+            isBirthWeight = true;
+          }
+
+          String formatWeight(dynamic value, {bool isBirthWeight = false}) {
             if (value == null) return '--';
 
             final num? v = num.tryParse(value.toString());
             if (v == null || v <= 0) return '--';
 
-            // grams (newborn)
+            // Birth weight → always grams
+            if (isBirthWeight) {
+              return '${v.round()} gms';
+            }
+
+            // grams
             if (v > 100) {
               return '${v.round()} g';
             }
@@ -173,7 +186,10 @@ class _Lbwrefered extends State<Lbwrefered> {
             'beneficiaryKey': row['unique_key']?.toString(),
             'name': name,
             'age_gender': ageGender,
-            'weight_display': formatWeight(rawWeight),
+            'weight_display': formatWeight(
+              rawWeight,
+              isBirthWeight: isBirthWeight,
+            ),
             'status': 'LBW',
             '_raw': row,
           });

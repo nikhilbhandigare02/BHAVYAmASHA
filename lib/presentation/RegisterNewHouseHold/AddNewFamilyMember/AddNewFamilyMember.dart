@@ -335,23 +335,6 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     _dummyHeadBloc = AddFamilyHeadBloc();
     _loadAdultsFromSecureStorage();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (_isEdit) {
-        final st = _bloc.state;
-        if (st.useDob == true && st.dob != null) {
-          _bloc.add(AnmUpdateDob(st.dob!));
-        } else {
-          final y = st.updateYear ?? '';
-          final m = st.updateMonth ?? '';
-          final d = st.updateDay ?? '';
-          if (y.isNotEmpty || m.isNotEmpty || d.isNotEmpty) {
-            updateDobFromAge();
-          }
-        }
-      }
-    });
-
     print('HHID passed to AddNewFamilyMember: ${widget.hhId}');
 
     _fatherOption = '';
@@ -3986,34 +3969,153 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               ),
                                             ),
                                             const SizedBox(width: 8),
-                                            SizedBox(
-                                              height: 30,
-                                              child: RoundButton(
-                                                title: l.linkAbha,
-                                                width: 140,
-                                                borderRadius: 8,
-                                                fontSize: 12,
-                                                onPress: () async {
-                                                  final result = await Navigator.pushNamed(
-                                                    context,
-                                                    Route_Names.Abhalinkscreen,
-                                                  );
+                                            // Hide ABHA link button when in edit mode
+                                            if (!widget.isEdit)
+                                              SizedBox(
+                                                height: 30,
+                                                child: RoundButton(
+                                                  title: l.linkAbha,
+                                                  width: 140,
+                                                  borderRadius: 8,
+                                                  fontSize: 12,
+                                                  onPress: () async {
+                                                    final result = await Navigator.pushNamed(
+                                                      context,
+                                                      Route_Names.Abhalinkscreen,
+                                                    );
 
-                                                  debugPrint("BACK FROM ABHA LINK SCREEN (New Member)");
-                                                  debugPrint("RESULT: $result");
+                                                    debugPrint("BACK FROM ABHA LINK SCREEN (New Member)");
+                                                    debugPrint("RESULT: $result");
 
-                                                  if (result is Map<String, dynamic> && mounted) {
-                                                    _handleAbhaProfileResult(result, context);
-                                                  }
-                                                },
+                                                    if (result is Map<String, dynamic> && mounted) {
+                                                      _handleAbhaProfileResult(result, context);
+                                                    }
+                                                  },
+                                                ),
                                               ),
-                                            ),
                                           ],
                                         ),
                                       )
                                     ],
                                   ),
                                 ),
+                                // RCH ID field for female adults
+                                if ((state.memberType ?? '').toLowerCase() == 'adult' && 
+                                    (state.gender ?? '').toLowerCase() == 'female') ...[
+                                  Divider(
+                                    color: AppColors.divider,
+                                    thickness: 0.5,
+                                    height: 0,
+                                  ),
+                                  _section(
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: IgnorePointer(
+                                            ignoring: widget.isEdit,
+                                            child: CustomTextField(
+                                              labelText: l.rchIdLabel,
+                                              hintText: l?.enter_12_digit_rch_id ?? 'Enter 12 digit RCH ID',
+                                              keyboardType: TextInputType.number,
+                                              initialValue: state.RichIDChanged ?? '',
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter.digitsOnly,
+                                                LengthLimitingTextInputFormatter(12),
+                                              ],
+                                              onChanged: (value) {
+                                                context
+                                                    .read<AddnewfamilymemberBloc>()
+                                                    .add(RichIDChanged(value.trim()));
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        SizedBox(
+                                          height: 30,
+                                          child: RoundButton(
+                                            title: 'Verify',
+                                            width: 80,
+                                            borderRadius: 8,
+                                            fontSize: 12,
+                                            isLoading: _isLoading,
+                                            disabled: !state.isRchIdButtonEnabled || widget.isEdit,
+                                            onPress: () async {
+                                              final rchIdStr = state.RichIDChanged?.trim() ?? '';
+
+                                              // --- Basic validation ---
+                                              if (rchIdStr.isEmpty) {
+                                                showAppSnackBar(
+                                                  context,
+                                                  l?.please_enter_rch_id_first ?? 'Please enter RCH ID first',
+                                                );
+                                                return;
+                                              }
+                                              if (rchIdStr.length != 12) {
+                                                showAppSnackBar(
+                                                  context,
+                                                  l?.rch_id_must_be_12digits ?? 'RCH ID must be exactly 12 digits',
+                                                );
+                                                return;
+                                              }
+
+                                              final rchId = int.tryParse(rchIdStr);
+                                              if (rchId == null) {
+                                                showAppSnackBar(
+                                                  context,
+                                                  l?.invalid_rch_id ?? 'Invalid RCH ID',
+                                                );
+                                                return;
+                                              }
+
+                                              setState(() => _isLoading = true);
+                                              showAppSnackBar(
+                                                context,
+                                                l?.verifying_rch_id ?? 'Verifying RCH ID...',
+                                              );
+
+                                              print('API REQUEST → getRCHData(rchId: $rchId, requestFor: 2)');
+                                              try {
+                                                final requestFor = 2; // 2 for female adult
+                                                
+                                                final response = await fetchRCHDataForScreen(
+                                                  rchId,
+                                                  requestFor: requestFor,
+                                                );
+
+                                                if (response == null || response.isEmpty) {
+                                                  showAppSnackBar(
+                                                    context,
+                                                    l?.no_data_found_rch_id ?? 'No data found for this RCH ID',
+                                                  );
+                                                  return;
+                                                }
+
+                                                showAppSnackBar(
+                                                  context,
+                                                  'RCH ID verified successfully!',
+                                                );
+
+                                                // TODO: Process response data if needed
+                                                print('RCH Response: $response');
+
+                                              } catch (e) {
+                                                showAppSnackBar(
+                                                  context,
+                                                  'Error verifying RCH ID: $e',
+                                                );
+                                              } finally {
+                                                if (mounted) {
+                                                  setState(() => _isLoading = false);
+                                                }
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                                 Divider(
                                   color: AppColors.divider,
                                   thickness: 0.5,
