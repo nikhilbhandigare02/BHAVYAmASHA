@@ -452,7 +452,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                             // Category Field
                             CustomTextField(
                               labelText: t?.categoryLabel ?? 'Category',
-                              hintText: t?.enterCategory ?? ' category',
+                              hintText: t?.selectOptions ?? ' Select',
                               initialValue: state.category,
                               onChanged: (value) => context
                                   .read<EligibleCouleUpdateBloc>()
