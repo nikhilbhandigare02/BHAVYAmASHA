@@ -477,11 +477,9 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
   Future<Map<String, dynamic>> _getVisitCount(String beneficiaryId) async {
     try {
       if (beneficiaryId.isEmpty) {
-        print('⚠️ Empty beneficiary ID provided to _getVisitCount');
         return {'count': 0, 'isHighRisk': false};
       }
 
-      print('🔍 Fetching visit count and high-risk status for beneficiary: $beneficiaryId');
       final result = await LocalStorageDao.instance.getANCVisitCount(beneficiaryId);
       print('✅ Visit details for $beneficiaryId: $result');
       return result;
@@ -782,7 +780,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                           ],
                           SizedBox(width: 2,),
                           Text(
-                            '${isAncDue ? ' ' : ''}${l10n?.visitsLabel ?? 'Visits :'} $count',
+                            '${l10n?.visitsLabel } : $count',
                             style: TextStyle(
                               color: primary,
                               fontWeight: FontWeight.w500,

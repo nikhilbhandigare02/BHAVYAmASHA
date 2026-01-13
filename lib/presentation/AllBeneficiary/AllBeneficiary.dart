@@ -150,6 +150,9 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           'Age|Gender': _formatAgeGender(
             info['dob'],
             info['gender'],
+            row['is_death'] ?? 0,
+            row['death_details'],
+            row['modified_date_time'],
           ),
           'Mobileno.': info['mobileNo']?.toString() ?? '',
           'FatherName': info['fatherName']?.toString() ?? info['father_name']?.toString() ?? info['father']?.toString() ?? '',
@@ -218,7 +221,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
   }
 
 
-  String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
+  String _formatAgeGender(dynamic dobRaw, dynamic genderRaw, int isDeath, dynamic deathDetailsRaw, dynamic modifiedDateTimeRaw) {
     String age = 'N/A';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
     if (dobRaw != null && dobRaw.toString().isNotEmpty) {
@@ -227,7 +230,73 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         dob = DateTime.tryParse(dobRaw.toString());
       } catch (_) {}
       if (dob != null) {
-        age = '${DateTime.now().difference(dob).inDays ~/ 365}';
+        DateTime referenceDate = DateTime.now();
+        
+        // Only calculate age using death date if is_death equals 1
+        if (isDeath == 1) {
+          DateTime? deathDate;
+          
+          // First try to get date from death_details
+          if (deathDetailsRaw != null) {
+            Map<String, dynamic> deathDetails = {};
+            try {
+              if (deathDetailsRaw is String) {
+                deathDetails = jsonDecode(deathDetailsRaw as String) as Map<String, dynamic>;
+              } else if (deathDetailsRaw is Map) {
+                deathDetails = Map<String, dynamic>.from(deathDetailsRaw as Map);
+              }
+              
+              // Parse date of death
+              String deathDateStr = (deathDetails['date_of_death'] ?? '').toString();
+              if (deathDateStr.isNotEmpty && deathDateStr != 'null') {
+                try {
+                  deathDate = DateTime.parse(deathDateStr);
+                } catch (_) {
+                  // Try parsing as timestamp
+                  final timestamp = int.tryParse(deathDateStr);
+                  if (timestamp != null && timestamp > 0) {
+                    deathDate = DateTime.fromMillisecondsSinceEpoch(
+                      timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+                      isUtc: true,
+                    );
+                  }
+                }
+              }
+            } catch (e) {
+              print('Error parsing death details: $e');
+            }
+          }
+          
+          // If death date not found, try modified_date_time
+          if (deathDate == null && modifiedDateTimeRaw != null) {
+            print('🔍 Debug: modifiedDateTimeRaw = $modifiedDateTimeRaw');
+            try {
+              final modifiedDateStr = modifiedDateTimeRaw.toString();
+              if (modifiedDateStr.isNotEmpty) {
+                deathDate = DateTime.parse(modifiedDateStr);
+                print('✅ Debug: Successfully parsed modified_date_time: $deathDate');
+              }
+            } catch (_) {
+              print('❌ Debug: Failed to parse modified_date_time as string, trying timestamp...');
+              // Try parsing as timestamp
+              final timestamp = int.tryParse(modifiedDateTimeRaw.toString());
+              if (timestamp != null && timestamp > 0) {
+                deathDate = DateTime.fromMillisecondsSinceEpoch(
+                  timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+                  isUtc: true,
+                );
+                print('✅ Debug: Successfully parsed modified_date_time as timestamp: $deathDate');
+              }
+            }
+          }
+          
+          // Use death date if found, otherwise use current date
+          if (deathDate != null) {
+            referenceDate = deathDate;
+          }
+        }
+        
+        age = '${referenceDate.difference(dob).inDays ~/ 365}';
       }
     }
     String displayGender = gender == 'm' || gender == 'male'

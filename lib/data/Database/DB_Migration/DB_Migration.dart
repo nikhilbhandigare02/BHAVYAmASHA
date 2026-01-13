@@ -98,13 +98,8 @@ class DbMigration {
         "isFamilyheadWife",
         "weight",
         "birthWeight",
-        "totalBorn",
-        "totalLive",
-        "totalMale",
-        "totalFemale",
-        "youngestAge",
-        "ageUnit",
         "totalBorn","totalLive","totalMale","totalFemale","youngestAge","ageUnit","youngestGender",
+
 
       ];
 
@@ -162,7 +157,7 @@ class DbMigration {
         "totalFemale": "total_female_children",
         "youngestAge": "age_of_youngest_child",
         "ageUnit": "age_of_youngest_child_unit",
-        "youngestGender": "gender_of_youngest_child",
+        "youngestGender": "gender_of_younget_child",
 
       };
 
