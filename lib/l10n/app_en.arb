@@ -2611,7 +2611,7 @@
   "deathOther": "Other",
   "discussionTopic":"discussion topic/program",
   "userFound": "User found.",
-  "userLoginSuccses": "user login successfully",
+  "userLoginSuccses": "User Login Successfully",
   "invalidLoginCredentials": "Please enter valid user credentials.",
   "userNotFound": "User does not exist. Please enter valid credentials."
 }
