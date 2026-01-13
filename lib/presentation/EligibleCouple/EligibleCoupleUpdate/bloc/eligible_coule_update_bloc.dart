@@ -122,13 +122,13 @@ class EligibleCouleUpdateBloc
         }
       }
 
-      // Initialize children data variables
-      String totalBorn = '0';
-      String totalLive = '0';
-      String totalMale = '0';
-      String totalFemale = '0';
-      String youngestAge = '0';
-      String youngestAgeUnit = 'Years';
+      // Initialize children data variables (optional by default)
+      String totalBorn = '';
+      String totalLive = '';
+      String totalMale = '';
+      String totalFemale = '';
+      String youngestAge = '';
+      String youngestAgeUnit = '';
       String youngestGender = '';
 
       // Try to extract children data from the initial data

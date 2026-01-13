@@ -9920,7 +9920,7 @@ abstract class AppLocalizations {
   /// No description provided for @tolaMohalla.
   ///
   /// In en, this message translates to:
-  /// **'Tola/Mohalla'**
+  /// **'Mohalla/Tola'**
   String get tolaMohalla;
 
   /// No description provided for @noHouseholdsFound.

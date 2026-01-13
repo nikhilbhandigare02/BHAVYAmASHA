@@ -452,7 +452,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                             // Category Field
                             CustomTextField(
                               labelText: t?.categoryLabel ?? 'Category',
-                              hintText: t?.enterCategory ?? 'Enter category',
+                              hintText: t?.selectOptions ?? ' Select',
                               initialValue: state.category,
                               onChanged: (value) => context
                                   .read<EligibleCouleUpdateBloc>()
@@ -765,8 +765,10 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                 final male = int.tryParse(state.totalMaleChildren) ?? 0;
                                 final female = int.tryParse(state.totalFemaleChildren) ?? 0;
 
-                                // 1) total live children must not be greater than total born children
-                                if (live > born) {
+                                // 1) total live children must not be greater than total born children (validate if either entered)
+                                final liveStr = state.totalLiveChildren.trim();
+                                final bornStr = state.totalChildrenBorn.trim();
+                                if ((liveStr.isNotEmpty || bornStr.isNotEmpty) && live > born) {
                                   showAppSnackBar(
                                     context,
                                     t?.totalLiveChildrenval ?? 'Total live children can\'t be more than total born children',
@@ -774,8 +776,9 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                   return;
                                 }
 
-                                // 2) total male children must not be greater than total live children
-                                if (male > live) {
+                                // 2) total male children must not be greater than total live children (validate if either entered)
+                                final maleStr = state.totalMaleChildren.trim();
+                                if ((maleStr.isNotEmpty || liveStr.isNotEmpty) && male > live) {
                                   showAppSnackBar(
                                     context,
                                     t?.totalMaleChildrenval ?? 'Total male children can\'t be more than total live children',
@@ -783,8 +786,9 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                   return;
                                 }
 
-                                // 3) total female children must not be greater than total live children
-                                if (female > live) {
+                                // 3) total female children must not be greater than total live children (validate if either entered)
+                                final femaleStr = state.totalFemaleChildren.trim();
+                                if ((femaleStr.isNotEmpty || liveStr.isNotEmpty) && female > live) {
                                   showAppSnackBar(
                                     context,
                                     t?.totalFemaleChildrenval ?? 'Total female children can\'t be more than total live children',
@@ -792,8 +796,8 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                   return;
                                 }
 
-                                // 4) sum of male and female children must be equal to total live children
-                                if (live > 0 && (male + female) != live) {
+                                // 4) sum of male and female children must be equal to total live children (validate if any entered)
+                                if ((liveStr.isNotEmpty || maleStr.isNotEmpty || femaleStr.isNotEmpty) && (male + female) != live) {
                                   showAppSnackBar(
                                     context,
                                     t?.malePlusFemaleError ?? 'Some of total male and female must equal total live children',
@@ -824,30 +828,32 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                 showAppSnackBar(context, 'Please select age unit');
                                 return;
                               }
-                              final age = int.tryParse(ageStr);
-                              String? message;
-                              if (unit == 'Years') {
-                                if (age == null || age < 1 || age > 90) {
-                                  message =
-                                      t?.yearRangeValidation ??
-                                      'Year: only 1 to 90 allowed';
+                              if (ageStr.trim().isNotEmpty && unit.isNotEmpty) {
+                                final age = int.tryParse(ageStr);
+                                String? message;
+                                if (unit == 'Years') {
+                                  if (age == null || age < 1 || age > 90) {
+                                    message =
+                                        t?.yearRangeValidation ??
+                                        'Year: only 1 to 90 allowed';
+                                  }
+                                } else if (unit == 'Months') {
+                                  if (age == null || age < 1 || age > 11) {
+                                    message =
+                                        t?.monthRangeValidation ??
+                                        'Month: only 1 to 11 allowed';
+                                  }
+                                } else if (unit == 'Days') {
+                                  if (age == null || age < 1 || age > 30) {
+                                    message =
+                                        t?.daysRangeValidation ??
+                                        'Days: only 1 to 30 allowed';
+                                  }
                                 }
-                              } else if (unit == 'Months') {
-                                if (age == null || age < 1 || age > 11) {
-                                  message =
-                                      t?.monthRangeValidation ??
-                                      'Month: only 1 to 11 allowed';
+                                if (message != null) {
+                                  showAppSnackBar(context, message);
+                                  return;
                                 }
-                              } else if (unit == 'Days') {
-                                if (age == null || age < 1 || age > 30) {
-                                  message =
-                                      t?.daysRangeValidation ??
-                                      'Days: only 1 to 30 allowed';
-                                }
-                              }
-                              if (message != null) {
-                                showAppSnackBar(context, message);
-                                return;
                               }
                               if (!state.isSubmitting) {
                                 context.read<EligibleCouleUpdateBloc>().add(

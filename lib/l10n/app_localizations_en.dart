@@ -4936,7 +4936,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noRecordsFound => 'No records found';
 
   @override
-  String get tolaMohalla => 'Tola/Mohalla';
+  String get tolaMohalla => 'Mohalla/Tola';
 
   @override
   String get noHouseholdsFound => 'No households found';
