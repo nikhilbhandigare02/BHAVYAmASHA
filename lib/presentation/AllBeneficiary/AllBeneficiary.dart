@@ -439,19 +439,17 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       children: [
         InkWell(
           onTap: (data['is_death'] == 1) ? null : () async {
-            // Pass complete household data to next screen
             await Navigator.pushNamed(
               context,
               Route_Names.addFamilyMember,
               arguments: {
                 'isBeneficiary': true,
                 'isEdit': true,
-                // This flag indicates we came from AllBeneficiary and
-                // member should be saved/updated immediately on Add.
+
                 'isMemberDetails': true,
                 'beneficiaryId': completeBeneficiaryId,
                 'hhId': data['hhId']?.toString() ?? '',
-                'headName': data['Name']?.toString() ?? '',
+                'headName': data['Name']?.toString() ?? data['headName']?.toString() ??'',
                 'headGender': data['Gender']?.toString() ?? '',
                 'spouseName': data['SpouseName']?.toString() ?? '',
                 'spouseGender': data['SpouseGender']?.toString() ?? '',
@@ -471,7 +469,6 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
             debugPrint('   Head Name: ${data['Name']}');
             debugPrint('   Spouse Name: ${data['SpouseName']}');
 
-            // After returning from edit screen, reload data so updates are visible
             await _loadData();
             _onSearchChanged();
           },
@@ -491,7 +488,6 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header Row
                 Container(
                   decoration: const BoxDecoration(
                     color: AppColors.background,
@@ -555,7 +551,6 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                   ),
                 ),
 
-                // Card Body
                 Container(
                   decoration: BoxDecoration(
                     color: primary.withOpacity(0.95),
@@ -752,20 +747,10 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                               ),
                             ]),
 
-                          // Show Mother Name if available
-                          if (data['MotherName']?.toString().isNotEmpty == true)
-                            _buildRow([
-                              _rowText(
-                                l10n?.motherNameLabel ?? 'Mother Name',
-                                data['MotherName'],
-                              ),
-                              _rowText('', ''), // Empty cell for layout
-                              _rowText('', ''), // Empty cell for layout
-                            ]),
+
 
                           const SizedBox(height: 8),
 
-                          // Show Village and Tola/Mohalla for general records (except male+general where it's shown above)
                           if (!(isMale && isGeneral))
                             _buildRow([
                               _rowText(
@@ -774,8 +759,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                                     ? data['Tola/Mohalla']
                                     : (l10n?.na ?? 'N/A'),
                               ),
-                              _rowText('', ''), // Empty cell for layout
-                              _rowText('', ''), // Empty cell for layout
+                              _rowText('', ''),
+                              _rowText('', ''),
                             ]),
                         ],
                       ]),
@@ -794,7 +779,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                 title: l10n!.cbac,
                 color: AppColors.primary,
                 borderRadius: 6,
-                width: 100,
+                width: 140,
                 onPress: () {
                   final beneficiaryData = {
                     'beneficiaryId':

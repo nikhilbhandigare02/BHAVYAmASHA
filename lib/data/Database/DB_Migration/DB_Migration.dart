@@ -104,7 +104,6 @@ class DbMigration {
         "totalFemale",
         "youngestAge",
         "ageUnit",
-        "youngestGender",
         "totalBorn","totalLive","totalMale","totalFemale","youngestAge","ageUnit","youngestGender",
 
       ];

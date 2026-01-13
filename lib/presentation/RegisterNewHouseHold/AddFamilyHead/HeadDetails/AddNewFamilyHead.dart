@@ -2698,6 +2698,22 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                                 msg,
                                                               );
                                                               _scrollToFirstError();
+                                                            } else {
+                                                              // Manual validation for approximate age fields when navigating to next tab
+                                                              final state = context.read<AddFamilyHeadBloc>().state;
+                                                              if (!state.useDob) {
+                                                                final ageError = Validations.validateApproxAge(
+                                                                  AppLocalizations.of(context)!,
+                                                                  state.years ?? '',
+                                                                  state.months ?? '',
+                                                                  state.days ?? '',
+                                                                );
+                                                                if (ageError != null) {
+                                                                  canProceed = false;
+                                                                  showAppSnackBar(context, ageError);
+                                                                  _scrollToFirstError();
+                                                                }
+                                                              }
                                                             }
 
                                                           } else if (i == 1) {
