@@ -105,6 +105,8 @@ class DbMigration {
         "youngestAge",
         "ageUnit",
         "youngestGender",
+        "totalBorn","totalLive","totalMale","totalFemale","youngestAge","ageUnit","youngestGender",
+
       ];
 
       final Map<String, String> keyMapping = {
@@ -153,6 +155,16 @@ class DbMigration {
         "memberStatus": "member_status",
         "weight": "weight",
         "birthWeight": "weight_at_birth",
+        "isFamilyhead": "isFamilyhead",
+        "isFamilyheadWife": "isFamilyheadWife",
+        "totalBorn": "total_children",
+        "totalLive": "total_live_children",
+        "totalMale": "total_male_children",
+        "totalFemale": "total_female_children",
+        "youngestAge": "age_of_youngest_child",
+        "ageUnit": "age_of_youngest_child_unit",
+        "youngestGender": "gender_of_youngest_child",
+
       };
 
       for (final row in oldRows) {
