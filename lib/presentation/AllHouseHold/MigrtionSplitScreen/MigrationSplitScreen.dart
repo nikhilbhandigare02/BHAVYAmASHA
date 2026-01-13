@@ -412,12 +412,20 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       _disabledAdultNames.clear();
 
       for (final r in rows) {
-        // Skip if member is migrated (is_migrated = 1)
+        // Check if member is migrated
         final isMigrated =
             r['is_migrated'] == 1 ||
-            r['is_migrated'] == '1' ||
-            r['is_migrated'] == true;
-        if (isMigrated) continue;
+                r['is_migrated'] == '1' ||
+                r['is_migrated'] == true;
+
+        // Check if member is deceased
+        final isDeceased =
+            r['is_death'] == 1 ||
+                r['is_death'] == '1' ||
+                r['is_death'] == true;
+
+        // Skip if migrated OR deceased
+        if (isMigrated || isDeceased) continue;
 
         final uniqueKey = r['unique_key']?.toString() ?? '';
         if (uniqueKey.isEmpty) continue;
@@ -425,9 +433,9 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         final info = _tryDecodeInfo(r['beneficiary_info']);
         final isAdult = _isAdultRecord(info, r);
         final nm =
-            (info['headName'] ?? info['memberName'] ?? info['name'] ?? '')
-                .toString()
-                .trim();
+        (info['headName'] ?? info['memberName'] ?? info['name'] ?? '')
+            .toString()
+            .trim();
         final rel = (info['relation_to_head'] ?? info['relation'] ?? '')
             .toString()
             .toLowerCase();
@@ -682,12 +690,27 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
           width: _buttonWidth,
           height: _buttonHeight,
           child: ElevatedButton(
-            onPressed:
-                !_isSplitting &&
-                    _isMemberTypeSelected &&
-                    _selectedFamilyHead != null &&
-                    _houseNoController.text.trim().isNotEmpty
+            onPressed: !_isSplitting
                 ? () async {
+                    if (!_isMemberTypeSelected) {
+                      showAppSnackBar(context, 'Please select members');
+                      return;
+                    }
+                    if (_selectedFamilyHead == null) {
+                      showAppSnackBar(
+                        context,
+                        'Please select Family Head',
+                      );
+                      return;
+                    }
+                    if (_houseNoController.text.trim().isEmpty) {
+                      showAppSnackBar(
+                        context,
+                        'Please enter valid House number',
+                      );
+                      return;
+                    }
+
                     final confirm = await _showConfirmDialog(context);
                     if (confirm) {
                       setState(() {
@@ -813,30 +836,11 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
   }
 
   Future<void> _handleSplit() async {
-    if (_selectedFamilyHead == null || _houseNoController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Please fill all required fields',
-            style: TextStyle(fontSize: _labelFontSize),
-          ),
-        ),
-      );
-      return;
-    }
-
     try {
       final headName = _selectedFamilyHead!.trim();
       final headUniqueKey = _adultNameToId[headName] ?? '';
       if (headUniqueKey.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Selected head not found',
-              style: TextStyle(fontSize: _labelFontSize),
-            ),
-          ),
-        );
+        showAppSnackBar(context, 'Selected head not found');
         return;
       }
 
@@ -844,14 +848,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         headUniqueKey,
       );
       if (headRow == null || headRow.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Head record not found',
-              style: TextStyle(fontSize: _labelFontSize),
-            ),
-          ),
-        );
+        showAppSnackBar(context, 'Head record not found');
         return;
       }
 
