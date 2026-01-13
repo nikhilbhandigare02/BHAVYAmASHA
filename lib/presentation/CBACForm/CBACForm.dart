@@ -529,6 +529,7 @@ class _GeneralInfoTabState extends State<_GeneralInfoTab> {
     return BlocBuilder<CbacFormBloc, CbacFormState>(
       builder: (context, state) {
         // Update form fields after build is complete
+        final screeningDate = state.data['general.screeningDate'] as String?;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _updateFormFields(context);
         });
@@ -724,57 +725,45 @@ class _PersonalInfoTab extends StatelessWidget {
               previous.data['personal.gender'] !=
               current.data['personal.gender'],
           builder: (context, state) {
-            final codeGender = ['M', 'F', 'O'];
-            final labelGender = [
-              l10n.genderMale,
-              l10n.genderFemale,
-              l10n.genderOther,
-            ];
+            final genderValue = state.data['personal.gender'] as String? ?? '';
+            
             WidgetsBinding.instance.addPostFrameCallback((_) {
               final v = state.data['personal.gender'] as String?;
-              if (state.data['personal.gender_code'] == null && v != null) {
-                final idx = labelGender.indexOf(v);
-                if (idx >= 0) {
-                  context.read<CbacFormBloc>().add(
-                    CbacFieldChanged('personal.gender_code', codeGender[idx]),
-                  );
-                }
+              if (v != null && v != genderValue) {
+                context.read<CbacFormBloc>().add(
+                  CbacFieldChanged('personal.gender', v),
+                );
               }
             });
-            return ApiDropdown<String>(
+            
+            return CustomTextField(
               hintText: l10n.genderLabel,
               labelText: l10n.genderLabel,
-              items: labelGender,
-              value: state.data['personal.gender'],
-              getLabel: (s) => s,
+              controller: TextEditingController(
+                text: genderValue,
+              ),
               onChanged: (v) {
                 bloc.add(CbacFieldChanged('personal.gender', v));
-                final idx = v == null ? -1 : labelGender.indexOf(v);
-                if (idx >= 0) {
-                  bloc.add(
-                    CbacFieldChanged('personal.gender_code', codeGender[idx]),
-                  );
-                  final fatherName =
-                      (state.data['beneficiary.fatherName']
-                          ?.toString()
-                          .trim() ??
-                      '');
-                  final spouseName =
-                      (state.data['beneficiary.spouseName']
-                          ?.toString()
-                          .trim() ??
-                      '');
-                  if (codeGender[idx] == 'M') {
-                    if (fatherName.isNotEmpty) {
-                      bloc.add(CbacFieldChanged('personal.father', fatherName));
-                    }
-                  } else {
-                    final pick = spouseName.isNotEmpty
-                        ? spouseName
-                        : fatherName;
-                    if (pick.isNotEmpty) {
-                      bloc.add(CbacFieldChanged('personal.father', pick));
-                    }
+                final fatherName =
+                    (state.data['beneficiary.fatherName']
+                        ?.toString()
+                        .trim() ??
+                    '');
+                final spouseName =
+                    (state.data['beneficiary.spouseName']
+                        ?.toString()
+                        .trim() ??
+                    '');
+                if (v.toLowerCase() == 'male' || v.toLowerCase() == 'm') {
+                  if (fatherName.isNotEmpty) {
+                    bloc.add(CbacFieldChanged('personal.father', fatherName));
+                  }
+                } else {
+                  final pick = spouseName.isNotEmpty
+                      ? spouseName
+                      : fatherName;
+                  if (pick.isNotEmpty) {
+                    bloc.add(CbacFieldChanged('personal.father', pick));
                   }
                 }
               },
