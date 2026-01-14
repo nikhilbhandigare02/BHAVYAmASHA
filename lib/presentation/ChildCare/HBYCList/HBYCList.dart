@@ -532,7 +532,6 @@ class _HBYCListState extends State<HBYCList> {
     );
   }
 
-  // 🧱 Household Card UI
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final l10n = AppLocalizations.of(context);
     final Color primary = Theme.of(context).primaryColor;
