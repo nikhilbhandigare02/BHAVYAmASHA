@@ -526,7 +526,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
               _selectedChild = value;
             });
           },
-          hintText: l10n?.selectAMember ?? 'Select a member',
+          hintText: l10n?.selectChildren ?? 'Select a member',
         ),
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         const SizedBox(height: _verticalSpacing),
@@ -1171,7 +1171,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                                     index == 0;
                                 return CheckboxListTile(
                                   title: Text(
-                                    isDisabled ? '$name (Head)' : name,
+                                    isDisabled ? '$name ( Family Head)' : name,
                                     style: TextStyle(
                                       fontSize: 15.sp,
                                       color: isDisabled
