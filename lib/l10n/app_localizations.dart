@@ -9494,7 +9494,7 @@ abstract class AppLocalizations {
   /// No description provided for @ashaName.
   ///
   /// In en, this message translates to:
-  /// **'Name of ASHA'**
+  /// **'ASHA Name'**
   String get ashaName;
 
   /// No description provided for @healthcareProviderInformation.
@@ -15182,7 +15182,7 @@ abstract class AppLocalizations {
   /// No description provided for @discussionTopic.
   ///
   /// In en, this message translates to:
-  /// **'discussion topic/program'**
+  /// **'Discussion Sub Topic/Program'**
   String get discussionTopic;
 
   /// No description provided for @userFound.
