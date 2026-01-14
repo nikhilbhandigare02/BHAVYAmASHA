@@ -9920,7 +9920,7 @@ abstract class AppLocalizations {
   /// No description provided for @tolaMohalla.
   ///
   /// In en, this message translates to:
-  /// **'Mohalla/Tola'**
+  /// **'Tola/Mohalla'**
   String get tolaMohalla;
 
   /// No description provided for @noHouseholdsFound.
@@ -10460,7 +10460,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectMember.
   ///
   /// In en, this message translates to:
-  /// **'Select Member'**
+  /// **'Select Members'**
   String get selectMember;
 
   /// No description provided for @selectChild.
@@ -15208,6 +15208,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'User does not exist. Please enter valid credentials.'**
   String get userNotFound;
+
+  /// No description provided for @typeofschool.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of school'**
+  String get typeofschool;
+
+  /// No description provided for @government.
+  ///
+  /// In en, this message translates to:
+  /// **'Government'**
+  String get government;
+
+  /// No description provided for @private.
+  ///
+  /// In en, this message translates to:
+  /// **'private'**
+  String get private;
+
+  /// No description provided for @selectChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Children'**
+  String get selectChildren;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

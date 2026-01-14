@@ -67,17 +67,33 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
         return;
       }
 
-      List<Map<String, dynamic>> rows;
-      try {
-        rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      } catch (_) {
-        rows = <Map<String, dynamic>>[];
+      // Use same household count logic as HomeScreen.dart
+      final db = await DatabaseProvider.instance.database;
+
+      final beneficiaries =
+      await LocalStorageDao.instance.getAllBeneficiaries();
+
+      final households = await db.query(
+        'households',
+        where: 'is_deleted = 0 AND current_user_key = ?',
+        whereArgs: [currentUserKey],
+      );
+
+      /// ---------- MAP HOUSEHOLD -> CONFIGURED HEAD ----------
+      final Map<String, String> headKeyByHousehold = {};
+      for (final hh in households) {
+        final hhKey = (hh['unique_key'] ?? '').toString();
+        final headId = (hh['head_id'] ?? '').toString();
+        if (hhKey.isNotEmpty && headId.isNotEmpty) {
+          headKeyByHousehold[hhKey] = headId;
+        }
       }
 
-      final familyHeads = rows.where((r) {
+      final Set<String> householdKeysFromBeneficiaries = beneficiaries.where((r) {
         try {
           final householdRefKey = (r['household_ref_key'] ?? '').toString();
-          if (householdRefKey.isEmpty) return false;
+          final uniqueKey = (r['unique_key'] ?? '').toString();
+          if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
 
           if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
 
@@ -91,16 +107,86 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
             info = {};
           }
 
-          return info['isFamilyHead'] == true ||
-              info['isFamilyHead']?.toString().toLowerCase() == 'true';
+          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+
+          final bool isConfiguredHead =
+              configuredHeadKey != null && configuredHeadKey == uniqueKey;
+
+          final relation =
+          (info['relation_to_head'] ?? info['relation'] ?? '')
+              .toString()
+              .toLowerCase();
+
+          final bool isHeadByRelation =
+              relation == 'head' || relation == 'self';
+
+          final bool isFamilyHead =
+              info['isFamilyHead'] == true ||
+                  info['isFamilyHead']?.toString().toLowerCase() == 'true';
+
+          return isConfiguredHead || isHeadByRelation || isFamilyHead;
         } catch (_) {
           return false;
         }
-      }).toList();
+      }).map((r) {
+        return (r['household_ref_key'] ?? '').toString();
+      }).where((k) => k.isNotEmpty).toSet();
 
-      final familyCount = familyHeads.isNotEmpty
-          ? familyHeads.length
-          : (await LocalStorageDao.instance.getAllHouseholds()).length;
+      /// ---------- FALLBACK HOUSEHOLDS (SAME AS _loadData) ----------
+      final Set<String> householdKeysWithBeneficiaries = beneficiaries
+          .map((e) => (e['household_ref_key'] ?? '').toString())
+          .where((k) => k.isNotEmpty)
+          .toSet();
+
+      final Set<String> fallbackHouseholdKeys = {};
+
+      for (final hh in households) {
+        final hhRefKey = (hh['unique_key'] ?? '').toString();
+        if (hhRefKey.isEmpty) continue;
+
+        // Already counted via beneficiaries
+        if (householdKeysWithBeneficiaries.contains(hhRefKey)) continue;
+
+        Map<String, dynamic> hhInfo = {};
+        final raw = hh['household_info'];
+
+        if (raw is Map) {
+          hhInfo = Map<String, dynamic>.from(raw);
+        } else if (raw is String && raw.isNotEmpty) {
+          try {
+            hhInfo = Map<String, dynamic>.from(jsonDecode(raw));
+          } catch (_) {}
+        }
+
+        final headRaw = hhInfo['family_head_details'];
+        Map<String, dynamic> headInfo = {};
+
+        if (headRaw is Map) {
+          headInfo = Map<String, dynamic>.from(headRaw);
+        } else if (headRaw is String && headRaw.isNotEmpty) {
+          try {
+            headInfo = Map<String, dynamic>.from(jsonDecode(headRaw));
+          } catch (_) {}
+        }
+
+        final bool isHead =
+            headInfo['isFamilyHead'] == true ||
+                headInfo['isFamilyHead']?.toString().toLowerCase() == 'true' ||
+                headInfo['isFamilyhead'] == true ||
+                headInfo['isFamilyhead']?.toString().toLowerCase() == 'true';
+
+        if (isHead) {
+          fallbackHouseholdKeys.add(hhRefKey);
+        }
+      }
+
+      /// ---------- FINAL HOUSEHOLD SET ----------
+      final Set<String> finalHouseholdKeys = {
+        ...householdKeysFromBeneficiaries,
+        ...fallbackHouseholdKeys,
+      };
+
+      final familyCount = finalHouseholdKeys.length;
 
       final poCount = await _getPregnancyOutcomeCount();
       final hbnc = await _getHBNCCount();
@@ -176,21 +262,6 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
     return rows;
   }
 
-  bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
-    if (person.isEmpty) return false;
-    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
-    final isFemale = genderRaw == 'f' || genderRaw == 'female';
-    if (!isFemale) return false;
-    final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ?? head?['maritalStatus']?.toString().toLowerCase() ?? '';
-    final isMarried = maritalStatusRaw == 'married';
-    if (!isMarried) return false;
-    final dob = person['dob'];
-    final age = _calculateAge(dob);
-    final fpMethodRaw = person['fpMethod']?.toString().toLowerCase().trim() ?? '';
-    final hpMethodRaw = person['hpMethod']?.toString().toLowerCase().trim() ?? '';
-    final isSterilized = fpMethodRaw == 'female sterilization' || fpMethodRaw == 'male sterilization' || hpMethodRaw == 'female sterilization' || hpMethodRaw == 'male sterilization';
-    return age >= 15 && age <= 49 && !isSterilized;
-  }
 
   bool _isPregnant(Map<String, dynamic> person) {
     if (person.isEmpty) return false;
@@ -200,17 +271,6 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
     return flag == 'true' || flag == 'yes' || typoFlag == 'true' || typoFlag == 'yes' || statusFlag == 'pregnant';
   }
 
-  int _calculateAge(dynamic dobRaw) {
-    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
-    try {
-      final dob = DateTime.tryParse(dobRaw.toString());
-      if (dob == null) return 0;
-      return DateTime.now().difference(dob).inDays ~/ 365;
-    } catch (e) {
-      print('Error calculating age: $e');
-      return 0;
-    }
-  }
 
   Future<int> _getPregnancyOutcomeCount() async {
     try {
@@ -700,19 +760,6 @@ ORDER BY d.created_date_time DESC
     }
   }
 
-  num? _parseNumFlexible(dynamic v) {
-    if (v == null) return null;
-    if (v is num) return v;
-    String s = v.toString().trim().toLowerCase();
-    if (s.isEmpty) return null;
-    s = s.replaceAll(RegExp(r'[^0-9\.-]'), '');
-    if (s.isEmpty) return null;
-    final d = double.tryParse(s);
-    if (d != null) return d;
-    final i = int.tryParse(s);
-    if (i != null) return i;
-    return null;
-  }
 
   @override
   Widget build(BuildContext context) {

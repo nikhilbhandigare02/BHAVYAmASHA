@@ -114,10 +114,55 @@ class _DeseasedListState extends State<DeseasedList> {
           if (beneficiaryInfo['dob'] != null) {
             try {
               final dob = DateTime.parse(beneficiaryInfo['dob']);
-              final now = DateTime.now();
-              int age = now.year - dob.year;
-              if (now.month < dob.month ||
-                  (now.month == dob.month && now.day < dob.day)) {
+              
+              // Parse date of death for age calculation
+              DateTime? deathDate;
+              String deathDateStr = (deathDetails['date_of_death'] ?? '').toString();
+              
+              if (deathDateStr.isNotEmpty && deathDateStr != 'null') {
+                try {
+                  deathDate = DateTime.parse(deathDateStr);
+                } catch (_) {
+                  // Try parsing as timestamp
+                  final timestamp = int.tryParse(deathDateStr);
+                  if (timestamp != null && timestamp > 0) {
+                    deathDate = DateTime.fromMillisecondsSinceEpoch(
+                      timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+                      isUtc: true,
+                    );
+                  }
+                }
+              }
+              
+              // If death date not found, try modified_date_time from beneficiary record
+              if (deathDate == null && beneficiary['modified_date_time'] != null) {
+                final modifiedDateStr = beneficiary['modified_date_time'].toString();
+                print('🔍 Debug: DeseasedList modified_date_time = $modifiedDateStr');
+                try {
+                  if (modifiedDateStr.isNotEmpty) {
+                    deathDate = DateTime.parse(modifiedDateStr);
+                    print('✅ Debug: DeseasedList successfully parsed modified_date_time: $deathDate');
+                  }
+                } catch (_) {
+                  print('❌ Debug: DeseasedList failed to parse as string, trying timestamp...');
+                  // Try parsing as timestamp
+                  final timestamp = int.tryParse(modifiedDateStr);
+                  if (timestamp != null && timestamp > 0) {
+                    deathDate = DateTime.fromMillisecondsSinceEpoch(
+                      timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+                      isUtc: true,
+                    );
+                    print('✅ Debug: DeseasedList successfully parsed as timestamp: $deathDate');
+                  }
+                }
+              }
+
+              // Use death date for calculation, fallback to current date if death date not available
+              final referenceDate = deathDate ?? DateTime.now();
+              
+              int age = referenceDate.year - dob.year;
+              if (referenceDate.month < dob.month ||
+                  (referenceDate.month == dob.month && referenceDate.day < dob.day)) {
                 age--;
               }
               return age > 0 ? age.toString() : 'N/A';

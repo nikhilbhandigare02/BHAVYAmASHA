@@ -60,7 +60,12 @@ class GeneralDetailsTab extends StatelessWidget {
             }
           }
 
-          // Fallback: top-level visitDetails
+          // PNC Mother Form structure: pnc_mother_form.home_visit_day
+          if (visitNumber == null && decoded['pnc_mother_form'] is Map) {
+            final pnc = decoded['pnc_mother_form'] as Map<String, dynamic>;
+            visitNumber = int.tryParse(pnc['home_visit_day']?.toString() ?? '');
+          }
+
           if (visitNumber == null && decoded['visitDetails'] is Map) {
             final vd = decoded['visitDetails'] as Map;
             visitNumber = int.tryParse(vd['visitNumber']?.toString() ?? '');
@@ -116,12 +121,54 @@ class GeneralDetailsTab extends StatelessWidget {
               final formData = jsonDecode(formJson) as Map<String, dynamic>;
               print('📋 Form data keys: ${formData.keys.toList()}');
 
+              Map<String, dynamic>? visitData;
+
               // Check if form_data exists and is not null
               if (formData['form_data'] != null) {
                 print('✅ Successfully extracted form_data');
-                return formData['form_data'] as Map<String, dynamic>;
+                visitData = formData['form_data'] as Map<String, dynamic>?;
+              }
+              // Check if hbyc_form exists
+              else if (formData['hbyc_form'] != null) {
+                print('✅ Successfully extracted hbyc_form');
+                visitData = formData['hbyc_form'] as Map<String, dynamic>?;
+              }
+              // Check if pnc_mother_form exists and convert to visit details structure
+              else if (formData['pnc_mother_form'] != null) {
+                print('✅ Successfully extracted pnc_mother_form');
+                final pncForm = formData['pnc_mother_form'] as Map<String, dynamic>;
+                
+                // Convert pnc_mother_form to visit details structure
+                visitData = {
+                  'visitDetails': {
+                    'visitNumber': pncForm['home_visit_day'],
+                    'visitDate': pncForm['home_visit_date'],
+                  },
+                  'motherDetails': {
+                    'motherStatus': pncForm['mother_status'],
+                    'postDeliveryProblems': pncForm['does_mother_have_problem_post_delivery'],
+                    'excessiveBleeding': pncForm['is_bleeding'],
+                    'unconsciousFits': pncForm['is_unconsiousness'],
+                    'breastfeedingProblems': pncForm['breastfeeding_problem'],
+                    'breastfeedingProblemDescription': pncForm['problem_in_breastfeeding'],
+                    'breastfeedingHelpGiven': pncForm['action_taken_to_overcome_from_breasting_problem'],
+                    'padsPerDay': pncForm['number_of_pads_changed'],
+                    'temperature': pncForm['measure_and_check_temperature'],
+                    'paracetamolGiven': pncForm['paracetomol_tab_given'],
+                    'foulDischargeHighFever': pncForm['watery_discharge_with_foul'],
+                    'abnormalSpeechOrSeizure': pncForm['is_seizures'],
+                    'counselingAdvice': pncForm['is_counseled'],
+                    'nippleCracksPainOrEngorged': pncForm['does_mother_have_cracked_nipple'],
+                    'referHospital': pncForm['is_refer_to_hospital'],
+                    'referTo': pncForm['refered_to'],
+                  }
+                };
+              }
+
+              if (visitData != null) {
+                return visitData;
               } else {
-                print('⚠️ form_data is null in the form data');
+                print('⚠️ No valid visit data structure found');
                 print('Full form data: $formData');
               }
             }
@@ -149,9 +196,51 @@ class GeneralDetailsTab extends StatelessWidget {
                 final formData = jsonDecode(formJson) as Map<String, dynamic>;
                 print('📋 Form data keys: ${formData.keys.toList()}');
 
+                Map<String, dynamic>? visitData;
+
                 if (formData['form_data'] != null) {
                   print('✅ Successfully extracted form_data from most recent record');
-                  return formData['form_data'] as Map<String, dynamic>?;
+                  visitData = formData['form_data'] as Map<String, dynamic>?;
+                }
+                // Check if hbyc_form exists
+                else if (formData['hbyc_form'] != null) {
+                  print('✅ Successfully extracted hbyc_form from most recent record');
+                  visitData = formData['hbyc_form'] as Map<String, dynamic>?;
+                }
+                // Check if pnc_mother_form exists and convert to visit details structure
+                else if (formData['pnc_mother_form'] != null) {
+                  print('✅ Successfully extracted pnc_mother_form from most recent record');
+                  final pncForm = formData['pnc_mother_form'] as Map<String, dynamic>;
+                  
+                  // Convert pnc_mother_form to visit details structure
+                  visitData = {
+                    'visitDetails': {
+                      'visitNumber': pncForm['home_visit_day'],
+                      'visitDate': pncForm['home_visit_date'],
+                    },
+                    'motherDetails': {
+                      'motherStatus': pncForm['mother_status'],
+                      'postDeliveryProblems': pncForm['does_mother_have_problem_post_delivery'],
+                      'excessiveBleeding': pncForm['is_bleeding'],
+                      'unconsciousFits': pncForm['is_unconsiousness'],
+                      'breastfeedingProblems': pncForm['breastfeeding_problem'],
+                      'breastfeedingProblemDescription': pncForm['problem_in_breastfeeding'],
+                      'breastfeedingHelpGiven': pncForm['action_taken_to_overcome_from_breasting_problem'],
+                      'padsPerDay': pncForm['number_of_pads_changed'],
+                      'temperature': pncForm['measure_and_check_temperature'],
+                      'paracetamolGiven': pncForm['paracetomol_tab_given'],
+                      'foulDischargeHighFever': pncForm['watery_discharge_with_foul'],
+                      'abnormalSpeechOrSeizure': pncForm['is_seizures'],
+                      'counselingAdvice': pncForm['is_counseled'],
+                      'nippleCracksPainOrEngorged': pncForm['does_mother_have_cracked_nipple'],
+                      'referHospital': pncForm['is_refer_to_hospital'],
+                      'referTo': pncForm['refered_to'],
+                    }
+                  };
+                }
+
+                if (visitData != null) {
+                  return visitData;
                 }
               }
             } catch (e) {
@@ -185,8 +274,7 @@ class GeneralDetailsTab extends StatelessWidget {
       if (data != null && context.mounted) {
         print('🎯 Updating UI with loaded data');
         final bloc = context.read<HbncVisitBloc>();
-        // NOTE: Intentionally do NOT auto-fill motherDetails to keep MotherDetails tab blank
-        // Update visit details if they exist (except visitDate, which should default to current date)
+
         if (data['visitDetails'] != null) {
           final visitDetails = Map<String, dynamic>.from(data['visitDetails'] as Map);
           // Update each field individually, skipping visitDate
@@ -255,26 +343,35 @@ class GeneralDetailsTab extends StatelessWidget {
                       const schedule = [1, 3, 7, 14, 21, 28, 42];
                       final int displayDay;
 
-                      if (selectedDay != null && selectedDay > 0) {
-                        displayDay = selectedDay;
+                      // Always calculate the next visit day based on database
+                      int nextDay;
+                      if (lastCompleted <= 0) {
+                        // If no previous visit, start with day 1
+                        nextDay = schedule.first;
+                      } else if (lastCompleted >= 42) {
+                        // If last visit was 42, set to 0 (no more visits)
+                        nextDay = 0;
                       } else {
-                        int nextDay;
-                        if (lastCompleted <= 0) {
-                          nextDay = schedule.first;
+                        // Find the next visit day in the schedule
+                        final idx = schedule.indexOf(lastCompleted);
+                        if (idx >= 0 && idx < schedule.length - 1) {
+                          nextDay = schedule[idx + 1];
                         } else {
-                          final idx = schedule.indexOf(lastCompleted);
-                          if (idx >= 0 && idx < schedule.length - 1) {
-                            nextDay = schedule[idx + 1];
-                          } else {
-                            nextDay = schedule.last;
-                          }
+                          // If not found in schedule, default to first
+                          nextDay = schedule.first;
                         }
+                      }
 
-                        displayDay = nextDay;
+                      displayDay = nextDay;
+                      
+                      // Only update the bloc if the current state doesn't have a valid visit number
+                      if (selectedDay == null || selectedDay <= 0) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                          context.read<HbncVisitBloc>().add(
-                            VisitDetailsChanged(field: 'visitNumber', value: displayDay, beneficiaryId: beneficiaryId),
-                          );
+                          if (displayDay > 0) {
+                            context.read<HbncVisitBloc>().add(
+                              VisitDetailsChanged(field: 'visitNumber', value: displayDay, beneficiaryId: beneficiaryId),
+                            );
+                          }
                         });
                       }
 
@@ -282,19 +379,29 @@ class GeneralDetailsTab extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 8),
-                          ApiDropdown<int>(
-                            labelText: t.homeVisitDayLabel,
-                            items: [1, 3, 7, 14, 21, 28, 42],
-                            getLabel: (v) => v.toString(),
-                            value: displayDay,
-                            onChanged: (val) {
-                              if (val != null) {
-                                context.read<HbncVisitBloc>().add(
-                                  VisitDetailsChanged(field: 'visitNumber', value: val, beneficiaryId: beneficiaryId),
-                                );
-                              }
-                            },
-                          ),
+                          if (displayDay == 0)
+                            Text(
+                              'All visits completed (Day 42)',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.green[700],
+                              ),
+                            )
+                          else
+                            ApiDropdown<int>(
+                              labelText: t.homeVisitDayLabel,
+                              items: [1, 3, 7, 14, 21, 28, 42],
+                              getLabel: (v) => v.toString(),
+                              value: displayDay,
+                              onChanged: (val) {
+                                if (val != null) {
+                                  context.read<HbncVisitBloc>().add(
+                                    VisitDetailsChanged(field: 'visitNumber', value: val, beneficiaryId: beneficiaryId),
+                                  );
+                                }
+                              },
+                            ),
                         ],
                       );
                     },

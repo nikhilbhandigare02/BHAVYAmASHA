@@ -4065,7 +4065,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                                 "$_totalCount",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.green,
+                                  color: _totalCount > 0 ? Colors.green : Colors.green,
                                   fontSize: 15.sp,
                                 ),
                               ),
@@ -4313,7 +4313,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                               _getCompletedCountForEntry(entry.key, l10n),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.green,
+                                color: _getCompletedCountForEntry(entry.key, l10n) != "0" ? Colors.green : Colors.black,
                                 fontSize: 15.sp,
                               ),
                             ),

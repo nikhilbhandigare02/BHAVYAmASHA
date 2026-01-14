@@ -93,6 +93,34 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
     });
   }
 
+  DateTime _resolveSortDate(Map<String, dynamic> raw) {
+    dynamic value = raw['modified_date_time'];
+
+    if (value == null || value.toString().isEmpty) {
+      value = raw['created_date_time'];
+    }
+
+    if (value == null) {
+      return DateTime.fromMillisecondsSinceEpoch(0);
+    }
+
+    final str = value.toString();
+
+    // ISO 8601: 2026-01-08T13:38:14.074Z
+    final parsed = DateTime.tryParse(str);
+    if (parsed != null) return parsed.toUtc();
+
+    // Timestamp (seconds or milliseconds)
+    final ts = int.tryParse(str);
+    if (ts != null) {
+      return DateTime.fromMillisecondsSinceEpoch(
+        ts > 1000000000000 ? ts : ts * 1000,
+        isUtc: true,
+      );
+    }
+
+    return DateTime.fromMillisecondsSinceEpoch(0);
+  }
 
   Future<void> _loadData() async {
     if (mounted) {
@@ -115,11 +143,10 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         orderBy: 'created_date_time DESC',
       );
 
-      // Query database directly to get mother care activities records for ANC due count
       final motherCareActivities = await db.rawQuery(
         '''
         SELECT * FROM mother_care_activities 
-        WHERE current_user_key = ? AND mother_care_state = 'anc_due' AND is_deleted = 0
+        WHERE current_user_key = ? AND mother_care_state = 'anc_due' 
         ORDER BY created_date_time ASC
       ''',
         [currentUserKey],
@@ -640,17 +667,17 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         ...fallbackMapped,
       ];
 
-      /// --------- SORT ----------
+
       combined.sort((a, b) {
         final ra = a['_raw'] as Map<String, dynamic>;
         final rb = b['_raw'] as Map<String, dynamic>;
 
-        final ca = DateTime.tryParse(ra['created_date_time']?.toString() ?? '');
-        final cb = DateTime.tryParse(rb['created_date_time']?.toString() ?? '');
+        final DateTime dateA = _resolveSortDate(ra);
+        final DateTime dateB = _resolveSortDate(rb);
 
-        if (ca != null && cb != null) return cb.compareTo(ca);
-        return 0;
+        return dateB.compareTo(dateA); // latest first
       });
+
 
       if (mounted) {
         setState(() {

@@ -122,6 +122,8 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         final inferred = n < 200 ? 'kg' : 'gms';
         _formData['weight_mode'] = inferred;
         return inferred;
+
+
       }
     }
 
@@ -136,7 +138,6 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
   @override
   void initState() {
     super.initState();
-    // TabController will be initialized in didChangeDependencies when context is available
   }
 
   @override
@@ -259,11 +260,15 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         beneficiaryId: beneficiaryId,
       );
       if (rows.isEmpty) {
+        // If no followup forms found, try beneficiary table
+        await _prefillDataFromBeneficiaryTable(beneficiaryId);
         return;
       }
       final latest = rows.first;
       final formJsonStr = latest['form_json']?.toString() ?? '';
       if (formJsonStr.isEmpty) {
+        // If no form data, try beneficiary table
+        await _prefillDataFromBeneficiaryTable(beneficiaryId);
         return;
       }
       Map<String, dynamic>? formRoot;
@@ -274,6 +279,8 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           ? Map<String, dynamic>.from(formRoot!['form_data'] as Map)
           : null;
       if (formDataMap == null) {
+        // If no form data map, try beneficiary table
+        await _prefillDataFromBeneficiaryTable(beneficiaryId);
         return;
       }
       final latestWeight = formDataMap['weight_grams']?.toString() ?? '';
@@ -293,9 +300,101 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
             _getWeightMode();
           }
         });
+      } else {
+        // If followup form has no weight data, try beneficiary table
+        await _prefillDataFromBeneficiaryTable(beneficiaryId);
       }
     } catch (e) {
       debugPrint('Error pre-filling weights: $e');
+    }
+  }
+
+  Future<void> _prefillDataFromBeneficiaryTable(String beneficiaryId) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final List<Map<String, dynamic>> rows = await db.query(
+        'beneficiaries_new',
+        where: 'unique_key = ? OR id = ?',
+        whereArgs: [beneficiaryId, beneficiaryId],
+        limit: 1,
+      );
+
+      if (rows.isEmpty) {
+        debugPrint('No beneficiary found with ID: $beneficiaryId');
+        return;
+      }
+
+      final beneficiaryRow = rows.first;
+      final beneficiaryInfoStr = beneficiaryRow['beneficiary_info']?.toString() ?? '';
+      
+      if (beneficiaryInfoStr.isEmpty) {
+        debugPrint('No beneficiary_info found for beneficiary: $beneficiaryId');
+        return;
+      }
+
+      Map<String, dynamic>? beneficiaryInfo;
+      try {
+        beneficiaryInfo = jsonDecode(beneficiaryInfoStr) as Map<String, dynamic>?;
+      } catch (e) {
+        debugPrint('Error parsing beneficiary_info JSON: $e');
+        return;
+      }
+
+      if (beneficiaryInfo == null) {
+        return;
+      }
+
+      // Extract weight, birthWeight, and date of birth from beneficiary_info
+      final weight = beneficiaryInfo['weight']?.toString() ?? '';
+      final birthWeight = beneficiaryInfo['birthWeight']?.toString() ?? '';
+      final dob = beneficiaryInfo['dob']?.toString() ?? '';
+
+      bool hasDataToUpdate = false;
+
+      if (weight.isNotEmpty || birthWeight.isNotEmpty || dob.isNotEmpty) {
+        setState(() {
+          // Prefill weight
+          if (weight.isNotEmpty) {
+            _formData['weight_grams'] = weight;
+            debugPrint('Prefilled weight from beneficiary table: $weight');
+            hasDataToUpdate = true;
+          }
+          
+          // Prefill birthWeight
+          if (birthWeight.isNotEmpty) {
+            _formData['birth_weight_grams'] = birthWeight;
+            debugPrint('Prefilled birthWeight from beneficiary table: $birthWeight');
+            hasDataToUpdate = true;
+          }
+          
+          // Prefill date of birth if not already present in form data
+          if (dob.isNotEmpty) {
+            // Check if date of birth is already set in form data
+            final existingDob = _formData['date_of_birth']?.toString() ?? '';
+            if (existingDob.isEmpty) {
+              _formData['date_of_birth'] = dob;
+              debugPrint('Prefilled date of birth from beneficiary table: $dob');
+              
+              // Also update the birth date variable used by the form
+              try {
+                final parsedDob = DateTime.parse(dob);
+                _birthDate = parsedDob;
+                debugPrint('Updated _birthDate variable: $_birthDate');
+              } catch (e) {
+                debugPrint('Error parsing date of birth: $e');
+              }
+              hasDataToUpdate = true;
+            }
+          }
+          
+          // Set weight mode based on child's age if weight data was updated
+          if (hasDataToUpdate) {
+            _getWeightMode();
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Error pre-filling data from beneficiary table: $e');
     }
   }
 

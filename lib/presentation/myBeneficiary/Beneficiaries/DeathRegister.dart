@@ -201,7 +201,7 @@ class _DeathRegisterState extends State<DeathRegister> {
             beneficiaryInfo['name'] ??
             'Unknown';
 
-    // Calculate age from DOB if available using same logic as RegisterChildListScreen
+    // Calculate age from DOB to date of death if available using same logic as RegisterChildListScreen
     String age = 'Not Available';
     if (beneficiaryInfo['dob'] != null) {
       try {
@@ -221,14 +221,64 @@ class _DeathRegisterState extends State<DeathRegister> {
         }
 
         if (dob != null) {
-          final now = DateTime.now();
-          int years = now.year - dob.year;
-          int months = now.month - dob.month;
-          int days = now.day - dob.day;
+          // Parse date of death for age calculation
+          DateTime? deathDate;
+          String deathDateStr = (deathDetails['date_of_death'] ??
+              deathDetails['deathDate'] ??
+              deathDetails['dateOfDeath'] ??
+              beneficiaryInfo['date_of_death'] ??
+              beneficiaryInfo['deathDate'] ??
+              beneficiaryInfo['dateOfDeath'] ?? '').toString();
+          
+          if (deathDateStr.isNotEmpty && deathDateStr != '') {
+            deathDate = DateTime.tryParse(deathDateStr);
+            
+            if (deathDate == null) {
+              final timestamp = int.tryParse(deathDateStr);
+              if (timestamp != null && timestamp > 0) {
+                deathDate = DateTime.fromMillisecondsSinceEpoch(
+                  timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+                  isUtc: true,
+                );
+              }
+            }
+          }
+          
+          // If death date not found, try modified_date_time from data record
+          if (deathDate == null && data['modified_date_time'] != null) {
+            try {
+              final modifiedDateStr = data['modified_date_time'].toString();
+              print('🔍 Debug: DeathRegister modified_date_time = $modifiedDateStr');
+              if (modifiedDateStr.isNotEmpty) {
+                deathDate = DateTime.tryParse(modifiedDateStr);
+                
+                if (deathDate == null) {
+                  final timestamp = int.tryParse(modifiedDateStr);
+                  if (timestamp != null && timestamp > 0) {
+                    deathDate = DateTime.fromMillisecondsSinceEpoch(
+                      timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+                      isUtc: true,
+                    );
+                    print('✅ Debug: DeathRegister successfully parsed as timestamp: $deathDate');
+                  }
+                } else {
+                  print('✅ Debug: DeathRegister successfully parsed as date: $deathDate');
+                }
+              }
+            } catch (e) {
+              print('❌ Debug: DeathRegister error parsing modified_date_time: $e');
+            }
+          }
+
+          final referenceDate = deathDate ?? DateTime.now();
+          
+          int years = referenceDate.year - dob.year;
+          int months = referenceDate.month - dob.month;
+          int days = referenceDate.day - dob.day;
 
           if (days < 0) {
-            final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
-            final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+            final lastMonth = referenceDate.month - 1 < 1 ? 12 : referenceDate.month - 1;
+            final lastMonthYear = referenceDate.month - 1 < 1 ? referenceDate.year - 1 : referenceDate.year;
             final daysInLastMonth = DateTime(
               lastMonthYear,
               lastMonth + 1,
@@ -277,13 +327,14 @@ class _DeathRegisterState extends State<DeathRegister> {
             beneficiaryInfo['date_of_death'] ??
             beneficiaryInfo['deathDate'] ??
             beneficiaryInfo['dateOfDeath'] ??
-            'Not recorded';
+            data['modified_date_time'] ??
+            '-';
     final deathPlace =
         deathDetails['death_place'] ??
             deathDetails['deathPlace'] ??
             beneficiaryInfo['death_place'] ??
             beneficiaryInfo['deathPlace'] ??
-            '';
+            '-';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
@@ -408,7 +459,7 @@ class _DeathRegisterState extends State<DeathRegister> {
   }
 
   String _formatDate(String? dateString) {
-    if (dateString == null || dateString.isEmpty) return 'Not recorded';
+    if (dateString == null || dateString.isEmpty) return '';
     try {
       final date = DateTime.tryParse(dateString);
       if (date == null) return dateString;
