@@ -395,9 +395,9 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
   Future<DateTime?> _getLmpFromFollowupForm(Map<String, dynamic> data) async {
     try {
-      final benId = data['BeneficiaryID']?.toString() ?? 
-                   data['unique_key']?.toString() ?? 
-                   (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['unique_key']?.toString() : null);
+      final benId = data['beneficiaries_registration_ref_key']?.toString() ??
+                   data['beneficiary_ref_key']?.toString() ??
+                   (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['beneficiary_ref_key']?.toString() : null);
 
       final hhId = data['hhId']?.toString() ?? 
                   (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['household_ref_key']?.toString() : null);
@@ -428,7 +428,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
         try {
           final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
           
-          // Check for LMP date in eligible_couple_tracking_due_from structure
           final trackingData = root['eligible_couple_tracking_due_from'];
           if (trackingData is Map) {
             final lmpStr = trackingData['lmp_date']?.toString();

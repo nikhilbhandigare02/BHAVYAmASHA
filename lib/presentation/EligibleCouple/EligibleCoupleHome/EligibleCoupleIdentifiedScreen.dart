@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:sizer/sizer.dart';
+import 'package:sqflite/sqflite.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
@@ -61,16 +62,91 @@ class _EligibleCoupleIdentifiedScreenState
     return {};
   }
 
-  Future<void> _loadEligibleCouples() async {
-    try {
-      setState(() { _isLoading = true; });
-      final db = await DatabaseProvider.instance.database;
+  int? _calculateAgeFromDob(String? dob) {
+    if (dob == null || dob.isEmpty) return null;
 
+    try {
+      final DateTime dobDate = DateTime.parse(dob);
+      final DateTime today = DateTime.now();
+
+      int age = today.year - dobDate.year;
+
+      if (today.month < dobDate.month ||
+          (today.month == dobDate.month && today.day < dobDate.day)) {
+        age--;
+      }
+
+      return age;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<bool> _hasSterilizationRecord(
+      Database db,
+      String beneficiaryKey,
+      String ashaUniqueKey,
+      ) async {
+    final rows = await db.query(
+      FollowupFormDataTable.table,
+      where: '''
+      beneficiary_ref_key = ?
+      AND current_user_key = ?
+      AND is_deleted = 0
+      AND forms_ref_key = ?
+    ''',
+      whereArgs: [
+        beneficiaryKey,
+        ashaUniqueKey,
+        FollowupFormDataTable
+            .formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue],
+      ],
+    );
+
+    for (final row in rows) {
+      try {
+        final formJsonStr = row['form_json']?.toString();
+        if (formJsonStr == null || formJsonStr.isEmpty) continue;
+
+        final Map<String, dynamic> formJson =
+        Map<String, dynamic>.from(jsonDecode(formJsonStr));
+
+        final trackingDue =
+        formJson['eligible_couple_tracking_due_from'];
+
+        if (trackingDue is Map<String, dynamic>) {
+
+          final method =
+          trackingDue['method_of_contraception']
+              ?.toString()
+              .toLowerCase();
+
+          if (
+          (method == 'female_sterilization' ||
+              method == 'male_sterilization' || method == 'male sterilization' || method == 'female sterilization')) {
+            return true;
+          }
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+
+    return false;
+  }
+
+  Future<void> _loadEligibleCouples() async {
+    if (mounted) {
+      setState(() => _isLoading = true);
+    }
+
+    try {
+      final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
-      
+      final String currentUserKey =
+          currentUserData?['unique_key']?.toString() ?? '';
+
       if (currentUserKey.isEmpty) {
-        print('Error: Current user key not found');
         setState(() {
           _filtered = [];
           _isLoading = false;
@@ -79,110 +155,118 @@ class _EligibleCoupleIdentifiedScreenState
       }
 
       final query = '''
-        SELECT DISTINCT b.*, e.eligible_couple_state, 
-               e.created_date_time as registration_date
-        FROM beneficiaries_new b
-        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
-        WHERE b.is_deleted = 0 
-          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
-          AND (b.is_death = 0 OR b.is_death IS NULL)
-          AND e.eligible_couple_state = 'eligible_couple'
-          AND e.is_deleted = 0
-          AND e.current_user_key = ?
-        ORDER BY b.created_date_time DESC
-      ''';
+      SELECT DISTINCT b.*, 
+             e.eligible_couple_state, 
+             e.created_date_time AS registration_date
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e 
+              ON b.unique_key = e.beneficiary_ref_key
+      WHERE b.is_deleted = 0
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND (b.is_death = 0 OR b.is_death IS NULL)
+        AND e.eligible_couple_state IN ('eligible_couple')
+        AND e.is_deleted = 0
+        AND e.current_user_key = ?
+        AND b.current_user_key = ?
+      ORDER BY b.created_date_time DESC;
+    ''';
 
-      print('Executing query: $query');
-      print('With param: $currentUserKey');
-      
-      final rows = await db.rawQuery(query, [currentUserKey]);
-      print('Found ${rows.length} eligible couples');
-      
+      final rows = await db.rawQuery(query, [currentUserKey, currentUserKey]);
+
       if (rows.isEmpty) {
-        print('No eligible couples found for current user');
         setState(() {
           _filtered = [];
           _isLoading = false;
         });
         return;
       }
-      
-      final filteredRows = rows.map((row) {
-        final Map<String, dynamic> mappedRow = Map<String, dynamic>.from(row);
-        
+
+      final List<Map<String, dynamic>> couples = [];
+      final Set<String> processedBeneficiaries = {};
+
+      for (final row in rows) {
         try {
-          mappedRow['beneficiary_info'] = jsonDecode(mappedRow['beneficiary_info'] ?? '{}');
-          mappedRow['geo_location'] = jsonDecode(mappedRow['geo_location'] ?? '{}');
-          mappedRow['device_details'] = jsonDecode(mappedRow['device_details'] ?? '{}');
-          mappedRow['app_details'] = jsonDecode(mappedRow['app_details'] ?? '{}');
-          mappedRow['parent_user'] = jsonDecode(mappedRow['parent_user'] ?? '{}');
-        } catch (e) {
-          print('Error parsing JSON fields: $e');
-        }
-        
-        return mappedRow;
-      }).toList();
-      
-      print('Processed ${filteredRows.length} rows');
+          final beneficiaryKey = row['unique_key']?.toString();
+          if (beneficiaryKey == null || beneficiaryKey.isEmpty) continue;
 
+          // ❌ Avoid duplicates
+          if (processedBeneficiaries.contains(beneficiaryKey)) continue;
 
-      final couples = <Map<String, dynamic>>[];
-      
-      // Track duplicates based on household_ref_key and name combination
-      final Map<String, int> recordCount = {};
-      final Map<String, int> processedRecords = {};
+          // 🔹 Parse JSON fields
+          final beneficiaryInfoStr = row['beneficiary_info']?.toString() ?? '{}';
+          final Map<String, dynamic> info =
+          Map<String, dynamic>.from(jsonDecode(beneficiaryInfoStr));
 
-      // First pass: count occurrences of each unique record
-      for (final member in filteredRows) {
-        final info = _toStringMap(member['beneficiary_info']);
-        final memberUniqueKey = member['unique_key']?.toString() ?? '';
-        final householdKey = member['household_ref_key']?.toString() ?? '';
-        final name = info['memberName']?.toString() ?? info['headName']?.toString() ?? '';
-        
-        // Create a unique key based on household and name combination
-        final uniqueKey = '$householdKey-$name';
-        recordCount[uniqueKey] = (recordCount[uniqueKey] ?? 0) + 1;
-      }
+          final memberType =
+              info['memberType']?.toString().toLowerCase() ?? '';
+          final maritalStatus =
+              info['maritalStatus']?.toString().toLowerCase() ?? '';
 
-      // Process each eligible row
-      for (final member in filteredRows) {
-        final info = _toStringMap(member['beneficiary_info']);
-        final memberUniqueKey = member['unique_key']?.toString() ?? '';
-        final householdKey = member['household_ref_key']?.toString() ?? '';
-        final name = info['memberName']?.toString() ?? info['headName']?.toString() ?? '';
-        
-        // Check memberType and skip if child
-        final memberType = info['memberType']?.toString().toLowerCase() ?? '';
-        if (memberType == 'child') {
-          print('Skipping child record: $memberUniqueKey');
+          // ❌ Skip child
+          if (memberType == 'child') continue;
+
+          // ❌ Skip unmarried
+          if (maritalStatus != 'married') continue;
+
+          // 🔹 Age
+          int? age;
+          if (info['age'] != null) {
+            age = int.tryParse(info['age'].toString());
+          }
+          age ??= _calculateAgeFromDob(info['dob']?.toString());
+
+          if (age == null || age < 15 || age > 49) continue;
+
+          // ❌ Skip sterilization cases
+          final hasSterilization = await _hasSterilizationRecord(
+            db,
+            beneficiaryKey,
+            currentUserKey,
+          );
+
+          if (hasSterilization) continue;
+
+          // ✅ Mark processed
+          processedBeneficiaries.add(beneficiaryKey);
+
+          // 🔹 Normalize row before sending to UI
+          final Map<String, dynamic> normalizedRow =
+          Map<String, dynamic>.from(row);
+
+          try {
+            normalizedRow['beneficiary_info'] = info;
+            normalizedRow['geo_location'] =
+                jsonDecode(normalizedRow['geo_location'] ?? '{}');
+            normalizedRow['device_details'] =
+                jsonDecode(normalizedRow['device_details'] ?? '{}');
+            normalizedRow['app_details'] =
+                jsonDecode(normalizedRow['app_details'] ?? '{}');
+            normalizedRow['parent_user'] =
+                jsonDecode(normalizedRow['parent_user'] ?? '{}');
+          } catch (_) {}
+
+          // ✅ Add to list
+          couples.add(
+            _formatCoupleData(
+              normalizedRow,
+              info,
+              <String, dynamic>{},
+              isHead: false,
+              shouldShowGuestBadge: false,
+            ),
+          );
+        } catch (_) {
           continue;
         }
-
-        // Create the same unique key for duplicate detection
-        final uniqueKey = '$householdKey-$name';
-        final isDuplicate = recordCount[uniqueKey]! > 1;
-        
-        // Mark this record as guest if it's a duplicate and hasn't been marked yet
-        final shouldShowGuestBadge = isDuplicate && (processedRecords[uniqueKey] ?? 0) == 0;
-        processedRecords[uniqueKey] = (processedRecords[uniqueKey] ?? 0) + 1;
-
-        couples.add(_formatCoupleData(
-          _toStringMap(member),
-          info,
-          <String, dynamic>{}, // Empty counterpart
-          isHead: false,
-          shouldShowGuestBadge: shouldShowGuestBadge,
-        ));
       }
 
-      print('Final couples list contains ${couples.length} items');
       setState(() {
         _filtered = couples;
         _isLoading = false;
       });
     } catch (e, stackTrace) {
       print('Error in _loadEligibleCouples: $e');
-      print('Stack trace: $stackTrace');
+      print(stackTrace);
       setState(() {
         _filtered = [];
         _isLoading = false;

@@ -8,6 +8,7 @@ import 'package:medixcel_new/core/config/routes/Route_Name.dart';
 import 'package:medixcel_new/core/config/routes/Routes.dart' as AppRoutes;
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:sizer/sizer.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../../core/config/Constant/constant.dart';
 import '../../core/widgets/AppDrawer/Drawer.dart';
@@ -539,47 +540,88 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     try {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
 
       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
-        print('Error: Current user key not found');
         if (mounted) {
-          setState(() {
-            eligibleCouplesCount = 0;
-          });
+          setState(() => eligibleCouplesCount = 0);
         }
         return;
       }
 
       final query = '''
-        SELECT DISTINCT b.*, e.eligible_couple_state, 
-               e.created_date_time as registration_date
-        FROM beneficiaries_new b
-        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
-        WHERE b.is_deleted = 0 
-          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
-          AND e.eligible_couple_state = 'eligible_couple'
-          AND e.is_deleted = 0
-          AND b.is_death = 0
-          AND e.current_user_key = ?
-      ''';
+      SELECT DISTINCT b.*, 
+             e.eligible_couple_state, 
+             e.created_date_time AS registration_date
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e 
+              ON b.unique_key = e.beneficiary_ref_key
+      WHERE b.is_deleted = 0
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND (b.is_death = 0 OR b.is_death IS NULL)
+        AND e.eligible_couple_state IN ('eligible_couple', 'tracking_due')
+        AND e.is_deleted = 0
+        AND e.current_user_key = ?
+        AND b.current_user_key = ?
+      ORDER BY b.created_date_time DESC;
+    ''';
 
-      final rows = await db.rawQuery(query, [ashaUniqueKey]);
+      final rows = await db.rawQuery(query, [
+        ashaUniqueKey,
+        ashaUniqueKey,
+      ]);
 
       int count = 0;
+      final Set<String> countedBeneficiaries = {};
+
       for (final row in rows) {
         try {
-          final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
-          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty
-              ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfo))
-              : <String, dynamic>{};
+          final beneficiaryKey = row['unique_key']?.toString();
+          if (beneficiaryKey == null || beneficiaryKey.isEmpty) continue;
 
-          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
-          if (memberType != 'child') {
-            count++;
+          // ❌ avoid duplicate count
+          if (countedBeneficiaries.contains(beneficiaryKey)) continue;
+
+          final beneficiaryInfoStr =
+              row['beneficiary_info']?.toString() ?? '{}';
+          final Map<String, dynamic> info =
+          Map<String, dynamic>.from(jsonDecode(beneficiaryInfoStr));
+
+          final memberType =
+              info['memberType']?.toString().toLowerCase() ?? '';
+          final maritalStatus =
+              info['maritalStatus']?.toString().toLowerCase() ?? '';
+
+          // ❌ skip child
+          if (memberType == 'child') continue;
+
+          // ❌ skip unmarried
+          if (maritalStatus != 'married') continue;
+
+          // 🔹 age
+          int? age;
+          if (info['age'] != null) {
+            age = int.tryParse(info['age'].toString());
           }
-        } catch (_) {
+          age ??= _calculateAgeFromDob(info['dob']?.toString());
+
+          if (age == null || age < 15 || age > 49) continue;
+
+          // ❌ skip sterilization cases
+          final hasSterilization = await _hasSterilizationRecord(
+            db,
+            beneficiaryKey,
+            ashaUniqueKey,
+          );
+
+          if (hasSterilization) continue;
+
+          // ✅ count once
+          countedBeneficiaries.add(beneficiaryKey);
           count++;
+        } catch (_) {
+          continue;
         }
       }
 
@@ -588,27 +630,91 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           eligibleCouplesCount = count;
         });
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('Error loading eligible couples count: $e');
+      print(stackTrace);
       if (mounted) {
-        setState(() {
-          eligibleCouplesCount = 0;
-        });
+        setState(() => eligibleCouplesCount = 0);
       }
     }
   }
 
 
-  int _calculateEcAge(dynamic dobRaw) {
-    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
+  int? _calculateAgeFromDob(String? dob) {
+    if (dob == null || dob.isEmpty) return null;
+
     try {
-      final dob = DateTime.tryParse(dobRaw.toString());
-      if (dob == null) return 0;
-      return DateTime.now().difference(dob).inDays ~/ 365;
-    } catch (_) {
-      return 0;
+      final DateTime dobDate = DateTime.parse(dob);
+      final DateTime today = DateTime.now();
+
+      int age = today.year - dobDate.year;
+
+      if (today.month < dobDate.month ||
+          (today.month == dobDate.month && today.day < dobDate.day)) {
+        age--;
+      }
+
+      return age;
+    } catch (e) {
+      return null;
     }
   }
+
+  Future<bool> _hasSterilizationRecord(
+      Database db,
+      String beneficiaryKey,
+      String ashaUniqueKey,
+      ) async {
+    final rows = await db.query(
+      ffd.FollowupFormDataTable.table,
+      where: '''
+      beneficiary_ref_key = ?
+      AND current_user_key = ?
+      AND is_deleted = 0
+      AND forms_ref_key = ?
+    ''',
+      whereArgs: [
+        beneficiaryKey,
+        ashaUniqueKey,
+        ffd.FollowupFormDataTable
+            .formUniqueKeys[ffd.FollowupFormDataTable.eligibleCoupleTrackingDue],
+      ],
+    );
+
+    for (final row in rows) {
+      try {
+        final formJsonStr = row['form_json']?.toString();
+        if (formJsonStr == null || formJsonStr.isEmpty) continue;
+
+        final Map<String, dynamic> formJson =
+        Map<String, dynamic>.from(jsonDecode(formJsonStr));
+
+        final trackingDue =
+        formJson['eligible_couple_tracking_due_from'];
+
+        if (trackingDue is Map<String, dynamic>) {
+
+          final method =
+          trackingDue['method_of_contraception']
+              ?.toString()
+              .toLowerCase();
+
+          if (
+          (method == 'female_sterilization' ||
+              method == 'male_sterilization' || method == 'male sterilization' || method == 'female sterilization')) {
+            return true;
+          }
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+
+    return false;
+  }
+
+
+
 
 
 

@@ -158,115 +158,7 @@ class BeneficiaryRepository {
           }
         }
         await LocalStorageDao.instance.insertBeneficiary(row);
-        
-        // Check if this beneficiary is female and pregnant
-        try {
-          final beneficiaryInfo = _mapBeneficiaryInfo(rec);
-          final gender = beneficiaryInfo['gender']?.toString().toLowerCase();
-          final isPregnant = (beneficiaryInfo['isPregnant']?.toString().toLowerCase() == 'yes' ||
-                            beneficiaryInfo['isPregnant']?.toString().toLowerCase() == 'true');
-          
-          if (gender == 'female' && isPregnant) {
-            final currentUser = await UserInfo.getCurrentUser();
-            final userDetails = currentUser?['details'] is String
-                ? jsonDecode(currentUser?['details'] ?? '{}')
-                : currentUser?['details'] ?? {};
-            
-            final ashaUniqueKey = userDetails['unique_key']?.toString() ?? '';
-            final facilityId = userDetails['facility_id']?.toString() ?? '';
-            final uniqueKey = row['unique_key']?.toString() ?? '';
-            final householdKey = row['household_ref_key']?.toString() ?? '';
-            
-            if (uniqueKey.isNotEmpty && householdKey.isNotEmpty) {
-              final ts = DateTime.now().toIso8601String();
-              
-              final motherCareActivityData = {
-                'server_id': null,
-                'household_ref_key': householdKey,
-                'beneficiary_ref_key': uniqueKey,
-                'mother_care_state': 'anc_due',
-                'device_details': jsonEncode(rec['device_details'] ?? {}),
-                'app_details': jsonEncode(rec['app_details'] ?? {}),
-                'parent_user': jsonEncode({}),
-                'current_user_key': ashaUniqueKey,
-                'facility_id': facilityId,
-                'created_date_time': ts,
-                'modified_date_time': ts,
-                'is_synced': 0,
-                'is_deleted': 0,
-              };
 
-              print('Inserting mother care activity for pregnant beneficiary: ${jsonEncode(motherCareActivityData)}');
-              await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
-            }
-          }
-          
-          // Check for eligible couple
-          final maritalStatus = beneficiaryInfo['maritalStatus']?.toString().toLowerCase() ?? 
-                              beneficiaryInfo['marital_status']?.toString().toLowerCase() ?? '';
-          final age = _calculateAge(beneficiaryInfo['dob']?.toString() ?? '');
-          final isEligibleForCouple = maritalStatus == 'married' && age >= 15 && age <= 49;
-
-          if (isEligibleForCouple) {
-            try {
-              final currentUser = await UserInfo.getCurrentUser();
-              final userDetails = currentUser?['details'] is String
-                  ? jsonDecode(currentUser?['details'] ?? '{}')
-                  : currentUser?['details'] ?? {};
-              
-              final ashaUniqueKey = userDetails['unique_key']?.toString() ?? '';
-              final facilityId = userDetails['facility_id']?.toString() ?? '';
-              final uniqueKey = row['unique_key']?.toString() ?? '';
-              final householdKey = row['household_ref_key']?.toString() ?? '';
-              final spouseKey = row['spouse_key']?.toString() ?? '';
-              
-              if (uniqueKey.isNotEmpty && householdKey.isNotEmpty) {
-                final ts = DateTime.now().toIso8601String();
-                final deviceInfo = await DeviceInfo.getDeviceInfo();
-                final deviceDetails = {
-                  'id': deviceInfo.deviceId,
-                  'platform': deviceInfo.platform,
-                  'version': deviceInfo.osVersion,
-                  'model': deviceInfo.model,
-                };
-                
-                final eligibleCoupleActivityData = {
-                  'server_id': '',
-                  'household_ref_key': householdKey,
-                  'beneficiary_ref_key': uniqueKey,
-                  'eligible_couple_state': 'eligible_couple',
-                  'device_details': jsonEncode(deviceDetails),
-                  'app_details': jsonEncode({
-                    'app_version': deviceInfo.appVersion.split('+').first,
-                    'form_data': {
-                      'created_at': ts,
-                      'updated_at': ts,
-                    },
-                  }),
-                  'parent_user': '',
-                  'current_user_key': ashaUniqueKey,
-                  'facility_id': facilityId,
-                  'created_date_time': ts,
-                  'modified_date_time': ts,
-                  'is_synced': 0,
-                  'is_deleted': 0,
-                };
-
-                print('Inserting eligible couple activity for beneficiary: $uniqueKey');
-                final db = await DatabaseProvider.instance.database;
-                await db.insert(
-                  'eligible_couple_activities',
-                  eligibleCoupleActivityData,
-                  conflictAlgorithm: ConflictAlgorithm.replace,
-                );
-              }
-            } catch (e) {
-              print('Error inserting eligible couple activity: $e');
-            }
-          }
-        } catch (e) {
-          print('Error checking/inserting mother care activity or eligible couple: $e');
-        }
         
         inserted++;
       } catch (e) {
@@ -399,34 +291,56 @@ class BeneficiaryRepository {
     final addr = info['address'] is Map
         ? Map<String, dynamic>.from(info['address'] as Map)
         : <String, dynamic>{};
+    String? _resolveFatherName(Map<String, dynamic> info) {
+      final primary = info['father_or_spouse_name']?.toString().trim();
+      if (primary != null && primary.isNotEmpty) {
+        return primary;
+      }
+
+      final fallback = info['father_name']?.toString().trim();
+      if (fallback != null && fallback.isNotEmpty) {
+        return fallback;
+      }
+
+      return null;
+    }
 
 
+    String? _normalizeDob(dynamic dob) {
+      if (dob == null) return null;
+
+      try {
+        final parsed = DateTime.tryParse(dob.toString());
+        if (parsed == null) return null;
+
+        return DateFormat('yyyy-MM-dd').format(parsed);
+      } catch (_) {
+        return null;
+      }
+    }
 
     final mapped = <String, dynamic>{
-      // Basic info - API to local mapping
-      'memberType': info['ben_type'] == 'Child' ? 'child' : 'adult',
+      'memberType': info['ben_type'] == 'child' ? 'child' : 'adult',
       'relation': info['relaton_with_family_head'] ?? info['relation_to_head'] ?? '',
       'name': fullName,
       'headName': fullName,
-      
+      'memberName': info['member_name'],
+      'father_name': info['father_name'] ?? '',
       'houseNo': info['house_no'] ?? '',
-      'headName': info['member_name'] ?? fullName,
       'fatherName': info['father_or_spouse_name'],
       'motherName': info['mother_name'] ?? '',
-      
-      // DOB / age - API mapping
-      'useDob': true,
-      'dob': info['dob']?.toString() ?? info['date_of_birth']?.toString(),
+      'age_by': info['age_by'],
+      'useDob': info['age_by'],
+      'dob': _normalizeDob(info['dob'] ?? info['date_of_birth']),
       'approxAge': info['age'],
-      'years': info['age'],
-      'months': 0,
-      'days': 0,
+      'years': info['dob_day'],
+      'months': info['dob_month'],
+      'days': info['dob_year'],
       'updateDay': DateTime.now().day,
       'updateMonth': DateTime.now().month,
       'updateYear': DateTime.now().year,
 
-      // Children summary - API mapping
-      'children': info['have_children'] == 'yes' ? [] : [],
+      'children': info['total_children'],
       'birthOrder': info['birth_order'],
       'totalBorn': info['total_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),
       'totalLive': info['total_live_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),
@@ -436,21 +350,18 @@ class BeneficiaryRepository {
       'ageUnit': info['age_of_youngest_child_unit'] ?? 'years',
       'youngestGender': info['gender_of_younget_child'],
 
-      // Demographics - API mapping
       'gender': _genderText(info['gender']?.toString()),
       'occupation': info['occupation'],
       'education': info['education'],
       'religion': info['religion'],
       'category': info['category'],
 
-      // Health / pregnancy - API mapping
       'hasChildren': info['have_children'] ?? 'no',
       'isPregnant': info['is_women_pregenant'] ?? '',
       'lmp': info['lmp_date']?.toString(),
       'edd': info['edd_date']?.toString(),
-      'beneficiaryType': info['type_of_beneficiary'] ?? info['ben_type'],
+      'beneficiaryType': info['type_of_beneficiary'],
 
-      // Contact & IDs - API mapping
       'mobileOwner': info['whose_mob_no'] ?? '',
       'mobileNo': (info['mobile_no'] ?? info['phone'])?.toString(),
       'abhaAddress': info['abha_no'],
@@ -465,12 +376,10 @@ class BeneficiaryRepository {
       'ifsc': info['ifsc_code'],
       'ifscCode': info['ifsc_code'],
 
-      // Marital - API mapping
       'maritalStatus': _titleCase(info['marital_status']?.toString()),
       'ageAtMarriage': info['age_at_marrige'],
       'spouseName': info['name_of_spouse'] ?? info['father_or_spouse_name'],
 
-      // Address fields - API mapping
       'village': info['village_name'] ?? addr['village'] ?? '',
       'ward': info['ward_name'] ?? '',
       'wardNo': info['ward_no'] ?? '',
@@ -524,7 +433,6 @@ class BeneficiaryRepository {
       'adhar_no': info['adhar_no'],
       'family_head_adhar_no': info['family_head_adhar_no'],
       
-      // Poverty status
       'poverty_line': info['poverty_line'],
       
       // Migration status

@@ -121,11 +121,23 @@ class HouseholdRepository {
           exists = existingBySid != null && existingBySid.isNotEmpty;
         }
         if (exists) { skipped++; continue; }
+        final Map<String, dynamic> addressMap =
+        rec['address'] is Map<String, dynamic>
+            ? Map<String, dynamic>.from(rec['address'])
+            : <String, dynamic>{};
+
+        final Map<String, dynamic> familyHeadDetails =
+        rec['family_head_details'] is Map<String, dynamic>
+            ? Map<String, dynamic>.from(rec['family_head_details'])
+            : <String, dynamic>{};
+
+// 👇 insert family_head_details inside address
+        addressMap['family_head_details'] = familyHeadDetails;
 
         Map<String, dynamic> toInsert = {
           'server_id': serverId,
           'unique_key': uniqueKey,
-          'address': rec['address'] ?? {},
+          'address': addressMap,
           'geo_location': rec['geo_location'] ?? {},
           'head_id': (rec['family_head_details'] is Map) ? (rec['family_head_details']['unique_key']?.toString()) : null,
           'household_info': rec['household_info'] ?? {},

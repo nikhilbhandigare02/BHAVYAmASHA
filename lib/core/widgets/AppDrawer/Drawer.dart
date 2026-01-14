@@ -51,10 +51,11 @@ class _CustomDrawerState extends State<CustomDrawer> {
     if (mounted) {
       setState(() {
         // _appVersion = version;
-        _appVersion = '1.1.5';
+        _appVersion = '1.1.6';
       });
     }
   }
+
   int? _appRoleId;
   Future<void> _loadUserData() async {
     if (mounted) {
@@ -164,7 +165,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
     }
   }
 
-  String _appVersion = ''; // Default version
+  String _appVersion = '';
 
   // Helper method to get responsive icon size
   double _getIconSize(BuildContext context) {

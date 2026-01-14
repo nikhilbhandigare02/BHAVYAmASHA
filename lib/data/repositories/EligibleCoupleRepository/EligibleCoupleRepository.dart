@@ -138,15 +138,15 @@ class EligibleCoupleRepository {
       /// 🔴 CHECK: beneficiary_ref_key already exists?
       final existingByBeneficiary = await db.query(
         'eligible_couple_activities',
-        where: 'beneficiary_ref_key = ? AND is_deleted = 0',
+        where: 'beneficiary_ref_key = ?',
         whereArgs: [beneficiaryRefKey],
         limit: 1,
       );
 
-      if (existingByBeneficiary.isNotEmpty) {
-        skipped++;
-        continue; // ❌ EXCLUDE THIS RECORD
-      }
+      // if (existingByBeneficiary.isNotEmpty) {
+      //   skipped++;
+      //   continue; // ❌ EXCLUDE THIS RECORD
+      // }
 
       /// Existing check by server_id (normal sync logic)
       final existingByServer = await db.query(
@@ -194,10 +194,8 @@ class EligibleCoupleRepository {
         'device_details': deviceDetails,
         'app_details': appDetails,
         'parent_user': jsonEncode(parentUser),
-        'current_user_key': ashaId,
-        'facility_id':
-        int.tryParse(rec['facility_id']?.toString() ?? facilityId) ??
-            0,
+        'current_user_key': rec['created_by']?.toString(),
+        'facility_id': rec['facility_id']?.toString(),
         'created_date_time': rec['created_date_time']?.toString(),
         'modified_date_time': rec['modified_date_time']?.toString(),
         'is_synced': 1,
@@ -275,11 +273,7 @@ class EligibleCoupleRepository {
         '')
         .toString();
 
-    final facilityId = (working['asha_associated_with_facility_id'] ??
-        working['hsc_id'] ??
-        details['facility_id'] ??
-        details['hsc_id'] ??
-        '')
+    final facilityId = (working['asha_associated_with_facility_id'])
         .toString();
 
     if (ashaId.isEmpty || facilityId.isEmpty) return;

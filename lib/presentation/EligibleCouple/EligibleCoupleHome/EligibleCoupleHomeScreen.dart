@@ -6,7 +6,7 @@ import 'package:medixcel_new/data/Database/database_provider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
-import 'package:sqflite/sqflite.dart' show Sqflite;
+import 'package:sqflite/sqflite.dart' show Sqflite, Database;
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../core/widgets/AppHeader/AppHeader.dart' show AppHeader;
 import '../../../data/Database/local_storage_dao.dart';
@@ -33,11 +33,85 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
   void initState() {
     super.initState();
     _loadCounts();
-    _printEligibleCoupleActivities();
+    // _printEligibleCoupleActivities();
   }
 
 
   final LocalStorageDao _localStorageDao = LocalStorageDao();
+
+  int? _calculateAgeFromDob(String? dob) {
+    if (dob == null || dob.isEmpty) return null;
+
+    try {
+      final DateTime dobDate = DateTime.parse(dob);
+      final DateTime today = DateTime.now();
+
+      int age = today.year - dobDate.year;
+
+      if (today.month < dobDate.month ||
+          (today.month == dobDate.month && today.day < dobDate.day)) {
+        age--;
+      }
+
+      return age;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<bool> _hasSterilizationRecord(
+      Database db,
+      String beneficiaryKey,
+      String ashaUniqueKey,
+      ) async {
+    final rows = await db.query(
+      FollowupFormDataTable.table,
+      where: '''
+      beneficiary_ref_key = ?
+      AND current_user_key = ?
+      AND is_deleted = 0
+      AND forms_ref_key = ?
+    ''',
+      whereArgs: [
+        beneficiaryKey,
+        ashaUniqueKey,
+        FollowupFormDataTable
+            .formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue],
+      ],
+    );
+
+    for (final row in rows) {
+      try {
+        final formJsonStr = row['form_json']?.toString();
+        if (formJsonStr == null || formJsonStr.isEmpty) continue;
+
+        final Map<String, dynamic> formJson =
+        Map<String, dynamic>.from(jsonDecode(formJsonStr));
+
+        final trackingDue =
+        formJson['eligible_couple_tracking_due_from'];
+
+        if (trackingDue is Map<String, dynamic>) {
+
+          final method =
+          trackingDue['method_of_contraception']
+              ?.toString()
+              .toLowerCase();
+
+          if (
+              (method == 'female_sterilization' ||
+                  method == 'male_sterilization' || method == 'male sterilization' || method == 'female sterilization')) {
+            return true;
+          }
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+
+    return false;
+  }
+
 
   Future<void> _loadCounts() async {
     if (mounted) {
@@ -47,7 +121,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-      
+
       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
         print('Error: Current user key not found');
         if (mounted) {
@@ -59,41 +133,82 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         return;
       }
 
-      // Use same logic as myBeneficiaries.dart _getEligibleCoupleCount()
       final query = '''
-        SELECT DISTINCT b.*, e.eligible_couple_state, 
-               e.created_date_time as registration_date
-        FROM beneficiaries_new b
-        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
-        WHERE b.is_deleted = 0 
-          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
-          AND (b.is_death = 0 OR b.is_death IS NULL)
-          AND e.eligible_couple_state = 'eligible_couple'
-          AND e.is_deleted = 0
-          AND e.current_user_key = ?
+        SELECT DISTINCT b.*, 
+       e.eligible_couple_state, 
+       e.created_date_time as registration_date
+FROM beneficiaries_new b
+INNER JOIN eligible_couple_activities e 
+        ON b.unique_key = e.beneficiary_ref_key
+WHERE b.is_deleted = 0 
+  AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+  AND (b.is_death = 0 OR b.is_death IS NULL)
+  AND e.eligible_couple_state IN ('eligible_couple')
+  AND e.current_user_key = ?
+  AND b.current_user_key = ?
+ORDER BY b.created_date_time DESC;
+
       ''';
 
-      final rows = await db.rawQuery(query, [ashaUniqueKey]);
-      
+      final rows = await db.rawQuery(query, [ashaUniqueKey,ashaUniqueKey]);
+
       int count = 0;
+      final Set<String> countedBeneficiaries = {};
+
       for (final row in rows) {
         try {
+          final beneficiaryKey = row['unique_key']?.toString();
+          if (beneficiaryKey == null || beneficiaryKey.isEmpty) continue;
+
+          if (countedBeneficiaries.contains(beneficiaryKey)) {
+            continue;
+          }
+
           final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
-          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty 
+          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty
               ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfo))
               : <String, dynamic>{};
-          
-          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
-          if (memberType != 'child') {
-            count++;
+
+          final memberType =
+              info['memberType']?.toString().toLowerCase() ?? '';
+          final maritalStatus =
+              info['maritalStatus']?.toString().toLowerCase() ?? '';
+          final gender =
+              info['gender']?.toString().toLowerCase() ?? '';
+
+          int? age;
+          if (info['age'] != null) {
+            age = int.tryParse(info['age'].toString());
           }
-        } catch (_) {
+          age ??= _calculateAgeFromDob(info['dob']?.toString());
+
+          if (memberType == 'child' ||
+              maritalStatus != 'married' ||
+              age == null ||
+              age < 15 ||
+              age > 49) {
+            continue;
+          }
+
+          final hasSterilization = await _hasSterilizationRecord(
+            db,
+            beneficiaryKey,
+            ashaUniqueKey,
+          );
+
+          if (hasSterilization) {
+            continue;
+          }
+
+          countedBeneficiaries.add(beneficiaryKey);
           count++;
+        } catch (_) {
+          continue;
         }
       }
 
       final updatedCouples = await _localStorageDao.getUpdatedEligibleCouples();
-      
+
       if (mounted) {
         setState(() {
           eligibleCouplesCount = count;
@@ -174,25 +289,6 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
   }
 
 
-  Future<void> _printEligibleCoupleActivities() async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-      final rows = await db.query(
-        'eligible_couple_activities',
-        orderBy: 'created_date_time DESC',
-      );
-      print('eligible_couple_activities rows: ${rows.length}');
-      for (final row in rows) {
-        try {
-          print(jsonEncode(row));
-        } catch (_) {
-          print(row.toString());
-        }
-      }
-    } catch (e) {
-      print('Error reading eligible_couple_activities: $e');
-    }
-  }
 
   @override
   void dispose() {

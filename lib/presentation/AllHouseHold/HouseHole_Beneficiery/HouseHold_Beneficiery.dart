@@ -858,7 +858,7 @@ class _HouseHold_BeneficiaryScreenState
                       if (isChild)
                         Expanded(
                           child: _rowText(
-                            l10n?.richId ?? 'RCH ID',
+                            l10n?.rchIdLabel ?? 'RCH ID',
                             data['Rich_id']?.toString().trim().isNotEmpty == true
                                 ? data['Rich_id'].toString()
                                 : (l10n?.notAvailable ?? 'Not Available'),
@@ -867,7 +867,7 @@ class _HouseHold_BeneficiaryScreenState
                       else if (isFemale && !isChild)
                         Expanded(
                           child: _rowText(
-                            l10n?.richId ?? 'RCH ID',
+                            l10n?.rchIdLabel ?? 'RCH ID',
                             data['Rich_id']?.toString().trim().isNotEmpty == true
                                 ? data['Rich_id'].toString()
                                 : (l10n?.notAvailable ?? 'Not Available'),
@@ -978,7 +978,7 @@ class _HouseHold_BeneficiaryScreenState
                         if (isFemale)
                           Expanded(
                             child: _rowText(
-                              l10n?.richId ?? 'RCH ID',
+                              l10n?.rchIdLabel ?? 'RCH ID',
                               data['Rich_id']?.toString().trim().isNotEmpty == true
                                   ? data['Rich_id'].toString()
                                   : (l10n?.notAvailable ?? 'Not Available'),
