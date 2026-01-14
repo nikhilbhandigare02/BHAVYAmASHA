@@ -179,6 +179,11 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
     return '${dueDate.day.toString().padLeft(2, '0')}-${dueDate.month.toString().padLeft(2, '0')}-${dueDate.year}';
   }
 
+  String _calculateDueDateFromBirthDate(int daysToAdd) {
+    final dueDate = _birthDate.add(Duration(days: daysToAdd));
+    return '${dueDate.day.toString().padLeft(2, '0')}-${dueDate.month.toString().padLeft(2, '0')}-${dueDate.year}';
+  }
+
   String _getBirthDateFormatted() {
     return '${_birthDate.day.toString().padLeft(2, '0')}-${_birthDate.month.toString().padLeft(2, '0')}-${_birthDate.year}';
   }
@@ -960,7 +965,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
   Widget _buildSixWeekDoseTable() {
     final l10n = AppLocalizations.of(context);
-    final sixWeekDueDate = _calculateDueDate(6);
+    final sixWeekDueDate = _calculateDueDateFromBirthDate(42);
     final data = [
       {'name': l10n!.opv1, 'due': sixWeekDueDate},
       {'name': l10n.dpt1, 'due': sixWeekDueDate},
@@ -1077,7 +1082,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
   Widget _buildTenWeekDoseTable() {
     final l = AppLocalizations.of(context);
-    final tenWeekDueDate = _calculateDueDate(10);
+    final tenWeekDueDate = _calculateDueDateFromBirthDate(70);
     final data = [
       {'name': l!.opv2, 'due': tenWeekDueDate},
       {'name': l!.pentavalent2, 'due': tenWeekDueDate},
@@ -1132,7 +1137,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
   Widget _buildFourteenWeekDoseTable() {
     final l = AppLocalizations.of(context);
-    final fourteenWeekDueDate = _calculateDueDate(14);
+    final fourteenWeekDueDate = _calculateDueDateFromBirthDate(98);
     final data = [
       {'name': l!.opv3, 'due': fourteenWeekDueDate},
       {'name': l!.pentavalent3, 'due': fourteenWeekDueDate},
@@ -1494,7 +1499,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
   Widget _buildNineMonthDoseTable() {
     final l = AppLocalizations.of(context)!;
-    final nineMonthDueDate = _calculateDueDate(39);
+    final nineMonthDueDate = _calculateDueDateFromBirthDate(270);
     final data = [
       {'name': l.measles1, 'due': nineMonthDueDate},
       {'name': l.mrDose1, 'due': nineMonthDueDate},
@@ -1634,7 +1639,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
   Widget _buildSixteenToTwentyFourMonthDoseTable() {
     final l = AppLocalizations.of(context)!;
-    final sixteenToTwentyFourMonthDueDate = _calculateDueDate(69);
+    final sixteenToTwentyFourMonthDueDate = _calculateDueDateFromBirthDate(480);
     final data = [
       {'name': l.opvBooster, 'due': sixteenToTwentyFourMonthDueDate},
       {'name': l.dptBooster1, 'due': sixteenToTwentyFourMonthDueDate},
@@ -1769,7 +1774,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
   Widget _buildFiveToSixYearDoseTable() {
     final l = AppLocalizations.of(context)!;
-    final fiveToSixYearDueDate = _calculateDueDate(260);
+    final fiveToSixYearDueDate = _calculateDueDateFromBirthDate(1825);
     final data = [
       {'name': l.dptBooster2, 'due': fiveToSixYearDueDate},
     ];
@@ -1900,7 +1905,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
   Widget _buildTenYearDoseTable() {
     final l = AppLocalizations.of(context)!;
-    final tenYearDueDate = _calculateDueDate(520);
+    final tenYearDueDate = _calculateDueDateFromBirthDate(3650);
     final data = [
       {'name': l.tdVaccine, 'due': tenYearDueDate},
     ];
@@ -2042,7 +2047,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
 
   Widget _buildSixteenYearDoseTable() {
     final l = AppLocalizations.of(context)!;
-    final sixteenYearDueDate = _calculateDueDate(832);
+    final sixteenYearDueDate = _calculateDueDateFromBirthDate(5840);
     final data = [
       {'name': l.tdVaccine, 'due': sixteenYearDueDate},
     ];

@@ -139,10 +139,19 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         (v is int && v == 1) ||
         (v is bool && v == true) ||
         (v is String && (v == '1' || v.toLowerCase() == 'true'));
+
+    final isChildFlag =
+        (v is int && v == 0) ||
+        (v is bool && v == false) ||
+        (v is String && (v == '0' || v.toLowerCase() == 'false'));
+
+    if (isChildFlag) return false;
     if (isAdultFlag) return true;
 
     final memberType = (info['memberType'] ?? info['MemberType'] ?? '')
         .toString();
+    if (memberType.toLowerCase() == 'child') return false;
+
     if (memberType.toLowerCase() == 'adult') return true;
 
     final maritalStatus = (info['maritalStatus'] ?? info['MaritalStatus'] ?? '')
@@ -157,9 +166,6 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         .toString()
         .toLowerCase();
     if (relation == 'self' || relation == 'spouse') return true;
-
-    final age = _calculateAgeYears(info['dob']);
-    if (age != null && age >= 18) return true;
 
     return false;
   }
@@ -555,18 +561,13 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                   }
                 : null,
             style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              disabledBackgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              disabledForegroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-            ).copyWith(
-              backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-                if (states.contains(MaterialState.disabled)) return Colors.grey;
-                return Colors.green;
-              }),
-              foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-                if (states.contains(MaterialState.disabled)) return Colors.white70;
-                return Colors.white;
-              }),
             ),
             child: _isMigrating
                 ? const SizedBox(
