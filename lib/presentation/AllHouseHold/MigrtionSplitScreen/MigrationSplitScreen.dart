@@ -555,10 +555,18 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                   }
                 : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
+            ).copyWith(
+              backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                if (states.contains(MaterialState.disabled)) return Colors.grey;
+                return Colors.green;
+              }),
+              foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                if (states.contains(MaterialState.disabled)) return Colors.white70;
+                return Colors.white;
+              }),
             ),
             child: _isMigrating
                 ? const SizedBox(
