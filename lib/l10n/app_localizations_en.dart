@@ -5206,7 +5206,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadingMembers => 'Loading members...';
 
   @override
-  String get selectMember => 'Select Member';
+  String get selectMember => 'Select Members';
 
   @override
   String get selectChild => 'Select Child';
@@ -7589,4 +7589,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get private => 'private';
+
+  @override
+  String get selectChildren => 'Select Children';
 }

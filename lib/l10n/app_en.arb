@@ -1771,7 +1771,7 @@
   "split": "Split",
   "failedToLoadMembers": "Failed to load members",
   "loadingMembers": "Loading members...",
-  "selectMember": "Select Member",
+  "selectMember": "Select Members",
   "selectChild": "Select Child",
   "selectAMember": "Select a member",
   "migrate": "MIGRATE",
@@ -2616,5 +2616,6 @@
   "userNotFound": "User does not exist. Please enter valid credentials.",
   "typeofschool": "Type of school",
   "government": "Government",
-  "private": "private"
+  "private": "private",
+  "selectChildren":"Select Children"
 }

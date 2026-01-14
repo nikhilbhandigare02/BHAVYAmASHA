@@ -58,6 +58,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
 
   // Design Constants
   static const double _labelFontSize = 9.5;
+  static const double starzize = 16;
   static const double _inputFontSize = 12.0;
   static const double _buttonFontSize = 12.0;
   static const double _radioFontSize = 13.0;
@@ -105,7 +106,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
     if (_selectedChildren.isNotEmpty) {
       return _selectedChildren.join(', ');
     }
-    return l10n!.selectChild;
+    return l10n!.selectChildren;
   }
 
   bool get _isMemberTypeSelected => _selectedAdults.isNotEmpty;
@@ -215,7 +216,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
               ' *',
               style: TextStyle(
                 color: Colors.red,
-                fontSize: _labelFontSize,
+                fontSize: starzize,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -411,12 +412,20 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       _disabledAdultNames.clear();
 
       for (final r in rows) {
-        // Skip if member is migrated (is_migrated = 1)
+        // Check if member is migrated
         final isMigrated =
             r['is_migrated'] == 1 ||
-            r['is_migrated'] == '1' ||
-            r['is_migrated'] == true;
-        if (isMigrated) continue;
+                r['is_migrated'] == '1' ||
+                r['is_migrated'] == true;
+
+        // Check if member is deceased
+        final isDeceased =
+            r['is_death'] == 1 ||
+                r['is_death'] == '1' ||
+                r['is_death'] == true;
+
+        // Skip if migrated OR deceased
+        if (isMigrated || isDeceased) continue;
 
         final uniqueKey = r['unique_key']?.toString() ?? '';
         if (uniqueKey.isEmpty) continue;
@@ -424,9 +433,9 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         final info = _tryDecodeInfo(r['beneficiary_info']);
         final isAdult = _isAdultRecord(info, r);
         final nm =
-            (info['headName'] ?? info['memberName'] ?? info['name'] ?? '')
-                .toString()
-                .trim();
+        (info['headName'] ?? info['memberName'] ?? info['name'] ?? '')
+            .toString()
+            .trim();
         final rel = (info['relation_to_head'] ?? info['relation'] ?? '')
             .toString()
             .toLowerCase();
@@ -508,7 +517,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       if (_isMemberTypeSelected) ...[
         // _buildLabel('Select Child'),
         ApiDropdown<String>(
-          labelText: l10n?.selectChild ?? 'Select Child',
+          labelText: l10n?.selectChildren ?? 'Select Child',
           items: _childNames,
           getLabel: (item) => item,
           value: _selectedChild,
@@ -584,7 +593,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
       Padding(
         padding: const EdgeInsets.only(left: 0),
         child: _buildLabel(
-          l10n?.selectMemberType ?? 'Select Member Type',
+          l10n?.selectMember ?? 'Select Member Type',
           isRequired: true,
         ),
       ),
@@ -620,7 +629,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
 
       if (_isMemberTypeSelected) ...[
         // Select Child (Optional)
-        _buildLabel(l10n?.selectChildOptional ?? 'Select Child (Optional)'),
+        _buildLabel(l10n?.selectChildren ?? 'Select Child (Optional)'),
         // const SizedBox(height: 12),
         GestureDetector(
           onTap: () => _showChildSelectionDialog(context),
@@ -650,11 +659,10 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         SizedBox(height: 4),
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-        // _buildLabel('', isRequired: true),
-        // const SizedBox(height: _verticalSpacing),
         ApiDropdown<String>(
-          labelText: l10n?.selectNewFamilyHead ?? 'Select New Family Head',
+          labelText:'${ l10n?.selectNewFamilyHead ?? 'Select New Family Head'} *',
           items: _selectedAdults,
+
           getLabel: (item) => item,
           value: _selectedFamilyHead,
           onChanged: (value) {
@@ -662,26 +670,14 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
               _selectedFamilyHead = value;
             });
           },
-          hintText: l10n?.selectNewFamilyHead ?? 'Select new family head',
+          hintText: l10n?.selectMember ?? 'Select new family head',
         ),
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
-        // _buildLabel('House No', isRequired: true),
-        // TextField(
-        //   controller: _houseNoController,
-        //   style: const TextStyle(fontSize: _inputFontSize),
-        //   decoration: InputDecoration(
-        //     hintText: 'Enter house number',
-        //     hintStyle: TextStyle(
-        //       color: Colors.grey[600],
-        //       fontSize: _inputFontSize,
-        //     ),
-        //     border: InputBorder.none,
-        //   ),
-        // ),
+
         CustomTextField(
-          labelText: l10n?.enterHouseNumber ?? 'Enter house number',
-          hintText: l10n?.enterHouseNumber ?? 'Enter house number',
+          labelText: '${l10n?.houseNoLabel ?? 'Enter house number'} *',
+          hintText: l10n?.houseNoLabel ?? 'Enter house number',
           controller: _houseNoController,
         ),
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -694,12 +690,27 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
           width: _buttonWidth,
           height: _buttonHeight,
           child: ElevatedButton(
-            onPressed:
-                !_isSplitting &&
-                    _isMemberTypeSelected &&
-                    _selectedFamilyHead != null &&
-                    _houseNoController.text.trim().isNotEmpty
+            onPressed: !_isSplitting
                 ? () async {
+                    if (!_isMemberTypeSelected) {
+                      showAppSnackBar(context, 'Please select members');
+                      return;
+                    }
+                    if (_selectedFamilyHead == null) {
+                      showAppSnackBar(
+                        context,
+                        'Please select Family Head',
+                      );
+                      return;
+                    }
+                    if (_houseNoController.text.trim().isEmpty) {
+                      showAppSnackBar(
+                        context,
+                        'Please enter valid House number',
+                      );
+                      return;
+                    }
+
                     final confirm = await _showConfirmDialog(context);
                     if (confirm) {
                       setState(() {
@@ -825,30 +836,11 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
   }
 
   Future<void> _handleSplit() async {
-    if (_selectedFamilyHead == null || _houseNoController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Please fill all required fields',
-            style: TextStyle(fontSize: _labelFontSize),
-          ),
-        ),
-      );
-      return;
-    }
-
     try {
       final headName = _selectedFamilyHead!.trim();
       final headUniqueKey = _adultNameToId[headName] ?? '';
       if (headUniqueKey.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Selected head not found',
-              style: TextStyle(fontSize: _labelFontSize),
-            ),
-          ),
-        );
+        showAppSnackBar(context, 'Selected head not found');
         return;
       }
 
@@ -856,14 +848,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
         headUniqueKey,
       );
       if (headRow == null || headRow.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Head record not found',
-              style: TextStyle(fontSize: _labelFontSize),
-            ),
-          ),
-        );
+        showAppSnackBar(context, 'Head record not found');
         return;
       }
 
@@ -1005,7 +990,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n?.selectChild ?? 'Select Child',
+                    l10n?.selectChildren ?? 'Select Child',
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w500,
@@ -1125,7 +1110,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n?.selectMemberType ?? 'Select Member Type',
+                    l10n?.selectMember ?? 'Select Member Type',
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w500,

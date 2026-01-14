@@ -44,6 +44,11 @@ class MotherDetailsTab extends StatefulWidget {
 
 class _MotherDetailsTabState extends State<MotherDetailsTab> {
   bool _isMotherStatusLocked = false;
+  
+  // FocusNodes for text fields that need validation focus
+  final FocusNode _reasonOfDeathOtherFocusNode = FocusNode();
+  final FocusNode _breastfeedingProblemDescriptionFocusNode = FocusNode();
+  final FocusNode _breastfeedingHelpGivenFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -51,19 +56,23 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
     _loadLastMotherStatus();
   }
 
+  @override
+  void dispose() {
+    _reasonOfDeathOtherFocusNode.dispose();
+    _breastfeedingProblemDescriptionFocusNode.dispose();
+    _breastfeedingHelpGivenFocusNode.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadLastMotherStatus() async {
     try {
       if (widget.beneficiaryId.isEmpty) return;
-
       final db = await DatabaseProvider.instance.database;
-      final pncKey =
-          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother] ?? '';
+      final pncKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother] ?? '';
       if (pncKey.isEmpty) return;
-
       final rows = await db.query(
         FollowupFormDataTable.table,
-        where:
-            'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
         whereArgs: [pncKey, widget.beneficiaryId],
         orderBy: 'datetime(created_date_time) DESC',
         limit: 1,
@@ -133,9 +142,41 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
   Widget build(BuildContext context) {
     return BlocConsumer<HbncVisitBloc, HbncVisitState>(
       listenWhen: (previous, current) =>
-          previous.motherDetails != current.motherDetails,
+          previous.motherDetails != current.motherDetails ||
+          previous.focusedErrorField != current.focusedErrorField ||
+          previous.validationTick != current.validationTick,
       listener: (context, state) {
         print('MotherDetails (from state): ${state.motherDetails}');
+        
+        // Handle focus for text fields when validation occurs
+        if (state.focusedErrorField != null && mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            
+            // Add a small delay to ensure widget tree is fully built for conditionally rendered fields
+            Future.delayed(const Duration(milliseconds: 100), () {
+              if (!mounted) return;
+              
+              switch (state.focusedErrorField) {
+                case 'reasonOfDeathOther':
+                  if (_reasonOfDeathOtherFocusNode.canRequestFocus) {
+                    _reasonOfDeathOtherFocusNode.requestFocus();
+                  }
+                  break;
+                case 'breastfeedingProblemDescription':
+                  if (_breastfeedingProblemDescriptionFocusNode.canRequestFocus) {
+                    _breastfeedingProblemDescriptionFocusNode.requestFocus();
+                  }
+                  break;
+                case 'breastfeedingHelpGiven':
+                  if (_breastfeedingHelpGivenFocusNode.canRequestFocus) {
+                    _breastfeedingHelpGivenFocusNode.requestFocus();
+                  }
+                  break;
+              }
+            });
+          });
+        }
       },
       builder: (context, state) {
         final m = state.motherDetails;
@@ -231,6 +272,8 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             labelText: t.other_reason_of_death,
                             hintText: t.specify_other_reason,
                             initialValue: _asString(m['reasonOfDeathOther']),
+                            focusNode: _reasonOfDeathOtherFocusNode,
+                            autofocus: state.focusedErrorField == 'reasonOfDeathOther',
                             onChanged: (val) => context.read<HbncVisitBloc>().add(
                               MotherDetailsChanged(
                                 field: 'reasonOfDeathOther',
@@ -274,7 +317,6 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           ),
                           const Divider(),
                         ],
-
                         ApiDropdown<String>(
                           key: MotherDetailsTab.fieldKeys['postDeliveryProblems'],
                           labelText: t.postDeliveryProblemsLabel,
@@ -346,6 +388,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             initialValue:
                             _asString(m['breastfeedingProblemDescription']) ??
                                 '',
+                            focusNode: _breastfeedingProblemDescriptionFocusNode,
                             autofocus: state.focusedErrorField == 'breastfeedingProblemDescription',
                             onChanged: (val) => context.read<HbncVisitBloc>().add(
                               MotherDetailsChanged(
@@ -360,6 +403,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             labelText: t.breastfeeding_problem_help,
                             hintText: t.write_take_action,
                             initialValue: _asString(m['breastfeedingHelpGiven']),
+                            focusNode: _breastfeedingHelpGivenFocusNode,
                             autofocus: state.focusedErrorField == 'breastfeedingHelpGiven',
                             onChanged: (val) => context.read<HbncVisitBloc>().add(
                               MotherDetailsChanged(

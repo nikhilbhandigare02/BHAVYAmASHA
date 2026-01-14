@@ -7589,4 +7589,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get private => 'प्राइवेट';
+
+  @override
+  String get selectChildren => 'बच्चे का चयन करें';
 }
