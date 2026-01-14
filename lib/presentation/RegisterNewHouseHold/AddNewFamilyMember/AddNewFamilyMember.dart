@@ -337,8 +337,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
     print('HHID passed to AddNewFamilyMember: ${widget.hhId}');
 
+
     _fatherOption = '';
     _motherOption = '';
+
 
     _headName = widget.headName;
     _headGender = widget.headGender;
@@ -783,6 +785,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
         } else {
           _fatherOption = 'Other';
         }
+      } else if (_isEdit) {
+        _fatherOption = 'Father name is not added yet';
       }
 
       final motherName = (data['motherName'] ?? '') as String;
@@ -1384,6 +1388,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                             _fatherOption = 'Other';
                           });
                         }
+                      } else if (_isEdit) {
+                        setState(() {
+                          _fatherOption = 'Father name is not added yet';
+                        });
                       }
                       if (state.motherName != null &&
                           state.motherName!.isNotEmpty) {
@@ -2433,113 +2441,107 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                 if ((state.memberType ?? '').toLowerCase() ==
                                     'adult') ...[
                                   _section(
-                                    Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        Builder(
-                                          builder: (context) {
-                                            final Set<String> fatherSet = {
-                                              ..._maleAdultNames,
-                                            };
-                                            final List<String> fatherItems = [
-                                              ...fatherSet,
-                                              'Other',
-                                            ];
-                                            return ApiDropdown<String>(
-                                              labelText:
-                                              _isEdit ? l.fatherGuardianNameLabel : '${l.fatherGuardianNameLabel} *',
-                                              hintText: l.select,
-                                              items: fatherItems,
-                                              getLabel: (s) => s,
-                                              value: (_fatherOption == null ||
-                                                  _fatherOption.isEmpty ||
-                                                  _fatherOption == l.select)
-                                                  ? null
-                                                  : _fatherOption,
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+
+                                          /// 🔽 SHOW DROPDOWN ONLY WHEN NOT "Other"
+                                          if (_fatherOption != 'Other')
+                                            Builder(
+                                              builder: (context) {
+                                                final Set<String> fatherSet = {
+                                                  ..._maleAdultNames,
+                                                };
+                                                final List<String> fatherItems = [
+                                                  ...fatherSet,
+                                                  if (_isEdit) 'Father name is not added yet',
+                                                  'Other',
+                                                ];
+
+                                                return ApiDropdown<String>(
+                                                  labelText: _isEdit
+                                                      ? l.fatherGuardianNameLabel
+                                                      : '${l.fatherGuardianNameLabel} *',
+                                                  hintText: l.select,
+                                                  items: fatherItems,
+                                                  getLabel: (s) => s,
+                                                  value: (_fatherOption == null ||
+                                                      _fatherOption.isEmpty ||
+                                                      _fatherOption == l.select)
+                                                      ? (_isEdit ? 'Father name is not added yet' : null)
+                                                      : _fatherOption,
+                                                  validator: (value) {
+                                                    if (!_isEdit) {
+                                                      if (_fatherOption == l.select ||
+                                                          _fatherOption.isEmpty) {
+                                                        return l.fatherGuardianNameRequired.toLowerCase();
+                                                      }
+                                                    } else {
+                                                      if (_fatherOption == l.select ||
+                                                          _fatherOption.isEmpty) {
+                                                        return 'Father/guardian name not selected';
+                                                      }
+                                                    }
+                                                    return null;
+                                                  },
+                                                  onChanged: (v) {
+                                                    if (v == null) return;
+
+                                                    setState(() {
+                                                      _fatherOption = v;
+                                                    });
+
+                                                    if (v != 'Other' && v != l.select && v != 'Father name is not added yet') {
+                                                      context.read<AddnewfamilymemberBloc>().add(
+                                                        AnmUpdateFatherName(v),
+                                                      );
+                                                    } else {
+                                                      context.read<AddnewfamilymemberBloc>().add(
+                                                        AnmUpdateFatherName(''),
+                                                      );
+                                                    }
+
+                                                    _formKey.currentState?.validate();
+                                                  },
+                                                );
+                                              },
+                                            ),
+
+
+                                          if (_fatherOption == 'Other' && !_isEdit) ...[
+                                            Divider(
+                                              color: AppColors.divider,
+                                              thickness: 0.5,
+                                              height: 8,
+                                            ),
+
+                                            CustomTextField(
+                                              labelText: _isEdit
+                                                  ? l.fatherGuardianNameLabel
+                                                  : '${l.fatherGuardianNameLabel} *',
+                                              hintText: l.fatherGuardianNameLabel,
+                                              initialValue: _isEdit && (state.fatherName == null || state.fatherName!.isEmpty) 
+                                                  ? 'Father/guardian not selected yet' 
+                                                  : state.fatherName ?? '',
+                                              onChanged: (v) {
+                                                context.read<AddnewfamilymemberBloc>().add(
+                                                  AnmUpdateFatherName(v.trim()),
+                                                );
+                                                _formKey.currentState?.validate();
+                                              },
                                               validator: (value) {
-                                                if (!_isEdit) {
-                                                  if (_fatherOption == l.select ||
-                                                      _fatherOption.isEmpty) {
-                                                    return '${l.fatherGuardianNameRequired.toLowerCase()}';
-                                                  }
+                                                if (!_isEdit && (value == null || value.trim().isEmpty)) {
+                                                  return l.fatherGuardianNameRequired.toLowerCase();
+                                                } else if (_isEdit && (value == null || value.trim().isEmpty || value == 'Father/guardian not selected yet')) {
+                                                  return 'Father/guardian not selected yet';
                                                 }
                                                 return null;
                                               },
-                                              onChanged: (v) {
-                                                if (v == null) return;
-                                                setState(() {
-                                                  _fatherOption = v;
-                                                });
-                                                if (v != l.select &&
-                                                    v != 'Other') {
-                                                  context
-                                                      .read<
-                                                      AddnewfamilymemberBloc
-                                                  >()
-                                                      .add(
-                                                    AnmUpdateFatherName(v),
-                                                  );
-                                                } else {
-                                                  context
-                                                      .read<
-                                                      AddnewfamilymemberBloc
-                                                  >()
-                                                      .add(
-                                                    AnmUpdateFatherName(''),
-                                                  );
-                                                }
-                                                // Trigger form validation
-                                                if (_formKey.currentState !=
-                                                    null) {
-                                                  _formKey.currentState!
-                                                      .validate();
-                                                }
-                                              },
-                                            );
-                                          },
-                                        ),
-                                        if (_fatherOption == 'Other')
-                                          Divider(
-                                            color: AppColors.divider,
-                                            thickness: 0.5,
-                                            height: 0,
-                                          ),
+                                            ),
+                                          ],
+                                        ],
+                                      )
 
-                                        if (_fatherOption == 'Other')
-                                          CustomTextField(
-                                            labelText:
-                                            _isEdit ? l.fatherGuardianNameLabel : '${l.fatherGuardianNameLabel} *',
-                                            hintText: l.fatherGuardianNameLabel,
-                                             initialValue:
-                                            state.fatherName ?? '',
-                                            onChanged: (v) {
-                                              final name = v.trim();
-                                              context
-                                                  .read<
-                                                  AddnewfamilymemberBloc
-                                              >()
-                                                  .add(
-                                                AnmUpdateFatherName(name),
-                                              );
-                                              if (_formKey.currentState !=
-                                                  null) {
-                                                _formKey.currentState!
-                                                    .validate();
-                                              }
-                                            },
-                                            validator: (value) {
-                                              if (!_isEdit) {
-                                                if (value == null ||
-                                                    value.trim().isEmpty) {
-                                                  return '${l.fatherGuardianNameRequired.toLowerCase()}';
-                                                }
-                                              }
-                                              return null;
-                                            },
-                                          ),
-                                      ],
-                                    ),
                                   ),
                                   Divider(
                                     color: AppColors.divider,
@@ -2547,116 +2549,120 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                     height: 0,
                                   ),
                                   _section(
-                                    Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        Builder(
-                                          builder: (context) {
-                                            final Set<String> motherSet = {
-                                              ..._femaleAdultNames,
-                                            };
-                                            final List<String> motherItems = [
-                                              ...motherSet,
-                                              'Other',
-                                            ];
-                                            return ApiDropdown<String>(
-                                              labelText:
-                                              _isEdit ? l.motherNameLabel : "${l.motherNameLabel} *",
-                                              hintText: l.select,
-                                              items: motherItems,
-                                              getLabel: (s) => s,
-                                              value: (_motherOption == null ||
-                                                  _motherOption.isEmpty ||
-                                                  _motherOption == 'Select')
-                                                  ? null
-                                                  : _motherOption,
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+
+                                          /// 🔽 SHOW DROPDOWN ONLY WHEN NOT "Other"
+                                          if (_motherOption != 'Other')
+                                            Builder(
+                                              builder: (context) {
+                                                final Set<String> motherSet = {
+                                                  ..._femaleAdultNames,
+                                                };
+                                                final List<String> motherItems = [
+                                                  ...motherSet,
+                                                  'Other',
+                                                ];
+
+                                                return ApiDropdown<String>(
+                                                  labelText: _isEdit
+                                                      ? l.motherNameLabel
+                                                      : "${l.motherNameLabel} *",
+                                                  hintText: l.select,
+                                                  items: motherItems,
+                                                  getLabel: (s) => s,
+                                                  value: (_motherOption == null ||
+                                                      _motherOption.isEmpty ||
+                                                      _motherOption == l.select)
+                                                      ? null
+                                                      : _motherOption,
+
+                                                  /// ✅ EDIT MODE VALIDATION
+                                                  validator: (value) {
+                                                    if (_isEdit) {
+                                                      if (_motherOption == null ||
+                                                          _motherOption.isEmpty ||
+                                                          _motherOption == l.select) {
+                                                        return 'Mother name is not selected';
+                                                      }
+                                                    } else {
+                                                      if (_motherOption == l.select ||
+                                                          _motherOption.isEmpty) {
+                                                        return l.motherGuardianNameRequired.toLowerCase();
+                                                      }
+                                                    }
+                                                    return null;
+                                                  },
+
+                                                  onChanged: (v) {
+                                                    if (v == null) return;
+
+                                                    setState(() {
+                                                      _motherOption = v;
+                                                    });
+
+                                                    if (v != l.select && v != 'Other') {
+                                                      context
+                                                          .read<AddnewfamilymemberBloc>()
+                                                          .add(AnmUpdateMotherName(v));
+                                                    } else {
+                                                      context
+                                                          .read<AddnewfamilymemberBloc>()
+                                                          .add(AnmUpdateMotherName(''));
+                                                    }
+
+                                                    _formKey.currentState?.validate();
+                                                  },
+                                                );
+                                              },
+                                            ),
+
+                                          /// ✏️ SHOW TEXTFIELD ONLY WHEN "Other"
+                                          if (_motherOption == 'Other') ...[
+                                            Divider(
+                                              color: AppColors.divider,
+                                              thickness: 0.5,
+                                              height: 8,
+                                            ),
+
+                                            CustomTextField(
+                                              labelText: _isEdit
+                                                  ? l.motherNameLabel
+                                                  : "${l.motherNameLabel} *",
+                                              hintText: l.motherNameLabel,
+                                              initialValue: state.motherName ?? '',
+
+                                              onChanged: (v) {
+                                                context
+                                                    .read<AddnewfamilymemberBloc>()
+                                                    .add(AnmUpdateMotherName(v.trim()));
+                                                _formKey.currentState?.validate();
+                                              },
+
+                                              /// ✅ EDIT MODE VALIDATION
                                               validator: (value) {
-                                                if (!_isEdit) {
-                                                  if (_motherOption == 'Select' ||
-                                                      _motherOption.isEmpty) {
-                                                    return ' ${l.motherGuardianNameRequired.toLowerCase()}';
+                                                if (_isEdit) {
+                                                  if (value == null || value.trim().isEmpty) {
+                                                    return 'Mother name is not selected';
+                                                  }
+                                                } else {
+                                                  if (value == null || value.trim().isEmpty) {
+                                                    return l.motherGuardianNameRequired.toLowerCase();
                                                   }
                                                 }
                                                 return null;
                                               },
-                                              onChanged: (v) {
-                                                if (v == null) return;
-                                                setState(() {
-                                                  _motherOption = v;
-                                                });
-                                                if (v != 'Select' &&
-                                                    v != 'Other') {
-                                                  context
-                                                      .read<
-                                                      AddnewfamilymemberBloc
-                                                  >()
-                                                      .add(
-                                                    AnmUpdateMotherName(v),
-                                                  );
-                                                } else {
-                                                  context
-                                                      .read<
-                                                      AddnewfamilymemberBloc
-                                                  >()
-                                                      .add(
-                                                    AnmUpdateMotherName(''),
-                                                  );
-                                                }
-                                                if (_formKey.currentState !=
-                                                    null) {
-                                                  _formKey.currentState!
-                                                      .validate();
-                                                }
-                                              },
-                                            );
-                                          },
-                                        ),
-                                        // Divider(
-                                        //   color: AppColors.divider,
-                                        //   thickness: 0.5,
-                                        //   height: 0,
-                                        // ),
-                                        if (_motherOption == 'Other')
-                                          Divider(
-                                            color: AppColors.divider,
-                                            thickness: 0.5,
-                                            height: 0,
-                                          ),
-                                        if (_motherOption == 'Other') ...[
-                                          CustomTextField(
-                                            labelText: _isEdit ? l.motherNameLabel : "${l.motherNameLabel} *",
-                                            hintText: l.motherNameLabel,
-                                            initialValue:
-                                            state.motherName ?? '',
-                                            onChanged: (v) => context
-                                                .read<AddnewfamilymemberBloc>()
-                                                .add(
-                                              AnmUpdateMotherName(v.trim()),
                                             ),
-                                            validator: (value) {
-                                              if (!_isEdit) {
-                                                if (value == null ||
-                                                    value.trim().isEmpty) {
-                                                  return ' ${l.motherGuardianNameRequired.toLowerCase()}';
-                                                }
-                                              }
-                                              return null;
-                                            },
-                                          ),
-                                          Divider(
-                                            color: AppColors.divider,
-                                            thickness: 0.5,
-                                            height: 0,
-                                          ),
+
+                                            Divider(
+                                              color: AppColors.divider,
+                                              thickness: 0.5,
+                                              height: 0,
+                                            ),
+                                          ],
                                         ],
-                                        Divider(
-                                          color: AppColors.divider,
-                                          thickness: 0.5,
-                                          height: 0,
-                                        ),
-                                      ],
-                                    ),
+                                      )
                                   ),
                                 ],
 
@@ -2671,6 +2677,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           builder: (context) {
                                             final List<String> fatherItems = [
                                               ..._maleAdultNames,
+                                              if (_isEdit) 'Father name is not added yet',
                                               'Other',
                                             ];
                                             return ApiDropdown<String>(
@@ -2682,13 +2689,18 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                               value: (_fatherOption == null ||
                                                   _fatherOption.isEmpty ||
                                                   _fatherOption == 'Select')
-                                                  ? null
+                                                  ? (_isEdit ? 'Father name is not added yet' : null)
                                                   : _fatherOption,
                                               validator: (value) {
                                                 if (!_isEdit) {
                                                   if (_fatherOption == 'Select' ||
                                                       _fatherOption.isEmpty) {
                                                     return 'Please select or enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                                  }
+                                                } else {
+                                                  if (_fatherOption == 'Select' ||
+                                                      _fatherOption.isEmpty) {
+                                                    return 'Father/guardian name not selected';
                                                   }
                                                 }
                                                 return null;
@@ -2699,7 +2711,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   _fatherOption = v;
                                                 });
                                                 if (v != 'Select' &&
-                                                    v != 'Other') {
+                                                    v != 'Other' &&
+                                                    v != 'Father name is not added yet') {
                                                   context
                                                       .read<
                                                       AddnewfamilymemberBloc
@@ -2725,19 +2738,21 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                             );
                                           },
                                         ),
-                                        if (_fatherOption == 'Other')
+                                        if (_fatherOption == 'Other' && !_isEdit)
                                           Divider(
                                             color: AppColors.divider,
                                             thickness: 0.5,
                                             height: 0,
                                           ),
-                                        if (_fatherOption == 'Other')
+                                        if (_fatherOption == 'Other' && !_isEdit)
                                           CustomTextField(
                                             labelText:
                                             _isEdit ? l.fatherGuardianNameLabel : '${l.fatherGuardianNameLabel} *',
                                             hintText: l.fatherGuardianNameLabel,
                                             initialValue:
-                                            state.fatherName ?? '',
+                                            _isEdit && (state.fatherName == null || state.fatherName!.isEmpty)
+                                                ? 'Father/guardian not selected yet'
+                                                : state.fatherName ?? '',
                                             onChanged: (v) {
                                               final name = v.trim();
                                               context
@@ -2758,6 +2773,12 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 if (value == null ||
                                                     value.trim().isEmpty) {
                                                   return 'Please enter ${l.fatherGuardianNameLabel.toLowerCase()}';
+                                                }
+                                              } else {
+                                                if (value == null ||
+                                                    value.trim().isEmpty ||
+                                                    value == 'Father/guardian not selected yet') {
+                                                  return 'Father/guardian not selected yet';
                                                 }
                                               }
                                               return null;
