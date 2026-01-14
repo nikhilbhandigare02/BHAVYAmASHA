@@ -4723,7 +4723,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get anmName => 'ANM Name';
 
   @override
-  String get ashaName => 'Name of ASHA';
+  String get ashaName => 'ASHA Name';
 
   @override
   String get healthcareProviderInformation => 'Healthcare Provider Information';
@@ -4936,7 +4936,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noRecordsFound => 'No records found';
 
   @override
-  String get tolaMohalla => 'Mohalla/Tola';
+  String get tolaMohalla => 'Tola/Mohalla';
 
   @override
   String get noHouseholdsFound => 'No households found';
@@ -7567,7 +7567,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deathOther => 'Other';
 
   @override
-  String get discussionTopic => 'discussion topic/program';
+  String get discussionTopic => 'Discussion Sub Topic/Program';
 
   @override
   String get userFound => 'User found.';
@@ -7580,6 +7580,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get userNotFound => 'User does not exist. Please enter valid credentials.';
+
+  @override
+  String get typeofschool => 'Type of school';
+
+  @override
+  String get government => 'Government';
+
+  @override
+  String get private => 'private';
 
   @override
   String get selectChildren => 'Select Children';

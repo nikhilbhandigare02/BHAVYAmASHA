@@ -56,6 +56,36 @@ class _HouseHold_BeneficiaryScreenState
     _searchCtrl.dispose();
     super.dispose();
   }
+  DateTime _resolveSortDate(Map<String, dynamic> raw) {
+    dynamic value = raw['modified_date_time'];
+
+    if (value == null || value.toString().isEmpty) {
+      value = raw['created_date_time'];
+    }
+
+    if (value == null) {
+      return DateTime.fromMillisecondsSinceEpoch(0);
+    }
+
+    final str = value.toString();
+
+    // ISO 8601 (2026-01-08T13:38:14.074Z)
+    final parsed = DateTime.tryParse(str);
+    if (parsed != null) return parsed.toUtc();
+
+    // Timestamp (seconds / milliseconds)
+    final ts = int.tryParse(str);
+    if (ts != null) {
+      return DateTime.fromMillisecondsSinceEpoch(
+        ts > 1000000000000 ? ts : ts * 1000,
+        isUtc: true,
+      );
+    }
+
+    return DateTime.fromMillisecondsSinceEpoch(0);
+  }
+
+
 
   Future<void> _loadBeneficiaries() async {
     if (!mounted) return;
@@ -71,7 +101,17 @@ class _HouseHold_BeneficiaryScreenState
             ? 'household_ref_key = ? AND is_migrated = 0'
             : 'is_migrated = 0',
         whereArgs: widget.hhId != null ? [widget.hhId] : null,
+        orderBy: '''
+  datetime(
+    COALESCE(
+      NULLIF(modified_date_time, ''),
+      created_date_time
+    )
+  ) ASC,
+  id ASC
+  ''',
       );
+
 
       if (widget.hhId != null) {
         print('=== ALL RECORDS FOR HOUSEHOLD ${widget.hhId} ===');
@@ -212,25 +252,21 @@ class _HouseHold_BeneficiaryScreenState
         beneficiaries.add(card);
 
         // 🔃 Sort beneficiaries by created_date_time (latest first)
-        beneficiaries.sort((a, b) {
-          DateTime parseDate(dynamic value) {
-            if (value == null) {
-              return DateTime.fromMillisecondsSinceEpoch(0);
-            }
+        // beneficiaries.sort((a, b) {
+        //   final rawA = a['_raw'] as Map<String, dynamic>;
+        //   final rawB = b['_raw'] as Map<String, dynamic>;
+        //
+        //   DateTime parse(dynamic v) {
+        //     final d = DateTime.tryParse(v?.toString() ?? '');
+        //     return d?.toUtc() ?? DateTime.fromMillisecondsSinceEpoch(0);
+        //   }
+        //
+        //   final aDate = parse(rawA['modified_date_time'] ?? rawA['created_date_time']);
+        //   final bDate = parse(rawB['modified_date_time'] ?? rawB['created_date_time']);
+        //
+        //   return bDate.compareTo(aDate); // latest first
+        // });
 
-            try {
-              final dt = DateTime.parse(value.toString());
-              return dt.toLocal(); // handle UTC "Z"
-            } catch (_) {
-              return DateTime.fromMillisecondsSinceEpoch(0);
-            }
-          }
-
-          final DateTime dateA = parseDate(a['RegitrationDate']);
-          final DateTime dateB = parseDate(b['RegitrationDate']);
-
-          return dateB.compareTo(dateA);
-        });
 
         headerVillage ??= info['village']?.toString();
         headerMohalla ??= info['mohalla']?.toString();
@@ -599,7 +635,7 @@ class _HouseHold_BeneficiaryScreenState
     final gender = (data['_memberData']['gender']?.toString().toLowerCase() ?? '');
     final isFemale = gender == 'female' || gender == 'f';
     final isMale = gender == 'male' || gender == 'm';
-    
+
     final String relation =
         data['Relation']?.toString().toLowerCase() ?? '';
 
@@ -607,7 +643,7 @@ class _HouseHold_BeneficiaryScreenState
     final maritalStatus = (data['MaritalStatus']?.toString().toLowerCase() ?? '');
     final isUnmarried = maritalStatus == 'unmarried' || isChild; // Children are considered unmarried
     final isMarried = maritalStatus == 'married' && !isChild; // Children cannot be married
-    
+
     final registrationType = (data['RegitrationType']?.toString().toLowerCase() ?? '');
     final isGeneralRegistration = registrationType == 'general';
 
@@ -625,6 +661,11 @@ class _HouseHold_BeneficiaryScreenState
 
     return InkWell(
       onTap: () async {
+        // Check if beneficiary is deceased and prevent navigation
+        if (isDeceased) {
+          return;
+        }
+
         await Navigator.pushNamed(
           context,
           Route_Names.addFamilyMember,
@@ -845,25 +886,25 @@ class _HouseHold_BeneficiaryScreenState
                     Row(
                       children: [
                         // Father name for children - first column
-                        if ((data['FatherName']?.toString().isNotEmpty == true) || 
+                        if ((data['FatherName']?.toString().isNotEmpty == true) ||
                             (data['SpouseName']?.toString().isNotEmpty == true))
                           Expanded(
                             child: _rowText(
                               l10n?.fatherNameLabel ?? 'Father Name',
-                              data['FatherName']?.toString().isNotEmpty == true 
-                                  ? data['FatherName'] 
+                              data['FatherName']?.toString().isNotEmpty == true
+                                  ? data['FatherName']
                                   : data['SpouseName'],
                             ),
                           ),
-                        if ((data['FatherName']?.toString().isNotEmpty == true) || 
+                        if ((data['FatherName']?.toString().isNotEmpty == true) ||
                             (data['SpouseName']?.toString().isNotEmpty == true))
                           const SizedBox(width: 12),
                         // Mobile number for children - second column
                         Expanded(
                           child: _rowText(
                             l10n?.mobileLabel ?? 'Mobile no.',
-                            data['Mobileno.']?.toString().isNotEmpty == true 
-                                ? data['Mobileno.'] 
+                            data['Mobileno.']?.toString().isNotEmpty == true
+                                ? data['Mobileno.']
                                 : (l10n?.notAvailable ?? 'NA'),
                           ),
                         ),
@@ -922,13 +963,13 @@ class _HouseHold_BeneficiaryScreenState
                   if (!isChild && isUnmarried && isGeneralRegistration) ...[
                     Row(
                       children: [
-                        if ((data['FatherName']?.toString().isNotEmpty == true) || 
+                        if ((data['FatherName']?.toString().isNotEmpty == true) ||
                             (data['SpouseName']?.toString().isNotEmpty == true))
                           Expanded(
                             child: _rowText(
                               l10n?.fatherNameLabel ?? 'Father Name',
-                              data['FatherName']?.toString().isNotEmpty == true 
-                                  ? data['FatherName'] 
+                              data['FatherName']?.toString().isNotEmpty == true
+                                  ? data['FatherName']
                                   : data['SpouseName'],
                             ),
                           ),

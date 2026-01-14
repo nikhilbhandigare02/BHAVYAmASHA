@@ -9494,7 +9494,7 @@ abstract class AppLocalizations {
   /// No description provided for @ashaName.
   ///
   /// In en, this message translates to:
-  /// **'Name of ASHA'**
+  /// **'ASHA Name'**
   String get ashaName;
 
   /// No description provided for @healthcareProviderInformation.
@@ -9920,7 +9920,7 @@ abstract class AppLocalizations {
   /// No description provided for @tolaMohalla.
   ///
   /// In en, this message translates to:
-  /// **'Mohalla/Tola'**
+  /// **'Tola/Mohalla'**
   String get tolaMohalla;
 
   /// No description provided for @noHouseholdsFound.
@@ -15182,7 +15182,7 @@ abstract class AppLocalizations {
   /// No description provided for @discussionTopic.
   ///
   /// In en, this message translates to:
-  /// **'discussion topic/program'**
+  /// **'Discussion Sub Topic/Program'**
   String get discussionTopic;
 
   /// No description provided for @userFound.
@@ -15208,6 +15208,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'User does not exist. Please enter valid credentials.'**
   String get userNotFound;
+
+  /// No description provided for @typeofschool.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of school'**
+  String get typeofschool;
+
+  /// No description provided for @government.
+  ///
+  /// In en, this message translates to:
+  /// **'Government'**
+  String get government;
+
+  /// No description provided for @private.
+  ///
+  /// In en, this message translates to:
+  /// **'private'**
+  String get private;
 
   /// No description provided for @selectChildren.
   ///

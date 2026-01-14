@@ -51,6 +51,12 @@ final class ChildSchoolChange extends AddnewfamilymemberEvent {
   @override
   List<Object> get props => [value];
 }
+final class TypeOfSchoolChange extends AddnewfamilymemberEvent {
+  final String value;
+  const TypeOfSchoolChange(this.value);
+  @override
+  List<Object> get props => [value];
+}
 final class ChildrenChanged extends AddnewfamilymemberEvent {
   final String value;
   const ChildrenChanged(this.value);

@@ -559,6 +559,9 @@ class RegisterNewHouseholdBloc
                         'youngestGender': headForm['youngestGender'],
                         'children': headForm['children'],
 
+                        'childSchool': spDetails['ChildSchool'] ?? headForm['sp_childSchool'],
+                        'type_of_school': spDetails['TypeOfSchool'] ?? headForm['sp_type_of_school'] ?? spDetails['type_of_school'] ?? headForm['sp_typeOfSchool'],
+
                         'isFamilyhead': false,
                         'isFamilyheadWife': false,
                       }..removeWhere(
@@ -1177,6 +1180,8 @@ class RegisterNewHouseholdBloc
                   'weight': member['WeightChange'] ?? member['weight'],
                   'childSchool':
                   member['ChildSchool'] ?? member['childSchool'],
+                  'type_of_school':
+                  member['TypeOfSchool'] ?? member['type_of_school'] ?? member['typeOfSchool'],
                   'birthCertificate': member['BirthCertificateChange'] ??
                       member['birthCertificate'],
                   'birthWeight': member['birthWeight'],
@@ -1422,6 +1427,8 @@ class RegisterNewHouseholdBloc
                           'ecpQuantity': spMap['ecpQuantity'],
                           'maritalStatus': 'Married',
                           'relation_to_head': 'spouse',
+                          'childSchool': spMap['ChildSchool'],
+                          'type_of_school': spMap['TypeOfSchool'] ?? spMap['type_of_school'],
                           'isFamilyhead': false,
                           'isFamilyheadWife': false,
                         }

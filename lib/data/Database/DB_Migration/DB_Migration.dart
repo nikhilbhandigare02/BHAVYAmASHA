@@ -98,13 +98,8 @@ class DbMigration {
         "isFamilyheadWife",
         "weight",
         "birthWeight",
-        "totalBorn",
-        "totalLive",
-        "totalMale",
-        "totalFemale",
-        "youngestAge",
-        "ageUnit",
         "totalBorn","totalLive","totalMale","totalFemale","youngestAge","ageUnit","youngestGender",
+"childSchool","type_of_school"
 
       ];
 
@@ -162,7 +157,9 @@ class DbMigration {
         "totalFemale": "total_female_children",
         "youngestAge": "age_of_youngest_child",
         "ageUnit": "age_of_youngest_child_unit",
-        "youngestGender": "gender_of_youngest_child",
+        "youngestGender": "gender_of_younget_child",
+        "childSchool":"is_school_going_child",
+        "type_of_school":"type_of_school"
 
       };
 
@@ -323,7 +320,6 @@ class DbMigration {
             }
           }
 
-          // ---------- Fallback ----------
           headId ??= members.first["unique_key"] as String?;
         }
 

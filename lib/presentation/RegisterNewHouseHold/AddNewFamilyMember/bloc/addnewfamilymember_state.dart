@@ -21,6 +21,7 @@ class AddnewfamilymemberState extends Equatable {
   final String? otherDeathPlace;
   final String? name;
   final String? ChildSchool;
+  final String? TypeOfSchool;
   final String? WeightChange;
   final String? birthWeight;
   final String? fatherName;
@@ -90,6 +91,7 @@ class AddnewfamilymemberState extends Equatable {
     this.RichIDChanged,
     this.isRchIdButtonEnabled = false,
     this.ChildSchool,
+    this.TypeOfSchool,
     this.name,
     this.BirthCertificateChange,
     this.fatherName,
@@ -153,6 +155,7 @@ class AddnewfamilymemberState extends Equatable {
     String? WeightChange,
     String? birthWeight,
     String? ChildSchool,
+    String? TypeOfSchool,
     String? children,
     String? RichIDChanged,
     bool? isRchIdButtonEnabled,
@@ -226,6 +229,7 @@ class AddnewfamilymemberState extends Equatable {
       memberType: memberType ?? this.memberType,
       children: children ?? this.children,
       ChildSchool: ChildSchool ?? this.ChildSchool,
+      TypeOfSchool: TypeOfSchool ?? this.TypeOfSchool,
       RichIDChanged: RichIDChanged ?? this.RichIDChanged,
       isRchIdButtonEnabled: isRchIdButtonEnabled ?? this.isRchIdButtonEnabled,
       relation: relation ?? this.relation,
@@ -307,6 +311,7 @@ class AddnewfamilymemberState extends Equatable {
     dob,
     BirthCertificateChange,
     ChildSchool,
+    TypeOfSchool,
     children,
     approxAge,
     birthOrder,
@@ -410,6 +415,7 @@ class AddnewfamilymemberState extends Equatable {
       'isRchIdButtonEnabled': isRchIdButtonEnabled,
       'BirthCertificateChange': BirthCertificateChange,
       'ChildSchool': ChildSchool,
+      'TypeOfSchool': TypeOfSchool,
       'WeightChange': WeightChange,
       'birthWeight': birthWeight,
       'otherDeathReason': otherDeathReason,

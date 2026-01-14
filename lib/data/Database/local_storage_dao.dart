@@ -485,7 +485,6 @@ class LocalStorageDao {
             final decoded = jsonDecode(formJson) as Map<String, dynamic>;
             print('🔍 Parsed form data: $decoded');
 
-            // Check for high risk in form_data/anc_form
             final data = decoded['form_data'] ?? decoded['anc_form'];
             if (data is Map<String, dynamic>) {
               final hr = data['high_risk'] ?? data['is_high_risk'];
@@ -495,7 +494,6 @@ class LocalStorageDao {
               print('🔍 High risk status from form_data/anc_form: $isHighRisk');
             }
 
-            // If still not high risk, check top level for backward compatibility
             if (!isHighRisk) {
               final hr = decoded['high_risk'] ?? decoded['is_high_risk'];
               isHighRisk = hr == true ||

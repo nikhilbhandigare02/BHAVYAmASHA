@@ -553,16 +553,14 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         ...fallbackMapped,
       ];
 
-      /// --------- SORT ----------
       combined.sort((a, b) {
         final ra = a['_raw'] as Map<String, dynamic>;
         final rb = b['_raw'] as Map<String, dynamic>;
 
-        final ca = DateTime.tryParse(ra['created_date_time']?.toString() ?? '');
-        final cb = DateTime.tryParse(rb['created_date_time']?.toString() ?? '');
+        final DateTime dateA = _resolveSortDate(ra);
+        final DateTime dateB = _resolveSortDate(rb);
 
-        if (ca != null && cb != null) return cb.compareTo(ca);
-        return 0;
+        return dateB.compareTo(dateA); // latest first
       });
 
       if (mounted) {
@@ -579,6 +577,36 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         });
       }
     }
+  }
+
+
+  DateTime _resolveSortDate(Map<String, dynamic> raw) {
+    dynamic value = raw['modified_date_time'];
+
+    if (value == null || value.toString().isEmpty) {
+      value = raw['created_date_time'];
+    }
+
+    if (value == null) {
+      return DateTime.fromMillisecondsSinceEpoch(0);
+    }
+
+    final str = value.toString();
+
+    // ISO 8601: 2026-01-08T13:38:14.074Z
+    final parsed = DateTime.tryParse(str);
+    if (parsed != null) return parsed.toUtc();
+
+    // Timestamp (seconds or milliseconds)
+    final ts = int.tryParse(str);
+    if (ts != null) {
+      return DateTime.fromMillisecondsSinceEpoch(
+        ts > 1000000000000 ? ts : ts * 1000,
+        isUtc: true,
+      );
+    }
+
+    return DateTime.fromMillisecondsSinceEpoch(0);
   }
 
   @override
