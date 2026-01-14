@@ -3229,7 +3229,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   showAppSnackBar(context, error);
                                                 }
                                               });
-                                              return null; // Don't show red error message
+                                              return ' ';
                                             }
 
                                             final today = DateTime.now();
@@ -3252,7 +3252,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   showAppSnackBar(context, error);
                                                 }
                                               });
-                                              return null; // Don't show red error message
+                                              return ' ';
                                             }
 
                                             // Apply the 1 day–15 years rule only when member type is Child
@@ -3277,7 +3277,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     showAppSnackBar(context, error);
                                                   }
                                                 });
-                                                return null; // Don't show red error message
+                                                return ' ';
                                               }
                                             }
 
@@ -3342,6 +3342,33 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     v.trim(),
                                                   ),
                                                 ),
+                                                validator: (_) {
+                                                  final years = yearsController.text.trim();
+                                                  final months = monthsController.text.trim();
+                                                  final days = daysController.text.trim();
+                                                  String? error;
+                                                  final memberType = (state.memberType ?? '').trim().toLowerCase();
+                                                  if (memberType == 'child') {
+                                                    error = Validations.validateApproxAgeChild(
+                                                      l,
+                                                      years,
+                                                      months,
+                                                      days,
+                                                    );
+                                                  } else {
+                                                    error = Validations.validateApproxAge(
+                                                      l,
+                                                      years,
+                                                      months,
+                                                      days,
+                                                    );
+                                                  }
+                                                  if (error != null) {
+                                                    _captureAnmError(error);
+                                                    return ' ';
+                                                  }
+                                                  return null;
+                                                },
                                               ),
                                             ),
 
@@ -5282,31 +5309,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         onPress: () async {
                                           _clearAnmFormError();
                                           clearSpousFormError();
-
-                                          // Manual validation for approximate age fields
-                                          final state = context.read<AddnewfamilymemberBloc>().state;
-                                          if (!state.useDob) {
-                                            String? ageError;
-                                            if (state.memberType.toLowerCase() == 'child') {
-                                              ageError = Validations.validateApproxAgeChild(
-                                                l,
-                                                state.updateYear,
-                                                state.updateMonth,
-                                                state.updateDay,
-                                              );
-                                            } else {
-                                              ageError = Validations.validateApproxAge(
-                                                l,
-                                                state.updateYear,
-                                                state.updateMonth,
-                                                state.updateDay,
-                                              );
-                                            }
-                                            if (ageError != null) {
-                                              showAppSnackBar(context, ageError);
-                                              return;
-                                            }
-                                          }
+                                          // Age validation handled by field validators; rely on form.validate()
 
                                           final bool showSpouse =
                                               state.memberType != 'Child' &&

@@ -1113,7 +1113,19 @@ class _SpousdetailsState extends State<Spousdetails>
                                         );
                                       },
                                 validator: (value) {
-                                  // Don't show red validation message, only snackbar
+                                  final years = yearsController.text.trim();
+                                  final months = monthsController.text.trim();
+                                  final days = daysController.text.trim();
+                                  final error = Validations.validateApproxAge(
+                                    l,
+                                    years,
+                                    months,
+                                    days,
+                                  );
+                                  if (error != null) {
+                                    captureSpousError(error);
+                                    return ' ';
+                                  }
                                   return null;
                                 },
                               ),

@@ -40,6 +40,7 @@ import 'package:medixcel_new/core/widgets/ConfirmationDialogue/ConfirmationDialo
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/RegisterNewHouseHold/RegisterNewHouseHold.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/RegisterNewHouseHold/bloc/registernewhousehold_bloc.dart';
 import 'package:sizer/sizer.dart';
+
 class MaxValueFormatter extends TextInputFormatter {
   final int max;
 
@@ -47,9 +48,9 @@ class MaxValueFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) return newValue;
 
     final value = int.tryParse(newValue.text);
@@ -223,6 +224,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   int _ageFromDob(DateTime dob) {
     return DateTime.now().year - dob.year;
   }
+
   bool useDob = true;
 
   @override
@@ -368,11 +370,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
     // Calculate DOB and update BLoC state (rollover logic is handled in BLoC)
     final now = DateTime.now();
-    final calculatedDob = DateTime(
-      now.year - y,
-      now.month - m,
-      now.day - d,
-    );
+    final calculatedDob = DateTime(now.year - y, now.month - m, now.day - d);
 
     bloc.add(AfhUpdateDob(calculatedDob));
   }
@@ -400,6 +398,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     bloc.add(UpdateMonths(months.toString()));
     bloc.add(UpdateDays(days.toString()));
   }
+
   Widget _buildFamilyHeadForm(
     BuildContext context,
     AddFamilyHeadState state,
@@ -510,8 +509,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 child: Builder(
                   builder: (context) {
                     final now = DateTime.now();
-                    final adultMinDate = DateTime(now.year - 110, now.month, now.day);
-                    final adultMaxDate = DateTime(now.year - 15, now.month, now.day);
+                    final adultMinDate = DateTime(
+                      now.year - 110,
+                      now.month,
+                      now.day,
+                    );
+                    final adultMaxDate = DateTime(
+                      now.year - 15,
+                      now.month,
+                      now.day,
+                    );
 
                     return CustomDatePicker(
                       labelText: '${l.dobLabel} *',
@@ -523,7 +530,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       lastDate: adultMaxDate,
                       onDateChanged: (date) {
                         if (date != null) {
-                          context.read<AddFamilyHeadBloc>().add(AfhUpdateDob(date));
+                          context.read<AddFamilyHeadBloc>().add(
+                            AfhUpdateDob(date),
+                          );
                           updateAgeFromDob(date);
                         }
                       },
@@ -542,7 +551,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       },
                     );
                   },
-                )
+                ),
               )
             else
               _Section(
@@ -587,32 +596,28 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                 FilteringTextInputFormatter.digitsOnly,
                                 MaxValueFormatter(110),
                               ],
-                              validator: (value) {
+                              validator: (_) {
                                 final years = yearsController.text.trim();
                                 final months = monthsController.text.trim();
                                 final days = daysController.text.trim();
-                                // Check if all fields are empty
-                                if (years.isEmpty && months.isEmpty && days.isEmpty) {
-                                  final error = 'Please enter age between 15 to 110 years';
+                                final error = Validations.validateApproxAge(
+                                  l,
+                                  years,
+                                  months,
+                                  days,
+                                );
+                                if (error != null) {
                                   _captureError(error);
-                                  return ' '; // Return space to trigger hasError for scrolling but hide red text
-                                }
-                                // Additional validation for age range
-                                final y = int.tryParse(years) ?? 0;
-                                final m = int.tryParse(months) ?? 0;
-                                final d = int.tryParse(days) ?? 0;
-                                if (y < 15 || y > 110) {
-                                  final error = 'Please enter age between 15 to 110 years';
-                                  _captureError(error);
-                                  return ' '; // Return space to trigger hasError for scrolling but hide red text
+                                  return ' ';
                                 }
                                 return null;
                               },
+
                               onChanged: widget.isEdit
                                   ? null
-                                  : (value) => context.read<AddFamilyHeadBloc>().add(
-                                        UpdateYears(value),
-                                      ),
+                                  : (value) => context
+                                        .read<AddFamilyHeadBloc>()
+                                        .add(UpdateYears(value)),
                             ),
                           ),
                         ),
@@ -632,22 +637,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                 FilteringTextInputFormatter.digitsOnly,
                                 MaxValueFormatter(99),
                               ],
-                              validator: (value) {
-                                final years = yearsController.text.trim();
-                                final months = monthsController.text.trim();
-                                final days = daysController.text.trim();
-                                final error = Validations.validateApproxAge(l, years, months, days);
-                                if (error != null) {
-                                  // Don't capture error here - only years field captures
-                                  return ' '; // Return space to trigger hasError for scrolling but hide red text
-                                }
-                                return null;
-                              },
+                              validator: (_) => null,
+
                               onChanged: widget.isEdit
                                   ? null
-                                  : (value) => context.read<AddFamilyHeadBloc>().add(
-                                        UpdateMonths(value),
-                                      ),
+                                  : (value) => context
+                                        .read<AddFamilyHeadBloc>()
+                                        .add(UpdateMonths(value)),
                             ),
                           ),
                         ),
@@ -665,30 +661,21 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               readOnly: widget.isEdit,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
-                                MaxValueFormatter(99), // Allow up to 99 for rollover calculation
+                                MaxValueFormatter(
+                                  99,
+                                ), // Allow up to 99 for rollover calculation
                               ],
-                              validator: (value) {
-                                final years = yearsController.text.trim();
-                                final months = monthsController.text.trim();
-                                final days = daysController.text.trim();
-                                final error = Validations.validateApproxAge(l, years, months, days);
-                                if (error != null) {
-                                  // Don't capture error here - only years field captures
-                                  return ' '; // Return space to trigger hasError for scrolling but hide red text
-                                }
-                                return null;
-                              },
+                              validator: (value) => null,
                               onChanged: widget.isEdit
                                   ? null
-                                  : (value) => context.read<AddFamilyHeadBloc>().add(
-                                        UpdateDays(value),
-                                      ),
+                                  : (value) => context
+                                        .read<AddFamilyHeadBloc>()
+                                        .add(UpdateDays(value)),
                             ),
                           ),
                         ),
                       ],
-                    )
-
+                    ),
                   ],
                 ),
               ),
@@ -1772,40 +1759,44 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   }
 
   String? _normalizeGender(String? gender) {
-      if (gender == null) return null;
-      final g = gender.toString().toLowerCase().trim();
-      if (g.startsWith('m')) return 'Male';
-      if (g.startsWith('f')) return 'Female';
-      if (g.startsWith('t')) return 'Transgender';
-      return gender;
+    if (gender == null) return null;
+    final g = gender.toString().toLowerCase().trim();
+    if (g.startsWith('m')) return 'Male';
+    if (g.startsWith('f')) return 'Female';
+    if (g.startsWith('t')) return 'Transgender';
+    return gender;
+  }
+
+  String? _normalizeCategory(String? category) {
+    if (category == null) return null;
+    final c = category.toString().toUpperCase().trim();
+
+    debugPrint(
+      'AddNewFamilyHead: Normalizing category from "$category" to uppercase',
+    );
+
+    // Convert common variations to standard uppercase format
+    switch (c) {
+      case 'OBC':
+      case 'OB C':
+        debugPrint('AddNewFamilyHead: Category normalized to "OBC"');
+        return 'OBC';
+      case 'SC':
+      case 'S C':
+        debugPrint('AddNewFamilyHead: Category normalized to "SC"');
+        return 'SC';
+      case 'ST':
+      case 'S T':
+        debugPrint('AddNewFamilyHead: Category normalized to "ST"');
+        return 'ST';
+      default:
+        // For other categories, preserve original case but trim
+        debugPrint(
+          'AddNewFamilyHead: Category preserved as "${category.toString().trim()}"',
+        );
+        return category.toString().trim();
     }
-
-    String? _normalizeCategory(String? category) {
-      if (category == null) return null;
-      final c = category.toString().toUpperCase().trim();
-
-      debugPrint('AddNewFamilyHead: Normalizing category from "$category" to uppercase');
-
-      // Convert common variations to standard uppercase format
-      switch (c) {
-        case 'OBC':
-        case 'OB C':
-          debugPrint('AddNewFamilyHead: Category normalized to "OBC"');
-          return 'OBC';
-        case 'SC':
-        case 'S C':
-          debugPrint('AddNewFamilyHead: Category normalized to "SC"');
-          return 'SC';
-        case 'ST':
-        case 'S T':
-          debugPrint('AddNewFamilyHead: Category normalized to "ST"');
-          return 'ST';
-        default:
-          // For other categories, preserve original case but trim
-          debugPrint('AddNewFamilyHead: Category preserved as "${category.toString().trim()}"');
-          return category.toString().trim();
-      }
-    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1866,10 +1857,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     otherReligion: m['religion'] == 'Other'
                         ? m['other_religion']
                         : null,
-                  )));
+                  ),
+                ),
+              );
 
               final normalizedCategory = _normalizeCategory(m['category']);
-              debugPrint('AddNewFamilyHead: Final category value being set: "$normalizedCategory"');
+              debugPrint(
+                'AddNewFamilyHead: Final category value being set: "$normalizedCategory"',
+              );
 
               b.add(
                 AfhHydrate(
@@ -1882,7 +1877,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     useDob: m.containsKey('age_by')
                         ? m['age_by'] == 'by_dob'
                         : (m['useDob'] == 'true' || m['useDob'] == true),
-                    dob: _parseDate(m['dob'] as String? ?? m['date_of_birth'] as String? ?? m['dateOfBirth'] as String?),
+                    dob: _parseDate(
+                      m['dob'] as String? ??
+                          m['date_of_birth'] as String? ??
+                          m['dateOfBirth'] as String?,
+                    ),
                     edd: _parseDate(m['edd'] as String?),
                     lmp: _parseDate(m['lmp'] as String?),
                     approxAge: approx,
@@ -2066,8 +2065,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             final otherOccupation = getSpouseVal('other_occupation');
             final religion = getSpouseVal('religion');
             final otherReligion = getSpouseVal('other_religion');
-            final category = _normalizeCategory(getSpouseVal('category')?.toString());
-            debugPrint('AddNewFamilyHead: Spouse category normalized to: "$category"');
+            final category = _normalizeCategory(
+              getSpouseVal('category')?.toString(),
+            );
+            debugPrint(
+              'AddNewFamilyHead: Spouse category normalized to: "$category"',
+            );
             final otherCategory = getSpouseVal('other_category');
             final mobileOwner = getSpouseVal('mobileOwner');
             final mobileOwnerOtherRelation = getSpouseVal(
@@ -2127,7 +2130,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
               // Category fields
               category: category,
-              otherCategory: category == 'Other' ? getSpouseVal('other_category') : null,
+              otherCategory: category == 'Other'
+                  ? getSpouseVal('other_category')
+                  : null,
 
               abhaAddress: getSpouseVal('abhaAddress'),
 
@@ -2611,22 +2616,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                       isLoading: isLoading,
                                                       onPress: () {
                                                         _clearFormError();
-
-                                                        // Manual validation for approximate age fields
-                                                        final state = context.read<AddFamilyHeadBloc>().state;
-                                                        if (!state.useDob) {
-                                                          final ageError = Validations.validateApproxAge(
-                                                            AppLocalizations.of(context)!,
-                                                            state.years ?? '',
-                                                            state.months ?? '',
-                                                            state.days ?? '',
-                                                          );
-                                                          if (ageError != null) {
-                                                            showAppSnackBar(context, ageError);
-                                                            return;
-                                                          }
-                                                        }
-
                                                         final formState =
                                                             _formKey
                                                                 .currentState;
@@ -2737,8 +2726,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                               true;
                                                           if (i == 0) {
                                                             _clearFormError();
-                                                            final headForm = _formKey.currentState;
-                                                            if (headForm == null || !headForm.validate()) {
+                                                            final headForm =
+                                                                _formKey
+                                                                    .currentState;
+                                                            if (headForm ==
+                                                                    null ||
+                                                                !headForm
+                                                                    .validate()) {
                                                               canProceed =
                                                                   false;
                                                               final msg =
@@ -2750,7 +2744,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                               );
                                                               _scrollToFirstError();
                                                             }
-
                                                           } else if (i == 1) {
                                                             clearSpousFormError();
                                                             final spouseForm =
