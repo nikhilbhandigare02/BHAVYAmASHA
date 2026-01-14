@@ -526,7 +526,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
               _selectedChild = value;
             });
           },
-          hintText: l10n?.selectAMember ?? 'Select a member',
+          hintText: l10n?.selectChildren ?? 'Select a member',
         ),
         const Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         const SizedBox(height: _verticalSpacing),
@@ -555,10 +555,18 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                   }
                 : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
+            ).copyWith(
+              backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                if (states.contains(MaterialState.disabled)) return Colors.grey;
+                return Colors.green;
+              }),
+              foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                if (states.contains(MaterialState.disabled)) return Colors.white70;
+                return Colors.white;
+              }),
             ),
             child: _isMigrating
                 ? const SizedBox(
@@ -1171,7 +1179,7 @@ class _MigrationSplitScreenState extends State<MigrationSplitScreen> {
                                     index == 0;
                                 return CheckboxListTile(
                                   title: Text(
-                                    isDisabled ? '$name (Head)' : name,
+                                    isDisabled ? '$name ( Family Head)' : name,
                                     style: TextStyle(
                                       fontSize: 15.sp,
                                       color: isDisabled

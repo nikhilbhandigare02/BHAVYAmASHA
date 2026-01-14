@@ -95,7 +95,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         WHERE current_user_key = ? AND is_deleted = 0 
         AND (eligible_couple_state LIKE '%eligible_couple%' OR eligible_couple_state LIKE '%tracking_due%')
         ORDER BY created_date_time ASC
-      ''',
+         ''',
         [currentUserKey],
       );
 
