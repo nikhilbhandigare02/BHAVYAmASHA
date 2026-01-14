@@ -387,9 +387,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Row(
             children: [
               Expanded(
-                flex: 1,
+                flex: 2,
                 child: Text(
-                  l10n?.srNumber ?? "Sr",
+                  l10n?.srNo ?? "Sr No.",
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -441,7 +441,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   // Sr
                   Expanded(
-                    flex: 1,
+                    flex: 2,
                     child: Text(
                       (index + 1).toString(),
                       style: TextStyle(fontSize: 9),
