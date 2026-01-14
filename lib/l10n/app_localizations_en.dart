@@ -4723,7 +4723,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get anmName => 'ANM Name';
 
   @override
-  String get ashaName => 'Name of ASHA';
+  String get ashaName => 'ASHA Name';
 
   @override
   String get healthcareProviderInformation => 'Healthcare Provider Information';
@@ -7567,7 +7567,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deathOther => 'Other';
 
   @override
-  String get discussionTopic => 'discussion topic/program';
+  String get discussionTopic => 'Discussion Sub Topic/Program';
 
   @override
   String get userFound => 'User found.';

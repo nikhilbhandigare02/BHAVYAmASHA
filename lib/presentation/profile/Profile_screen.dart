@@ -424,7 +424,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
         ),
-
         // Table Rows
         ListView.builder(
           shrinkWrap: true,
