@@ -571,7 +571,12 @@ class AddnewfamilymemberBloc
       if (days >= 30) {
         final additionalMonths = (days / 30).floor();
         months += additionalMonths;
-        days = days % 30; // Keep remainder days
+        // For any days >= 30, remainder is (days - 31)
+        if (days <= 31) {
+          days = 0;
+        } else {
+          days = days - 31;
+        }
       }
 
       // Handle month rollover (12 months = 1 year)
@@ -612,7 +617,12 @@ class AddnewfamilymemberBloc
       if (days >= 30) {
         final additionalMonths = (days / 30).floor();
         months += additionalMonths;
-        days = days % 30; // Keep remainder days
+        // For any days >= 30, remainder is (days - 31)
+        if (days <= 31) {
+          days = 0;
+        } else {
+          days = days - 31;
+        }
       }
 
       // Handle month rollover (12 months = 1 year)
@@ -653,7 +663,12 @@ class AddnewfamilymemberBloc
       if (days >= 30) {
         final additionalMonths = (days / 30).floor();
         months += additionalMonths;
-        days = days % 30; // Keep remainder days
+        // For any days >= 30, remainder is (days - 31)
+        if (days <= 31) {
+          days = 0;
+        } else {
+          days = days - 31;
+        }
       }
 
       // Handle month rollover (12 months = 1 year)
