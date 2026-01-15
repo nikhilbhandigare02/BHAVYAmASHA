@@ -1206,11 +1206,11 @@ class _RegisterChildDueListFormScreen
 
                                           final parsed = double.tryParse(text);
                                           if (parsed == null) {
-                                            return _captureError('Please enter weight between', _keyWeight);
+                                            return _captureError('Please enter weight between 1.2 to 90 kg', _keyWeight);
                                           }
 
                                           if (parsed < 1.2 || parsed > 90) {
-                                            return _captureError('Weight must be between 1.2 and 90 kg', _keyWeight);
+                                            return _captureError('Please enter weight between 1.2 to 90 kg', _keyWeight);
                                           }
 
                                           return null;

@@ -1629,7 +1629,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     formJson: formData,
                   );
 
-                  showAppSnackBar(context, "Updated successfully!");
+                  showAppSnackBar(context, l10n.householdUpdatedSuccessfully);
                 } else {
                   final deviceInfo = await DeviceInfo.getDeviceInfo();
                   final newUniqueKey = await IdGenerator.generateUniqueId(
@@ -1641,12 +1641,11 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     'form_json': jsonEncode(formData),
                     'created_by': 'current_user',
                   });
-
-                  showAppSnackBar(context, "Saved successfully!");
+                  showAppSnackBar(context, l10n.saveSuccess);
                 }
-
                 // Go back and refresh list
                 if (mounted) Navigator.pop(context);
+                Navigator.pop(context);
               } catch (e) {
                 showAppSnackBar(context, "Error: $e");
               }

@@ -94,7 +94,12 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
       if (days >= 30) {
         final additionalMonths = (days / 30).floor();
         months += additionalMonths;
-        days = 0; // Always make days 0 after rollover, no remainder
+        // For any days >= 30, remainder is (days - 31)
+        if (days <= 31) {
+          days = 0;
+        } else {
+          days = days - 31;
+        }
       }
 
       // Handle month rollover (12 months = 1 year)
@@ -107,7 +112,7 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
       // Update the string values with calculated rollover
       final newYearStr = years.toString();
       final newMonthStr = months == 0 ? '' : months.toString();
-      final newDayStr = days == 0 ? '' : days.toString();
+      final newDayStr = days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
@@ -134,7 +139,12 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
       if (days >= 30) {
         final additionalMonths = (days / 30).floor();
         months += additionalMonths;
-        days = 0; // Always make days 0 after rollover, no remainder
+        // For any days >= 30, remainder is (days - 31)
+        if (days <= 31) {
+          days = 0;
+        } else {
+          days = days - 31;
+        }
       }
 
       // Handle month rollover (12 months = 1 year)
@@ -147,7 +157,7 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
       // Update the string values with calculated rollover
       final newYearStr = years.toString();
       final newMonthStr = months == 0 ? '' : months.toString();
-      final newDayStr = days == 0 ? '' : days.toString();
+      final newDayStr = days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
@@ -175,7 +185,12 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
       if (days >= 30) {
         final additionalMonths = (days / 30).floor();
         months += additionalMonths;
-        days = 0; // Always make days 0 after rollover, no remainder
+        // For any days >= 30, remainder is (days - 31)
+        if (days <= 31) {
+          days = 0;
+        } else {
+          days = days - 31;
+        }
       }
 
       // Handle month rollover (12 months = 1 year)
@@ -188,7 +203,7 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
       // Update the string values with calculated rollover
       final newYearStr = years.toString();
       final newMonthStr = months == 0 ? '' : months.toString();
-      final newDayStr = days == 0 ? '' : days.toString();
+      final newDayStr = days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();

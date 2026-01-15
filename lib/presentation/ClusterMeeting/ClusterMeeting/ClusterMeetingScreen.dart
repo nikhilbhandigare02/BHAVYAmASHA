@@ -107,21 +107,32 @@ class _ClusterMeetingScreenState extends State<ClusterMeetingScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : meetings.isEmpty
-          ? Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: 20), // space below app bar
-          Center(
-            child: Text(
-              l10n?.noRecordFound ?? "No Record Found",
-              style: TextStyle(
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade500,
-              ),
+          ? Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        child: Card(
+          color: Colors.white,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 50.0, horizontal: 20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  l10n?.noRecordFound ?? 'No Record Found',
+                  style: TextStyle(
+                    fontSize: 17.sp,
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       )
           : Column(
         children: [

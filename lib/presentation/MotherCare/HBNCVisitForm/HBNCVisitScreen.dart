@@ -476,6 +476,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
           t.err_post_delivery_problems_required,
       'err_breastfeeding_problems_required':
           t.err_breastfeeding_problems_required,
+      'err_meals_per_day_required': t.err_meals_per_day_required,
       'err_pads_per_day_required': t.err_pads_per_day_required,
       'err_mothers_temperature_required': t.err_mothers_temperature_required,
       'err_foul_discharge_high_fever_required':
@@ -493,7 +494,7 @@ class _HbncVisitScreenState extends State<HbncVisitScreen>
       'err_breastfeeding_problem_description_required':
           t.err_breastfeeding_problem_description_required,
       'err_breastfeeding_help_required': t.err_breastfeeding_help_required,
-      'err_meals_per_day_required': t.err_meals_per_day_required,
+
       'err_paracetamol_given_required': t.err_paracetamol_given_required,
       'err_milk_counseling_advice_required':
           t.err_milk_counseling_advice_required,

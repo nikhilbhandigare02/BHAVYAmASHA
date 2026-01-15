@@ -3698,7 +3698,7 @@ abstract class AppLocalizations {
   /// No description provided for @noRecordFound.
   ///
   /// In en, this message translates to:
-  /// **'No Record Found'**
+  /// **'No Record Found.'**
   String get noRecordFound;
 
   /// No description provided for @notAvailable.
@@ -5978,31 +5978,31 @@ abstract class AppLocalizations {
   /// No description provided for @err_mother_status_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select mother\'s status.'**
+  /// **'Please select mother status.'**
   String get err_mother_status_required;
 
   /// No description provided for @err_mcp_mother_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select MCP card availability (Mother).'**
+  /// **'Please select do you have \'Mother Child Protection(MCP)\' card.'**
   String get err_mcp_mother_required;
 
   /// No description provided for @err_post_delivery_problems_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select post-delivery problems.'**
+  /// **'Please select Does the mother have any of the following problems post delivery'**
   String get err_post_delivery_problems_required;
 
   /// No description provided for @err_breastfeeding_problems_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select breastfeeding problems.'**
+  /// **'Please select Does the mother have breast feeding problem'**
   String get err_breastfeeding_problems_required;
 
   /// No description provided for @err_mcp_mother_filled_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select MCP card filled status.'**
+  /// **'Please select hast the MCP card filled status.'**
   String get err_mcp_mother_filled_required;
 
   /// No description provided for @err_excessive_bleeding_required.
@@ -6020,31 +6020,31 @@ abstract class AppLocalizations {
   /// No description provided for @err_breastfeeding_problem_description_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter breastfeeding problem description.'**
+  /// **'Please enter problem'**
   String get err_breastfeeding_problem_description_required;
 
   /// No description provided for @err_breastfeeding_help_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter breastfeeding help or action taken.'**
+  /// **'Please write down the action taken'**
   String get err_breastfeeding_help_required;
 
   /// No description provided for @err_pads_per_day_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter number of pads changed per day.'**
+  /// **'Please enter how many pads have been changed in a day for bleeding'**
   String get err_pads_per_day_required;
 
   /// No description provided for @err_meals_per_day_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter number of full meals per day.'**
+  /// **'Please enter no. of times mother takes full meal in 24 hours'**
   String get err_meals_per_day_required;
 
   /// No description provided for @err_mothers_temperature_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter mother\'s temperature.'**
+  /// **'Please enter the temperature.'**
   String get err_mothers_temperature_required;
 
   /// No description provided for @err_paracetamol_given_required.
@@ -6068,7 +6068,7 @@ abstract class AppLocalizations {
   /// No description provided for @err_counseling_advice_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter counseling or advice.'**
+  /// **'Please enter Counseling / Advise'**
   String get err_counseling_advice_required;
 
   /// No description provided for @err_milk_not_producing_or_less_required.
@@ -6092,13 +6092,13 @@ abstract class AppLocalizations {
   /// No description provided for @err_refer_hospital_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select refer to hospital.'**
+  /// **'Please select wheather referred to hospital.'**
   String get err_refer_hospital_required;
 
   /// No description provided for @err_refer_to_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select referral facility.'**
+  /// **'Please select place to refer'**
   String get err_refer_to_required;
 
   /// No description provided for @err_baby_condition_required.
@@ -12890,7 +12890,7 @@ abstract class AppLocalizations {
   /// No description provided for @weightRangeError.
   ///
   /// In en, this message translates to:
-  /// **'Weight must be between 500 and 12500 grams'**
+  /// **'Please enter weight between 500 to 12500gms'**
   String get weightRangeError;
 
   /// No description provided for @enterValidWeight.
@@ -12914,7 +12914,7 @@ abstract class AppLocalizations {
   /// No description provided for @enterValidBirthWeight.
   ///
   /// In en, this message translates to:
-  /// **'Please enter birth weight 1200 to 4000gm'**
+  /// **'Please enter birth weight between 1200 to 4000gm'**
   String get enterValidBirthWeight;
 
   /// No description provided for @specifyReligionLabel.
@@ -13562,7 +13562,7 @@ abstract class AppLocalizations {
   /// No description provided for @srNumber.
   ///
   /// In en, this message translates to:
-  /// **'Sr'**
+  /// **'Sr No.'**
   String get srNumber;
 
   /// No description provided for @communityC.
@@ -13850,25 +13850,25 @@ abstract class AppLocalizations {
   /// No description provided for @hscNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HSC Name'**
+  /// **'HSC'**
   String get hscNameHint;
 
   /// No description provided for @hscNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HSC Name'**
+  /// **'HSC'**
   String get hscNameLabel;
 
   /// No description provided for @hwcNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HWC Name'**
+  /// **'HWC'**
   String get hwcNameHint;
 
   /// No description provided for @hwcNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HWC Name'**
+  /// **'HWC'**
   String get hwcNameLabel;
 
   /// No description provided for @moveForward.
@@ -15244,6 +15244,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next anc due date'**
   String get nextancduedate;
+
+  /// No description provided for @householdUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Household updated successfully'**
+  String get householdUpdatedSuccessfully;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
