@@ -2189,7 +2189,7 @@
   "enterValidWeight": "Please enter a valid weight in grams",
   "enterBirthWeight": "Enter birth weight",
   "birthWeightRange": "Birth weight (1200-4000 gms)",
-  "enterValidBirthWeight": "Please enter a valid birth weight in grams",
+  "enterValidBirthWeight": "Please enter birth weight 1200 to 4000gm",
   "specifyReligionLabel": "Specify Religion",
   "enterReligion": "Enter your religion",
   "pleaseSpecifyReligion": "Please specify your religion",

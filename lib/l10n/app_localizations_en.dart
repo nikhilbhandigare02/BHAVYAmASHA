@@ -6433,7 +6433,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get birthWeightRange => 'Birth weight (1200-4000 gms)';
 
   @override
-  String get enterValidBirthWeight => 'Please enter a valid birth weight in grams';
+  String get enterValidBirthWeight => 'Please enter birth weight 1200 to 4000gm';
 
   @override
   String get specifyReligionLabel => 'Specify Religion';

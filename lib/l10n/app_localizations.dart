@@ -12914,7 +12914,7 @@ abstract class AppLocalizations {
   /// No description provided for @enterValidBirthWeight.
   ///
   /// In en, this message translates to:
-  /// **'Please enter a valid birth weight in grams'**
+  /// **'Please enter birth weight 1200 to 4000gm'**
   String get enterValidBirthWeight;
 
   /// No description provided for @specifyReligionLabel.

@@ -546,7 +546,7 @@ class _RegisterChildDueListFormScreen
       final String? ownerLabel = () {
         final raw = data.mobileOwner?.toLowerCase() ?? '';
         if (raw.isEmpty) return null;
-        final headLabel = l10n?.headOfFamily ?? 'Head of the family';
+        final headLabel = 'Family head';
         final motherLabel = l10n?.mother ?? 'Mother';
         final fatherLabel = l10n?.father ?? 'Father';
         final otherLabel = l10n?.other ?? 'Other';
@@ -1206,7 +1206,7 @@ class _RegisterChildDueListFormScreen
 
                                           final parsed = double.tryParse(text);
                                           if (parsed == null) {
-                                            return _captureError('Enter valid weight', _keyWeight);
+                                            return _captureError('Please enter weight between', _keyWeight);
                                           }
 
                                           if (parsed < 1.2 || parsed > 90) {
@@ -1237,7 +1237,7 @@ class _RegisterChildDueListFormScreen
 
                                               final parsed = int.tryParse(text);
                                               if (parsed == null) {
-                                                return _captureError(l10n?.enterValidWeight, _keyWeight);
+                                                return _captureError(l10n?.weightRangeError, _keyWeight);
                                               }
 
                                               if (parsed < 500 || parsed > 12500) {

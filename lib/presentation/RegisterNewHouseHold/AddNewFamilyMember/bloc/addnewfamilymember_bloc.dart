@@ -170,6 +170,20 @@ class AddnewfamilymemberBloc
           'is_deleted': beneficiary['is_deleted'] == 1,
         };
 
+        T? _firstValue<T>(List<String> keys) {
+          for (final k in keys) {
+            final v = allData[k];
+            if (v is T) return v;
+            if (v != null && T == String) {
+              final s = v.toString();
+              if (s.trim().isNotEmpty) return s as T;
+            }
+          }
+          return null;
+        }
+
+        String? _firstString(List<String> keys) => _firstValue<String>(keys);
+
         // Derive primary name from available fields
         final String? primaryName =
             (allData['name'] as String?) ??
@@ -186,6 +200,15 @@ class AddnewfamilymemberBloc
           final rl = r.toLowerCase();
           if (rl == 'self' || rl == 'head') {
             primaryRelation = 'Self';
+          } else if (rl == 'spouse') {
+            final g = (allData['gender'] ?? '').toString().toLowerCase();
+            if (g == 'female' || g == 'f') {
+              primaryRelation = 'Wife';
+            } else if (g == 'male' || g == 'm') {
+              primaryRelation = 'Husband';
+            } else {
+              primaryRelation = 'Spouse';
+            }
           } else {
             primaryRelation = r;
           }
@@ -340,21 +363,26 @@ class AddnewfamilymemberBloc
         }
         
         // Determine useDob based on age_by field
-        final ageBy = allData['age_by'] as String?;
+        final dynamic ageByRaw = allData['age_by'];
         bool useDobValue = true; // default to DOB
-        if (ageBy != null) {
-          if (ageBy == 'by_age') {
+        if (ageByRaw != null) {
+          if (ageByRaw is bool) {
+            useDobValue = ageByRaw;
+          } else {
+            final ageBy = ageByRaw.toString();
+            if (ageBy == 'by_age') {
             useDobValue = false;
-          } else if (ageBy == 'by_dob') {
+            } else if (ageBy == 'by_dob') {
             useDobValue = true;
+            }
           }
         }
         
         // Update the state with all the data
         emit(state.copyWith(
           name: primaryName,
-          fatherName: allData['fatherName'] as String?,
-          motherName: allData['motherName'] as String?,
+          fatherName: _firstString(['fatherName', 'father_name']),
+          motherName: _firstString(['motherName', 'mother_name']),
           memberType: normalizedMemberType,
           relation: primaryRelation,
           otherRelation: otherRelationValue,
@@ -383,17 +411,17 @@ class AddnewfamilymemberBloc
           abhaAddress: allData['abhaAddress'] as String?,
           
           // Handle mobile owner and relation
-          mobileOwner: allData['mobileOwner'] as String?,
+          mobileOwner: _firstString(['mobileOwner', 'mobile_owner']),
           mobileOwnerRelation: rawMobileOwnerRelation ?? 
                             (allData['mobile_owner_relation'] as String?),
-          mobileNo: allData['mobileNo'] as String?,
+          mobileNo: _firstString(['mobileNo', 'mobile_no', 'mobile']),
           voterId: allData['voterId'] as String?,
           rationId: allData['rationId'] as String? ?? allData['rationCardId'] as String?,
           phId: allData['phId'] as String?,
           beneficiaryType: allData['beneficiaryType'] as String?,
-          maritalStatus: allData['maritalStatus'] as String?,
+          maritalStatus: _firstString(['maritalStatus', 'marital_status']),
           ageAtMarriage: allData['ageAtMarriage'] as String?,
-          spouseName: allData['spouseName'] as String?,
+          spouseName: _firstString(['spouseName', 'spouse_name']),
           hasChildren: (allData['hasChildren'] ?? allData['have_children']) as String?,
           isPregnant: allData['isPregnant'] as String?,
           lmp: lmpDate,
