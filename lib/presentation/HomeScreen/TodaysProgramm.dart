@@ -3457,6 +3457,13 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 DateTime.now().toIso8601String(),
               );
               completedItem['_rawRow'] = {};
+              // Ensure household_id is preserved from original item
+              if (item['household_id'] != null) {
+                completedItem['household_id'] = item['household_id'];
+              }
+              if (item['household_ref_key'] != null) {
+                completedItem['household_ref_key'] = item['household_ref_key'];
+              }
               _eligibleCompletedCoupleItems.insert(0, completedItem);
             });
             await _loadData();
