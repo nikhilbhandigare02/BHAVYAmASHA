@@ -10,6 +10,7 @@ class CbacFormState extends Equatable {
   final String? errorMessage;
   final List<String> missingKeys;
   final bool isSuccess;
+  final int? validationFailedTab;
 
   const CbacFormState({
     this.consentDialogShown = false,
@@ -20,6 +21,7 @@ class CbacFormState extends Equatable {
     this.errorMessage,
     this.missingKeys = const [],
     this.isSuccess = false,
+    this.validationFailedTab,
   });
 
   CbacFormState copyWith({
@@ -32,6 +34,8 @@ class CbacFormState extends Equatable {
     bool clearError = false,
     List<String>? missingKeys,
     bool? isSuccess,
+    int? validationFailedTab,
+    bool clearValidationFailedTab = false,
   }) {
     return CbacFormState(
       consentDialogShown: consentDialogShown ?? this.consentDialogShown,
@@ -42,11 +46,24 @@ class CbacFormState extends Equatable {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       missingKeys: clearError ? const [] : (missingKeys ?? this.missingKeys),
       isSuccess: isSuccess ?? this.isSuccess,
+      validationFailedTab: clearValidationFailedTab
+          ? null
+          : (validationFailedTab ?? this.validationFailedTab),
     );
   }
 
   @override
-  List<Object?> get props => [consentDialogShown, consentAgreed, activeTab, data, submitting, errorMessage, missingKeys, isSuccess];
+  List<Object?> get props => [
+        consentDialogShown,
+        consentAgreed,
+        activeTab,
+        data,
+        submitting,
+        errorMessage,
+        missingKeys,
+        isSuccess,
+        validationFailedTab,
+      ];
 }
 
 class CbacFormInitial extends CbacFormState {

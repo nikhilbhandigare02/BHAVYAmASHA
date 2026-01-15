@@ -2440,10 +2440,7 @@
   "pleaseEnterMemberType": "Please enter Member type",
   "invalidMemberType": "Invalid member type",
   "accountNumberAtLeast10Digits": "Account number must be at least 10 digits",
-
-
-
-  "diseaseTb": "Tuberculosis (TB)",
+   "diseaseTb": "Tuberculosis (TB)",
   "diseaseHepatitisB": "Hepatitis B",
   "diseaseAsthma": "Asthma",
   "diseaseHighBp": "High Blood Pressure",

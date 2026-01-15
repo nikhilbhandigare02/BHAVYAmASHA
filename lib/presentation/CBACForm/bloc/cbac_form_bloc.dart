@@ -215,6 +215,19 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
     
     on<CbacConsentDisagreed>((event, emit) => emit(state.copyWith(consentAgreed: false)));
 
+    on<CbacTabChanged>((event, emit) {
+      emit(state.copyWith(activeTab: event.tabIndex));
+    });
+
+    on<CbacClearValidationError>((event, emit) {
+      emit(
+        state.copyWith(
+          clearError: true,
+          clearValidationFailedTab: true,
+        ),
+      );
+    });
+
     on<CbacNextTab>((event, emit) {
       if (!state.consentAgreed) return;  
       bool has(String key) {
@@ -366,13 +379,16 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
         targetTab = 0;
       }
       final token = DateTime.now().microsecondsSinceEpoch.toString();
-      emit(state.copyWith(
-        submitting: false,
-        missingKeys: missing,
-        errorMessage: token,
-        activeTab: targetTab,
-        clearError: false,
-      ));
+      emit(
+        state.copyWith(
+          submitting: false,
+          missingKeys: missing,
+          errorMessage: token,
+          validationFailedTab: targetTab,
+          activeTab: targetTab,
+          clearError: false,
+        ),
+      );
       return;
     }
 

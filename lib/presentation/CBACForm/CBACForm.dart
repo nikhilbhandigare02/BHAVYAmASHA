@@ -209,14 +209,11 @@ class _CbacformState extends State<Cbacform> {
                           ).colorScheme.onPrimary.withOpacity(0.7),
                           indicatorWeight: 3.0,
                           tabs: tabs,
-                          onTap: (_) {
-
-                            final controller = DefaultTabController.of(context);
-                            if (controller != null &&
-                                controller.index != state.activeTab) {
-                              controller.animateTo(state.activeTab);
-                            }
-                          }, // navigation is controlled by buttons
+                          onTap: (idx) {
+                            context
+                                .read<CbacFormBloc>()
+                                .add(CbacTabChanged(idx));
+                          },
                         ),
                       ),
                     ),
@@ -242,11 +239,7 @@ class _CbacformState extends State<Cbacform> {
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                         child: Builder(
                           builder: (tabContext) {
-                            final currentIndex =
-                                DefaultTabController.of(tabContext)?.index ??
-                                    state.activeTab;
-                            final isLastTab = currentIndex == tabs.length - 1 ||
-                                state.activeTab == tabs.length - 1;
+                            final isLastTab = state.activeTab == 5;
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [

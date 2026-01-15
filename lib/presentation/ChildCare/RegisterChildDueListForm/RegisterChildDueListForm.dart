@@ -1193,8 +1193,8 @@ class _RegisterChildDueListFormScreen
                                     return Container(
                                       key: _keyWeight,
                                       child: CustomTextField(
-                                        labelText: ((l10n?.weightRange ?? 'Weight') + ' (1.2-90) kg'),
-                                        hintText: ((l10n?.weightRange ?? 'Weight') + ' (1.2-90) kg'),
+                                        labelText: l10n?.weightRange ?? 'Weight'  ,
+                                        hintText:  l10n?.weightRange ?? 'Weight',
                                         initialValue: state.weightGrams,
                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
                                         onChanged: (v) => bloc.add(WeightGramsChanged(v)),

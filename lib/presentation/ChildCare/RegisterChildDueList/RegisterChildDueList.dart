@@ -266,24 +266,25 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
       // 1. Modified Query: Added GROUP BY cca.beneficiary_ref_key
       final List<Map<String, dynamic>> childActivities = await db.rawQuery(
         '''
+  WITH ranked AS (
+      SELECT
+          cca.*,
+          ROW_NUMBER() OVER (
+              PARTITION BY cca.beneficiary_ref_key
+              ORDER BY datetime(cca.created_date_time) DESC, cca.rowid DESC
+          ) AS rn
+      FROM child_care_activities cca
+      WHERE cca.child_care_state = ?
+        AND cca.is_deleted = 0
+        ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND cca.current_user_key = ?' : ''}
+  )
   SELECT
-      cca.*,
+      ranked.*,
       bn.created_date_time AS beneficiary_created_date_time
-  FROM child_care_activities cca
-  INNER JOIN (
-      SELECT beneficiary_ref_key,
-             MAX(datetime(created_date_time)) AS max_activity_date
-      FROM child_care_activities
-      WHERE is_deleted = 0
-      GROUP BY beneficiary_ref_key
-  ) latest
-      ON cca.beneficiary_ref_key = latest.beneficiary_ref_key
-     AND datetime(cca.created_date_time) = latest.max_activity_date
+  FROM ranked
   INNER JOIN beneficiaries_new bn
-      ON bn.unique_key = cca.beneficiary_ref_key
-  WHERE cca.child_care_state = ?
-    AND cca.is_deleted = 0
-    ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND cca.current_user_key = ?' : ''}
+      ON bn.unique_key = ranked.beneficiary_ref_key
+  WHERE ranked.rn = 1
   ORDER BY datetime(bn.created_date_time) DESC
   ''',
         [

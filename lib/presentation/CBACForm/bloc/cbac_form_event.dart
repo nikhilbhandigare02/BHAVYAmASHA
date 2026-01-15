@@ -59,3 +59,14 @@ class CbacFieldChanged extends CBACFormEvent {
 class CbacSubmitted extends CBACFormEvent {
   const CbacSubmitted();
 }
+
+class CbacTabChanged extends CBACFormEvent {
+  final int tabIndex;
+  const CbacTabChanged(this.tabIndex);
+  @override
+  List<Object?> get props => [tabIndex];
+}
+
+class CbacClearValidationError extends CBACFormEvent {
+  const CbacClearValidationError();
+}
