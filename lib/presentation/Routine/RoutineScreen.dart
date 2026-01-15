@@ -1278,7 +1278,7 @@ import 'package:sizer/sizer.dart';
                             ] else if (isPwData) ...[
                               Text(
                                 item['badge'] == 'ANC'
-                                  ? '${l10n!.antenatal} ${item['nextVisit'] ?? l10n!.na}'
+                                  ? '${l10n!.lastVisitDate} ${item['nextVisit'] ?? l10n!.na}'
                                   : item['badge'] == 'PW'
                                     ? 'Pregnant Woman'
                                     : 'Next Visits: ${item['nextVisit'] ?? 'N/A'}',

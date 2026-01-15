@@ -530,7 +530,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       }
     }
   }
-  /// Returns a map of household_ref_key -> ANC due pregnant women count
   Future<Map<String, int>> calculatePregnantWomenCount() async {
     final db = await DatabaseProvider.instance.database;
     final currentUserData = await SecureStorageService.getCurrentUserData();
