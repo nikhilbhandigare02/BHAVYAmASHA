@@ -601,7 +601,7 @@
   "newPasswordTooShort": "New password must be at least 6 characters",
   "noHbncVisits": "No HBNC visits found",
   "noPreviousVisits": "No previous visits found",
-  "noRecordFound": "No Record Found",
+  "noRecordFound": "No Record Found.",
   "notAvailable": "Not Available",
   "occupationEmployed": "Employed",
   "occupationLabel": "Occupation",
@@ -2298,7 +2298,7 @@
   "population": "Population",
   "phoneNumberShort": "Ph No.",
   "area": "Area",
-  "srNumber": "Sr",
+  "srNumber": "Sr No.",
   "communityC": "C - Community",
   "institutionalI": "I - Institutional",
   "categoryA": "Category A",
@@ -2347,10 +2347,10 @@
   "sr_No": "Sr.No.",
   "present": "Present?",
 
-  "hscNameHint": "HSC Name",
-  "hscNameLabel": "HSC Name",
-  "hwcNameHint": "HWC Name",
-  "hwcNameLabel": "HWC Name",
+  "hscNameHint": "HSC",
+  "hscNameLabel": "HSC",
+  "hwcNameHint": "HWC",
+  "hwcNameLabel": "HWC",
 
   "moveForward": "Move forward?",
   "lastVisit": "Last Visit",
@@ -2619,7 +2619,8 @@
   "government": "Government",
   "private": "private",
   "selectChildren":"Select Children",
-  "nextancduedate":"Next anc due date"
+  "nextancduedate":"Next anc due date",
+  "householdUpdatedSuccessfully": "Household updated successfully"
 
 
 }

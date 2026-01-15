@@ -3698,7 +3698,7 @@ abstract class AppLocalizations {
   /// No description provided for @noRecordFound.
   ///
   /// In en, this message translates to:
-  /// **'No Record Found'**
+  /// **'No Record Found.'**
   String get noRecordFound;
 
   /// No description provided for @notAvailable.
@@ -13562,7 +13562,7 @@ abstract class AppLocalizations {
   /// No description provided for @srNumber.
   ///
   /// In en, this message translates to:
-  /// **'Sr'**
+  /// **'Sr No.'**
   String get srNumber;
 
   /// No description provided for @communityC.
@@ -13850,25 +13850,25 @@ abstract class AppLocalizations {
   /// No description provided for @hscNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HSC Name'**
+  /// **'HSC'**
   String get hscNameHint;
 
   /// No description provided for @hscNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HSC Name'**
+  /// **'HSC'**
   String get hscNameLabel;
 
   /// No description provided for @hwcNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HWC Name'**
+  /// **'HWC'**
   String get hwcNameHint;
 
   /// No description provided for @hwcNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HWC Name'**
+  /// **'HWC'**
   String get hwcNameLabel;
 
   /// No description provided for @moveForward.
@@ -15244,6 +15244,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next anc due date'**
   String get nextancduedate;
+
+  /// No description provided for @householdUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Household updated successfully'**
+  String get householdUpdatedSuccessfully;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
