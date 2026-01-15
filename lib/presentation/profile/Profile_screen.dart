@@ -389,7 +389,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Expanded(
                 flex: 2,
                 child: Text(
-                  l10n?.srNo ?? "Sr No.",
+                  l10n?.srNumber ?? "Sr No.",
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -539,6 +539,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       decoration: InputDecoration(
                         hintText: l10n?.population ?? "Population",
+                        hintStyle: TextStyle(color: Colors.grey),
                         isDense: true,
                         fillColor: Colors.grey.shade200,
                         filled: true,

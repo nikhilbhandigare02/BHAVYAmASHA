@@ -1821,7 +1821,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noPreviousVisits => 'No previous visits found';
 
   @override
-  String get noRecordFound => 'No Record Found';
+  String get noRecordFound => 'No Record Found.';
 
   @override
   String get notAvailable => 'Not Available';
@@ -6757,7 +6757,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get area => 'Area';
 
   @override
-  String get srNumber => 'Sr';
+  String get srNumber => 'Sr No.';
 
   @override
   String get communityC => 'C - Community';
@@ -6901,16 +6901,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get present => 'Present?';
 
   @override
-  String get hscNameHint => 'HSC Name';
+  String get hscNameHint => 'HSC';
 
   @override
-  String get hscNameLabel => 'HSC Name';
+  String get hscNameLabel => 'HSC';
 
   @override
-  String get hwcNameHint => 'HWC Name';
+  String get hwcNameHint => 'HWC';
 
   @override
-  String get hwcNameLabel => 'HWC Name';
+  String get hwcNameLabel => 'HWC';
 
   @override
   String get moveForward => 'Move forward?';
@@ -7598,4 +7598,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nextancduedate => 'Next anc due date';
+
+  @override
+  String get householdUpdatedSuccessfully => 'Household updated successfully';
 }

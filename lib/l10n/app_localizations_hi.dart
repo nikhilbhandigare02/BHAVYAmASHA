@@ -2145,7 +2145,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get saveButton => 'संरक्षित करें';
 
   @override
-  String get saveSuccess => 'Form Submitted successfully';
+  String get saveSuccess => 'प्रपत्र सफलतापूर्वक संरक्षित किया गया';
 
   @override
   String get savingButton => 'SAVING...';
@@ -7598,4 +7598,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get nextancduedate => 'Next anc due date';
+
+  @override
+  String get householdUpdatedSuccessfully => 'घरेलू सफलतापूर्वक अपडेट किया गया';
 }
