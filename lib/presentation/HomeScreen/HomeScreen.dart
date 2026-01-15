@@ -489,10 +489,20 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         whereArgs: [currentUserKey],
       );
 
-      final finalHouseholdKeys = getFinalHouseholdKeys(
+     /* final finalHouseholdKeys = getFinalHouseholdKeys(
         households: households,
         beneficiaries: beneficiaries,
-      );
+      );*/
+
+       Set<String> unique_key = {};
+
+      for (final hh in households) {
+        final hhRefKey = (hh['unique_key'] ?? '').toString();
+        if (hhRefKey.isEmpty) continue;
+        unique_key.add(hhRefKey);
+      }
+
+      final finalHouseholdKeys = unique_key;
 
 
       /// ---------- MAP HOUSEHOLD -> CONFIGURED HEAD ----------

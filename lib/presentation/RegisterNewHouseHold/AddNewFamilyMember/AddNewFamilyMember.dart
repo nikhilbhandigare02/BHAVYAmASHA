@@ -2569,7 +2569,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
                                                     getLabel: (s) {
                                                       if (s == fatherNotAddedKey) {
-                                                        return 'Father name not added yet';
+                                                        return 'Father is not added yet';
                                                       }
                                                       return s;
                                                     },
@@ -2687,7 +2687,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
                                                 getLabel: (s) {
                                                   if (s == motherNotAddedKey) {
-                                                    return 'Mother name not added yet';
+                                                    return 'Mother is not added yet';
                                                   }
                                                   return s;
                                                 },
@@ -2711,7 +2711,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     if (_motherOption == null ||
                                                         _motherOption.isEmpty ||
                                                         _motherOption == l.select) {
-                                                      return 'Mother name is not selected';
+                                                      return 'Mother is is not selected';
                                                     }
                                                   } else {
                                                     if (_motherOption == l.select || _motherOption.isEmpty) {
@@ -2846,7 +2846,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
 
                                                     getLabel: (s) {
                                                       if (s == fatherNotAddedKey) {
-                                                        return 'Father name not added yet';
+                                                        return 'Father is not added yet';
                                                       }
                                                       return s;
                                                     },

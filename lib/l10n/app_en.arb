@@ -539,6 +539,7 @@
   "listFamilySurvey": "Family Survey List",
   "listHBNC": "HBNC List",
   "listRoutineImmunization": "Routine Immunization (RI)",
+  "lastSurveyList": "Last Survey date",
   "lmpDateLabel": "Date of last menstrual period (LMP) *",
   "loginFailed": "Login Failed",
   "loginToContinue": "Login to continue",
@@ -2617,5 +2618,8 @@
   "typeofschool": "Type of school",
   "government": "Government",
   "private": "private",
-  "selectChildren":"Select Children"
+  "selectChildren":"Select Children",
+  "nextancduedate":"Next anc due date"
+
+
 }

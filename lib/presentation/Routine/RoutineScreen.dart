@@ -91,31 +91,61 @@ import 'package:sizer/sizer.dart';
       return rows;
     }
   
-    Future<String> _getLastVisitDateFromFollowup(String beneficiaryRefKey, String formRefKey) async {
+
+  Future<Map<String, dynamic>> _getVisitCount(String beneficiaryId) async {
     try {
-      final db = await DatabaseProvider.instance.database;
-      
-      final rows = await db.query(
-        'followup_form_data',
-        columns: ['created_date_time'],
-        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
-        whereArgs: [beneficiaryRefKey, formRefKey],
-        orderBy: 'created_date_time DESC',
-        limit: 1,
-      );
-      
-      if (rows.isNotEmpty) {
-        final createdDateTime = rows.first['created_date_time']?.toString();
-        if (createdDateTime != null && createdDateTime.isNotEmpty) {
-          return _formatDateFromString(createdDateTime);
-        }
+      if (beneficiaryId.isEmpty) {
+        return {'count': 0, 'isHighRisk': false};
       }
-      
-      return 'Not Available';
+
+      final result = await LocalStorageDao.instance.getANCVisitCount(beneficiaryId);
+      print('✅ Visit details for $beneficiaryId: $result');
+      return result;
     } catch (e) {
-      print('Error getting last visit date from followup: $e');
-      return 'Not Available';
+      print('❌ Error in _getVisitCount for $beneficiaryId: $e');
+      return {'count': 0, 'isHighRisk': false};
     }
+  }
+
+  String _getNextAncDueDate(DateTime? lmpDate, int visitCount) {
+    if (lmpDate == null) return '${AppLocalizations.of(context)!.nextancduedate}: ${AppLocalizations.of(context)!.na}';
+    
+    final t = AppLocalizations.of(context);
+    final now = DateTime.now();
+    final ancRanges = _calculateAncDateRanges(lmpDate);
+    
+    String? nextAncKey;
+    String? nextAncLabel;
+    
+    if (visitCount == 0) {
+      // First ANC is due
+      nextAncKey = '1st_anc_end';
+      nextAncLabel = t!.nextancduedate;
+    } else if (visitCount == 1) {
+      // Second ANC is due
+      nextAncKey = '2nd_anc_end';
+      nextAncLabel = t!.nextancduedate;
+    } else if (visitCount == 2) {
+      // Third ANC is due
+      nextAncKey = '3rd_anc_end';
+      nextAncLabel = t!.nextancduedate;
+    } else if (visitCount == 3) {
+      // Fourth ANC is due
+      nextAncKey = '4th_anc_end';
+      nextAncLabel = t!.nextancduedate;
+    } else {
+      nextAncKey = '4th_anc_end';
+      nextAncLabel = t!.nextancduedate;
+    }
+    
+    if (nextAncKey != null && ancRanges.containsKey(nextAncKey)) {
+      final dueDate = ancRanges[nextAncKey];
+      if (dueDate != null) {
+        return '$nextAncLabel: ${_formatDate(dueDate)}';
+      }
+    }
+    
+    return '${t!.nextancduedate}: ${t!.na}';
   }
 
   Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {
@@ -147,77 +177,196 @@ import 'package:sizer/sizer.dart';
       if (input == null || input.isEmpty) return '';
       return input.length <= 11 ? input : input.substring(input.length - 11);
     }
-  
-    Future<Map<String, dynamic>> _processPerson(Map<String, dynamic> row, Map<String, dynamic> info, {bool isPregnant = false}) async {
+
+
+    Future<DateTime?> _extractLmpDate(Map<String, dynamic> data) async {
       try {
-        final beneficiaryId = row['unique_key']?.toString() ?? '';
-        if (beneficiaryId.isEmpty) return {};
-  
-        final name = info['memberName'] ?? info['headName'] ?? 'Unknown';
-        final age = _calculateAge(info['dob']);
-        final mobile = info['mobileNo'] ?? '';
-        final lmp = info['lmp']?.toString();
-  
-        Map<String, DateTime> ancDates = {};
-        String nextVisit = 'N/A';
-        if (lmp != null && lmp.isNotEmpty) {
-          try {
-            final lmpDate = DateTime.tryParse(lmp.split('T')[0]);
+        // First try to get LMP from beneficiary_info (beneficiaries_new table)
+        dynamic rawInfo = data['beneficiary_info'];
+        Map<String, dynamic> info;
+
+        if (rawInfo is String && rawInfo.isNotEmpty) {
+          info = jsonDecode(rawInfo) as Map<String, dynamic>;
+        } else if (rawInfo is Map) {
+          info = Map<String, dynamic>.from(rawInfo as Map);
+        } else {
+          info = <String, dynamic>{};
+        }
+
+        final lmpRaw = info['lmp']?.toString();
+        if (lmpRaw != null && lmpRaw.isNotEmpty) {
+          String dateStr = lmpRaw;
+          if (dateStr.contains('T')) {
+            dateStr = dateStr.split('T')[0];
+          }
+          final lmpDate = DateTime.tryParse(dateStr);
+          if (lmpDate != null) {
+            print('✅ Found LMP date from beneficiaries_new: ${_formatDate(lmpDate)}');
+            return lmpDate;
+          }
+        }
+
+        // Fallback: try to get from _rawRow if available
+        final rawRow = data['_rawRow'] as Map<String, dynamic>?;
+        if (rawRow != null) {
+          rawInfo = rawRow['beneficiary_info'];
+          if (rawInfo is String && rawInfo.isNotEmpty) {
+            info = jsonDecode(rawInfo) as Map<String, dynamic>;
+          } else if (rawInfo is Map) {
+            info = Map<String, dynamic>.from(rawInfo as Map);
+          } else {
+            info = <String, dynamic>{};
+          }
+
+          final lmpRaw = info['lmp']?.toString();
+          if (lmpRaw != null && lmpRaw.isNotEmpty) {
+            String dateStr = lmpRaw;
+            if (dateStr.contains('T')) {
+              dateStr = dateStr.split('T')[0];
+            }
+            final lmpDate = DateTime.tryParse(dateStr);
             if (lmpDate != null) {
-              ancDates = _calculateAncDateRanges(lmpDate);
-              nextVisit = _getNextVisitDate(ancDates);
+              print('✅ Found LMP date from _rawRow: ${_formatDate(lmpDate)}');
+              return lmpDate;
+            }
+          }
+        }
+
+        // If not found in beneficiaries_new, check followup forms
+        print('⚠️ No LMP found in beneficiaries_new, checking followup forms...');
+        final lmpFromFollowup = await _getLmpFromFollowupForm(data);
+        if (lmpFromFollowup != null) {
+          print('✅ Found LMP date from followup form: ${_formatDate(lmpFromFollowup)}');
+          return lmpFromFollowup;
+        }
+
+        print('⚠️ No LMP date found in beneficiaries_new or followup forms');
+        return null;
+      } catch (e) {
+        print('⚠️ Error extracting LMP date: $e');
+        return null;
+      }
+    }
+
+    Future<DateTime?> _getLmpFromFollowupForm(Map<String, dynamic> data) async {
+      try {
+        final benId = data['BeneficiaryID']?.toString() ??
+            data['unique_key']?.toString() ??
+            (data['_rawRow'] is Map
+                ? (data['_rawRow'] as Map)['unique_key']?.toString()
+                : null);
+
+        final hhId = data['hhId']?.toString() ??
+            data['household_ref_key']?.toString() ??
+            (data['_rawRow'] is Map
+                ? (data['_rawRow'] as Map)['household_ref_key']?.toString()
+                : null);
+
+        if (benId == null || benId.isEmpty || hhId == null || hhId.isEmpty) {
+          print('⚠️ Missing beneficiary ID or household ID for followup form LMP lookup');
+          print('   benId: $benId');
+          print('   hhId: $hhId');
+          print('   data keys: ${data.keys}');
+          return null;
+        }
+
+        print('🔍 Looking for followup forms with benId: $benId, hhId: $hhId');
+
+        final dao = LocalStorageDao();
+        final forms = await dao.getFollowupFormsByHouseholdAndBeneficiary(
+          formType: FollowupFormDataTable.eligibleCoupleTrackingDue,
+          householdId: hhId,
+          beneficiaryId: benId,
+        );
+
+        if (forms.isEmpty) {
+          print('ℹ️ No eligible couple tracking due forms found for beneficiary');
+          return null;
+        }
+
+        print('📋 Found ${forms.length} followup forms to process');
+
+        for (final form in forms) {
+          final formJsonStr = form['form_json']?.toString();
+          final formHouseholdId = form['household_ref_key']?.toString();
+          final formBeneficiaryId = form['beneficiary_ref_key']?.toString();
+
+          print('📄 Processing form: household=$formHouseholdId, beneficiary=$formBeneficiaryId');
+
+          if (formJsonStr == null || formJsonStr.isEmpty) {
+            print('⚠️ Empty form_json, skipping');
+            continue;
+          }
+
+          try {
+            final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
+            print('🔍 Parsing followup form JSON: ${root.keys}');
+
+            String? lmpStr;
+
+            /// ✅ EXISTING CONDITION (DO NOT REMOVE)
+            final trackingData = root['eligible_couple_tracking_due_from'];
+            if (trackingData is Map) {
+              final val = trackingData['lmp_date']?.toString();
+              if (val != null && val.isNotEmpty) {
+                lmpStr = val;
+                print('✅ Found LMP in eligible_couple_tracking_due_from: $lmpStr');
+              }
+            }
+
+            /// ✅ NEW CONDITION (ADDED SAFELY)
+            if ((lmpStr == null || lmpStr.isEmpty) &&
+                root['form_data'] is Map) {
+              final formData = root['form_data'] as Map<String, dynamic>;
+              final val = formData['lmp_date']?.toString();
+              // Check for null, empty, or just empty string
+              if (val != null && val.isNotEmpty && val != '""') {
+                lmpStr = val;
+                print('✅ Found LMP in form_data: $lmpStr');
+              } else {
+                print('⚠️ LMP date in form_data is empty or invalid: $val');
+              }
+            }
+
+            if (lmpStr != null && lmpStr.isNotEmpty) {
+              try {
+                // Handle different date formats
+                String dateStr = lmpStr;
+                if (dateStr.contains('T')) {
+                  // For ISO 8601 format, extract just the date part or parse as-is
+                  try {
+                    final lmpDate = DateTime.parse(dateStr);
+                    print('✅ Successfully parsed LMP date: $lmpDate');
+                    return lmpDate;
+                  } catch (e) {
+                    // If full parsing fails, try date part only
+                    dateStr = dateStr.split('T')[0];
+                    print('⚠️ Full date parsing failed, trying date part only: $dateStr');
+                  }
+                }
+
+                final lmpDate = DateTime.parse(dateStr);
+                print('✅ Successfully parsed LMP date: $lmpDate');
+                return lmpDate;
+              } catch (e) {
+                print('⚠️ Error parsing LMP date "$lmpStr": $e');
+              }
+            } else {
+              print('⚠️ No LMP date found in form data');
             }
           } catch (e) {
-            print('Error calculating ANC dates: $e');
+            print('⚠️ Error parsing followup form JSON: $e');
           }
         }
-  
-        final syncStatus = await _getSyncStatus(beneficiaryId);
-  
-        return {
-          'BeneficiaryID': beneficiaryId,
-          'unique_key': beneficiaryId,
-          'Name': name,
-          'age': age,
-          'gender': 'Female',
-          'mobile': mobile,
-          'lmpDate': lmp,
-          'ancDates': ancDates,
-          'nextVisit': nextVisit,
-          'badge': 'ANC',
-          'is_synced': syncStatus['is_synced'] ?? false,
-          '_rawRow': row,
-        };
-      } catch (e) {
-        print('Error processing person: $e');
-        return {};
-      }
-    }
-  
-    Future<String?> _extractLmpDate(Map<String, dynamic> ancDue) async {
-      try {
-        // Try to extract LMP from the form_json or other fields
-        final formJson = ancDue['form_json']?.toString();
-        if (formJson != null && formJson.isNotEmpty) {
-          final decoded = jsonDecode(formJson) as Map<String, dynamic>;
-          // Check different possible structures for LMP
-          if (decoded['form_data'] != null) {
-            final formData = decoded['form_data'] as Map<String, dynamic>;
-            return formData['lmp']?.toString();
-          } else if (decoded['hbyc_form'] != null) {
-            final hbycForm = decoded['hbyc_form'] as Map<String, dynamic>;
-            return hbycForm['lmp']?.toString();
-          }
-        }
-        
-        // Fallback: try to get from beneficiary info if available
+
+        print('ℹ️ No LMP date found in any eligible couple tracking due forms');
         return null;
       } catch (e) {
-        print('Error extracting LMP date: $e');
+        print('❌ Error loading LMP from followup form: $e');
         return null;
       }
     }
-  
+
     Future<void> _loadPregnantWomen() async {
       if (!mounted) return;
   
@@ -275,11 +424,29 @@ import 'package:sizer/sizer.dart';
                     info['mobile_no']?.toString().trim() ??
                     '';
 
-            // ---------------- GET LAST VISIT DATE ----------------
-            String lastVisitDate = 'Not Available';
-            if (isAncDue) {
-              // For ANC due, get last visit from followup_form_data table
-              lastVisitDate = await _getLastVisitDateFromFollowup(beneficiaryId, FollowupFormDataTable.ancDueRegistration);
+            // ---------------- GET NEXT ANC DUE DATE ----------------
+            String nextAncDueDate = 'N/A';
+            try {
+              // Get visit count for this beneficiary
+              final visitData = await _getVisitCount(beneficiaryId);
+              final visitCount = visitData['count'] ?? 0;
+              
+              // Extract LMP date from beneficiary info first
+              DateTime? lmpDate;
+              final lmpStr = info['lmp']?.toString();
+              if (lmpStr != null && lmpStr.isNotEmpty) {
+                lmpDate = DateTime.tryParse(lmpStr.split('T')[0]);
+              }
+              
+              // If LMP not found in beneficiary info, try to get from followup forms
+              if (lmpDate == null) {
+                lmpDate = await _extractLmpDate(row);
+              }
+              
+              // Calculate next ANC due date
+              nextAncDueDate = _getNextAncDueDate(lmpDate, visitCount);
+            } catch (e) {
+              print('Error calculating next ANC due date: $e');
             }
 
             pregnantWomen.add({
@@ -292,7 +459,7 @@ import 'package:sizer/sizer.dart';
               'isPregnant': isPregnant,
               'isAncDue': isAncDue,
               'RegistrationDate': row['created_date_time'],
-              'lastVisitDate': lastVisitDate,
+              'nextAncDueDate': nextAncDueDate,
               '_rawRow': row,
               'badge': isAncDue ? 'ANC' : 'PW',
             });
@@ -313,8 +480,21 @@ import 'package:sizer/sizer.dart';
             continue;
           }
 
-          // ---------------- GET LAST VISIT DATE ----------------
-          final lastVisitDate = await _getLastVisitDateFromFollowup(beneficiaryId, FollowupFormDataTable.ancDueRegistration);
+          // ---------------- GET NEXT ANC DUE DATE ----------------
+          String nextAncDueDate = 'N/A';
+          try {
+            // Get visit count for this beneficiary
+            final visitData = await _getVisitCount(beneficiaryId);
+            final visitCount = visitData['count'] ?? 0;
+            
+            // Extract LMP date from ancDue record (now returns DateTime directly)
+            final lmpDate = await _extractLmpDate(ancDue);
+            
+            // Calculate next ANC due date
+            nextAncDueDate = _getNextAncDueDate(lmpDate, visitCount);
+          } catch (e) {
+            print('Error calculating next ANC due date for ANC due record: $e');
+          }
 
           pregnantWomen.add({
             'BeneficiaryID': beneficiaryId,
@@ -326,7 +506,7 @@ import 'package:sizer/sizer.dart';
             'isPregnant': false,
             'isAncDue': true,
             'RegistrationDate': ancDue['created_date_time'],
-            'lastVisitDate': lastVisitDate,
+            'nextAncDueDate': nextAncDueDate,
             '_rawRow': ancDue,
             'badge': 'ANC',
           });
@@ -1268,7 +1448,6 @@ import 'package:sizer/sizer.dart';
                             ),
                             const SizedBox(height: 2),
                             if (isChildData) ...[
-                              // Show last visit date for child data
                               Text(
                                 'Last visit: ${item['LastVisitDate'] ?? '-'}',
                                 style:  TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
@@ -1278,21 +1457,15 @@ import 'package:sizer/sizer.dart';
                             ] else if (isPwData) ...[
                               Text(
                                 item['badge'] == 'ANC'
-                                  ? '${l10n!.lastVisitDate} ${item['nextVisit'] ?? l10n!.na}'
+                                  ? item['nextAncDueDate'] ?? 'N/A'
                                   : item['badge'] == 'PW'
                                     ? 'Pregnant Woman'
-                                    : 'Next Visits: ${item['nextVisit'] ?? 'N/A'}',
-                                style:  TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Last visit: ${item['lastVisitDate'] ?? 'Not Available'}',
+                                    : item['nextAncDueDate'] ?? 'N/A',
                                 style:  TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
                               ),
                               const SizedBox(height: 2),
 
                             ] else ...[
-                              // Show next visit for ANC or other data
                               Text(
                                 item['badge'] == 'ANC'
                                   ? '${l10n!.antenatal} ${item['nextVisit'] ?? '-'}'

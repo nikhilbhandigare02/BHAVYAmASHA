@@ -52,34 +52,10 @@ class ApiDropdown<T> extends StatefulWidget {
 
 class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
   int? _lastOpenedTick;
-  T? _selectedItem;
+
   String _toTitleCase(String text) {
     return text;
   }
-
-  bool _isEnglishKey(String value) {
-    // english keys contain only lowercase letters, numbers and underscores
-    return RegExp(r'^[a-z0-9_]+$').hasMatch(value);
-  }
-
-  T? _getMatchedItem() {
-    if (widget.value == null) return null;
-
-    final rawValue = widget.value.toString();
-
-    // 🔥 If value is NOT an English key (e.g. Hindi), show as-is
-    if (!_isEnglishKey(rawValue)) {
-      return null;
-    }
-
-    for (final item in widget.items) {
-      if (_normalize(widget.getLabel(item)) == _normalize(rawValue)) {
-        return item;
-      }
-    }
-    return null;
-  }
-
 
   Widget? get _labelWidget {
     if (widget.labelText == null || widget.labelText!.isEmpty) return null;
@@ -113,115 +89,15 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
     );
   }
 
-  T? _resolveSelectedItem() {
-    final rawValue = widget.value?.toString();
-    if (rawValue == null) return null;
-
-    final normalizedRaw = _normalize(rawValue);
-
-    for (final item in widget.items) {
-      final key = item.toString();
-      final label = widget.getLabel(item);
-
-      if (_normalize(key) == normalizedRaw ||
-          _normalize(label) == normalizedRaw) {
-        return item;
-      }
-    }
-    return null;
-  }
-
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-
-// 🔥 keep internal state in sync with API value
-    /*_selectedItem ??= matchedItem;*/
-    _selectedItem = _resolveSelectedItem();
-
     final TextStyle inputStyle = TextStyle(
       fontSize: ResponsiveFont.getInputFontSize(context),
       fontWeight: FontWeight.w500,
       color: AppColors.onSurfaceVariant,
       height: 1,
     );
-
-    /*String displayText() {
-      final rawValue = widget.value?.toString();
-      if (rawValue == null) {
-        return widget.hintText ?? l10n.selectOptionLabel;
-      }
-
-      // 1️⃣ If already localized (Hindi), return as-is
-      if (!_isEnglishKey(rawValue)) {
-        return rawValue;
-      }
-
-      // 2️⃣ Try to find matching item safely
-      T? matchedItem;
-      for (final item in widget.items) {
-        if (_normalize(widget.getLabel(item)) == _normalize(rawValue)) {
-          matchedItem = item;
-          break;
-        }
-      }
-
-      if (matchedItem != null) {
-        return widget.getLabel(matchedItem);
-      }
-
-      // 3️⃣ Fallback
-      return rawValue;
-    }*/
-
-    /*String displayText() {
-      final rawValue = widget.value;
-      if (rawValue == null) {
-        return widget.hintText ?? l10n.selectOptionLabel;
-      }
-
-      for (final item in widget.items) {
-        // Compare using value/key, NOT label
-        if (item.toString() == rawValue.toString()) {
-          // Always return localized label
-          return widget.getLabel(item);
-        }
-      }
-
-      // Fallback (already localized or legacy)
-      return rawValue.toString();
-    }*/
-
-    String displayText() {
-      final rawValue = widget.value?.toString();
-      if (rawValue == null) {
-        return widget.hintText ?? l10n.selectOptionLabel;
-      }
-
-      final normalizedRaw = _normalize(rawValue);
-
-      for (final item in widget.items) {
-        final key = item.toString();
-        final label = widget.getLabel(item);
-
-        // 1️⃣ Match by key
-        if (_normalize(key) == normalizedRaw) {
-          return label;
-        }
-
-        // 2️⃣ Match by localized label (Hindi / English)
-        if (_normalize(label) == normalizedRaw) {
-          return label;
-        }
-      }
-
-      // 3️⃣ Fallback (already localized or unknown)
-      return rawValue;
-    }
-
-
-
 
     return FormField<T>(
       initialValue: widget.value,
@@ -251,9 +127,9 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
                     onTap: widget.readOnly || widget.onChanged == null
                         ? null
                         : () {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      _showSelectDialog(context, field);
-                    },
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            _showSelectDialog(context, field);
+                          },
                     borderRadius: BorderRadius.circular(4),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
@@ -281,33 +157,19 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
                                     child: _labelWidget!,
                                   ),
                                 const SizedBox(height: 3),
-
-
-
                                 Text(
-                                  displayText(),
+                                  widget.value != null
+                                      ? widget.getLabel(widget.value as T)
+                                      : (widget.hintText ?? l10n.selectOptionLabel),
                                   style: inputStyle.copyWith(
                                     color: widget.value != null
                                         ? AppColors.onSurfaceVariant
                                         : AppColors.grey,
                                     fontWeight: FontWeight.w400,
-                                    fontSize: ResponsiveFont.getHintFontSize(context),
+                                    fontSize: ResponsiveFont.getHintFontSize(context)
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                /*Text(
-                                  widget.value != null
-                                      ? widget.getLabel(widget.value as T)
-                                      : (widget.hintText ?? l10n.selectOptionLabel),
-                                  style: inputStyle.copyWith(
-                                      color: widget.value != null
-                                          ? AppColors.onSurfaceVariant
-                                          : AppColors.grey,
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: ResponsiveFont.getHintFontSize(context)
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),*/
                               ],
                             ),
                           ),
@@ -347,32 +209,9 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
     }
   }
 
-  String _normalize(String value) {
-    return value
-        .toLowerCase()
-        .replaceAll('_', ' ')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
-  }
-
   Future<void> _showSingleSelectDialog(
       BuildContext context, FormFieldState<T> field) async {
-    // T? tempValue = widget.items.contains(widget.value) ? widget.value : null;
-
-    /*T? tempValue;
-
-    if (widget.value != null) {
-      for (final item in widget.items) {
-        if (_normalize(widget.getLabel(item)) ==
-            _normalize(widget.value.toString())) {
-          tempValue = item;
-          break;
-        }
-      }
-    }*/
-
-    T? tempValue = _resolveSelectedItem();
-
+    T? tempValue = widget.items.contains(widget.value) ? widget.value : null;
     final l10n = AppLocalizations.of(context);
 
 
@@ -409,35 +248,35 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
                 mainAxisSize: MainAxisSize.min,
                 children: widget.items.isEmpty
                     ? [
-                  ListTile(
-                    leading: const Icon(Icons.radio_button_unchecked, color: Colors.grey),
-                    title: Text(
-                      widget.emptyOptionText ?? ('No options found'),
-                      style: TextStyle(
-                        fontSize: widget.labelFontSize ?? 15.sp,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    enabled: false,
-                    contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
-                    dense: true,
-                    visualDensity: const VisualDensity(vertical: -4),
-                  )
-                ]
+                        ListTile(
+                          leading: const Icon(Icons.radio_button_unchecked, color: Colors.grey),
+                          title: Text(
+                            widget.emptyOptionText ?? ('No options found'),
+                            style: TextStyle(
+                              fontSize: widget.labelFontSize ?? 15.sp,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          enabled: false,
+                          contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
+                          dense: true,
+                          visualDensity: const VisualDensity(vertical: -4),
+                        )
+                      ]
                     : widget.items.map((item) {
-                  return RadioListTile<T>(
-                    title: Text(
-                      widget.convertToTitleCase ? _toTitleCase(widget.getLabel(item)) : widget.getLabel(item),
-                      style: TextStyle(fontSize: widget.labelFontSize ?? 15.sp),
-                    ),
-                    value: item,
-                    groupValue: tempValue,
-                    onChanged: (val) => setState(() => tempValue = val),
-                    contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
-                    dense: true,
-                    visualDensity: const VisualDensity(vertical: -4),
-                  );
-                }).toList(),
+                        return RadioListTile<T>(
+                          title: Text(
+                            widget.convertToTitleCase ? _toTitleCase(widget.getLabel(item)) : widget.getLabel(item),
+                            style: TextStyle(fontSize: widget.labelFontSize ?? 15.sp),
+                          ),
+                          value: item,
+                          groupValue: tempValue,
+                          onChanged: (val) => setState(() => tempValue = val),
+                          contentPadding: EdgeInsets.symmetric(vertical: 0.2.h),
+                          dense: true,
+                          visualDensity: const VisualDensity(vertical: -4),
+                        );
+                      }).toList(),
               ),
             ),
           ),
@@ -454,7 +293,7 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
                     Navigator.pop(context);
                   },
                   child: Text(
-                    l10n?.cancel ?? 'CANCEL',
+                      l10n?.cancel ?? 'CANCEL',
                     style: TextStyle(
                       fontSize: widget.labelFontSize ?? 14.sp,
                       fontWeight: FontWeight.w600,
@@ -465,16 +304,9 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
                 TextButton(
                   onPressed: () {
                     if (tempValue != null && widget.onChanged != null) {
-                      setState(() {
-                        _selectedItem = tempValue; // 🔥 update display immediately
-                      });
                       widget.onChanged!(tempValue);
                       field.didChange(tempValue);
                     }
-                    /*if (tempValue != null && widget.onChanged != null) {
-                      widget.onChanged!(tempValue);
-                      field.didChange(tempValue);
-                    }*/
                     FocusManager.instance.primaryFocus?.unfocus();
                     FocusScope.of(context).unfocus();
                     FocusScope.of(context).requestFocus(FocusNode());
@@ -504,7 +336,7 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
       BuildContext context, FormFieldState<T> field) async {
     List<T> tempValues = List<T>.from(widget.selectedValues);
 
-    final l10n = AppLocalizations.of(context);
+  final l10n = AppLocalizations.of(context);
     await showDialog<List<T>>(
       context: context,
       barrierDismissible: false,
@@ -518,7 +350,7 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
               Text(
                 (widget.labelText ?? l10n!.selectOption).replaceAll(' *', ''),
                 style: TextStyle(
-                  fontSize: widget.labelFontSize ?? 16.sp,
+                  fontSize: widget.labelFontSize ?? 16.sp,  
                   fontWeight: FontWeight.w600,
                   color: Colors.black,
                 ),

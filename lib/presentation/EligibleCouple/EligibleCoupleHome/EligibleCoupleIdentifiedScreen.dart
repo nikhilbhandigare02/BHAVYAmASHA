@@ -189,10 +189,8 @@ class _EligibleCoupleIdentifiedScreenState
           final beneficiaryKey = row['unique_key']?.toString();
           if (beneficiaryKey == null || beneficiaryKey.isEmpty) continue;
 
-          // ❌ Avoid duplicates
           if (processedBeneficiaries.contains(beneficiaryKey)) continue;
 
-          // 🔹 Parse JSON fields
           final beneficiaryInfoStr = row['beneficiary_info']?.toString() ?? '{}';
           final Map<String, dynamic> info =
           Map<String, dynamic>.from(jsonDecode(beneficiaryInfoStr));
@@ -202,7 +200,6 @@ class _EligibleCoupleIdentifiedScreenState
           final maritalStatus =
               info['maritalStatus']?.toString().toLowerCase() ?? '';
 
-          // ❌ Skip child
           if (memberType == 'child') continue;
 
           // ❌ Skip unmarried

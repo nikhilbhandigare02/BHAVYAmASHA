@@ -192,24 +192,24 @@ class _HouseHold_BeneficiaryScreenState
         final isFemale = gender == 'female' || gender == 'f';
         final richId =
             info['RichIDChanged']?.toString() ??
-            info['richIdChanged']?.toString() ??
-            info['richId']?.toString() ??
-            info['Rich_id']?.toString() ??
-            '';
+                info['richIdChanged']?.toString() ??
+                info['richId']?.toString() ??
+                info['Rich_id']?.toString() ??
+                '';
 
         final name =
             info['memberName']?.toString() ??
-            info['name']?.toString() ??
-            info['headName']?.toString() ??
-            info['member_name']?.toString() ??
-            info['memberNameLocal']?.toString() ??
-            '';
+                info['name']?.toString() ??
+                info['headName']?.toString() ??
+                info['member_name']?.toString() ??
+                info['memberNameLocal']?.toString() ??
+                '';
 
         // Get relation
         final relation =
             info['relation']?.toString() ??
-            info['relation_to_head']?.toString() ??
-            'Member';
+                info['relation_to_head']?.toString() ??
+                'Member';
 
         // Create card for this record
         final card = <String, dynamic>{
@@ -220,21 +220,21 @@ class _HouseHold_BeneficiaryScreenState
           'Name': name,
           'Age|Gender': _formatAgeGender(info['dob'], info['gender']),
           'Mobileno.':
-              info['mobileNo']?.toString() ??
+          info['mobileNo']?.toString() ??
               info['mobile']?.toString() ??
               info['mobile_number']?.toString() ??
               '',
           'Relation': relation,
           'MaritalStatus':
-              info['maritalStatus']?.toString() ??
+          info['maritalStatus']?.toString() ??
               info['marital_status']?.toString() ??
               '',
           'FatherName':
-              info['fatherName']?.toString() ??
+          info['fatherName']?.toString() ??
               info['father_name']?.toString() ??
               '',
           'MotherName':
-              info['motherName']?.toString() ??
+          info['motherName']?.toString() ??
               info['mother_name']?.toString() ??
               '',
           'WifeName': info['wifeName']?.toString() ?? info['wife_name']?.toString() ?? info['wife']?.toString() ?? info['spouse_name']?.toString() ?? '',
@@ -272,6 +272,34 @@ class _HouseHold_BeneficiaryScreenState
         headerMohalla ??= info['mohalla']?.toString();
       }
 
+      final List<String> relationOrder = [
+        'self',
+        'family head',
+        'wife',
+        'father',
+        'mother',
+        'son',
+        'daughter',
+        'father in law',
+        'mother in law',
+        'neighbour',
+        'relative',
+        'other',
+      ];
+
+      _beneficiaries.sort((a, b) {
+        final relationA = normalizeRelation(a['Relation']);
+        final relationB = normalizeRelation(b['Relation']);
+
+        final indexA = relationOrder.indexOf(relationA);
+        final indexB = relationOrder.indexOf(relationB);
+
+        final safeIndexA = indexA == -1 ? relationOrder.length : indexA;
+        final safeIndexB = indexB == -1 ? relationOrder.length : indexB;
+
+        return safeIndexA.compareTo(safeIndexB);
+      });
+
       if (mounted) {
         setState(() {
           _beneficiaries = List<Map<String, dynamic>>.from(beneficiaries);
@@ -287,6 +315,15 @@ class _HouseHold_BeneficiaryScreenState
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  String normalizeRelation(dynamic value) {
+    return value
+        ?.toString()
+        .toLowerCase()
+        .replaceAll('_', ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim() ?? '';
   }
 
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
@@ -422,7 +459,7 @@ class _HouseHold_BeneficiaryScreenState
               controller: _searchCtrl,
               decoration: InputDecoration(
                 hintText:
-                    l10n?.householdBeneficiarySearch ??
+                l10n?.householdBeneficiarySearch ??
                     'Household Beneficiary Search',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
@@ -469,38 +506,38 @@ class _HouseHold_BeneficiaryScreenState
           // List
           _isLoading
               ? const Expanded(
-                  child: Center(child: CircularProgressIndicator()),
-                )
+            child: Center(child: CircularProgressIndicator()),
+          )
               : _filtered.isEmpty
               ? Expanded(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        _beneficiaries.isEmpty
-                            ? l10n?.noBeneficiariesFoundAddNew ??
-                                  'No beneficiaries found. Add a new beneficiary to get started.'
-                            : l10n?.noMatchingBeneficiariesFound ??
-                                  'No matching beneficiaries found.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                      ),
-                    ),
-                  ),
-                )
-              : Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: _loadBeneficiaries,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                      itemCount: _filtered.length,
-                      itemBuilder: (context, index) {
-                        final data = _filtered[index];
-                        return _householdCard(context, data);
-                      },
-                    ),
-                  ),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  _beneficiaries.isEmpty
+                      ? l10n?.noBeneficiariesFoundAddNew ??
+                      'No beneficiaries found. Add a new beneficiary to get started.'
+                      : l10n?.noMatchingBeneficiariesFound ??
+                      'No matching beneficiaries found.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 ),
+              ),
+            ),
+          )
+              : Expanded(
+            child: RefreshIndicator(
+              onRefresh: _loadBeneficiaries,
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                itemCount: _filtered.length,
+                itemBuilder: (context, index) {
+                  final data = _filtered[index];
+                  return _householdCard(context, data);
+                },
+              ),
+            ),
+          ),
 
           SafeArea(
             child: Padding(
@@ -513,8 +550,8 @@ class _HouseHold_BeneficiaryScreenState
                 height: 35,
                 child: RoundButton(
                   title:
-                      (l10n?.addNewBeneficiaryButton ?? 'Add New Beneficiary')
-                          .toUpperCase(),
+                  (l10n?.addNewBeneficiaryButton ?? 'Add New Beneficiary')
+                      .toUpperCase(),
                   color: AppColors.primary,
                   borderRadius: 8,
                   height: 50,
@@ -528,7 +565,7 @@ class _HouseHold_BeneficiaryScreenState
                     }
 
                     final head = _beneficiaries.firstWhere(
-                      (b) => b['Relation'] == 'Head',
+                          (b) => b['Relation'] == 'Head',
                       orElse: () => {
                         'Name': '',
                         'Gender': '',
@@ -537,7 +574,7 @@ class _HouseHold_BeneficiaryScreenState
                       },
                     );
                     final spouse = _beneficiaries.firstWhere(
-                      (b) => b['Relation'] == 'Spouse',
+                          (b) => b['Relation'] == 'Spouse',
                       orElse: () => {
                         'Name': '',
                         'Gender': '',
@@ -614,7 +651,7 @@ class _HouseHold_BeneficiaryScreenState
 
     // Get head and spouse info within this household
     final head = _beneficiaries.firstWhere(
-      (b) => b['Relation'] == 'Head',
+          (b) => b['Relation'] == 'Head',
       orElse: () => {
         'Name': '',
         'Gender': '',
@@ -623,7 +660,7 @@ class _HouseHold_BeneficiaryScreenState
       },
     );
     final spouse = _beneficiaries.firstWhere(
-      (b) => b['Relation'] == 'Spouse',
+          (b) => b['Relation'] == 'Spouse',
       orElse: () => {'Name': '', 'Gender': '', 'Age|Gender': ''},
     );
 
@@ -656,8 +693,8 @@ class _HouseHold_BeneficiaryScreenState
         : null;
     final String completeBeneficiaryId =
         raw?['unique_key']?.toString() ??
-        data['BeneficiaryID']?.toString() ??
-        '';
+            data['BeneficiaryID']?.toString() ??
+            '';
 
     return InkWell(
       onTap: () async {
@@ -673,7 +710,7 @@ class _HouseHold_BeneficiaryScreenState
             'isBeneficiary': true,
             'isEdit': true,
             'isMemberDetails':
-                true,
+            true,
             'beneficiaryId': completeBeneficiaryId,
             'hhId': data['hhId']?.toString() ?? '',
 
@@ -750,10 +787,10 @@ class _HouseHold_BeneficiaryScreenState
                       Expanded(
                         child: Text(
                           (data['hhId'] != null &&
-                                  data['hhId'].toString().length > 11)
+                              data['hhId'].toString().length > 11)
                               ? data['hhId'].toString().substring(
-                                  data['hhId'].toString().length - 11,
-                                )
+                            data['hhId'].toString().length - 11,
+                          )
                               : (data['hhId']?.toString() ?? ''),
                           style: TextStyle(
                             color: primary,
@@ -836,8 +873,8 @@ class _HouseHold_BeneficiaryScreenState
                           l10n?.beneficiaryIdLabel ?? 'Beneficiary ID',
                           (data['_raw']?['unique_key']?.toString().length ?? 0) > 11
                               ? data['_raw']['unique_key'].toString().substring(
-                                  data['_raw']['unique_key'].toString().length - 11,
-                                )
+                            data['_raw']['unique_key'].toString().length - 11,
+                          )
                               : (data['_raw']?['unique_key']?.toString() ?? ''),
                         ),
                       ),
@@ -874,9 +911,9 @@ class _HouseHold_BeneficiaryScreenState
                           ),
                         )
                       else if (isMale && !isChild)
-                        Expanded(
-                          child: _rowText(l10n?.mobileLabel ?? 'Mobile no.', data['Mobileno.'] ?? ''),
-                        ),
+                          Expanded(
+                            child: _rowText(l10n?.mobileLabel ?? 'Mobile no.', data['Mobileno.'] ?? ''),
+                          ),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -975,7 +1012,8 @@ class _HouseHold_BeneficiaryScreenState
                           ),
                         if (isFemale)
                           const SizedBox(width: 12),
-                        if (isFemale)
+                        if (isFemale && ( ((data['FatherName']?.toString().isNotEmpty == true) ||
+                            (data['SpouseName']?.toString().isNotEmpty == true))))
                           Expanded(
                             child: _rowText(
                               l10n?.rchIdLabel ?? 'RCH ID',

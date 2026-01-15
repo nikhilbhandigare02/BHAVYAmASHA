@@ -3323,6 +3323,12 @@ abstract class AppLocalizations {
   /// **'Routine Immunization (RI)'**
   String get listRoutineImmunization;
 
+  /// No description provided for @lastSurveyList.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Survey date'**
+  String get lastSurveyList;
+
   /// No description provided for @lmpDateLabel.
   ///
   /// In en, this message translates to:
@@ -15232,6 +15238,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Children'**
   String get selectChildren;
+
+  /// No description provided for @nextancduedate.
+  ///
+  /// In en, this message translates to:
+  /// **'Next anc due date'**
+  String get nextancduedate;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

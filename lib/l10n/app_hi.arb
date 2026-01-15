@@ -429,6 +429,7 @@
   "listANC": "प्रसव पूर्व जांच",
   "listEligibleCoupleDue": "योग्य दम्पत्ती",
   "listFamilySurvey": "परिवार सर्वेक्षण सूची",
+  "lastSurveyList": "अंतिम सर्वेक्षण सूची",
   "listHBNC": "एचबीएनसी जांच",
   "listRoutineImmunization": "नियमित टीकाकरण (आरआई)",
   "lmpDateLabelText": "एलएमपी की तिथि",
@@ -2478,7 +2479,8 @@
   "selectChildren":"बच्चे का चयन करें",
   "typeofschool": "स्कूल के प्रकार",
   "government": "सरकारी",
-  "private": "प्राइवेट"
+  "private": "प्राइवेट",
+  "nextancduedate":"Next anc due date"
 }
 
 

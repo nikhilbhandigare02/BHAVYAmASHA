@@ -1635,6 +1635,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listRoutineImmunization => 'Routine Immunization (RI)';
 
   @override
+  String get lastSurveyList => 'Last Survey date';
+
+  @override
   String get lmpDateLabel => 'Date of last menstrual period (LMP) *';
 
   @override
@@ -7592,4 +7595,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectChildren => 'Select Children';
+
+  @override
+  String get nextancduedate => 'Next anc due date';
 }

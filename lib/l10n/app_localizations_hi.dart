@@ -1635,6 +1635,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get listRoutineImmunization => 'नियमित टीकाकरण (आरआई)';
 
   @override
+  String get lastSurveyList => 'अंतिम सर्वेक्षण सूची';
+
+  @override
   String get lmpDateLabel => 'अंतिम माहवारी की तिथि';
 
   @override
@@ -7592,4 +7595,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get selectChildren => 'बच्चे का चयन करें';
+
+  @override
+  String get nextancduedate => 'Next anc due date';
 }

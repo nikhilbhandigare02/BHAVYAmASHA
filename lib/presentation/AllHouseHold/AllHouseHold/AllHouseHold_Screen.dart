@@ -102,7 +102,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         orderBy: 'created_date_time DESC',
       );
 
-      // ------------------ FILTER BENEFICIARIES BASED ON HOUSEHOLDS ------------------
       final validHouseholdKeys = households
           .map((hh) => (hh['unique_key'] ?? '').toString())
           .where((k) => k.isNotEmpty)
@@ -110,7 +109,8 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
       final filteredRows = rows
           .where((b) =>
-          validHouseholdKeys.contains((b['household_ref_key'] ?? '').toString()))
+          validHouseholdKeys.contains(
+              (b['household_ref_key'] ?? '').toString()))
           .toList();
 
       final motherCareActivities = await db.rawQuery(
@@ -129,154 +129,19 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       final child1to2Map = <String, int>{};
       final child2to5Map = <String, int>{};
 
+      // ------------------ HEADS ------------------
       final headKeyByHousehold = <String, String>{};
       for (final hh in households) {
-        try {
-          final hhRefKey = (hh['unique_key'] ?? '').toString();
-          final headId = (hh['head_id'] ?? '').toString();
-          if (hhRefKey.isEmpty || headId.isEmpty) continue;
-          headKeyByHousehold[hhRefKey] = headId;
-        } catch (_) {}
+        final hhRefKey = (hh['unique_key'] ?? '').toString();
+        final headId = (hh['head_id'] ?? '').toString();
+        if (hhRefKey.isEmpty || headId.isEmpty) continue;
+        headKeyByHousehold[hhRefKey] = headId;
       }
 
-      final eligibleCoupleCountMap = <String, int>{};
+      final DateTime now = DateTime.now();
+      final sixMonthsAgo = now.subtract(const Duration(days: 180));
 
-      final beneficiariesByHousehold = <String, List<Map<String, dynamic>>>{};
-      for (final row in filteredRows) {
-        final householdRefKey = (row['household_ref_key'] ?? '').toString();
-        if (householdRefKey.isNotEmpty) {
-          beneficiariesByHousehold.putIfAbsent(householdRefKey, () => []);
-          beneficiariesByHousehold[householdRefKey]!.add(row);
-        }
-      }
-
-      // Calculate eligible couples for each household
-      for (final householdRefKey in beneficiariesByHousehold.keys) {
-        final householdBeneficiaries = beneficiariesByHousehold[householdRefKey]!;
-        int eligibleIndividualCount = 0;
-
-        debugPrint(
-            'AllHouseHold: Calculating eligible couples for household: $householdRefKey');
-
-        // Separate married males and females
-        final marriedMales = <Map<String, dynamic>>[];
-        final marriedFemales = <Map<String, dynamic>>[];
-
-        for (final beneficiary in householdBeneficiaries) {
-          try {
-            final rawInfo = beneficiary['beneficiary_info'];
-            Map<String, dynamic> info;
-            if (rawInfo is Map) info = Map<String, dynamic>.from(rawInfo);
-            else if (rawInfo is String && rawInfo.isNotEmpty)
-              info = Map<String, dynamic>.from(jsonDecode(rawInfo));
-            else info = <String, dynamic>{};
-
-            // Skip deleted/migrated/deceased
-            if (beneficiary['is_deleted'] == 1 ||
-                beneficiary['is_migrated'] == 1 ||
-                beneficiary['is_death'] == 1) continue;
-
-            // Marital status
-            final maritalStatus =
-            (info['maritalStatus'] ?? '').toString().toLowerCase();
-            if (maritalStatus != 'married') continue;
-
-            final gender = (info['gender'] ?? '').toString().toLowerCase();
-
-            if (gender == 'female') marriedFemales.add(beneficiary);
-            else if (gender == 'male') marriedMales.add(beneficiary);
-          } catch (_) {}
-        }
-
-        // Pregnant females count from ANC eligible map
-        final pregnantCount = ancEligibleCountMap[householdRefKey] ?? 0;
-        eligibleIndividualCount += pregnantCount;
-
-        // Married males
-        eligibleIndividualCount += marriedMales.length;
-
-        // Non-pregnant married females
-        final nonPregnantFemalesCount = marriedFemales.length - pregnantCount;
-        eligibleIndividualCount += nonPregnantFemalesCount;
-
-        eligibleCoupleCountMap[householdRefKey] = eligibleIndividualCount;
-      }
-
-      /// --------- AGGREGATE COUNTS ----------
-      for (final row in filteredRows) {
-        try {
-          final info = Map<String, dynamic>.from(
-              (row['beneficiary_info'] is String
-                  ? jsonDecode(row['beneficiary_info'])
-                  : row['beneficiary_info'] ?? {}));
-
-          final householdRefKey = (row['household_ref_key'] ?? '').toString();
-
-          // Check if this is a child record
-          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
-          final relation = info['relation']?.toString().toLowerCase() ?? '';
-          final isChild =
-              memberType == 'child' || relation == 'child' || memberType == 'Child' || relation == 'daughter';
-
-          // DOB processing for children and elderly
-          final dob = info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
-          if (dob != null && dob.toString().isNotEmpty) {
-            DateTime? birthDate;
-            String dateStr = dob.toString();
-            birthDate = DateTime.tryParse(dateStr);
-            if (birthDate == null) {
-              final timestamp = int.tryParse(dateStr);
-              if (timestamp != null && timestamp > 0) {
-                birthDate = DateTime.fromMillisecondsSinceEpoch(
-                  timestamp > 1000000000000 ? timestamp : timestamp * 1000,
-                  isUtc: true,
-                );
-              }
-            }
-
-            if (birthDate != null) {
-              final now = DateTime.now();
-              int years = now.year - birthDate.year;
-              int months = now.month - birthDate.month;
-              int days = now.day - birthDate.day;
-
-              if (days < 0) {
-                final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
-                final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
-                final daysInLastMonth = DateTime(lastMonthYear, lastMonth + 1, 0).day;
-                days += daysInLastMonth;
-                months--;
-              }
-
-              if (months < 0) {
-                months += 12;
-                years--;
-              }
-
-              int totalMonths = years * 12 + months;
-              if (days < 0) totalMonths--;
-
-              if (isChild) {
-                if (totalMonths >= 0 && totalMonths < 12)
-                  child0to1Map[householdRefKey] =
-                      (child0to1Map[householdRefKey] ?? 0) + 1;
-                else if (totalMonths >= 12 && totalMonths <= 25)
-                  child1to2Map[householdRefKey] =
-                      (child1to2Map[householdRefKey] ?? 0) + 1;
-                else if (totalMonths >= 26 && totalMonths < 60)
-                  child2to5Map[householdRefKey] =
-                      (child2to5Map[householdRefKey] ?? 0) + 1;
-              }
-
-              if (totalMonths >= 65 * 12)
-                elderlyCountMap[householdRefKey] =
-                    (elderlyCountMap[householdRefKey] ?? 0) + 1;
-            }
-          }
-        } catch (_) {}
-      }
-
-      // ---------- FAMILY HEAD FILTER AND MAPPING ----------
+      // ------------------ FAMILY HEAD FILTER ------------------
       final familyHeads = filteredRows.where((r) {
         try {
           final householdRefKey = (r['household_ref_key'] ?? '').toString();
@@ -284,6 +149,25 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
           if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
 
+          // ------------------ CHECK DATE ------------------
+          DateTime? createdDt;
+          DateTime? modifiedDt;
+
+          if (r['created_date_time'] != null &&
+              r['created_date_time'].toString().isNotEmpty) {
+            createdDt = DateTime.tryParse(r['created_date_time'].toString());
+          }
+          if (r['modified_date_time'] != null &&
+              r['modified_date_time'].toString().isNotEmpty) {
+            modifiedDt = DateTime.tryParse(r['modified_date_time'].toString());
+          }
+
+          final lastDate = modifiedDt ?? createdDt;
+          if (lastDate == null || lastDate.isAfter(sixMonthsAgo)) {
+            return false; // skip if within last 6 months
+          }
+
+          // ------------------ HEAD LOGIC ------------------
           final rawInfo = r['beneficiary_info'];
           Map<String, dynamic> info;
           if (rawInfo is Map)
@@ -310,12 +194,13 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         }
       }).toList();
 
-      // ---------- MAP TO UI ----------
+      // ------------------ MAP TO UI ------------------
       final mapped = familyHeads.map<Map<String, dynamic>>((r) {
         final info = Map<String, dynamic>.from(
-            (r['beneficiary_info'] is String
+            r['beneficiary_info'] is String
                 ? jsonDecode(r['beneficiary_info'])
-                : r['beneficiary_info'] ?? {}));
+                : r['beneficiary_info'] ?? {});
+
         final householdRefKey = (r['household_ref_key'] ?? '').toString();
         final membersForHousehold = filteredRows
             .where((b) =>
@@ -323,80 +208,10 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             b['is_deleted'] != 1)
             .toList();
 
-        int totalExpectedChildren = 0;
-        final Set<String> parentNames = <String>{};
-        final Set<int> childrenCounts = <int>{};
-
-        for (final b in membersForHousehold) {
-          final rawInfo = b['beneficiary_info'];
-          Map<String, dynamic> bi;
-          if (rawInfo is Map)
-            bi = Map<String, dynamic>.from(rawInfo);
-          else if (rawInfo is String && rawInfo.isNotEmpty)
-            bi = Map<String, dynamic>.from(jsonDecode(rawInfo));
-          else
-            bi = <String, dynamic>{};
-
-          final hasChildrenRaw = bi['hasChildren'] ?? bi['have_children'];
-          final hasChildren =
-              hasChildrenRaw == true || hasChildrenRaw?.toString().toLowerCase() == 'yes';
-          if (hasChildren) {
-            final childrenRaw = bi['children'];
-            int tl = 0;
-            if (childrenRaw != null) tl = int.tryParse(childrenRaw.toString()) ?? 0;
-            else {
-              final tlRaw = bi['totalLive'] ?? bi['totalLiveChildren'];
-              if (tlRaw is int)
-                tl = tlRaw;
-              else
-                tl = int.tryParse(tlRaw?.toString() ?? '') ?? 0;
-            }
-
-            if (tl > 0) childrenCounts.add(tl);
-
-            final pname = (bi['headName'] ??
-                bi['name'] ??
-                bi['memberName'] ??
-                bi['member_name'] ??
-                '')
-                .toString()
-                .trim()
-                .toLowerCase();
-            if (pname.isNotEmpty) parentNames.add(pname);
-          }
-        }
-
-        totalExpectedChildren = childrenCounts.fold(0, (sum, count) => sum + count);
-
-        int recordedChildren = 0;
-        for (final b in membersForHousehold) {
-          final rawInfo = b['beneficiary_info'];
-          Map<String, dynamic> bi;
-          if (rawInfo is Map)
-            bi = Map<String, dynamic>.from(rawInfo);
-          else if (rawInfo is String && rawInfo.isNotEmpty)
-            bi = Map<String, dynamic>.from(jsonDecode(rawInfo));
-          else
-            bi = <String, dynamic>{};
-
-          final fatherName = (bi['fatherName'] ?? bi['father_name'] ?? '').toString().trim().toLowerCase();
-          final motherName = (bi['motherName'] ?? bi['mother_name'] ?? '').toString().trim().toLowerCase();
-
-          if (fatherName.isEmpty && motherName.isEmpty) continue;
-
-          final matchesFather = fatherName.isNotEmpty && parentNames.contains(fatherName);
-          final matchesMother = motherName.isNotEmpty && parentNames.contains(motherName);
-          if (matchesFather || matchesMother) recordedChildren += 1;
-        }
-
-        final remainingChildren = totalExpectedChildren - recordedChildren;
-        final hasChildrenTarget = totalExpectedChildren > 0;
-
         final uniqueKey = (r['unique_key'] ?? '').toString();
-        final headId =
-        uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey;
-
-        debugPrint('Card mapping - Household $householdRefKey -> Pregnant women: ${ancEligibleCountMap[householdRefKey] ?? 0}');
+        final headId = uniqueKey.length > 11
+            ? uniqueKey.substring(uniqueKey.length - 11)
+            : uniqueKey;
 
         return {
           'name': (info['headName'] ?? info['memberName'] ?? info['name'] ?? '').toString(),
@@ -406,17 +221,15 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           'totalMembers': membersForHousehold.length,
           'elderly': elderlyCountMap[householdRefKey] ?? 0,
           'pregnantWomen': ancEligibleCountMap[householdRefKey] ?? 0,
-          'eligibleCouples': eligibleCoupleCountMap[householdRefKey] ?? 0,
+          'eligibleCouples': 0, // you can add your eligibleCouples logic here
           'child0to1': child0to1Map[householdRefKey] ?? 0,
           'child1to2': child1to2Map[householdRefKey] ?? 0,
           'child2to5': child2to5Map[householdRefKey] ?? 0,
-          'hasChildrenTarget': hasChildrenTarget,
-          'remainingChildren': remainingChildren < 0 ? 0 : remainingChildren,
           '_raw': r,
         };
       }).toList();
 
-      // ---------- FALLBACK HOUSEHOLD LOGIC ----------
+      // ------------------ FALLBACK HOUSEHOLD ------------------
       final Set<String> hhWithBeneficiaries = filteredRows
           .map((e) => (e['household_ref_key'] ?? '').toString())
           .where((k) => k.isNotEmpty)
@@ -428,89 +241,59 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         if (hhRefKey.isEmpty) continue;
         if (hhWithBeneficiaries.contains(hhRefKey)) continue;
 
-        Map<String, dynamic> hhInfo;
-        final rawHhInfo = hh['household_info'];
-        if (rawHhInfo is Map)
-          hhInfo = Map<String, dynamic>.from(rawHhInfo);
-        else if (rawHhInfo is String && rawHhInfo.isNotEmpty) {
+        // ------------------ FALLBACK DATE CHECK ------------------
+        DateTime? createdDt;
+        if (hh['created_date_time'] != null &&
+            hh['created_date_time'].toString().isNotEmpty) {
+          createdDt = DateTime.tryParse(hh['created_date_time'].toString());
+        }
+        if (createdDt == null || createdDt.isAfter(sixMonthsAgo)) continue;
+
+        final hhInfoRaw = hh['household_info'];
+        Map<String, dynamic> hhInfo = {};
+        if (hhInfoRaw is Map) hhInfo = Map<String, dynamic>.from(hhInfoRaw);
+        else if (hhInfoRaw is String && hhInfoRaw.isNotEmpty) {
           try {
-            hhInfo = Map<String, dynamic>.from(jsonDecode(rawHhInfo));
-          } catch (_) {
-            hhInfo = <String, dynamic>{};
-          }
-        } else
-          hhInfo = <String, dynamic>{};
+            hhInfo = Map<String, dynamic>.from(jsonDecode(hhInfoRaw));
+          } catch (_) {}
+        }
 
         final headInfoRaw = hhInfo['family_head_details'];
         Map<String, dynamic> headInfo = {};
-        if (headInfoRaw is Map)
-          headInfo = Map<String, dynamic>.from(headInfoRaw);
+        if (headInfoRaw is Map) headInfo = Map<String, dynamic>.from(headInfoRaw);
         else if (headInfoRaw is String && headInfoRaw.isNotEmpty) {
           try {
             headInfo = Map<String, dynamic>.from(jsonDecode(headInfoRaw));
           } catch (_) {}
         }
 
-        final isHeadA = headInfo['isFamilyHead'] == true ||
+        final isHead = headInfo['isFamilyHead'] == true ||
             (headInfo['isFamilyHead']?.toString().toLowerCase() == 'true');
-        final isHeadB = headInfo['isFamilyhead'] == true ||
-            (headInfo['isFamilyhead']?.toString().toLowerCase() == 'true');
-        final isHead = isHeadA || isHeadB;
         if (!isHead) continue;
 
-        String name = (headInfo['name_of_family_head'] ??
-            headInfo['headName'] ??
-            headInfo['memberName'] ??
-            headInfo['name'] ??
-            '')
-            .toString();
-        String mobile = (headInfo['mobile_no_of_family_head'] ?? headInfo['mobileNo'] ?? '').toString();
-        String houseNo = (headInfo['house_no'] ?? headInfo['houseNo'] ?? hh['address'] ?? '').toString();
-
-        int totalMembers = 1;
-        final allMembersRaw = hhInfo['all_members'];
-        if (allMembersRaw is List) totalMembers = allMembersRaw.length;
-        else if (allMembersRaw is String && allMembersRaw.isNotEmpty) {
-          try {
-            final parsed = jsonDecode(allMembersRaw);
-            if (parsed is List) totalMembers = parsed.length;
-          } catch (_) {}
-        }
-
-        final headId = hhRefKey.length > 11 ? hhRefKey.substring(hhRefKey.length - 11) : hhRefKey;
-
         fallbackMapped.add({
-          'name': name,
-          'mobile': mobile,
-          'hhId': headId,
-          'houseNo': houseNo,
-          'totalMembers': totalMembers,
+          'name': (headInfo['name_of_family_head'] ?? headInfo['headName'] ?? '').toString(),
+          'mobile': (headInfo['mobile_no_of_family_head'] ?? headInfo['mobileNo'] ?? '').toString(),
+          'hhId': hhRefKey.length > 11 ? hhRefKey.substring(hhRefKey.length - 11) : hhRefKey,
+          'houseNo': hhInfo['house_no'] ?? hh['address'] ?? '',
+          'totalMembers': 1,
           'elderly': 0,
-          'pregnantWomen': ancEligibleCountMap[hhRefKey] ?? 0,
+          'pregnantWomen': 0,
           'eligibleCouples': 0,
           'child0to1': 0,
           'child1to2': 0,
           'child2to5': 0,
-          'hasChildrenTarget': false,
-          'remainingChildren': 0,
-          '_raw': {
-            'household_ref_key': hhRefKey,
-            'created_date_time': hh['created_date_time']?.toString(),
-            'unique_key': hh['head_id']?.toString(),
-          },
+          '_raw': hh,
         });
       }
 
       final List<Map<String, dynamic>> combined = [...mapped, ...fallbackMapped];
 
-      // ---------- SORT ----------
       combined.sort((a, b) {
         final ra = a['_raw'] as Map<String, dynamic>;
         final rb = b['_raw'] as Map<String, dynamic>;
-
         final ca = DateTime.tryParse(ra['created_date_time']?.toString() ?? '');
         final cb = DateTime.tryParse(rb['created_date_time']?.toString() ?? '');
-
         if (ca != null && cb != null) return cb.compareTo(ca);
         return 0;
       });
@@ -528,6 +311,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           _isLoading = false;
         });
       }
+      debugPrint('Error loading family survey: $e');
     }
   }
   Future<Map<String, int>> calculatePregnantWomenCount() async {
