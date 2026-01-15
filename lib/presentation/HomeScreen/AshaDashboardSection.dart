@@ -24,7 +24,6 @@ class AshaDashboardSection extends StatelessWidget {
   final int? ncdCount;
   final int appRoleId;
 
-
   const AshaDashboardSection({
     super.key,
     required this.selectedGridIndex,
@@ -42,21 +41,21 @@ class AshaDashboardSection extends StatelessWidget {
     this.highRiskCount,
     this.ncdCount,
     required this.appRoleId,
-
   });
 
   // Helper method to get responsive icon size
   double getIconSize(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final isLandscape = screenSize.width > screenSize.height;
-    
+
     // Use a combination of screen width and height to get a consistent size
-    final baseSize = isLandscape 
-        ? screenSize.height * 0.05  // Increased size in landscape (from 0.04)
-        : screenSize.width * 0.07;  // Normal size in portrait
-    
+    final baseSize = isLandscape
+        ? screenSize.height *
+              0.05 // Increased size in landscape (from 0.04)
+        : screenSize.width * 0.07; // Normal size in portrait
+
     // Ensure the icon size has reasonable bounds
-    return baseSize.clamp(24.0, 36.0);  // Increased min and max sizes
+    return baseSize.clamp(24.0, 36.0); // Increased min and max sizes
   }
 
   @override
@@ -65,21 +64,54 @@ class AshaDashboardSection extends StatelessWidget {
     final iconSize = getIconSize(context);
     final screenSize = MediaQuery.of(context).size;
     final isLandscape = screenSize.width > screenSize.height;
-    
+
     final mainGridAspectRatio = isLandscape ? 2.0 : 1.2;
     final bottomGridAspectRatio = isLandscape ? 2.0 : 1.2;
 
     final List<Map<String, dynamic>> mainGridItems = [
-      {"image": 'assets/images/plus.png', "label": l10n.gridRegisterNewHousehold},
-      {"image": 'assets/images/home.png', "label": l10n.gridAllHousehold, "count": householdCount ?? 0},
-      {"image": 'assets/images/dashboard.png', "label": l10n.gridAllBeneficiaries, "count": beneficiariesCount ?? 0},
-      {"image": 'assets/images/beneficiaries.png', "label": l10n.gridMyBeneficiaries},
+      {
+        "image": 'assets/images/plus.png',
+        "label": l10n.gridRegisterNewHousehold,
+      },
+      {
+        "image": 'assets/images/home.png',
+        "label": l10n.gridAllHousehold,
+        "count": householdCount ?? 0,
+      },
+      {
+        "image": 'assets/images/dashboard.png',
+        "label": l10n.gridAllBeneficiaries,
+        "count": beneficiariesCount ?? 0,
+      },
+      {
+        "image": 'assets/images/beneficiaries.png',
+        "label": l10n.gridMyBeneficiaries,
+      },
       {"image": 'assets/images/id-card.png', "label": l10n.gridAbhaGeneration},
-      {"image": 'assets/images/work-in-progress.png', "label": l10n.gridWorkProgress},
-      {"image": 'assets/images/couple.png', "label": l10n.gridEligibleCoupleASHA, "count": eligibleCouplesCount ?? 0},
-      {"image": 'assets/images/mother.png', "label": l10n.gridMotherCare, "count": ancVisitCount ?? 0},
-      {"image": 'assets/images/toddler.png', "label": l10n.gridChildCare, "count": childRegisteredCount ?? 0},
-      {"image": 'assets/images/hrp.png', "label": l10n.gridHighRisk, "count": highRiskCount ?? 0},
+      {
+        "image": 'assets/images/work-in-progress.png',
+        "label": l10n.gridWorkProgress,
+      },
+      {
+        "image": 'assets/images/couple.png',
+        "label": l10n.gridEligibleCoupleASHA,
+        "count": eligibleCouplesCount ?? 0,
+      },
+      {
+        "image": 'assets/images/mother.png',
+        "label": l10n.gridMotherCare,
+        "count": ancVisitCount ?? 0,
+      },
+      {
+        "image": 'assets/images/toddler.png',
+        "label": l10n.gridChildCare,
+        "count": childRegisteredCount ?? 0,
+      },
+      {
+        "image": 'assets/images/hrp.png',
+        "label": l10n.gridHighRisk,
+        "count": highRiskCount ?? 0,
+      },
       {"image": 'assets/images/video.png', "label": l10n.gridAshaKiDuniya},
       {"image": 'assets/images/inventory.png', "label": l10n.gridTraining},
     ];
@@ -92,12 +124,17 @@ class AshaDashboardSection extends StatelessWidget {
     final List<Map<String, dynamic>> bottomGridItems = [
       {"image": 'assets/images/announcement.png', "label": l10n.announcements},
       if (appRoleId == 4)
-        {"image": 'assets/images/beneficiaries.png', "label": l10n.clusterMeetings},
+        {
+          "image": 'assets/images/beneficiaries.png',
+          "label": l10n.clusterMeetings,
+        },
       {"image": 'assets/images/help-icon.png', "label": '${l10n.help}\nनियम'},
-      {"image": 'assets/images/autoimmune-disease.png', "label": l10n.ncd, "count": ncdCount ?? 0},
+      {
+        "image": 'assets/images/autoimmune-disease.png',
+        "label": l10n.ncd,
+        "count": ncdCount ?? 0,
+      },
     ];
-
-
 
     return SafeArea(
       child: Stack(
@@ -111,7 +148,6 @@ class AshaDashboardSection extends StatelessWidget {
           //     fit: BoxFit.cover,
           //   ),
           // ),
-
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -120,7 +156,7 @@ class AshaDashboardSection extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: mainGridItems.length,
-                  gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     mainAxisSpacing: 0.4.h,
                     crossAxisSpacing: 0.4.w,
@@ -141,7 +177,10 @@ class AshaDashboardSection extends StatelessWidget {
                         child: Stack(
                           children: [
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.5.w),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 1.5.w,
+                                vertical: 1.5.w,
+                              ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -155,7 +194,9 @@ class AshaDashboardSection extends StatelessWidget {
                                       width: iconSize,
                                       height: iconSize,
                                       fit: BoxFit.contain,
-                                      color: index == 0 ? AppColors.primary : null,
+                                      color: index == 0
+                                          ? AppColors.primary
+                                          : null,
                                     ),
                                   ),
                                   SizedBox(height: 1.h),
@@ -197,7 +238,6 @@ class AshaDashboardSection extends StatelessWidget {
                         ),
                       ),
                     );
-
                   },
                 ),
 
@@ -205,16 +245,19 @@ class AshaDashboardSection extends StatelessWidget {
 
                 InkWell(
                   onTap: () {
-
-                      Navigator.pushNamed(context, Route_Names.Routinescreen);
-
+                    Navigator.pushNamed(context, Route_Names.Routinescreen);
                   },
                   child: Card(
                     color: AppColors.background,
                     elevation: 2,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.8.h)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0.8.h),
+                    ),
                     child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 1.5.h, horizontal: 4.w),
+                      padding: EdgeInsets.symmetric(
+                        vertical: 1.5.h,
+                        horizontal: 4.w,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
@@ -245,7 +288,6 @@ class AshaDashboardSection extends StatelessWidget {
                   ),
                 ),
 
-
                 const SizedBox(height: 8),
 
                 // Bottom Grid
@@ -253,7 +295,7 @@ class AshaDashboardSection extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: bottomGridItems.length,
-                  gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     mainAxisSpacing: 0.4.h,
                     crossAxisSpacing: 0.4.w,
@@ -272,7 +314,10 @@ class AshaDashboardSection extends StatelessWidget {
                         child: Stack(
                           children: [
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.9.h),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 2.w,
+                                vertical: 0.9.h,
+                              ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -325,7 +370,6 @@ class AshaDashboardSection extends StatelessWidget {
                         ),
                       ),
                     );
-
                   },
                 ),
               ],
@@ -347,38 +391,37 @@ class AshaDashboardSection extends StatelessWidget {
     if (index == 0) {
       Navigator.pushNamed(context, Route_Names.RegisterNewHousehold);
       return;
-    }else if (index == 1) {
+    } else if (index == 1) {
       Navigator.pushNamed(context, Route_Names.AllHousehold);
       return;
-    }else if (index == 2) {
+    } else if (index == 2) {
       Navigator.pushNamed(context, Route_Names.AllBeneficiaryScreen);
       return;
-    }else if (index == 3) {
+    } else if (index == 3) {
       Navigator.pushNamed(context, Route_Names.Mybeneficiaries);
       return;
-    }else if (index == 4) {
+    } else if (index == 4) {
       Navigator.pushNamed(context, Route_Names.ABHAGeneration);
       return;
-    }else if (index == 5) {
+    } else if (index == 5) {
       Navigator.pushNamed(context, Route_Names.WorkProgress);
       return;
-    }else if (index == 6) {
+    } else if (index == 6) {
       Navigator.pushNamed(context, Route_Names.EligibleCoupleHomeScreen);
       return;
-    }else if (index == 7) {
+    } else if (index == 7) {
       Navigator.pushNamed(context, Route_Names.Mothercarehomescreen);
       return;
-    }else if (index == 8) {
+    } else if (index == 8) {
       Navigator.pushNamed(context, Route_Names.ChildCareHomeScreen);
       return;
-
-    }else if (index == 9) {
+    } else if (index == 9) {
       Navigator.pushNamed(context, Route_Names.HighRisk);
       return;
-    }else if (index == 10) {
+    } else if (index == 10) {
       Navigator.pushNamed(context, Route_Names.AshaKiDuniyaScreen);
       return;
-    }else if (index == 11) {
+    } else if (index == 11) {
       Navigator.pushNamed(context, Route_Names.TrainingHomeScreen);
       return;
     }
@@ -414,4 +457,5 @@ class AshaDashboardSection extends StatelessWidget {
         Navigator.pushNamed(context, Route_Names.NCDHome);
         break;
     }
-  }}
+  }
+}

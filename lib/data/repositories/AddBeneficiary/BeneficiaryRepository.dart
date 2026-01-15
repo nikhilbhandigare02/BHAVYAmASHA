@@ -340,7 +340,7 @@ class BeneficiaryRepository {
       'updateMonth': DateTime.now().month,
       'updateYear': DateTime.now().year,
 
-      'children': info['total_children'],
+      'children': info['total_live_children'],
       'birthOrder': info['birth_order'],
       'totalBorn': info['total_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),
       'totalLive': info['total_live_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),
@@ -391,6 +391,7 @@ class BeneficiaryRepository {
 
       // Misc fields - API mapping
       'weight': info['weight'],
+      'birthWeight': info['weight_at_birth'],
       'childSchool': info['is_school_going_child'],
       'birthCertificate': info['is_birth_certificate_issued'],
       'memberStatus': info['member_status'] ?? '',

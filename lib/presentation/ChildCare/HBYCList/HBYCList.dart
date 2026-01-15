@@ -104,7 +104,6 @@ class _HBYCListState extends State<HBYCList> {
     return months >= 3 && months <= 15;
   }
 
-  // Format date to 'dd-MM-yyyy'
   String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return 'N/A';
     try {
@@ -115,7 +114,6 @@ class _HBYCListState extends State<HBYCList> {
     }
   }
 
-  // Format age and gender string
   String _formatAgeGender(String? dob, String? gender) {
     final months = _calculateAgeInMonths(dob);
     final years = months ~/ 12;

@@ -348,10 +348,10 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
           name,
         );
         if (isAlreadyRegistered) continue;
+        final t = AppLocalizations.of(context);
 
-        // Prepare child card
         final card = <String, dynamic>{
-          'hhId': activity['household_ref_key']?.toString() ?? '',
+          'hhId': row['household_ref_key'] ??t!.na,
           'RegitrationDate': _formatDate(
             activity['created_date_time']?.toString() ??
                 row['created_date_time']?.toString(),

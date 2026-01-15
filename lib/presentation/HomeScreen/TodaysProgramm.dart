@@ -3041,7 +3041,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
           final isDeath = row['is_death'] == 1;
           final isMigrated = row['is_migrated'] == 1;
-          if (isDeath || isMigrated) continue;
+          final isDeleted = row['is_deleted'] == 1;
+          if (isDeath || isMigrated || isDeleted) continue;
 
           // Only include household head records similar to AllHouseHold_Screen
           final householdRefKey = (row['household_ref_key'] ?? '').toString();
@@ -3118,31 +3119,30 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             return s;
           }
 
-          // Derive lastSurveyDate from modified_date_time if available, otherwise created_date_time
+          // Parse both dates
           String? modifiedStr = pickDateStr(modifiedRaw);
           String? createdStr = pickDateStr(createdRaw);
 
-          if (modifiedStr != null) {
-            lastSurveyDt = DateTime.tryParse(modifiedStr);
-            lastSurveyDate = modifiedStr;
-          } else if (createdStr != null) {
-            lastSurveyDt = DateTime.tryParse(createdStr);
-            lastSurveyDate = createdStr;
-          }
+          DateTime? modifiedDt = modifiedStr != null ? DateTime.tryParse(modifiedStr) : null;
+          DateTime? createdDt = createdStr != null ? DateTime.tryParse(createdStr) : null;
 
-          // 6-month condition: show this family only if the last survey
-          // was done more than 6 months ago. If there is no lastSurveyDt,
-          // skip (treat as not eligible).
-          if (lastSurveyDt == null) {
-            continue;
-          }
+          // Check if either date is more than 6 months ago
           final now = DateTime.now();
-          final sixMonthsAgo = DateTime(now.year, now.month - 6, now.day);
+          final sixMonthsAgo = now.subtract(const Duration(days: 180));
+          
+          bool isEligible = false;
+          if (modifiedDt != null && !modifiedDt.isAfter(sixMonthsAgo)) {
+            isEligible = true;
+            lastSurveyDt = modifiedDt;
+            lastSurveyDate = modifiedStr!;
+          } else if (createdDt != null && !createdDt.isAfter(sixMonthsAgo)) {
+            isEligible = true;
+            lastSurveyDt = createdDt;
+            lastSurveyDate = createdStr!;
+          }
 
-          // Hide records whose last survey is after sixMonthsAgo (i.e. within
-          // the last 6 months). Records dated exactly on or before
-          // sixMonthsAgo (6+ months ago) are shown.
-          if (lastSurveyDt.isAfter(sixMonthsAgo)) {
+          // If neither date is 6+ months ago, skip this record
+          if (!isEligible) {
             continue;
           }
 

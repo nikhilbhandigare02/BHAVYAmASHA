@@ -869,6 +869,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
       final hhId =
           widget.beneficiaryData?['hhId']?.toString() ??
+          widget.beneficiaryData?['household_ref_key']?.toString() ??
           (widget.beneficiaryData?['_rawRow'] is Map
               ? (widget.beneficiaryData?['_rawRow'] as Map)['household_ref_key']
                     ?.toString()
@@ -960,6 +961,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
       final hhId =
           widget.beneficiaryData?['hhId']?.toString() ??
+          widget.beneficiaryData?['household_ref_key']?.toString() ??
           (widget.beneficiaryData?['_rawRow'] is Map
               ? (widget.beneficiaryData?['_rawRow'] as Map)['household_ref_key']
                     ?.toString()
@@ -994,7 +996,7 @@ class _AncvisitformState extends State<Ancvisitform> {
         print('Forms Ref Key: ${form['forms_ref_key']}');
         print('Beneficiary Ref Key: ${form['beneficiary_ref_key']}');
         print('Household Ref Key: ${form['household_ref_key']}');
-        
+
         final formJsonStr = form['form_json']?.toString();
         if (formJsonStr == null || formJsonStr.isEmpty) {
           print('⚠️ No form_json data found');
@@ -1006,30 +1008,31 @@ class _AncvisitformState extends State<Ancvisitform> {
         try {
           final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
           print('🔍 Root keys: ${root.keys.toList()}');
-          
+
           // Check for LMP date in eligible_couple_tracking_due_from structure
           final trackingData = root['eligible_couple_tracking_due_from'];
           if (trackingData is Map) {
             print('✅ Found eligible_couple_tracking_due_from structure');
             print('🔍 Tracking data keys: ${trackingData.keys.toList()}');
-            
+
             final lmpStr = trackingData['lmp_date']?.toString();
             print('🔍 LMP string: $lmpStr');
-            
-            if (lmpStr != null && lmpStr.isNotEmpty) {
+
+            // Check for null, empty, or just empty string
+            if (lmpStr != null && lmpStr.isNotEmpty && lmpStr != '""') {
               try {
                 final lmpDate = DateTime.parse(lmpStr);
                 print('✅ Successfully parsed LMP date: $lmpDate');
-                
+
                 _bloc.add(LmpDateChanged(lmpDate));
                 final weeks = _calculateWeeksOfPregnancy(lmpDate);
                 _bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
                 print('✅ Set LMP date and calculated weeks: $weeks');
-                
+
                 // Also set EDD if available
                 final eddStr = trackingData['edd_date']?.toString();
                 print('🔍 EDD string: $eddStr');
-                if (eddStr != null && eddStr.isNotEmpty) {
+                if (eddStr != null && eddStr.isNotEmpty && eddStr != '""') {
                   try {
                     final eddDate = DateTime.parse(eddStr);
                     _bloc.add(EddDateChanged(eddDate));
@@ -1040,7 +1043,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                 } else {
                   print('ℹ️ No EDD date found in tracking data');
                 }
-                
+
                 return; // Found LMP date, exit the method
               } catch (e) {
                 print('⚠️ Error parsing LMP date from followup form: $e');
@@ -1051,7 +1054,65 @@ class _AncvisitformState extends State<Ancvisitform> {
           } else {
             print('⚠️ No eligible_couple_tracking_due_from structure found');
             print('🔍 Available root keys: ${root.keys.toList()}');
-            
+
+            /// ✅ NEW CONDITION - Check form_data structure
+            if (root['form_data'] is Map) {
+              final formData = root['form_data'] as Map<String, dynamic>;
+              final lmpStr = formData['lmp_date']?.toString();
+              print('🔍 LMP string from form_data: $lmpStr');
+              
+              // Check for null, empty, or just empty string
+              if (lmpStr != null && lmpStr.isNotEmpty && lmpStr != '""') {
+                try {
+                  // Handle different date formats
+                  String dateStr = lmpStr;
+                  if (dateStr.contains('T')) {
+                    try {
+                      final lmpDate = DateTime.parse(dateStr);
+                      print('✅ Successfully parsed LMP date from form_data: $lmpDate');
+                      
+                      _bloc.add(LmpDateChanged(lmpDate));
+                      final weeks = _calculateWeeksOfPregnancy(lmpDate);
+                      _bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
+                      print('✅ Set LMP date and calculated weeks from form_data: $weeks');
+                      
+                      // Also set EDD if available
+                      final eddStr = formData['edd_date']?.toString();
+                      if (eddStr != null && eddStr.isNotEmpty && eddStr != '""') {
+                        try {
+                          final eddDate = DateTime.parse(eddStr);
+                          _bloc.add(EddDateChanged(eddDate));
+                          print('✅ Set EDD date from form_data: $eddDate');
+                        } catch (e) {
+                          print('⚠️ Error parsing EDD date from form_data: $e');
+                        }
+                      }
+                      
+                      return; // Found LMP date, exit the method
+                    } catch (e) {
+                      // If full parsing fails, try date part only
+                      dateStr = dateStr.split('T')[0];
+                      print('⚠️ Full date parsing failed, trying date part only: $dateStr');
+                    }
+                  }
+                  
+                  final lmpDate = DateTime.parse(dateStr);
+                  print('✅ Successfully parsed LMP date from form_data: $lmpDate');
+                  
+                  _bloc.add(LmpDateChanged(lmpDate));
+                  final weeks = _calculateWeeksOfPregnancy(lmpDate);
+                  _bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
+                  print('✅ Set LMP date and calculated weeks from form_data: $weeks');
+                  
+                  return; // Found LMP date, exit the method
+                } catch (e) {
+                  print('⚠️ Error parsing LMP date from form_data: $e');
+                }
+              } else {
+                print('⚠️ LMP date in form_data is empty or invalid: $lmpStr');
+              }
+            }
+
             // Let's also check if there are other possible structures
             for (final key in root.keys) {
               final value = root[key];
@@ -1073,6 +1134,7 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
   }
 
+  
   Future<void> _loadLastTd1DateFromDb() async {
     try {
       final benId =

@@ -9,6 +9,7 @@ import 'package:medixcel_new/data/SecureStorage/SecureStorage.dart';
 
 import '../../core/config/Constant/constant.dart';
 import '../../data/Database/database_provider.dart';
+import '../../data/Database/tables/followup_form_data_table.dart';
 import '../../l10n/app_localizations.dart';
 
 class SyncStatusScreen extends StatefulWidget {
@@ -455,10 +456,10 @@ sfgfdd
 
   Future<void> _loadEligibleCouplesCount() async {
     try {
-      print('🔍 Starting to load eligible couples count...');
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
 
       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
         if (mounted) {
@@ -471,55 +472,73 @@ sfgfdd
       }
 
       final query = '''
-        SELECT DISTINCT b.*, 
-       e.eligible_couple_state, 
-       e.created_date_time as registration_date
-FROM beneficiaries_new b
-INNER JOIN eligible_couple_activities e 
+      SELECT DISTINCT b.*, 
+             e.eligible_couple_state,
+             e.is_synced AS e_is_synced
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e 
         ON b.unique_key = e.beneficiary_ref_key
-WHERE b.is_deleted = 0 
-  AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
-  AND (b.is_death = 0 OR b.is_death IS NULL)
-  AND e.eligible_couple_state IN ('eligible_couple', 'tracking_due')
-  AND e.is_deleted = 0
-  AND e.current_user_key = ?
-ORDER BY b.created_date_time DESC;
-      ''';
+      WHERE b.is_deleted = 0
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND (b.is_death = 0 OR b.is_death IS NULL)
+        AND e.eligible_couple_state IN ('eligible_couple')
+        AND e.is_deleted = 0
+        AND e.current_user_key = ?
+    ''';
 
       final rows = await db.rawQuery(query, [ashaUniqueKey]);
-      
+
       int totalCount = 0;
       int syncedCount = 0;
-      
+
       for (final row in rows) {
         try {
-          final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
-          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty 
-              ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfo))
+          /// ---------- PARSE BENEFICIARY INFO ----------
+          final beneficiaryInfoStr = row['beneficiary_info'];
+
+          final Map<String, dynamic> info =
+          beneficiaryInfoStr is String && beneficiaryInfoStr.isNotEmpty
+              ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfoStr))
               : <String, dynamic>{};
-          
-          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
-          if (memberType != 'child') {
-            totalCount++;
-            
-            // Check if synced
-            final isSynced = (row['e_is_synced'] ?? 0) == 1;
-            if (isSynced) {
-              syncedCount++;
-            }
-          }
-        } catch (_) {
+
+          final memberType =
+              info['memberType']?.toString().toLowerCase() ?? '';
+          final maritalStatus =
+              info['maritalStatus']?.toString().toLowerCase() ?? '';
+          if (memberType == 'child') continue;
+
+          /// ---------- AGE ----------
+          final dob = info['dob']?.toString();
+          final age = _calculateAgeFromDob(dob);
+          if (age == null) continue;
+
+          final gender =
+              info['gender']?.toString().toLowerCase() ?? '';
+
+          /// ---------- AGE ELIGIBILITY ----------
+          if (gender == 'female' && (age < 15 || age > 49)) continue;
+
+          final beneficiaryKey = row['unique_key']?.toString() ?? '';
+          final hasSterilization = await _hasSterilizationRecord(
+            db,
+            beneficiaryKey,
+            ashaUniqueKey,
+          );
+
+          if (hasSterilization) continue;
+
+          /// ---------- COUNT ----------
           totalCount++;
-          // If there's an error parsing beneficiary_info, still count it
-          // and check sync status from the activity record
+
           final isSynced = (row['e_is_synced'] ?? 0) == 1;
           if (isSynced) {
             syncedCount++;
           }
+        } catch (_) {
+          // ignore malformed rows
+          continue;
         }
       }
-      
-      print('✅ Setting counts - Total: $totalCount, Synced: $syncedCount');
 
       if (mounted) {
         setState(() {
@@ -537,7 +556,78 @@ ORDER BY b.created_date_time DESC;
       }
     }
   }
+  int? _calculateAgeFromDob(String? dob) {
+    if (dob == null || dob.isEmpty) return null;
 
+    try {
+      final DateTime dobDate = DateTime.parse(dob);
+      final DateTime today = DateTime.now();
+
+      int age = today.year - dobDate.year;
+
+      if (today.month < dobDate.month ||
+          (today.month == dobDate.month && today.day < dobDate.day)) {
+        age--;
+      }
+
+      return age;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<bool> _hasSterilizationRecord(
+      Database db,
+      String beneficiaryKey,
+      String ashaUniqueKey,
+      ) async {
+    final rows = await db.query(
+      FollowupFormDataTable.table,
+      where: '''
+      beneficiary_ref_key = ?
+      AND current_user_key = ?
+      AND is_deleted = 0
+      AND forms_ref_key = ?
+    ''',
+      whereArgs: [
+        beneficiaryKey,
+        ashaUniqueKey,
+        FollowupFormDataTable
+            .formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue],
+      ],
+    );
+
+    for (final row in rows) {
+      try {
+        final formJsonStr = row['form_json']?.toString();
+        if (formJsonStr == null || formJsonStr.isEmpty) continue;
+
+        final Map<String, dynamic> formJson =
+        Map<String, dynamic>.from(jsonDecode(formJsonStr));
+
+        final trackingDue =
+        formJson['eligible_couple_tracking_due_from'];
+
+        if (trackingDue is Map<String, dynamic>) {
+
+          final method =
+          trackingDue['method_of_contraception']
+              ?.toString()
+              .toLowerCase();
+
+          if (
+          (method == 'female_sterilization' ||
+              method == 'male_sterilization' || method == 'male sterilization' || method == 'female sterilization')) {
+            return true;
+          }
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+
+    return false;
+  }
   
   @override
   Widget build(BuildContext context) {

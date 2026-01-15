@@ -20,8 +20,6 @@ import '../../data/Database/database_provider.dart';
 import '../../data/Database/tables/followup_form_data_table.dart' as ffd;
 import '../../data/SecureStorage/SecureStorage.dart';
 
-
-
 import '../../data/models/AbhaCreated/AbhaCreated.dart';
 import '../../data/models/ExistingAbhaCreated/ExistingAbhaCreated.dart';
 import '../../data/models/TimeStamp/Timestamp_Response.dart';
@@ -72,7 +70,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   int notificationCount = 0;
   int ncdCount = 0;
 
-  final ChildCareCountProvider _childCareCountProvider = ChildCareCountProvider();
+  final ChildCareCountProvider _childCareCountProvider =
+      ChildCareCountProvider();
   Timer? _uiRefreshTimer;
   Future<void> _loadUserRoleAndData() async {
     try {
@@ -102,6 +101,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       if (mounted) setState(() => appRoleId = 0);
     }
   }
+
   @override
   void initState() {
     super.initState();
@@ -177,7 +177,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     });
   }
 
-
   @override
   void dispose() {
     _uiRefreshTimer?.cancel();
@@ -187,7 +186,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     }
     super.dispose();
   }
-  final ExistingAbhaCreatedRepository _repositoryABHA = ExistingAbhaCreatedRepository();
+
+  final ExistingAbhaCreatedRepository _repositoryABHA =
+      ExistingAbhaCreatedRepository();
   ExistingAbhaCreated? _existingAbhaData;
   Future<void> _fetchExistingAbhaCreated() async {
     setState(() {
@@ -201,7 +202,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       if (_userUniqueKey == null || _userUniqueKey.isEmpty) {
         throw Exception('User unique key is missing!');
       }
-      final response = await _repositoryABHA.existingAbhaCreated(_userUniqueKey);
+      final response = await _repositoryABHA.existingAbhaCreated(
+        _userUniqueKey,
+      );
 
       print('✅ Raw API Response (HomeScreen): ${response.toJson()}');
       print('📊 ABHA Created Count: ${response.data?.abhaCreated}');
@@ -230,8 +233,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   final String _userUniqueKey = '8X0FR8NZSU7';
   final BeneficiaryRepository _benefRepo = BeneficiaryRepository();
 
-
-
   Future<void> _fetchAbhaCreated() async {
     setState(() {
       _isLoading = true;
@@ -258,6 +259,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       });
     }
   }
+
   final TimeStampRepository _repository = TimeStampRepository();
   TimeStampResponce? _timeStamp;
   Future<void> _fetchTimeStamp() async {
@@ -278,10 +280,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       if (parsed.time != null) {
         // Parse server time string
         final serverTime = DateTime.parse(parsed.time!);
-        final formattedServerTime = DateFormat('dd MMM yyyy, hh:mm a').format(serverTime);
+        final formattedServerTime = DateFormat(
+          'dd MMM yyyy, hh:mm a',
+        ).format(serverTime);
 
         final systemTime = DateTime.now();
-        final formattedSystemTime = DateFormat('dd MMM yyyy, hh:mm a').format(systemTime);
+        final formattedSystemTime = DateFormat(
+          'dd MMM yyyy, hh:mm a',
+        ).format(systemTime);
 
         print(' Server Time: $formattedServerTime');
         print(' System Time: $formattedSystemTime');
@@ -308,6 +314,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       });
     }
   }
+
   void _showTimeMismatchDialog(String serverTime, String systemTime) {
     showDialog(
       context: context,
@@ -342,6 +349,116 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       },
     );
   }
+  Set<String> getFinalHouseholdKeys({
+    required List<Map<String, dynamic>> households,
+    required List<Map<String, dynamic>> beneficiaries,
+  }) {
+    /// ---------- MAP HOUSEHOLD -> CONFIGURED HEAD ----------
+    final Map<String, String> headKeyByHousehold = {};
+    for (final hh in households) {
+      final hhKey = (hh['unique_key'] ?? '').toString();
+      final headId = (hh['head_id'] ?? '').toString();
+      if (hhKey.isNotEmpty && headId.isNotEmpty) {
+        headKeyByHousehold[hhKey] = headId;
+      }
+    }
+
+    /// ---------- FAMILY HEADS FROM BENEFICIARIES ----------
+    final Set<String> householdKeysFromBeneficiaries = beneficiaries.where((r) {
+      try {
+        final householdRefKey = (r['household_ref_key'] ?? '').toString();
+        final uniqueKey = (r['unique_key'] ?? '').toString();
+        if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
+
+        if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
+
+        final rawInfo = r['beneficiary_info'];
+        Map<String, dynamic> info;
+        if (rawInfo is Map) {
+          info = Map<String, dynamic>.from(rawInfo);
+        } else if (rawInfo is String && rawInfo.isNotEmpty) {
+          info = Map<String, dynamic>.from(jsonDecode(rawInfo));
+        } else {
+          info = {};
+        }
+
+        final configuredHeadKey = headKeyByHousehold[householdRefKey];
+        final bool isConfiguredHead =
+            configuredHeadKey != null && configuredHeadKey == uniqueKey;
+
+        final relation =
+        (info['relation_to_head'] ?? info['relation'] ?? '')
+            .toString()
+            .toLowerCase();
+
+        final bool isHeadByRelation =
+            relation == 'head' || relation == 'self';
+
+        final bool isFamilyHead =
+            info['isFamilyHead'] == true ||
+                info['isFamilyHead']?.toString().toLowerCase() == 'true';
+
+        return isConfiguredHead || isHeadByRelation || isFamilyHead;
+      } catch (_) {
+        return false;
+      }
+    }).map((r) {
+      return (r['household_ref_key'] ?? '').toString();
+    }).where((k) => k.isNotEmpty).toSet();
+
+    /// ---------- FALLBACK HOUSEHOLDS (EXACT SAME AS _loadData) ----------
+    final Set<String> householdKeysWithBeneficiaries = beneficiaries
+        .map((e) => (e['household_ref_key'] ?? '').toString())
+        .where((k) => k.isNotEmpty)
+        .toSet();
+
+    final Set<String> fallbackHouseholdKeys = {};
+
+    for (final hh in households) {
+      final hhRefKey = (hh['unique_key'] ?? '').toString();
+      if (hhRefKey.isEmpty) continue;
+
+      if (householdKeysWithBeneficiaries.contains(hhRefKey)) continue;
+
+      Map<String, dynamic> hhInfo = {};
+      final raw = hh['household_info'];
+
+      if (raw is Map) {
+        hhInfo = Map<String, dynamic>.from(raw);
+      } else if (raw is String && raw.isNotEmpty) {
+        try {
+          hhInfo = Map<String, dynamic>.from(jsonDecode(raw));
+        } catch (_) {}
+      }
+
+      final headRaw = hhInfo['family_head_details'];
+      Map<String, dynamic> headInfo = {};
+
+      if (headRaw is Map) {
+        headInfo = Map<String, dynamic>.from(headRaw);
+      } else if (headRaw is String && headRaw.isNotEmpty) {
+        try {
+          headInfo = Map<String, dynamic>.from(jsonDecode(headRaw));
+        } catch (_) {}
+      }
+
+      final bool isHead =
+          headInfo['isFamilyHead'] == true ||
+              headInfo['isFamilyHead']?.toString().toLowerCase() == 'true' ||
+              headInfo['isFamilyhead'] == true ||
+              headInfo['isFamilyhead']?.toString().toLowerCase() == 'true';
+
+      if (isHead) {
+        fallbackHouseholdKeys.add(hhRefKey);
+      }
+    }
+
+    /// ---------- FINAL EXACT MATCH ----------
+    return {
+      ...householdKeysFromBeneficiaries,
+      ...fallbackHouseholdKeys,
+    };
+  }
 
   Future<void> _loadHouseholdCount() async {
     householdCount = 0;
@@ -363,14 +480,20 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
       final db = await DatabaseProvider.instance.database;
 
-      final beneficiaries =
-      await LocalStorageDao.instance.getAllBeneficiaries();
+      final beneficiaries = await LocalStorageDao.instance
+          .getAllBeneficiaries();
 
       final households = await db.query(
         'households',
         where: 'is_deleted = 0 AND current_user_key = ?',
         whereArgs: [currentUserKey],
       );
+
+      final finalHouseholdKeys = getFinalHouseholdKeys(
+        households: households,
+        beneficiaries: beneficiaries,
+      );
+
 
       /// ---------- MAP HOUSEHOLD -> CONFIGURED HEAD ----------
       final Map<String, String> headKeyByHousehold = {};
@@ -383,48 +506,52 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       }
 
       /// ---------- FAMILY HEAD FROM BENEFICIARIES ----------
-      final Set<String> householdKeysFromBeneficiaries = beneficiaries.where((r) {
-        try {
-          final householdRefKey = (r['household_ref_key'] ?? '').toString();
-          final uniqueKey = (r['unique_key'] ?? '').toString();
-          if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
+      final Set<String> householdKeysFromBeneficiaries = beneficiaries
+          .where((r) {
+            try {
+              final householdRefKey = (r['household_ref_key'] ?? '').toString();
+              final uniqueKey = (r['unique_key'] ?? '').toString();
+              if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
 
-          if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
+              if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
 
-          final rawInfo = r['beneficiary_info'];
-          Map<String, dynamic> info;
-          if (rawInfo is Map) {
-            info = Map<String, dynamic>.from(rawInfo);
-          } else if (rawInfo is String && rawInfo.isNotEmpty) {
-            info = Map<String, dynamic>.from(jsonDecode(rawInfo));
-          } else {
-            info = {};
-          }
+              final rawInfo = r['beneficiary_info'];
+              Map<String, dynamic> info;
+              if (rawInfo is Map) {
+                info = Map<String, dynamic>.from(rawInfo);
+              } else if (rawInfo is String && rawInfo.isNotEmpty) {
+                info = Map<String, dynamic>.from(jsonDecode(rawInfo));
+              } else {
+                info = {};
+              }
 
-          final configuredHeadKey = headKeyByHousehold[householdRefKey];
+              final configuredHeadKey = headKeyByHousehold[householdRefKey];
 
-          final bool isConfiguredHead =
-              configuredHeadKey != null && configuredHeadKey == uniqueKey;
+              final bool isConfiguredHead =
+                  configuredHeadKey != null && configuredHeadKey == uniqueKey;
 
-          final relation =
-          (info['relation_to_head'] ?? info['relation'] ?? '')
-              .toString()
-              .toLowerCase();
+              final relation =
+                  (info['relation_to_head'] ?? info['relation'] ?? '')
+                      .toString()
+                      .toLowerCase();
 
-          final bool isHeadByRelation =
-              relation == 'head' || relation == 'self';
+              final bool isHeadByRelation =
+                  relation == 'head' || relation == 'self';
 
-          final bool isFamilyHead =
-              info['isFamilyHead'] == true ||
+              final bool isFamilyHead =
+                  info['isFamilyHead'] == true ||
                   info['isFamilyHead']?.toString().toLowerCase() == 'true';
 
-          return isConfiguredHead || isHeadByRelation || isFamilyHead;
-        } catch (_) {
-          return false;
-        }
-      }).map((r) {
-        return (r['household_ref_key'] ?? '').toString();
-      }).where((k) => k.isNotEmpty).toSet();
+              return isConfiguredHead || isHeadByRelation || isFamilyHead;
+            } catch (_) {
+              return false;
+            }
+          })
+          .map((r) {
+            return (r['household_ref_key'] ?? '').toString();
+          })
+          .where((k) => k.isNotEmpty)
+          .toSet();
 
       /// ---------- FALLBACK HOUSEHOLDS (SAME AS _loadData) ----------
       final Set<String> householdKeysWithBeneficiaries = beneficiaries
@@ -465,9 +592,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
         final bool isHead =
             headInfo['isFamilyHead'] == true ||
-                headInfo['isFamilyHead']?.toString().toLowerCase() == 'true' ||
-                headInfo['isFamilyhead'] == true ||
-                headInfo['isFamilyhead']?.toString().toLowerCase() == 'true';
+            headInfo['isFamilyHead']?.toString().toLowerCase() == 'true' ||
+            headInfo['isFamilyhead'] == true ||
+            headInfo['isFamilyhead']?.toString().toLowerCase() == 'true';
 
         if (isHead) {
           fallbackHouseholdKeys.add(hhRefKey);
@@ -475,10 +602,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       }
 
       /// ---------- FINAL HOUSEHOLD SET ----------
-      final Set<String> finalHouseholdKeys = {
-        ...householdKeysFromBeneficiaries,
-        ...fallbackHouseholdKeys,
-      };
+
 
       /// ---------- SYNC COUNT ----------
       final Map<String, Map<String, dynamic>> householdByKey = {};
@@ -518,7 +642,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   Future<void> _loadBeneficiariesCount() async {
     try {
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries(isMigrated: 0);
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries(
+        isMigrated: 0,
+      );
       final count = rows.length;
       if (mounted) {
         setState(() {
@@ -540,8 +666,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     try {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey =
-      currentUserData?['unique_key']?.toString();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
         if (mounted) {
@@ -567,10 +692,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       ORDER BY b.created_date_time DESC;
     ''';
 
-      final rows = await db.rawQuery(query, [
-        ashaUniqueKey,
-        ashaUniqueKey,
-      ]);
+      final rows = await db.rawQuery(query, [ashaUniqueKey, ashaUniqueKey]);
 
       int count = 0;
       final Set<String> countedBeneficiaries = {};
@@ -585,11 +707,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
           final beneficiaryInfoStr =
               row['beneficiary_info']?.toString() ?? '{}';
-          final Map<String, dynamic> info =
-          Map<String, dynamic>.from(jsonDecode(beneficiaryInfoStr));
+          final Map<String, dynamic> info = Map<String, dynamic>.from(
+            jsonDecode(beneficiaryInfoStr),
+          );
 
-          final memberType =
-              info['memberType']?.toString().toLowerCase() ?? '';
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
           final maritalStatus =
               info['maritalStatus']?.toString().toLowerCase() ?? '';
 
@@ -639,7 +761,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     }
   }
 
-
   int? _calculateAgeFromDob(String? dob) {
     if (dob == null || dob.isEmpty) return null;
 
@@ -661,10 +782,10 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   }
 
   Future<bool> _hasSterilizationRecord(
-      Database db,
-      String beneficiaryKey,
-      String ashaUniqueKey,
-      ) async {
+    Database db,
+    String beneficiaryKey,
+    String ashaUniqueKey,
+  ) async {
     final rows = await db.query(
       ffd.FollowupFormDataTable.table,
       where: '''
@@ -676,8 +797,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       whereArgs: [
         beneficiaryKey,
         ashaUniqueKey,
-        ffd.FollowupFormDataTable
-            .formUniqueKeys[ffd.FollowupFormDataTable.eligibleCoupleTrackingDue],
+        ffd.FollowupFormDataTable.formUniqueKeys[ffd
+            .FollowupFormDataTable
+            .eligibleCoupleTrackingDue],
       ],
     );
 
@@ -686,22 +808,21 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         final formJsonStr = row['form_json']?.toString();
         if (formJsonStr == null || formJsonStr.isEmpty) continue;
 
-        final Map<String, dynamic> formJson =
-        Map<String, dynamic>.from(jsonDecode(formJsonStr));
+        final Map<String, dynamic> formJson = Map<String, dynamic>.from(
+          jsonDecode(formJsonStr),
+        );
 
-        final trackingDue =
-        formJson['eligible_couple_tracking_due_from'];
+        final trackingDue = formJson['eligible_couple_tracking_due_from'];
 
         if (trackingDue is Map<String, dynamic>) {
-
-          final method =
-          trackingDue['method_of_contraception']
+          final method = trackingDue['method_of_contraception']
               ?.toString()
               .toLowerCase();
 
-          if (
-          (method == 'female_sterilization' ||
-              method == 'male_sterilization' || method == 'male sterilization' || method == 'female sterilization')) {
+          if ((method == 'female_sterilization' ||
+              method == 'male_sterilization' ||
+              method == 'male sterilization' ||
+              method == 'female sterilization')) {
             return true;
           }
         }
@@ -712,11 +833,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
     return false;
   }
-
-
-
-
-
 
   Future<void> _loadAncVisitCount() async {
     try {
@@ -737,7 +853,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   Future<void> _loadChildRegisteredCount() async {
     try {
-      final result = await _childCareCountProvider.getRegisteredChildCountTotalAndSync();
+      final result = await _childCareCountProvider
+          .getRegisteredChildCountTotalAndSync();
       final total = result['total']!;
       final synced = result['synced']!;
       if (mounted) {
@@ -769,11 +886,13 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     try {
       final db = await DatabaseProvider.instance.database;
 
-       final currentUserData = await SecureStorageService.getCurrentUserData();
+      final currentUserData = await SecureStorageService.getCurrentUserData();
       String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
-        debugPrint('Error: ASHA Unique Key is missing. Cannot load NCD forms count.');
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+        debugPrint(
+          'Error: ASHA Unique Key is missing. Cannot load NCD forms count.',
+        );
         if (mounted) {
           setState(() {
             ncdCount = 0;
@@ -787,7 +906,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         // 3. Add mandatory current_user_key condition
         where: 'forms_ref_key = ? AND current_user_key = ?',
         whereArgs: [
-          ffd.FollowupFormDataTable.formUniqueKeys[ffd.FollowupFormDataTable.cbac],
+          ffd.FollowupFormDataTable.formUniqueKeys[ffd
+              .FollowupFormDataTable
+              .cbac],
           ashaUniqueKey,
         ],
       );
@@ -824,7 +945,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     }
   }
 
-
   Future<void> fetchApiData() async {
     await Future.delayed(const Duration(seconds: 2));
 
@@ -846,211 +966,226 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return WillPopScope(
-        onWillPop: () async {
-          final shouldExit = await showConfirmationDialog(
-            context: context,
-            title: l10n.exitAppTitle,
-            message: l10n.exitAppMessage,
-            noButtonColor: AppColors.primary,
-            yesButtonColor:AppColors.primary,
-            yesText: l10n.yes,
-            noText: l10n.no,
-          );///
-          return shouldExit ?? false;
-        },
-        child: Scaffold(
-            backgroundColor: Colors.white,
-            appBar: AppHeader(
-              screenTitle: l10n.homeTitle,
-              showBack: false,
-              icon1Image: 'assets/images/search.png',
-              onIcon1Tap: () => Navigator.pushNamed(context, Route_Names.GuestBeneficiarySearch),
-              icon2Widget: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12.0),
-                    child: Image.asset(
-                      'assets/images/img_1.png',
-                      height: MediaQuery.of(context).orientation == Orientation.landscape ? 5.h : 2.7.h,
-                      width: MediaQuery.of(context).orientation == Orientation.landscape ? 5.h : 2.7.h,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-                  if (notificationCount > 0)
-                    Positioned(
-                      right: 6,
-                      top: -4,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: Center(
-                          child: Text(
-                            notificationCount.toString(),
-                            style:  TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              onIcon2Tap: () => Navigator.pushNamed(context, Route_Names.notificationScreen),
-              icon3Image: 'assets/images/home.png',
-              onIcon3Tap: () => Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HomeScreen(initialTabIndex: 1),
+      onWillPop: () async {
+        final shouldExit = await showConfirmationDialog(
+          context: context,
+          title: l10n.exitAppTitle,
+          message: l10n.exitAppMessage,
+          noButtonColor: AppColors.primary,
+          yesButtonColor: AppColors.primary,
+          yesText: l10n.yes,
+          noText: l10n.no,
+        );
+
+        ///
+        return shouldExit ?? false;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppHeader(
+          screenTitle: l10n.homeTitle,
+          showBack: false,
+          icon1Image: 'assets/images/search.png',
+          onIcon1Tap: () =>
+              Navigator.pushNamed(context, Route_Names.GuestBeneficiarySearch),
+          icon2Widget: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: Image.asset(
+                  'assets/images/img_1.png',
+                  height:
+                      MediaQuery.of(context).orientation ==
+                          Orientation.landscape
+                      ? 5.h
+                      : 2.7.h,
+                  width:
+                      MediaQuery.of(context).orientation ==
+                          Orientation.landscape
+                      ? 5.h
+                      : 2.7.h,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
-            ),
-            drawer: CustomDrawer(
-              onSyncCompleted: () async {
-                await _loadHouseholdCount();
-                await _loadBeneficiariesCount();
-                await _loadEligibleCouplesCount();
-                // await _loadPregnantWomenCount();
-                await _loadAncVisitCount();
-                await _loadChildRegisteredCount();
-                await _loadHighRiskCount();
-                await _loadNotificationCount();
-                await _loadNcdCount();
-              },
-            ),
-            body: Stack(
-                children: [
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Image.asset(
-                      'assets/images/sakhi-bg.jpg',
-                      width: 25.h,
-                      fit: BoxFit.cover,
-                      opacity: AlwaysStoppedAnimation(0.1),
+              if (notificationCount > 0)
+                Positioned(
+                  right: 6,
+                  top: -4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Center(
+                      child: Text(
+                        notificationCount.toString(),
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
                     ),
                   ),
-                  Column(
+                ),
+            ],
+          ),
+          onIcon2Tap: () =>
+              Navigator.pushNamed(context, Route_Names.notificationScreen),
+          icon3Image: 'assets/images/home.png',
+          onIcon3Tap: () => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(initialTabIndex: 1),
+            ),
+          ),
+        ),
+        drawer: CustomDrawer(
+          onSyncCompleted: () async {
+            await _loadHouseholdCount();
+            await _loadBeneficiariesCount();
+            await _loadEligibleCouplesCount();
+            // await _loadPregnantWomenCount();
+            await _loadAncVisitCount();
+            await _loadChildRegisteredCount();
+            await _loadHighRiskCount();
+            await _loadNotificationCount();
+            await _loadNcdCount();
+          },
+        ),
+        body: Stack(
+          children: [
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Image.asset(
+                'assets/images/sakhi-bg.jpg',
+                width: 25.h,
+                fit: BoxFit.cover,
+                opacity: AlwaysStoppedAnimation(0.1),
+              ),
+            ),
+            Column(
+              children: [
+                // Tabs
+                Material(
+                  color: AppColors.background,
+                  elevation: 2,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Row(
                     children: [
-                      // Tabs
-                      Material(
-                        color: AppColors.background,
-                        elevation: 2,
-                        borderRadius: BorderRadius.circular(8),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: InkWell(
-                                onTap: () => setState(() => selectedIndex = 0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => setState(() => selectedIndex = 0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.today,
-                                            color:AppColors.primary,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            l10n.tabTodaysProgram,
-                                            style: TextStyle(
-                                              fontSize: 15.sp,
-                                              color: selectedIndex == 0
-                                                  ? AppColors.primary
-                                                  : AppColors.outline,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
+                                    Icon(Icons.today, color: AppColors.primary),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      l10n.tabTodaysProgram,
+                                      style: TextStyle(
+                                        fontSize: 15.sp,
+                                        color: selectedIndex == 0
+                                            ? AppColors.primary
+                                            : AppColors.outline,
+                                        fontWeight: FontWeight.w500,
                                       ),
-                                    ),
-                                    Container(
-                                      height: 3,
-                                      color: selectedIndex == 0
-                                          ? AppColors.primary
-                                          : Colors.transparent,
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-                            Container(width: 1, height: 50, color: AppColors.divider),
-                            Expanded(
-                              child: InkWell(
-                                onTap: () async {
-                                  setState(() => selectedIndex = 1);
-                                  await _loadBeneficiariesCount();
-                                },
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                              Icons.apps_sharp,
-                                              color: AppColors.primary
-
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            l10n.tabAshaDashboard,
-                                            style: TextStyle(
-                                              fontSize: 15.sp,
-                                              color: selectedIndex == 1
-                                                  ? AppColors.primary
-                                                  : AppColors.outline,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 3,
-                                      color: selectedIndex == 1
-                                          ? AppColors.primary
-                                          : Colors.transparent,
-                                    ),
-                                  ],
-                                ),
+                              Container(
+                                height: 3,
+                                color: selectedIndex == 0
+                                    ? AppColors.primary
+                                    : Colors.transparent,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-
+                      Container(width: 1, height: 50, color: AppColors.divider),
                       Expanded(
-                        child: selectedIndex == 0
-                            ? isLoading
+                        child: InkWell(
+                          onTap: () async {
+                            setState(() => selectedIndex = 1);
+                            await _loadBeneficiariesCount();
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.apps_sharp,
+                                      color: AppColors.primary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      l10n.tabAshaDashboard,
+                                      style: TextStyle(
+                                        fontSize: 15.sp,
+                                        color: selectedIndex == 1
+                                            ? AppColors.primary
+                                            : AppColors.outline,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                height: 3,
+                                color: selectedIndex == 1
+                                    ? AppColors.primary
+                                    : Colors.transparent,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                Expanded(
+                  child: selectedIndex == 0
+                      ? isLoading
                             ? const Center(child: CircularProgressIndicator())
                             : SingleChildScrollView(
-                          child: TodayProgramSection(
-                            selectedGridIndex: selectedGridIndex,
-                            onGridTap: (index) =>
-                                setState(() => selectedGridIndex = index),
-                            apiData: apiData,
-                          ),
-                        )
-                            : SingleChildScrollView(
+                                child: TodayProgramSection(
+                                  selectedGridIndex: selectedGridIndex,
+                                  onGridTap: (index) =>
+                                      setState(() => selectedGridIndex = index),
+                                  apiData: apiData,
+                                ),
+                              )
+                      : SingleChildScrollView(
                           child: AshaDashboardSection(
                             householdCount: householdCount,
                             beneficiariesCount: beneficiariesCount,
@@ -1072,9 +1207,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                               null,
                               null,
                               null,
-                                  () async {
+                              () async {
                                 final result = await Navigator.pushNamed(
-                                    context, Route_Names.Mothercarehomescreen);
+                                  context,
+                                  Route_Names.Mothercarehomescreen,
+                                );
                                 if (!mounted) return;
                                 if (result is int) {
                                   setState(() {
@@ -1089,10 +1226,13 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                             ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ])));
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override

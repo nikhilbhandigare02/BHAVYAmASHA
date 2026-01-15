@@ -389,8 +389,19 @@ class _HBNCListScreenState
           final mobile = beneficiaryInfo['mobileNo']?.toString() ?? t!.na;
           final rchId = beneficiaryInfo['RichID']?.toString() ??
               beneficiaryInfo['rchId']?.toString() ?? t!.na;
-          final husbandName = beneficiaryInfo['spouseName']?.toString() ??
-              beneficiaryInfo['fatherName']?.toString() ?? t!.na;
+          /*final husbandName = beneficiaryInfo['spouseName']?.toString() ??
+    beneficiaryInfo['fatherName']?.toString() ?? t!.na;*/
+          String? _nonEmpty(dynamic v) {
+            if (v == null) return null;
+            final s = v.toString().trim();
+            return s.isEmpty ? null : s;
+          }
+
+          final husbandName =
+              _nonEmpty(beneficiaryInfo['spouseName']) ??
+                  _nonEmpty(beneficiaryInfo['father_name']) ??
+                  _nonEmpty(beneficiaryInfo['fatherName']) ??
+                  t!.na;
 
           final householdRefKey = beneficiary['household_ref_key']?.toString() ?? t!.na;
           final createdDateTime = beneficiary['created_date_time']?.toString() ?? '';

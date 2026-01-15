@@ -315,7 +315,18 @@ ORDER BY d.created_date_time DESC
               ? jsonDecode(beneficiaryRow['beneficiary_info'] as String)
               : <String, dynamic>{});
 
-          husbandName = (info['spouseName'] ?? info['spouse_name'] ?? info['husbandName'] ?? info['husband_name'] ?? 'N/A').toString();
+          String? _nonEmpty(dynamic v) {
+            if (v == null) return null;
+            final s = v.toString().trim();
+            return s.isEmpty ? null : s;
+          }
+          // husbandName = (info['spouseName'] ?? info['spouse_name'] ?? info['husbandName'] ?? info['husband_name'] ?? 'N/A').toString();
+          final t = AppLocalizations.of(context);
+          husbandName =
+              _nonEmpty(info['spouseName']) ??
+                  _nonEmpty(info['father_name']) ??
+                  _nonEmpty(info['fatherName']) ??
+                  t!.na;
         } catch (e) {
           print('⚠️ Error parsing beneficiary_info for spouse name: $e');
         }
