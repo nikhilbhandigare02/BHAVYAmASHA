@@ -158,7 +158,7 @@ class _CbacformState extends State<Cbacform> {
                   return k;
                 }
 
-                // Show only the first missing field label in SnackBar
+
                 final firstKey = state.missingKeys.first;
                 final firstLabel = labelForKey(firstKey);
                 final msg = '${l10n.cbacPleaseFill} $firstLabel';
@@ -210,7 +210,7 @@ class _CbacformState extends State<Cbacform> {
                           indicatorWeight: 3.0,
                           tabs: tabs,
                           onTap: (_) {
-                            // Keep the visible tab in sync with BLoC-controlled activeTab
+
                             final controller = DefaultTabController.of(context);
                             if (controller != null &&
                                 controller.index != state.activeTab) {
@@ -250,7 +250,7 @@ class _CbacformState extends State<Cbacform> {
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                // 👇 Keep layout stable — use SizedBox(width: 120) when hidden
+
                                 if (state.activeTab != 0)
                                   SizedBox(
                                     height: 34,
@@ -741,21 +741,10 @@ class _PersonalInfoTab extends StatelessWidget {
           builder: (context, state) {
             final genderValue = state.data['personal.gender'] as String? ?? '';
             
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              final v = state.data['personal.gender'] as String?;
-              if (v != null && v != genderValue) {
-                context.read<CbacFormBloc>().add(
-                  CbacFieldChanged('personal.gender', v),
-                );
-              }
-            });
-            
             return CustomTextField(
               hintText: l10n.genderLabel,
               labelText: l10n.genderLabel,
-              controller: TextEditingController(
-                text: genderValue,
-              ),
+              initialValue: genderValue,
               onChanged: (v) {
                 bloc.add(CbacFieldChanged('personal.gender', v));
                 final fatherName =
@@ -1347,7 +1336,7 @@ class _PartBTab extends StatelessWidget {
       child: Center(
         child: Text(
           text,
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+          style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14.sp),
         ),
       ),
     );
@@ -1679,8 +1668,9 @@ class _PartCTabState extends State<_PartCTab> {
               l10n.cropResidues,
               l10n.cowdung,
               l10n.coal,
-              l10n.lpg,
               l10n.cbacC_fuelKerosene,
+              l10n.lpg,
+
             ];
 
             return _buildMultiSelectField(
@@ -1704,10 +1694,13 @@ class _PartCTabState extends State<_PartCTab> {
               current.data['partC.businessRisk'],
           builder: (context, state) {
             final allOptions = [
-              l10n.cbacC_workingPollutedIndustries,
-              l10n.burningOfGrabage,
               l10n.burningCrop,
+              l10n.burningOfGrabage,
               l10n.cbacC_workingSmokeyFactory,
+              l10n.cbacC_workingPollutedIndustries,
+
+
+
               // l10n.cbacC_workingMines,
               // l10n.cbacC_workingConstruction,
               // l10n.cbacC_workingBrickKilns,
