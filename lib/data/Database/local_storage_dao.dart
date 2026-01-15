@@ -3074,7 +3074,7 @@ class LocalStorageDao {
       final db = await _db;
       final result = await db.query(
         FollowupFormDataTable.table,
-        where: 'forms_ref_key = ? AND beneficiary_ref_key = ?',
+        where: 'forms_ref_key = ? AND household_ref_key = ? AND beneficiary_ref_key = ?',
         whereArgs: [
           FollowupFormDataTable.formUniqueKeys[formType],
           householdId,

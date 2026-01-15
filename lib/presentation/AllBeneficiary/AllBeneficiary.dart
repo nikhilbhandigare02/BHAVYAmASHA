@@ -128,13 +128,17 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
         final String village = info['village']?.toString() ?? '';
         final String mohalla = info['mohalla']?.toString() ?? '';
-
+        final String maritalStatus = info['maritalStatus']?.toString() ?? '';
+        final t = AppLocalizations.of(context);
         final bool isChild =
             (info['memberType']?.toString().toLowerCase() == 'child') ||
                 (relation.toLowerCase() == 'child');
 
         final String registrationType = isChild ? 'Child' : 'General';
-
+        final fatherName =
+            _nonEmpty(info['father_name']) ??
+                _nonEmpty(info['fatherName']) ??
+                t!.na;
         beneficiaries.add({
           'hhId': hhId,
           'unique_key': uniqueKey,
@@ -155,13 +159,14 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
             row['modified_date_time'],
           ),
           'Mobileno.': info['mobileNo']?.toString() ?? '',
-          'FatherName': info['fatherName']?.toString() ?? info['father_name']?.toString() ?? info['father']?.toString() ?? '',
+          'FatherName': fatherName,
           'MotherName': info['motherName']?.toString() ?? info['mother_name']?.toString() ?? info['mother']?.toString() ?? '',
           'WifeName': info['wifeName']?.toString() ?? info['wife_name']?.toString() ?? info['wife']?.toString() ?? info['spouse_name']?.toString() ?? '',
           'HusbandName': info['husbandName']?.toString() ?? info['husband_name']?.toString() ?? info['husband']?.toString() ?? info['spouse_name']?.toString() ?? '',
           'SpouseName': info['spouseName']?.toString() ?? info['spouse_name']?.toString() ?? info['spouse']?.toString() ?? '',
           'SpouseGender': info['spouseGender']?.toString() ?? info['spouse_gender']?.toString() ?? info['gender']?.toString() ?? '',
           'Relation': relation,
+          'MaritalStatus': maritalStatus,
           'is_synced': row['is_synced'] ?? 0,
           'is_death': row['is_death'] ?? 0,
           '_rawInfo': info, // Store raw beneficiary info for fallback access
@@ -219,7 +224,11 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       });
     }
   }
-
+  String? _nonEmpty(dynamic v) {
+    if (v == null) return null;
+    final s = v.toString().trim();
+    return s.isEmpty ? null : s;
+  }
 
   String _formatAgeGender(dynamic dobRaw, dynamic genderRaw, int isDeath, dynamic deathDetailsRaw, dynamic modifiedDateTimeRaw) {
     String age = 'N/A';
@@ -231,11 +240,11 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       } catch (_) {}
       if (dob != null) {
         DateTime referenceDate = DateTime.now();
-        
+
         // Only calculate age using death date if is_death equals 1
         if (isDeath == 1) {
           DateTime? deathDate;
-          
+
           // First try to get date from death_details
           if (deathDetailsRaw != null) {
             Map<String, dynamic> deathDetails = {};
@@ -245,7 +254,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
               } else if (deathDetailsRaw is Map) {
                 deathDetails = Map<String, dynamic>.from(deathDetailsRaw as Map);
               }
-              
+
               // Parse date of death
               String deathDateStr = (deathDetails['date_of_death'] ?? '').toString();
               if (deathDateStr.isNotEmpty && deathDateStr != 'null') {
@@ -266,7 +275,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
               print('Error parsing death details: $e');
             }
           }
-          
+
           // If death date not found, try modified_date_time
           if (deathDate == null && modifiedDateTimeRaw != null) {
             print('🔍 Debug: modifiedDateTimeRaw = $modifiedDateTimeRaw');
@@ -289,13 +298,13 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
               }
             }
           }
-          
+
           // Use death date if found, otherwise use current date
           if (deathDate != null) {
             referenceDate = deathDate;
           }
         }
-        
+
         age = '${referenceDate.difference(dob).inDays ~/ 365}';
       }
     }
@@ -482,6 +491,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
 
     // Marital status logic - need to extract from data or assume based on relation
     final String relation = data['Relation']?.toString().toLowerCase() ?? '';
+    final String maritalStatus = data['MaritalStatus']?.toString().toLowerCase() ?? '';
+
     final bool isUnmarried = relation.isEmpty ||
         relation == 'son' ||
         relation == 'daughter' ||
@@ -491,23 +502,25 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         relation == 'granddaughter' ||
         relation == 'nephew' ||
         relation == 'niece' ||
+        relation == 'father' ||
         isChild; // Children are considered unmarried
-    
+
     final bool isMarried = !isUnmarried && !isChild;
 
     // Helper functions to get data with fallback to raw beneficiary info
     String getMobileNumber() {
       // Check regular data first
       String mobile = data['Mobileno.']?.toString() ?? '';
+
       if (mobile.isNotEmpty) return mobile;
-      
+
       // Check raw beneficiary info for mobileNo
       final rawInfo = data['_rawInfo'] as Map<String, dynamic>?;
       if (rawInfo != null) {
         mobile = rawInfo['mobileNo']?.toString() ?? '';
         if (mobile.isNotEmpty) return mobile;
       }
-      
+
       return mobile;
     }
 
@@ -515,14 +528,14 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       // Check regular data first
       String village = data['village']?.toString() ?? '';
       if (village.isNotEmpty) return village;
-      
+
       // Check raw beneficiary info for village
       final rawInfo = data['_rawInfo'] as Map<String, dynamic>?;
       if (rawInfo != null) {
         village = rawInfo['village']?.toString() ?? '';
         if (village.isNotEmpty) return village;
       }
-      
+
       return village;
     }
 
@@ -530,17 +543,17 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
       // Check regular data first
       String mohalla = data['Tola/Mohalla']?.toString() ?? '';
       if (mohalla.isNotEmpty) return mohalla;
-      
+
       // Check raw beneficiary info for mohalla fields
       final rawInfo = data['_rawInfo'] as Map<String, dynamic>?;
       if (rawInfo != null) {
         mohalla = rawInfo['mohalla']?.toString() ?? '';
         if (mohalla.isNotEmpty) return mohalla;
-        
+
         mohalla = rawInfo['mohallaTola']?.toString() ?? '';
         if (mohalla.isNotEmpty) return mohalla;
       }
-      
+
       return mohalla;
     }
 
@@ -553,7 +566,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     (completeBeneficiaryId.length > 11 && completeBeneficiaryId != 'N/A')
         ? completeBeneficiaryId.substring(completeBeneficiaryId.length - 11)
         : completeBeneficiaryId;
-
+    final t = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -676,7 +689,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                     color: primary.withOpacity(0.95),
                     borderRadius: const BorderRadius.vertical(
                       bottom: Radius.circular(6),
-                      ),
+                    ),
                   ),
                   padding: const EdgeInsets.all(12),
                   child: Column(
@@ -720,12 +733,12 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                                 : (l10n?.notAvailable ?? 'Not Available'),
                           )
                         else if (isMale && !isChild)
-                          _rowText(
-                            l10n?.mobileLabelSimple ?? 'Mobile No.',
-                            getMobileNumber().isNotEmpty
-                                ? getMobileNumber()
-                                : (l10n?.na ?? 'N/A'),
-                          ),
+                            _rowText(
+                              l10n?.mobileLabelSimple ?? 'Mobile No.',
+                              getMobileNumber().isNotEmpty
+                                  ? getMobileNumber()
+                                  : (l10n?.na ?? 'N/A'),
+                            ),
                       ]),
                       const SizedBox(height: 8),
 
@@ -733,12 +746,12 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                       if (isChild) ...[
                         _buildRow([
                           // Father name for children - first column
-                          if ((data['FatherName']?.toString().isNotEmpty == true) || 
+                          if ((data['FatherName']?.toString().isNotEmpty == true) ||
                               (data['SpouseName']?.toString().isNotEmpty == true))
                             _rowText(
                               l10n?.fatherName ?? 'Father Name',
-                              data['FatherName']?.toString().isNotEmpty == true 
-                                  ? data['FatherName'] 
+                              data['FatherName']?.toString().isNotEmpty == true
+                                  ? data['FatherName']
                                   : data['SpouseName'],
                             )
                           else
@@ -746,8 +759,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                           // Mobile number for children - second column
                           _rowText(
                             l10n?.mobileLabelSimple ?? 'Mobile No.',
-                            getMobileNumber().isNotEmpty 
-                                ? getMobileNumber() 
+                            getMobileNumber().isNotEmpty
+                                ? getMobileNumber()
                                 : (l10n?.na ?? 'NA'),
                           ),
                           // Village for children - third column
@@ -783,6 +796,13 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                               l10n?.husbandName ?? 'Husband Name',
                               data['SpouseName'],
                             )
+                          else if ((data['FatherName']?.toString().isNotEmpty == true))
+                              _rowText(
+                                l10n?.fatherName ?? 'Father Name',
+                                data['FatherName']?.toString().isNotEmpty == true
+                                    ? data['FatherName']
+                                    : t!.na,
+                              )
                           else
                             _rowText('', ''),
                           _rowText(
@@ -809,6 +829,52 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                           _rowText('', ''), // Empty cell for layout
                           _rowText('', ''), // Empty cell for layout
                         ]),
+                      ],
+
+                      if (maritalStatus=='unmarried' && isGeneral) ...[
+                        _buildRow([
+                          if ((data['FatherName']?.toString().isNotEmpty == true) ||
+                              (data['SpouseName']?.toString().isNotEmpty == true))
+                            _rowText(
+                              l10n?.fatherName ?? 'Father Name',
+                              data['FatherName']?.toString().isNotEmpty == true
+                                  ? data['FatherName']
+                                  : data['SpouseName'],
+                            )
+                          else
+                            _rowText('', ''),
+                          if (isFemale)
+                            _rowText(
+                              l10n?.rchIdLabel ?? 'RCH ID',
+                              data['RichID']?.toString().trim().isNotEmpty == true
+                                  ? data['RichID'].toString()
+                                  : (l10n?.notAvailable ?? 'Not Available'),
+                            )
+                          else
+                            _rowText(
+                              l10n?.mobileLabelSimple ?? 'Mobile No.',
+                              getMobileNumber().isNotEmpty
+                                  ? getMobileNumber()
+                                  : (l10n?.na ?? 'N/A'),
+                            ),
+                          _rowText(
+                            l10n?.userVillageLabel ?? 'Village',
+                            getVillage().isNotEmpty
+                                ? getVillage()
+                                : (l10n?.na ?? 'N/A'),
+                          ),
+                        ]),
+                        /* const SizedBox(height: 8),
+                        _buildRow([
+                          _rowText(
+                            l10n?.tolaMohalla ?? 'Tola/Mohalla',
+                            getMohalla().isNotEmpty
+                                ? getMohalla()
+                                : (l10n?.na ?? 'N/A'),
+                          ),
+                          _rowText('', ''), // Empty cell for layout
+                          _rowText('', ''), // Empty cell for layout
+                        ]),*/
                       ],
 
                       // CATEGORY 3: Married males - show wife name, mobile, village, tola/mohalla
@@ -853,51 +919,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                       ],
 
                       // CATEGORY 4: Unmarried males/females with general registration - show father name, village, tola/mohalla
-                      if (!isChild && isUnmarried && isGeneral) ...[
-                        _buildRow([
-                          if ((data['FatherName']?.toString().isNotEmpty == true) || 
-                              (data['SpouseName']?.toString().isNotEmpty == true))
-                            _rowText(
-                              l10n?.fatherName ?? 'Father Name',
-                              data['FatherName']?.toString().isNotEmpty == true 
-                                  ? data['FatherName'] 
-                                  : data['SpouseName'],
-                            )
-                          else
-                            _rowText('', ''),
-                          if (isFemale)
-                            _rowText(
-                              l10n?.rchIdLabel ?? 'RCH ID',
-                              data['RichID']?.toString().trim().isNotEmpty == true
-                                  ? data['RichID'].toString()
-                                  : (l10n?.notAvailable ?? 'Not Available'),
-                            )
-                          else
-                            _rowText(
-                              l10n?.mobileLabelSimple ?? 'Mobile No.',
-                              getMobileNumber().isNotEmpty
-                                  ? getMobileNumber()
-                                  : (l10n?.na ?? 'N/A'),
-                            ),
-                          _rowText(
-                            l10n?.userVillageLabel ?? 'Village',
-                            getVillage().isNotEmpty
-                                ? getVillage()
-                                : (l10n?.na ?? 'N/A'),
-                          ),
-                        ]),
-                        const SizedBox(height: 8),
-                        _buildRow([
-                          _rowText(
-                            l10n?.tolaMohalla ?? 'Tola/Mohalla',
-                            getMohalla().isNotEmpty
-                                ? getMohalla()
-                                : (l10n?.na ?? 'N/A'),
-                          ),
-                          _rowText('', ''), // Empty cell for layout
-                          _rowText('', ''), // Empty cell for layout
-                        ]),
-                      ],
+
                     ],
                   ),
                 )],
