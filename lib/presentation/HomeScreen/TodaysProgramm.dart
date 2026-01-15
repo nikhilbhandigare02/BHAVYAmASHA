@@ -3000,7 +3000,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
       final List<Map<String, dynamic>> items = [];
 
-      // ------------------ MAP household -> head_id ------------------
       final Map<String, String> headKeyByHousehold = {};
       for (final hh in households) {
         final hhRefKey = (hh['unique_key'] ?? '').toString();
@@ -3015,14 +3014,12 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
       for (final row in rows) {
         try {
-          // ------------------ ASHA FILTER ------------------
           if (ashaUniqueKey != null &&
               ashaUniqueKey.isNotEmpty &&
               row['current_user_key']?.toString() != ashaUniqueKey) {
             continue;
           }
 
-          // ------------------ SKIP INVALID ------------------
           if (row['is_death'] == 1 ||
               row['is_migrated'] == 1 ||
               row['is_deleted'] == 1) continue;
@@ -3457,13 +3454,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 DateTime.now().toIso8601String(),
               );
               completedItem['_rawRow'] = {};
-              // Ensure household_id is preserved from original item
-              if (item['household_id'] != null) {
-                completedItem['household_id'] = item['household_id'];
-              }
-              if (item['household_ref_key'] != null) {
-                completedItem['household_ref_key'] = item['household_ref_key'];
-              }
               _eligibleCompletedCoupleItems.insert(0, completedItem);
             });
             await _loadData();
