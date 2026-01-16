@@ -2364,7 +2364,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trainingFormTitle => 'Training Details';
 
   @override
-  String get trainingNameLabel => 'Name of Training';
+  String get trainingNameLabel => 'Training name';
 
   @override
   String get trainingPlaceLabel => 'Place of Training';

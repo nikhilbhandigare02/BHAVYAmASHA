@@ -4784,7 +4784,7 @@ abstract class AppLocalizations {
   /// No description provided for @trainingNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Name of Training'**
+  /// **'Training name'**
   String get trainingNameLabel;
 
   /// No description provided for @trainingPlaceLabel.

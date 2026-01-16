@@ -347,7 +347,7 @@ class _GuestBeneficiarySearchState extends State<GuestBeneficiarySearch> {
                                       CustomTextField(
                                         labelText: l10n.mobileLabelSimple,
                                         hintText:
-                                            l10n.enter10DigitNumber ??
+                                            l10n.mobileLabelSimple ??
                                             'Enter 10 digit number',
                                         keyboardType: TextInputType.number,
                                         maxLength: 10,
