@@ -62,7 +62,7 @@ class BeneficiaryData {
       gender: json['gender']?.toString(),
       mobile: json['mobile']?.toString(),
       rchId: json['rchId']?.toString(),
-      fatherName: json['fatherName']?.toString(),
+      fatherName: json['father_name']?.toString(),
       motherName: json['motherName']?.toString(),
       spouseName: json['spouseName']?.toString(),
       dateOfBirth: json['dateOfBirth']?.toString(),
@@ -213,7 +213,7 @@ class _RegisterChildDueListFormScreen
             rchId: (info['rchId']?.toString() ??
                 info['RichID']?.toString() ??
                 info['RichIDChanged']?.toString()),
-            fatherName: info['fatherName']?.toString(),
+            fatherName: info['father_name']?.toString(),
             motherName: info['motherName']?.toString(),
             spouseName: (info['spouseName']?.toString() ??
                 headDetails['spouseName']?.toString() ??
@@ -306,7 +306,7 @@ class _RegisterChildDueListFormScreen
               name: headDetails['headName']?.toString(),
               gender: headDetails['gender']?.toString(),
               mobile: headDetails['mobileNo']?.toString(),
-              fatherName: headDetails['fatherName']?.toString(),
+              fatherName: headDetails['father_name']?.toString(),
               spouseName: (headDetails['spouseName']?.toString() ??
                   headDetails['husbandName']?.toString() ??
                   headDetails['wifeName']?.toString()),
@@ -345,7 +345,7 @@ class _RegisterChildDueListFormScreen
                   gender: member['gender']?.toString(),
                   mobile: member['mobileNo']?.toString(),
                   rchId: member['richId']?.toString(),
-                  fatherName: member['fatherName']?.toString(),
+                  fatherName: member['father_name']?.toString(),
                   motherName: member['motherName']?.toString(),
                   spouseName: (member['spouseName']?.toString() ??
                       member['husbandName']?.toString() ??

@@ -133,77 +133,36 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         return;
       }
 
+      // Use same logic as myBeneficiaries.dart _getEligibleCoupleCount()
       final query = '''
-        SELECT DISTINCT b.*, 
-       e.eligible_couple_state, 
-       e.created_date_time as registration_date
-FROM beneficiaries_new b
-INNER JOIN eligible_couple_activities e 
-        ON b.unique_key = e.beneficiary_ref_key
-WHERE b.is_deleted = 0 
-  AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
-  AND (b.is_death = 0 OR b.is_death IS NULL)
-  AND e.eligible_couple_state IN ('eligible_couple')
-  AND e.current_user_key = ?
-  AND b.current_user_key = ?
-ORDER BY b.created_date_time DESC;
-
+        SELECT DISTINCT b.*, e.eligible_couple_state, 
+               e.created_date_time as registration_date
+        FROM beneficiaries_new b
+        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+        WHERE b.is_deleted = 0 
+          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+          AND (b.is_death = 0 OR b.is_death IS NULL)
+          AND e.eligible_couple_state = 'eligible_couple'
+          AND e.is_deleted = 0
+          AND e.current_user_key = ?
       ''';
 
-      final rows = await db.rawQuery(query, [ashaUniqueKey,ashaUniqueKey]);
+      final rows = await db.rawQuery(query, [ashaUniqueKey]);
 
       int count = 0;
-      final Set<String> countedBeneficiaries = {};
-
       for (final row in rows) {
         try {
-          final beneficiaryKey = row['unique_key']?.toString();
-          if (beneficiaryKey == null || beneficiaryKey.isEmpty) continue;
-
-          if (countedBeneficiaries.contains(beneficiaryKey)) {
-            continue;
-          }
-
           final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
           final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty
               ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfo))
               : <String, dynamic>{};
 
-          final memberType =
-              info['memberType']?.toString().toLowerCase() ?? '';
-          final maritalStatus =
-              info['maritalStatus']?.toString().toLowerCase() ?? '';
-          final gender =
-              info['gender']?.toString().toLowerCase() ?? '';
-
-          int? age;
-          if (info['age'] != null) {
-            age = int.tryParse(info['age'].toString());
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          if (memberType != 'child') {
+            count++;
           }
-          age ??= _calculateAgeFromDob(info['dob']?.toString());
-
-          if (memberType == 'child' ||
-              maritalStatus != 'married' ||
-              age == null ||
-              age < 15 ||
-              age > 49) {
-            continue;
-          }
-
-          final hasSterilization = await _hasSterilizationRecord(
-            db,
-            beneficiaryKey,
-            ashaUniqueKey,
-          );
-
-          if (hasSterilization) {
-            continue;
-          }
-
-          countedBeneficiaries.add(beneficiaryKey);
-          count++;
         } catch (_) {
-          continue;
+          count++;
         }
       }
 

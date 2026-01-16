@@ -675,87 +675,47 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     try {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey =
-      currentUserData?['unique_key']?.toString();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+        print('Error: Current user key not found');
         if (mounted) {
-          setState(() => eligibleCouplesCount = 0);
+          setState(() {
+            eligibleCouplesCount = 0;
+          });
         }
         return;
       }
 
       final query = '''
-      SELECT DISTINCT b.*, 
-             e.eligible_couple_state, 
-             e.created_date_time AS registration_date
-      FROM beneficiaries_new b
-      INNER JOIN eligible_couple_activities e 
-              ON b.unique_key = e.beneficiary_ref_key
-      WHERE b.is_deleted = 0
-        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
-        AND (b.is_death = 0 OR b.is_death IS NULL)
-        AND e.eligible_couple_state IN ('eligible_couple')
-        AND e.current_user_key = ?
-        AND b.current_user_key = ?
-      ORDER BY b.created_date_time DESC;
-    ''';
+        SELECT DISTINCT b.*, e.eligible_couple_state, 
+               e.created_date_time as registration_date
+        FROM beneficiaries_new b
+        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+        WHERE b.is_deleted = 0 
+          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+          AND e.eligible_couple_state = 'eligible_couple'
+          AND e.is_deleted = 0
+          AND b.is_death = 0
+          AND e.current_user_key = ?
+      ''';
 
-      final rows = await db.rawQuery(query, [ashaUniqueKey, ashaUniqueKey]);
+      final rows = await db.rawQuery(query, [ashaUniqueKey]);
 
       int count = 0;
-      final Set<String> countedBeneficiaries = {};
-
       for (final row in rows) {
         try {
-          final beneficiaryKey = row['unique_key']?.toString();
-          if (beneficiaryKey == null || beneficiaryKey.isEmpty) continue;
-
-          // ❌ avoid duplicate count
-          if (countedBeneficiaries.contains(beneficiaryKey)) continue;
-
-          final beneficiaryInfo =
-              row['beneficiary_info']?.toString() ?? '{}';
-
-          final Map<String, dynamic> info =
-          beneficiaryInfo.isNotEmpty
+          final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
+          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty
               ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfo))
               : <String, dynamic>{};
 
-          final memberType =
-              info['memberType']?.toString().toLowerCase() ?? '';
-          final maritalStatus =
-              info['maritalStatus']?.toString().toLowerCase() ?? '';
-
-          // ❌ skip child
-          if (memberType == 'child') continue;
-
-          // ❌ skip unmarried
-          if (maritalStatus != 'married') continue;
-
-          // 🔹 age calculation (same as _loadCounts)
-          int? age;
-          if (info['age'] != null) {
-            age = int.tryParse(info['age'].toString());
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          if (memberType != 'child') {
+            count++;
           }
-          age ??= _calculateAgeFromDob(info['dob']?.toString());
-
-          if (age == null || age < 15 || age > 49) continue;
-
-          // ❌ skip sterilization cases
-          final hasSterilization = await _hasSterilizationRecord(
-            db,
-            beneficiaryKey,
-            ashaUniqueKey,
-          );
-
-          if (hasSterilization) continue;
-
-          // ✅ count
-          countedBeneficiaries.add(beneficiaryKey);
-          count++;
         } catch (_) {
-          continue;
+          count++;
         }
       }
 
@@ -764,34 +724,28 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           eligibleCouplesCount = count;
         });
       }
-    } catch (e, stackTrace) {
-      print('Error loading eligible couples count: $e');
-      print(stackTrace);
-      if (mounted) {
-        setState(() => eligibleCouplesCount = 0);
-      }
-    }
-  }
-
-  int? _calculateAgeFromDob(String? dob) {
-    if (dob == null || dob.isEmpty) return null;
-
-    try {
-      final DateTime dobDate = DateTime.parse(dob);
-      final DateTime today = DateTime.now();
-
-      int age = today.year - dobDate.year;
-
-      if (today.month < dobDate.month ||
-          (today.month == dobDate.month && today.day < dobDate.day)) {
-        age--;
-      }
-
-      return age;
     } catch (e) {
-      return null;
+      print('Error loading eligible couples count: $e');
+      if (mounted) {
+        setState(() {
+          eligibleCouplesCount = 0;
+        });
+      }
     }
   }
+
+
+  int _calculateEcAge(dynamic dobRaw) {
+    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
+    try {
+      final dob = DateTime.tryParse(dobRaw.toString());
+      if (dob == null) return 0;
+      return DateTime.now().difference(dob).inDays ~/ 365;
+    } catch (_) {
+      return 0;
+    }
+  }
+
 
   Future<bool> _hasSterilizationRecord(
     Database db,

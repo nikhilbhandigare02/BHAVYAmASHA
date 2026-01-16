@@ -2979,11 +2979,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get err_breastfeeding_problems_required => 'Please select Does the mother have breast feeding problem';
 
   @override
-<<<<<<< HEAD
   String get err_mcp_mother_filled_required => 'Please select hast the MCP card filled';
-=======
-  String get err_mcp_mother_filled_required => 'Please select hast the MCP card filled status.';
->>>>>>> 2e8920f1d1f3b7aa51bc3fdaf35344f6b98c8058
 
   @override
   String get err_excessive_bleeding_required => 'Please select excessive bleeding.';
@@ -6443,7 +6439,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterBirthWeight => 'Enter birth weight';
 
   @override
-  String get birthWeightRange => 'Birth weight (1200-4000 gms)';
+  String get birthWeightRange => 'Birth Weight (1200-4000)gms';
 
   @override
   String get enterValidBirthWeight => 'Please enter birth weight between 1200 to 4000gm';

@@ -6014,11 +6014,7 @@ abstract class AppLocalizations {
   /// No description provided for @err_mcp_mother_filled_required.
   ///
   /// In en, this message translates to:
-<<<<<<< HEAD
   /// **'Please select hast the MCP card filled'**
-=======
-  /// **'Please select hast the MCP card filled status.'**
->>>>>>> 2e8920f1d1f3b7aa51bc3fdaf35344f6b98c8058
   String get err_mcp_mother_filled_required;
 
   /// No description provided for @err_excessive_bleeding_required.
@@ -12930,7 +12926,7 @@ abstract class AppLocalizations {
   /// No description provided for @birthWeightRange.
   ///
   /// In en, this message translates to:
-  /// **'Birth weight (1200-4000 gms)'**
+  /// **'Birth Weight (1200-4000)gms'**
   String get birthWeightRange;
 
   /// No description provided for @enterValidBirthWeight.
