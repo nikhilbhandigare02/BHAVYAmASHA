@@ -740,6 +740,11 @@ class _PersonalInfoTab extends StatelessWidget {
               initialValue: genderValue,
               onChanged: (v) {
                 bloc.add(CbacFieldChanged('personal.gender', v));
+                final currentFather =
+                    (state.data['personal.father']?.toString().trim() ?? '');
+                if (currentFather.isNotEmpty) {
+                  return;
+                }
                 final fatherName =
                     (state.data['beneficiary.fatherName']
                         ?.toString()
