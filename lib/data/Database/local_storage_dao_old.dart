@@ -340,8 +340,6 @@ class LocalStorageDao {
 
   Future<String> getLatestEligibleCoupleActivityServerId() async {
     try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       final db = await _db;
       final rows = await db.query(
         'eligible_couple_activities',
@@ -352,8 +350,7 @@ class LocalStorageDao {
           'id',
           'is_deleted',
         ],
-        where: "server_id IS NOT NULL AND TRIM(server_id) != '' AND current_user_key = ?",
-        whereArgs: [ashaUniqueKey],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
         orderBy: "created_date_time DESC",
         limit: 1,
       );
@@ -369,8 +366,6 @@ class LocalStorageDao {
 
   Future<String> getLatestChildCareActivityServerId() async {
     try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       final db = await _db;
       final rows = await db.query(
         'child_care_activities',
@@ -381,9 +376,9 @@ class LocalStorageDao {
           'id',
           'is_deleted',
         ],
-        where: "server_id IS NOT NULL AND TRIM(server_id) != ''  AND current_user_key = ?",
-        whereArgs: [ashaUniqueKey],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
         orderBy: "created_date_time DESC",
+
         limit: 1,
       );
 
@@ -398,8 +393,6 @@ class LocalStorageDao {
 
   Future<String> getLatestMotherCareActivityServerId() async {
     try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       final db = await _db;
       final rows = await db.query(
         'mother_care_activities',
@@ -410,8 +403,7 @@ class LocalStorageDao {
           'id',
           'is_deleted',
         ],
-        where: "server_id IS NOT NULL AND TRIM(server_id) != '' AND current_user_key = ?",
-        whereArgs: [ashaUniqueKey],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
         orderBy: "created_date_time DESC",
         limit: 1,
       );
@@ -530,7 +522,7 @@ class LocalStorageDao {
   Future<String?> getLastANCVisitDate(String beneficiaryId) async {
     try {
       final db = await _db;
-
+      
       // Query to get the latest ANC visit record from followup table
       final result = await db.rawQuery('''
         SELECT created_date_time
@@ -2828,8 +2820,6 @@ class LocalStorageDao {
 
   Future<String> getLatestHouseholdServerId() async {
     try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       final db = await _db;
       final rows = await db.query(
         'households',
@@ -2840,8 +2830,7 @@ class LocalStorageDao {
           'id',
           'is_deleted',
         ],
-        where: "server_id IS NOT NULL AND TRIM(server_id) != '' AND current_user_key = ?",
-        whereArgs: [ashaUniqueKey],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
         orderBy: "created_date_time DESC",
         limit: 1,
       );
@@ -3051,8 +3040,6 @@ class LocalStorageDao {
 
   Future<String> getLatestFollowupFormServerId() async {
     try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       final db = await _db;
       final rows = await db.query(
         FollowupFormDataTable.table,
@@ -3063,11 +3050,11 @@ class LocalStorageDao {
           'id',
           'is_deleted',
         ],
-        where: "server_id IS NOT NULL AND TRIM(server_id) != '' AND current_user_key = ?",
-        whereArgs: [ashaUniqueKey],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
         orderBy: "created_date_time DESC",
         limit: 1,
       );
+
 
       if (rows.isEmpty) return '';
       final sid = rows.first['server_id'];
@@ -3428,14 +3415,11 @@ extension LocalStorageDaoReads on LocalStorageDao {
 
   Future<String> getLatestBeneficiaryServerId() async {
     try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       final db = await _db;
       final rows = await db.query(
         'beneficiaries_new',
         columns: ['server_id'],
-        where: "server_id IS NOT NULL AND TRIM(server_id) != '' AND current_user_key = ?",
-        whereArgs: [ashaUniqueKey],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
         orderBy: "created_date_time DESC",
         limit: 1,
       );

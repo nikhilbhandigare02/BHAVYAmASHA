@@ -51,6 +51,7 @@ class DbMigration {
         "date_of_death",
         "childSchool",
         "fatherName",
+        "father_name",
         "motherName",
         "spouseName",
         "birthCertificate",
@@ -113,6 +114,7 @@ class DbMigration {
         "memberName": "member_name",
         "motherName": "mother_name",
         "fatherName": "father_name",
+        "father_name": "father_name",
         "spouseName": "father_or_spouse_name",
         "dob": "date_of_birth",
         "years": "dob_year",
@@ -170,7 +172,6 @@ class DbMigration {
         final Map<String, dynamic> finalJson = {};
 
         for (final key in beneficiaryKeys) {
-          // 🔹 First priority → same key
           if (form.containsKey(key) &&
               form[key] != null &&
               form[key].toString() != "null") {
@@ -178,7 +179,6 @@ class DbMigration {
             continue;
           }
 
-          // 🔹 Second priority → mapped key
           if (keyMapping.containsKey(key)) {
             final mappedKey = keyMapping[key]!;
             if (form.containsKey(mappedKey) &&

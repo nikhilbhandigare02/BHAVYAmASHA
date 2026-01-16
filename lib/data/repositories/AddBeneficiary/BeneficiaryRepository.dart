@@ -389,7 +389,6 @@ class BeneficiaryRepository {
       'district': addr['district'] ?? '',
       'block': addr['block'] ?? '',
 
-      // Misc fields - API mapping
       'weight': info['weight'],
       'birthWeight': info['weight_at_birth'],
       'childSchool': info['is_school_going_child'],
@@ -397,7 +396,6 @@ class BeneficiaryRepository {
       'memberStatus': info['member_status'] ?? '',
       'relation_to_head': info['relaton_with_family_head'] ?? info['relationToHead'] ?? '',
       
-      // Additional API-specific fields
       'is_abha_verified': info['is_abha_verified'] ?? false,
       'is_rch_id_verified': info['is_rch_id_verified'] ?? false,
       'is_fetched_from_abha': info['is_fetched_from_abha'] ?? false,

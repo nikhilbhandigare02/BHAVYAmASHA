@@ -363,16 +363,16 @@ ORDER BY d.created_date_time DESC
       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) return 0;
 
       final query = '''
-      SELECT DISTINCT b.*
-      FROM beneficiaries_new b
-      INNER JOIN eligible_couple_activities e
-        ON b.unique_key = e.beneficiary_ref_key
-      WHERE b.is_deleted = 0
-        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
-        AND (b.is_death = 0 OR b.is_death IS NULL)
-        AND e.eligible_couple_state = 'eligible_couple'
-        AND e.is_deleted = 0
-        AND e.current_user_key = ?
+      SELECT DISTINCT b.*, e.eligible_couple_state, 
+               e.created_date_time as registration_date
+        FROM beneficiaries_new b
+        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+        WHERE b.is_deleted = 0 
+          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+          AND (b.is_death = 0 OR b.is_death IS NULL)
+          AND e.eligible_couple_state = 'eligible_couple'
+          AND e.is_deleted = 0
+          AND e.current_user_key = ?
     ''';
 
       final rows = await db.rawQuery(query, [ashaUniqueKey]);
