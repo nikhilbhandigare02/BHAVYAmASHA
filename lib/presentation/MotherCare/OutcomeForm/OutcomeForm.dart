@@ -11,6 +11,7 @@ import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../core/widgets/DatePicker/timepicker.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
+import '../../../data/Database/local_storage_dao.dart';
 import '../../../l10n/app_localizations.dart';
 import 'bloc/outcome_form_bloc.dart';
 import '../../../data/SecureStorage/SecureStorage.dart';
@@ -185,6 +186,33 @@ class _OutcomeFormView extends StatelessWidget {
                           context.read<OutcomeFormBloc>().add(
                             GestationWeeksChanged(weeks),
                           );
+                        } else {
+                          // Try to calculate week from LMP date if not available in form data
+                          final beneficiaryId = beneficiaryData['BeneficiaryID']?.toString() ??
+                                              beneficiaryData['beneficiaryId']?.toString() ??
+                                              beneficiaryData['unique_key']?.toString() ??
+                                              '';
+                          if (beneficiaryId.isNotEmpty) {
+                            final lmpDate = await _getLmpFromFollowupForms(beneficiaryId);
+                            if (lmpDate != null) {
+                              // Use delivery date for calculation if available, otherwise current date
+                              DateTime? deliveryDate;
+                              try {
+                                deliveryDate = DateTime.parse(createdAt);
+                              } catch (_) {
+                                deliveryDate = null;
+                              }
+                              
+                              final calculatedWeeks = _calculateWeeksOfPregnancy(lmpDate, deliveryDate);
+                              final weeksString = calculatedWeeks.toString();
+                              context.read<OutcomeFormBloc>().add(
+                                GestationWeeksChanged(weeksString),
+                              );
+                              print('✅ Calculated gestation weeks: $weeksString from LMP: $lmpDate');
+                            } else {
+                              print('ℹ️ Could not calculate gestation weeks - no LMP date found');
+                            }
+                          }
                         }
 
                         // Derive children count from children_arr array or other fields
@@ -1169,6 +1197,136 @@ String _getWeeksOfPregnancy(Map<String, dynamic> formData) {
   final format2Weeks = formData['week_of_pregnancy']?.toString() ?? '';
 
   return format1Weeks.isNotEmpty ? format1Weeks : format2Weeks;
+}
+
+// Calculate weeks of pregnancy from LMP date (similar to PreviousVisit)
+int _calculateWeeksOfPregnancy(DateTime? lmpDate, DateTime? deliveryDate) {
+  if (lmpDate == null) return 0;
+  final base = deliveryDate ?? DateTime.now();
+  final difference = base.difference(lmpDate).inDays;
+  return (difference / 7).floor() + 1;
+}
+
+Future<DateTime?> _getLmpFromFollowupForms(String beneficiaryId) async {
+  try {
+    try {
+      final beneficiaryRow = await LocalStorageDao.instance
+          .getBeneficiaryByUniqueKey(beneficiaryId);
+      if (beneficiaryRow != null) {
+        final infoRaw = beneficiaryRow['beneficiary_info'];
+        Map<String, dynamic> info;
+        if (infoRaw is Map<String, dynamic>) {
+          info = infoRaw;
+        } else if (infoRaw is Map) {
+          info = Map<String, dynamic>.from(infoRaw);
+        } else if (infoRaw is String && infoRaw.isNotEmpty) {
+          info = Map<String, dynamic>.from(jsonDecode(infoRaw));
+        } else {
+          info = {};
+        }
+
+        // Check for LMP date in beneficiary info
+        if (info['lmp'] != null) {
+          try {
+            final lmpDate = DateTime.parse(info['lmp'].toString());
+            print('✅ Found LMP date from beneficiary info: $lmpDate');
+            return lmpDate;
+          } catch (e) {
+            print('⚠️ Error parsing LMP date from beneficiary info: ${info['lmp']} - $e');
+          }
+        }
+      }
+    } catch (e) {
+      print('⚠️ Error getting LMP from beneficiary info: $e');
+    }
+
+    // Get beneficiary info to extract household ID
+    final beneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
+    String? hhId;
+    
+    for (final beneficiary in beneficiaries) {
+      if (beneficiary['unique_key']?.toString() == beneficiaryId) {
+        hhId = beneficiary['household_ref_key']?.toString();
+        break;
+      }
+    }
+    
+    if (hhId == null || hhId.isEmpty) {
+      print('⚠️ Could not find household ID for beneficiary: $beneficiaryId');
+      return null;
+    }
+
+    final dao = LocalStorageDao();
+    final forms = await dao.getFollowupFormsByHouseholdAndBeneficiary(
+      formType: FollowupFormDataTable.eligibleCoupleTrackingDue,
+      householdId: hhId,
+      beneficiaryId: beneficiaryId,
+    );
+
+    if (forms.isEmpty) {
+      print('ℹ️ No eligible couple tracking due forms found for beneficiary');
+      return null;
+    }
+
+    for (final form in forms) {
+      final formJsonStr = form['form_json']?.toString();
+      if (formJsonStr == null || formJsonStr.isEmpty) continue;
+
+      try {
+        final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
+        
+        // Check for LMP date in eligible_couple_tracking_due_from structure
+        final trackingData = root['eligible_couple_tracking_due_from'];
+        if (trackingData is Map) {
+          final lmpStr = trackingData['lmp_date']?.toString();
+          if (lmpStr != null && lmpStr.isNotEmpty && lmpStr != '""') {
+            try {
+              final lmpDate = DateTime.parse(lmpStr);
+              print('✅ Found LMP date from followup form: $lmpDate');
+              return lmpDate;
+            } catch (e) {
+              print('⚠️ Error parsing LMP date: $e');
+            }
+          }
+        }
+        
+        // Check for LMP date in form_data structure
+        if (root['form_data'] is Map) {
+          final formData = root['form_data'] as Map<String, dynamic>;
+          final lmpStr = formData['lmp_date']?.toString();
+          if (lmpStr != null && lmpStr.isNotEmpty && lmpStr != '""') {
+            try {
+              String dateStr = lmpStr;
+              if (dateStr.contains('T')) {
+                try {
+                  final lmpDate = DateTime.parse(dateStr);
+                  print('✅ Found LMP date from form_data: $lmpDate');
+                  return lmpDate;
+                } catch (e) {
+                  dateStr = dateStr.split('T')[0];
+                  print('⚠️ Full date parsing failed, trying date part only: $dateStr');
+                }
+              }
+              
+              final lmpDate = DateTime.parse(dateStr);
+              print('✅ Found LMP date from form_data: $lmpDate');
+              return lmpDate;
+            } catch (e) {
+              print('⚠️ Error parsing LMP date from form_data: $e');
+            }
+          }
+        }
+      } catch (e) {
+        print('⚠️ Error parsing followup form JSON: $e');
+      }
+    }
+    
+    print('ℹ️ No LMP date found in any eligible couple tracking due forms');
+    return null;
+  } catch (e) {
+    print('❌ Error loading LMP from followup forms: $e');
+    return null;
+  }
 }
 
 String _getChildCount(Map<String, dynamic> formData) {

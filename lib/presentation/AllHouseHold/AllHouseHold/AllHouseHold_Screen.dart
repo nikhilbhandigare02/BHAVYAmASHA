@@ -463,7 +463,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
               hasChildrenRaw == true ||
               hasChildrenRaw?.toString().toLowerCase() == 'yes';
           if (hasChildren) {
-            // Check for children field first (from your data format), then fallback to totalLive fields
             final childrenRaw = bi['children'];
             int tl = 0;
             if (childrenRaw != null) {
@@ -477,7 +476,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
               }
             }
 
-            // Add to Set to avoid duplicate counts from head and spouse
             if (tl > 0) {
               childrenCounts.add(tl);
             }

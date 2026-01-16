@@ -44,6 +44,7 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
   void didUpdateWidget(MultiSelect<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selectedValues != widget.selectedValues) {
+      print('🔍 MultiSelect didUpdateWidget: selectedValues changed from ${oldWidget.selectedValues} to ${widget.selectedValues}');
       setState(() {
         _selectedItems = List<T>.from(widget.selectedValues);
       });
@@ -223,22 +224,32 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
             child: Row(
               children: [
                 Expanded(
-                  child: Text(
-                    _selectedItems.isEmpty
-                        ? widget.hintText
-                        : _selectedItems
-                        .map((item) => widget.items
-                        .firstWhere(
-                            (e) => e.value == item)
-                        .label)
-                        .join(', '),
-                    style: TextStyle(
-                      color: _selectedItems.isEmpty
-                          ? AppColors.grey
-                          : AppColors.onSurface,
-                      fontSize:
-                      ResponsiveFont.getHintFontSize(context),
-                    ),
+                  child: Builder(
+                    builder: (context) {
+                      final displayText = _selectedItems.isEmpty
+                          ? widget.hintText
+                          : _selectedItems
+                          .map((item) {
+                            final foundItem = widget.items
+                                .where((e) => e.value == item)
+                                .firstOrNull;
+                            return foundItem?.label ?? item.toString();
+                          })
+                          .join(', ');
+                      
+                      print('🔍 MultiSelect build: _selectedItems=$_selectedItems, displayText="$displayText"');
+                      
+                      return Text(
+                        displayText,
+                        style: TextStyle(
+                          color: _selectedItems.isEmpty
+                              ? AppColors.grey
+                              : AppColors.onSurface,
+                          fontSize:
+                          ResponsiveFont.getHintFontSize(context),
+                        ),
+                      );
+                    }
                   ),
                 ),
                 const Icon(Icons.arrow_drop_down,

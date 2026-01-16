@@ -71,8 +71,9 @@ class _Lbwrefered extends State<Lbwrefered> {
 
           bool isLbw = false;
 
+          // New logic: Show records with both weight and birthWeight present
           if (weight != null && birthWeight != null) {
-            isLbw = (weight <= 1.6 && birthWeight <= 1600);
+            isLbw = true; // Show if both are present regardless of values
           } else if (weight != null && birthWeight == null) {
             isLbw = (weight <= 1.6);
           } else if (weight == null && birthWeight != null) {

@@ -1830,7 +1830,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   AddFamilyHeadState(
                     houseNo: m['houseNo'],
                     headName: m['headName'],
-                    fatherName: m['fatherName'],
+                    fatherName: m['father_name'],
                     AfhABHAChange: m['AfhABHAChange'],
                     children: m['children'],
                     useDob: m.containsKey('age_by')
@@ -1871,7 +1871,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   AddFamilyHeadState(
                     houseNo: m['houseNo'] ?? m['house_no'] ?? m['houseNumber'],
                     headName: m['headName'],
-                    fatherName: m['fatherName'],
+                    fatherName: m['father_name'],
                     AfhABHAChange: m['AfhABHAChange'],
                     children: m['children'],
                     useDob: m.containsKey('age_by')
@@ -2099,7 +2099,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   getSpouseVal('spouseName') ??
                   getHeadVal('headName') ??
                   getHeadVal('memberName'),
-              fatherName: getSpouseVal('fatherName'),
+              fatherName: getSpouseVal('father_name'),
               useDob:
                   (getSpouseVal('useDob') == true ||
                   getSpouseVal('useDob') == 'true'),

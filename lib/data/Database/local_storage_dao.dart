@@ -2149,6 +2149,34 @@ class LocalStorageDao {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getBeneficiariesByHouseholdFamily(String householdId, String beneficiary_ref_key) async {
+    try {
+      final db = await _db;
+      final rows = await db.query(
+        'beneficiaries_new',
+        where: 'household_ref_key = ? AND is_deleted = ? And unique_key = ?',
+        whereArgs: [householdId, 0, beneficiary_ref_key],
+      );
+
+
+
+      return rows.map((row) {
+        final mapped = Map<String, dynamic>.from(row);
+        mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
+        mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
+        mapped['death_details'] = safeJsonDecode(mapped['death_details']);
+        mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+        mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+        mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+        return mapped;
+      }).toList();
+    } catch (e) {
+      print('Error getting beneficiaries by household: $e');
+      rethrow;
+    }
+  }
+
+
   Future<List<Map<String, dynamic>>> getBeneficiariesByHousehold(String householdId) async {
     try {
       final db = await _db;

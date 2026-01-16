@@ -516,52 +516,52 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       }
 
       /// ---------- FAMILY HEAD FROM BENEFICIARIES ----------
-      final Set<String> householdKeysFromBeneficiaries = beneficiaries
-          .where((r) {
-            try {
-              final householdRefKey = (r['household_ref_key'] ?? '').toString();
-              final uniqueKey = (r['unique_key'] ?? '').toString();
-              if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
-
-              if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
-
-              final rawInfo = r['beneficiary_info'];
-              Map<String, dynamic> info;
-              if (rawInfo is Map) {
-                info = Map<String, dynamic>.from(rawInfo);
-              } else if (rawInfo is String && rawInfo.isNotEmpty) {
-                info = Map<String, dynamic>.from(jsonDecode(rawInfo));
-              } else {
-                info = {};
-              }
-
-              final configuredHeadKey = headKeyByHousehold[householdRefKey];
-
-              final bool isConfiguredHead =
-                  configuredHeadKey != null && configuredHeadKey == uniqueKey;
-
-              final relation =
-                  (info['relation_to_head'] ?? info['relation'] ?? '')
-                      .toString()
-                      .toLowerCase();
-
-              final bool isHeadByRelation =
-                  relation == 'head' || relation == 'self';
-
-              final bool isFamilyHead =
-                  info['isFamilyHead'] == true ||
-                  info['isFamilyHead']?.toString().toLowerCase() == 'true';
-
-              return isConfiguredHead || isHeadByRelation || isFamilyHead;
-            } catch (_) {
-              return false;
-            }
-          })
-          .map((r) {
-            return (r['household_ref_key'] ?? '').toString();
-          })
-          .where((k) => k.isNotEmpty)
-          .toSet();
+      // final Set<String> householdKeysFromBeneficiaries = beneficiaries
+      //     .where((r) {
+      //       try {
+      //         final householdRefKey = (r['household_ref_key'] ?? '').toString();
+      //         final uniqueKey = (r['unique_key'] ?? '').toString();
+      //         if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
+      //
+      //         if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
+      //
+      //         final rawInfo = r['beneficiary_info'];
+      //         Map<String, dynamic> info;
+      //         if (rawInfo is Map) {
+      //           info = Map<String, dynamic>.from(rawInfo);
+      //         } else if (rawInfo is String && rawInfo.isNotEmpty) {
+      //           info = Map<String, dynamic>.from(jsonDecode(rawInfo));
+      //         } else {
+      //           info = {};
+      //         }
+      //
+      //         final configuredHeadKey = headKeyByHousehold[householdRefKey];
+      //
+      //         final bool isConfiguredHead =
+      //             configuredHeadKey != null && configuredHeadKey == uniqueKey;
+      //
+      //         final relation =
+      //             (info['relation_to_head'] ?? info['relation'] ?? '')
+      //                 .toString()
+      //                 .toLowerCase();
+      //
+      //         final bool isHeadByRelation =
+      //             relation == 'head' || relation == 'self';
+      //
+      //         final bool isFamilyHead =
+      //             info['isFamilyHead'] == true ||
+      //             info['isFamilyHead']?.toString().toLowerCase() == 'true';
+      //
+      //         return isConfiguredHead || isHeadByRelation || isFamilyHead;
+      //       } catch (_) {
+      //         return false;
+      //       }
+      //     })
+      //     .map((r) {
+      //       return (r['household_ref_key'] ?? '').toString();
+      //     })
+      //     .where((k) => k.isNotEmpty)
+      //     .toSet();
 
       /// ---------- FALLBACK HOUSEHOLDS (SAME AS _loadData) ----------
       final Set<String> householdKeysWithBeneficiaries = beneficiaries

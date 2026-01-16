@@ -84,14 +84,13 @@ class _MisreportState extends State<Misreport> {
 
     try {
 
-     // developer.log('Getting registered child count...', name: 'ChildCareCountProvider');
       final db = await DatabaseProvider.instance.database;
 
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       String whereClause = 'is_deleted = ? AND is_adult = ? AND is_death = ?';
-      List<dynamic> whereArgs = [0, 0, 0]; // is_deleted = 0, is_adult = 0 (child)
+      List<dynamic> whereArgs = [0, 0, 0];
 
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         whereClause += ' AND current_user_key = ?';
@@ -117,28 +116,15 @@ class _MisreportState extends State<Misreport> {
 
       for (final row in rows) {
         try {
-          // 🔹 Parse created_date_time
           final createdStr = row['created_date_time']?.toString();
           if (createdStr == null || createdStr.isEmpty) continue;
 
-          // Convert "2025-12-30 11:49:38" → ISO
           final createdDate =
           DateTime.tryParse(createdStr.replaceFirst(' ', 'T'));
 
           if (createdDate == null) continue;
 
           final DateTime today = DateTime.now();
-          final DateTime oneMonthAgo = DateTime(
-            today.year,
-            today.month - 1,
-            today.day,
-          );
-          // 🔹 Date filter: today → last month
-          final bool isWithinLastMonth =
-              createdDate.isAfter(oneMonthAgo.subtract(const Duration(days: 1))) &&
-                  createdDate.isBefore(today.add(const Duration(days: 1)));
-
-          if (!isWithinLastMonth) continue;
 
           final info = row['beneficiary_info'] is String
               ? jsonDecode(row['beneficiary_info'] as String)
@@ -146,7 +132,6 @@ class _MisreportState extends State<Misreport> {
 
           if (info is! Map) continue;
 
-          // Match the exact same criteria as RegisterChildListScreen
           final memberType = (info['memberType']?.toString() ?? '').toLowerCase();
           final relation = (info['relation']?.toString() ?? '').toLowerCase();
           final name = info['name']?.toString() ??
@@ -162,7 +147,6 @@ class _MisreportState extends State<Misreport> {
             childCount++;
           }
         } catch (e) {
-         // developer.log('Error processing beneficiary: $e', name: 'ChildCareCountProvider');
           continue;
         }
       }
@@ -557,22 +541,7 @@ class _MisreportState extends State<Misreport> {
   }
 
   int _getPregnantWomenCountLastMonth(List<Map<String, dynamic>> list) {
-    final DateTime today = DateTime.now();
-    final DateTime oneMonthAgo = DateTime(
-      today.year,
-      today.month - 1,
-      today.day,
-    );
-
-    return list.where((item) {
-      final regDateStr = item['RegistrationDate']?.toString();
-      final regDate = _parseDDMMYYYY(regDateStr);
-
-      if (regDate == null) return false;
-
-      return regDate.isAfter(oneMonthAgo.subtract(const Duration(days: 1))) &&
-          regDate.isBefore(today.add(const Duration(days: 1)));
-    }).length;
+    return list.length;
   }
 
   DateTime? _parseDDMMYYYY(String? date) {
