@@ -5234,7 +5234,7 @@ abstract class AppLocalizations {
   /// No description provided for @dateOfBirthLabel.
   ///
   /// In en, this message translates to:
-  /// **'Date of Birth *'**
+  /// **'Date of birth *'**
   String get dateOfBirthLabel;
 
   /// No description provided for @dateOfRegistrationLabel.
@@ -5246,7 +5246,7 @@ abstract class AppLocalizations {
   /// No description provided for @dateOfRegistrationLabelR.
   ///
   /// In en, this message translates to:
-  /// **'Date of Registration'**
+  /// **'Date of registration *'**
   String get dateOfRegistrationLabelR;
 
   /// No description provided for @childNameLabel.
@@ -5264,7 +5264,7 @@ abstract class AppLocalizations {
   /// No description provided for @mobileNumberLabel.
   ///
   /// In en, this message translates to:
-  /// **'mobile number'**
+  /// **'Mobile number'**
   String get mobileNumberLabel;
 
   /// No description provided for @mothersRchIdLabel.
@@ -5282,7 +5282,7 @@ abstract class AppLocalizations {
   /// No description provided for @birthCertificateNumberLabel.
   ///
   /// In en, this message translates to:
-  /// **'birth certificate number'**
+  /// **'Birth certificate number'**
   String get birthCertificateNumberLabel;
 
   /// No description provided for @weightGramLabel.

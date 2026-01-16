@@ -1072,7 +1072,7 @@ class _RegisterChildDueListFormScreen
                               child: CustomTextField(
                                 labelText: "${l10n?.mobileNumberLabel} *" ??
                                     'Mobile number *',
-                                hintText: l10n?.enter10DigitMobileNumber,
+                                hintText: l10n?.mobileNumberLabel,
                                 maxLength: 10,
                                 initialValue: state.mobileNumber,
                                 keyboardType: TextInputType.phone,
@@ -1195,6 +1195,7 @@ class _RegisterChildDueListFormScreen
                                       child: CustomTextField(
                                         labelText: l10n?.weightRange ?? 'Weight'  ,
                                         hintText:  l10n?.weightRange ?? 'Weight',
+                                        maxLength: 3,
                                         initialValue: state.weightGrams,
                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
                                         onChanged: (v) => bloc.add(WeightGramsChanged(v)),
@@ -1227,6 +1228,7 @@ class _RegisterChildDueListFormScreen
                                             labelText: l10n?.child_weight ?? 'Child weight',
                                             hintText: l10n?.child_weight ?? 'Child weight',
                                             initialValue: state.weightGrams,
+                                            maxLength: 5,
                                             keyboardType: TextInputType.number,
                                             onChanged: (v) => bloc.add(WeightGramsChanged(v)),
                                             validator: (value) {
@@ -1257,8 +1259,9 @@ class _RegisterChildDueListFormScreen
                                             key: _keyBirthWeight,
                                             child: CustomTextField(
                                               labelText: l10n?.birthWeightRange ?? 'Birth weight',
-                                              hintText: l10n?.enterBirthWeight ?? 'Enter birth weight',
+                                              hintText: l10n?.birthWeightRange ?? 'Enter birth weight',
                                               initialValue: state.birthWeightGrams,
+                                               maxLength: 4,
                                               keyboardType: TextInputType.number,
                                               onChanged: (v) => bloc.add(BirthWeightGramsChanged(v)),
                                               validator: (value) {

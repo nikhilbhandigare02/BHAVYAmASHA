@@ -133,27 +133,27 @@ class _CbacformState extends State<Cbacform> {
                     case 'partA.familyHistory':
                       return l10n.cbacA_familyQ;
                     case 'partB.b1.cough2w':
-                      return l10n.cbacB_b1_cough2w;
+                      return '${l10n.cbacB_b1_cough2w} *';
                     case 'partB.b1.bloodMucus':
-                      return l10n.cbacB_b1_bloodMucus;
+                      return '${l10n.cbacB_b1_bloodMucus} *';
                     case 'partB.b1.fever2w':
-                      return l10n.cbacB_b1_fever2w;
+                      return '${l10n.cbacB_b1_fever2w} *';
                     case 'partB.b1.weightLoss':
-                      return l10n.cbacB_b1_weightLoss;
+                      return '${l10n.cbacB_b1_weightLoss} *';
                     case 'partB.b1.nightSweat':
-                      return l10n.cbacB_b1_nightSweat;
+                      return '${l10n.cbacB_b1_nightSweat} *';
                     case 'partB.b1.druggs':
-                      return l10n.cbacB_b1_druggs;
+                      return '${l10n.cbacB_b1_druggs} **';
                     case 'partB.b1.Tuberculosis':
-                      return l10n.cbacB_b1_tuberculosisFamily;
+                      return '${l10n.cbacB_b1_tuberculosisFamily} **';
                     case 'partB.b1.history':
-                      return l10n.cbacB_b1_history;
+                      return '${l10n.cbacB_b1_history} **';
                     case 'partB.b2.excessBleeding':
-                      return l10n.cbacB_b2_excessBleeding;
+                      return '${l10n.cbacB_b2_excessBleeding}***';
                     case 'partB.b2.depression':
-                      return l10n.cbacB_b2_depression;
+                      return '${l10n.cbacB_b2_depression}***';
                     case 'partB.b2.uterusProlapse':
-                      return l10n.cbacB_b2_uterusProlapse;
+                      return '${l10n.cbacB_b2_uterusProlapse}***';
                   }
                   return k;
                 }
@@ -790,8 +790,8 @@ class _PersonalInfoTab extends StatelessWidget {
           buildWhen: (previous, current) =>
               previous.data['personal.idType'] !=
               current.data['personal.idType'],
-          builder: (context, state) {
-            return ApiDropdown<String>(
+              builder: (context, state) {
+              return ApiDropdown<String>(
               hintText: l10n.identificationTypeLabel,
               labelText: l10n.identificationTypeLabel,
               items: [l10n.idTypeAadhaar, l10n.idTypeVoterId, l10n.uid],
@@ -931,7 +931,7 @@ class _PartATab extends StatelessWidget {
         final bloc = BlocProvider.of<CbacFormBloc>(context);
         final l10n = AppLocalizations.of(context)!;
 
-        // --- 1. Load Data ---
+
         final age = state.data['partA.age'] as String?;
         final tobacco = state.data['partA.tobacco'] as String?;
         final alcohol = state.data['partA.alcohol'] as String?;

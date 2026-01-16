@@ -2589,13 +2589,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rchChildSerialHint => 'Sr. no of child in RCH register';
 
   @override
-  String get dateOfBirthLabel => 'Date of Birth *';
+  String get dateOfBirthLabel => 'Date of birth *';
 
   @override
   String get dateOfRegistrationLabel => 'Date of Registration *';
 
   @override
-  String get dateOfRegistrationLabelR => 'Date of Registration';
+  String get dateOfRegistrationLabelR => 'Date of registration *';
 
   @override
   String get childNameLabel => 'Name of child *';
@@ -2604,7 +2604,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get whoseMobileNumberLabel => 'Whose mobile number is this';
 
   @override
-  String get mobileNumberLabel => 'mobile number';
+  String get mobileNumberLabel => 'Mobile number';
 
   @override
   String get mothersRchIdLabel => 'RCH ID no. of mother';
@@ -2613,7 +2613,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get birthCertificateIssuedLabel => 'Is birth certificate issued?';
 
   @override
-  String get birthCertificateNumberLabel => 'birth certificate number';
+  String get birthCertificateNumberLabel => 'Birth certificate number';
 
   @override
   String get weightGramLabel => 'Weight (g)';
