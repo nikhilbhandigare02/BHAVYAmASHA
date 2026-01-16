@@ -2961,19 +2961,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get err_visit_date_required => 'Please enter date of home visit.';
 
   @override
-  String get err_mother_status_required => 'Please select mother\'s status.';
+  String get err_mother_status_required => 'Please select mother status.';
 
   @override
-  String get err_mcp_mother_required => 'Please select MCP card availability (Mother).';
+  String get err_mcp_mother_required => 'Please select do you have \'Mother Child Protection(MCP)\' card.';
 
   @override
-  String get err_post_delivery_problems_required => 'Please select post-delivery problems.';
+  String get err_post_delivery_problems_required => 'Please select Does the mother have any of the following problems post delivery';
 
   @override
-  String get err_breastfeeding_problems_required => 'Please select breastfeeding problems.';
+  String get err_breastfeeding_problems_required => 'Please select Does the mother have breast feeding problem';
 
   @override
-  String get err_mcp_mother_filled_required => 'Please select MCP card filled status.';
+  String get err_mcp_mother_filled_required => 'Please select hast the MCP card filled';
 
   @override
   String get err_excessive_bleeding_required => 'Please select excessive bleeding.';
@@ -2982,19 +2982,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get err_unconscious_fits_required => 'Please select unconscious/fits.';
 
   @override
-  String get err_breastfeeding_problem_description_required => 'Please enter breastfeeding problem description.';
+  String get err_breastfeeding_problem_description_required => 'Please enter problem';
 
   @override
-  String get err_breastfeeding_help_required => 'Please enter breastfeeding help or action taken.';
+  String get err_breastfeeding_help_required => 'Please write down the action taken';
 
   @override
-  String get err_pads_per_day_required => 'Please enter number of pads changed per day.';
+  String get err_pads_per_day_required => 'Please enter how many pads have been changed in a day for bleeding';
 
   @override
-  String get err_meals_per_day_required => 'Please enter number of full meals per day.';
+  String get err_meals_per_day_required => 'Please enter no. of times mother takes full meal in 24 hours';
 
   @override
-  String get err_mothers_temperature_required => 'Please enter mother\'s temperature.';
+  String get err_mothers_temperature_required => 'Please enter the temperature.';
 
   @override
   String get err_paracetamol_given_required => 'Please select paracetamol tablet given.';
@@ -3006,22 +3006,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get err_abnormal_speech_or_seizure_required => 'Please select abnormal speech or seizures.';
 
   @override
-  String get err_counseling_advice_required => 'Please enter counseling or advice.';
+  String get err_counseling_advice_required => 'Please enter Counseling / Advise';
 
   @override
-  String get err_milk_not_producing_or_less_required => 'Please select milk not producing or less.';
+  String get err_milk_not_producing_or_less_required => 'Please select Mother\'s milk is not being produced after delivery or she thinks less milk is being produced';
 
   @override
-  String get err_nipple_cracks_pain_or_engorged_required => 'Please select nipple cracks, pain, or engorged breasts.';
+  String get err_nipple_cracks_pain_or_engorged_required => 'Please select is the mother having cracked nipples/ painful and / or engorged breasts';
 
   @override
-  String get err_milk_counseling_advice_required => 'Please enter counseling or advice for milk problem.';
+  String get err_milk_counseling_advice_required => 'Please enter Counseling / Advise for milk problem.';
 
   @override
-  String get err_refer_hospital_required => 'Please select refer to hospital.';
+  String get err_refer_hospital_required => 'Please select wheather referred to hospital.';
 
   @override
-  String get err_refer_to_required => 'Please select referral facility.';
+  String get err_refer_to_required => 'Please select place to refer';
 
   @override
   String get err_baby_condition_required => 'Please select baby\'s condition.';

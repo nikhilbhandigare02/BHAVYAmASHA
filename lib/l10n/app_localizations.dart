@@ -5978,31 +5978,31 @@ abstract class AppLocalizations {
   /// No description provided for @err_mother_status_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select mother\'s status.'**
+  /// **'Please select mother status.'**
   String get err_mother_status_required;
 
   /// No description provided for @err_mcp_mother_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select MCP card availability (Mother).'**
+  /// **'Please select do you have \'Mother Child Protection(MCP)\' card.'**
   String get err_mcp_mother_required;
 
   /// No description provided for @err_post_delivery_problems_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select post-delivery problems.'**
+  /// **'Please select Does the mother have any of the following problems post delivery'**
   String get err_post_delivery_problems_required;
 
   /// No description provided for @err_breastfeeding_problems_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select breastfeeding problems.'**
+  /// **'Please select Does the mother have breast feeding problem'**
   String get err_breastfeeding_problems_required;
 
   /// No description provided for @err_mcp_mother_filled_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select MCP card filled status.'**
+  /// **'Please select hast the MCP card filled'**
   String get err_mcp_mother_filled_required;
 
   /// No description provided for @err_excessive_bleeding_required.
@@ -6020,31 +6020,31 @@ abstract class AppLocalizations {
   /// No description provided for @err_breastfeeding_problem_description_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter breastfeeding problem description.'**
+  /// **'Please enter problem'**
   String get err_breastfeeding_problem_description_required;
 
   /// No description provided for @err_breastfeeding_help_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter breastfeeding help or action taken.'**
+  /// **'Please write down the action taken'**
   String get err_breastfeeding_help_required;
 
   /// No description provided for @err_pads_per_day_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter number of pads changed per day.'**
+  /// **'Please enter how many pads have been changed in a day for bleeding'**
   String get err_pads_per_day_required;
 
   /// No description provided for @err_meals_per_day_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter number of full meals per day.'**
+  /// **'Please enter no. of times mother takes full meal in 24 hours'**
   String get err_meals_per_day_required;
 
   /// No description provided for @err_mothers_temperature_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter mother\'s temperature.'**
+  /// **'Please enter the temperature.'**
   String get err_mothers_temperature_required;
 
   /// No description provided for @err_paracetamol_given_required.
@@ -6068,37 +6068,37 @@ abstract class AppLocalizations {
   /// No description provided for @err_counseling_advice_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter counseling or advice.'**
+  /// **'Please enter Counseling / Advise'**
   String get err_counseling_advice_required;
 
   /// No description provided for @err_milk_not_producing_or_less_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select milk not producing or less.'**
+  /// **'Please select Mother\'s milk is not being produced after delivery or she thinks less milk is being produced'**
   String get err_milk_not_producing_or_less_required;
 
   /// No description provided for @err_nipple_cracks_pain_or_engorged_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select nipple cracks, pain, or engorged breasts.'**
+  /// **'Please select is the mother having cracked nipples/ painful and / or engorged breasts'**
   String get err_nipple_cracks_pain_or_engorged_required;
 
   /// No description provided for @err_milk_counseling_advice_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter counseling or advice for milk problem.'**
+  /// **'Please enter Counseling / Advise for milk problem.'**
   String get err_milk_counseling_advice_required;
 
   /// No description provided for @err_refer_hospital_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select refer to hospital.'**
+  /// **'Please select wheather referred to hospital.'**
   String get err_refer_hospital_required;
 
   /// No description provided for @err_refer_to_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select referral facility.'**
+  /// **'Please select place to refer'**
   String get err_refer_to_required;
 
   /// No description provided for @err_baby_condition_required.
