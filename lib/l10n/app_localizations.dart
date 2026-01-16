@@ -13868,25 +13868,25 @@ abstract class AppLocalizations {
   /// No description provided for @hscNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HSC'**
+  /// **'HSC Name'**
   String get hscNameHint;
 
   /// No description provided for @hscNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HSC'**
+  /// **'HSC Name'**
   String get hscNameLabel;
 
   /// No description provided for @hwcNameHint.
   ///
   /// In en, this message translates to:
-  /// **'HWC'**
+  /// **'HWC Name'**
   String get hwcNameHint;
 
   /// No description provided for @hwcNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'HWC'**
+  /// **'HWC Name'**
   String get hwcNameLabel;
 
   /// No description provided for @moveForward.
