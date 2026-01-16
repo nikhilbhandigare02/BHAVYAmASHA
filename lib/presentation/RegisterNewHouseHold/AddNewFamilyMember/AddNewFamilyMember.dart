@@ -5127,8 +5127,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       ),
                                     ],
 
-                                    // Spouse name field - show in both modes, read-only in edit mode
-                                    _section(
+                                    if(!_isEdit)...[_section(
                                       CustomTextField(
                                         labelText: '${l.spouseNameLabel} *',
                                         hintText: l.spouseNameHint,
@@ -5137,8 +5136,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         onChanged: _isEdit ? null : (v) => context
                                             .read<AddnewfamilymemberBloc>()
                                             .add(
-                                              AnmUpdateSpouseName(v.trim()),
-                                            ),
+                                          AnmUpdateSpouseName(v.trim()),
+                                        ),
                                         validator: (value) {
                                           if (state.maritalStatus ==
                                               'Married') {
@@ -5152,7 +5151,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           return null;
                                         },
                                       ),
-                                    ),
+                                    ),],
+
                                     Divider(
                                       color: AppColors.divider,
                                       thickness: 0.5,

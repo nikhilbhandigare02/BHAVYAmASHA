@@ -51,7 +51,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
     if (mounted) {
       setState(() {
         // _appVersion = version;
-        _appVersion = '1.1.7';
+        _appVersion = '1.1.8';
       });
     }
   }

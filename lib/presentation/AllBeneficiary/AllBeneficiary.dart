@@ -838,7 +838,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                         ]),
                       ],
 
-                      if (maritalStatus=='unmarried' && isGeneral) ...[
+                      if (!isMarried && isGeneral) ...[
                         _buildRow([
                           if ((data['FatherName']?.toString().isNotEmpty == true) ||
                               (data['SpouseName']?.toString().isNotEmpty == true))
@@ -850,7 +850,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                             )
                           else
                             _rowText('', ''),
-                          if (isFemale)
+                          if (isFemale && isChild)
                             _rowText(
                               l10n?.rchIdLabel ?? 'RCH ID',
                               data['RichID']?.toString().trim().isNotEmpty == true
@@ -925,6 +925,18 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                           _rowText('', ''), // Empty cell for layout
                         ]),*/
                       ],
+
+                      if(maritalStatus=='widow'||maritalStatus=='divorced'||maritalStatus=='separated' ||maritalStatus=='widower')
+                      _buildRow([
+                          _rowText(
+                            l10n?.tolaMohalla ?? 'Tola/Mohalla',
+                            getMohalla().isNotEmpty
+                                ? getMohalla()
+                                : (l10n?.na ?? 'N/A'),
+                          ),
+                          _rowText('', ''), // Empty cell for layout
+                          _rowText('', ''), // Empty cell for layout
+                        ]),
 
                       // CATEGORY 4: Unmarried males/females with general registration - show father name, village, tola/mohalla
 

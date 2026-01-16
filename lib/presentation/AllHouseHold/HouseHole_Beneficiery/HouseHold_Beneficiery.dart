@@ -963,6 +963,15 @@ class _HouseHold_BeneficiaryScreenState
                               data['SpouseName'],
                             ),
                           ),
+                        Expanded(
+                          child: _rowText(
+                            l10n?.mobileLabel ?? 'Mobile no.',
+                            data['Mobileno.']?.toString().isNotEmpty == true
+                                ? data['Mobileno.']
+                                : (l10n?.notAvailable ?? 'NA'),
+                          ),
+                        ),
+    Expanded(child: Spacer(),)
                       ],
                     ),
                   ],
@@ -1036,6 +1045,7 @@ class _HouseHold_BeneficiaryScreenState
     // Father name for children - first column
    /* if ((data['FatherName']?.toString().isNotEmpty == true) ||
     (data['SpouseName']?.toString().isNotEmpty == true))*/
+      if(!isMarried&&!isChild)
     Expanded(
     child: _rowText(
       l10n?.fatherNameLabel ?? 'Father Name',
@@ -1049,8 +1059,7 @@ class _HouseHold_BeneficiaryScreenState
     if ((data['FatherName']?.toString().isNotEmpty == true) ||
     (data['SpouseName']?.toString().isNotEmpty == true))
     const SizedBox(width: 12),
-    // Mobile number for children - second column
-     if (!isMale && !isChild && isFemale)
+     if (!isMale && !isChild && isFemale&&!isMarried)
     Expanded(
     child: _rowText(
     l10n?.mobileLabel ?? 'Mobile no.',

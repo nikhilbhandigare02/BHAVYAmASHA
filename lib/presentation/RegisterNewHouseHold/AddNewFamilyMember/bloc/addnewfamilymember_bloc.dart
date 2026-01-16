@@ -107,13 +107,13 @@ class AddnewfamilymemberBloc
     try {
       print('📥 [Bloc] Loading beneficiary data: ${event.beneficiaryId}');
       print('📥 [Bloc] Data cleared flag: $_dataClearedByTypeChange');
-      
+
       // If data was cleared by type change, don't reload beneficiary data
       if (_dataClearedByTypeChange) {
         print('📥 [Bloc] Skipping beneficiary data load due to type change clear');
         return;
       }
-      
+
       // Get the complete beneficiary record
       final db = await DatabaseProvider.instance.database;
       final List<Map<String, dynamic>> results = await db.query(
@@ -128,7 +128,7 @@ class AddnewfamilymemberBloc
         // Remember which row is being edited so that we can update it later
         _editingBeneficiaryRowId = beneficiary['id'] as int?;
         _editingBeneficiaryKey = beneficiary['unique_key']?.toString();
-        
+
         print('=== Loaded Beneficiary for Editing ===');
         print('Row ID: $_editingBeneficiaryRowId');
         print('Unique Key: $_editingBeneficiaryKey');
@@ -187,13 +187,13 @@ class AddnewfamilymemberBloc
         // Derive primary name from available fields
         final String? primaryName =
             (allData['name'] as String?) ??
-            (allData['memberName'] as String?) ??
-            (allData['headName'] as String?);
+                (allData['memberName'] as String?) ??
+                (allData['headName'] as String?);
 
         // Derive relation from either 'relation' or legacy 'relation_to_head'
         final String? rawRelation =
             (allData['relation'] as String?) ??
-            (allData['relation_to_head'] as String?);
+                (allData['relation_to_head'] as String?);
         String? primaryRelation;
         if (rawRelation != null) {
           final r = rawRelation.toString();
@@ -239,9 +239,9 @@ class AddnewfamilymemberBloc
         // approximate age fields.
         DateTime? loadedDob = allData['dob'] != null
             ? DateTime.tryParse(allData['dob'])
-              : allData['date_of_birth'] != null
-                ? DateTime.tryParse(allData['date_of_birth'])
-                : null;
+            : allData['date_of_birth'] != null
+            ? DateTime.tryParse(allData['date_of_birth'])
+            : null;
         String? loadedApproxAge = allData['approxAge']?.toString();
         String? loadedUpdateYear = allData['updateYear']?.toString();
         String? loadedUpdateMonth = allData['updateMonth']?.toString();
@@ -300,14 +300,14 @@ class AddnewfamilymemberBloc
         final rawCategory = allData['category'] as String?;
         final rawOccupation = allData['occupation'] as String?;
         final rawMobileOwnerRelation = allData['mobileOwnerRelation'] as String?;
-        
+
         // Check if the field is 'Other' in the database
         // final isReligionOther = rawReligion == 'Other';
         // final isCategoryOther = rawCategory == 'Other';
         // final isOccupationOther = rawOccupation == 'Other';
         // final isRelationOther = rawMobileOwnerRelation == 'Other';
 
-        
+
         // Variables to store the processed values
         String? religionValue = rawReligion;
         String? otherReligionValue;
@@ -317,7 +317,7 @@ class AddnewfamilymemberBloc
         String? otherOccupationValue;
         String? mobileOwnerRelationValue = rawMobileOwnerRelation;
         String? otherRelationValue;
-        
+
         // Process religion field
         if (rawReligion != null && rawReligion.endsWith('_other')) {
           religionValue = 'Other';
@@ -325,7 +325,7 @@ class AddnewfamilymemberBloc
         } else {
           otherReligionValue = allData['other_religion'] as String?;
         }
-        
+
         // Process category field
         if (rawCategory != null && rawCategory.endsWith('_other')) {
           categoryValue = 'Other';
@@ -333,7 +333,7 @@ class AddnewfamilymemberBloc
         } else {
           otherCategoryValue = allData['other_category'] as String?;
         }
-        
+
         // Process occupation field
         if (rawOccupation != null && rawOccupation.endsWith('_other')) {
           occupationValue = 'Other';
@@ -341,7 +341,7 @@ class AddnewfamilymemberBloc
         } else {
           otherOccupationValue = allData['other_occupation'] as String?;
         }
-        
+
         // Process mobile owner relation field
         if (rawMobileOwnerRelation != null && rawMobileOwnerRelation.endsWith('_other')) {
           mobileOwnerRelationValue = 'Other';
@@ -349,19 +349,19 @@ class AddnewfamilymemberBloc
         } else {
           otherRelationValue = allData['other_relation'] as String?;
         }
-        
+
         // // Debug log to see what values we're getting from the database
         // print('Religion: $religionValue, Other: $otherReligionValue');
         // print('Category: $categoryValue, Other: $otherCategoryValue');
         // print('Occupation: $occupationValue, Other: $otherOccupationValue');
         // print('Relation: $mobileOwnerRelationValue, Other: $otherRelationValue');
-        
+
         // Normalize member type to camelCase
         String normalizedMemberType = allData['memberType'] as String? ?? 'Adult';
         if (normalizedMemberType.isNotEmpty) {
           normalizedMemberType = normalizedMemberType[0].toUpperCase() + normalizedMemberType.substring(1).toLowerCase();
         }
-        
+
         // Determine useDob based on age_by field
         final dynamic ageByRaw = allData['age_by'];
         bool useDobValue = true; // default to DOB
@@ -371,23 +371,23 @@ class AddnewfamilymemberBloc
           } else {
             final ageBy = ageByRaw.toString();
             if (ageBy == 'by_age') {
-            useDobValue = false;
+              useDobValue = false;
             } else if (ageBy == 'by_dob') {
-            useDobValue = true;
+              useDobValue = true;
             }
           }
         }
-        
+
         final String? fatherName =
-            (allData['father_name'] as String?);
+        (allData['father_name'] as String?);
         final String? motherName =
             (allData['motherName'] as String?) ??
-            (allData['mother_name'] as String?);
+                (allData['mother_name'] as String?);
 
         // Update the state with all the data
         emit(state.copyWith(
           name: primaryName,
-          fatherName: allData['fatherName'] as String?,
+          fatherName: allData['father_name'] as String?,
           motherName: allData['motherName'] as String?,
           memberType: normalizedMemberType,
           relation: primaryRelation,
@@ -403,23 +403,23 @@ class AddnewfamilymemberBloc
           // Handle occupation and other occupation
           occupation: occupationValue,
           otherOccupation: otherOccupationValue,
-          
+
           education: allData['education'] as String?,
-          
+
           // Handle religion and other religion
           religion: religionValue,
           otherReligion: otherReligionValue,
-          
+
           // Handle category and other category
           category: categoryValue,
           otherCategory: otherCategoryValue,
-          
+
           abhaAddress: allData['abhaAddress'] as String?,
-          
+
           // Handle mobile owner and relation
           mobileOwner: _firstString(['mobileOwner', 'mobile_owner']),
-          mobileOwnerRelation: rawMobileOwnerRelation ?? 
-                            (allData['mobile_owner_relation'] as String?),
+          mobileOwnerRelation: rawMobileOwnerRelation ??
+              (allData['mobile_owner_relation'] as String?),
           mobileNo: _firstString(['mobileNo', 'mobile_no', 'mobile']),
           voterId: allData['voterId'] as String?,
           rationId: allData['rationId'] as String? ?? allData['rationCardId'] as String?,
@@ -688,7 +688,7 @@ class AddnewfamilymemberBloc
       final yearStr = e.value;
       final monthStr = state.updateMonth ?? '0';
       final dayStr = state.updateDay ?? '0';
-      
+
       int years = int.tryParse(yearStr.isEmpty ? '0' : yearStr) ?? 0;
       int months = int.tryParse(monthStr.isEmpty ? '0' : monthStr) ?? 0;
       int days = int.tryParse(dayStr.isEmpty ? '0' : dayStr) ?? 0;
@@ -738,13 +738,13 @@ class AddnewfamilymemberBloc
     on<AnmUpdateBankAcc>((e, emit) => emit(state.copyWith(bankAcc: e.value)));
     on<RichIDChanged>(
           (e, emit) {
-            final value = e.value;
-            final isButtonEnabled = value.length == 12;
-            emit(state.copyWith(
-              RichIDChanged: value,
-              isRchIdButtonEnabled: isButtonEnabled,
-            ));
-          },
+        final value = e.value;
+        final isButtonEnabled = value.length == 12;
+        emit(state.copyWith(
+          RichIDChanged: value,
+          isRchIdButtonEnabled: isButtonEnabled,
+        ));
+      },
     );
     on<AnmUpdateIfsc>((e, emit) => emit(state.copyWith(ifsc: e.value)));
     on<AnmUpdateOccupation>(
@@ -1226,7 +1226,7 @@ class AddnewfamilymemberBloc
 
 
         // Check if member is female and pregnant, then insert ANC due status
-        if (state.gender?.toLowerCase() == 'female' && 
+        if (state.gender?.toLowerCase() == 'female' &&
             (state.isPregnant?.toLowerCase() == 'yes' || state.isPregnant?.toLowerCase() == 'true')) {
           try {
             final motherCareActivityData = {
@@ -1253,14 +1253,14 @@ class AddnewfamilymemberBloc
               'is_synced': 0,
               'is_deleted': 0,
             };
-            
+
             print('Inserting mother care activity for pregnant member: ${jsonEncode(motherCareActivityData)}');
             await LocalStorageDao.instance.insertMotherCareActivity(motherCareActivityData);
           } catch (e) {
             print('Error inserting mother care activity for member: $e');
           }
         }
-        
+
         if (state.memberType?.toLowerCase() == 'child') {
           try {
             final childCareActivityData = {
@@ -1289,7 +1289,7 @@ class AddnewfamilymemberBloc
               'is_synced': 0,
               'is_deleted': 0,
             };
-            
+
             print('Inserting child care activity: ${jsonEncode(childCareActivityData)}');
             await LocalStorageDao.instance.insertChildCareActivity(childCareActivityData);
           } catch (e) {
@@ -1314,7 +1314,7 @@ class AddnewfamilymemberBloc
                 'ageAtMarriage': spousState.ageAtMarriage,
                 'RichIDChanged': spousState.RichIDChanged,
                 'spouseName': spousState.spouseName,
-                'fatherName': spousState.fatherName,
+                'father_name': spousState.fatherName,
                 'useDob': spousState.useDob,
                 'age_by': spousState.useDob,
                 'dob': spousState.dob?.toIso8601String(),
@@ -1533,8 +1533,8 @@ class AddnewfamilymemberBloc
             final info = (savedMember['beneficiary_info'] is Map)
                 ? Map<String, dynamic>.from(savedMember['beneficiary_info'])
                 : (savedMember['beneficiary_info'] is String && (savedMember['beneficiary_info'] as String).isNotEmpty)
-                    ? Map<String, dynamic>.from(jsonDecode(savedMember['beneficiary_info']))
-                    : <String, dynamic>{};
+                ? Map<String, dynamic>.from(jsonDecode(savedMember['beneficiary_info']))
+                : <String, dynamic>{};
 
             final currentUser2 = await UserInfo.getCurrentUser();
             final userDetails = currentUser2?['details'] is String
@@ -1619,9 +1619,10 @@ class AddnewfamilymemberBloc
               'mother_ben_ref_key': info['mother_ben_ref_key'] ?? savedMember['mother_key']?.toString() ?? '',
               'father_ben_ref_key': info['father_ben_ref_key'] ?? savedMember['father_key']?.toString() ?? '',
               'relaton_with_family_head':
-                  info['relaton_with_family_head'] ?? info['relation_to_head'] ?? state.relation,
+              info['relaton_with_family_head'] ?? info['relation_to_head'] ?? state.relation,
               'member_status': info['member_status'] ?? state.memberStatus ?? 'alive',
               'member_name': info['member_name'] ?? nameStr,
+              'father_name': info['father_name'] ?? nameStr,
               'father_or_spouse_name': info['father_or_spouse_name'] ?? info['fatherName'] ?? info['spouseName'],
               'have_children': info['have_children'] ?? info['hasChildren'] ?? state.hasChildren,
               'is_family_planning': info['is_family_planning'] ?? savedMember['is_family_planning'] ?? 0,
@@ -1643,9 +1644,9 @@ class AddnewfamilymemberBloc
               'isFamilyhead': info['isFamilyhead'] ?? false,
               'isFamilyheadWife': info['isFamilyheadWife'] ?? false,
               'age_of_youngest_child_unit':
-                  info['age_of_youngest_child_unit'] ?? info['ageUnit'],
+              info['age_of_youngest_child_unit'] ?? info['ageUnit'],
               'type_of_beneficiary':
-                  info['type_of_beneficiary'] ?? info['beneficiaryType'] ?? state.beneficiaryType,
+              info['type_of_beneficiary'] ?? info['beneficiaryType'] ?? state.beneficiaryType,
               'name_of_spouse': info['name_of_spouse'] ?? info['spouseName'] ?? state.spouseName,
             }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty));
 
@@ -1743,8 +1744,8 @@ class AddnewfamilymemberBloc
               final info = (savedMember['beneficiary_info'] is Map)
                   ? Map<String, dynamic>.from(savedMember['beneficiary_info'])
                   : (savedMember['beneficiary_info'] is String && (savedMember['beneficiary_info'] as String).isNotEmpty)
-                      ? Map<String, dynamic>.from(jsonDecode(savedMember['beneficiary_info']))
-                      : <String, dynamic>{};
+                  ? Map<String, dynamic>.from(jsonDecode(savedMember['beneficiary_info']))
+                  : <String, dynamic>{};
 
               final currentUser2 = await UserInfo.getCurrentUser();
               final userDetails = currentUser2?['details'] is String
@@ -2141,7 +2142,7 @@ class AddnewfamilymemberBloc
           ..['name'] = state.name
           ..['memberName'] = state.name
           ..['headName'] = existingInfo.containsKey('headName') ? state.name : existingInfo['headName']
-          ..['fatherName'] = state.fatherName
+          ..['father_name'] = state.fatherName
           ..['motherName'] = state.motherName
           ..['useDob'] = state.useDob
           ..['age_by'] = state.useDob ? 'by_dob' : 'by_age'
