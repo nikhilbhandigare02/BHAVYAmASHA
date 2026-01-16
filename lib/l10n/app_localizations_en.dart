@@ -2364,7 +2364,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trainingFormTitle => 'Training Details';
 
   @override
-  String get trainingNameLabel => 'Name of Training';
+  String get trainingNameLabel => 'Training name';
 
   @override
   String get trainingPlaceLabel => 'Place of Training';
@@ -6910,16 +6910,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get present => 'Present?';
 
   @override
-  String get hscNameHint => 'HSC';
+  String get hscNameHint => 'HSC Name';
 
   @override
-  String get hscNameLabel => 'HSC';
+  String get hscNameLabel => 'HSC Name';
 
   @override
-  String get hwcNameHint => 'HWC';
+  String get hwcNameHint => 'HWC Name';
 
   @override
-  String get hwcNameLabel => 'HWC';
+  String get hwcNameLabel => 'HWC Name';
 
   @override
   String get moveForward => 'Move forward?';

@@ -1210,7 +1210,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       builder: (context, state) {
                         return CustomTextField(
                           key: ValueKey('aww_name_field_${state.awwName}'),
-                          labelText: l10n.awwNameLabel,
+                          labelText: l10n.awwNameHint,
                           hintText: l10n.awwNameHint,
                           initialValue: state.awwName,
                           onChanged: (v) => bloc.add(AwwNameChanged(v)),
@@ -1226,7 +1226,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         return CustomTextField(
                           key: ValueKey('aww_mobile_field_${state.awwMobile}'),
                           labelText: l10n.awwMobileLabel,
-                          hintText: l10n.awwMobileHint,
+                          hintText: l10n.awwMobileLabel,
                           initialValue: state.awwMobile,
                           keyboardType: TextInputType.phone,
                           onChanged: (v) => bloc.add(AwwMobileChanged(v)),

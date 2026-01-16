@@ -245,10 +245,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ancVisitSearchHint => 'ए.एन.सी दौरे की खोज';
 
   @override
-  String get anganwadiCenterNoHint => 'आंगनवाड़ी केंद्र संख्या';
+  String get anganwadiCenterNoHint => 'आँगनवाड़ी केंद्र संख्या';
 
   @override
-  String get anganwadiCenterNoLabel => 'आंगनवाड़ी केंद्र संख्या';
+  String get anganwadiCenterNoLabel => 'आँगनवाड़ी केंद्र संख्या';
 
   @override
   String get anm1MobileHint => 'ए.एन.एम. 1 का मोबाइल नंबर';
@@ -359,10 +359,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get awwMobileHint => 'ए.डब्ल्यू.डब्ल्यू. का मोबाइल नंबर';
 
   @override
-  String get awwMobileLabel => 'ए.डब्ल्यू.डब्ल्यू. का मोबाइल नंबर';
+  String get awwMobileLabel => 'आँगनवाड़ी कार्यकर्ता का मोबाइल नंबर';
 
   @override
-  String get awwNameHint => 'ए.डब्ल्यू.डब्ल्यू. का नाम';
+  String get awwNameHint => 'आँगनवाड़ी सेविका का नाम';
 
   @override
   String get awwNameLabel => 'ए.डब्ल्यू.डब्ल्यू. का नाम';

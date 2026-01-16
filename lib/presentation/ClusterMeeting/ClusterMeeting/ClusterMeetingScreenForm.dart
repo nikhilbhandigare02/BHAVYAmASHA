@@ -69,6 +69,11 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       );
     });
   }
+  String format24Hour(TimeOfDay time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
 
   Widget _tableHeaderCell(String text) {
     return Container(
@@ -656,7 +661,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
           }
         }
 
-        // Topics
+        // Topics - Load topic names
         final topicsStr = formJson["discussion_topics"];
         if (topicsStr != null && topicsStr is String) {
           _selectedTopics = topicsStr
@@ -666,11 +671,41 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
               .toSet();
         }
 
+        // Load sub-topics from saved data
+        _selectedSubTopics = {};
+        final immunizationSubTopic = formJson["immunization_discussion_topic"];
+        if (immunizationSubTopic != null && immunizationSubTopic.toString().isNotEmpty) {
+          _selectedSubTopics[1] = immunizationSubTopic.toString();
+        }
+        final pregnantWomenSubTopic = formJson["pregnant_women_discussion_topic"];
+        if (pregnantWomenSubTopic != null && pregnantWomenSubTopic.toString().isNotEmpty) {
+          _selectedSubTopics[2] = pregnantWomenSubTopic.toString();
+        }
+        final deathsSubTopic = formJson["deaths_discussion_topic"];
+        if (deathsSubTopic != null && deathsSubTopic.toString().isNotEmpty) {
+          _selectedSubTopics[8] = deathsSubTopic.toString();
+        }
+        final familyPlanningSubTopic = formJson["family_planning_discussion_topic"];
+        if (familyPlanningSubTopic != null && familyPlanningSubTopic.toString().isNotEmpty) {
+          _selectedSubTopics[10] = familyPlanningSubTopic.toString();
+        }
+        final otherPublicHealthSubTopic = formJson["other_public_health_program_discussion_topic"];
+        if (otherPublicHealthSubTopic != null && otherPublicHealthSubTopic.toString().isNotEmpty) {
+          _selectedSubTopics[11] = otherPublicHealthSubTopic.toString();
+        }
+        final administrativeSubTopic = formJson["administrative_discussion_topic"];
+        if (administrativeSubTopic != null && administrativeSubTopic.toString().isNotEmpty) {
+          _selectedSubTopics[12] = administrativeSubTopic.toString();
+        }
+        final trainingSupportSubTopic = formJson["training_and_support_discussion_topic"];
+        if (trainingSupportSubTopic != null && trainingSupportSubTopic.toString().isNotEmpty) {
+          _selectedSubTopics[13] = trainingSupportSubTopic.toString();
+        }
+
         // Other Topic Details
         final otherTopic = formJson["other_topic_details"];
         if (otherTopic != null && otherTopic.isNotEmpty) {
           _otherTopicController.text = otherTopic;
-          _showOtherTopicField = _selectedTopics.contains('Other');
         }
 
         final savedPresentList =
@@ -689,8 +724,35 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
         _ashaPresentCount = _presentList.where((e) => e).length;
         _ashaAbsentCount = _presentList.where((e) => !e).length;
       });
+
+      // Convert topic names to IDs after build completes (since discussionTopics is populated in build())
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _convertTopicNamesToIds();
+      });
     } catch (e) {
       print("Error loading meeting: $e");
+    }
+  }
+
+  void _convertTopicNamesToIds() {
+    if (_selectedTopics.isEmpty || discussionTopics.isEmpty) return;
+
+    final topicIds = <int>{};
+    for (final topicName in _selectedTopics) {
+      final topic = discussionTopics.firstWhere(
+        (t) => t.name.toLowerCase() == topicName.toLowerCase(),
+        orElse: () => const DiscussionTopic(id: -1, name: ''),
+      );
+      if (topic.id != -1) {
+        topicIds.add(topic.id);
+      }
+    }
+
+    if (topicIds.isNotEmpty) {
+      setState(() {
+        _selectedTopicIds = topicIds;
+        _showOtherTopicField = _selectedTopicIds.contains(14);
+      });
     }
   }
 
@@ -1160,8 +1222,9 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     labelText: l10n?.fromTime ?? "From (HH:MM)",
                     hintText: l10n?.deliveryTimeHint,
                     initialValue: _fromTime != null
-                        ? _fromTime!.format(context)
+                        ? format24Hour(_fromTime!)
                         : "",
+
                     readOnly: true,
                   ),
                 ),
@@ -1175,8 +1238,9 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                     labelText: l10n?.toTime ?? "To (HH:MM)",
                     hintText: l10n?.deliveryTimeHint,
                     initialValue: _toTime != null
-                        ? _toTime!.format(context)
+                        ? format24Hour(_toTime!)
                         : "",
+
                     readOnly: true,
                   ),
                 ),
@@ -1609,7 +1673,13 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
                 'month_year': _selectedMonthYear != null
                     ? "${_selectedMonthYear!.month.toString().padLeft(2, '0')}-${_selectedMonthYear!.year}"
                     : null,
-                'discussion_topics': _selectedTopics.join(", "),
+                'discussion_topics': _selectedTopicIds.map((id) {
+                  final topic = discussionTopics.firstWhere(
+                    (t) => t.id == id,
+                    orElse: () => const DiscussionTopic(id: -1, name: ''),
+                  );
+                  return topic.id != -1 ? topic.name : '';
+                }).where((name) => name.isNotEmpty).join(", "),
                 'immunization_discussion_topic': _selectedSubTopics[1] ?? '',
                 'pregnant_women_discussion_topic': _selectedSubTopics[2] ?? '',
                 'deaths_discussion_topic': _selectedSubTopics[8] ?? '',
