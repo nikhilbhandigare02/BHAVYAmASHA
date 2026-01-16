@@ -1853,6 +1853,12 @@ abstract class AppLocalizations {
   /// **'Children Details'**
   String get childrenDetailsTitle;
 
+  /// No description provided for @childrenDetailsTitleSection.
+  ///
+  /// In en, this message translates to:
+  /// **'CHILDREN DETAILS'**
+  String get childrenDetailsTitleSection;
+
   /// No description provided for @choMobileHint.
   ///
   /// In en, this message translates to:
@@ -2392,6 +2398,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Family Head Details'**
   String get familyHeadDetailsTitle;
+
+  /// No description provided for @familyHeadDetailssectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'FAMILY HEAD DETAILS'**
+  String get familyHeadDetailssectionTitle;
 
   /// No description provided for @father.
   ///
@@ -6490,6 +6502,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Spouse Details'**
   String get spousDetails;
+
+  /// No description provided for @spousDetailsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'SPOUSE DETAILS'**
+  String get spousDetailsSection;
 
   /// No description provided for @relationWithFamilyHead.
   ///

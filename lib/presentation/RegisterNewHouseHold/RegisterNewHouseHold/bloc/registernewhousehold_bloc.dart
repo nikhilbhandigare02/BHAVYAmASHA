@@ -1160,7 +1160,7 @@ class RegisterNewHouseholdBloc
                   'relation': relation,
                   'otherRelation': member['otherRelation'],
                   'name': name,
-                  'fatherName': member['fatherName'],
+                  'father_name': member['father_name'],
                   'motherName': member['motherName'],
                   'useDob': member['useDob'],
                   'dob': member['dob'],
@@ -1388,7 +1388,7 @@ class RegisterNewHouseholdBloc
                               member['ageAtMarriage'],
                           'RichIDChanged': spMap['RichIDChanged'],
                           'spouseName': spMap['spouseName'] ?? name,
-                          'fatherName': spMap['fatherName'],
+                          'father_name': spMap['father_name'],
                           'useDob': spMap['useDob'],
                           'dob': spMap['dob'],
                           'edd': spMap['edd'],
@@ -2201,6 +2201,8 @@ class RegisterNewHouseholdBloc
           info['headName'] ??
           info['memberName'] ??
           info['name'],
+      'father_name':
+          info['father_name'],
       'father_or_spouse_name':
           info['father_or_spouse_name'] ??
           info['fatherName'] ??

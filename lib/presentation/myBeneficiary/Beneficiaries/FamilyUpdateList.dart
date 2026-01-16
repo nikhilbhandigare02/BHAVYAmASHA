@@ -29,6 +29,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
   void initState() {
     super.initState();
     _loadData();
+
     _searchCtrl.addListener(_onSearchChanged);
   }
 
@@ -88,7 +89,6 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         orderBy: 'created_date_time DESC',
       );
 
-      // Query database directly to get eligible couple activities records for eligible_couple and tracking_due states
       final ecActivities = await db.rawQuery(
         '''
         SELECT * FROM eligible_couple_activities 

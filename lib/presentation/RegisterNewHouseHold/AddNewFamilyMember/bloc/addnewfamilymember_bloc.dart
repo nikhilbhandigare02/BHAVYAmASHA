@@ -350,11 +350,17 @@ class AddnewfamilymemberBloc
           }
         }
         
+        final String? fatherName =
+            (allData['father_name'] as String?);
+        final String? motherName =
+            (allData['motherName'] as String?) ??
+            (allData['mother_name'] as String?);
+
         // Update the state with all the data
         emit(state.copyWith(
           name: primaryName,
-          fatherName: allData['fatherName'] as String?,
-          motherName: allData['motherName'] as String?,
+          fatherName: fatherName,
+          motherName: motherName,
           memberType: normalizedMemberType,
           relation: primaryRelation,
           otherRelation: otherRelationValue,
@@ -1018,7 +1024,7 @@ class AddnewfamilymemberBloc
             'relation': state.relation,
             'otherRelation': state.otherRelation,
             'name': state.name,
-            'fatherName': state.fatherName,
+            'father_name': state.fatherName,
             'motherName': state.motherName,
             'useDob': state.useDob,
             'age_by': state.useDob ? 'by_dob' : 'by_age"',
@@ -1280,7 +1286,7 @@ class AddnewfamilymemberBloc
                 'ageAtMarriage': spousState.ageAtMarriage,
                 'RichIDChanged': spousState.RichIDChanged,
                 'spouseName': spousState.spouseName,
-                'fatherName': spousState.fatherName,
+                'father_name': spousState.fatherName,
                 'useDob': spousState.useDob,
                 'age_by': spousState.useDob,
                 'dob': spousState.dob?.toIso8601String(),
@@ -1573,8 +1579,7 @@ class AddnewfamilymemberBloc
                 'pincode': working['pincode'] ?? userDetails['pincode'],
               }..removeWhere((k, v) => v == null || (v is String && v.trim().isEmpty)),
 
-              // Extra flat fields required by backend sample schema,
-              // mapped from existing local info/state when possible.
+
               'is_abha_verified': info['is_abha_verified'] ?? false,
               'is_rch_id_verified': info['is_rch_id_verified'] ?? false,
               'is_fetched_from_abha': info['is_fetched_from_abha'] ?? false,
@@ -1588,6 +1593,7 @@ class AddnewfamilymemberBloc
                   info['relaton_with_family_head'] ?? info['relation_to_head'] ?? state.relation,
               'member_status': info['member_status'] ?? state.memberStatus ?? 'alive',
               'member_name': info['member_name'] ?? nameStr,
+              'father_name': info['father_name'] ?? nameStr,
               'father_or_spouse_name': info['father_or_spouse_name'] ?? info['fatherName'] ?? info['spouseName'],
               'have_children': info['have_children'] ?? info['hasChildren'] ?? state.hasChildren,
               'is_family_planning': info['is_family_planning'] ?? savedMember['is_family_planning'] ?? 0,
@@ -2107,7 +2113,7 @@ class AddnewfamilymemberBloc
           ..['name'] = state.name
           ..['memberName'] = state.name
           ..['headName'] = existingInfo.containsKey('headName') ? state.name : existingInfo['headName']
-          ..['fatherName'] = state.fatherName
+          ..['father_name'] = state.fatherName
           ..['motherName'] = state.motherName
           ..['useDob'] = state.useDob
           ..['age_by'] = state.useDob ? 'by_dob' : 'by_age'

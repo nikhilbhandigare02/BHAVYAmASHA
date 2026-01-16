@@ -505,7 +505,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         relation == 'father' ||
         isChild; // Children are considered unmarried
 
-    final bool isMarried = !isUnmarried && !isChild;
+    //final bool isMarried = !isUnmarried && !isChild;
+    final isMarried = maritalStatus == 'married' && !isChild;
 
     // Helper functions to get data with fallback to raw beneficiary info
     String getMobileNumber() {
@@ -733,12 +734,18 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                                 : (l10n?.notAvailable ?? 'Not Available'),
                           )
                         else if (isMale && !isChild)
-                            _rowText(
+                        _rowText(
+    l10n?.tolaMohalla ?? 'Tola/Mohalla',
+    getMohalla().isNotEmpty
+    ? getMohalla()
+        : (l10n?.na ?? 'N/A'),
+    ),
+                            /*_rowText(
                               l10n?.mobileLabelSimple ?? 'Mobile No.',
                               getMobileNumber().isNotEmpty
                                   ? getMobileNumber()
                                   : (l10n?.na ?? 'N/A'),
-                            ),
+                            )*/
                       ]),
                       const SizedBox(height: 8),
 
@@ -878,7 +885,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                       ],
 
                       // CATEGORY 3: Married males - show wife name, mobile, village, tola/mohalla
-                      if (isMale && isMarried) ...[
+                      if (isMale && isMarried && !isChild) ...[
                         _buildRow([
                           if (data['WifeName']?.toString().isNotEmpty == true)
                             _rowText(
@@ -906,7 +913,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                           ),
                         ]),
                         const SizedBox(height: 8),
-                        _buildRow([
+
+                        /*_buildRow([
                           _rowText(
                             l10n?.tolaMohalla ?? 'Tola/Mohalla',
                             getMohalla().isNotEmpty
@@ -915,7 +923,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                           ),
                           _rowText('', ''), // Empty cell for layout
                           _rowText('', ''), // Empty cell for layout
-                        ]),
+                        ]),*/
                       ],
 
                       // CATEGORY 4: Unmarried males/females with general registration - show father name, village, tola/mohalla

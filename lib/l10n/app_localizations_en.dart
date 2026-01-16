@@ -896,6 +896,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get childrenDetailsTitle => 'Children Details';
 
   @override
+  String get childrenDetailsTitleSection => 'CHILDREN DETAILS';
+
+  @override
   String get choMobileHint => 'Mobile no. of CHO';
 
   @override
@@ -1166,6 +1169,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyHeadDetailsTitle => 'Family Head Details';
+
+  @override
+  String get familyHeadDetailssectionTitle => 'FAMILY HEAD DETAILS';
 
   @override
   String get father => 'Father';
@@ -3217,6 +3223,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get spousDetails => 'Spouse Details';
+
+  @override
+  String get spousDetailsSection => 'SPOUSE DETAILS';
 
   @override
   String get relationWithFamilyHead => 'Relation with the family head';

@@ -896,6 +896,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get childrenDetailsTitle => 'बच्चों का विवरण';
 
   @override
+  String get childrenDetailsTitleSection => 'बच्चों का विवरण';
+
+  @override
   String get choMobileHint => 'सी.एच.ओ. का मोबाइल नंबर';
 
   @override
@@ -1166,6 +1169,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get familyHeadDetailsTitle => 'परिवार के मुखिया का विवरण';
+
+  @override
+  String get familyHeadDetailssectionTitle => 'परिवार के मुखिया का विवरण';
 
   @override
   String get father => 'पिता का';
@@ -3217,6 +3223,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get spousDetails => 'जीवनसाथी का विवरण';
+
+  @override
+  String get spousDetailsSection => 'जीवनसाथी का विवरण';
 
   @override
   String get relationWithFamilyHead => 'परिवार के मुखिया के साथ संबंध';

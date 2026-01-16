@@ -671,12 +671,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     }
   }
 
-  // Add this method to the _HomeScreenState class
   Future<void> _loadEligibleCouplesCount() async {
     try {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
 
       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
         if (mounted) {
@@ -695,8 +695,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       WHERE b.is_deleted = 0
         AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
         AND (b.is_death = 0 OR b.is_death IS NULL)
-        AND e.eligible_couple_state IN ('eligible_couple', 'tracking_due')
-        AND e.is_deleted = 0
+        AND e.eligible_couple_state IN ('eligible_couple')
         AND e.current_user_key = ?
         AND b.current_user_key = ?
       ORDER BY b.created_date_time DESC;
@@ -715,13 +714,16 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           // ❌ avoid duplicate count
           if (countedBeneficiaries.contains(beneficiaryKey)) continue;
 
-          final beneficiaryInfoStr =
+          final beneficiaryInfo =
               row['beneficiary_info']?.toString() ?? '{}';
-          final Map<String, dynamic> info = Map<String, dynamic>.from(
-            jsonDecode(beneficiaryInfoStr),
-          );
 
-          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          final Map<String, dynamic> info =
+          beneficiaryInfo.isNotEmpty
+              ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfo))
+              : <String, dynamic>{};
+
+          final memberType =
+              info['memberType']?.toString().toLowerCase() ?? '';
           final maritalStatus =
               info['maritalStatus']?.toString().toLowerCase() ?? '';
 
@@ -731,7 +733,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           // ❌ skip unmarried
           if (maritalStatus != 'married') continue;
 
-          // 🔹 age
+          // 🔹 age calculation (same as _loadCounts)
           int? age;
           if (info['age'] != null) {
             age = int.tryParse(info['age'].toString());
@@ -749,7 +751,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
           if (hasSterilization) continue;
 
-          // ✅ count once
+          // ✅ count
           countedBeneficiaries.add(beneficiaryKey);
           count++;
         } catch (_) {

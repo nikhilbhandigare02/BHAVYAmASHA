@@ -5109,38 +5109,37 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       ),
                                     ],
 
-                                    // Spouse name field - hide in edit mode
-                                    if (!_isEdit) ...[
-                                      _section(
-                                        CustomTextField(
-                                          labelText: '${l.spouseNameLabel} *',
-                                          hintText: l.spouseNameHint,
-                                          initialValue: state.spouseName,
-                                          onChanged: (v) => context
-                                              .read<AddnewfamilymemberBloc>()
-                                              .add(
-                                                AnmUpdateSpouseName(v.trim()),
+                                    // Spouse name field - show in both modes, read-only in edit mode
+                                    _section(
+                                      CustomTextField(
+                                        labelText: '${l.spouseNameLabel} *',
+                                        hintText: l.spouseNameHint,
+                                        initialValue: state.spouseName,
+                                        readOnly: _isEdit,
+                                        onChanged: _isEdit ? null : (v) => context
+                                            .read<AddnewfamilymemberBloc>()
+                                            .add(
+                                              AnmUpdateSpouseName(v.trim()),
+                                            ),
+                                        validator: (value) {
+                                          if (state.maritalStatus ==
+                                              'Married') {
+                                            return _captureAnmError(
+                                              Validations.validateSpousName(
+                                                l,
+                                                value,
                                               ),
-                                          validator: (value) {
-                                            if (state.maritalStatus ==
-                                                'Married') {
-                                              return _captureAnmError(
-                                                Validations.validateSpousName(
-                                                  l,
-                                                  value,
-                                                ),
-                                              );
-                                            }
-                                            return null;
-                                          },
-                                        ),
+                                            );
+                                          }
+                                          return null;
+                                        },
                                       ),
-                                      Divider(
-                                        color: AppColors.divider,
-                                        thickness: 0.5,
-                                        height: 0,
-                                      ),
-                                    ],
+                                    ),
+                                    Divider(
+                                      color: AppColors.divider,
+                                      thickness: 0.5,
+                                      height: 0,
+                                    ),
 
                                     if (!_isEdit) ...[
                                       _section(
