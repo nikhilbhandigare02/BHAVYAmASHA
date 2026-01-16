@@ -6014,7 +6014,11 @@ abstract class AppLocalizations {
   /// No description provided for @err_mcp_mother_filled_required.
   ///
   /// In en, this message translates to:
+<<<<<<< HEAD
+  /// **'Please select hast the MCP card filled'**
+=======
   /// **'Please select hast the MCP card filled status.'**
+>>>>>>> 2e8920f1d1f3b7aa51bc3fdaf35344f6b98c8058
   String get err_mcp_mother_filled_required;
 
   /// No description provided for @err_excessive_bleeding_required.
@@ -6086,19 +6090,19 @@ abstract class AppLocalizations {
   /// No description provided for @err_milk_not_producing_or_less_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select milk not producing or less.'**
+  /// **'Please select Mother\'s milk is not being produced after delivery or she thinks less milk is being produced'**
   String get err_milk_not_producing_or_less_required;
 
   /// No description provided for @err_nipple_cracks_pain_or_engorged_required.
   ///
   /// In en, this message translates to:
-  /// **'Please select nipple cracks, pain, or engorged breasts.'**
+  /// **'Please select is the mother having cracked nipples/ painful and / or engorged breasts'**
   String get err_nipple_cracks_pain_or_engorged_required;
 
   /// No description provided for @err_milk_counseling_advice_required.
   ///
   /// In en, this message translates to:
-  /// **'Please enter counseling or advice for milk problem.'**
+  /// **'Please enter Counseling / Advise for milk problem.'**
   String get err_milk_counseling_advice_required;
 
   /// No description provided for @err_refer_hospital_required.

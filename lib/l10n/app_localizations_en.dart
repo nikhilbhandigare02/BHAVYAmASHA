@@ -2979,7 +2979,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get err_breastfeeding_problems_required => 'Please select Does the mother have breast feeding problem';
 
   @override
+<<<<<<< HEAD
+  String get err_mcp_mother_filled_required => 'Please select hast the MCP card filled';
+=======
   String get err_mcp_mother_filled_required => 'Please select hast the MCP card filled status.';
+>>>>>>> 2e8920f1d1f3b7aa51bc3fdaf35344f6b98c8058
 
   @override
   String get err_excessive_bleeding_required => 'Please select excessive bleeding.';
@@ -3015,13 +3019,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get err_counseling_advice_required => 'Please enter Counseling / Advise';
 
   @override
-  String get err_milk_not_producing_or_less_required => 'Please select milk not producing or less.';
+  String get err_milk_not_producing_or_less_required => 'Please select Mother\'s milk is not being produced after delivery or she thinks less milk is being produced';
 
   @override
-  String get err_nipple_cracks_pain_or_engorged_required => 'Please select nipple cracks, pain, or engorged breasts.';
+  String get err_nipple_cracks_pain_or_engorged_required => 'Please select is the mother having cracked nipples/ painful and / or engorged breasts';
 
   @override
-  String get err_milk_counseling_advice_required => 'Please enter counseling or advice for milk problem.';
+  String get err_milk_counseling_advice_required => 'Please enter Counseling / Advise for milk problem.';
 
   @override
   String get err_refer_hospital_required => 'Please select wheather referred to hospital.';

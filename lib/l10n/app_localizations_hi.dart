@@ -2979,7 +2979,11 @@ class AppLocalizationsHi extends AppLocalizations {
   String get err_breastfeeding_problems_required => 'स्तनपान संबंधी समस्या का चयन अनिवार्य है।';
 
   @override
+<<<<<<< HEAD
+  String get err_mcp_mother_filled_required => 'Please select hast the MCP card filled';
+=======
   String get err_mcp_mother_filled_required => 'Please select hast the MCP card filled status.';
+>>>>>>> 2e8920f1d1f3b7aa51bc3fdaf35344f6b98c8058
 
   @override
   String get err_excessive_bleeding_required => 'Please select excessive bleeding.';
@@ -3021,7 +3025,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get err_nipple_cracks_pain_or_engorged_required => 'निप्पल में दरार/दर्द/कड़े स्तन का चयन अनिवार्य है।';
 
   @override
-  String get err_milk_counseling_advice_required => 'Please enter counseling or advice for milk problem.';
+  String get err_milk_counseling_advice_required => 'Please enter Counseling / Advise for milk problem.';
 
   @override
   String get err_refer_hospital_required => 'Please select wheather referred to hospital.';
