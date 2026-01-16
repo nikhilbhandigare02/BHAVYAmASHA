@@ -1853,6 +1853,12 @@ abstract class AppLocalizations {
   /// **'Children Details'**
   String get childrenDetailsTitle;
 
+  /// No description provided for @childrenDetailsTitleSection.
+  ///
+  /// In en, this message translates to:
+  /// **'CHILDREN DETAILS'**
+  String get childrenDetailsTitleSection;
+
   /// No description provided for @choMobileHint.
   ///
   /// In en, this message translates to:
@@ -2392,6 +2398,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Family Head Details'**
   String get familyHeadDetailsTitle;
+
+  /// No description provided for @familyHeadDetailssectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'FAMILY HEAD DETAILS'**
+  String get familyHeadDetailssectionTitle;
 
   /// No description provided for @father.
   ///
@@ -5234,7 +5246,7 @@ abstract class AppLocalizations {
   /// No description provided for @dateOfBirthLabel.
   ///
   /// In en, this message translates to:
-  /// **'Date of Birth *'**
+  /// **'Date of birth *'**
   String get dateOfBirthLabel;
 
   /// No description provided for @dateOfRegistrationLabel.
@@ -5246,7 +5258,7 @@ abstract class AppLocalizations {
   /// No description provided for @dateOfRegistrationLabelR.
   ///
   /// In en, this message translates to:
-  /// **'Date of Registration'**
+  /// **'Date of registration *'**
   String get dateOfRegistrationLabelR;
 
   /// No description provided for @childNameLabel.
@@ -5264,7 +5276,7 @@ abstract class AppLocalizations {
   /// No description provided for @mobileNumberLabel.
   ///
   /// In en, this message translates to:
-  /// **'mobile number'**
+  /// **'Mobile number'**
   String get mobileNumberLabel;
 
   /// No description provided for @mothersRchIdLabel.
@@ -5282,7 +5294,7 @@ abstract class AppLocalizations {
   /// No description provided for @birthCertificateNumberLabel.
   ///
   /// In en, this message translates to:
-  /// **'birth certificate number'**
+  /// **'Birth certificate number'**
   String get birthCertificateNumberLabel;
 
   /// No description provided for @weightGramLabel.
@@ -6002,7 +6014,11 @@ abstract class AppLocalizations {
   /// No description provided for @err_mcp_mother_filled_required.
   ///
   /// In en, this message translates to:
+<<<<<<< HEAD
   /// **'Please select hast the MCP card filled'**
+=======
+  /// **'Please select hast the MCP card filled status.'**
+>>>>>>> 2e8920f1d1f3b7aa51bc3fdaf35344f6b98c8058
   String get err_mcp_mother_filled_required;
 
   /// No description provided for @err_excessive_bleeding_required.
@@ -6490,6 +6506,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Spouse Details'**
   String get spousDetails;
+
+  /// No description provided for @spousDetailsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'SPOUSE DETAILS'**
+  String get spousDetailsSection;
 
   /// No description provided for @relationWithFamilyHead.
   ///
@@ -12890,7 +12912,7 @@ abstract class AppLocalizations {
   /// No description provided for @weightRangeError.
   ///
   /// In en, this message translates to:
-  /// **'Weight must be between 500 and 12500 grams'**
+  /// **'Please enter weight between 500 to 12500gms'**
   String get weightRangeError;
 
   /// No description provided for @enterValidWeight.
@@ -12914,7 +12936,7 @@ abstract class AppLocalizations {
   /// No description provided for @enterValidBirthWeight.
   ///
   /// In en, this message translates to:
-  /// **'Please enter a valid birth weight in grams'**
+  /// **'Please enter birth weight between 1200 to 4000gm'**
   String get enterValidBirthWeight;
 
   /// No description provided for @specifyReligionLabel.

@@ -25,12 +25,9 @@ class RegisterNewHouseHoldScreen extends StatefulWidget {
   final List<Map<String, String>>? initialMembers;
   final bool headAddedInit;
   final bool hideAddMemberButton;
-  // If false, do not show success popup when saving (used for update flows)
   final bool showSuccessOnSave;
-  // Flag to indicate whether we are editing an existing household
   final bool isEdit;
-  // Optional initial head form, used in edit flows so that SaveHousehold
-  // can see the existing keys (hh_unique_key, head_unique_key, etc.).
+
   final Map<String, dynamic>? initialHeadForm;
 
   const RegisterNewHouseHoldScreen({

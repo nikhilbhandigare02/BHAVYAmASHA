@@ -133,32 +133,32 @@ class _CbacformState extends State<Cbacform> {
                     case 'partA.familyHistory':
                       return l10n.cbacA_familyQ;
                     case 'partB.b1.cough2w':
-                      return l10n.cbacB_b1_cough2w;
+                      return '${l10n.cbacB_b1_cough2w} *';
                     case 'partB.b1.bloodMucus':
-                      return l10n.cbacB_b1_bloodMucus;
+                      return '${l10n.cbacB_b1_bloodMucus} *';
                     case 'partB.b1.fever2w':
-                      return l10n.cbacB_b1_fever2w;
+                      return '${l10n.cbacB_b1_fever2w} *';
                     case 'partB.b1.weightLoss':
-                      return l10n.cbacB_b1_weightLoss;
+                      return '${l10n.cbacB_b1_weightLoss} *';
                     case 'partB.b1.nightSweat':
-                      return l10n.cbacB_b1_nightSweat;
+                      return '${l10n.cbacB_b1_nightSweat} *';
                     case 'partB.b1.druggs':
-                      return l10n.cbacB_b1_druggs;
+                      return '${l10n.cbacB_b1_druggs} **';
                     case 'partB.b1.Tuberculosis':
-                      return l10n.cbacB_b1_tuberculosisFamily;
+                      return '${l10n.cbacB_b1_tuberculosisFamily} **';
                     case 'partB.b1.history':
-                      return l10n.cbacB_b1_history;
+                      return '${l10n.cbacB_b1_history} **';
                     case 'partB.b2.excessBleeding':
-                      return l10n.cbacB_b2_excessBleeding;
+                      return '${l10n.cbacB_b2_excessBleeding}***';
                     case 'partB.b2.depression':
-                      return l10n.cbacB_b2_depression;
+                      return '${l10n.cbacB_b2_depression}***';
                     case 'partB.b2.uterusProlapse':
-                      return l10n.cbacB_b2_uterusProlapse;
+                      return '${l10n.cbacB_b2_uterusProlapse}***';
                   }
                   return k;
                 }
 
-                // Show only the first missing field label in SnackBar
+
                 final firstKey = state.missingKeys.first;
                 final firstLabel = labelForKey(firstKey);
                 final msg = '${l10n.cbacPleaseFill} $firstLabel';
@@ -209,14 +209,11 @@ class _CbacformState extends State<Cbacform> {
                           ).colorScheme.onPrimary.withOpacity(0.7),
                           indicatorWeight: 3.0,
                           tabs: tabs,
-                          onTap: (_) {
-                            // Keep the visible tab in sync with BLoC-controlled activeTab
-                            final controller = DefaultTabController.of(context);
-                            if (controller != null &&
-                                controller.index != state.activeTab) {
-                              controller.animateTo(state.activeTab);
-                            }
-                          }, // navigation is controlled by buttons
+                          onTap: (idx) {
+                            context
+                                .read<CbacFormBloc>()
+                                .add(CbacTabChanged(idx));
+                          },
                         ),
                       ),
                     ),
@@ -242,15 +239,11 @@ class _CbacformState extends State<Cbacform> {
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                         child: Builder(
                           builder: (tabContext) {
-                            final currentIndex =
-                                DefaultTabController.of(tabContext)?.index ??
-                                    state.activeTab;
-                            final isLastTab = currentIndex == tabs.length - 1 ||
-                                state.activeTab == tabs.length - 1;
+                            final isLastTab = state.activeTab == 5;
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                // 👇 Keep layout stable — use SizedBox(width: 120) when hidden
+
                                 if (state.activeTab != 0)
                                   SizedBox(
                                     height: 34,
@@ -741,23 +734,17 @@ class _PersonalInfoTab extends StatelessWidget {
           builder: (context, state) {
             final genderValue = state.data['personal.gender'] as String? ?? '';
             
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              final v = state.data['personal.gender'] as String?;
-              if (v != null && v != genderValue) {
-                context.read<CbacFormBloc>().add(
-                  CbacFieldChanged('personal.gender', v),
-                );
-              }
-            });
-            
             return CustomTextField(
               hintText: l10n.genderLabel,
               labelText: l10n.genderLabel,
-              controller: TextEditingController(
-                text: genderValue,
-              ),
+              initialValue: genderValue,
               onChanged: (v) {
                 bloc.add(CbacFieldChanged('personal.gender', v));
+                final currentFather =
+                    (state.data['personal.father']?.toString().trim() ?? '');
+                if (currentFather.isNotEmpty) {
+                  return;
+                }
                 final fatherName =
                     (state.data['beneficiary.fatherName']
                         ?.toString()
@@ -803,8 +790,8 @@ class _PersonalInfoTab extends StatelessWidget {
           buildWhen: (previous, current) =>
               previous.data['personal.idType'] !=
               current.data['personal.idType'],
-          builder: (context, state) {
-            return ApiDropdown<String>(
+              builder: (context, state) {
+              return ApiDropdown<String>(
               hintText: l10n.identificationTypeLabel,
               labelText: l10n.identificationTypeLabel,
               items: [l10n.idTypeAadhaar, l10n.idTypeVoterId, l10n.uid],
@@ -944,7 +931,7 @@ class _PartATab extends StatelessWidget {
         final bloc = BlocProvider.of<CbacFormBloc>(context);
         final l10n = AppLocalizations.of(context)!;
 
-        // --- 1. Load Data ---
+
         final age = state.data['partA.age'] as String?;
         final tobacco = state.data['partA.tobacco'] as String?;
         final alcohol = state.data['partA.alcohol'] as String?;
@@ -1347,7 +1334,7 @@ class _PartBTab extends StatelessWidget {
       child: Center(
         child: Text(
           text,
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+          style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14.sp),
         ),
       ),
     );
@@ -1679,8 +1666,9 @@ class _PartCTabState extends State<_PartCTab> {
               l10n.cropResidues,
               l10n.cowdung,
               l10n.coal,
-              l10n.lpg,
               l10n.cbacC_fuelKerosene,
+              l10n.lpg,
+
             ];
 
             return _buildMultiSelectField(
@@ -1704,10 +1692,13 @@ class _PartCTabState extends State<_PartCTab> {
               current.data['partC.businessRisk'],
           builder: (context, state) {
             final allOptions = [
-              l10n.cbacC_workingPollutedIndustries,
-              l10n.burningOfGrabage,
               l10n.burningCrop,
+              l10n.burningOfGrabage,
               l10n.cbacC_workingSmokeyFactory,
+              l10n.cbacC_workingPollutedIndustries,
+
+
+
               // l10n.cbacC_workingMines,
               // l10n.cbacC_workingConstruction,
               // l10n.cbacC_workingBrickKilns,

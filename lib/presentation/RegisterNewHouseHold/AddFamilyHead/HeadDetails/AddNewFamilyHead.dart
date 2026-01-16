@@ -2446,11 +2446,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               spBloc.add(SpUpdateSpouseName(headName));
                             }
                           }
-                          tabs.add(Tab(text: l.spousDetails));
+                          tabs.add(Tab(text: l.spousDetailsSection));
                           views.add(
                             MultiBlocListener(
                               listeners: [
-                                // Head -> Spouse: keep spouse tab prefilled
                                 BlocListener<
                                   AddFamilyHeadBloc,
                                   AddFamilyHeadState
@@ -2526,7 +2525,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           );
                         }
                         if (showChildren) {
-                          tabs.add(Tab(text: l.childrenDetailsTitle));
+                          tabs.add(Tab(text: l.childrenDetailsTitleSection));
                           views.add(const Childrendetaills());
                         }
 

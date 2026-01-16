@@ -546,7 +546,7 @@ class _RegisterChildDueListFormScreen
       final String? ownerLabel = () {
         final raw = data.mobileOwner?.toLowerCase() ?? '';
         if (raw.isEmpty) return null;
-        final headLabel = l10n?.headOfFamily ?? 'Head of the family';
+        final headLabel = 'Family head';
         final motherLabel = l10n?.mother ?? 'Mother';
         final fatherLabel = l10n?.father ?? 'Father';
         final otherLabel = l10n?.other ?? 'Other';
@@ -1072,7 +1072,7 @@ class _RegisterChildDueListFormScreen
                               child: CustomTextField(
                                 labelText: "${l10n?.mobileNumberLabel} *" ??
                                     'Mobile number *',
-                                hintText: l10n?.enter10DigitMobileNumber,
+                                hintText: l10n?.mobileNumberLabel,
                                 maxLength: 10,
                                 initialValue: state.mobileNumber,
                                 keyboardType: TextInputType.phone,
@@ -1193,8 +1193,9 @@ class _RegisterChildDueListFormScreen
                                     return Container(
                                       key: _keyWeight,
                                       child: CustomTextField(
-                                        labelText: ((l10n?.weightRange ?? 'Weight') + ' (1.2-90) kg'),
-                                        hintText: ((l10n?.weightRange ?? 'Weight') + ' (1.2-90) kg'),
+                                        labelText: l10n?.weightRange ?? 'Weight'  ,
+                                        hintText:  l10n?.weightRange ?? 'Weight',
+                                        maxLength: 3,
                                         initialValue: state.weightGrams,
                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
                                         onChanged: (v) => bloc.add(WeightGramsChanged(v)),
@@ -1206,11 +1207,11 @@ class _RegisterChildDueListFormScreen
 
                                           final parsed = double.tryParse(text);
                                           if (parsed == null) {
-                                            return _captureError('Enter valid weight', _keyWeight);
+                                            return _captureError('Please enter weight between 1.2 to 90 kg', _keyWeight);
                                           }
 
                                           if (parsed < 1.2 || parsed > 90) {
-                                            return _captureError('Weight must be between 1.2 and 90 kg', _keyWeight);
+                                            return _captureError('Please enter weight between 1.2 to 90 kg', _keyWeight);
                                           }
 
                                           return null;
@@ -1227,6 +1228,7 @@ class _RegisterChildDueListFormScreen
                                             labelText: l10n?.child_weight ?? 'Child weight',
                                             hintText: l10n?.child_weight ?? 'Child weight',
                                             initialValue: state.weightGrams,
+                                            maxLength: 5,
                                             keyboardType: TextInputType.number,
                                             onChanged: (v) => bloc.add(WeightGramsChanged(v)),
                                             validator: (value) {
@@ -1237,7 +1239,7 @@ class _RegisterChildDueListFormScreen
 
                                               final parsed = int.tryParse(text);
                                               if (parsed == null) {
-                                                return _captureError(l10n?.enterValidWeight, _keyWeight);
+                                                return _captureError(l10n?.weightRangeError, _keyWeight);
                                               }
 
                                               if (parsed < 500 || parsed > 12500) {
@@ -1257,8 +1259,9 @@ class _RegisterChildDueListFormScreen
                                             key: _keyBirthWeight,
                                             child: CustomTextField(
                                               labelText: l10n?.birthWeightRange ?? 'Birth weight',
-                                              hintText: l10n?.enterBirthWeight ?? 'Enter birth weight',
+                                              hintText: l10n?.birthWeightRange ?? 'Enter birth weight',
                                               initialValue: state.birthWeightGrams,
+                                               maxLength: 4,
                                               keyboardType: TextInputType.number,
                                               onChanged: (v) => bloc.add(BirthWeightGramsChanged(v)),
                                               validator: (value) {

@@ -979,6 +979,11 @@ class ChildCareCountProvider {
 
       for (final row in followupForms) {
         try {
+          final formJson = row['form_json'] as String?;
+          if (formJson == null || formJson.isEmpty) {
+            continue;
+          }
+
           final beneficiaryRefKey = row['beneficiary_ref_key']?.toString() ?? '';
           if (beneficiaryRefKey.isEmpty ||
               countedBeneficiaries.contains(beneficiaryRefKey)) {
@@ -988,77 +993,71 @@ class ChildCareCountProvider {
           /// STEP 4️⃣: Validate beneficiary (child + alive)
           final beneficiaryRows = await db.query(
             'beneficiaries_new',
-            where: '''
-            unique_key = ?
-            AND is_deleted = 0
-            AND is_adult = 0
-            AND is_migrated = 0
-            AND (is_death IS NULL OR is_death = 0)
-            ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND current_user_key = ?' : ''}
-          ''',
-            whereArgs: ashaUniqueKey != null && ashaUniqueKey.isNotEmpty
-                ? [beneficiaryRefKey, ashaUniqueKey]
-                : [beneficiaryRefKey],
+            where:
+                'unique_key = ? AND (is_death IS NULL OR is_death = 0) AND current_user_key = ?',
+            whereArgs: [beneficiaryRefKey, ashaUniqueKey],
             limit: 1,
           );
 
           if (beneficiaryRows.isEmpty) continue;
 
-          /// STEP 5️⃣: Exclude case-closure
-          final caseClosureRecords = await db.query(
-            FollowupFormDataTable.table,
-            where: '''
-            beneficiary_ref_key = ?
-            AND form_json LIKE ?
-            AND is_deleted = 0
-            ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND current_user_key = ?' : ''}
-          ''',
-            whereArgs: ashaUniqueKey != null && ashaUniqueKey.isNotEmpty
-                ? [beneficiaryRefKey, '%case_closure%', ashaUniqueKey]
-                : [beneficiaryRefKey, '%case_closure%'],
-          );
-
-          bool hasCaseClosure = false;
-          for (final cc in caseClosureRecords) {
-            try {
-              final ccJson = jsonDecode(cc['form_json'] as String);
-              final caseClosure =
-                  ccJson['form_data']?['case_closure'] ?? {};
-              if (caseClosure['is_case_closure'] == true) {
-                hasCaseClosure = true;
-                break;
-              }
-            } catch (_) {}
-          }
-
-          if (hasCaseClosure) continue;
-
           /// STEP 6️⃣: Validate form type (registration / tracking)
-          final formJson = row['form_json'] as String?;
-          if (formJson == null || formJson.isEmpty) continue;
-
           final decoded = jsonDecode(formJson);
           String formType = '';
+          final formsRefKey = row['forms_ref_key']?.toString() ?? '';
 
           if (decoded is Map && decoded['form_type'] != null) {
             formType = decoded['form_type'].toString();
-          } else if (decoded is Map && decoded.keys.isNotEmpty) {
-            formType = decoded.keys.first.toString();
+          } else if (decoded is Map && decoded['child_registration_due_form'] is Map) {
+            formType = 'child_registration_due';
+          } else if (decoded is Map && decoded.isNotEmpty) {
+            final firstKey = decoded.keys.first;
+            if (firstKey.toString().contains('child_registration') ||
+                firstKey.toString().contains('child_tracking')) {
+              formType = firstKey.toString();
+            }
           }
 
-          final isValidTrackingForm =
-              formType.contains('child_tracking') ||
-                  formType.contains('child_registration');
+          final isChildRegistration =
+              formType == FollowupFormDataTable.childRegistrationDue ||
+                  formType == 'child_registration_due';
 
-          if (!isValidTrackingForm) continue;
+          final isChildTracking = formsRefKey == '30bycxe4gv7fqnt6' ||
+              formType == FollowupFormDataTable.childTrackingDue ||
+              formType == 'child_tracking_due';
+
+          if (!isChildRegistration && !isChildTracking) {
+            continue;
+          }
 
           /// STEP 7️⃣: Extract child name safely
           Map<String, dynamic> formData = {};
 
-          if (decoded is Map && decoded['form_data'] is Map) {
-            formData = Map<String, dynamic>.from(decoded['form_data']);
-          } else if (decoded is Map && decoded.values.first is Map) {
-            formData = Map<String, dynamic>.from(decoded.values.first);
+          if (decoded is Map && decoded['form_data'] is String) {
+            try {
+              formData = jsonDecode(decoded['form_data']);
+            } catch (_) {}
+          } else if (decoded is Map && decoded['form_data'] is Map) {
+            formData = Map<String, dynamic>.from(decoded['form_data'] as Map);
+          } else if (decoded is Map && decoded.containsKey('child_name')) {
+            formData = Map<String, dynamic>.from(decoded);
+          } else if (decoded is Map && decoded['formData'] is Map) {
+            formData = Map<String, dynamic>.from(decoded['formData'] as Map);
+          }
+
+          if (decoded is Map) {
+            try {
+              if (decoded['child_registration_due_form'] is Map) {
+                formData = Map<String, dynamic>.from(
+                  decoded['child_registration_due_form'] as Map,
+                );
+              } else if (decoded.isNotEmpty) {
+                final firstKey = decoded.keys.first;
+                if (decoded[firstKey] is Map) {
+                  formData = Map<String, dynamic>.from(decoded[firstKey] as Map);
+                }
+              }
+            } catch (_) {}
           }
 
           final childName =
@@ -1067,6 +1066,48 @@ class ChildCareCountProvider {
                   '';
 
           if (childName.isEmpty) continue;
+
+          if (beneficiaryRefKey.isNotEmpty) {
+            final caseClosureWhere =
+                (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
+                    ? 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0 AND current_user_key = ?'
+                    : 'beneficiary_ref_key = ? AND form_json LIKE ? AND is_deleted = 0';
+            final caseClosureArgs =
+                (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty)
+                    ? [beneficiaryRefKey, '%case_closure%', ashaUniqueKey]
+                    : [beneficiaryRefKey, '%case_closure%'];
+
+            final caseClosureRecords = await db.query(
+              FollowupFormDataTable.table,
+              where: caseClosureWhere,
+              whereArgs: caseClosureArgs,
+            );
+
+            if (caseClosureRecords.isNotEmpty) {
+              bool hasCaseClosure = false;
+              for (final ccRecord in caseClosureRecords) {
+                try {
+                  final ccFormJson = ccRecord['form_json'] as String?;
+                  if (ccFormJson != null) {
+                    final ccFormData = jsonDecode(ccFormJson);
+                    final ccFormDataMap =
+                        ccFormData['form_data'] as Map<String, dynamic>? ?? {};
+                    final caseClosure =
+                        ccFormDataMap['case_closure'] as Map<String, dynamic>? ??
+                            {};
+                    if (caseClosure['is_case_closure'] == true) {
+                      hasCaseClosure = true;
+                      break;
+                    }
+                  }
+                } catch (_) {}
+              }
+
+              if (hasCaseClosure) {
+                continue;
+              }
+            }
+          }
 
           /// STEP 8️⃣: Count unique beneficiary
           countedBeneficiaries.add(beneficiaryRefKey);

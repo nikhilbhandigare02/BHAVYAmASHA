@@ -211,7 +211,6 @@ class _HouseHold_BeneficiaryScreenState
                 info['relation_to_head']?.toString() ??
                 'Member';
 
-        // Create card for this record
         final card = <String, dynamic>{
           'hhId': rowHhId,
           'RegitrationDate': row['created_date_time']?.toString() ?? '',
@@ -230,7 +229,6 @@ class _HouseHold_BeneficiaryScreenState
               info['marital_status']?.toString() ??
               '',
           'FatherName':
-          info['fatherName']?.toString() ??
               info['father_name']?.toString() ??
               '',
           'MotherName':
@@ -244,7 +242,6 @@ class _HouseHold_BeneficiaryScreenState
           '_memberData': info,
         };
 
-        // Add RICH ID for females
         if (isFemale) {
           card['Rich_id'] = richId;
         }
@@ -619,18 +616,15 @@ class _HouseHold_BeneficiaryScreenState
         final dateSegments = datePart.split('-');
 
         if (dateSegments.length == 3) {
-          // If it's already in dd-mm-yyyy format, just return it as is
           if (dateSegments[0].length == 2 && dateSegments[2].length == 4) {
             return datePart;
           }
-          // If it's in yyyy-mm-dd format, reformat it
           else if (dateSegments[0].length == 4 && dateSegments[2].length == 2) {
             return '${dateSegments[2]}-${dateSegments[1]}-${dateSegments[0]}';
           }
         }
       }
 
-      // If we have a valid date, format it
       if (date != null) {
         final day = date.day.toString().padLeft(2, '0');
         final month = date.month.toString().padLeft(2, '0');
@@ -638,7 +632,6 @@ class _HouseHold_BeneficiaryScreenState
         return '$day-$month-$year';
       }
 
-      // If all else fails, return the original string
       return dateString;
     } catch (e) {
       return dateString; // Return original if parsing/formatting fails
@@ -716,7 +709,7 @@ class _HouseHold_BeneficiaryScreenState
 
             'headName': head['Name']?.toString() ?? '',
             'headGender': isHeadMale ? 'Male' : 'Female',
-            'spouseName': spouse['Name']?.toString() ?? '',
+            'spouseName': spouse['Name']?.toString() ??  '',
             'spouseGender': isHeadMale ? 'Female' : 'Male',
 
             'relation': data['Relation']?.toString() ?? '',
@@ -997,7 +990,7 @@ class _HouseHold_BeneficiaryScreenState
                   ],
 
                   // CATEGORY 4: Unmarried males/females with general registration - show father name
-                  if (!isChild && isUnmarried && isGeneralRegistration) ...[
+                  ...((!isChild && isUnmarried && isGeneralRegistration) ?[
                     Row(
                       children: [
                         if ((data['FatherName']?.toString().isNotEmpty == true) ||
@@ -1010,7 +1003,20 @@ class _HouseHold_BeneficiaryScreenState
                                   : data['SpouseName'],
                             ),
                           ),
-                        if (isFemale)
+                        const SizedBox(width: 12),
+                        if (!isMale && !isChild && isFemale)
+                          Expanded(
+                            child: _rowText(
+                              l10n?.mobileLabel ?? 'Mobile no.',
+                              data['Mobileno.']?.toString().isNotEmpty == true
+                                  ? data['Mobileno.']
+                                  : (l10n?.notAvailable ?? 'NA'),
+                            ),
+                          ),
+                        const SizedBox(width: 12),
+                        // Empty third column
+                        const Expanded(child: SizedBox()),
+                      /*  if (isFemale)
                           const SizedBox(width: 12),
                         if (isFemale && ( ((data['FatherName']?.toString().isNotEmpty == true) ||
                             (data['SpouseName']?.toString().isNotEmpty == true))))
@@ -1021,10 +1027,44 @@ class _HouseHold_BeneficiaryScreenState
                                   ? data['Rich_id'].toString()
                                   : (l10n?.notAvailable ?? 'Not Available'),
                             ),
-                          ),
+                          ),*/
                       ],
                     ),
-                  ],
+                  ] :[
+    Row(
+    children: [
+    // Father name for children - first column
+   /* if ((data['FatherName']?.toString().isNotEmpty == true) ||
+    (data['SpouseName']?.toString().isNotEmpty == true))*/
+    Expanded(
+    child: _rowText(
+      l10n?.fatherNameLabel ?? 'Father Name',
+      (data['FatherName']?.toString().trim().isNotEmpty == true)
+          ? data['FatherName']
+          : (data['SpouseName']?.toString().trim().isNotEmpty == true)
+          ? data['SpouseName']
+          : (l10n?.notAvailable ?? 'NA'),
+    ),
+    ),
+    if ((data['FatherName']?.toString().isNotEmpty == true) ||
+    (data['SpouseName']?.toString().isNotEmpty == true))
+    const SizedBox(width: 12),
+    // Mobile number for children - second column
+     if (!isMale && !isChild && isFemale)
+    Expanded(
+    child: _rowText(
+    l10n?.mobileLabel ?? 'Mobile no.',
+    data['Mobileno.']?.toString().isNotEmpty == true
+    ? data['Mobileno.']
+        : (l10n?.notAvailable ?? 'NA'),
+    ),
+    ),
+    const SizedBox(width: 12),
+    // Empty third column
+    const Expanded(child: SizedBox()),
+    ],
+    ),
+    ]),
                 ],
               ),
             ),

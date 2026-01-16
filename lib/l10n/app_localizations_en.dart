@@ -896,6 +896,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get childrenDetailsTitle => 'Children Details';
 
   @override
+  String get childrenDetailsTitleSection => 'CHILDREN DETAILS';
+
+  @override
   String get choMobileHint => 'Mobile no. of CHO';
 
   @override
@@ -1166,6 +1169,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyHeadDetailsTitle => 'Family Head Details';
+
+  @override
+  String get familyHeadDetailssectionTitle => 'FAMILY HEAD DETAILS';
 
   @override
   String get father => 'Father';
@@ -2589,13 +2595,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rchChildSerialHint => 'Sr. no of child in RCH register';
 
   @override
-  String get dateOfBirthLabel => 'Date of Birth *';
+  String get dateOfBirthLabel => 'Date of birth *';
 
   @override
   String get dateOfRegistrationLabel => 'Date of Registration *';
 
   @override
-  String get dateOfRegistrationLabelR => 'Date of Registration';
+  String get dateOfRegistrationLabelR => 'Date of registration *';
 
   @override
   String get childNameLabel => 'Name of child *';
@@ -2604,7 +2610,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get whoseMobileNumberLabel => 'Whose mobile number is this';
 
   @override
-  String get mobileNumberLabel => 'mobile number';
+  String get mobileNumberLabel => 'Mobile number';
 
   @override
   String get mothersRchIdLabel => 'RCH ID no. of mother';
@@ -2613,7 +2619,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get birthCertificateIssuedLabel => 'Is birth certificate issued?';
 
   @override
-  String get birthCertificateNumberLabel => 'birth certificate number';
+  String get birthCertificateNumberLabel => 'Birth certificate number';
 
   @override
   String get weightGramLabel => 'Weight (g)';
@@ -2973,7 +2979,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get err_breastfeeding_problems_required => 'Please select Does the mother have breast feeding problem';
 
   @override
+<<<<<<< HEAD
   String get err_mcp_mother_filled_required => 'Please select hast the MCP card filled';
+=======
+  String get err_mcp_mother_filled_required => 'Please select hast the MCP card filled status.';
+>>>>>>> 2e8920f1d1f3b7aa51bc3fdaf35344f6b98c8058
 
   @override
   String get err_excessive_bleeding_required => 'Please select excessive bleeding.';
@@ -3217,6 +3227,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get spousDetails => 'Spouse Details';
+
+  @override
+  String get spousDetailsSection => 'SPOUSE DETAILS';
 
   @override
   String get relationWithFamilyHead => 'Relation with the family head';
@@ -6421,7 +6434,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enter_Weight => 'Enter weight';
 
   @override
-  String get weightRangeError => 'Weight must be between 500 and 12500 grams';
+  String get weightRangeError => 'Please enter weight between 500 to 12500gms';
 
   @override
   String get enterValidWeight => 'Please enter a valid weight in grams';
@@ -6433,7 +6446,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get birthWeightRange => 'Birth weight (1200-4000 gms)';
 
   @override
-  String get enterValidBirthWeight => 'Please enter a valid birth weight in grams';
+  String get enterValidBirthWeight => 'Please enter birth weight between 1200 to 4000gm';
 
   @override
   String get specifyReligionLabel => 'Specify Religion';

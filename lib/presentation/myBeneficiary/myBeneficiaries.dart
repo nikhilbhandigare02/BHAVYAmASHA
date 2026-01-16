@@ -44,12 +44,12 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
 
   Future<void> _loadCounts() async {
     try {
-      // Use same data fetching logic as FamilyUpdateList.dart and AllHouseHold_Screen.dart
+      if (mounted) setState(() => isLoading = true);
+
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
 
       if (currentUserKey.isEmpty) {
-        print('Error: Current user key not found');
         if (mounted) {
           setState(() {
             familyUpdateCount = 0;
@@ -68,9 +68,9 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
         return;
       }
 
-      // Use same household count logic as HomeScreen.dart
       final db = await DatabaseProvider.instance.database;
 
+      /// ---------- SAME AS _loadHouseholdCount ----------
       final beneficiaries =
       await LocalStorageDao.instance.getAllBeneficiaries();
 
@@ -80,115 +80,18 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
         whereArgs: [currentUserKey],
       );
 
-      /// ---------- MAP HOUSEHOLD -> CONFIGURED HEAD ----------
-      final Map<String, String> headKeyByHousehold = {};
-      for (final hh in households) {
-        final hhKey = (hh['unique_key'] ?? '').toString();
-        final headId = (hh['head_id'] ?? '').toString();
-        if (hhKey.isNotEmpty && headId.isNotEmpty) {
-          headKeyByHousehold[hhKey] = headId;
-        }
-      }
-
-      final Set<String> householdKeysFromBeneficiaries = beneficiaries.where((r) {
-        try {
-          final householdRefKey = (r['household_ref_key'] ?? '').toString();
-          final uniqueKey = (r['unique_key'] ?? '').toString();
-          if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
-
-          if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
-
-          final rawInfo = r['beneficiary_info'];
-          Map<String, dynamic> info;
-          if (rawInfo is Map) {
-            info = Map<String, dynamic>.from(rawInfo);
-          } else if (rawInfo is String && rawInfo.isNotEmpty) {
-            info = Map<String, dynamic>.from(jsonDecode(rawInfo));
-          } else {
-            info = {};
-          }
-
-          final configuredHeadKey = headKeyByHousehold[householdRefKey];
-
-          final bool isConfiguredHead =
-              configuredHeadKey != null && configuredHeadKey == uniqueKey;
-
-          final relation =
-          (info['relation_to_head'] ?? info['relation'] ?? '')
-              .toString()
-              .toLowerCase();
-
-          final bool isHeadByRelation =
-              relation == 'head' || relation == 'self';
-
-          final bool isFamilyHead =
-              info['isFamilyHead'] == true ||
-                  info['isFamilyHead']?.toString().toLowerCase() == 'true';
-
-          return isConfiguredHead || isHeadByRelation || isFamilyHead;
-        } catch (_) {
-          return false;
-        }
-      }).map((r) {
-        return (r['household_ref_key'] ?? '').toString();
-      }).where((k) => k.isNotEmpty).toSet();
-
-      /// ---------- FALLBACK HOUSEHOLDS (SAME AS _loadData) ----------
-      final Set<String> householdKeysWithBeneficiaries = beneficiaries
-          .map((e) => (e['household_ref_key'] ?? '').toString())
-          .where((k) => k.isNotEmpty)
-          .toSet();
-
-      final Set<String> fallbackHouseholdKeys = {};
+      /// ✅ EXACT FINAL LOGIC USED IN _loadHouseholdCount
+      final Set<String> finalHouseholdKeys = {};
 
       for (final hh in households) {
         final hhRefKey = (hh['unique_key'] ?? '').toString();
         if (hhRefKey.isEmpty) continue;
-
-        // Already counted via beneficiaries
-        if (householdKeysWithBeneficiaries.contains(hhRefKey)) continue;
-
-        Map<String, dynamic> hhInfo = {};
-        final raw = hh['household_info'];
-
-        if (raw is Map) {
-          hhInfo = Map<String, dynamic>.from(raw);
-        } else if (raw is String && raw.isNotEmpty) {
-          try {
-            hhInfo = Map<String, dynamic>.from(jsonDecode(raw));
-          } catch (_) {}
-        }
-
-        final headRaw = hhInfo['family_head_details'];
-        Map<String, dynamic> headInfo = {};
-
-        if (headRaw is Map) {
-          headInfo = Map<String, dynamic>.from(headRaw);
-        } else if (headRaw is String && headRaw.isNotEmpty) {
-          try {
-            headInfo = Map<String, dynamic>.from(jsonDecode(headRaw));
-          } catch (_) {}
-        }
-
-        final bool isHead =
-            headInfo['isFamilyHead'] == true ||
-                headInfo['isFamilyHead']?.toString().toLowerCase() == 'true' ||
-                headInfo['isFamilyhead'] == true ||
-                headInfo['isFamilyhead']?.toString().toLowerCase() == 'true';
-
-        if (isHead) {
-          fallbackHouseholdKeys.add(hhRefKey);
-        }
+        finalHouseholdKeys.add(hhRefKey);
       }
 
-      /// ---------- FINAL HOUSEHOLD SET ----------
-      final Set<String> finalHouseholdKeys = {
-        ...householdKeysFromBeneficiaries,
-        ...fallbackHouseholdKeys,
-      };
+      final int familyCount = finalHouseholdKeys.length;
 
-      final familyCount = finalHouseholdKeys.length;
-
+      /// ---------- OTHER COUNTS ----------
       final poCount = await _getPregnancyOutcomeCount();
       final hbnc = await _getHBNCCount();
       final ecCount = await _getEligibleCoupleCount();
@@ -199,7 +102,6 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
       final migrated = await _getMigratedOutCount();
       final guest = await _getGuestBeneficiaryCount();
 
-      // Update state
       if (mounted) {
         setState(() {
           familyUpdateCount = familyCount;
@@ -215,11 +117,10 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
           isLoading = false;
         });
       }
-    } catch (e) {
-      print('Error loading beneficiary counts: $e');
-      if (mounted) {
-        setState(() => isLoading = false);
-      }
+    } catch (e, st) {
+      print('❌ _loadCounts error: $e');
+      print(st);
+      if (mounted) setState(() => isLoading = false);
     }
   }
 

@@ -896,6 +896,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get childrenDetailsTitle => 'बच्चों का विवरण';
 
   @override
+  String get childrenDetailsTitleSection => 'बच्चों का विवरण';
+
+  @override
   String get choMobileHint => 'सी.एच.ओ. का मोबाइल नंबर';
 
   @override
@@ -1166,6 +1169,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get familyHeadDetailsTitle => 'परिवार के मुखिया का विवरण';
+
+  @override
+  String get familyHeadDetailssectionTitle => 'परिवार के मुखिया का विवरण';
 
   @override
   String get father => 'पिता का';
@@ -2973,7 +2979,11 @@ class AppLocalizationsHi extends AppLocalizations {
   String get err_breastfeeding_problems_required => 'स्तनपान संबंधी समस्या का चयन अनिवार्य है।';
 
   @override
+<<<<<<< HEAD
   String get err_mcp_mother_filled_required => 'Please select hast the MCP card filled';
+=======
+  String get err_mcp_mother_filled_required => 'Please select hast the MCP card filled status.';
+>>>>>>> 2e8920f1d1f3b7aa51bc3fdaf35344f6b98c8058
 
   @override
   String get err_excessive_bleeding_required => 'Please select excessive bleeding.';
@@ -3217,6 +3227,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get spousDetails => 'जीवनसाथी का विवरण';
+
+  @override
+  String get spousDetailsSection => 'जीवनसाथी का विवरण';
 
   @override
   String get relationWithFamilyHead => 'परिवार के मुखिया के साथ संबंध';
