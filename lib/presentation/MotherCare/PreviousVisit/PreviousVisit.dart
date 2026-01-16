@@ -90,7 +90,7 @@ class _PreviousVisitScreenState extends State<PreviousVisitScreen> {
 
     return Scaffold(
       appBar: AppHeader(
-        screenTitle: t.previousVisits,
+        screenTitle: t.previousVisitsButtonS,
         showBack: true,
       ),
       body: SafeArea(
@@ -103,12 +103,33 @@ class _PreviousVisitScreenState extends State<PreviousVisitScreen> {
                 : _errorMessage.isNotEmpty
                     ? Center(child: Text(_errorMessage))
                     : _pncVisits.isEmpty
-                        ? Center(
-                            child: Text(
-                              t.noPreviousVisits,
-                              textAlign: TextAlign.center,
-                            ),
-                          )
+                        ? Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              child: Card(
+                color: Colors.white,
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 50.0, horizontal: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        t?.noRecordFound ?? 'No Record Found',
+                        style: TextStyle(
+                          fontSize: 17,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
                         : Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -150,7 +171,7 @@ class _TableHeader extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Row(
           children: [
-            Expanded(flex: 2, child: Text(t.prevVisitSrNo, style: const TextStyle(fontWeight: FontWeight.w600))),
+            Expanded(flex: 2, child: Text(t.srNo, style: const TextStyle(fontWeight: FontWeight.w600))),
             Expanded(flex: 6, child: Text(t.prevVisitPncDate, style: const TextStyle(fontWeight: FontWeight.w600))),
             Expanded(flex: 4, child: Text(t.prevVisitPncDay, style: const TextStyle(fontWeight: FontWeight.w600))),
           ],

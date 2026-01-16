@@ -2979,7 +2979,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get err_breastfeeding_problems_required => 'स्तनपान संबंधी समस्या का चयन अनिवार्य है।';
 
   @override
-  String get err_mcp_mother_filled_required => 'Please select MCP card filled status.';
+  String get err_mcp_mother_filled_required => 'Please select hast the MCP card filled status.';
 
   @override
   String get err_excessive_bleeding_required => 'Please select excessive bleeding.';
@@ -2988,16 +2988,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get err_unconscious_fits_required => 'Please select unconscious/fits.';
 
   @override
-  String get err_breastfeeding_problem_description_required => 'Please enter breastfeeding problem description.';
+  String get err_breastfeeding_problem_description_required => 'Please enter problem';
 
   @override
-  String get err_breastfeeding_help_required => 'Please enter breastfeeding help or action taken.';
+  String get err_breastfeeding_help_required => 'Please write down the action taken';
 
   @override
   String get err_pads_per_day_required => 'प्रतिदिन बदले जाने वाले पैड की संख्या अनिवार्य है।';
 
   @override
-  String get err_meals_per_day_required => 'Please enter number of full meals per day.';
+  String get err_meals_per_day_required => 'Please enter no. of times mother takes full meal in 24 hours';
 
   @override
   String get err_mothers_temperature_required => 'माता का तापमान अनिवार्य है।';
@@ -3024,10 +3024,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get err_milk_counseling_advice_required => 'Please enter counseling or advice for milk problem.';
 
   @override
-  String get err_refer_hospital_required => 'Please select refer to hospital.';
+  String get err_refer_hospital_required => 'Please select wheather referred to hospital.';
 
   @override
-  String get err_refer_to_required => 'Please select referral facility.';
+  String get err_refer_to_required => 'Please select place to refer';
 
   @override
   String get err_baby_condition_required => 'शिशु की स्थिति अनिवार्य है।';

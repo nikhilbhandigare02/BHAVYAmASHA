@@ -92,6 +92,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
   bool _isEdit = false;
   bool _argsHandled = false;
 
+  bool _updateSuccessSnackShown = false;
+
   bool _isMemberDetails = false;
   String _fatherOption = '';
   String _motherOption = '';
@@ -1364,8 +1366,24 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                     listener: (context, state) {
                       if (state.postApiStatus == PostApiStatus.success) {
                         // Only navigate back after successful save
+                        if (_isEdit && !_updateSuccessSnackShown) {
+                          _updateSuccessSnackShown = true;
+                          showAppSnackBar(
+                            context,
+                            'Beneficiary Updated Successfully',
+                          );
+                        }
+
                         final Map<String, dynamic> result = state.toJson();
-                        Navigator.of(context).pop(result);
+                        if (_isEdit) {
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            if (mounted) {
+                              Navigator.of(context).pop(result);
+                            }
+                          });
+                        } else {
+                          Navigator.of(context).pop(result);
+                        }
                       } else if (state.postApiStatus == PostApiStatus.error) {
                         // Show error message if save fails
                         if (state.errorMessage != null &&
@@ -5694,6 +5712,14 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                         }
 
                         if (state.postApiStatus == PostApiStatus.success) {
+                          if (_isEdit && !_updateSuccessSnackShown) {
+                            _updateSuccessSnackShown = true;
+                            showAppSnackBar(
+                              context,
+                              'Beneficiary Updated Successfully',
+                            );
+                          }
+
                           final Map<String, dynamic> result = state.toJson();
                           // Attach lightweight summary needed by the Register table
                           try {
@@ -5710,13 +5736,23 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                               result['spouseName'] = _spouseName;
                             }
                           } catch (_) {}
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (mounted) {
-                              Navigator.of(
-                                context,
-                              ).pop<Map<String, dynamic>>(result);
-                            }
-                          });
+                          if (_isEdit) {
+                            Future.delayed(const Duration(milliseconds: 300), () {
+                              if (mounted) {
+                                Navigator.of(
+                                  context,
+                                ).pop<Map<String, dynamic>>(result);
+                              }
+                            });
+                          } else {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) {
+                                Navigator.of(
+                                  context,
+                                ).pop<Map<String, dynamic>>(result);
+                              }
+                            });
+                          }
                         }
                       },
                       child: SafeArea(

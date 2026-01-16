@@ -307,74 +307,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
       }).toList();
 
       /// --------- MAP TO UI MODEL ----------
-      final Map<String, Map<String, dynamic>> headRowByHousehold = {};
-      for (final r in familyHeads) {
-        try {
-          final householdRefKey = (r['household_ref_key'] ?? '').toString();
-          if (householdRefKey.isEmpty) continue;
-
-          final uniqueKey = (r['unique_key'] ?? '').toString();
-          final configuredHeadKey = headKeyByHousehold[householdRefKey];
-          final bool isConfiguredHead =
-              configuredHeadKey != null && configuredHeadKey == uniqueKey;
-
-          Map<String, dynamic> info;
-          final rawInfo = r['beneficiary_info'];
-          if (rawInfo is Map) {
-            info = Map<String, dynamic>.from(rawInfo);
-          } else if (rawInfo is String && rawInfo.isNotEmpty) {
-            info = Map<String, dynamic>.from(jsonDecode(rawInfo));
-          } else {
-            info = {};
-          }
-          final relation =
-              (info['relation_to_head'] ?? info['relation'] ?? '')
-                  .toString()
-                  .toLowerCase();
-          final bool isHeadByRelation = relation == 'head';
-          final bool isSelfByRelation = relation == 'self';
-
-          final existing = headRowByHousehold[householdRefKey];
-          if (existing == null) {
-            headRowByHousehold[householdRefKey] = r;
-          } else {
-            bool existingIsConfigured = false;
-            bool existingIsHead = false;
-            bool existingIsSelf = false;
-            try {
-              final exUnique = (existing['unique_key'] ?? '').toString();
-              final exConfiguredHeadKey = headKeyByHousehold[householdRefKey];
-              existingIsConfigured =
-                  exConfiguredHeadKey != null && exConfiguredHeadKey == exUnique;
-              Map<String, dynamic> exInfo;
-              final exRawInfo = existing['beneficiary_info'];
-              if (exRawInfo is Map) {
-                exInfo = Map<String, dynamic>.from(exRawInfo);
-              } else if (exRawInfo is String && exRawInfo.isNotEmpty) {
-                exInfo = Map<String, dynamic>.from(jsonDecode(exRawInfo));
-              } else {
-                exInfo = {};
-              }
-              final exRelation =
-                  (exInfo['relation_to_head'] ?? exInfo['relation'] ?? '')
-                      .toString()
-                      .toLowerCase();
-              existingIsHead = exRelation == 'head';
-              existingIsSelf = exRelation == 'self';
-            } catch (_) {}
-
-            if (isConfiguredHead && !existingIsConfigured) {
-              headRowByHousehold[householdRefKey] = r;
-            } else if (!existingIsHead && isHeadByRelation) {
-              headRowByHousehold[householdRefKey] = r;
-            } else if (!existingIsSelf && isSelfByRelation) {
-              headRowByHousehold[householdRefKey] = r;
-            }
-          }
-        } catch (_) {}
-      }
-
-      final mapped = headRowByHousehold.values.map<Map<String, dynamic>>((r) {
+      final mapped = familyHeads.map<Map<String, dynamic>>((r) {
         final info = Map<String, dynamic>.from(
           (r['beneficiary_info'] is String
               ? jsonDecode(r['beneficiary_info'])
