@@ -14,6 +14,7 @@ class BeneficiaryRepository {
   final NetworkServiceApi _api = NetworkServiceApi();
 
   Future<Map<String, dynamic>> fetchAndStoreBeneficiaries({required String lastId, int pageSize = 20}) async {
+
     final currentUser = await UserInfo.getCurrentUser();
     final userDetails = currentUser?['details'] is String
         ? jsonDecode(currentUser?['details'] ?? '{}')
@@ -155,7 +156,7 @@ class BeneficiaryRepository {
         final uniqueKey = row['unique_key']?.toString();
         if (uniqueKey != null && uniqueKey.isNotEmpty) {
           final existing = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(uniqueKey);
-          if (existing != null && existing.isNotEmpty) {
+         /* if (existing != null && existing.isNotEmpty) {
             final existingSynced = (existing['is_synced'] == 1) || (existing['is_synced']?.toString() == '1');
             if (existingSynced) {
               print('Skipping already synced beneficiary: $uniqueKey');
@@ -165,11 +166,13 @@ class BeneficiaryRepository {
             print('Skipping beneficiary with existing record: $uniqueKey');
             skipped++;
             continue;
+          }*/
+          if (existing == null || existing.isEmpty) {
+            print('Inserting beneficiary: server_id=$serverId, unique_key=$uniqueKey');
+            await LocalStorageDao.instance.insertBeneficiary(row);
           }
         }
-        
-        print('Inserting beneficiary: server_id=$serverId, unique_key=$uniqueKey');
-        await LocalStorageDao.instance.insertBeneficiary(row);
+
         print('Successfully inserted beneficiary: $uniqueKey');
         inserted++;
       } catch (e) {

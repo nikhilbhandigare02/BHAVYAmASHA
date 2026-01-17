@@ -135,19 +135,6 @@ class EligibleCoupleRepository {
 
       if (serverId == null || beneficiaryRefKey == null) continue;
 
-      /// 🔴 CHECK: beneficiary_ref_key already exists?
-      final existingByBeneficiary = await db.query(
-        'eligible_couple_activities',
-        where: 'beneficiary_ref_key = ?',
-        whereArgs: [beneficiaryRefKey],
-        limit: 1,
-      );
-
-      // if (existingByBeneficiary.isNotEmpty) {
-      //   skipped++;
-      //   continue; // ❌ EXCLUDE THIS RECORD
-      // }
-
       /// Existing check by server_id (normal sync logic)
       final existingByServer = await db.query(
         'eligible_couple_activities',
