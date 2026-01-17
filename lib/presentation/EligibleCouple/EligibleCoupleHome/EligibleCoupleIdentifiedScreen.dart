@@ -63,14 +63,14 @@ class _EligibleCoupleIdentifiedScreenState
 
   Future<void> _loadEligibleCouples() async {
     try {
-      setState(() { _isLoading = true; });
-      final db = await DatabaseProvider.instance.database;
+      setState(() => _isLoading = true);
 
+      final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
 
       if (currentUserKey.isEmpty) {
-        print('Error: Current user key not found');
+        print('❌ Error: Current user key not found');
         setState(() {
           _filtered = [];
           _isLoading = false;
@@ -79,27 +79,26 @@ class _EligibleCoupleIdentifiedScreenState
       }
 
       final query = '''
-        SELECT DISTINCT b.*, e.eligible_couple_state, 
-               e.created_date_time as registration_date
-        FROM beneficiaries_new b
-        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
-        WHERE b.is_deleted = 0 
-          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
-          AND (b.is_death = 0 OR b.is_death IS NULL)
-          AND e.eligible_couple_state = 'eligible_couple'
-          AND e.is_deleted = 0
-          AND e.current_user_key = ?
-        ORDER BY b.created_date_time DESC
-      ''';
-
-      print('Executing query: $query');
-      print('With param: $currentUserKey');
+      SELECT 
+        b.*, 
+        e.eligible_couple_state,
+        e.created_date_time AS registration_date
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e
+        ON b.unique_key = e.beneficiary_ref_key
+      WHERE b.is_deleted = 0
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND (b.is_death = 0 OR b.is_death IS NULL)
+        AND e.eligible_couple_state = 'eligible_couple'
+        AND e.is_deleted = 0
+        AND e.current_user_key = ?
+      ORDER BY e.created_date_time DESC
+    ''';
 
       final rows = await db.rawQuery(query, [currentUserKey]);
-      print('Found ${rows.length} eligible couples');
+      print('🔍 Raw eligible couple rows: ${rows.length}');
 
       if (rows.isEmpty) {
-        print('No eligible couples found for current user');
         setState(() {
           _filtered = [];
           _isLoading = false;
@@ -107,88 +106,78 @@ class _EligibleCoupleIdentifiedScreenState
         return;
       }
 
-      final filteredRows = rows.map((row) {
-        final Map<String, dynamic> mappedRow = Map<String, dynamic>.from(row);
+      final List<Map<String, dynamic>> couples = [];
+      final Set<String> seenBeneficiaries = {};
 
+      for (final row in rows) {
+        final Map<String, dynamic> member =
+        Map<String, dynamic>.from(row);
+
+        Map<String, dynamic> info = {};
         try {
-          mappedRow['beneficiary_info'] = jsonDecode(mappedRow['beneficiary_info'] ?? '{}');
-          mappedRow['geo_location'] = jsonDecode(mappedRow['geo_location'] ?? '{}');
-          mappedRow['device_details'] = jsonDecode(mappedRow['device_details'] ?? '{}');
-          mappedRow['app_details'] = jsonDecode(mappedRow['app_details'] ?? '{}');
-          mappedRow['parent_user'] = jsonDecode(mappedRow['parent_user'] ?? '{}');
+          final raw = member['beneficiary_info'];
+          if (raw is String && raw.isNotEmpty) {
+            info = jsonDecode(raw) as Map<String, dynamic>;
+          } else if (raw is Map) {
+            info = Map<String, dynamic>.from(raw);
+          }
         } catch (e) {
-          print('Error parsing JSON fields: $e');
-        }
-
-        return mappedRow;
-      }).toList();
-
-      print('Processed ${filteredRows.length} rows');
-
-
-      final couples = <Map<String, dynamic>>[];
-
-      // Track duplicates based on household_ref_key and name combination
-      final Map<String, int> recordCount = {};
-      final Map<String, int> processedRecords = {};
-
-      // First pass: count occurrences of each unique record
-      for (final member in filteredRows) {
-        final info = _toStringMap(member['beneficiary_info']);
-        final memberUniqueKey = member['unique_key']?.toString() ?? '';
-        final householdKey = member['household_ref_key']?.toString() ?? '';
-        final name = info['memberName']?.toString() ?? info['headName']?.toString() ?? '';
-
-        // Create a unique key based on household and name combination
-        final uniqueKey = '$householdKey-$name';
-        recordCount[uniqueKey] = (recordCount[uniqueKey] ?? 0) + 1;
-      }
-
-      // Process each eligible row
-      for (final member in filteredRows) {
-        final info = _toStringMap(member['beneficiary_info']);
-        final memberUniqueKey = member['unique_key']?.toString() ?? '';
-        final householdKey = member['household_ref_key']?.toString() ?? '';
-        final name = info['memberName']?.toString() ?? info['headName']?.toString() ?? '';
-
-        // Check memberType and skip if child
-        final memberType = info['memberType']?.toString().toLowerCase() ?? '';
-        if (memberType == 'child') {
-          print('Skipping child record: $memberUniqueKey');
+          print('⚠️ JSON parse error: $e');
           continue;
         }
 
-        // Create the same unique key for duplicate detection
-        final uniqueKey = '$householdKey-$name';
-        final isDuplicate = recordCount[uniqueKey]! > 1;
+        final String beneficiaryKey =
+            member['unique_key']?.toString() ?? '';
 
-        // Mark this record as guest if it's a duplicate and hasn't been marked yet
-        final shouldShowGuestBadge = isDuplicate && (processedRecords[uniqueKey] ?? 0) == 0;
-        processedRecords[uniqueKey] = (processedRecords[uniqueKey] ?? 0) + 1;
+        if (beneficiaryKey.isEmpty) {
+          print('⚠️ Beneficiary unique_key missing');
+          continue;
+        }
 
-        couples.add(_formatCoupleData(
-          _toStringMap(member),
-          info,
-          <String, dynamic>{}, // Empty counterpart
-          isHead: false,
-          shouldShowGuestBadge: shouldShowGuestBadge,
-        ));
+        final String memberType =
+            info['memberType']?.toString().toLowerCase() ?? '';
+
+        // 🚫 Skip children
+        if (memberType == 'child') {
+          print('⛔ Skipping child record');
+          continue;
+        }
+
+        // 🚫 Skip duplicate beneficiary
+        if (seenBeneficiaries.contains(beneficiaryKey)) {
+          print('⛔ Duplicate beneficiary skipped: $beneficiaryKey');
+          continue;
+        }
+
+        seenBeneficiaries.add(beneficiaryKey);
+
+        couples.add(
+          _formatCoupleData(
+            _toStringMap(member),
+            info,
+            <String, dynamic>{},
+            isHead: true,
+            shouldShowGuestBadge: false,
+          ),
+        );
       }
 
-      print('Final couples list contains ${couples.length} items');
+      print('✅ Final eligible couples (unique beneficiaries): ${couples.length}');
+
       setState(() {
         _filtered = couples;
         _isLoading = false;
       });
     } catch (e, stackTrace) {
-      print('Error in _loadEligibleCouples: $e');
-      print('Stack trace: $stackTrace');
+      print('❌ Error in _loadEligibleCouples: $e');
+      print(stackTrace);
       setState(() {
         _filtered = [];
         _isLoading = false;
       });
     }
   }
+
 
   Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead, bool shouldShowGuestBadge = false}) {
     final hhId = row['household_ref_key']?.toString() ?? '';

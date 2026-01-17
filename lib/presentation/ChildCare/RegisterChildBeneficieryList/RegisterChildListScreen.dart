@@ -209,96 +209,99 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
     try {
       final db = await DatabaseProvider.instance.database;
 
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+      final currentUserData =
+      await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
 
-      print('🔍 Fetching deceased beneficiaries...');
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      /* -----------------------------------------------------------
+     * STEP 1: FETCH DECEASED CHILD BENEFICIARIES
+     * ----------------------------------------------------------- */
       final deceasedChildren = await db.rawQuery('''
-        SELECT DISTINCT beneficiary_ref_key, form_json 
-        FROM followup_form_data 
-        WHERE form_json LIKE '%"reason_of_death":%' 
+      SELECT DISTINCT beneficiary_ref_key, form_json
+      FROM followup_form_data
+      WHERE form_json LIKE '%"reason_of_death":%'
         AND current_user_key = ?
-      ''', [ashaUniqueKey]);
+    ''', [ashaUniqueKey]);
 
-      print('✅ Found ${deceasedChildren.length} potential deceased records');
+      final Set<String> deceasedIds = {};
 
-      final deceasedIds = <String>{};
-      for (var child in deceasedChildren) {
+      for (final child in deceasedChildren) {
         try {
           final jsonData = jsonDecode(child['form_json'] as String);
-          final formData = jsonData['form_data'] as Map<String, dynamic>?;
-          final caseClosure = formData?['case_closure'] as Map<String, dynamic>?;
+          final formData =
+          jsonData['form_data'] as Map<String, dynamic>?;
+          final caseClosure =
+          formData?['case_closure'] as Map<String, dynamic>?;
 
           if (caseClosure?['is_case_closure'] == true &&
-              caseClosure?['reason_of_death']?.toString().toLowerCase() == 'death') {
-            final beneficiaryId = child['beneficiary_ref_key']?.toString();
-            if (beneficiaryId != null && beneficiaryId.isNotEmpty) {
-              print('Found deceased beneficiary: $beneficiaryId');
-              deceasedIds.add(beneficiaryId);
+              caseClosure?['reason_of_death']
+                  ?.toString()
+                  .toLowerCase() ==
+                  'death') {
+            final id =
+            child['beneficiary_ref_key']?.toString();
+            if (id != null && id.isNotEmpty) {
+              deceasedIds.add(id);
             }
           }
-        } catch (e) {
-          print('⚠️ Error processing deceased record: $e');
-        }
+        } catch (_) {}
       }
 
-      print('✅ Total deceased beneficiaries: ${deceasedIds.length}');
+      /* -----------------------------------------------------------
+     * STEP 2: FETCH FIRST CHILD CARE REGISTRATION DATE
+     * ----------------------------------------------------------- */
+      final Map<String, String> registrationDates = {};
 
-      final registrationDates = <String, String>{};
       final childCareRecords = await db.rawQuery('''
-        SELECT 
-          beneficiary_ref_key, 
-          created_date_time,
-          child_care_state
-        FROM child_care_activities 
-        ORDER BY created_date_time ASC
-      ''');
+      SELECT beneficiary_ref_key, created_date_time
+      FROM child_care_activities
+      ORDER BY created_date_time ASC
+    ''');
 
-      print('🔍 Child care records query: Getting first entry for each beneficiary');
-      print('📊 Found ${childCareRecords.length} total child care records');
-      
-      final Map<String, Map<String, dynamic>> firstRecordsByBeneficiary = {};
-      for (var record in childCareRecords) {
-        final beneficiaryKey = record['beneficiary_ref_key']?.toString();
-        if (beneficiaryKey != null && !firstRecordsByBeneficiary.containsKey(beneficiaryKey)) {
-          firstRecordsByBeneficiary[beneficiaryKey] = record;
-        }
-      }
-      
-      // Extract dates from first records
-      for (var entry in firstRecordsByBeneficiary.entries) {
-        final beneficiaryKey = entry.key;
-        final record = entry.value;
-        final createdDate = record['created_date_time']?.toString();
-        final careState = record['child_care_state']?.toString();
-        print('📋 First child care record for beneficiary=$beneficiaryKey, state=$careState, date=$createdDate');
-        if (createdDate != null) {
-          registrationDates[beneficiaryKey] = createdDate;
+      for (final record in childCareRecords) {
+        final key =
+        record['beneficiary_ref_key']?.toString();
+        if (key != null && !registrationDates.containsKey(key)) {
+          registrationDates[key] =
+              record['created_date_time']?.toString() ?? '';
         }
       }
 
-      print('📊 Found ${registrationDates.length} registration dates from child_care_activities');
+      final rows = await db.rawQuery('''
+      SELECT DISTINCT B.*
+      FROM beneficiaries_new B
+      INNER JOIN child_care_activities CCA
+        ON B.unique_key = CCA.beneficiary_ref_key
+      WHERE B.is_deleted = 0
+        AND B.is_adult = 0
+        AND B.is_migrated = 0
+        AND B.current_user_key = ?
+        AND CCA.child_care_state IN ('registration_due', 'tracking_due', 'infant_pnc')
+      ORDER BY B.created_date_time DESC
+    ''', [ashaUniqueKey]);
 
-      final List<Map<String, dynamic>> rows = await db.rawQuery('''
-  SELECT 
-    B.*
-  FROM beneficiaries_new B
-  WHERE 
-    B.is_deleted = 0
-    AND B.is_adult = 0
-    AND B.is_migrated = 0
-    AND B.current_user_key = ?
-  ORDER BY B.created_date_time DESC
-''', [ashaUniqueKey]);
-
-
-      print('📊 Found ${rows.length} total beneficiaries');
-      final childBeneficiaries = <Map<String, dynamic>>[];
+      final List<Map<String, dynamic>> childBeneficiaries = [];
+      final Set<String> processedBeneficiaries = {};
 
       for (final row in rows) {
         try {
-          final rowHhId = row['household_ref_key']?.toString();
-          if (rowHhId == null) continue;
+          final beneficiaryId =
+              row['unique_key']?.toString() ?? '';
+          if (beneficiaryId.isEmpty) continue;
+
+          if (!processedBeneficiaries.add(beneficiaryId)) {
+            continue;
+          }
+
+          final householdId =
+          row['household_ref_key']?.toString();
+          if (householdId == null) continue;
 
           final info = row['beneficiary_info'] is String
               ? jsonDecode(row['beneficiary_info'] as String)
@@ -306,100 +309,72 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
 
           if (info is! Map) continue;
 
-          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
-          final relation = info['relation']?.toString().toLowerCase() ?? '';
+          final memberType =
+              info['memberType']?.toString().toLowerCase() ?? '';
+          final relation =
+              info['relation']?.toString().toLowerCase() ?? '';
 
-          if (memberType == 'child' || relation == 'child' ||
-              memberType == 'Child' || relation == 'daughter') {
-
-            final name = info['name']?.toString() ??
-                info['memberName']?.toString() ??
-                info['member_name']?.toString() ??
-                '';
-
-            // if (name.isEmpty) continue; // Skip if no name
-
-            final fatherName = info['fatherName']?.toString() ??
-                info['father_name']?.toString() ?? '';
-
-            final motherName = info['motherName']?.toString() ??
-                info['mother_name']?.toString() ?? '';
-
-            final spouseName = info['spouseName']?.toString() ??
-                info['spouse_name']?.toString() ?? '';
-
-            final mobileNo = info['mobileNo']?.toString() ??
-                info['mobile']?.toString() ??
-                info['mobile_number']?.toString() ?? '';
-
-            final richId = info['RichIDChanged']?.toString() ??
-                info['richIdChanged']?.toString() ??
-                info['richId']?.toString() ?? '';
-
-            final dob = info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
-            final gender = info['gender'] ?? info['sex'];
-
-            final beneficiaryId = row['unique_key']?.toString() ?? '';
-            final isDeceased = deceasedIds.contains(beneficiaryId);
-
-            if (isDeceased) {
-              print('ℹ️ Marking as deceased - ID: $beneficiaryId, Name: $name');
-            }
-
-            String registrationDate;
-            print('🔍 Checking beneficiary ID: $beneficiaryId against ${registrationDates.length} registration dates');
-            print('📋 Available registration keys: ${registrationDates.keys.toList()}');
-
-            if (registrationDates.containsKey(beneficiaryId)) {
-              registrationDate = _formatDate(registrationDates[beneficiaryId]);
-              print('📅 ✅ Using registration date from child_care_activities for $beneficiaryId: $registrationDate');
-            } else {
-              registrationDate = _formatDate(row['created_date_time']?.toString());
-              print('📅 ❌ Using registration date from beneficiaries_new for $beneficiaryId: $registrationDate');
-            }
-
-            final card = <String, dynamic>{
-              'hhId': rowHhId,
-              'RegitrationDate': registrationDate,
-              'RegitrationType': 'Child',
-              'BeneficiaryID': beneficiaryId,
-              'RchID': richId,
-              'Name': name,
-              'Age|Gender': _formatAgeGender(dob, gender),
-              'Mobileno.': mobileNo,
-              'FatherName': fatherName,
-              'MotherName': motherName,
-              'SpouseName': spouseName,
-              'is_deceased': isDeceased,
-              'is_death': row['is_death'] ?? 0,
-              '_raw': row,
-            };
-
-            childBeneficiaries.add(card);
+          if (!(memberType == 'child' ||
+              relation == 'child' ||
+              relation == 'daughter')) {
+            continue;
           }
-        } catch (e) {
-          print('⚠️ Error processing beneficiary record: $e');
-        }
+
+          final name = info['name']?.toString() ??
+              info['memberName']?.toString() ??
+              '';
+
+          final fatherName =
+              info['fatherName']?.toString() ?? '';
+          final motherName =
+              info['motherName']?.toString() ?? '';
+          final mobileNo =
+              info['mobileNo']?.toString() ?? '';
+
+          final dob = info['dob'] ??
+              info['dateOfBirth'] ??
+              info['date_of_birth'];
+          final gender = info['gender'] ?? info['sex'];
+
+          final bool isDeceased =
+          deceasedIds.contains(beneficiaryId);
+
+          final String registrationDate =
+          registrationDates.containsKey(beneficiaryId)
+              ? _formatDate(
+              registrationDates[beneficiaryId])
+              : _formatDate(
+              row['created_date_time']?.toString());
+
+          childBeneficiaries.add({
+            'hhId': householdId,
+            'RegitrationDate': registrationDate,
+            'RegitrationType': 'Child',
+            'BeneficiaryID': beneficiaryId,
+            'Name': name,
+            'Age|Gender': _formatAgeGender(dob, gender),
+            'Mobileno.': mobileNo,
+            'FatherName': fatherName,
+            'MotherName': motherName,
+            'is_deceased': isDeceased,
+            'is_death': row['is_death'] ?? 0,
+            '_raw': row,
+          });
+        } catch (_) {}
       }
 
+      /* -----------------------------------------------------------
+     * STEP 5: UPDATE UI
+     * ----------------------------------------------------------- */
       if (mounted) {
         setState(() {
-          _childBeneficiaries = List<Map<String, dynamic>>.from(childBeneficiaries);
-          _filtered = List<Map<String, dynamic>>.from(childBeneficiaries);
+          _childBeneficiaries = List.from(childBeneficiaries);
+          _filtered = List.from(childBeneficiaries);
           _isLoading = false;
-
-
-          debugPrint('✅ Loaded ${_childBeneficiaries.length} child beneficiaries');
-          debugPrint('✅ Filtered list contains ${_filtered.length} records');
-
-          final count = _childBeneficiaries.length > 5 ? 5 : _childBeneficiaries.length;
-          for (int i = 0; i < count; i++) {
-            debugPrint('Record $i: ${_childBeneficiaries[i]['Name']} (ID: ${_childBeneficiaries[i]['BeneficiaryID']})');
-          }
         });
       }
     } catch (e) {
-      debugPrint('Error loading child beneficiaries: $e');
+      debugPrint('❌ Error loading child beneficiaries: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }

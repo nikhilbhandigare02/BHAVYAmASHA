@@ -1444,52 +1444,26 @@ class _TodayworkState extends State<Todaywork> {
     try {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
-      final ancFormKey =
-          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
-              .ancDueRegistration] ??
-              '';
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
 
       final List<Map<String, dynamic>> items = [];
       final Set<String> processedBeneficiaries = {};
 
-      final excludedStates = await db.query(
-        'mother_care_activities',
-        where:
-        "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother')",
-        columns: ['beneficiary_ref_key'],
-        distinct: true,
-      );
+      // ---------- Fetch ANC due beneficiaries ----------
+      String query = '''
+      SELECT 
+        mca.*,
+        bn.*,
+        bn.household_ref_key
+      FROM mother_care_activities mca
+      INNER JOIN beneficiaries_new bn
+        ON mca.beneficiary_ref_key = bn.unique_key
+      WHERE mca.mother_care_state = 'anc_due'
+        AND bn.is_deleted = 0
+    ''';
 
-      final excludedBeneficiaryIds = excludedStates
-          .map((e) => e['beneficiary_ref_key']?.toString())
-          .where((id) => id != null && id.isNotEmpty)
-          .toSet();
-
-      debugPrint('Excluded beneficiary IDs: $excludedBeneficiaryIds');
-
-      // Get all beneficiaries with anc_due state that are not in excluded states
-      String query =
-      '''
-  SELECT 
-    mca.*, 
-    bn.*, 
-    bn.id AS beneficiary_id, 
-    mca.id AS mca_id,
-    bn.household_ref_key
-  FROM mother_care_activities mca
-  INNER JOIN beneficiaries_new bn 
-      ON mca.beneficiary_ref_key = bn.unique_key
-  WHERE (mca.mother_care_state = 'anc_due' 
-         OR mca.mother_care_state = 'anc_due')
-    AND bn.is_deleted = 0
-    ${excludedBeneficiaryIds.isNotEmpty ? 'AND mca.beneficiary_ref_key NOT IN (${excludedBeneficiaryIds.map((_) => '?').join(',')})' : ''}
-''';
-
-      List<dynamic> args = excludedBeneficiaryIds.isNotEmpty
-          ? excludedBeneficiaryIds.toList()
-          : [];
+      final List<dynamic> args = [];
 
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         query += ' AND bn.current_user_key = ?';
@@ -1498,447 +1472,248 @@ class _TodayworkState extends State<Todaywork> {
 
       query += ' ORDER BY mca.created_date_time DESC';
 
-      debugPrint('Executing query: $query');
-      debugPrint('With parameters: $args');
+      final List<Map<String, Object?>> rows =
+      await db.rawQuery(query, args);
 
-      final ancDueRecords = await db.rawQuery(query, args);
+      final DateTime today = DateTime.now();
+      final DateTime todayDate =
+      DateTime(today.year, today.month, today.day);
 
-      debugPrint(
-        'Found ${ancDueRecords.length} ANC due records after filtering',
-      );
+      bool isTodayInsideWindow(DateTime start, DateTime end) {
+        final s = DateTime(start.year, start.month, start.day);
+        final e = DateTime(end.year, end.month, end.day);
+        return (todayDate.isAtSameMomentAs(s) ||
+            todayDate.isAfter(s)) &&
+            (todayDate.isAtSameMomentAs(e) ||
+                todayDate.isBefore(e));
+      }
 
-      // Process the filtered rows
-      for (final row in ancDueRecords) {
-        final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
-        if (beneficiaryId.isEmpty ||
-            processedBeneficiaries.contains(beneficiaryId)) {
-          continue; // Skip if already processed or no beneficiary ID
+      // ---------- Process each row ----------
+      for (final row in rows) {
+        final String beneficiaryKey =
+            row['beneficiary_ref_key']?.toString() ?? '';
+
+        if (beneficiaryKey.isEmpty ||
+            processedBeneficiaries.contains(beneficiaryKey)) {
+          continue;
         }
+        processedBeneficiaries.add(beneficiaryKey);
+
+        // Skip death / migrated
+        if (row['is_death'] == 1 || row['is_migrated'] == 1) continue;
+
+        // ---------- Parse beneficiary info ----------
+        final Object? infoRaw = row['beneficiary_info'];
+        if (infoRaw == null) continue;
+
+        late Map<String, dynamic> info;
         try {
-          processedBeneficiaries.add(beneficiaryId);
-          final uniqueKeyFull = row['unique_key']?.toString() ?? '';
-          final isDeath = row['is_death'] == 1;
-          final isMigrated = row['is_migrated'] == 1;
-          if (isDeath || isMigrated) continue;
-
-          // Check if beneficiary has abortion followup form with is_abortion = 'yes'
-          final abortionForms = await db.query(
-            'followup_form_data',
-            where: "forms_ref_key = 'bt7gs9rl1a5d26mz' AND beneficiary_ref_key = ? AND form_json LIKE '%\"is_abortion\"%'",
-            whereArgs: [beneficiaryId],
-          );
-
-          bool hasAbortion = false;
-          for (final form in abortionForms) {
-            try {
-              final formJson = form['form_json']?.toString();
-              if (formJson != null && formJson.isNotEmpty) {
-                final decoded = jsonDecode(formJson);
-                if (decoded is Map<String, dynamic>) {
-                  final ancForm = decoded['anc_form'];
-                  if (ancForm is Map<String, dynamic>) {
-                    final isAbortion = ancForm['is_abortion']?.toString().toLowerCase();
-                    if (isAbortion == 'yes' || isAbortion == 'true' || isAbortion == '1') {
-                      hasAbortion = true;
-                      break;
-                    }
-                  }
-                }
-              }
-            } catch (e) {
-              debugPrint('Error checking abortion form: $e');
-            }
-          }
-
-          if (hasAbortion) {
-            debugPrint('Excluding beneficiary $beneficiaryId - has abortion record');
-            continue;
-          }
-
-          // Parse beneficiary_info
-          final infoRaw = row['beneficiary_info'];
-          if (infoRaw == null) continue;
-
-          Map<String, dynamic> info = {};
-          try {
-            info = infoRaw is String
-                ? jsonDecode(infoRaw) as Map<String, dynamic>
-                : Map<String, dynamic>.from(infoRaw as Map);
-          } catch (e) {
-            debugPrint('Error parsing beneficiary_info: $e');
-            continue;
-          }
-          final isPregnant =
-              info['isPregnant']?.toString().toLowerCase() == 'yes';
-          final genderRaw = info['gender']?.toString().toLowerCase() ?? '';
-
-          // For ANC due records, we still want to show them even if not marked as pregnant
-          if (!isPregnant && genderRaw != 'f' && genderRaw != 'female')
-            continue;
-
-          final name =
-          (info['memberName'] ??
-              info['headName'] ??
-              info['name'] ??
-              'Unknown')
-              .toString()
-              .trim();
-
-          String ageText = '-';
-          final dobRaw =
-              info['dob']?.toString() ?? info['dateOfBirth']?.toString();
-          if (dobRaw != null && dobRaw.isNotEmpty) {
-            try {
-              String dateStr = dobRaw;
-              if (dateStr.contains('T')) {
-                dateStr = dateStr.split('T')[0];
-              }
-              final birthDate = DateTime.tryParse(dateStr);
-              if (birthDate != null) {
-                final now = DateTime.now();
-                int years = now.year - birthDate.year;
-                int months = now.month - birthDate.month;
-                int days = now.day - birthDate.day;
-
-                if (days < 0) {
-                  final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
-                  final lastMonthYear = now.month - 1 < 1
-                      ? now.year - 1
-                      : now.year;
-                  final daysInLastMonth = DateTime(
-                    lastMonthYear,
-                    lastMonth + 1,
-                    0,
-                  ).day;
-                  days += daysInLastMonth;
-                  months--;
-                }
-
-                if (months < 0) {
-                  months += 12;
-                  years--;
-                }
-
-                if (years > 0) {
-                  ageText = '$years Y';
-                } else if (months > 0) {
-                  ageText = '$months M';
-                } else {
-                  ageText = '$days D';
-                }
-              }
-            } catch (_) {}
-          }
-
-          if (ageText == '-') {
-            final years = info['years']?.toString();
-            final approxAge = info['approxAge']?.toString();
-            ageText = (years != null && years.isNotEmpty)
-                ? '${years} Y'
-                : (approxAge != null && approxAge.isNotEmpty)
-                ? '${approxAge} Y'
-                : '-';
-          }
-
-          final mobile = (info['mobileNo'] ?? info['phone'])?.toString();
-
-          String lastVisitDate = '-';
-          DateTime? lastVisitDt;
-
-          String? modifiedRaw = row['modified_date_time']?.toString();
-          String? createdRaw = row['created_date_time']?.toString();
-
-          String? pickDateStr(String? raw) {
-            if (raw == null || raw.isEmpty) return null;
-            String s = raw;
-            if (s.contains('T')) {
-              s = s.split('T')[0];
-            }
-            return s;
-          }
-
-          String? modifiedStr = pickDateStr(modifiedRaw);
-          String? createdStr = pickDateStr(createdRaw);
-
-          if (modifiedStr != null) {
-            lastVisitDt = DateTime.tryParse(modifiedStr);
-            lastVisitDate = _formatAncDateOnly(modifiedStr);
-          } else if (createdStr != null) {
-            lastVisitDt = DateTime.tryParse(createdStr);
-            lastVisitDate = _formatAncDateOnly(createdStr);
-          }
-
-          // Extract LMP date using the comprehensive logic from ANCVisitListScreen
-          DateTime? lmpDate = await _extractLmpDate(row);
-
-          // Also try to get LMP from beneficiary info directly (same as RoutineScreen)
-          if (lmpDate == null) {
-            final lmpStr = info['lmp']?.toString();
-            if (lmpStr != null && lmpStr.isNotEmpty) {
-              lmpDate = DateTime.tryParse(lmpStr.split('T')[0]);
-            }
-          }
-
-          if (lmpDate == null) {
-            print('⚠️ No LMP date found for beneficiary $uniqueKeyFull, will show N/A');
-            String nextAncDueDate = '${AppLocalizations.of(context)!.na}';
-
-            final householdRefKey = row['household_ref_key']?.toString() ?? '';
-            String rawId = row['unique_key']?.toString() ?? '';
-            if (rawId.length > 11) {
-              rawId = rawId.substring(rawId.length - 11);
-            }
-            final uniqueKey = row['unique_key']?.toString() ?? '';
-
-            items.add({
-              'id': rawId,
-              'household_ref_key': householdRefKey,
-              'hhId': householdRefKey,
-              'unique_key': uniqueKey,
-              'BeneficiaryID': uniqueKey,
-              'name': name,
-              'age': ageText,
-              'gender': 'Female',
-              'last Visit date': lastVisitDate,
-              'Current ANC last due date': nextAncDueDate,
-              'mobile': mobile ?? '-',
-              'badge': 'ANC',
-              'beneficiary_info': jsonEncode(info),
-              '_rawRow': row,
-            });
-            continue;
-          } else {
-            print('✅ Using LMP date for beneficiary $uniqueKeyFull: ${_formatDate(lmpDate)}');
-          }
-
-          final ancRanges = _calculateAncDateRanges(lmpDate);
-
-          final today = DateTime.now();
-          final todayDate = DateTime(today.year, today.month, today.day);
-
-          bool _isTodayInWindow(DateTime start, DateTime end) {
-            final startDate = DateTime(start.year, start.month, start.day);
-            final endDate = DateTime(end.year, end.month, end.day);
-            return (todayDate.isAtSameMomentAs(startDate) ||
-                todayDate.isAfter(startDate)) &&
-                (todayDate.isAtSameMomentAs(endDate) ||
-                    todayDate.isBefore(endDate));
-          }
-
-          bool _hasFormInWindow(
-              List<Map<String, dynamic>> forms,
-              DateTime start,
-              DateTime end,
-              ) {
-            for (final formRow in forms) {
-              try {
-                final formJsonRaw = formRow['form_json']?.toString();
-                String? dateRaw;
-
-                if (formJsonRaw != null && formJsonRaw.isNotEmpty) {
-                  final decoded = jsonDecode(formJsonRaw);
-                  if (decoded is Map && decoded['form_data'] is Map) {
-                    final formData = Map<String, dynamic>.from(
-                      decoded['form_data'] as Map,
-                    );
-                    dateRaw = formData['date_of_inspection']?.toString();
-                  }
-                }
-
-                dateRaw ??= formRow['created_date_time']?.toString();
-                if (dateRaw == null || dateRaw.isEmpty) {
-                  return true;
-                }
-
-                String dateStr = dateRaw;
-                if (dateStr.contains('T')) {
-                  dateStr = dateStr.split('T')[0];
-                }
-                final dt = DateTime.tryParse(dateStr);
-                if (dt == null) {
-                  return true;
-                }
-
-                final d = DateTime(dt.year, dt.month, dt.day);
-                final startDate = DateTime(start.year, start.month, start.day);
-                final endDate = DateTime(end.year, end.month, end.day);
-                final within =
-                    (d.isAtSameMomentAs(startDate) || d.isAfter(startDate)) &&
-                        (d.isAtSameMomentAs(endDate) || d.isBefore(endDate));
-                if (within) return true;
-              } catch (_) {}
-            }
-            return false;
-          }
-
-          List<Map<String, dynamic>> existingForms = [];
-          if (ancFormKey.isNotEmpty && uniqueKeyFull.isNotEmpty) {
-            existingForms = await db.query(
-              FollowupFormDataTable.table,
-              columns: ['form_json', 'created_date_time'],
-              where: 'forms_ref_key = ? AND beneficiary_ref_key = ? ',
-              whereArgs: [ancFormKey, uniqueKeyFull],
-            );
-          }
-
-          DateTime? dueVisitStartDate;
-          DateTime? dueVisitEndDate;
-          String? currentAncVisitName;
-
-          final firstStart = ancRanges['1st_anc_start'];
-          final firstEnd = ancRanges['1st_anc_end'];
-          final secondStart = ancRanges['2nd_anc_start'];
-          final secondEnd = ancRanges['2nd_anc_end'];
-          final thirdStart = ancRanges['3rd_anc_start'];
-          final thirdEnd = ancRanges['3rd_anc_end'];
-          final fourthStart = ancRanges['4th_anc_start'];
-          final fourthEnd = ancRanges['4th_anc_end'];
-
-          bool hasDueVisit = false;
-
-          if (!hasDueVisit &&
-              firstStart != null &&
-              firstEnd != null &&
-              _isTodayInWindow(firstStart, firstEnd)) {
-            if (!_hasFormInWindow(existingForms, firstStart, firstEnd)) {
-              hasDueVisit = true;
-              dueVisitStartDate = firstStart;
-              dueVisitEndDate = firstEnd;
-            }
-          }
-
-          if (!hasDueVisit &&
-              secondStart != null &&
-              secondEnd != null &&
-              _isTodayInWindow(secondStart, secondEnd)) {
-            if (!_hasFormInWindow(existingForms, secondStart, secondEnd)) {
-              hasDueVisit = true;
-              dueVisitStartDate = secondStart;
-              dueVisitEndDate = secondEnd;
-            }
-          }
-
-          if (!hasDueVisit &&
-              thirdStart != null &&
-              thirdEnd != null &&
-              _isTodayInWindow(thirdStart, thirdEnd)) {
-            if (!_hasFormInWindow(existingForms, thirdStart, thirdEnd)) {
-              hasDueVisit = true;
-              dueVisitStartDate = thirdStart;
-              dueVisitEndDate = thirdEnd;
-            }
-          }
-
-          if (!hasDueVisit &&
-              fourthStart != null &&
-              fourthEnd != null &&
-              _isTodayInWindow(fourthStart, fourthEnd)) {
-            if (!_hasFormInWindow(existingForms, fourthStart, fourthEnd)) {
-              hasDueVisit = true;
-              dueVisitStartDate = fourthStart;
-              dueVisitEndDate = fourthEnd;
-            }
-          }
-
-          if (!hasDueVisit ||
-              dueVisitStartDate == null ||
-              dueVisitEndDate == null) {
-            continue;
-          }
-
-          final visitCount = await _getVisitCountFromFollowupForm(uniqueKeyFull);
-          print('🔍 Visit count for beneficiary $uniqueKeyFull: $visitCount');
-
-          final visitData = await _getVisitCount(uniqueKeyFull);
-          final dbVisitCount = visitData['count'] ?? 0;
-          print('🔍 DB visit count for beneficiary $uniqueKeyFull: $dbVisitCount');
-
-          // Calculate next ANC due date using the same logic as RoutineScreen
-          String nextAncDueDate = 'N/A';
-          try {
-            // Use the LMP date that was already extracted above
-            nextAncDueDate = _getNextAncDueDate(lmpDate, dbVisitCount);
-            print('✅ Next ANC due date for beneficiary $uniqueKeyFull: $nextAncDueDate');
-          } catch (e) {
-            print('Error calculating next ANC due date: $e');
-          }
-
-          // Check if the due date is up to today's date
-          bool shouldShowRecord = false;
-          if (nextAncDueDate != 'N/A' && nextAncDueDate != AppLocalizations.of(context)!.na) {
-            try {
-              final dueDate = DateTime.parse(nextAncDueDate);
-              final today = DateTime.now();
-              final todayDate = DateTime(today.year, today.month, today.day);
-
-              // Only show record if due date is today or in the future (not past due)
-              if (dueDate.isAtSameMomentAs(todayDate) || dueDate.isAfter(todayDate)) {
-                shouldShowRecord = true;
-                print('✅ ANC record $uniqueKeyFull: Due date $nextAncDueDate is valid (today or future)');
-              } else {
-                print('⚠️ ANC record $uniqueKeyFull: Due date $nextAncDueDate is past, skipping');
-              }
-            } catch (e) {
-              print('Error parsing due date for comparison: $e');
-              shouldShowRecord = true; // Show record if date parsing fails
-            }
-          } else {
-            print('⚠️ ANC record $uniqueKeyFull: No valid due date, skipping');
-          }
-
-          // Only add record if it should be shown (due date is today or future)
-          if (!shouldShowRecord) {
-            continue; // Skip this record
-          }
-
-          // Use the same next ANC due date logic as RoutineScreen for "Current ANC last due date"
-          String currentAncLastDueDateText = nextAncDueDate;
-
-          final householdRefKey = row['household_ref_key']?.toString() ?? '';
-
-          String rawId = row['unique_key']?.toString() ?? '';
-          if (rawId.length > 11) {
-            rawId = rawId.substring(rawId.length - 11);
-          }
-
-          final uniqueKey = row['unique_key']?.toString() ?? '';
-
-          items.add({
-            'id': rawId,
-            'household_ref_key': householdRefKey, // full household key
-            'hhId': householdRefKey,
-            'unique_key': uniqueKey,
-            'BeneficiaryID': uniqueKey,
-            'name': name,
-            'age': ageText,
-            'gender': 'Female',
-            'last Visit date': lastVisitDate,
-            'Current ANC last due date': currentAncLastDueDateText,
-            'mobile': mobile ?? '-',
-            'badge': 'ANC',
-            'beneficiary_info': jsonEncode(info),
-            '_rawRow': row,
-          });
+          info = infoRaw is String
+              ? jsonDecode(infoRaw) as Map<String, dynamic>
+              : Map<String, dynamic>.from(infoRaw as Map);
         } catch (_) {
           continue;
         }
-      }
 
-      // Removed duplicate ANC due items query as we're now handling this in the main query above
+        final bool isPregnant =
+            info['isPregnant']?.toString().toLowerCase() == 'yes';
+        final String gender =
+            info['gender']?.toString().toLowerCase() ?? '';
+
+        if (!isPregnant && gender != 'f' && gender != 'female') continue;
+
+        // ---------- Extract LMP ----------
+        DateTime? lmpDate = await _extractLmpDate(row);
+        lmpDate ??= info['lmp'] != null
+            ? DateTime.tryParse(info['lmp'].toString().split('T')[0])
+            : null;
+
+        if (lmpDate == null) continue;
+
+        // ---------- Calculate ANC windows ----------
+        final Map<String, DateTime?> ancRanges =
+        _calculateAncDateRanges(lmpDate);
+
+        DateTime? activeWindowStart;
+        DateTime? activeWindowEnd;
+
+        final DateTime? firstStart =
+        ancRanges['1st_anc_start'];
+        final DateTime? firstEnd =
+        ancRanges['1st_anc_end'];
+
+        final DateTime? secondStart =
+        ancRanges['2nd_anc_start'];
+        final DateTime? secondEnd =
+        ancRanges['2nd_anc_end'];
+
+        final DateTime? thirdStart =
+        ancRanges['3rd_anc_start'];
+        final DateTime? thirdEnd =
+        ancRanges['3rd_anc_end'];
+
+        final DateTime? fourthStart =
+        ancRanges['4th_anc_start'];
+        final DateTime? fourthEnd =
+        ancRanges['4th_anc_end'];
+
+        if (firstStart != null &&
+            firstEnd != null &&
+            isTodayInsideWindow(firstStart, firstEnd)) {
+          activeWindowStart = firstStart;
+          activeWindowEnd = firstEnd;
+        } else if (secondStart != null &&
+            secondEnd != null &&
+            isTodayInsideWindow(secondStart, secondEnd)) {
+          activeWindowStart = secondStart;
+          activeWindowEnd = secondEnd;
+        } else if (thirdStart != null &&
+            thirdEnd != null &&
+            isTodayInsideWindow(thirdStart, thirdEnd)) {
+          activeWindowStart = thirdStart;
+          activeWindowEnd = thirdEnd;
+        } else if (fourthStart != null &&
+            fourthEnd != null &&
+            isTodayInsideWindow(fourthStart, fourthEnd)) {
+          activeWindowStart = fourthStart;
+          activeWindowEnd = fourthEnd;
+        }
+
+        // ❌ Today is not in ANY ANC window
+        if (activeWindowStart == null || activeWindowEnd == null) {
+          continue;
+        }
+
+        // ---------- Check followup forms for ANC visits ----------
+        final ancFormKey = 'bt7gs9rl1a5d26mz'; // FollowupFormDataTable.ancDueRegistration
+        final followupFormsQuery = await db.query(
+          FollowupFormDataTable.table,
+          where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+          whereArgs: [ancFormKey, beneficiaryKey],
+          orderBy: 'created_date_time DESC',
+        );
+
+        bool shouldExcludeFromTodo = false;
+
+        if (followupFormsQuery.isNotEmpty) {
+          print('🔍 Found ${followupFormsQuery.length} ANC followup forms for beneficiary $beneficiaryKey');
+
+          for (final form in followupFormsQuery) {
+            final createdTimeStr = form['created_date_time']?.toString();
+            if (createdTimeStr != null && createdTimeStr.isNotEmpty) {
+              try {
+                final createdTime = DateTime.parse(createdTimeStr);
+                final createdDate = DateTime(createdTime.year, createdTime.month, createdTime.day);
+
+                bool isInAnyAncWindow = false;
+
+                if (firstStart != null && firstEnd != null) {
+                  final windowStart = DateTime(firstStart.year, firstStart.month, firstStart.day);
+                  final windowEnd = DateTime(firstEnd.year, firstEnd.month, firstEnd.day);
+                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
+                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
+                    isInAnyAncWindow = true;
+                    print('✅ Form created within 1st ANC window: ${_formatDate(createdTime)}');
+                  }
+                }
+
+                if (!isInAnyAncWindow && secondStart != null && secondEnd != null) {
+                  final windowStart = DateTime(secondStart.year, secondStart.month, secondStart.day);
+                  final windowEnd = DateTime(secondEnd.year, secondEnd.month, secondEnd.day);
+                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
+                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
+                    isInAnyAncWindow = true;
+                    print('✅ Form created within 2nd ANC window: ${_formatDate(createdTime)}');
+                  }
+                }
+
+                if (!isInAnyAncWindow && thirdStart != null && thirdEnd != null) {
+                  final windowStart = DateTime(thirdStart.year, thirdStart.month, thirdStart.day);
+                  final windowEnd = DateTime(thirdEnd.year, thirdEnd.month, thirdEnd.day);
+                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
+                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
+                    isInAnyAncWindow = true;
+                    print('✅ Form created within 3rd ANC window: ${_formatDate(createdTime)}');
+                  }
+                }
+
+                if (!isInAnyAncWindow && fourthStart != null && fourthEnd != null) {
+                  final windowStart = DateTime(fourthStart.year, fourthStart.month, fourthStart.day);
+                  final windowEnd = DateTime(fourthEnd.year, fourthEnd.month, fourthEnd.day);
+                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
+                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
+                    isInAnyAncWindow = true;
+                    print('✅ Form created within 4th ANC window: ${_formatDate(createdTime)}');
+                  }
+                }
+
+                if (isInAnyAncWindow) {
+                  shouldExcludeFromTodo = true;
+                  print('🚫 Excluding beneficiary $beneficiaryKey from ANC todo list - form created within ANC window');
+                  break;
+                }
+              } catch (e) {
+                print('⚠️ Error parsing created_date_time for form: $e');
+              }
+            }
+          }
+        } else {
+          print('ℹ️ No ANC followup forms found for beneficiary $beneficiaryKey - including in todo list');
+        }
+
+        // If any form was created within ANC window, exclude from todo list
+        if (shouldExcludeFromTodo) {
+          continue;
+        }
+
+        // ---------- Age ----------
+        String ageText = '-';
+        if (info['dob'] != null) {
+          final DateTime? dob =
+          DateTime.tryParse(info['dob'].toString().split('T')[0]);
+          if (dob != null) {
+            ageText = '${today.year - dob.year} Y';
+          }
+        }
+
+        final String uniqueKey =
+            row['unique_key']?.toString() ?? '';
+        final String householdRefKey =
+            row['household_ref_key']?.toString() ?? '';
+
+        // ---------- Add record ----------
+        items.add({
+          'id': uniqueKey.length > 11
+              ? uniqueKey.substring(uniqueKey.length - 11)
+              : uniqueKey,
+          'unique_key': uniqueKey,
+          'household_ref_key': householdRefKey,
+          'name':
+          info['memberName'] ?? info['name'] ?? 'Unknown',
+          'age': ageText,
+          'gender': 'Female',
+          'last Visit date':
+          _formatAncDateOnly(activeWindowStart.toIso8601String()),
+          'Current ANC last due date':
+          _formatAncDateOnly(activeWindowEnd.toIso8601String()),
+          'mobile': info['mobileNo'] ?? '-',
+          'badge': 'ANC',
+          'beneficiary_info': jsonEncode(info),
+          '_rawRow': row,
+        });
+      }
 
       if (mounted) {
-        setState(() {
-          _ancItems = items; // Use the already filtered items list
-        });
+        setState(() => _ancItems = items);
         _saveTodayWorkCountsToStorage();
-        debugPrint('Updated _ancItems with ${items.length} filtered records');
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('ANC load error: $e');
+    }
   }
 
   Future<DateTime?> _extractLmpDate(Map<String, dynamic> data) async {
     try {
-      // First try to get LMP from beneficiary_info (beneficiaries_new table)
       dynamic rawInfo = data['beneficiary_info'];
       Map<String, dynamic> info;
 

@@ -14,6 +14,7 @@ class BeneficiaryRepository {
   final NetworkServiceApi _api = NetworkServiceApi();
 
   Future<Map<String, dynamic>> fetchAndStoreBeneficiaries({required String lastId, int pageSize = 20}) async {
+
     final currentUser = await UserInfo.getCurrentUser();
     final userDetails = currentUser?['details'] is String
         ? jsonDecode(currentUser?['details'] ?? '{}')
@@ -78,12 +79,20 @@ class BeneficiaryRepository {
     for (final rec in dataList) {
       try {
         final serverId = rec['_id']?.toString();
-        if (serverId == null || serverId.isEmpty) continue;
-
-        final info = _mapBeneficiaryInfo(rec);
+        if (serverId == null || serverId.isEmpty) {
+          print('Skipping record with missing server_id');
+          continue;
+        }
 
         final hhRefKey = rec['household_ref_key']?.toString();
         final benUniqueKey = rec['unique_key']?.toString();
+        
+        if (benUniqueKey == null || benUniqueKey.isEmpty) {
+          print('Skipping record with missing unique_key: $serverId');
+          continue;
+        }
+
+        final info = _mapBeneficiaryInfo(rec);
         if (hhRefKey != null && hhRefKey.isNotEmpty) {
           final existingHh = await LocalStorageDao.instance.getHouseholdByUniqueKey(hhRefKey);
           if (existingHh == null || existingHh.isEmpty) {
@@ -147,19 +156,24 @@ class BeneficiaryRepository {
         final uniqueKey = row['unique_key']?.toString();
         if (uniqueKey != null && uniqueKey.isNotEmpty) {
           final existing = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(uniqueKey);
-          if (existing != null && existing.isNotEmpty) {
+         /* if (existing != null && existing.isNotEmpty) {
             final existingSynced = (existing['is_synced'] == 1) || (existing['is_synced']?.toString() == '1');
             if (existingSynced) {
+              print('Skipping already synced beneficiary: $uniqueKey');
               skipped++;
               continue;
             }
+            print('Skipping beneficiary with existing record: $uniqueKey');
             skipped++;
             continue;
+          }*/
+          if (existing == null || existing.isEmpty) {
+            print('Inserting beneficiary: server_id=$serverId, unique_key=$uniqueKey');
+            await LocalStorageDao.instance.insertBeneficiary(row);
           }
         }
-        await LocalStorageDao.instance.insertBeneficiary(row);
 
-        
+        print('Successfully inserted beneficiary: $uniqueKey');
         inserted++;
       } catch (e) {
         print('Error inserting beneficiary: $e');
@@ -310,11 +324,41 @@ class BeneficiaryRepository {
       if (dob == null) return null;
 
       try {
-        final parsed = DateTime.tryParse(dob.toString());
+        String dobString = dob.toString().trim();
+        if (dobString.isEmpty) return null;
+        
+        // Try ISO format first
+        DateTime? parsed = DateTime.tryParse(dobString);
+        
+        // If ISO parsing fails, try common formats
+        if (parsed == null) {
+          // Try DD/MM/YYYY or DD-MM-YYYY
+          final regex1 = RegExp(r'^(\d{2})[/-](\d{2})[/-](\d{4})$');
+          final match1 = regex1.firstMatch(dobString);
+          if (match1 != null) {
+            final day = int.parse(match1.group(1)!);
+            final month = int.parse(match1.group(2)!);
+            final year = int.parse(match1.group(3)!);
+            parsed = DateTime(year, month, day);
+          }
+          
+          // Try YYYY/MM/DD or YYYY-MM-DD
+          if (parsed == null) {
+            final regex2 = RegExp(r'^(\d{4})[/-](\d{2})[/-](\d{2})$');
+            final match2 = regex2.firstMatch(dobString);
+            if (match2 != null) {
+              final year = int.parse(match2.group(1)!);
+              final month = int.parse(match2.group(2)!);
+              final day = int.parse(match2.group(3)!);
+              parsed = DateTime(year, month, day);
+            }
+          }
+        }
+        
         if (parsed == null) return null;
-
         return DateFormat('yyyy-MM-dd').format(parsed);
-      } catch (_) {
+      } catch (e) {
+        print('Error normalizing DOB: $e');
         return null;
       }
     }
@@ -333,9 +377,9 @@ class BeneficiaryRepository {
       'useDob': info['age_by'],
       'dob': _normalizeDob(info['dob'] ?? info['date_of_birth']),
       'approxAge': info['age'],
-      'years': info['dob_day'],
+      'years': info['dob_year'],
       'months': info['dob_month'],
-      'days': info['dob_year'],
+      'days': info['dob_day'],
       'updateDay': DateTime.now().day,
       'updateMonth': DateTime.now().month,
       'updateYear': DateTime.now().year,
@@ -407,8 +451,8 @@ class BeneficiaryRepository {
       'type_of_beneficiary': info['type_of_beneficiary'] ?? '',
       
       // Family planning fields
-      'is_family_planning': info['is_family_planning'] ?? 0,
-      'method_of_contraception': info['method_of_contraception'],
+      'fp_adopting': info['is_family_planning'] ?? 0,
+      'fp_method': info['method_of_contraception'],
       
       // Bank details
       'bankName': info['bank_name'],
@@ -438,15 +482,15 @@ class BeneficiaryRepository {
       'is_migrated': info['is_migrated'],
       
       // Contraception quantities
-      'quantity_of_condoms': info['quantity_of_condoms'],
-      'quantity_of_mala_n_daily': info['quantity_of_mala_n_daily'],
-      'quantity_of_chhaya_weekly': info['quantity_of_chhaya_weekly'],
-      'quantity_of_ecp': info['quantity_of_ecp'],
+      'condom_quantity': info['quantity_of_condoms'],
+      'mala_quantity': info['quantity_of_mala_n_daily'],
+      'chhaya_quantity': info['quantity_of_chhaya_weekly'],
+      'ecp_quantity': info['quantity_of_ecp'],
       
       // Family planning dates
-      'date_of_antra': info['date_of_antra'],
+      'antra_injection_date': info['date_of_antra'],
       'removal_date': info['removal_date'],
-      'reason': info['reason'],
+      'removal_reason': info['reason'],
     };
 
     mapped.removeWhere((key, value) => value == null);

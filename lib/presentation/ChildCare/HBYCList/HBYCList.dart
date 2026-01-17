@@ -119,11 +119,23 @@ class _HBYCListState extends State<HBYCList> {
     final years = months ~/ 12;
     final remainingMonths = months % 12;
     
-    String ageText = years > 0 
-        ? '$years Y${remainingMonths > 0 ? ' $remainingMonths M' : ''}'
-        : '$months M';
+    String ageText;
+    if (years > 0) {
+      // If there are years, show only years
+      ageText = '${years}Y';
+    } else {
+      // If no years, show only months
+      ageText = '${months}M';
+    }
+    
+    // Convert gender to camelCase
+    String formattedGender = 'N/A';
+    if (gender != null && gender.isNotEmpty) {
+      formattedGender = gender.toLowerCase();
+      formattedGender = formattedGender[0].toUpperCase() + formattedGender.substring(1);
+    }
         
-    return '$ageText | ${gender ?? 'N/A'}';
+    return '$ageText | $formattedGender';
   }
 
   // Check if case is closed for a beneficiary

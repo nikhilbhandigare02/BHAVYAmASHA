@@ -80,9 +80,7 @@ class ChildCareRepository {
 
     String? token = await SecureStorageService.getToken();
     if ((token == null || token.isEmpty) && userDetails is Map) {
-      try {
-        token = userDetails['token']?.toString();
-      } catch (_) {}
+      token = userDetails['token']?.toString();
     }
 
     final headers = <String, String>{
@@ -104,9 +102,10 @@ class ChildCareRepository {
       headers: headers,
     );
 
-    final dataList = (response is Map && response['data'] is List)
-        ? List<Map<String, dynamic>>.from(response['data'] as List)
-        : <Map<String, dynamic>>[];
+    final List<Map<String, dynamic>> dataList =
+    (response is Map && response['data'] is List)
+        ? List<Map<String, dynamic>>.from(response['data'])
+        : [];
 
     final Database db = await DatabaseProvider.instance.database;
 
@@ -115,19 +114,27 @@ class ChildCareRepository {
 
     for (final rec in dataList) {
       final serverId = rec['_id']?.toString();
-      if (serverId == null) continue;
+      final beneficiaryKey =
+      rec['beneficiaries_registration_ref_key']?.toString();
 
+      if (serverId == null ||
+          beneficiaryKey == null ||
+          beneficiaryKey.isEmpty) {
+        continue;
+      }
+
+      /// 🔍 CHECK DUPLICATE USING beneficiary_ref_key
       final existing = await db.query(
         'child_care_activities',
-        where: 'server_id = ?',
-        whereArgs: [serverId],
+        where: 'beneficiary_ref_key = ?',
+        whereArgs: [beneficiaryKey],
         limit: 1,
       );
 
       final deviceDetails = jsonEncode(rec['device_details'] ?? {});
       final appDetails = jsonEncode(rec['app_details'] ?? {});
 
-      final parentUser = <String, dynamic>{
+      final parentUser = {
         'app_role_id': rec['app_role_id'],
         'is_guest': rec['is_guest'],
         'parent_added_by': rec['parent_added_by'],
@@ -137,9 +144,12 @@ class ChildCareRepository {
         'modified_date_time': rec['modified_date_time'],
         'added_by': rec['added_by'],
         'added_date_time': rec['added_date_time'],
-        'modified_by_added_on_server': rec['modified_by_added_on_server'],
-        'modified_date_time_added_on_server': rec['modified_date_time_added_on_server'],
-        'is_member_details_processed': rec['is_member_details_processed'],
+        'modified_by_added_on_server':
+        rec['modified_by_added_on_server'],
+        'modified_date_time_added_on_server':
+        rec['modified_date_time_added_on_server'],
+        'is_member_details_processed':
+        rec['is_member_details_processed'],
         'is_death': rec['is_death'],
         'is_deleted': rec['is_deleted'],
         'is_disabled': rec['is_disabled'],
@@ -152,8 +162,10 @@ class ChildCareRepository {
 
       final row = {
         'server_id': serverId,
-        'household_ref_key': rec['household_ref_key']?.toString() ?? rec['unique_key']?.toString(),
-        'beneficiary_ref_key': rec['beneficiaries_registration_ref_key']?.toString(),
+        'household_ref_key':
+        rec['household_ref_key']?.toString() ??
+            rec['unique_key']?.toString(),
+        'beneficiary_ref_key': beneficiaryKey,
         'mother_key': rec['mother_key']?.toString(),
         'father_key': rec['father_key']?.toString(),
         'child_care_state': rec['child_care_type']?.toString(),
@@ -161,7 +173,8 @@ class ChildCareRepository {
         'app_details': appDetails,
         'parent_user': jsonEncode(parentUser),
         'current_user_key': ashaId,
-        'facility_id': int.tryParse(rec['facility_id']?.toString() ?? facilityId) ?? 0,
+        'facility_id':
+        int.tryParse(rec['facility_id']?.toString() ?? facilityId) ?? 0,
         'created_date_time': rec['created_date_time']?.toString(),
         'modified_date_time': rec['modified_date_time']?.toString(),
         'is_synced': 1,
@@ -175,8 +188,8 @@ class ChildCareRepository {
         await db.update(
           'child_care_activities',
           row,
-          where: 'server_id = ?',
-          whereArgs: [serverId],
+          where: 'beneficiary_ref_key = ?',
+          whereArgs: [beneficiaryKey],
         );
         updated++;
       }

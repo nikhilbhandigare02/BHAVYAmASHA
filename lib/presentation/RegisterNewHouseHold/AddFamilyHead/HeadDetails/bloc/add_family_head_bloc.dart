@@ -435,8 +435,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
 
       if (state.mobileNo == null || state.mobileNo!.trim().length < 10)
         errors.add('Please enter valid mobile number');
-      // if (state.mobileOwner == null || state.mobileOwner!.trim().length < 10)
-      //   errors.add('Please select whose mobile number');
+
       if (state.useDob) {
         if (state.dob == null) {
           errors.add('Please enter valid Date of Birth');
@@ -472,7 +471,6 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         errors.add('Please select Marital status ');
       }
 
-      // Pregnancy validations: only when Female + Married
       final isFemale = state.gender == 'Female';
       final isMarried = state.maritalStatus == 'Married';
       if (isFemale && isMarried) {
@@ -499,8 +497,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         );
         return;
       }
-      // All DB insert/update + API sync is now handled in RegisterNewHouseholdBloc.SaveHousehold.
-      // Here we only indicate that validation passed.
+
       emit(
         state.copyWith(
           postApiStatus: PostApiStatus.success,

@@ -1914,6 +1914,88 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           continue;
         }
 
+        // ---------- Check followup forms for ANC visits ----------
+        final ancFormKey = 'bt7gs9rl1a5d26mz'; // FollowupFormDataTable.ancDueRegistration
+        final followupFormsQuery = await db.query(
+          FollowupFormDataTable.table,
+          where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+          whereArgs: [ancFormKey, beneficiaryKey],
+          orderBy: 'created_date_time DESC',
+        );
+
+        bool shouldExcludeFromTodo = false;
+        
+        if (followupFormsQuery.isNotEmpty) {
+          print('🔍 Found ${followupFormsQuery.length} ANC followup forms for beneficiary $beneficiaryKey');
+          
+          for (final form in followupFormsQuery) {
+            final createdTimeStr = form['created_date_time']?.toString();
+            if (createdTimeStr != null && createdTimeStr.isNotEmpty) {
+              try {
+                final createdTime = DateTime.parse(createdTimeStr);
+                final createdDate = DateTime(createdTime.year, createdTime.month, createdTime.day);
+                
+                bool isInAnyAncWindow = false;
+                
+                if (firstStart != null && firstEnd != null) {
+                  final windowStart = DateTime(firstStart.year, firstStart.month, firstStart.day);
+                  final windowEnd = DateTime(firstEnd.year, firstEnd.month, firstEnd.day);
+                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
+                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
+                    isInAnyAncWindow = true;
+                    print('✅ Form created within 1st ANC window: ${_formatDate(createdTime)}');
+                  }
+                }
+                
+                if (!isInAnyAncWindow && secondStart != null && secondEnd != null) {
+                  final windowStart = DateTime(secondStart.year, secondStart.month, secondStart.day);
+                  final windowEnd = DateTime(secondEnd.year, secondEnd.month, secondEnd.day);
+                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
+                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
+                    isInAnyAncWindow = true;
+                    print('✅ Form created within 2nd ANC window: ${_formatDate(createdTime)}');
+                  }
+                }
+                
+                if (!isInAnyAncWindow && thirdStart != null && thirdEnd != null) {
+                  final windowStart = DateTime(thirdStart.year, thirdStart.month, thirdStart.day);
+                  final windowEnd = DateTime(thirdEnd.year, thirdEnd.month, thirdEnd.day);
+                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
+                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
+                    isInAnyAncWindow = true;
+                    print('✅ Form created within 3rd ANC window: ${_formatDate(createdTime)}');
+                  }
+                }
+                
+                if (!isInAnyAncWindow && fourthStart != null && fourthEnd != null) {
+                  final windowStart = DateTime(fourthStart.year, fourthStart.month, fourthStart.day);
+                  final windowEnd = DateTime(fourthEnd.year, fourthEnd.month, fourthEnd.day);
+                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
+                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
+                    isInAnyAncWindow = true;
+                    print('✅ Form created within 4th ANC window: ${_formatDate(createdTime)}');
+                  }
+                }
+                
+                if (isInAnyAncWindow) {
+                  shouldExcludeFromTodo = true;
+                  print('🚫 Excluding beneficiary $beneficiaryKey from ANC todo list - form created within ANC window');
+                  break;
+                }
+              } catch (e) {
+                print('⚠️ Error parsing created_date_time for form: $e');
+              }
+            }
+          }
+        } else {
+          print('ℹ️ No ANC followup forms found for beneficiary $beneficiaryKey - including in todo list');
+        }
+
+        // If any form was created within ANC window, exclude from todo list
+        if (shouldExcludeFromTodo) {
+          continue;
+        }
+
         // ---------- Age ----------
         String ageText = '-';
         if (info['dob'] != null) {
