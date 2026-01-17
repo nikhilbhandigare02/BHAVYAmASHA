@@ -897,7 +897,9 @@ class LocalStorageDao {
       'unique_key': data['unique_key'],
       'beneficiary_state': data['beneficiary_state'] is List
           ? jsonEncode(data['beneficiary_state'])
-          : data['beneficiary_state'],
+          : data['beneficiary_state'] is Map
+              ? jsonEncode(data['beneficiary_state'])
+              : data['beneficiary_state']?.toString() ?? '[]',
       'pregnancy_count': data['pregnancy_count'],
       'beneficiary_info': _encodeIfObject(data['beneficiary_info']),
       'geo_location': _encodeIfObject(data['geo_location']),
@@ -1024,19 +1026,29 @@ class LocalStorageDao {
       final List<Map<String, dynamic>> deceasedBeneficiaries = await db.rawQuery(
         '''
       SELECT 
-        b.*,
-        h.household_info AS household_data,
-        h.created_date_time AS household_created_date,
-        h.household_info AS hh_info
-      FROM beneficiaries_new b
-      LEFT JOIN households h 
-        ON b.household_ref_key = h.unique_key
-      WHERE b.is_death = 1
-        AND b.is_deleted = 0
-        AND b.is_migrated = 0
-        AND b.is_adult = 0
-        ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
-      ORDER BY b.created_date_time DESC
+  b.*,
+  h.household_info AS household_data,
+  h.created_date_time AS household_created_date,
+  h.household_info AS hh_info
+FROM beneficiaries_new b
+LEFT JOIN households h 
+  ON b.household_ref_key = h.unique_key
+WHERE b.is_death = 1
+  AND b.is_deleted = 0
+  AND b.is_migrated = 0
+  AND b.is_adult = 0
+  AND (
+    b.beneficiary_info LIKE '%"memberType":"child"%' OR
+    b.beneficiary_info LIKE '%"memberType":"Child"%'
+  )
+  AND EXISTS (
+    SELECT 1
+    FROM child_care_activities cca
+    WHERE cca.beneficiary_ref_key = b.unique_key
+      AND cca.child_care_state IN ('registration_due', 'tracking_due')
+  )
+  ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
+ORDER BY b.created_date_time DESC;
       ''',
         ashaUniqueKey != null && ashaUniqueKey.isNotEmpty
             ? [ashaUniqueKey]

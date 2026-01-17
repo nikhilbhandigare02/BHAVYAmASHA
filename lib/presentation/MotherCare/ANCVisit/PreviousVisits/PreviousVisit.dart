@@ -18,7 +18,6 @@ class _PreviousvisitState extends State<Previousvisit> {
   List<Map<String, String>> _visits = [];
   bool _loading = true;
 
-  // Calculate weeks of pregnancy from LMP date
   int _calculateWeeksOfPregnancy(DateTime? lmpDate, DateTime? visitDate) {
     if (lmpDate == null) return 0;
     final base = visitDate ?? DateTime.now();

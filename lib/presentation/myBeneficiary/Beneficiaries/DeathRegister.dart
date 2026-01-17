@@ -77,7 +77,6 @@ class _DeathRegisterState extends State<DeathRegister> {
       final records = await LocalStorageDao.instance.getDeathRecords();
       print('✅ [DeathRegister] Fetched ${records.length} death records');
 
-      // Debug: Print first few records
       for (var i = 0; i < (records.length < 3 ? records.length : 3); i++) {
         print('📝 Record ${i + 1}: ${records[i]}');
       }
@@ -317,7 +316,7 @@ class _DeathRegisterState extends State<DeathRegister> {
         : genderRaw == 'f' || genderRaw == 'female'
         ? 'Female'
         : 'Other';
-    final hhId = data['household_ref_key']?.toString() ?? 'N/A';
+    final hhId = data['beneficiary_ref_key']?.toString() ?? 'N/A';
     final uniqueKey = data['unique_key']?.toString() ?? '';
 
     final deathDate =
@@ -365,7 +364,6 @@ class _DeathRegisterState extends State<DeathRegister> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header
             Container(
               decoration: const BoxDecoration(
                 color: AppColors.background,
@@ -377,9 +375,9 @@ class _DeathRegisterState extends State<DeathRegister> {
                   const Icon(Icons.home, color: Colors.black54, size: 18),
                   Expanded(
                     child: Text(
-                      (hhId.length) > 11
-                          ? hhId.substring(hhId.length - 11)
-                          : hhId,
+                      (uniqueKey.length) > 11
+                          ? uniqueKey.substring(uniqueKey.length - 11)
+                          : uniqueKey,
                       style: TextStyle(color: primary, fontWeight: FontWeight.w600),
                     ),
                   ),

@@ -442,57 +442,48 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      final List<Map<String, dynamic>> rows = await db.rawQuery('''
-  SELECT 
-    B.*
-  FROM beneficiaries_new B
-  WHERE 
-    B.is_deleted = 0
-    AND B.is_adult = 0
-    AND B.is_migrated = 0
-    AND B.current_user_key = ?
-  ORDER BY B.created_date_time DESC
-''', [ashaUniqueKey]);
+      final totalResult = await db.rawQuery('''
+        SELECT COUNT(*) as count
+        FROM beneficiaries_new B
+        INNER JOIN child_care_activities CCA ON B.unique_key = CCA.beneficiary_ref_key
+        WHERE 
+          B.is_deleted = 0
+          AND B.is_adult = 0
+          AND B.is_migrated = 0
+          AND B.current_user_key = ?
+          AND CCA.child_care_state IN ('registration_due', 'tracking_due')
+          AND (
+            B.beneficiary_info LIKE '%"memberType":"child"%' OR
+            B.beneficiary_info LIKE '%"memberType":"Child"%'
+          )
+      ''', [ashaUniqueKey]);
 
-      int childCount = 0;
-      int childCountIsSync = 0;
+      // Get synced count with child care activities filtering
+      final syncedResult = await db.rawQuery('''
+        SELECT COUNT(*) as count
+        FROM beneficiaries_new B
+        INNER JOIN child_care_activities CCA ON B.unique_key = CCA.beneficiary_ref_key
+        WHERE 
+          B.is_deleted = 0
+          AND B.is_adult = 0
+          AND B.is_migrated = 0
+          AND B.current_user_key = ?
+          AND CCA.child_care_state IN ('registration_due', 'tracking_due')
+          AND (
+            B.beneficiary_info LIKE '%"memberType":"child"%' OR
+            B.beneficiary_info LIKE '%"memberType":"Child"%'
+          )
+          AND B.is_synced = 1
+      ''', [ashaUniqueKey]);
 
-      for (final row in rows) {
-        try {
-          final info = row['beneficiary_info'] is String
-              ? jsonDecode(row['beneficiary_info'] as String)
-              : row['beneficiary_info'];
+      final totalCount = totalResult.first['count'] as int? ?? 0;
+      final syncedCount = syncedResult.first['count'] as int? ?? 0;
 
-          if (info is! Map) continue;
-
-          final memberType = (info['memberType']?.toString() ?? '').toLowerCase();
-          final relation = (info['relation']?.toString() ?? '').toLowerCase();
-          final name = info['name']?.toString() ??
-              info['memberName']?.toString() ??
-              info['member_name']?.toString() ??
-              '';
-
-          final isSynced = row['is_synced'] ?? 0;
-
-          if ((memberType == 'child' ||
-              relation == 'child' ||
-              relation == 'son' ||
-              relation == 'daughter') &&
-              name.isNotEmpty) {
-
-            childCount++;
-            if (isSynced == 1) {
-              childCountIsSync++;
-            }
-          }
-        } catch (e) {
-          print('Error processing beneficiary: $e');
-        }
-      }
+      print('✅ Child Care Counts - Total: $totalCount, Synced: $syncedCount');
 
       return {
-        'total': childCount,
-        'synced': childCountIsSync,
+        'total': totalCount,
+        'synced': syncedCount,
       };
 
     } catch (e, stackTrace) {

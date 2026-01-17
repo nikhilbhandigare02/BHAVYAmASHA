@@ -96,9 +96,9 @@ class _OutcomeFormView extends StatelessWidget {
                       }
 
                       final count =
-                          await SecureStorageService.getSubmissionCount(
-                            beneficiaryId,
-                          );
+                      await SecureStorageService.getSubmissionCount(
+                        beneficiaryId,
+                      );
                       print(
                         '✅ Found $count submissions for BeneficiaryID: $beneficiaryId',
                       );
@@ -127,14 +127,14 @@ class _OutcomeFormView extends StatelessWidget {
                       final db = await DatabaseProvider.instance.database;
                       final beneficiaryId =
                           beneficiaryData['BeneficiaryID']?.toString() ??
-                          beneficiaryData['beneficiaryId']?.toString() ??
-                          beneficiaryData['unique_key']?.toString() ??
-                          '';
+                              beneficiaryData['beneficiaryId']?.toString() ??
+                              beneficiaryData['unique_key']?.toString() ??
+                              '';
                       final ancKey =
                           FollowupFormDataTable
                               .formUniqueKeys[FollowupFormDataTable
                               .ancDueRegistration] ??
-                          '';
+                              '';
                       if (beneficiaryId.isEmpty || ancKey.isEmpty) return;
                       final results = await db.query(
                         FollowupFormDataTable.table,
@@ -189,9 +189,9 @@ class _OutcomeFormView extends StatelessWidget {
                         } else {
                           // Try to calculate week from LMP date if not available in form data
                           final beneficiaryId = beneficiaryData['BeneficiaryID']?.toString() ??
-                                              beneficiaryData['beneficiaryId']?.toString() ??
-                                              beneficiaryData['unique_key']?.toString() ??
-                                              '';
+                              beneficiaryData['beneficiaryId']?.toString() ??
+                              beneficiaryData['unique_key']?.toString() ??
+                              '';
                           if (beneficiaryId.isNotEmpty) {
                             final lmpDate = await _getLmpFromFollowupForms(beneficiaryId);
                             if (lmpDate != null) {
@@ -202,7 +202,7 @@ class _OutcomeFormView extends StatelessWidget {
                               } catch (_) {
                                 deliveryDate = null;
                               }
-                              
+
                               final calculatedWeeks = _calculateWeeksOfPregnancy(lmpDate, deliveryDate);
                               final weeksString = calculatedWeeks.toString();
                               context.read<OutcomeFormBloc>().add(
@@ -292,7 +292,7 @@ class _OutcomeFormFields extends StatelessWidget {
           isEditable: true,
           labelText: l10n.deliveryDate,
           onDateChanged: (d) => bloc.add(DeliveryDateChanged(d)),
-         //  readOnly: true,
+          //  readOnly: true,
         ),
         Divider(color: AppColors.divider, thickness: 0.5, height: 0),
         const SizedBox(height: 8),
@@ -423,17 +423,17 @@ class _OutcomeFormFields extends StatelessWidget {
               }
             },
             value:
-                (state.institutionalPlaceType == null ||
-                    state.institutionalPlaceType!.isEmpty ||
-                    ![
-                      'Public',
-                      'Private',
-                    ].contains(state.institutionalPlaceType))
+            (state.institutionalPlaceType == null ||
+                state.institutionalPlaceType!.isEmpty ||
+                ![
+                  'Public',
+                  'Private',
+                ].contains(state.institutionalPlaceType))
                 ? null
                 : state.institutionalPlaceType,
             onChanged: (v) => bloc.add(InstitutionalPlaceTypeChanged(v ?? '')),
             labelText:
-                l10n?.institutionPlaceOfDelivery ??
+            l10n?.institutionPlaceOfDelivery ??
                 'Institution place of delivery',
           ),
 
@@ -461,22 +461,22 @@ class _OutcomeFormFields extends StatelessWidget {
                 }
               },
               value:
-                  (state.institutionalPlaceOfDelivery == null ||
-                      state.institutionalPlaceOfDelivery!.isEmpty ||
-                      ![
-                        'Sub-Center',
-                        'PHC',
-                        'CHC',
-                        'RH',
-                        'DH',
-                        'MCH',
-                      ].contains(state.institutionalPlaceOfDelivery))
+              (state.institutionalPlaceOfDelivery == null ||
+                  state.institutionalPlaceOfDelivery!.isEmpty ||
+                  ![
+                    'Sub-Center',
+                    'PHC',
+                    'CHC',
+                    'RH',
+                    'DH',
+                    'MCH',
+                  ].contains(state.institutionalPlaceOfDelivery))
                   ? null
                   : state.institutionalPlaceOfDelivery,
               onChanged: (v) =>
                   bloc.add(InstitutionalPlaceOfDeliveryChanged(v ?? '')),
               labelText:
-                  l10n?.institutionPlaceOfDelivery ??
+              l10n?.institutionPlaceOfDelivery ??
                   'Institutional place of delivery',
               hintText: l10n?.select ?? 'Select',
             ),
@@ -497,18 +497,18 @@ class _OutcomeFormFields extends StatelessWidget {
                 }
               },
               value:
-                  (state.institutionalPlaceOfDelivery == null ||
-                      state.institutionalPlaceOfDelivery!.isEmpty ||
-                      ![
-                        'Nursing Home',
-                        'Hospital',
-                      ].contains(state.institutionalPlaceOfDelivery))
+              (state.institutionalPlaceOfDelivery == null ||
+                  state.institutionalPlaceOfDelivery!.isEmpty ||
+                  ![
+                    'Nursing Home',
+                    'Hospital',
+                  ].contains(state.institutionalPlaceOfDelivery))
                   ? null
                   : state.institutionalPlaceOfDelivery,
               onChanged: (v) =>
                   bloc.add(InstitutionalPlaceOfDeliveryChanged(v ?? '')),
               labelText:
-                  l10n?.nonInstitutionalPlaceOfDelivery ??
+              l10n?.nonInstitutionalPlaceOfDelivery ??
                   'Institutional place of delivery',
               hintText: l10n?.select ?? 'Select',
             ),
@@ -533,19 +533,19 @@ class _OutcomeFormFields extends StatelessWidget {
               }
             },
             value:
-                (state.nonInstitutionalPlaceType == null ||
-                    state.nonInstitutionalPlaceType!.isEmpty ||
-                    ![
-                      'Home Based delivery',
-                      'In Transit',
-                      'Other',
-                    ].contains(state.nonInstitutionalPlaceType))
+            (state.nonInstitutionalPlaceType == null ||
+                state.nonInstitutionalPlaceType!.isEmpty ||
+                ![
+                  'Home Based delivery',
+                  'In Transit',
+                  'Other',
+                ].contains(state.nonInstitutionalPlaceType))
                 ? l10n.select
                 : state.nonInstitutionalPlaceType!,
             onChanged: (v) =>
                 bloc.add(NonInstitutionalPlaceTypeChanged(v ?? '')),
             labelText:
-                l10n?.nonInstitutionalPlaceOfDelivery ??
+            l10n?.nonInstitutionalPlaceOfDelivery ??
                 'Institutional place of delivery',
           ),
 
@@ -575,9 +575,9 @@ class _OutcomeFormFields extends StatelessWidget {
                 }
               },
               value:
-                  (state.transitPlace == null ||
-                      state.transitPlace!.isEmpty ||
-                      !['Ambulance', 'Other'].contains(state.transitPlace))
+              (state.transitPlace == null ||
+                  state.transitPlace!.isEmpty ||
+                  !['Ambulance', 'Other'].contains(state.transitPlace))
                   ? l10n.select
                   : state.transitPlace!,
               onChanged: (v) => bloc.add(TransitPlaceChanged(v ?? '')),
@@ -629,17 +629,17 @@ class _OutcomeFormFields extends StatelessWidget {
             }
           },
           value:
-              (state.conductedBy == null ||
-                  state.conductedBy!.isEmpty ||
-                  ![
-                    'ANM',
-                    'LHV',
-                    'Doctor',
-                    'Staff Nurse',
-                    'Relative',
-                    'TBA (Non-Skilled birth attendant)',
-                    'Other',
-                  ].contains(state.conductedBy))
+          (state.conductedBy == null ||
+              state.conductedBy!.isEmpty ||
+              ![
+                'ANM',
+                'LHV',
+                'Doctor',
+                'Staff Nurse',
+                'Relative',
+                'TBA (Non-Skilled birth attendant)',
+                'Other',
+              ].contains(state.conductedBy))
               ? null
               : state.conductedBy!,
           onChanged: (v) => bloc.add(ConductedByChanged(v ?? '')),
@@ -667,12 +667,12 @@ class _OutcomeFormFields extends StatelessWidget {
           ],
           getLabel: (s) => s,
           value:
-              state.deliveryType.isEmpty ||
-                  ![
-                    l10n.cesareanDelivery,
-                    l10n.assistedDelivery,
-                    l10n.normalDelivery,
-                  ].contains(state.deliveryType)
+          state.deliveryType.isEmpty ||
+              ![
+                l10n.cesareanDelivery,
+                l10n.assistedDelivery,
+                l10n.normalDelivery,
+              ].contains(state.deliveryType)
               ? null
               : state.deliveryType,
           onChanged: (v) => bloc.add(DeliveryTypeChanged(v ?? '')),
@@ -685,8 +685,8 @@ class _OutcomeFormFields extends StatelessWidget {
           items: [l10n.yes, l10n.no],
           getLabel: (s) => s,
           value:
-              state.complications.isEmpty ||
-                  ![l10n.yes, l10n.no].contains(state.complications)
+          state.complications.isEmpty ||
+              ![l10n.yes, l10n.no].contains(state.complications)
               ? null
               : state.complications,
           onChanged: (v) => bloc.add(ComplicationsChanged(v ?? '')),
@@ -736,20 +736,20 @@ class _OutcomeFormFields extends StatelessWidget {
               }
             },
             value:
-                (state.complicationType == null ||
-                    state.complicationType!.isEmpty ||
-                    ![
-                      'Convulsion',
-                      'Ante Partumhaemorrhage (Aph)',
-                      'Pregnancy Induced Hypertension (PIH)',
-                      'Repeated Abortion',
-                      'Mother Death',
-                      'Congenital Anomaly',
-                      'Blood Transfusion',
-                      'Obstructed Labour',
-                      'PPH',
-                      'Any other',
-                    ].contains(state.complicationType))
+            (state.complicationType == null ||
+                state.complicationType!.isEmpty ||
+                ![
+                  'Convulsion',
+                  'Ante Partumhaemorrhage (Aph)',
+                  'Pregnancy Induced Hypertension (PIH)',
+                  'Repeated Abortion',
+                  'Mother Death',
+                  'Congenital Anomaly',
+                  'Blood Transfusion',
+                  'Obstructed Labour',
+                  'PPH',
+                  'Any other',
+                ].contains(state.complicationType))
                 ? null
                 : state.complicationType!,
             onChanged: (v) => bloc.add(ComplicationTypeChanged(v ?? '')),
@@ -823,9 +823,9 @@ class _OutcomeFormFields extends StatelessWidget {
                       TextSpan(
                         text: l10n.outcomeCount.endsWith('*')
                             ? l10n.outcomeCount.substring(
-                                0,
-                                l10n.outcomeCount.length - 1,
-                              )
+                          0,
+                          l10n.outcomeCount.length - 1,
+                        )
                             : l10n.outcomeCount,
                       ),
                       if (l10n.outcomeCount.endsWith('*'))
@@ -1125,11 +1125,11 @@ class _OutcomeFormFields extends StatelessWidget {
                 final bloc = context.read<OutcomeFormBloc>();
                 final beneficiaryData =
                     (context
-                                .findAncestorWidgetOfExactType<
-                                  BlocProvider<OutcomeFormBloc>
-                                >()
-                                ?.child
-                            as _OutcomeFormView)
+                        .findAncestorWidgetOfExactType<
+                        BlocProvider<OutcomeFormBloc>
+                    >()
+                        ?.child
+                    as _OutcomeFormView)
                         .beneficiaryData;
 
                 // Pass localized messages to the BLoC
@@ -1199,7 +1199,6 @@ String _getWeeksOfPregnancy(Map<String, dynamic> formData) {
   return format1Weeks.isNotEmpty ? format1Weeks : format2Weeks;
 }
 
-// Calculate weeks of pregnancy from LMP date (similar to PreviousVisit)
 int _calculateWeeksOfPregnancy(DateTime? lmpDate, DateTime? deliveryDate) {
   if (lmpDate == null) return 0;
   final base = deliveryDate ?? DateTime.now();
@@ -1209,6 +1208,7 @@ int _calculateWeeksOfPregnancy(DateTime? lmpDate, DateTime? deliveryDate) {
 
 Future<DateTime?> _getLmpFromFollowupForms(String beneficiaryId) async {
   try {
+    // First try to get LMP from beneficiary info
     try {
       final beneficiaryRow = await LocalStorageDao.instance
           .getBeneficiaryByUniqueKey(beneficiaryId);
@@ -1243,14 +1243,14 @@ Future<DateTime?> _getLmpFromFollowupForms(String beneficiaryId) async {
     // Get beneficiary info to extract household ID
     final beneficiaries = await LocalStorageDao.instance.getAllBeneficiaries();
     String? hhId;
-    
+
     for (final beneficiary in beneficiaries) {
       if (beneficiary['unique_key']?.toString() == beneficiaryId) {
         hhId = beneficiary['household_ref_key']?.toString();
         break;
       }
     }
-    
+
     if (hhId == null || hhId.isEmpty) {
       print('⚠️ Could not find household ID for beneficiary: $beneficiaryId');
       return null;
@@ -1274,7 +1274,7 @@ Future<DateTime?> _getLmpFromFollowupForms(String beneficiaryId) async {
 
       try {
         final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
-        
+
         // Check for LMP date in eligible_couple_tracking_due_from structure
         final trackingData = root['eligible_couple_tracking_due_from'];
         if (trackingData is Map) {
@@ -1289,7 +1289,7 @@ Future<DateTime?> _getLmpFromFollowupForms(String beneficiaryId) async {
             }
           }
         }
-        
+
         // Check for LMP date in form_data structure
         if (root['form_data'] is Map) {
           final formData = root['form_data'] as Map<String, dynamic>;
@@ -1307,7 +1307,7 @@ Future<DateTime?> _getLmpFromFollowupForms(String beneficiaryId) async {
                   print('⚠️ Full date parsing failed, trying date part only: $dateStr');
                 }
               }
-              
+
               final lmpDate = DateTime.parse(dateStr);
               print('✅ Found LMP date from form_data: $lmpDate');
               return lmpDate;
@@ -1320,7 +1320,7 @@ Future<DateTime?> _getLmpFromFollowupForms(String beneficiaryId) async {
         print('⚠️ Error parsing followup form JSON: $e');
       }
     }
-    
+
     print('ℹ️ No LMP date found in any eligible couple tracking due forms');
     return null;
   } catch (e) {
@@ -1328,6 +1328,8 @@ Future<DateTime?> _getLmpFromFollowupForms(String beneficiaryId) async {
     return null;
   }
 }
+
+
 
 String _getChildCount(Map<String, dynamic> formData) {
   // Format 2: Derive from children_arr array

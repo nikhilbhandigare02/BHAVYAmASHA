@@ -119,22 +119,22 @@ import 'package:sizer/sizer.dart';
     
     if (visitCount == 0) {
       // First ANC is due
-      nextAncKey = '1st_anc_end';
+      nextAncKey = '1st_anc_start';
       nextAncLabel = t!.nextancduedate;
     } else if (visitCount == 1) {
       // Second ANC is due
-      nextAncKey = '2nd_anc_end';
+      nextAncKey = '2nd_anc_start';
       nextAncLabel = t!.nextancduedate;
     } else if (visitCount == 2) {
       // Third ANC is due
-      nextAncKey = '3rd_anc_end';
+      nextAncKey = '3rd_anc_start';
       nextAncLabel = t!.nextancduedate;
     } else if (visitCount == 3) {
       // Fourth ANC is due
-      nextAncKey = '4th_anc_end';
+      nextAncKey = '4th_anc_start';
       nextAncLabel = t!.nextancduedate;
     } else {
-      nextAncKey = '4th_anc_end';
+      nextAncKey = '4th_anc_start';
       nextAncLabel = t!.nextancduedate;
     }
     

@@ -42,7 +42,7 @@ class _Lbwrefered extends State<Lbwrefered> {
       final rows = await db.query(
         'beneficiaries_new',
         where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL) AND current_user_key = ?',
-        whereArgs: [ashaUniqueKey],
+        whereArgs: [ashaUniqueKey], // Pass the key as an argument
       );
 
       print('🔎 Beneficiaries fetched: ${rows.length}');
@@ -71,11 +71,10 @@ class _Lbwrefered extends State<Lbwrefered> {
 
           bool isLbw = false;
 
-          // New logic: Show records with both weight and birthWeight present
           if (weight != null && birthWeight != null) {
-            isLbw = true; // Show if both are present regardless of values
+            isLbw = (weight < 1.6 && birthWeight <= 1600);
           } else if (weight != null && birthWeight == null) {
-            isLbw = (weight <= 1.6);
+            isLbw = (weight < 1.6);
           } else if (weight == null && birthWeight != null) {
             isLbw = (birthWeight <= 1600);
           }
@@ -88,22 +87,17 @@ class _Lbwrefered extends State<Lbwrefered> {
           final dobRaw = info['dob'] ?? info['dateOfBirth'];
 
           final ageGender = _formatAgeGender(dobRaw, genderRaw);
+          int toGrams(dynamic value) {
+            if (value == null) return 0;
 
-          String formatNumber(num value) {
-            return value % 1 == 0
-                ? value.toInt().toString()
-                : value.toString();
+            final w = double.tryParse(value.toString()) ?? 0;
+
+            // If value looks like kg (e.g. 2.5), convert to grams
+            return w < 20 ? (w * 1000).round() : w.round();
           }
 
-          String weightDisplay = 'N/A';
-
-          if (weight != null) {
-            // kg
-            weightDisplay = '${formatNumber(weight)} kg';
-          } else if (birthWeight != null) {
-            // grams
-            weightDisplay = '${formatNumber(birthWeight)} gms';
-          }
+          final weightDisplay =
+              '${toGrams(weight ?? birthWeight)} gms';
 
 
           lbwChildren.add({

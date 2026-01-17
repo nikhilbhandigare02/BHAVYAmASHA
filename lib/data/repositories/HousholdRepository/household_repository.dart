@@ -109,7 +109,6 @@ class HouseholdRepository {
         final serverId = rec['_id']?.toString();
         if (serverId == null || serverId.isEmpty) { skipped++; continue; }
 
-        // Dedup by unique_key or server_id
         final uniqueKey = rec['unique_key']?.toString();
         bool exists = false;
         if (uniqueKey != null && uniqueKey.isNotEmpty) {
@@ -131,7 +130,6 @@ class HouseholdRepository {
             ? Map<String, dynamic>.from(rec['family_head_details'])
             : <String, dynamic>{};
 
-// 👇 insert family_head_details inside address
         addressMap['family_head_details'] = familyHeadDetails;
 
         Map<String, dynamic> toInsert = {

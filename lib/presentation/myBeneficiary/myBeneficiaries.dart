@@ -619,7 +619,7 @@ ORDER BY d.created_date_time DESC
       final String? ashaUniqueKey =
       currentUserData?['unique_key']?.toString();
 
-      print('🔍 Calculating LBW children count (≤2 years only)');
+      print('🔍 Calculating LBW children count (flexible thresholds)');
 
       final rows = await db.query(
         'beneficiaries_new',
@@ -638,26 +638,35 @@ ORDER BY d.created_date_time DESC
 
       for (final row in rows) {
         try {
-          // ---------- Parse beneficiary_info ----------
           final infoStr = row['beneficiary_info']?.toString();
           if (infoStr == null || infoStr.isEmpty) continue;
 
-          final Map<String, dynamic> info =
-          jsonDecode(infoStr) as Map<String, dynamic>;
+          final decoded = jsonDecode(infoStr);
+          if (decoded is! Map) continue;
 
-          // 🚫 Skip if child age > 2 years
+          final Map<String, dynamic> info =
+          Map<String, dynamic>.from(decoded);
+
+          // 🚫 Skip if age > 2 years
           final bool isUnderTwo =
           _isBelowOrEqualTwoYears(info, info['dob'] ?? info['dateOfBirth']);
           if (!isUnderTwo) continue;
 
-          // ---------- LBW check ----------
-          final int? weightGm = normalizeToGrams(info['weight']);
-          final int? birthWeightGm =
-          normalizeToGrams(info['birthWeight']);
+          // ---------- SAME FLEXIBLE LBW LOGIC ----------
+          final double? weight =
+          _parseNumFlexible(info['weight'])?.toDouble();
+          final double? birthWeight =
+          _parseNumFlexible(info['birthWeight'])?.toDouble();
 
           bool isLbw = false;
-          if (weightGm != null && weightGm <= 1600) isLbw = true;
-          if (birthWeightGm != null && birthWeightGm <= 1600) isLbw = true;
+
+          if (weight != null && birthWeight != null) {
+            isLbw = (weight <= 1.6 && birthWeight <= 1600);
+          } else if (weight != null && birthWeight == null) {
+            isLbw = (weight <= 1.6);
+          } else if (weight == null && birthWeight != null) {
+            isLbw = (birthWeight <= 1600);
+          }
 
           if (!isLbw) continue;
 
@@ -676,10 +685,22 @@ ORDER BY d.created_date_time DESC
     }
   }
 
+  num? _parseNumFlexible(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v;
+    String s = v.toString().trim().toLowerCase();
+    if (s.isEmpty) return null;
+    s = s.replaceAll(RegExp(r'[^0-9\.-]'), '');
+    if (s.isEmpty) return null;
+    final d = double.tryParse(s);
+    if (d != null) return d;
+    final i = int.tryParse(s);
+    if (i != null) return i;
+    return null;
+  }
 
   Future<int> _getAbortionListCount() async {
     try {
-      // Get abortion visits from followup forms directly - same logic as AbortionList.dart
       final dbForms = await LocalStorageDao.instance.getAbortionFollowupForms();
       
       print('Total abortion records fetched for count: ${dbForms.length}');

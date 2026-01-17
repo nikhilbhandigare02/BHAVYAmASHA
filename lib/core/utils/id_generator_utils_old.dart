@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:flutter/services.dart';
 import 'package:medixcel_new/core/utils/device_info_utils.dart';
 
 class IdGenerator {
@@ -16,7 +15,7 @@ class IdGenerator {
   /// - second (2 digits)
   /// - microseconds (6 digits)
   /// - counter (3 digits) - increments for IDs generated in the same microsecond
- /* static Future<String> generateUniqueId(DeviceInfo deviceInfo) async {
+  static Future<String> generateUniqueId(DeviceInfo deviceInfo) async {
     final now = DateTime.now();
     
     // Reset counter if timestamp changed
@@ -44,47 +43,5 @@ class IdGenerator {
         '${_counter.toString().padLeft(3, '0')}';
         
     return '${deviceInfo.deviceId}_$formattedDate';
-  }
-}*/
-
-  static Future<String> generateUniqueId(DeviceInfo deviceInfo) async {
-
-    try{
-      final DateTime now = DateTime.now();
-      String deviceId = await DeviceInfoService.getAndroidId();
-      // yyyyMMddHHmmss
-      final String formattedDate =
-          '${now.year}'
-          '${now.month.toString().padLeft(2, '0')}'
-          '${now.day.toString().padLeft(2, '0')}'
-          '${now.hour.toString().padLeft(2, '0')}'
-          '${now.minute.toString().padLeft(2, '0')}'
-          '${now.second.toString().padLeft(2, '0')}';
-
-      // milliseconds padded to 4 digits
-      final String milliseconds =
-      now.millisecond.toString().padLeft(4, '0');
-
-      return '${deviceId}_${milliseconds}$formattedDate';
-    }
-    catch(e){
-      return '';
-    }
-  }
-
-}
-
-class DeviceInfoService {
-  static const MethodChannel _channel =
-  MethodChannel('flutter/device_info');
-
-  static Future<String> getAndroidId() async {
-    try {
-      final String? deviceId =
-      await _channel.invokeMethod<String>('getAndroidId');
-      return deviceId ?? 'Unknown';
-    } catch (e) {
-      return 'Unknown';
-    }
   }
 }

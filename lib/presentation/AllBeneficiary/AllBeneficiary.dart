@@ -52,63 +52,57 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     });
 
     final beneficiaries = <Map<String, dynamic>>[];
-    final dao = LocalStorageDao();
+    final seenUniqueKeys = <String>{}; // 🔑 DUPLICATE PREVENTION
 
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries(
-        isMigrated: 0, // DB-level filter
+        isMigrated: 0,
       );
 
       print('=== AllBeneficiary Screen - Data Loading ===');
       print('Total records from database: ${rows.length}');
 
-      for (int i = 0; i < rows.length; i++) {
-        print('\n--- Record $i ---');
-        print('beneficiary_info: ${rows[i]['beneficiary_info']}');
-        print('household_ref_key: ${rows[i]['household_ref_key']}');
-        print('unique_key: ${rows[i]['unique_key']}');
-        print('created_date_time: ${rows[i]['created_date_time']}');
-        print('is_migrated: ${rows[i]['is_migrated']}');
-      }
-      print('=== End of Data Loading ===\n');
-
       for (final row in rows) {
 
-        final int isMigrated = row['is_migrated'] ?? 0;
-        if (isMigrated == 1) {
+        final String uniqueKey = row['unique_key']?.toString() ?? '';
+
+        // 🚫 SKIP DUPLICATE BENEFICIARY
+        if (uniqueKey.isEmpty || seenUniqueKeys.contains(uniqueKey)) {
+          print('⛔ Skipping duplicate beneficiary: $uniqueKey');
           continue;
         }
+        seenUniqueKeys.add(uniqueKey);
 
+        final int isMigrated = row['is_migrated'] ?? 0;
+        if (isMigrated == 1) continue;
+
+        // ---------------- PARSE beneficiary_info SAFELY ----------------
         Map<String, dynamic> info;
         try {
-          if (row['beneficiary_info'] is String) {
-            info = jsonDecode(row['beneficiary_info'] as String)
-            as Map<String, dynamic>;
-          } else if (row['beneficiary_info'] is Map) {
-            info = Map<String, dynamic>.from(row['beneficiary_info'] as Map);
+          final rawInfo = row['beneficiary_info'];
+          if (rawInfo is String && rawInfo.isNotEmpty) {
+            info = jsonDecode(rawInfo) as Map<String, dynamic>;
+          } else if (rawInfo is Map) {
+            info = Map<String, dynamic>.from(rawInfo);
           } else {
             info = <String, dynamic>{};
           }
         } catch (e) {
-          print('Error parsing beneficiary info: $e');
+          print('⚠️ Error parsing beneficiary info: $e');
           info = <String, dynamic>{};
         }
 
-        // Debug: Print all available keys in beneficiary info
-        print('🔍 Available keys in beneficiary info: ${info.keys.toList()}');
-        print('👤 Full beneficiary info: $info');
+        final t = AppLocalizations.of(context);
 
         final String hhId = row['household_ref_key']?.toString() ?? '';
-        final String createdDate =
-            row['created_date_time']?.toString() ?? '';
-        final String gender =
-            info['gender']?.toString().toLowerCase() ?? '';
+        final String createdDate = row['created_date_time']?.toString() ?? '';
+        final String gender = info['gender']?.toString().toLowerCase() ?? '';
+
         final String richId =
             info['RichIDChanged']?.toString() ??
                 info['richIdChanged']?.toString() ??
                 '';
 
-        // Unified display name
         final String displayName =
         (info['name'] ??
             info['memberName'] ??
@@ -116,29 +110,25 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
             '')
             .toString();
 
-        final String uniqueKey = row['unique_key']?.toString() ?? '';
-        final String beneficiaryId = uniqueKey.length > 11
-            ? uniqueKey.substring(uniqueKey.length - 11)
-            : uniqueKey;
+        final String beneficiaryId =
+        uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey;
 
         final String relation =
             info['relation_to_head']?.toString() ??
                 info['relation']?.toString() ??
                 'N/A';
 
-        final String village = info['village']?.toString() ?? '';
-        final String mohalla = info['mohalla']?.toString() ?? '';
-        final String maritalStatus = info['maritalStatus']?.toString() ?? '';
-        final t = AppLocalizations.of(context);
         final bool isChild =
-            (info['memberType']?.toString().toLowerCase() == 'child') ||
-                (relation.toLowerCase() == 'child');
+            info['memberType']?.toString().toLowerCase() == 'child' ||
+                relation.toLowerCase() == 'child';
 
         final String registrationType = isChild ? 'Child' : 'General';
+
         final fatherName =
             _nonEmpty(info['father_name']) ??
                 _nonEmpty(info['fatherName']) ??
                 t!.na;
+
         beneficiaries.add({
           'hhId': hhId,
           'unique_key': uniqueKey,
@@ -146,8 +136,8 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           'RegitrationDate': createdDate,
           'RegitrationType': registrationType,
           'BeneficiaryID': beneficiaryId,
-          'Tola/Mohalla': mohalla,
-          'village': village,
+          'Tola/Mohalla': info['mohalla']?.toString() ?? '',
+          'village': info['village']?.toString() ?? '',
           'RichID': richId,
           'Gender': gender,
           'Name': displayName,
@@ -160,70 +150,47 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
           ),
           'Mobileno.': info['mobileNo']?.toString() ?? '',
           'FatherName': fatherName,
-          'MotherName': info['motherName']?.toString() ?? info['mother_name']?.toString() ?? info['mother']?.toString() ?? '',
-          'WifeName': info['wifeName']?.toString() ?? info['wife_name']?.toString() ?? info['wife']?.toString() ?? info['spouse_name']?.toString() ?? '',
-          'HusbandName': info['husbandName']?.toString() ?? info['husband_name']?.toString() ?? info['husband']?.toString() ?? info['spouse_name']?.toString() ?? '',
-          'SpouseName': info['spouseName']?.toString() ?? info['spouse_name']?.toString() ?? info['spouse']?.toString() ?? '',
-          'SpouseGender': info['spouseGender']?.toString() ?? info['spouse_gender']?.toString() ?? info['gender']?.toString() ?? '',
+          'MotherName': info['motherName']?.toString() ??
+              info['mother_name']?.toString() ??
+              '',
+          'SpouseName': info['spouseName']?.toString() ??
+              info['spouse_name']?.toString() ??
+              '',
           'Relation': relation,
-          'MaritalStatus': maritalStatus,
+          'MaritalStatus': info['maritalStatus']?.toString() ?? '',
           'is_synced': row['is_synced'] ?? 0,
           'is_death': row['is_death'] ?? 0,
-          '_rawInfo': info, // Store raw beneficiary info for fallback access
+          '_rawInfo': info,
         });
-
-        // Debug: Print extracted spouse names
-        print('💑 Extracted spouse names:');
-        print('  - WifeName: ${info['wifeName'] ?? info['wife_name'] ?? info['wife'] ?? info['spouse_name'] ?? 'NOT FOUND'}');
-        print('  - HusbandName: ${info['husbandName'] ?? info['husband_name'] ?? info['husband'] ?? info['spouse_name'] ?? 'NOT FOUND'}');
-        print('  - SpouseName: ${info['spouseName'] ?? info['spouse_name'] ?? info['spouse'] ?? 'NOT FOUND'}');
-      }
-    } catch (e) {
-      print('❌ Error loading data: $e');
-    } finally {
-      print('\n=== Data Processing Complete ===');
-      print('Total beneficiaries processed: ${beneficiaries.length}');
-
-      for (int i = 0; i < beneficiaries.length; i++) {
-        print('\nBeneficiary $i:');
-        print('  Name: ${beneficiaries[i]['Name']}');
-        print('  Type: ${beneficiaries[i]['RegitrationType']}');
-        print('  Household: ${beneficiaries[i]['hhId']}');
       }
 
-      print('=== End Processing ===\n');
-
-      // 🔃 Sort by created_date_time (latest first) - using original database field
-      // 🔃 Sort by created_date_time (latest first – date + time)
+      // 🔃 SORT (latest first)
       beneficiaries.sort((a, b) {
-        DateTime parseDate(dynamic value) {
-          if (value == null) {
-            return DateTime.fromMillisecondsSinceEpoch(0);
-          }
-
+        DateTime parse(dynamic v) {
           try {
-            final dt = DateTime.parse(value.toString());
-            return dt.toLocal(); // IMPORTANT: handle Z (UTC)
+            return DateTime.parse(v.toString()).toLocal();
           } catch (_) {
             return DateTime.fromMillisecondsSinceEpoch(0);
           }
         }
 
-        final DateTime dateA = parseDate(a['created_date_time']);
-        final DateTime dateB = parseDate(b['created_date_time']);
-
-        // Latest first
-        return dateB.compareTo(dateA);
+        return parse(b['created_date_time'])
+            .compareTo(parse(a['created_date_time']));
       });
 
-
-      setState(() {
-        _allBeneficiaries = beneficiaries;
-        _filtered = beneficiaries;
-        _isLoading = false;
-      });
+    } catch (e) {
+      print('❌ Error loading data: $e');
     }
+
+    setState(() {
+      _allBeneficiaries = beneficiaries;
+      _filtered = beneficiaries;
+      _isLoading = false;
+    });
+
+    print('✅ Final unique beneficiaries: ${beneficiaries.length}');
   }
+
   String? _nonEmpty(dynamic v) {
     if (v == null) return null;
     final s = v.toString().trim();
