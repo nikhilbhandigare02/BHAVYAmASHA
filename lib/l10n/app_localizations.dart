@@ -326,7 +326,7 @@ abstract class AppLocalizations {
   /// No description provided for @religionBuddhism.
   ///
   /// In en, this message translates to:
-  /// **'Buddhism'**
+  /// **'Buddism'**
   String get religionBuddhism;
 
   /// No description provided for @religionJainism.
@@ -15260,7 +15260,7 @@ abstract class AppLocalizations {
   /// No description provided for @nextancduedate.
   ///
   /// In en, this message translates to:
-  /// **'Next anc due date'**
+  /// **'Next ANC due date'**
   String get nextancduedate;
 
   /// No description provided for @householdUpdatedSuccessfully.
