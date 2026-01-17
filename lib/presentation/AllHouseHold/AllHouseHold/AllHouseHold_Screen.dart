@@ -164,7 +164,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         }
       }
       
-      // Calculate eligible couples for each household
       for (final householdRefKey in beneficiariesByHousehold.keys) {
         final householdBeneficiaries = beneficiariesByHousehold[householdRefKey]!;
         int eligibleCoupleCount = 0;
@@ -331,7 +330,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
               if (days < 0)
                 totalMonths--; // Adjust if not yet reached birthday this month
 
-              // Only categorize as child if memberType indicates it's a child
               if (isChild) {
                 if (totalMonths >= 0 && totalMonths < 12) {
                   child0to1Map[householdRefKey] =

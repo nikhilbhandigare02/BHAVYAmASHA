@@ -67,7 +67,6 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
 
     final rawValue = widget.value.toString();
 
-    // 🔥 If value is NOT an English key (e.g. Hindi), show as-is
     if (!_isEnglishKey(rawValue)) {
       return null;
     }
@@ -192,10 +191,16 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
       // Fallback (already localized or legacy)
       return rawValue.toString();
     }*/
+    bool _isHintSelected() {
+      return widget.value == null ||
+          widget.value.toString().trim().isEmpty ||
+          _resolveSelectedItem() == null;
+    }
 
     String displayText() {
       final rawValue = widget.value?.toString();
-      if (rawValue == null) {
+
+      if (rawValue == null || rawValue.trim().isEmpty) {
         return widget.hintText ?? l10n.selectOptionLabel;
       }
 
@@ -205,20 +210,20 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
         final key = item.toString();
         final label = widget.getLabel(item);
 
-        // 1️⃣ Match by key
+        // ✅ Match by key
         if (_normalize(key) == normalizedRaw) {
           return label;
         }
 
-        // 2️⃣ Match by localized label (Hindi / English)
         if (_normalize(label) == normalizedRaw) {
           return label;
         }
       }
 
-      // 3️⃣ Fallback (already localized or unknown)
-      return rawValue;
+      // ✅ Case 2: value not found in items → show hint
+      return widget.hintText ?? l10n.selectOptionLabel;
     }
+
 
 
 
@@ -287,9 +292,9 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
                                 Text(
                                   displayText(),
                                   style: inputStyle.copyWith(
-                                    color: widget.value != null
-                                        ? AppColors.onSurfaceVariant
-                                        : AppColors.grey,
+                                    color: _isHintSelected()
+                                        ? AppColors.grey              // ✅ "Select option"
+                                        : AppColors.onSurfaceVariant,
                                     fontWeight: FontWeight.w400,
                                     fontSize: ResponsiveFont.getHintFontSize(context),
                                   ),

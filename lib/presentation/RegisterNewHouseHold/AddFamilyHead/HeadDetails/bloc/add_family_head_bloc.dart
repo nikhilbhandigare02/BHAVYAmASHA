@@ -240,6 +240,32 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
     on<AfhUpdateIsPregnant>(
           (event, emit) => emit(state.copyWith(isPregnant: event.value)),
     );
+    on<AfhUpdateMemberStatus>(
+      (event, emit) async {
+        emit(state.copyWith(memberStatus: event.value));
+        
+        // Update beneficiary's is_death field when status changes to death
+        if (event.value == 'death' && state.headUniqueKey != null) {
+          try {
+            await LocalStorageDao.instance.updateBeneficiaryDeathStatus(
+              uniqueKey: state.headUniqueKey!,
+              isDeath: 1,
+            );
+          } catch (e) {
+            print('Error updating beneficiary death status: $e');
+          }
+        } else if (event.value == 'alive' && state.headUniqueKey != null) {
+          try {
+            await LocalStorageDao.instance.updateBeneficiaryDeathStatus(
+              uniqueKey: state.headUniqueKey!,
+              isDeath: 0,
+            );
+          } catch (e) {
+            print('Error updating beneficiary death status: $e');
+          }
+        }
+      },
+    );
 
     on<LMPChange>((event, emit) {
       final lmp = event.value;

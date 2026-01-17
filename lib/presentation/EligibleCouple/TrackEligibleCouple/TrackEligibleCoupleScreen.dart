@@ -345,7 +345,6 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     const Divider(thickness: 1, color: Colors.grey),
                     const SizedBox(height: 8),
 
-                    // Dependent questions for family planning
                     if (state.fpAdopting == true) ...[
                       ApiDropdown<String>(
                         labelText: t?.methodOfContraception ?? 'Method of contraception',
