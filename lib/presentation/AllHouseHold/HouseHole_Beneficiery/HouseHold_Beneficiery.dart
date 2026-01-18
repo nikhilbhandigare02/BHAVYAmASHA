@@ -56,34 +56,7 @@ class _HouseHold_BeneficiaryScreenState
     _searchCtrl.dispose();
     super.dispose();
   }
-  DateTime _resolveSortDate(Map<String, dynamic> raw) {
-    dynamic value = raw['modified_date_time'];
 
-    if (value == null || value.toString().isEmpty) {
-      value = raw['created_date_time'];
-    }
-
-    if (value == null) {
-      return DateTime.fromMillisecondsSinceEpoch(0);
-    }
-
-    final str = value.toString();
-
-    // ISO 8601 (2026-01-08T13:38:14.074Z)
-    final parsed = DateTime.tryParse(str);
-    if (parsed != null) return parsed.toUtc();
-
-    // Timestamp (seconds / milliseconds)
-    final ts = int.tryParse(str);
-    if (ts != null) {
-      return DateTime.fromMillisecondsSinceEpoch(
-        ts > 1000000000000 ? ts : ts * 1000,
-        isUtc: true,
-      );
-    }
-
-    return DateTime.fromMillisecondsSinceEpoch(0);
-  }
 
 
 
@@ -102,12 +75,6 @@ class _HouseHold_BeneficiaryScreenState
             : 'is_migrated = 0',
         whereArgs: widget.hhId != null ? [widget.hhId] : null,
         orderBy: '''
-  datetime(
-    COALESCE(
-      NULLIF(modified_date_time, ''),
-      created_date_time
-    )
-  ) ASC,
   id ASC
   ''',
       );
@@ -283,6 +250,33 @@ class _HouseHold_BeneficiaryScreenState
         'relative',
         'other',
       ];
+
+      beneficiaries.sort((a, b) {
+        // 1️⃣ Relation priority
+        final relationA = normalizeRelation(a['Relation']);
+        final relationB = normalizeRelation(b['Relation']);
+
+        final indexA = relationOrder.indexOf(relationA);
+        final indexB = relationOrder.indexOf(relationB);
+
+        final safeIndexA = indexA == -1 ? relationOrder.length : indexA;
+        final safeIndexB = indexB == -1 ? relationOrder.length : indexB;
+
+        if (safeIndexA != safeIndexB) {
+          return safeIndexA.compareTo(safeIndexB);
+        }
+
+        // 2️⃣ SAME relation → sort by beneficiary_new.id
+        final rawA = a['_raw'] as Map<String, dynamic>;
+        final rawB = b['_raw'] as Map<String, dynamic>;
+
+        final int idA = int.tryParse(rawA['id']?.toString() ?? '') ?? 0;
+        final int idB = int.tryParse(rawB['id']?.toString() ?? '') ?? 0;
+
+        return idA.compareTo(idB); // ASC (older first)
+        // return idB.compareTo(idA); // DESC (latest first)
+      });
+
 
       _beneficiaries.sort((a, b) {
         final relationA = normalizeRelation(a['Relation']);

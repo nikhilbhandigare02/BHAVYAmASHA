@@ -240,32 +240,41 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
     on<AfhUpdateIsPregnant>(
           (event, emit) => emit(state.copyWith(isPregnant: event.value)),
     );
-    on<AfhUpdateMemberStatus>(
-      (event, emit) async {
-        emit(state.copyWith(memberStatus: event.value));
-        
-        // Update beneficiary's is_death field when status changes to death
-        if (event.value == 'death' && state.headUniqueKey != null) {
-          try {
+
+
+    on<AfhUpdateMemberStatus>((event, emit) async {
+      emit(state.copyWith(memberStatus: event.value));
+
+      if (event.value == 'death') {
+        try {
+          final spouseData = state.toJson();
+          final spouseUniqueKey = spouseData['unique_key'] ?? spouseData['spouse_unique_key'];
+
+          if (spouseUniqueKey != null) {
             await LocalStorageDao.instance.updateBeneficiaryDeathStatus(
-              uniqueKey: state.headUniqueKey!,
+              uniqueKey: spouseUniqueKey,
               isDeath: 1,
             );
-          } catch (e) {
-            print('Error updating beneficiary death status: $e');
           }
-        } else if (event.value == 'alive' && state.headUniqueKey != null) {
-          try {
+        } catch (e) {
+          print('Error updating spouse beneficiary death status: $e');
+        }
+      } else if (event.value == 'alive') {
+        try {
+          final spouseData = state.toJson();
+          final spouseUniqueKey = spouseData['unique_key'] ?? spouseData['spouse_unique_key'];
+
+          if (spouseUniqueKey != null) {
             await LocalStorageDao.instance.updateBeneficiaryDeathStatus(
-              uniqueKey: state.headUniqueKey!,
+              uniqueKey: spouseUniqueKey,
               isDeath: 0,
             );
-          } catch (e) {
-            print('Error updating beneficiary death status: $e');
           }
+        } catch (e) {
+          print('Error updating spouse beneficiary death status: $e');
         }
-      },
-    );
+      }
+    });
 
     on<LMPChange>((event, emit) {
       final lmp = event.value;

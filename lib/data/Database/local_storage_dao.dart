@@ -2149,132 +2149,135 @@ ORDER BY b.created_date_time DESC;
     }
   }
 
-  Future<List<Map<String, dynamic>>> getHighRiskANCVisits() async {
-    final db = await _db;
+    Future<List<Map<String, dynamic>>> getHighRiskANCVisits() async {
+      final db = await _db;
 
-    final currentUser = await _getCurrentUserData();
-    final ashaUniqueKey = currentUser?['unique_key']?.toString() ?? '';
+      final currentUser = await _getCurrentUserData();
+      final ashaUniqueKey = currentUser?['unique_key']?.toString() ?? '';
 
-    if (ashaUniqueKey.isEmpty) return [];
+      if (ashaUniqueKey.isEmpty) return [];
 
-    final beneficiaries = await db.rawQuery(
-      '''
-      SELECT DISTINCT B.*
-      FROM beneficiaries_new B
-      INNER JOIN mother_care_activities M ON M.beneficiary_ref_key = B.unique_key
-      WHERE B.is_deleted = 0
-        AND B.is_migrated = 0
-        AND B.current_user_key = ?
-        AND M.is_deleted = 0
-        AND M.current_user_key = ?
-        AND M.mother_care_state = 'anc_due'
-        AND M.created_date_time = (
-          SELECT MAX(created_date_time)
-          FROM mother_care_activities
-          WHERE beneficiary_ref_key = B.unique_key
-            AND is_deleted = 0
-        )
-    ''',
-      [ashaUniqueKey, ashaUniqueKey],
-    );
+      final beneficiaries = await db.rawQuery(
+        '''
+  SELECT DISTINCT B.*
+  FROM beneficiaries_new B
+  INNER JOIN mother_care_activities M
+    ON M.beneficiary_ref_key = B.unique_key
+  WHERE B.is_deleted = 0
+    AND B.is_migrated = 0
+    AND B.current_user_key = ?
+    AND M.is_deleted = 0
+    AND M.current_user_key = ?
+    AND M.mother_care_state = 'anc_due'
+    AND M.created_date_time = (
+      SELECT MAX(created_date_time)
+      FROM mother_care_activities
+      WHERE beneficiary_ref_key = B.unique_key
+        AND is_deleted = 0
+    )
+  ORDER BY datetime(B.created_date_time) DESC
+  ''',
+        [ashaUniqueKey, ashaUniqueKey],
+      );
 
-    final List<Map<String, dynamic>> result = [];
-    final Set<String> processedBeneficiaries = {};
 
-    for (final beneficiary in beneficiaries) {
-      try {
-        final beneficiaryRefKey = beneficiary['unique_key'] as String?;
-        if (beneficiaryRefKey == null) continue;
+      final List<Map<String, dynamic>> result = [];
+      final Set<String> processedBeneficiaries = {};
 
-        final forms = await db.query(
-          FollowupFormDataTable.table,
-          where:
-              'is_deleted = 0 AND forms_ref_key = ? AND beneficiary_ref_key = ?',
-          whereArgs: [
-            FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
-                .ancDueRegistration],
-            beneficiaryRefKey,
-          ],
-          orderBy: 'created_date_time DESC',
-          limit: 1,
-        );
+      for (final beneficiary in beneficiaries) {
+        try {
+          final beneficiaryRefKey = beneficiary['unique_key'] as String?;
+          if (beneficiaryRefKey == null) continue;
 
-        if (forms.isEmpty) continue;
-
-        final form = forms.first;
-        final formJson = form['form_json'] as String?;
-        if (formJson == null || formJson.isEmpty) continue;
-
-        final decoded = jsonDecode(formJson);
-        if (decoded is! Map<String, dynamic>) continue;
-
-        final data = decoded['form_data'] ?? decoded['anc_form'];
-        if (data is! Map<String, dynamic>) continue;
-
-        final hr = data['high_risk'] ?? data['is_high_risk'];
-        final bool isHighRisk =
-            hr == true ||
-            hr == 1 ||
-            (hr is String && ['true', 'yes', '1'].contains(hr.toLowerCase()));
-
-        if (!isHighRisk) continue;
-
-        final beneficiaryData = Map<String, dynamic>.from(beneficiary);
-        if (beneficiaryData['beneficiary_info'] is String) {
-          beneficiaryData['beneficiary_info'] = jsonDecode(
-            beneficiaryData['beneficiary_info'],
-          );
-        }
-
-        if (beneficiary.isEmpty) continue;
-
-        processedBeneficiaries.add(beneficiaryRefKey);
-
-        /// Fetch spouse (optional)
-        Map<String, dynamic>? spouseData;
-        final spouseKey = beneficiaryData['spouse_key'];
-        if (spouseKey != null) {
-          final spouse = await db.rawQuery(
-            '''
-          SELECT B.*
-          FROM beneficiaries_new B
-          WHERE B.unique_key = ?
-            AND B.is_deleted = 0
-            AND B.is_migrated = 0
-            AND B.current_user_key = ?
-          LIMIT 1
-        ''',
-            [spouseKey, ashaUniqueKey],
+          final forms = await db.query(
+            FollowupFormDataTable.table,
+            where:
+                'is_deleted = 0 AND forms_ref_key = ? AND beneficiary_ref_key = ?',
+            whereArgs: [
+              FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+                  .ancDueRegistration],
+              beneficiaryRefKey,
+            ],
+            orderBy: 'created_date_time DESC',
+            limit: 1,
           );
 
-          if (spouse.isNotEmpty) {
-            spouseData = Map<String, dynamic>.from(spouse.first);
-            if (spouseData['beneficiary_info'] is String) {
-              spouseData['beneficiary_info'] = jsonDecode(
-                spouseData['beneficiary_info'],
-              );
+          if (forms.isEmpty) continue;
+
+          final form = forms.first;
+          final formJson = form['form_json'] as String?;
+          if (formJson == null || formJson.isEmpty) continue;
+
+          final decoded = jsonDecode(formJson);
+          if (decoded is! Map<String, dynamic>) continue;
+
+          final data = decoded['form_data'] ?? decoded['anc_form'];
+          if (data is! Map<String, dynamic>) continue;
+
+          final hr = data['high_risk'] ?? data['is_high_risk'];
+          final bool isHighRisk =
+              hr == true ||
+              hr == 1 ||
+              (hr is String && ['true', 'yes', '1'].contains(hr.toLowerCase()));
+
+          if (!isHighRisk) continue;
+
+          final beneficiaryData = Map<String, dynamic>.from(beneficiary);
+          if (beneficiaryData['beneficiary_info'] is String) {
+            beneficiaryData['beneficiary_info'] = jsonDecode(
+              beneficiaryData['beneficiary_info'],
+            );
+          }
+
+          if (beneficiary.isEmpty) continue;
+
+          processedBeneficiaries.add(beneficiaryRefKey);
+
+          /// Fetch spouse (optional)
+          Map<String, dynamic>? spouseData;
+          final spouseKey = beneficiaryData['spouse_key'];
+          if (spouseKey != null) {
+            final spouse = await db.rawQuery(
+              '''
+            SELECT B.*
+            FROM beneficiaries_new B
+            WHERE B.unique_key = ?
+              AND B.is_deleted = 0
+              AND B.is_migrated = 0
+              AND B.current_user_key = ?
+            LIMIT 1
+          ''',
+              [spouseKey, ashaUniqueKey],
+            );
+
+            if (spouse.isNotEmpty) {
+              spouseData = Map<String, dynamic>.from(spouse.first);
+              if (spouseData['beneficiary_info'] is String) {
+                spouseData['beneficiary_info'] = jsonDecode(
+                  spouseData['beneficiary_info'],
+                );
+              }
             }
           }
+
+          result.add({
+            'id': form['id'],
+            'forms_ref_key': form['forms_ref_key'],
+            'form_type': form['form_type'],
+            'beneficiary_ref_key': beneficiaryRefKey,
+            'beneficiary_data': beneficiaryData,
+            'spouse_data': spouseData,
+            'created_date_time': form['created_date_time'],
+            'modified_date_time': form['modified_date_time'],
+            'form_data': data,
+          });
+        } catch (e) {
+          debugPrint('❌ High-risk ANC error: $e');
         }
-
-        result.add({
-          'id': form['id'],
-          'forms_ref_key': form['forms_ref_key'],
-          'form_type': form['form_type'],
-          'beneficiary_ref_key': beneficiaryRefKey,
-          'beneficiary_data': beneficiaryData,
-          'spouse_data': spouseData,
-          'created_date_time': form['created_date_time'],
-          'modified_date_time': form['modified_date_time'],
-          'form_data': data,
-        });
-      } catch (e) {
-        debugPrint('❌ High-risk ANC error: $e');
       }
-    }
 
-    return result;
-  }
+      return result;
+    }
 
   Future<List<Map<String, dynamic>>> getAbortionFollowupForms() async {
     final db = await _db;

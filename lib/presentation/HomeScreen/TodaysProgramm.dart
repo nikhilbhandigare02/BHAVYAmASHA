@@ -1087,14 +1087,14 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                   '';
 
           if (ecFormKey.isNotEmpty) {
-            // 1. Get all EC Tracking Due forms created TODAY only
+            // 1. Get all EC Tracking Due forms created OR modified TODAY only
             String queryForms =
                 'SELECT * FROM ${FollowupFormDataTable.table} '
                 'WHERE forms_ref_key = ? '
                 'AND (is_deleted IS NULL OR is_deleted = 0) '
-                'AND DATE(created_date_time) = DATE(?)';
+                'AND (DATE(created_date_time) = DATE(?) OR DATE(modified_date_time) = DATE(?))';
 
-            List<dynamic> argsForms = [ecFormKey, todayStr];
+            List<dynamic> argsForms = [ecFormKey, todayStr, todayStr];
 
             if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
               queryForms += ' AND current_user_key = ?';
@@ -1153,26 +1153,39 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               // The fact that it was submitted today means it should be in completed list
               // But only show for current day, not permanently
 
-              // Check if form was created today (not just any time today)
-              bool isCreatedToday = false;
+              // Check if form was created OR modified today
+              bool isFromToday = false;
               try {
-                final createdDate = DateTime.parse(row['created_date_time'].toString());
                 final now = DateTime.now();
-                isCreatedToday = createdDate.year == now.year &&
-                    createdDate.month == now.month &&
-                    createdDate.day == now.day;
+                
+                // Check created_date_time
+                if (row['created_date_time'] != null) {
+                  final createdDate = DateTime.parse(row['created_date_time'].toString());
+                  isFromToday = createdDate.year == now.year &&
+                      createdDate.month == now.month &&
+                      createdDate.day == now.day;
+                }
+                
+                // If not from today based on created_date_time, check modified_date_time
+                if (!isFromToday && row['modified_date_time'] != null) {
+                  final modifiedDate = DateTime.parse(row['modified_date_time'].toString());
+                  isFromToday = modifiedDate.year == now.year &&
+                      modifiedDate.month == now.month &&
+                      modifiedDate.day == now.day;
+                }
               } catch (e) {
-                print('Error parsing created date: $e');
+                print('Error parsing dates: $e');
               }
 
               print('=== DEBUG: Date Check ===');
               print('Created Date: ${row['created_date_time']}');
-              print('Is Created Today: $isCreatedToday');
+              print('Modified Date: ${row['modified_date_time']}');
+              print('Is From Today: $isFromToday');
               print('================================');
 
-              // Only include if created today
-              if (!isCreatedToday) {
-                print('❌ SKIPPED: Form not created today');
+              // Only include if created OR modified today
+              if (!isFromToday) {
+                print('❌ SKIPPED: Form not from today (neither created nor modified today)');
                 continue;
               }
 
@@ -1780,7 +1793,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       final List<Map<String, dynamic>> items = [];
       final Set<String> processedBeneficiaries = {};
 
-      // ---------- Fetch ANC due beneficiaries ----------
       String query = '''
       SELECT 
         mca.*,
@@ -1914,85 +1926,17 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           continue;
         }
 
-        // ---------- Check followup forms for ANC visits ----------
-        final ancFormKey = 'bt7gs9rl1a5d26mz'; // FollowupFormDataTable.ancDueRegistration
+        // ---------- Check if ANC followup form already exists ----------
+        final ancFormKey = 'bt7gs9rl1a5d26mz'; // ANC due registration form key
         final followupFormsQuery = await db.query(
           FollowupFormDataTable.table,
           where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
           whereArgs: [ancFormKey, beneficiaryKey],
-          orderBy: 'created_date_time DESC',
+          limit: 1, // Only need to check if at least one record exists
         );
 
-        bool shouldExcludeFromTodo = false;
-        
         if (followupFormsQuery.isNotEmpty) {
-          print('🔍 Found ${followupFormsQuery.length} ANC followup forms for beneficiary $beneficiaryKey');
-          
-          for (final form in followupFormsQuery) {
-            final createdTimeStr = form['created_date_time']?.toString();
-            if (createdTimeStr != null && createdTimeStr.isNotEmpty) {
-              try {
-                final createdTime = DateTime.parse(createdTimeStr);
-                final createdDate = DateTime(createdTime.year, createdTime.month, createdTime.day);
-                
-                bool isInAnyAncWindow = false;
-                
-                if (firstStart != null && firstEnd != null) {
-                  final windowStart = DateTime(firstStart.year, firstStart.month, firstStart.day);
-                  final windowEnd = DateTime(firstEnd.year, firstEnd.month, firstEnd.day);
-                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
-                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
-                    isInAnyAncWindow = true;
-                    print('✅ Form created within 1st ANC window: ${_formatDate(createdTime)}');
-                  }
-                }
-                
-                if (!isInAnyAncWindow && secondStart != null && secondEnd != null) {
-                  final windowStart = DateTime(secondStart.year, secondStart.month, secondStart.day);
-                  final windowEnd = DateTime(secondEnd.year, secondEnd.month, secondEnd.day);
-                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
-                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
-                    isInAnyAncWindow = true;
-                    print('✅ Form created within 2nd ANC window: ${_formatDate(createdTime)}');
-                  }
-                }
-                
-                if (!isInAnyAncWindow && thirdStart != null && thirdEnd != null) {
-                  final windowStart = DateTime(thirdStart.year, thirdStart.month, thirdStart.day);
-                  final windowEnd = DateTime(thirdEnd.year, thirdEnd.month, thirdEnd.day);
-                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
-                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
-                    isInAnyAncWindow = true;
-                    print('✅ Form created within 3rd ANC window: ${_formatDate(createdTime)}');
-                  }
-                }
-                
-                if (!isInAnyAncWindow && fourthStart != null && fourthEnd != null) {
-                  final windowStart = DateTime(fourthStart.year, fourthStart.month, fourthStart.day);
-                  final windowEnd = DateTime(fourthEnd.year, fourthEnd.month, fourthEnd.day);
-                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
-                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
-                    isInAnyAncWindow = true;
-                    print('✅ Form created within 4th ANC window: ${_formatDate(createdTime)}');
-                  }
-                }
-                
-                if (isInAnyAncWindow) {
-                  shouldExcludeFromTodo = true;
-                  print('🚫 Excluding beneficiary $beneficiaryKey from ANC todo list - form created within ANC window');
-                  break;
-                }
-              } catch (e) {
-                print('⚠️ Error parsing created_date_time for form: $e');
-              }
-            }
-          }
-        } else {
-          print('ℹ️ No ANC followup forms found for beneficiary $beneficiaryKey - including in todo list');
-        }
-
-        // If any form was created within ANC window, exclude from todo list
-        if (shouldExcludeFromTodo) {
+          // ANC followup form already exists, exclude from todo list
           continue;
         }
 

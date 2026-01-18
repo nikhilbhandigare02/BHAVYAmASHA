@@ -5452,7 +5452,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reasonForAbsent => 'Reason for absent';
 
   @override
-  String get isBeneficiaryAbsent => 'Is Beneficiary Absent';
+  String get isBeneficiaryAbsent => 'Is Beneficiary Absent?';
 
   @override
   String get quantityOfMalaN => 'Quantity of Mala -N (Daily contraceptive pill)';
@@ -6104,6 +6104,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get member_status_label => 'Member Status *';
+
+  @override
+  String get member_status_head => 'Member Status';
 
   @override
   String get death => 'Death';
@@ -7610,4 +7613,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get householdUpdatedSuccessfully => 'Household updated successfully';
+
+  @override
+  String get dontNO => 'Don\'t Know';
+
+  @override
+  String get dateOfvisitTracking => 'Date of visit';
 }

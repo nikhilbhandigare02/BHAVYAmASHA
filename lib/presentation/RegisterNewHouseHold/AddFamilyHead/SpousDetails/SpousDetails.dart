@@ -53,10 +53,10 @@ String? captureSpousError(String? message) {
 }
 
 bool validateAllSpousFields(
-  SpousState state,
-  AppLocalizations l, {
-  bool isEdit = false,
-}) {
+    SpousState state,
+    AppLocalizations l, {
+      bool isEdit = false,
+    }) {
   final form = spousFormKey.currentState;
   bool isValid = true;
 
@@ -320,12 +320,12 @@ List<String> _getMobileOwnerList(String gender) {
 
 class _SpousdetailsState extends State<Spousdetails>
     with AutomaticKeepAliveClientMixin {
-  
+
   // Controllers for age fields to handle dynamic updates
   final yearsController = TextEditingController();
   final monthsController = TextEditingController();
   final daysController = TextEditingController();
-  
+
   void _updateDobFromAge(String years, String months, String days) {
     final bloc = context.read<SpousBloc>();
 
@@ -368,9 +368,9 @@ class _SpousdetailsState extends State<Spousdetails>
   final RegisterNewHouseHold repository = RegisterNewHouseHold();
 
   Future<Map<String, dynamic>?> fetchRCHDataForScreen(
-    int rchId, {
-    required int requestFor,
-  }) async {
+      int rchId, {
+        required int requestFor,
+      }) async {
     try {
       print('Calling API: getRCHData(rchId: $rchId, requestFor: $requestFor)');
 
@@ -561,7 +561,7 @@ class _SpousdetailsState extends State<Spousdetails>
       if (widget.isMemberDetails) {
         return BlocListener<AddnewfamilymemberBloc, AddnewfamilymemberState>(
           listenWhen: (previous, current) =>
-              previous.religion != current.religion ||
+          previous.religion != current.religion ||
               previous.category != current.category ||
               previous.otherReligion != current.otherReligion ||
               previous.otherCategory != current.otherCategory ||
@@ -611,7 +611,7 @@ class _SpousdetailsState extends State<Spousdetails>
       } else {
         return BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
           listenWhen: (previous, current) =>
-              previous.headName != current.headName ||
+          previous.headName != current.headName ||
               previous.spouseName != current.spouseName ||
               previous.gender != current.gender ||
               previous.mobileNo != current.mobileNo ||
@@ -697,9 +697,9 @@ class _SpousdetailsState extends State<Spousdetails>
   }
 
   void _handleAbhaProfileResult(
-    Map<String, dynamic> profile,
-    BuildContext context,
-  ) {
+      Map<String, dynamic> profile,
+      BuildContext context,
+      ) {
     debugPrint("ABHA Profile Received in Spouse Tab: $profile");
 
     final spBloc = context.read<SpousBloc>();
@@ -806,27 +806,27 @@ class _SpousdetailsState extends State<Spousdetails>
 
                       items: widget.isMemberDetails
                           ? [
-                              'Self',
-                              'Father',
-                              'Mother',
-                              'Husband',
-                              'Wife',
-                              'Brother',
-                              'Sister',
-                              'Nephew',
-                              'Niece',
-                              'Son',
-                              'Daughter',
-                              'Grand Father',
-                              'Grand Mother',
-                              'Father In Law',
-                              'Mother In Law',
-                              'Grand Son',
-                              'Grand Daughter',
-                              'Son In Law',
-                              'Daughter In Law',
-                              'Other',
-                            ]
+                        'Self',
+                        'Father',
+                        'Mother',
+                        'Husband',
+                        'Wife',
+                        'Brother',
+                        'Sister',
+                        'Nephew',
+                        'Niece',
+                        'Son',
+                        'Daughter',
+                        'Grand Father',
+                        'Grand Mother',
+                        'Father In Law',
+                        'Mother In Law',
+                        'Grand Son',
+                        'Grand Daughter',
+                        'Son In Law',
+                        'Daughter In Law',
+                        'Other',
+                      ]
                           : const ['Husband', 'Wife'],
                       validator: (value) => captureSpousError(
                         value == null || value.isEmpty
@@ -888,22 +888,22 @@ class _SpousdetailsState extends State<Spousdetails>
 
                       value: widget.isMemberDetails
                           ? ((state.relation == null ||
-                                  state.relation!.trim().isEmpty)
-                                ? null
-                                : state.relation)
+                          state.relation!.trim().isEmpty)
+                          ? null
+                          : state.relation)
                           : (state.relation == 'Spouse'
-                                ? (state.gender == 'Female'
-                                      ? 'Husband'
-                                      : 'Wife')
-                                : (state.relation ??
-                                      (state.gender == 'Female'
-                                          ? 'Husband'
-                                          : 'Wife'))),
+                          ? (state.gender == 'Female'
+                          ? 'Husband'
+                          : 'Wife')
+                          : (state.relation ??
+                          (state.gender == 'Female'
+                              ? 'Husband'
+                              : 'Wife'))),
                       onChanged: widget.isEdit
                           ? null
                           : (v) => context.read<SpousBloc>().add(
-                              SpUpdateRelation(v),
-                            ),
+                        SpUpdateRelation(v),
+                      ),
                     ),
                   ),
                 ),
@@ -962,8 +962,8 @@ class _SpousdetailsState extends State<Spousdetails>
                     onChanged: widget.isEdit
                         ? null
                         : (v) => context.read<SpousBloc>().add(
-                            SpUpdateSpouseName(v.trim()),
-                          ),
+                      SpUpdateSpouseName(v.trim()),
+                    ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return l.pleaseEnterSpouseName;
@@ -996,16 +996,16 @@ class _SpousdetailsState extends State<Spousdetails>
                       onChanged: widget.isEdit
                           ? null
                           : (_) {
-                                context.read<SpousBloc>().add(SpToggleUseDob());
-                                // When switching to DOB mode, update DOB from age fields
-                                if (!state.useDob) {
-                                  _updateDobFromAge(
-                                    yearsController.text,
-                                    monthsController.text,
-                                    daysController.text,
-                                  );
-                                }
-                              },
+                        context.read<SpousBloc>().add(SpToggleUseDob());
+                        // When switching to DOB mode, update DOB from age fields
+                        if (!state.useDob) {
+                          _updateDobFromAge(
+                            yearsController.text,
+                            monthsController.text,
+                            daysController.text,
+                          );
+                        }
+                      },
                     ),
                     Text(l.dobShort, style: TextStyle(fontSize: 14.sp)),
                     SizedBox(width: 4.w),
@@ -1015,16 +1015,16 @@ class _SpousdetailsState extends State<Spousdetails>
                       onChanged: widget.isEdit
                           ? null
                           : (_) {
-                                context.read<SpousBloc>().add(SpToggleUseDob());
-                                // When switching to DOB mode, update DOB from age fields
-                                if (!state.useDob) {
-                                  _updateDobFromAge(
-                                    yearsController.text,
-                                    monthsController.text,
-                                    daysController.text,
-                                  );
-                                }
-                              },
+                        context.read<SpousBloc>().add(SpToggleUseDob());
+                        // When switching to DOB mode, update DOB from age fields
+                        if (!state.useDob) {
+                          _updateDobFromAge(
+                            yearsController.text,
+                            monthsController.text,
+                            daysController.text,
+                          );
+                        }
+                      },
                     ),
                     Text(l.ageApproximate, style: TextStyle(fontSize: 14.sp)),
                   ],
@@ -1101,15 +1101,15 @@ class _SpousdetailsState extends State<Spousdetails>
                                 onChanged: widget.isEdit
                                     ? null
                                     : (v) {
-                                        context.read<SpousBloc>().add(
-                                          UpdateYearsChanged(v.trim()),
-                                        );
-                                        _updateDobFromAge(
-                                          yearsController.text,
-                                          monthsController.text,
-                                          daysController.text,
-                                        );
-                                      },
+                                  context.read<SpousBloc>().add(
+                                    UpdateYearsChanged(v.trim()),
+                                  );
+                                  _updateDobFromAge(
+                                    yearsController.text,
+                                    monthsController.text,
+                                    daysController.text,
+                                  );
+                                },
                                 validator: (value) {
                                   final years = yearsController.text.trim();
                                   final months = monthsController.text.trim();
@@ -1152,15 +1152,15 @@ class _SpousdetailsState extends State<Spousdetails>
                                 onChanged: widget.isEdit
                                     ? null
                                     : (v) {
-                                        context.read<SpousBloc>().add(
-                                          UpdateMonthsChanged(v.trim()),
-                                        );
-                                        _updateDobFromAge(
-                                          yearsController.text,
-                                          monthsController.text,
-                                          daysController.text,
-                                        );
-                                      },
+                                  context.read<SpousBloc>().add(
+                                    UpdateMonthsChanged(v.trim()),
+                                  );
+                                  _updateDobFromAge(
+                                    yearsController.text,
+                                    monthsController.text,
+                                    daysController.text,
+                                  );
+                                },
                                 validator: (value) {
                                   // Don't show red validation message, only snackbar
                                   return null;
@@ -1194,15 +1194,15 @@ class _SpousdetailsState extends State<Spousdetails>
                                 onChanged: widget.isEdit
                                     ? null
                                     : (v) {
-                                        context.read<SpousBloc>().add(
-                                          UpdateDaysChanged(v.trim()),
-                                        );
-                                        _updateDobFromAge(
-                                          yearsController.text,
-                                          monthsController.text,
-                                          daysController.text,
-                                        );
-                                      },
+                                  context.read<SpousBloc>().add(
+                                    UpdateDaysChanged(v.trim()),
+                                  );
+                                  _updateDobFromAge(
+                                    yearsController.text,
+                                    monthsController.text,
+                                    daysController.text,
+                                  );
+                                },
                                 validator: (value) {
                                   // Don't show red validation message, only snackbar
                                   return null;
@@ -1555,8 +1555,8 @@ class _SpousdetailsState extends State<Spousdetails>
                               // Show error if not empty and not exactly 12 digits
                               if (value.isNotEmpty && value.length != 12) {
                                 WidgetsBinding.instance.addPostFrameCallback((
-                                  _,
-                                ) {
+                                    _,
+                                    ) {
                                   if (mounted) {
                                     showAppSnackBar(
                                       context,
@@ -1640,7 +1640,7 @@ class _SpousdetailsState extends State<Spousdetails>
                                 } else {
                                   final message =
                                       result?['message'] ??
-                                      l.failed_to_fetch_rch_data;
+                                          l.failed_to_fetch_rch_data;
                                   showAppSnackBar(context, message);
                                 }
                               } else {
@@ -1726,7 +1726,7 @@ class _SpousdetailsState extends State<Spousdetails>
                           }
 
                           final headNo =
-                              (widget.headMobileNo?.trim() ??
+                          (widget.headMobileNo?.trim() ??
                               context
                                   .read<AddFamilyHeadBloc>()
                                   .state
@@ -2302,6 +2302,57 @@ class _SpousdetailsState extends State<Spousdetails>
                         initialValue: state.condomQuantity,
                         onChanged: (value) {
                           spBloc.add(CondomQuantityChanged(value ?? ''));
+                        },
+                      ),
+                      Divider(
+                        color: AppColors.divider,
+                        thickness: 0.5,
+                        height: 0,
+                      ),
+                    ],
+                    if (state.fpMethod ==
+                        'Mala -N (Daily Contraceptive pill)') ...[
+                      CustomTextField(
+                        labelText: l.quantityOfMalaN,
+                        hintText: l.quantityOfMalaN,
+                        keyboardType: TextInputType.number,
+                        initialValue: state.malaQuantity,
+                        onChanged: (value) {
+                          spBloc.add(MalaQuantityChanged(value ?? ''));
+                        },
+                      ),
+                      Divider(
+                        color: AppColors.divider,
+                        thickness: 0.5,
+                        height: 0,
+                      ),
+                    ],
+                    if (state.fpMethod ==
+                        'Chhaya (Weekly Contraceptive pill)') ...[
+                      CustomTextField(
+                        labelText: l.quantityOfChhaya,
+                        hintText: l.quantityOfChhaya,
+                        keyboardType: TextInputType.number,
+                        initialValue: state.chhayaQuantity,
+                        onChanged: (value) {
+                          spBloc.add(ChhayaQuantityChanged(value ?? ''));
+                        },
+                      ),
+                      Divider(
+                        color: AppColors.divider,
+                        thickness: 0.5,
+                        height: 0,
+                      ),
+                    ],
+                    if (state.fpMethod ==
+                        'ECP (Emergency Contraceptive pill)') ...[
+                      CustomTextField(
+                        labelText: l.quantityOfECP,
+                        hintText: l.quantityOfECP,
+                        keyboardType: TextInputType.number,
+                        initialValue: state.ecpQuantity,
+                        onChanged: (value) {
+                          spBloc.add(ECPQuantityChanged(value ?? ''));
                         },
                       ),
                       Divider(

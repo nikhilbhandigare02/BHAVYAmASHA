@@ -56,9 +56,7 @@ class TrackEligibleCoupleState extends Equatable {
     Map<String, dynamic>? previousFormData,
   }) {
     final now = DateTime.now();
-    final financialYear = now.month >= 4
-        ? '${now.year}-${(now.year + 1).toString().substring(2)}'
-        : '${now.year - 1}-${now.year.toString().substring(2)}';
+    final financialYear = now.year.toString();
 
     if (previousFormData != null) {
       // Parse previous form data if available
@@ -67,7 +65,7 @@ class TrackEligibleCoupleState extends Equatable {
         beneficiaryId: beneficiaryId,
         beneficiaryRefKey: beneficiaryRefKey,
         visitDate: now,
-        financialYear: formData['financial_year']?.toString() ?? financialYear,
+        financialYear: financialYear,
         isPregnant: formData['is_pregnant'] as bool?,
         lmpDate: formData['lmp_date'] != null ? DateTime.parse(formData['lmp_date']) : null,
         eddDate: formData['edd_date'] != null ? DateTime.parse(formData['edd_date']) : null,

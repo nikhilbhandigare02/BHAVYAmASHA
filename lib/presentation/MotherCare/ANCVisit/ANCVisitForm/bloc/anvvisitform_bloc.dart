@@ -24,33 +24,6 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
 
   final DatabaseProvider _databaseProvider = DatabaseProvider.instance;
 
-  Future<String?> _getHouseNumber(String householdRefKey) async {
-    try {
-      final db = await _databaseProvider.database;
-      final result = await db.query(
-        'beneficiaries_new',
-        where: 'household_ref_key = ?',
-        whereArgs: [householdRefKey],
-      );
-
-      if (result.isNotEmpty) {
-        for (final row in result) {
-          try {
-            final beneficiaryInfo = jsonDecode(row['beneficiary_info'] as String? ?? '{}') as Map<String, dynamic>;
-            if (beneficiaryInfo.containsKey('houseNo') && beneficiaryInfo['houseNo'] != null) {
-              return beneficiaryInfo['houseNo'].toString();
-            }
-          } catch (e) {
-            print('Error parsing beneficiary info: $e');
-          }
-        }
-      }
-      return null;
-    } catch (e) {
-      print('Error fetching house number: $e');
-      return null;
-    }
-  }
 
   AnvvisitformBloc({
     required this.beneficiaryId,

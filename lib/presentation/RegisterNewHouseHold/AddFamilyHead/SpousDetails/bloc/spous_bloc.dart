@@ -2,6 +2,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../../../../../data/Database/local_storage_dao.dart';
+
 part 'spous_event.dart';
 part 'spous_state.dart';
 
@@ -278,6 +280,40 @@ class SpousBloc extends Bloc<SpousEvent, SpousState> {
       ));
     });
     on<SpUpdateIsPregnant>((event, emit) => emit(state.copyWith(isPregnant: event.value)));
+    on<SpUpdateMemberStatus>((event, emit) async {
+      emit(state.copyWith(memberStatus: event.value));
+      
+      // Update beneficiary's is_death field when status changes to death
+      if (event.value == 'death') {
+        try {
+          final spouseData = state.toJson();
+          final spouseUniqueKey = spouseData['unique_key'] ?? spouseData['spouse_unique_key'];
+          
+          if (spouseUniqueKey != null) {
+            await LocalStorageDao.instance.updateBeneficiaryDeathStatus(
+              uniqueKey: spouseUniqueKey,
+              isDeath: 1,
+            );
+          }
+        } catch (e) {
+          print('Error updating spouse beneficiary death status: $e');
+        }
+      } else if (event.value == 'alive') {
+        try {
+          final spouseData = state.toJson();
+          final spouseUniqueKey = spouseData['unique_key'] ?? spouseData['spouse_unique_key'];
+          
+          if (spouseUniqueKey != null) {
+            await LocalStorageDao.instance.updateBeneficiaryDeathStatus(
+              uniqueKey: spouseUniqueKey,
+              isDeath: 0,
+            );
+          }
+        } catch (e) {
+          print('Error updating spouse beneficiary death status: $e');
+        }
+      }
+    });
 
     on<SpLMPChange>((event, emit) {
       final lmp = event.value;

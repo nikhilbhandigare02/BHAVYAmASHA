@@ -827,7 +827,6 @@ class _AncvisitformState extends State<Ancvisitform> {
         );
       }
 
-      // Use visitCount passed from previous screen to determine next ANC visit number (final confirmation)
       try {
         final dynamic rawVisitCount = data['visitCount'];
         int visitCount = 0;
