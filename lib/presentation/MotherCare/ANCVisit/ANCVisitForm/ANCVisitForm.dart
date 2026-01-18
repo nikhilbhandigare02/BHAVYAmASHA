@@ -171,7 +171,6 @@ class _AncvisitformState extends State<Ancvisitform> {
     _bloc.add(
       PlaceOfAncChanged(formData['place_of_anc'] ?? ''),
     ); // Don't auto-fill place of ANC
-    // Date of inspection is always set to current date, not loaded from form data
     _bloc.add(
       HouseNumberChanged(
         formData['house_no'] ??

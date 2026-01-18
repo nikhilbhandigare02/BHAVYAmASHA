@@ -1271,46 +1271,43 @@ class _SpousdetailsState extends State<Spousdetails>
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                 _section(
-                  IgnorePointer(
-                    ignoring: widget.isEdit,
-                    child: ApiDropdown<String>(
-                      labelText: l.occupationLabel,
-                      items: const [
-                        'Unemployed',
-                        'Housewife',
-                        'Daily Wage Labor',
-                        'Agriculture',
-                        'Salaried',
-                        'Business',
-                        'Retired',
-                        'Other',
-                      ],
-                      getLabel: (s) {
-                        switch (s) {
-                          case 'Unemployed':
-                            return l.occupationUnemployed;
-                          case 'Housewife':
-                            return l.occupationHousewife;
-                          case 'Daily Wage Labor':
-                            return l.occupationDailyWageLabor;
-                          case 'Agriculture':
-                            return l.occupationAgriculture;
-                          case 'Salaried':
-                            return l.occupationSalaried;
-                          case 'Business':
-                            return l.occupationBusiness;
-                          case 'Retired':
-                            return l.occupationRetired;
-                          case 'Other':
-                            return l.occupationOther;
-                          default:
-                            return s;
-                        }
-                      },
-                      value: state.occupation,
-                      onChanged: (v) =>
-                          context.read<SpousBloc>().add(SpUpdateOccupation(v)),
-                    ),
+                  ApiDropdown<String>(
+                    labelText: l.occupationLabel,
+                    items: const [
+                      'Unemployed',
+                      'Housewife',
+                      'Daily Wage Labor',
+                      'Agriculture',
+                      'Salaried',
+                      'Business',
+                      'Retired',
+                      'Other',
+                    ],
+                    getLabel: (s) {
+                      switch (s) {
+                        case 'Unemployed':
+                          return l.occupationUnemployed;
+                        case 'Housewife':
+                          return l.occupationHousewife;
+                        case 'Daily Wage Labor':
+                          return l.occupationDailyWageLabor;
+                        case 'Agriculture':
+                          return l.occupationAgriculture;
+                        case 'Salaried':
+                          return l.occupationSalaried;
+                        case 'Business':
+                          return l.occupationBusiness;
+                        case 'Retired':
+                          return l.occupationRetired;
+                        case 'Other':
+                          return l.occupationOther;
+                        default:
+                          return s;
+                      }
+                    },
+                    value: state.occupation,
+                    onChanged: (v) =>
+                        context.read<SpousBloc>().add(SpUpdateOccupation(v)),
                   ),
                 ),
 
@@ -2038,25 +2035,22 @@ class _SpousdetailsState extends State<Spousdetails>
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
                 _section(
-                  IgnorePointer(
-                    ignoring: widget.isEdit,
-                    child: ApiDropdown<String>(
-                      labelText: l.beneficiaryTypeLabel,
-                      items: const ['StayingInHouse', 'SeasonalMigrant'],
-                      getLabel: (s) {
-                        switch (s) {
-                          case 'StayingInHouse':
-                            return l.migrationStayingInHouse;
-                          case 'SeasonalMigrant':
-                            return l.migrationSeasonalMigrant;
-                          default:
-                            return s;
-                        }
-                      },
-                      value: state.beneficiaryType,
-                      onChanged: (v) => context.read<SpousBloc>().add(
-                        SpUpdateBeneficiaryType(v),
-                      ),
+                  ApiDropdown<String>(
+                    labelText: l.beneficiaryTypeLabel,
+                    items: const ['StayingInHouse', 'SeasonalMigrant'],
+                    getLabel: (s) {
+                      switch (s) {
+                        case 'StayingInHouse':
+                          return l.migrationStayingInHouse;
+                        case 'SeasonalMigrant':
+                          return l.migrationSeasonalMigrant;
+                        default:
+                          return s;
+                      }
+                    },
+                    value: state.beneficiaryType,
+                    onChanged: (v) => context.read<SpousBloc>().add(
+                      SpUpdateBeneficiaryType(v),
                     ),
                   ),
                 ),

@@ -4350,7 +4350,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                         const SizedBox(height: 2),
                         if (item['age'] != null || item['gender'] != null) ...[
                           Text(
-                            '${item['age'] ?? '-'} - ${item['gender'] ?? '-'}',
+                            '${item['age'] ?? '-'} | ${item['gender'] ?? '-'}',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14.sp,

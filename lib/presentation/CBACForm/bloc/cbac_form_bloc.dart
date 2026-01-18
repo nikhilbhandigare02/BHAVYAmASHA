@@ -1,5 +1,5 @@
 import 'dart:convert';
- import 'package:bloc/bloc.dart';
+import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -55,14 +55,14 @@ class BeneficiaryInfo {
         info = {};
       }
     }
-    
+
     return BeneficiaryInfo(
       name: info?['name'] ?? info?['memberName'] ?? info?['headName'],
       gender: info?['gender']?.toString().toLowerCase(),
       dob: info?['dob'],
       mobile: info?['mobileNo'],
       address: info?['address'] ?? info?['village'],
-      fatherName: info?['fatherName'],
+      fatherName: info?['father_name'],
       spouseName: info?['spouseName'],
       relationToHead: info?['relation_to_head'],
       uniqueKey: data['unique_key']?.toString(),
@@ -78,7 +78,7 @@ class BeneficiaryInfo {
       final birthDate = DateTime.parse(dob!);
       final now = DateTime.now();
       int age = now.year - birthDate.year;
-      if (now.month < birthDate.month || 
+      if (now.month < birthDate.month ||
           (now.month == birthDate.month && now.day < birthDate.day)) {
         age--;
       }
@@ -92,20 +92,20 @@ class BeneficiaryInfo {
 class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
   static const int totalTabs = 6;
   static const _secureStorage = FlutterSecureStorage();
-  
+
   String? beneficiaryId;
   String? householdId;
-  
+
   Future<Database> get _database async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, 'm_aasha.db');
     return openDatabase(path);
   }
-  
+
   CbacFormBloc({String? beneficiaryId, String? householdId}) : super(const CbacFormInitial()) {
     this.beneficiaryId = beneficiaryId;
     this.householdId = householdId;
-    
+
     on<CbacOpened>((event, emit) async {
       // Update beneficiary and household IDs from event
       if (event.beneficiaryId != null && event.beneficiaryId!.isNotEmpty) {
@@ -114,14 +114,14 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
       if (event.hhid != null && event.hhid!.isNotEmpty) {
         this.householdId = event.hhid;
       }
-      
+
       print('🔄 CbacOpened - beneficiaryId: ${this.beneficiaryId}, householdId: ${this.householdId}');
-      
+
       // Show consent dialog if not shown before
       if (!state.consentDialogShown) {
         emit(state.copyWith(consentDialogShown: true));
       }
-      
+
       // Update state with the provided IDs
       emit(state.copyWith(
         data: {
@@ -130,7 +130,7 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
           'household_ref_key': this.householdId,
         },
       ));
-      
+
       // Load beneficiary data if ID is provided
       if (this.beneficiaryId?.isNotEmpty == true) {
         try {
@@ -144,7 +144,7 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
               'age': beneficiary.age,
               'mobile': beneficiary.mobile,
               'address': beneficiary.village ?? beneficiary.address,
-              'fatherName': beneficiary.fatherName,
+              'father_name': beneficiary.fatherName,
               'spouseName': beneficiary.spouseName,
               'relationToHead': beneficiary.relationToHead,
               'uniqueKey': beneficiary.uniqueKey,
@@ -158,61 +158,66 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
         }
       }
     });
-    
+
     on<CbacBeneficiaryLoaded>((event, emit) {
       final data = Map<String, dynamic>.from(state.data);
       final beneficiary = event.beneficiaryData;
-      
+
       data['personal.name'] = beneficiary['name'];
       final g = beneficiary['gender']?.toString().toLowerCase();
       data['personal.gender'] =
-          (g == 'm' || g == 'male')
-              ? 'Male'
-              : (g == 'f' || g == 'female')
-                  ? 'Female'
-                  : 'Other';
+      (g == 'm' || g == 'male')
+          ? 'Male'
+          : (g == 'f' || g == 'female')
+          ? 'Female'
+          : 'Other';
       data['personal.gender_code'] =
-          (g == 'm' || g == 'male')
-              ? 'M'
-              : (g == 'f' || g == 'female')
-                  ? 'F'
-                  : 'O';
+      (g == 'm' || g == 'male')
+          ? 'M'
+          : (g == 'f' || g == 'female')
+          ? 'F'
+          : 'O';
       data['personal.age'] = beneficiary['age']?.toString();
       data['personal.mobile'] = beneficiary['mobile'];
       data['personal.address'] = beneficiary['address'];
       data['beneficiary.voterId'] = beneficiary['voterId'];
-      data['beneficiary.fatherName'] = beneficiary['fatherName'];
+      data['beneficiary.father_name'] = beneficiary['father_name'];
       data['beneficiary.spouseName'] = beneficiary['spouseName'];
 
-      final fatherName = (beneficiary['fatherName']?.toString().trim() ?? '');
-      final spouseName = (beneficiary['spouseName']?.toString().trim() ?? '');
+      final fatherName = (beneficiary['father_name']?.toString().trim() ?? '');
       final genderCode = data['personal.gender_code']?.toString() ?? '';
+
       if (genderCode == 'M') {
+        // Male: Only use fatherName, never search for spouseName
         if (fatherName.isNotEmpty) {
-          data['personal.father'] = beneficiary['fatherName'];
+          data['personal.father'] = beneficiary['father_name'];
         } else {
           data['personal.father'] = '';
         }
       } else {
+        // Female: Search for spouseName first, then fallback to fatherName
+        final spouseName = (beneficiary['spouseName']?.toString().trim() ?? '');
         if (spouseName.isNotEmpty) {
           data['personal.father'] = beneficiary['spouseName'];
         } else if (fatherName.isNotEmpty) {
-          data['personal.father'] = beneficiary['fatherName'];
+          data['personal.father'] = beneficiary['father_name'];
+        } else {
+          data['personal.father'] = '';
         }
       }
-      
+
       emit(state.copyWith(data: data));
     });
 
     on<CbacConsentDialogShown>((event, emit) => emit(state.copyWith(consentDialogShown: true)));
-    
+
     on<CbacConsentAgreed>((event, emit) => emit(state.copyWith(
       consentAgreed: true,
       // Reset error message when consent is given
       errorMessage: null,
       missingKeys: const [],
     )));
-    
+
     on<CbacConsentDisagreed>((event, emit) => emit(state.copyWith(consentAgreed: false)));
 
     on<CbacTabChanged>((event, emit) {
@@ -229,7 +234,7 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
     });
 
     on<CbacNextTab>((event, emit) {
-      if (!state.consentAgreed) return;  
+      if (!state.consentAgreed) return;
       bool has(String key) {
         final v = state.data[key];
         if (v == null) return false;
@@ -413,9 +418,9 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
           whereArgs: [householdRefKey],
           limit: 1,
         );
-        
+
         print('🔍 Found ${beneficiaryMaps.length} beneficiaries for household');
-        
+
         if (beneficiaryMaps.isNotEmpty) {
           final beneficiary = beneficiaryMaps.first;
           print('🔍 Found beneficiary data: ${beneficiary.toString()}');
@@ -427,7 +432,7 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
       } else {
         print('ℹ️ Skipping beneficiary lookup - householdRefKey: $householdRefKey, beneficiaryRefKey: $beneficiaryRefKey');
       }
-      
+
       print('💾 Final reference keys - beneficiaryRefKey: $beneficiaryRefKey, householdRefKey: $householdRefKey');
 
       final now = DateTime.now().toIso8601String();
@@ -623,7 +628,7 @@ class CbacFormBloc extends Bloc<CBACFormEvent, CbacFormState> {
         print('form_json field: ${formDataForDb['form_json']}');
         print('form_json is null: ${formDataForDb['form_json'] == null}');
         print('form_json length: ${(formDataForDb['form_json'] as String?)?.length}');
-        
+
         final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
 
         if (formId > 0) {

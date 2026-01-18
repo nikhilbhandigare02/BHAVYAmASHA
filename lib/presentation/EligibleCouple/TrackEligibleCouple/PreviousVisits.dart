@@ -295,11 +295,25 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                             ),
                           ),
                           child: Builder(builder: (context) {
-                            final fpAdopting = (formValues['fp_adopting'] == true) ||
-                                (formValues['fp_adopting']?.toString().toLowerCase() == 'true');
-                            final method = _formatValue(formValues['fp_method']);
+                            final alt = formData['eligible_couple_tracking_due_from'] is Map
+                                ? formData['eligible_couple_tracking_due_from'] as Map<String, dynamic>
+                                : <String, dynamic>{};
+                            final fpAdoptingRaw = formValues['fp_adopting'] ?? alt['is_family_planning'];
+                            bool fpAdopting = (fpAdoptingRaw == true) ||
+                                (fpAdoptingRaw?.toString().toLowerCase() == 'true') ||
+                                (fpAdoptingRaw?.toString().toLowerCase() == 'yes') ||
+                                (fpAdoptingRaw?.toString() == '1');
+                            final methodRaw = formValues['fp_method'] ?? alt['method_of_contraception'];
+                            final hasMethod = methodRaw != null && methodRaw.toString().trim().isNotEmpty;
+                            if (!fpAdopting && hasMethod) {
+                              fpAdopting = true;
+                            }
                             final familyPlanningValue = fpAdopting ? 'Yes' : 'No';
-                            final methodValue = fpAdopting ? method : 'Not Available';
+                            final methodValue = fpAdopting
+                                ? ((methodRaw == null || (methodRaw is String && methodRaw.toString().isEmpty))
+                                ? 'Not Available'
+                                : _formatValue(methodRaw))
+                                : 'Not Available';
                             return Row(
                               children: [
                                 Expanded(

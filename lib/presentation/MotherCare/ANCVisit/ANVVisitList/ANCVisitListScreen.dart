@@ -698,7 +698,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
     final ageGender = '${data['Age']} Y';
 
-    // Use COMPLETE IDs for functionality
     final uniqueKey = data['unique_key']?.toString() ?? '';
     final beneficiaryId = data['BeneficiaryID']?.toString() ?? '';
     final hhId = data['hhId']?.toString() ?? '';

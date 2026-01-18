@@ -5058,8 +5058,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           'Married',
                                           'Divorced',
                                           'Separated',
-                                          'Widow',
                                           'Widower',
+                                          'Widow',
                                         ],
                                         getLabel: (s) {
                                           switch (s) {

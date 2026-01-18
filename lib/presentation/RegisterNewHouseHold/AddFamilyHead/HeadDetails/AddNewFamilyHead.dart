@@ -439,7 +439,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             ),
             Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
-            // Member Status Dropdown - only shown in edit mode
             if (widget.isEdit) ...[
               _Section(
                 child: ApiDropdown<String>(
@@ -741,47 +740,44 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
             _Section(
-              child: IgnorePointer(
-                ignoring: widget.isEdit,
-                child: ApiDropdown<String>(
-                  labelText: l.occupationLabel,
+              child: ApiDropdown<String>(
+                labelText: l.occupationLabel,
 
-                  items: const [
-                    'Unemployed',
-                    'Housewife',
-                    'Daily Wage Labor',
-                    'Agriculture',
-                    'Salaried',
-                    'Business',
-                    'Retired',
-                    'Other',
-                  ],
-                  getLabel: (s) {
-                    switch (s) {
-                      case 'Unemployed':
-                        return l.occupationUnemployed;
-                      case 'Housewife':
-                        return l.occupationHousewife;
-                      case 'Daily Wage Labor':
-                        return l.occupationDailyWageLabor;
-                      case 'Agriculture':
-                        return l.occupationAgriculture;
-                      case 'Salaried':
-                        return l.occupationSalaried;
-                      case 'Business':
-                        return l.occupationBusiness;
-                      case 'Retired':
-                        return l.occupationRetired;
-                      case 'Other':
-                        return l.occupationOther;
-                      default:
-                        return s;
-                    }
-                  },
-                  value: state.occupation,
-                  onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
-                    AfhUpdateOccupation(v),
-                  ),
+                items: const [
+                  'Unemployed',
+                  'Housewife',
+                  'Daily Wage Labor',
+                  'Agriculture',
+                  'Salaried',
+                  'Business',
+                  'Retired',
+                  'Other',
+                ],
+                getLabel: (s) {
+                  switch (s) {
+                    case 'Unemployed':
+                      return l.occupationUnemployed;
+                    case 'Housewife':
+                      return l.occupationHousewife;
+                    case 'Daily Wage Labor':
+                      return l.occupationDailyWageLabor;
+                    case 'Agriculture':
+                      return l.occupationAgriculture;
+                    case 'Salaried':
+                      return l.occupationSalaried;
+                    case 'Business':
+                      return l.occupationBusiness;
+                    case 'Retired':
+                      return l.occupationRetired;
+                    case 'Other':
+                      return l.occupationOther;
+                    default:
+                      return s;
+                  }
+                },
+                value: state.occupation,
+                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                  AfhUpdateOccupation(v),
                 ),
               ),
             ),
@@ -1446,8 +1442,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   'Married',
                   'Divorced',
                   'Separated',
-                  'Widow',
                   'Widower',
+                  'Widow',
+
                 ],
                 getLabel: (s) {
                   switch (s) {
