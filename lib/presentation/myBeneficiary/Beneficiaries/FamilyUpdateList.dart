@@ -85,7 +85,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
         'households',
         where: 'is_deleted = 0 AND current_user_key = ?',
         whereArgs: [currentUserKey],
-        orderBy: 'created_date_time DESC',
+        orderBy: 'id DESC',
       );
 
       /// household_ref_key -> head_unique_key

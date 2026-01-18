@@ -111,7 +111,7 @@ class _Migratedout extends State<Migratedout> {
         final name = (info['headName'] ?? info['memberName'] ?? info['name'] ?? '').toString();
         final ageGender = _formatAgeGender(info['dob'], info['gender']);
         return {
-          'hhId': r['household_ref_key']?.toString() ?? '',
+          'hhId': r['unique_key']?.toString() ?? '',
           'name': name,
           'age_gender': ageGender,
           'status': 'Migrated',

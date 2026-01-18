@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:sizer/sizer.dart';
+import 'package:sqflite/sqflite.dart';
 import '../../../core/config/routes/Route_Name.dart';
 import '../../../core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/l10n/app_localizations.dart';
@@ -143,6 +144,16 @@ class _EligibleCoupleIdentifiedScreenState
           continue;
         }
 
+        final beneficiaryKeya = row['unique_key']?.toString() ?? '';
+        final hasSterilization =
+        await _hasSterilizationRecord(
+          db,
+          beneficiaryKeya,
+          currentUserKey,
+        );
+
+        if (hasSterilization) continue;
+
         // 🚫 Skip duplicate beneficiary
         if (seenBeneficiaries.contains(beneficiaryKey)) {
           print('⛔ Duplicate beneficiary skipped: $beneficiaryKey');
@@ -176,6 +187,59 @@ class _EligibleCoupleIdentifiedScreenState
         _isLoading = false;
       });
     }
+  }
+
+  Future<bool> _hasSterilizationRecord(
+      Database db,
+      String beneficiaryKey,
+      String ashaUniqueKey,
+      ) async {
+    final rows = await db.query(
+      FollowupFormDataTable.table,
+      where: '''
+      beneficiary_ref_key = ?
+      AND current_user_key = ?
+      AND is_deleted = 0
+      AND forms_ref_key = ?
+    ''',
+      whereArgs: [
+        beneficiaryKey,
+        ashaUniqueKey,
+        FollowupFormDataTable
+            .formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue],
+      ],
+    );
+
+    for (final row in rows) {
+      try {
+        final formJsonStr = row['form_json']?.toString();
+        if (formJsonStr == null || formJsonStr.isEmpty) continue;
+
+        final Map<String, dynamic> formJson =
+        Map<String, dynamic>.from(jsonDecode(formJsonStr));
+
+        final trackingDue =
+        formJson['eligible_couple_tracking_due_from'];
+
+        if (trackingDue is Map<String, dynamic>) {
+
+          final method =
+          trackingDue['method_of_contraception']
+              ?.toString()
+              .toLowerCase();
+
+          if (
+          (method == 'female_sterilization' ||
+              method == 'male_sterilization' || method == 'male sterilization' || method == 'female sterilization')) {
+            return true;
+          }
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+
+    return false;
   }
 
 

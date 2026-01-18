@@ -792,14 +792,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               info['gender']?.toString().toLowerCase() ?? '';
 
           /// -------- AGE ELIGIBILITY --------
-          if (gender == 'female' && (age < 15 || age > 49)) continue;
+          /*if (gender == 'female' && (age < 15 || age > 49)) continue;
           if (gender == 'male' && (age < 15 || age > 54)) continue;
-
+*/
           /// -------- STERILIZATION CHECK --------
           final beneficiaryKey = row['unique_key']?.toString() ?? '';
-          if(beneficiaryKey =='157525ca6a78894e_86020250115073242'){
-            print('aa');
-          }
           final hasSterilization =
           await _hasSterilizationRecord(
             db,

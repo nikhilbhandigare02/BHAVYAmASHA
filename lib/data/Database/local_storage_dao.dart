@@ -2359,7 +2359,7 @@ ORDER BY b.created_date_time DESC;
         'households',
         where: where,
         whereArgs: whereArgs,
-        orderBy: 'created_date_time DESC',
+        orderBy: 'id DESC',
       );
 
       final result = rows.map((row) {
@@ -2664,7 +2664,7 @@ ORDER BY b.created_date_time DESC;
         columns: ['DISTINCT unique_key', '*'],
         where: where,
         whereArgs: whereArgs,
-        orderBy: 'created_date_time DESC',
+        orderBy: 'id DESC',
       );
 
       final result = rows.map((row) {
@@ -2806,7 +2806,7 @@ ORDER BY b.created_date_time DESC;
               AND current_user_key = ?
             GROUP BY unique_key
           )
-          ORDER BY created_date_time DESC
+          ORDER BY id DESC
           ''',
         [ashaUniqueKey],
       );
@@ -3134,7 +3134,7 @@ ORDER BY b.created_date_time DESC;
         BeneficiariesTable.table,
         where: 'is_migrated = 1 AND is_deleted = 0 AND current_user_key = ?',
         whereArgs: [ashaUniqueKey],
-        orderBy: 'created_date_time DESC',
+        orderBy: 'id DESC',
       );
 
       print(
