@@ -326,7 +326,7 @@ abstract class AppLocalizations {
   /// No description provided for @religionBuddhism.
   ///
   /// In en, this message translates to:
-  /// **'Buddhism'**
+  /// **'Buddism'**
   String get religionBuddhism;
 
   /// No description provided for @religionJainism.

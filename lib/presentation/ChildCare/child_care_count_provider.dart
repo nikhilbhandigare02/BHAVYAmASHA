@@ -588,29 +588,34 @@ class ChildCareCountProvider {
       // Use the SAME query structure as _loadChildBeneficiaries
       final List<Map<String, dynamic>> childActivities = await db.rawQuery(
         '''
-      SELECT cca.*
+  WITH ranked AS (
+      SELECT
+          cca.*,
+          ROW_NUMBER() OVER (
+              PARTITION BY cca.beneficiary_ref_key
+              ORDER BY datetime(cca.created_date_time) DESC, cca.rowid DESC
+          ) AS rn
       FROM child_care_activities cca
-      INNER JOIN (
-          SELECT beneficiary_ref_key,
-                 MAX(created_date_time) AS max_date
-          FROM child_care_activities
-          WHERE is_deleted = 0
-          GROUP BY beneficiary_ref_key
-      ) latest
-        ON cca.beneficiary_ref_key = latest.beneficiary_ref_key
-       AND cca.created_date_time = latest.max_date
-      WHERE cca.child_care_state = ?
-        AND cca.is_deleted = ?
+      WHERE cca.child_care_state IN (?, ?)
+        AND cca.is_deleted = 0
         ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND cca.current_user_key = ?' : ''}
-      GROUP BY cca.beneficiary_ref_key 
-      ORDER BY cca.created_date_time DESC
-      ''',
+  )
+  SELECT
+      ranked.*,
+      bn.created_date_time AS beneficiary_created_date_time
+  FROM ranked
+  INNER JOIN beneficiaries_new bn
+      ON bn.unique_key = ranked.beneficiary_ref_key
+  WHERE ranked.rn = 1
+  ORDER BY datetime(ranked.created_date_time) DESC
+  ''',
         [
           'registration_due',
-          0,
+          'infant_pnc',
           if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) ashaUniqueKey,
         ],
       );
+
 
       developer.log(
         'Found ${childActivities.length} unique child care activities',
@@ -699,7 +704,6 @@ class ChildCareCountProvider {
       final normalizedSearchName = childName.trim().toLowerCase();
       debugPrint('\n🔍 Checking registration for child: "$childName" with beneficiary_ref_key: "$beneficiaryRefKey"');
 
-      // Query followup_form_data only for this beneficiary_ref_key
       final results = await db.query(
         'followup_form_data',
         where: 'beneficiary_ref_key = ? AND (form_json LIKE ? OR form_json LIKE ?)',

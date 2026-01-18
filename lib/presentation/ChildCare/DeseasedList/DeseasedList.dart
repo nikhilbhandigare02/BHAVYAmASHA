@@ -53,28 +53,32 @@ class _DeseasedListState extends State<DeseasedList> {
       final List<Map<String, dynamic>> deceasedBeneficiaries =
       await db.rawQuery(
         '''
-      SELECT 
-        b.*,
-        h.household_info AS household_data,
-        h.created_date_time AS household_created_date,
-        h.household_info AS hh_info
-      FROM ${BeneficiariesTable.table} b
-      INNER JOIN child_care_activities cca ON b.unique_key = cca.beneficiary_ref_key
-      LEFT JOIN households h 
-        ON b.household_ref_key = h.unique_key
-      WHERE b.is_death = 1
-        AND b.is_deleted = 0
-        AND b.is_migrated = 0
-        AND b.is_adult = 0
-        AND cca.child_care_state IN ('registration_due', 'tracking_due')
-       
-        ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
-      ORDER BY b.created_date_time DESC
-      ''',
+  SELECT DISTINCT b.*,
+         h.household_info AS household_data,
+         h.created_date_time AS household_created_date,
+         h.household_info AS hh_info
+  FROM ${BeneficiariesTable.table} b
+  LEFT JOIN (
+      SELECT cca.beneficiary_ref_key, MAX(cca.created_date_time) AS latest_activity
+      FROM child_care_activities cca
+      WHERE cca.child_care_state IN ('registration_due', 'tracking_due')
+        AND cca.is_deleted = 0
+      GROUP BY cca.beneficiary_ref_key
+  ) cca_max ON b.unique_key = cca_max.beneficiary_ref_key
+  LEFT JOIN households h 
+    ON b.household_ref_key = h.unique_key
+  WHERE b.is_death = 1
+    AND b.is_deleted = 0
+    AND b.is_migrated = 0
+    AND b.is_adult = 0
+    ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
+  ORDER BY b.created_date_time DESC
+  ''',
         ashaUniqueKey != null && ashaUniqueKey.isNotEmpty
             ? [ashaUniqueKey]
             : [],
       );
+
 
       final transformed = deceasedBeneficiaries.map((beneficiary) {
         final beneficiaryInfo =

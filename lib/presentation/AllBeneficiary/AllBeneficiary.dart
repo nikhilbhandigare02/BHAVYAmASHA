@@ -52,7 +52,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
     });
 
     final beneficiaries = <Map<String, dynamic>>[];
-    final seenUniqueKeys = <String>{}; // 🔑 DUPLICATE PREVENTION
+    final seenUniqueKeys = <String>{};
 
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries(
@@ -130,6 +130,7 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
                 t!.na;
 
         beneficiaries.add({
+          'db_id': row['id'],
           'hhId': hhId,
           'unique_key': uniqueKey,
           'created_date_time': createdDate,
@@ -164,19 +165,13 @@ class _AllBeneficiaryScreenState extends State<AllBeneficiaryScreen> {
         });
       }
 
-      // 🔃 SORT (latest first)
       beneficiaries.sort((a, b) {
-        DateTime parse(dynamic v) {
-          try {
-            return DateTime.parse(v.toString()).toLocal();
-          } catch (_) {
-            return DateTime.fromMillisecondsSinceEpoch(0);
-          }
-        }
+        final int idA = int.tryParse(a['db_id']?.toString() ?? '') ?? 0;
+        final int idB = int.tryParse(b['db_id']?.toString() ?? '') ?? 0;
 
-        return parse(b['created_date_time'])
-            .compareTo(parse(a['created_date_time']));
+        return idB.compareTo(idA);
       });
+
 
     } catch (e) {
       print('❌ Error loading data: $e');

@@ -123,7 +123,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get religionNotDisclosed => 'Do not want to disclose';
 
   @override
-  String get religionBuddhism => 'Buddhism';
+  String get religionBuddhism => 'Buddism';
 
   @override
   String get religionJainism => 'Jainism';

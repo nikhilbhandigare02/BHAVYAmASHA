@@ -274,7 +274,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
               ORDER BY datetime(cca.created_date_time) DESC, cca.rowid DESC
           ) AS rn
       FROM child_care_activities cca
-      WHERE cca.child_care_state = ?
+      WHERE cca.child_care_state IN (?, ?)
         AND cca.is_deleted = 0
         ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND cca.current_user_key = ?' : ''}
   )
@@ -285,13 +285,15 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
   INNER JOIN beneficiaries_new bn
       ON bn.unique_key = ranked.beneficiary_ref_key
   WHERE ranked.rn = 1
-  ORDER BY datetime(bn.created_date_time) DESC
+  ORDER BY datetime(ranked.created_date_time) DESC
   ''',
         [
           'registration_due',
+          'infant_pnc',
           if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) ashaUniqueKey,
         ],
       );
+
 
 
       debugPrint(
