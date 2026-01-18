@@ -281,6 +281,13 @@ class AddnewfamilymemberBloc
           if (d.isNotEmpty) loadedUpdateDay = d;
         }
 
+
+        if (allData['age_by'] == 'by_age') {
+          loadedUpdateDay = allData['days']?.toString();
+          loadedUpdateMonth = allData['months']?.toString();
+          loadedUpdateYear = allData['years']?.toString();
+        }
+
         // Parse LMP and EDD dates if they exist
         DateTime? lmpDate = allData['lmp'] != null
             ? DateTime.tryParse(allData['lmp'])

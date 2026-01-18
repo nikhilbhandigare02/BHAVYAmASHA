@@ -25,12 +25,13 @@ class ApiDropdown<T> extends StatefulWidget {
   final bool readOnly;
   final int? autoOpenTick;
 
-  const ApiDropdown({
+
+   ApiDropdown({
     super.key,
     this.labelText,
     required this.items,
     required this.getLabel,
-    this.value,
+    T? value,
     this.onChanged,
     this.isExpanded = true,
     this.hintText,
@@ -44,11 +45,45 @@ class ApiDropdown<T> extends StatefulWidget {
     this.readOnly = false,
     this.convertToTitleCase = true,
     this.autoOpenTick,
-  });
+  }): value = _normalizeValue(value);
+
+  static T? _normalizeValue<T>(T? value) {
+    if (value is String) {
+      switch (value) {
+        case 'not_disclosed':
+          return 'Do not want to disclose' as T;
+        case 'atyanth_pichda_varg':
+          return 'Atyant Pichda Varg' as T;
+
+      // 🔹 Place of Service / Facility cases
+        case 'vhsnd_anganwadi':
+          return 'VHSND/Anganwadi' as T;
+        case 'hsc_and_hwc':
+          return 'Health Sub-center/Health & Wealth Centre(HSC/HWC)' as T;
+        case 'phc':
+          return 'Primary Health Centre(PHC)' as T;
+        case 'chc':
+          return 'Community Health Centre (CHC)' as T;
+        case 'rh':
+          return 'Referral Hospital(RH)' as T;
+        case 'dh':
+          return 'District Hospital(DH)' as T;
+        case 'mch':
+          return 'Medical College Hospital(MCH)' as T;
+        case 'pmsma_site':
+          return 'PMSMA Site' as T;
+      }
+    }
+    return value;
+  }
+
 
   @override
   State<ApiDropdown<T>> createState() => _ApiDropdownState<T>();
+
 }
+
+
 
 class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
   int? _lastOpenedTick;
@@ -60,23 +95,6 @@ class _ApiDropdownState<T> extends State<ApiDropdown<T>> {
   bool _isEnglishKey(String value) {
     // english keys contain only lowercase letters, numbers and underscores
     return RegExp(r'^[a-z0-9_]+$').hasMatch(value);
-  }
-
-  T? _getMatchedItem() {
-    if (widget.value == null) return null;
-
-    final rawValue = widget.value.toString();
-
-    if (!_isEnglishKey(rawValue)) {
-      return null;
-    }
-
-    for (final item in widget.items) {
-      if (_normalize(widget.getLabel(item)) == _normalize(rawValue)) {
-        return item;
-      }
-    }
-    return null;
   }
 
 
