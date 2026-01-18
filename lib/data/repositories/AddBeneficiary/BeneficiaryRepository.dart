@@ -402,7 +402,7 @@ class BeneficiaryRepository {
       'updateMonth': DateTime.now().month,
       'updateYear': DateTime.now().year,
 
-      'children': info['total_live_children'],
+      'children': info['totalBorn'],
       'birthOrder': info['birth_order'],
       'totalBorn': info['total_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),
       'totalLive': info['total_live_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),

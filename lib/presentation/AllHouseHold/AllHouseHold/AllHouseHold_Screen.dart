@@ -209,6 +209,8 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       final eligibleCoupleCountMap = <String, int>{};
 
       final beneficiariesByHousehold = <String, List<Map<String, dynamic>>>{};
+
+// Group beneficiaries by household
       for (final row in rows) {
         final householdRefKey = (row['household_ref_key'] ?? '').toString();
         if (householdRefKey.isNotEmpty) {
@@ -217,74 +219,76 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         }
       }
 
+// Calculate eligible couples per household
       for (final householdRefKey in beneficiariesByHousehold.keys) {
-        final householdBeneficiaries = beneficiariesByHousehold[householdRefKey]!;
-        int eligibleCoupleCount = 0;
+        final householdBeneficiaries =
+        beneficiariesByHousehold[householdRefKey]!;
 
-        debugPrint('AllHouseHold: Calculating eligible couples for household: $householdRefKey');
+        int marriedMaleCount = 0;
+        int marriedFemaleCount = 0;
 
-        // Separate married males and females
-        final marriedMales = <Map<String, dynamic>>[];
-        final marriedFemales = <Map<String, dynamic>>[];
+        debugPrint(
+            'AllHouseHold: Calculating eligible couples for household: $householdRefKey');
 
         for (final beneficiary in householdBeneficiaries) {
           try {
+            // Skip deleted / migrated / death
+            if (beneficiary['is_deleted'] == 1 ||
+                beneficiary['is_migrated'] == 1 ||
+                beneficiary['is_death'] == 1) {
+              continue;
+            }
+
+            // Parse beneficiary_info safely
             final rawInfo = beneficiary['beneficiary_info'];
             Map<String, dynamic> info;
+
             if (rawInfo is Map) {
               info = Map<String, dynamic>.from(rawInfo);
             } else if (rawInfo is String && rawInfo.isNotEmpty) {
               info = Map<String, dynamic>.from(jsonDecode(rawInfo));
             } else {
-              info = <String, dynamic>{};
-            }
-
-            if (beneficiary['is_deleted'] == 1 || beneficiary['is_migrated'] == 1 || beneficiary['is_death'] == 1) {
               continue;
             }
 
-            final maritalStatus = (info['maritalStatus'] ?? '').toString().toLowerCase();
+            // ✅ STRICT MARITAL STATUS CHECK
+            final maritalStatus = info['maritalStatus']
+                ?.toString()
+                .trim()
+                .toLowerCase();
+
             if (maritalStatus != 'married') {
+              // ❌ skip single / widowed / divorced / separated / null
               continue;
             }
 
-            final gender = (info['gender'] ?? '').toString().toLowerCase();
-            final name = (info['headName'] ?? info['memberName'] ?? info['name'] ?? '').toString();
+            // Gender check
+            final gender =
+                info['gender']?.toString().trim().toLowerCase() ?? '';
 
-            // For females: add to married females list
-            if (gender == 'female') {
-              marriedFemales.add(beneficiary);
+            if (gender == 'male') {
+              marriedMaleCount++;
+            } else if (gender == 'female') {
+              marriedFemaleCount++;
             }
-            else if (gender == 'male') {
-              marriedMales.add(beneficiary);
-              debugPrint('AllHouseHold: Found married male: $name');
-            }
-          } catch (_) {
+          } catch (e) {
             continue;
           }
         }
 
+        // ✅ Eligible individuals count (as per your existing logic)
+        final eligibleIndividuals =
+            marriedMaleCount + marriedFemaleCount;
 
-        int eligibleIndividualCount = 0;
+        eligibleCoupleCountMap[householdRefKey] = eligibleIndividuals;
 
-        eligibleIndividualCount += marriedMales.length;
-
-        // Count all married females (each = 1 eligible individual)
-        eligibleIndividualCount += marriedFemales.length;
-
-        debugPrint('AllHouseHold: Eligible individuals calculation:');
-        debugPrint('  - Married males: ${marriedMales.length}');
-        debugPrint('  - Married females: ${marriedFemales.length}');
-        debugPrint('  - Total eligible individuals: $eligibleIndividualCount');
-
-        eligibleCoupleCountMap[householdRefKey] = eligibleIndividualCount;
-        debugPrint('AllHouseHold: Final eligible individual count for household $householdRefKey: $eligibleIndividualCount');
-        debugPrint('AllHouseHold: Married males: ${marriedMales.length}, Married females: ${marriedFemales.length}');
+        debugPrint(
+            'AllHouseHold: Household $householdRefKey → Married males: $marriedMaleCount, Married females: $marriedFemaleCount, Eligible individuals: $eligibleIndividuals');
       }
 
 
       final ancDueBeneficiaries = <String>{}; // Set of beneficiary_ref_keys with ANC due
-      
+
       for (final ma in motherCareActivities) {
         try {
           final beneficiaryKey = (ma['beneficiary_ref_key'] ?? '').toString();
@@ -294,7 +298,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           debugPrint('AllHouseHold: ANC due - Beneficiary: $beneficiaryKey');
         } catch (_) {}
       }
-      
+
       debugPrint('AllHouseHold: Found ${ancDueBeneficiaries.length} beneficiaries with ANC due');
 
       for (final row in rows) {
@@ -338,7 +342,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
               // Use the helper function to calculate detailed age
               final ageDetails = _calculateDetailedAge(birthDate);
               final totalMonths = ageDetails['totalMonths'] as int;
-              
+
               final name = (info['headName'] ?? info['memberName'] ?? info['name'] ?? '').toString();
               debugPrint('AllHouseHold: Age calculation for $name:');
               debugPrint('  - DOB: $birthDate');
@@ -381,7 +385,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         final child1to2 = child1to2Map[householdRefKey] ?? 0;
         final child2to5 = child2to5Map[householdRefKey] ?? 0;
         final elderly = elderlyCountMap[householdRefKey] ?? 0;
-        
+
         if (child0to1 > 0 || child1to2 > 0 || child2to5 > 0 || elderly > 0) {
           debugPrint('  Household $householdRefKey: 0-1y: $child0to1, 1-2y: $child1to2, 2-5y: $child2to5, 65+: $elderly');
         }
@@ -394,7 +398,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           final uniqueKey = (r['unique_key'] ?? '').toString();
           if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
 
-          // Exclude migrated & death
           if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
 
           // Check if household head_id matches beneficiary unique_key
@@ -526,7 +529,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             : uniqueKey;
 
         final householdRefKeyFromRaw = (r['household_ref_key'] ?? '').toString();
-        
+
         // Count pregnant women in this household by checking beneficiaries with ANC due
         int pregnantWomenCount = 0;
         for (final member in membersForHousehold) {
@@ -535,9 +538,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             pregnantWomenCount++;
           }
         }
-        
+
         debugPrint('AllHouseHold: Mapping for household $householdRefKeyFromRaw - Pregnant women: $pregnantWomenCount');
-        
+
         return {
           'name': (info['headName'] ?? info['memberName'] ?? info['name'] ?? '')
               .toString(),
