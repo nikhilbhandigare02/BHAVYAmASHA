@@ -1800,31 +1800,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     }
   }
 
-  Future<bool> _hasCompletedAncVisitToday(String beneficiaryKey) async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
-      final ancFormKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
-      if (ancFormKey.isEmpty) return false;
-
-      final now = DateTime.now();
-      final todayStr = '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-
-      final result = await db.query(
-        FollowupFormDataTable.table,
-        where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND DATE(created_date_time) = DATE(?) AND (is_deleted IS NULL OR is_deleted = 0)',
-        whereArgs: [ancFormKey, beneficiaryKey, todayStr],
-      );
-
-      return result.isNotEmpty;
-    } catch (e) {
-      print('Error checking completed ANC visit for beneficiary $beneficiaryKey: $e');
-      return false;
-    }
-  }
-
   Future<void> _loadAncItems() async {
     try {
       final db = await DatabaseProvider.instance.database;
@@ -1862,7 +1837,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       final DateTime today = DateTime.now();
       final DateTime todayDate =
       DateTime(today.year, today.month, today.day);
-      final todayStr = '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
 
       bool isTodayInsideWindow(DateTime start, DateTime end) {
         final s = DateTime(start.year, start.month, start.day);
@@ -1969,6 +1943,20 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           continue;
         }
 
+        // ---------- Check if ANC followup form already exists ----------
+        final ancFormKey = 'bt7gs9rl1a5d26mz'; // ANC due registration form key
+        final followupFormsQuery = await db.query(
+          FollowupFormDataTable.table,
+          where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+          whereArgs: [ancFormKey, beneficiaryKey],
+          limit: 1, // Only need to check if at least one record exists
+        );
+
+        if (followupFormsQuery.isNotEmpty) {
+          // ANC followup form already exists, exclude from todo list
+          continue;
+        }
+
         // ---------- Age ----------
         String ageText = '-';
         if (info['dob'] != null) {
@@ -1977,49 +1965,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           if (dob != null) {
             ageText = '${today.year - dob.year} Y';
           }
-        }
-
-        // ---------- Check if ANC visit completed today ----------
-        final hasCompletedToday = await _hasCompletedAncVisitToday(beneficiaryKey);
-        
-        if (hasCompletedToday) {
-          // Add to completed list
-          final String uniqueKey = row['unique_key']?.toString() ?? '';
-          final String householdRefKey = row['household_ref_key']?.toString() ?? '';
-          
-          _ancCompletedItems.add({
-            'id': uniqueKey.length > 11
-                ? uniqueKey.substring(uniqueKey.length - 11)
-                : uniqueKey,
-            'unique_key': uniqueKey,
-            'household_ref_key': householdRefKey,
-            'hhId': householdRefKey,
-            'BeneficiaryID': beneficiaryKey,
-            'name': info['memberName'] ?? info['name'] ?? 'Unknown',
-            'age': ageText,
-            'gender': 'Female',
-            'last Visit date': _formatDateFromString(DateTime.now().toIso8601String()),
-            'Current ANC last due date': '',
-            'mobile': info['mobileNo'] ?? '-',
-            'badge': 'ANC',
-            '_rawRow': row,
-          });
-          
-          // Skip adding to todo list since it's completed today
-          continue;
-        }
-
-        // ---------- Check if ANC followup form already exists (excluding today) ----------
-        final ancFormKey = 'bt7gs9rl1a5d26mz'; // ANC due registration form key
-        final followupFormsQuery = await db.query(
-          FollowupFormDataTable.table,
-          where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND DATE(created_date_time) != DATE(?) AND (is_deleted IS NULL OR is_deleted = 0)',
-          whereArgs: [ancFormKey, beneficiaryKey, todayStr],
-          limit: 1,
-        );
-
-        if (followupFormsQuery.isNotEmpty) {
-          continue;
         }
 
         final String uniqueKey =
