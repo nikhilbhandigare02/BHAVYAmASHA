@@ -13,7 +13,7 @@ import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 class BeneficiaryRepository {
   final NetworkServiceApi _api = NetworkServiceApi();
 
-  Future<Map<String, dynamic>> fetchAndStoreBeneficiaries({required String lastId, int pageSize = 20}) async {
+  Future<Map<String, dynamic>> fetchAndStoreBeneficiaries({required String lastId, int pageSize = 100}) async {
 
     final currentUser = await UserInfo.getCurrentUser();
     final userDetails = currentUser?['details'] is String
@@ -44,6 +44,7 @@ class BeneficiaryRepository {
         Endpoints.getBeneficiary,
         {
           'last_id': effectiveLastId,
+          "limit": 20
         },
         headers: headers,
       );
@@ -54,7 +55,7 @@ class BeneficiaryRepository {
           headers: headers,
           queryParams: {
             'last_id': effectiveLastId,
-            'page_size': pageSize.toString(),
+            "limit": 20
           },
         );
       } catch (_) {
@@ -63,7 +64,7 @@ class BeneficiaryRepository {
           headers: headers,
           queryParams: {
             'last_id': effectiveLastId,
-            'page_size': pageSize.toString(),
+            "limit": 20
           },
         );
       }
@@ -153,9 +154,12 @@ class BeneficiaryRepository {
           'is_deleted': _toInt(rec['is_deleted']),
         };
 
-        final uniqueKey = row['unique_key']?.toString();
+        final uniqueKey = row['server_id']?.toString();
         if (uniqueKey != null && uniqueKey.isNotEmpty) {
-          final existing = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(uniqueKey);
+          if(uniqueKey=='696b76644239d35553728f27' || uniqueKey == '696b766f99764a6a83a22a21' || uniqueKey == '696b766f99764a6a83a22a23'){
+            print('aa');
+          }
+          final existing = await LocalStorageDao.instance.getBeneficiaryByServerKey(uniqueKey);
          /* if (existing != null && existing.isNotEmpty) {
             final existingSynced = (existing['is_synced'] == 1) || (existing['is_synced']?.toString() == '1');
             if (existingSynced) {
@@ -167,13 +171,27 @@ class BeneficiaryRepository {
             skipped++;
             continue;
           }*/
+
           if (existing == null || existing.isEmpty) {
             print('Inserting beneficiary: server_id=$serverId, unique_key=$uniqueKey');
-            await LocalStorageDao.instance.insertBeneficiary(row);
+            try {
+              await LocalStorageDao.instance.insertBeneficiary(row);
+              print('Inserted beneficiary: server_id=$serverId, unique_key=$uniqueKey');
+            }
+                catch(e){
+
+              print('Failed inserted');
+                }
+          }
+          else {
+            print("BenifSkip db else ${uniqueKey}");
           }
         }
+        else {
+          print("BenifSkip uniqueKey else ${uniqueKey}");
+        }
 
-        print('Successfully inserted beneficiary: $uniqueKey');
+        //print('Successfully inserted beneficiary: $uniqueKey');
         inserted++;
       } catch (e) {
         print('Error inserting beneficiary: $e');
