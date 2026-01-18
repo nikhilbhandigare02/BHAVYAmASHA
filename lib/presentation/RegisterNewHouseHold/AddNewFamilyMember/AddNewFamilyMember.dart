@@ -4118,9 +4118,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         labelText:
                                             l?.is_birth_certificate_issued ??
                                             'is birth certificate issued?',
-                                        hintText:
-                                        l?.is_birth_certificate_issued ??
-                                            'is birth certificate issued?',
+
                                         items: const ['Yes', 'No'],
                                         getLabel: (s) {
                                           switch (s) {

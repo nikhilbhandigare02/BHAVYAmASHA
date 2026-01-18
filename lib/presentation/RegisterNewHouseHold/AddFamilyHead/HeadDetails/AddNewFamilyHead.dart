@@ -439,6 +439,31 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             ),
             Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
+            // Member Status Dropdown - only shown in edit mode
+            if (widget.isEdit) ...[
+              _Section(
+                child: ApiDropdown<String>(
+                  labelText: 'Member Status',
+                  items: const ['alive', 'death'],
+                  getLabel: (s) {
+                    switch (s) {
+                      case 'alive':
+                        return 'Alive';
+                      case 'death':
+                        return 'Death';
+                      default:
+                        return s;
+                    }
+                  },
+                  value: state.memberStatus,
+                  onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                    AfhUpdateMemberStatus(v),
+                  ),
+                ),
+              ),
+              Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+            ],
+
             _Section(
               child: CustomTextField(
                 labelText: '${l.nameOfFamilyHeadLabel} *',
@@ -718,6 +743,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 ignoring: widget.isEdit,
                 child: ApiDropdown<String>(
                   labelText: l.occupationLabel,
+
                   items: const [
                     'Unemployed',
                     'Housewife',
@@ -1867,6 +1893,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     otherReligion: m['religion'] == 'Other'
                         ? m['other_religion']
                         : null,
+                     memberStatus: (m['is_death'] == 1) ? 'death' : m['memberStatus'],
                   ),
                 ),
               );
@@ -1966,6 +1993,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     hpremovalDate: _parseDate(m['hpremovalDate'] as String?),
                     hpremovalReason: m['hpremovalReason'],
                     hpcondomQuantity: m['hpcondomQuantity'],
+                    memberStatus: (m['is_death'] == 1) ? 'death' : m['memberStatus'],
                   ),
                 ),
               );
@@ -2021,12 +2049,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             final m = widget.initial;
             if (m == null || m.isEmpty) return SpousBloc();
 
-            // Use specific accessors to prevent leaking Head data into Spouse form
             dynamic getSpouseVal(String key) {
-              // Try with sp_ prefix first
               if (m.containsKey('sp_$key')) return m['sp_$key'];
 
-              // Try alternative keys if specific fields
               if (key == 'bankAcc') {
                 return m['sp_bankAccountNumber'] ??
                     m['sp_account_number'] ??

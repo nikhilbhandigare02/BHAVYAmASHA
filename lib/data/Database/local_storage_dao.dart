@@ -787,6 +787,25 @@ class LocalStorageDao {
     }
   }
 
+  Future<int> updateBeneficiaryDeathStatus({required String uniqueKey, required int isDeath}) async {
+    try {
+      final db = await _db;
+      final changes = await db.update(
+        'beneficiaries_new',
+        {
+          'is_death': isDeath,
+          'modified_date_time': DateTime.now().toIso8601String(),
+        },
+        where: 'unique_key = ?',
+        whereArgs: [uniqueKey],
+      );
+      return changes;
+    } catch (e) {
+      print('Error updating beneficiary death status by unique_key: $e');
+      rethrow;
+    }
+  }
+
   dynamic _encodeIfObject(dynamic v) {
     if (v == null) return null;
     if (v is Map || v is List) return jsonEncode(v);

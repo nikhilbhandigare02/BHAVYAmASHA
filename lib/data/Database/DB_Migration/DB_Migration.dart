@@ -99,8 +99,9 @@ class DbMigration {
         "isFamilyheadWife",
         "weight",
         "birthWeight",
+        "fp_method",
         "totalBorn","totalLive","totalMale","totalFemale","youngestAge","ageUnit","youngestGender",
-"childSchool","type_of_school"
+"childSchool","type_of_school","is_family_planning"
 
       ];
 
@@ -161,7 +162,9 @@ class DbMigration {
         "ageUnit": "age_of_youngest_child_unit",
         "youngestGender": "gender_of_younget_child",
         "childSchool":"is_school_going_child",
-        "type_of_school":"type_of_school"
+        "type_of_school":"type_of_school",
+        "fp_method":"method_of_contraception",
+        "is_family_planning":"is_family_planning"
 
       };
 
