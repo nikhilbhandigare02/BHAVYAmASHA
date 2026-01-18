@@ -741,6 +741,7 @@ extension _AddFamilyHeadBlocHelpers on AddFamilyHeadBloc {
       'relaton_with_family_head':
       info['relaton_with_family_head'] ?? info['relation_to_head'] ?? 'self',
       'member_status': info['member_status'] ?? 'alive',
+      'father_name': info['father_name'] ?? '',
       'member_name': info['member_name'] ?? info['headName'] ?? info['memberName'] ?? info['name'],
       'father_or_spouse_name':
       info['father_or_spouse_name'] ?? info['fatherName'] ?? info['spouseName'] ?? '',

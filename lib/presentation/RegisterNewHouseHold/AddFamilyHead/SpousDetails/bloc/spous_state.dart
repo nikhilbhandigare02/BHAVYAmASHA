@@ -244,7 +244,7 @@ class SpousState extends Equatable {
       'RichIDChanged': RichIDChanged,
       'isRchIdButtonEnabled': isRchIdButtonEnabled,
       'spouseName': spouseName,
-      'fatherName': fatherName,
+      'father_name': fatherName,
       'useDob': useDob,
       'dob': dob?.toIso8601String(),
       'edd': edd?.toIso8601String(),

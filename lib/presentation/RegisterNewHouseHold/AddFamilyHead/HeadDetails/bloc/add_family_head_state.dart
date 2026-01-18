@@ -403,7 +403,7 @@ class AddFamilyHeadState extends Equatable {
       'houseNo': houseNo,
       'headName': headName,
       'children': children,
-      'fatherName': fatherName,
+      'father_name': fatherName,
       'AfhABHAChange': AfhABHAChange,
       'useDob': useDob,
       'dob': dob?.toIso8601String(),

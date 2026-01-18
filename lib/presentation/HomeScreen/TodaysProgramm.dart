@@ -3324,6 +3324,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
       print('=== DEBUG: Loading Family Survey Completed Items ===');
       print('Today String: $todayStr');
+      print('Filter Criteria: Created before 6 months AND modified today');
 
       for (final row in rows) {
         try {
@@ -3367,43 +3368,54 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           // ❌ If neither condition matches → skip
           if (!isHouseholdHead && !isFamilyHeadFromInfo) continue;
 
-          // ------------------ CHECK IF MODIFIED TODAY ------------------
-          bool isModifiedToday = false;
+          // ------------------ CHECK IF CREATED BEFORE 6 MONTHS AND MODIFIED TODAY ------------------
+          final sixMonthsAgo = DateTime.now().subtract(const Duration(days: 180));
+          bool meetsCriteria = false;
           final String? rawModifiedDate = row['modified_date_time']?.toString();
+          final String? rawCreatedDate = row['created_date_time']?.toString();
 
-          if (rawModifiedDate != null && rawModifiedDate.isNotEmpty) {
+          if (rawModifiedDate != null && rawModifiedDate.isNotEmpty && rawCreatedDate != null && rawCreatedDate.isNotEmpty) {
             try {
-              String dateStr = rawModifiedDate;
-              // Handle both "YYYY-MM-DD HH:MM:SS" and "YYYY-MM-DDTHH:MM:SS" formats
-              if (dateStr.contains(' ')) {
-                dateStr = dateStr.split(' ')[0];
-              } else if (dateStr.contains('T')) {
-                dateStr = dateStr.split('T')[0];
+              // Check if modified today
+              bool isModifiedToday = false;
+              String modifiedDateStr = rawModifiedDate;
+              if (modifiedDateStr.contains(' ')) {
+                modifiedDateStr = modifiedDateStr.split(' ')[0];
+              } else if (modifiedDateStr.contains('T')) {
+                modifiedDateStr = modifiedDateStr.split('T')[0];
               }
-              if (dateStr == todayStr) {
+              if (modifiedDateStr == todayStr) {
                 isModifiedToday = true;
-                print('📋 Record modified today - including in completed list');
               }
+
+              // Check if created before 6 months
+              bool createdBeforeSixMonths = false;
+              String createdDateStr = rawCreatedDate;
+              if (createdDateStr.contains(' ')) {
+                createdDateStr = createdDateStr.split(' ')[0];
+              } else if (createdDateStr.contains('T')) {
+                createdDateStr = createdDateStr.split('T')[0];
+              }
+              final createdDate = DateTime.parse(createdDateStr);
+              createdBeforeSixMonths = createdDate.isBefore(sixMonthsAgo);
+
+              meetsCriteria = isModifiedToday && createdBeforeSixMonths;
+
+              print('=== DEBUG: Family Survey Date Check ===');
+              print('Created Date: $rawCreatedDate');
+              print('Modified Date: $rawModifiedDate');
+              print('Six Months Ago: $sixMonthsAgo');
+              print('Created Before 6 Months: $createdBeforeSixMonths');
+              print('Modified Today: $isModifiedToday');
+              print('Meets Criteria: $meetsCriteria');
+              print('====================================');
             } catch (e) {
-              // If parsing fails, try to extract date part
-              if (rawModifiedDate.contains(' ')) {
-                final datePart = rawModifiedDate.split(' ')[0];
-                if (datePart == todayStr) {
-                  isModifiedToday = true;
-                  print('📋 Record modified today (fallback) - including in completed list');
-                }
-              } else if (rawModifiedDate.contains('T')) {
-                final datePart = rawModifiedDate.split('T')[0];
-                if (datePart == todayStr) {
-                  isModifiedToday = true;
-                  print('📋 Record modified today (fallback) - including in completed list');
-                }
-              }
+              print('Error parsing dates for family survey: $e');
             }
           }
 
-          // Only include if modified today
-          if (!isModifiedToday) continue;
+          // Only include if created before 6 months AND modified today
+          if (!meetsCriteria) continue;
 
           // ------------------ DATE PARSING ------------------
           DateTime? createdDt;
@@ -3476,14 +3488,12 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
             displayId = displayId.substring(displayId.length - 11);
           }
 
-          // ------------------ ADD ITEM ------------------
-          final rawCreatedDate = row['created_date_time']?.toString();
-
           print('=== DEBUG: Adding Family Survey Completed Item ===');
           print('Name: $name');
           print('Raw Created Date: $rawCreatedDate');
           print('Raw Modified Date: $rawModifiedDate');
           print('Last Survey Date: $lastSurveyDate');
+          print('Criteria: Created before 6 months AND modified today');
           print('=============================================');
 
           items.add({
