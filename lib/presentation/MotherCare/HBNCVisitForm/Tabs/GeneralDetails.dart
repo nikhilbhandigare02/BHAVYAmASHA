@@ -13,7 +13,7 @@ import 'dart:convert';
 
 class GeneralDetailsTab extends StatelessWidget {
   final String beneficiaryId;
-  
+
   const GeneralDetailsTab({super.key, required this.beneficiaryId});
 
   Future<int> _getLastCompletedVisitDayFromDb() async {
@@ -29,7 +29,7 @@ class GeneralDetailsTab extends StatelessWidget {
       final rows = await db.query(
         FollowupFormDataTable.table,
         where:
-            'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
         whereArgs: [formsRefKey, beneficiaryId],
         orderBy: 'datetime(created_date_time) DESC',
         limit: 1,
@@ -137,7 +137,7 @@ class GeneralDetailsTab extends StatelessWidget {
               else if (formData['pnc_mother_form'] != null) {
                 print('✅ Successfully extracted pnc_mother_form');
                 final pncForm = formData['pnc_mother_form'] as Map<String, dynamic>;
-                
+
                 // Convert pnc_mother_form to visit details structure
                 visitData = {
                   'visitDetails': {
@@ -211,7 +211,7 @@ class GeneralDetailsTab extends StatelessWidget {
                 else if (formData['pnc_mother_form'] != null) {
                   print('✅ Successfully extracted pnc_mother_form from most recent record');
                   final pncForm = formData['pnc_mother_form'] as Map<String, dynamic>;
-                  
+
                   // Convert pnc_mother_form to visit details structure
                   visitData = {
                     'visitDetails': {
@@ -295,10 +295,10 @@ class GeneralDetailsTab extends StatelessWidget {
         final visitMap = state.visitDetails;
         // Handle visit number selection
         final dynamic dayRaw = visitMap['visitNumber'];
-        final int? selectedDay = dayRaw != null 
-            ? (dayRaw is int ? dayRaw : int.tryParse(dayRaw.toString())) 
+        final int? selectedDay = dayRaw != null
+            ? (dayRaw is int ? dayRaw : int.tryParse(dayRaw.toString()))
             : null;
-            
+
         // Set default visit date to current date if not already set
         final DateTime currentDate = DateTime.now();
 
@@ -317,7 +317,7 @@ class GeneralDetailsTab extends StatelessWidget {
 
         final DateTime visitDate = _parseDate(visitMap['visitDate']) ?? currentDate;
 
-         if (visitMap['visitDate'] == null) {
+        if (visitMap['visitDate'] == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             context.read<HbncVisitBloc>().add(
               VisitDetailsChanged(
@@ -363,7 +363,7 @@ class GeneralDetailsTab extends StatelessWidget {
                       }
 
                       displayDay = nextDay;
-                      
+
                       // Only update the bloc if the current state doesn't have a valid visit number
                       if (selectedDay == null || selectedDay <= 0) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -415,8 +415,8 @@ class GeneralDetailsTab extends StatelessWidget {
                     lastDate: DateTime(2100),
                     onDateChanged: (date) {
                       context.read<HbncVisitBloc>().add(
-                            VisitDetailsChanged(field: 'visitDate', value: date, beneficiaryId: beneficiaryId),
-                          );
+                        VisitDetailsChanged(field: 'visitDate', value: date, beneficiaryId: beneficiaryId),
+                      );
                     },
                   ),
                   const Divider(),

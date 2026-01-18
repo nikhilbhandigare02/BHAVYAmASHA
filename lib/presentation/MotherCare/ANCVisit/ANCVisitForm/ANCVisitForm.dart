@@ -203,7 +203,7 @@ class _AncvisitformState extends State<Ancvisitform> {
     if (formData['is_breast_feeding'] != null) {
       final isBreastFeeding =
           formData['is_breast_feeding'] == true ||
-          formData['is_breast_feeding'] == 'true';
+              formData['is_breast_feeding'] == 'true';
       _bloc.add(IsBreastFeedingChanged(isBreastFeeding ? 'Yes' : 'No'));
     }
 
@@ -236,8 +236,8 @@ class _AncvisitformState extends State<Ancvisitform> {
     print('🔍 Loading tablet fields...');
     final folicAcidValue =
         formData['folic_acid_tablets'] ??
-        formData['folic_acid_tab_quantity'] ??
-        '';
+            formData['folic_acid_tab_quantity'] ??
+            '';
     _bloc.add(FolicAcidTabletsChanged(folicAcidValue));
     print('🔍 Set folic acid to: $folicAcidValue');
 
@@ -245,16 +245,16 @@ class _AncvisitformState extends State<Ancvisitform> {
     // Try new field first, then fall back to old field names
     final ironFolicValue =
         formData['iron_folic_acid_tablets'] ??
-        formData['iron_and_folic_acid_tab_quantity'] ??
-        '';
+            formData['iron_and_folic_acid_tab_quantity'] ??
+            '';
     _bloc.add(IronFolicAcidTabletsChanged(ironFolicValue));
     print('🔍 Set iron+folic acid to: $ironFolicValue');
 
     // Handle calcium vitamin field with multiple possible field names
     final calciumVitaminValue =
         formData['calcium_vitamin_tablets'] ??
-        formData['calcium_and_vit_d_tab_quantity'] ??
-        '';
+            formData['calcium_and_vit_d_tab_quantity'] ??
+            '';
     _bloc.add(CalciumVitaminD3TabletsChanged(calciumVitaminValue));
     print('🔍 Set calcium vitamin to: $calciumVitaminValue');
 
@@ -278,8 +278,8 @@ class _AncvisitformState extends State<Ancvisitform> {
     if (diseases.isEmpty) {
       final diseaseString =
           formData['pre_existing_disease']?.toString() ??
-          formData['pre_exist_desease']?.toString() ??
-          '';
+              formData['pre_exist_desease']?.toString() ??
+              '';
       if (diseaseString.isNotEmpty) {
         diseases = diseaseString
             .split(',')
@@ -297,8 +297,8 @@ class _AncvisitformState extends State<Ancvisitform> {
     // Handle other disease field
     final otherDiseaseValue =
         formData['other_disease']?.toString() ??
-        formData['other_pre_exist_desease']?.toString() ??
-        '';
+            formData['other_pre_exist_desease']?.toString() ??
+            '';
     if (otherDiseaseValue.isNotEmpty) {
       _bloc.add(OtherDiseaseChanged(otherDiseaseValue));
       print('🔍 Set other disease to: $otherDiseaseValue');
@@ -344,9 +344,9 @@ class _AncvisitformState extends State<Ancvisitform> {
     try {
       final householdRefKey =
           data['hhId']?.toString() ??
-          (data['_rawRow'] is Map
-              ? (data['_rawRow'] as Map)['household_ref_key']?.toString()
-              : null);
+              (data['_rawRow'] is Map
+                  ? (data['_rawRow'] as Map)['household_ref_key']?.toString()
+                  : null);
 
       if (householdRefKey != null && householdRefKey.isNotEmpty) {
         final db = await DatabaseProvider.instance.database;
@@ -360,8 +360,8 @@ class _AncvisitformState extends State<Ancvisitform> {
           for (final row in result) {
             try {
               final beneficiaryInfo =
-                  jsonDecode(row['beneficiary_info'] as String? ?? '{}')
-                      as Map<String, dynamic>;
+              jsonDecode(row['beneficiary_info'] as String? ?? '{}')
+              as Map<String, dynamic>;
               if (beneficiaryInfo.containsKey('houseNo') &&
                   beneficiaryInfo['houseNo'] != null) {
                 _bloc.add(
@@ -471,8 +471,8 @@ class _AncvisitformState extends State<Ancvisitform> {
       if (_bloc.state.womanName == null || _bloc.state.womanName!.isEmpty) {
         final nameFromData =
             data['memberName']?.toString() ??
-            data['headName']?.toString() ??
-            data['name']?.toString();
+                data['headName']?.toString() ??
+                data['name']?.toString();
         if (nameFromData != null && nameFromData.isNotEmpty) {
           _bloc.add(WomanNameChanged(nameFromData));
         }
@@ -481,8 +481,8 @@ class _AncvisitformState extends State<Ancvisitform> {
       if (_bloc.state.husbandName == null || _bloc.state.husbandName!.isEmpty) {
         final spouseName =
             data['spouseName']?.toString() ??
-            data['headName']?.toString() ??
-            data['husbandName']?.toString();
+                data['headName']?.toString() ??
+                data['husbandName']?.toString();
         if (spouseName != null && spouseName.isNotEmpty) {
           _bloc.add(HusbandNameChanged(spouseName));
         }
@@ -497,12 +497,12 @@ class _AncvisitformState extends State<Ancvisitform> {
         final localStorageDao = LocalStorageDao();
         final existingForms = await localStorageDao
             .getFollowupFormsByHouseholdAndBeneficiary(
-              formType: FollowupFormDataTable.ancDueRegistration,
-              householdId: hhId,
-              beneficiaryId: dataBeneficiaryId.isNotEmpty
-                  ? dataBeneficiaryId
-                  : uniqueKey,
-            );
+          formType: FollowupFormDataTable.ancDueRegistration,
+          householdId: hhId,
+          beneficiaryId: dataBeneficiaryId.isNotEmpty
+              ? dataBeneficiaryId
+              : uniqueKey,
+        );
 
         if (existingForms.isNotEmpty) {
           final formData = existingForms.first;
@@ -536,7 +536,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                 _updateFormWithData(formDataMapData);
 
               }
-             /* final formJson = jsonDecode(formData['form_json'] as String);
+              /* final formJson = jsonDecode(formData['form_json'] as String);
               if (formJson is Map && formJson['formJson'] is Map) {
                 final formDataMap =
                     formJson['formJson'] as Map<String, dynamic>;
@@ -556,8 +556,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                 final formDataJson = jsonDecode(form['form_json'] as String);
                 final name =
                     formDataJson['womanName'] ??
-                    formDataJson['name'] ??
-                    'Not found';
+                        formDataJson['name'] ??
+                        'Not found';
                 print('  - Name from form: $name');
 
                 // If this is the current beneficiary, log more details
@@ -598,8 +598,8 @@ class _AncvisitformState extends State<Ancvisitform> {
           try {
             final byBeneficiary = await localStorageDao
                 .getAncFormsByBeneficiaryId(
-                  dataBeneficiaryId.isNotEmpty ? dataBeneficiaryId : uniqueKey,
-                );
+              dataBeneficiaryId.isNotEmpty ? dataBeneficiaryId : uniqueKey,
+            );
 
             if (byBeneficiary.isNotEmpty) {
               final latest = byBeneficiary.first;
@@ -608,11 +608,11 @@ class _AncvisitformState extends State<Ancvisitform> {
               final fd = latest['anc_form'] is Map
                   ? Map<String, dynamic>.from(latest['anc_form'] as Map)
                   : (latest['form_json'] != null
-                        ? ((jsonDecode(latest['form_json'] as String)
-                                      as Map<String, dynamic>?)?['anc_form']
-                                  as Map<String, dynamic>?) ??
-                              {}
-                        : <String, dynamic>{});
+                  ? ((jsonDecode(latest['form_json'] as String)
+              as Map<String, dynamic>?)?['anc_form']
+              as Map<String, dynamic>?) ??
+                  {}
+                  : <String, dynamic>{});
 
               print('📝 Loaded fallback ANC form data: $fd');
               _updateFormWithData(fd);
@@ -769,7 +769,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                       final beneficiaryInfo = visit['beneficiary_info'] as Map;
                       if (beneficiaryInfo['head_details'] is Map) {
                         final headDetails =
-                            beneficiaryInfo['head_details'] as Map;
+                        beneficiaryInfo['head_details'] as Map;
                         visitHouseNo = headDetails['houseNo']?.toString();
                         if (visitHouseNo != null) {
                           print(
@@ -793,10 +793,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                       // Then try nested in _rawRow.beneficiary_info.head_details
                       else if (rawRow['beneficiary_info'] is Map) {
                         final rawBeneficiaryInfo =
-                            rawRow['beneficiary_info'] as Map;
+                        rawRow['beneficiary_info'] as Map;
                         if (rawBeneficiaryInfo['head_details'] is Map) {
                           final headDetails =
-                              rawBeneficiaryInfo['head_details'] as Map;
+                          rawBeneficiaryInfo['head_details'] as Map;
                           visitHouseNo = headDetails['houseNo']?.toString();
                           if (visitHouseNo != null) {
                             print(
@@ -811,9 +811,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                         (dataId.isNotEmpty &&
                             (visitId == dataId ||
                                 visitBeneficiaryId == dataId)) ||
-                        (dataBeneficiaryId.isNotEmpty &&
-                            (visitId == dataBeneficiaryId ||
-                                visitBeneficiaryId == dataBeneficiaryId));
+                            (dataBeneficiaryId.isNotEmpty &&
+                                (visitId == dataBeneficiaryId ||
+                                    visitBeneficiaryId == dataBeneficiaryId));
 
                     if (isMatch) {
                       houseNo = visitHouseNo;
@@ -873,7 +873,7 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
     await _loadPreviousLmpFromEligibleCouple();
     await _loadLastTd1DateFromDb();
-    
+
     // Set date of inspection to current date
     _bloc.add(DateOfInspectionChanged(DateTime.now()));
   }
@@ -882,19 +882,19 @@ class _AncvisitformState extends State<Ancvisitform> {
     try {
       final benId =
           widget.beneficiaryData?['BeneficiaryID']?.toString() ??
-          widget.beneficiaryData?['unique_key']?.toString() ??
-          (widget.beneficiaryData?['_rawRow'] is Map
-              ? (widget.beneficiaryData?['_rawRow'] as Map)['unique_key']
-                    ?.toString()
-              : null);
+              widget.beneficiaryData?['unique_key']?.toString() ??
+              (widget.beneficiaryData?['_rawRow'] is Map
+                  ? (widget.beneficiaryData?['_rawRow'] as Map)['unique_key']
+                  ?.toString()
+                  : null);
 
       final hhId =
           widget.beneficiaryData?['hhId']?.toString() ??
-          widget.beneficiaryData?['household_ref_key']?.toString() ??
-          (widget.beneficiaryData?['_rawRow'] is Map
-              ? (widget.beneficiaryData?['_rawRow'] as Map)['household_ref_key']
-                    ?.toString()
-              : null);
+              widget.beneficiaryData?['household_ref_key']?.toString() ??
+              (widget.beneficiaryData?['_rawRow'] is Map
+                  ? (widget.beneficiaryData?['_rawRow'] as Map)['household_ref_key']
+                  ?.toString()
+                  : null);
 
       if (benId == null || benId.isEmpty || hhId == null || hhId.isEmpty) {
         return;
@@ -932,9 +932,9 @@ class _AncvisitformState extends State<Ancvisitform> {
             if (lmp != null) {
               final same =
                   uiLmp != null &&
-                  lmp.year == uiLmp.year &&
-                  lmp.month == uiLmp.month &&
-                  lmp.day == uiLmp.day;
+                      lmp.year == uiLmp.year &&
+                      lmp.month == uiLmp.month &&
+                      lmp.day == uiLmp.day;
               if (same) {
                 print('Skipping LMP equal to current: $lmp');
                 continue;
@@ -974,19 +974,19 @@ class _AncvisitformState extends State<Ancvisitform> {
     try {
       final benId =
           widget.beneficiaryData?['BeneficiaryID']?.toString() ??
-          widget.beneficiaryData?['unique_key']?.toString() ??
-          (widget.beneficiaryData?['_rawRow'] is Map
-              ? (widget.beneficiaryData?['_rawRow'] as Map)['unique_key']
-                    ?.toString()
-              : null);
+              widget.beneficiaryData?['unique_key']?.toString() ??
+              (widget.beneficiaryData?['_rawRow'] is Map
+                  ? (widget.beneficiaryData?['_rawRow'] as Map)['unique_key']
+                  ?.toString()
+                  : null);
 
       final hhId =
           widget.beneficiaryData?['hhId']?.toString() ??
-          widget.beneficiaryData?['household_ref_key']?.toString() ??
-          (widget.beneficiaryData?['_rawRow'] is Map
-              ? (widget.beneficiaryData?['_rawRow'] as Map)['household_ref_key']
-                    ?.toString()
-              : null);
+              widget.beneficiaryData?['household_ref_key']?.toString() ??
+              (widget.beneficiaryData?['_rawRow'] is Map
+                  ? (widget.beneficiaryData?['_rawRow'] as Map)['household_ref_key']
+                  ?.toString()
+                  : null);
 
       print('🔍 Beneficiary ID: $benId');
       print('🔍 Household ID: $hhId');
@@ -1081,7 +1081,7 @@ class _AncvisitformState extends State<Ancvisitform> {
               final formData = root['form_data'] as Map<String, dynamic>;
               final lmpStr = formData['lmp_date']?.toString();
               print('🔍 LMP string from form_data: $lmpStr');
-              
+
               // Check for null, empty, or just empty string
               if (lmpStr != null && lmpStr.isNotEmpty && lmpStr != '""') {
                 try {
@@ -1091,12 +1091,12 @@ class _AncvisitformState extends State<Ancvisitform> {
                     try {
                       final lmpDate = DateTime.parse(dateStr);
                       print('✅ Successfully parsed LMP date from form_data: $lmpDate');
-                      
+
                       _bloc.add(LmpDateChanged(lmpDate));
                       final weeks = _calculateWeeksOfPregnancy(lmpDate);
                       _bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
                       print('✅ Set LMP date and calculated weeks from form_data: $weeks');
-                      
+
                       // Also set EDD if available
                       final eddStr = formData['edd_date']?.toString();
                       if (eddStr != null && eddStr.isNotEmpty && eddStr != '""') {
@@ -1108,7 +1108,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                           print('⚠️ Error parsing EDD date from form_data: $e');
                         }
                       }
-                      
+
                       return; // Found LMP date, exit the method
                     } catch (e) {
                       // If full parsing fails, try date part only
@@ -1116,15 +1116,15 @@ class _AncvisitformState extends State<Ancvisitform> {
                       print('⚠️ Full date parsing failed, trying date part only: $dateStr');
                     }
                   }
-                  
+
                   final lmpDate = DateTime.parse(dateStr);
                   print('✅ Successfully parsed LMP date from form_data: $lmpDate');
-                  
+
                   _bloc.add(LmpDateChanged(lmpDate));
                   final weeks = _calculateWeeksOfPregnancy(lmpDate);
                   _bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
                   print('✅ Set LMP date and calculated weeks from form_data: $weeks');
-                  
+
                   return; // Found LMP date, exit the method
                 } catch (e) {
                   print('⚠️ Error parsing LMP date from form_data: $e');
@@ -1155,16 +1155,16 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
   }
 
-  
+
   Future<void> _loadLastTd1DateFromDb() async {
     try {
       final benId =
           widget.beneficiaryData?['BeneficiaryID']?.toString() ??
-          widget.beneficiaryData?['unique_key']?.toString() ??
-          (widget.beneficiaryData?['_rawRow'] is Map
-              ? (widget.beneficiaryData?['_rawRow'] as Map)['unique_key']
-                    ?.toString()
-              : null);
+              widget.beneficiaryData?['unique_key']?.toString() ??
+              (widget.beneficiaryData?['_rawRow'] is Map
+                  ? (widget.beneficiaryData?['_rawRow'] as Map)['unique_key']
+                  ?.toString()
+                  : null);
 
       if (benId == null || benId.isEmpty) {
         return;
@@ -1327,7 +1327,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 style: TextStyle(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
+                                  color: Colors.black,
                                 ),
                               ),
                             ),
@@ -1371,7 +1371,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                             ApiDropdown<String>(
                               labelText:
-                                  l10n?.placeOfAncLabel ?? 'Place of ANC',
+                              l10n?.placeOfAncLabel ?? 'Place of ANC',
                               items: const [
                                 'VHSND/Anganwadi',
                                 'Health Sub-center/Health & Wealth Centre(HSC/HWC)',
@@ -1420,13 +1420,13 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                             CustomDatePicker(
                               labelText:
-                                  l10n?.dateOfInspectionLabel ??
+                              l10n?.dateOfInspectionLabel ??
                                   'Date of inspection *',
                               hintText:
-                                  l10n?.dateOfInspectionLabel ??
+                              l10n?.dateOfInspectionLabel ??
                                   'Date of inspection *',
                               initialDate:
-                                  state.dateOfInspection ?? DateTime.now(),
+                              state.dateOfInspection ?? DateTime.now(),
                               readOnly: true,
                               validator: (date) => validateDateRequired(date),
                             ),
@@ -1439,9 +1439,9 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                             CustomTextField(
                               labelText:
-                                  l10n?.houseNumberLabel ?? 'House number',
+                              l10n?.houseNumberLabel ?? 'House number',
                               hintText:
-                                  l10n?.houseNumberLabel ?? 'House number',
+                              l10n?.houseNumberLabel ?? 'House number',
                               initialValue: state.houseNumber,
                               readOnly: true,
                               onChanged: (v) => bloc.add(HouseNumberChanged(v)),
@@ -1453,10 +1453,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
                             CustomTextField(
                               labelText:
-                                  l10n?.nameOfPregnantWomanLabel ??
+                              l10n?.nameOfPregnantWomanLabel ??
                                   'Name of Pregnant Woman',
                               hintText:
-                                  l10n?.nameOfPregnantWomanLabel ??
+                              l10n?.nameOfPregnantWomanLabel ??
                                   'Name of Pregnant Woman',
                               readOnly: true,
                               key: ValueKey('woman_name_${state.womanName}'),
@@ -1470,10 +1470,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
                             CustomTextField(
                               labelText:
-                                  l10n?.husbandNameLabel ?? "Husband's name",
+                              l10n?.husbandNameLabel ?? "Husband's name",
                               readOnly: true,
                               hintText:
-                                  l10n?.husbandNameLabel ?? "Husband's name",
+                              l10n?.husbandNameLabel ?? "Husband's name",
                               key: ValueKey(
                                 'husband_name_${state.husbandName}',
                               ),
@@ -1508,10 +1508,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                               ),
                               child: CustomDatePicker(
                                 labelText:
-                                    l10n?.lmpDateLabel ??
+                                l10n?.lmpDateLabel ??
                                     'Date of last menstrual period (LMP) *',
                                 hintText:
-                                    l10n?.lmpDateLabel ??
+                                l10n?.lmpDateLabel ??
                                     'Date of last menstrual period (LMP) *',
                                 initialDate: state.lmpDate ?? DateTime.now(),
                                 readOnly: true,
@@ -1520,7 +1520,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     bloc.add(LmpDateChanged(d));
                                     final base =
                                         bloc.state.dateOfInspection ??
-                                        DateTime.now();
+                                            DateTime.now();
                                     final difference = base
                                         .difference(d)
                                         .inDays;
@@ -1540,10 +1540,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
                             CustomDatePicker(
                               labelText:
-                                  l10n?.eddDateLabel ??
+                              l10n?.eddDateLabel ??
                                   'Expected date of delivery (EDD)',
                               hintText:
-                                  l10n?.eddDateLabel ??
+                              l10n?.eddDateLabel ??
                                   'Expected date of delivery (EDD)',
                               initialDate: state.eddDate,
                               readOnly: true,
@@ -1560,13 +1560,13 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 'weeks_of_pregnancy_${state.weeksOfPregnancy}',
                               ),
                               labelText:
-                                  l10n?.weeksOfPregnancyLabel ??
+                              l10n?.weeksOfPregnancyLabel ??
                                   'No. of weeks of pregnancy',
                               hintText:
-                                  l10n?.weeksOfPregnancyLabel ??
+                              l10n?.weeksOfPregnancyLabel ??
                                   'No. of weeks of pregnancy',
                               initialValue: state.weeksOfPregnancy,
-                             // readOnly: true,
+                              // readOnly: true,
                               keyboardType: TextInputType.number,
                               onChanged: (v) =>
                                   bloc.add(WeeksOfPregnancyChanged(v)),
@@ -1596,8 +1596,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                                       icon: Icons.remove,
                                       onTap: state.gravida > 1
                                           ? () => bloc.add(
-                                              const GravidaDecremented(),
-                                            )
+                                        const GravidaDecremented(),
+                                      )
                                           : null,
                                       enabled: state.gravida > 1,
                                     ),
@@ -1621,8 +1621,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                                       icon: Icons.add,
                                       onTap: state.gravida < 15
                                           ? () => bloc.add(
-                                              const GravidaIncremented(),
-                                            )
+                                        const GravidaIncremented(),
+                                      )
                                           : null,
                                       enabled: state.gravida < 15,
                                     ),
@@ -1638,7 +1638,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
                             ApiDropdown<String>(
                               labelText:
-                                  l10n?.isWomanBreastfeedingLabel ??
+                              l10n?.isWomanBreastfeedingLabel ??
                                   'Is woman breastfeeding?',
                               items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
                               value: state.isBreastFeeding.isEmpty
@@ -1657,28 +1657,28 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
                             Opacity(
                               opacity:
-                                  (() {
-                                    // If booster date is already selected, disable TD1 field
-                                    if (state.tdBoosterDate != null) {
-                                      return true;
-                                    }
-                                    final prev = _prevLmpFromEc;
-                                    final curr = state.lmpDate;
-                                    if (prev != null && curr != null) {
-                                      final years = _fullYearsBetween(
-                                        prev,
-                                        curr,
-                                      );
-                                      return years <
-                                          3; // disable if gap < 3 years
-                                    }
-                                    return false;
-                                  })()
+                              (() {
+                                // If booster date is already selected, disable TD1 field
+                                if (state.tdBoosterDate != null) {
+                                  return true;
+                                }
+                                final prev = _prevLmpFromEc;
+                                final curr = state.lmpDate;
+                                if (prev != null && curr != null) {
+                                  final years = _fullYearsBetween(
+                                    prev,
+                                    curr,
+                                  );
+                                  return years <
+                                      3; // disable if gap < 3 years
+                                }
+                                return false;
+                              })()
                                   ? 0.5
                                   : 1.0,
                               child: CustomDatePicker(
                                 labelText:
-                                    l10n?.td1DateLabel ??
+                                l10n?.td1DateLabel ??
                                     'Date of T.D(Tetanus and adult diphtheria) 1',
                                 hintText: 'dd-mm-yyyy',
                                 initialDate: state.td1Date,
@@ -1709,28 +1709,28 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
                             Opacity(
                               opacity:
-                                  (() {
-                                    final inspect =
-                                        state.dateOfInspection ??
+                              (() {
+                                final inspect =
+                                    state.dateOfInspection ??
                                         DateTime.now();
-                                    final td1 =
-                                        state.td1Date ?? _lastTd1DateFromDb;
-                                    if (td1 == null) {
-                                      return true;
-                                    }
-                                    final days = inspect.difference(td1).inDays;
-                                    return days < 28;
-                                  })()
+                                final td1 =
+                                    state.td1Date ?? _lastTd1DateFromDb;
+                                if (td1 == null) {
+                                  return true;
+                                }
+                                final days = inspect.difference(td1).inDays;
+                                return days < 28;
+                              })()
                                   ? 0.5
                                   : 1.0,
                               child: CustomDatePicker(
                                 labelText:
-                                    l10n?.td2DateLabel ??
+                                l10n?.td2DateLabel ??
                                     'Date of T.D(Tetanus and adult diphtheria) 2',
                                 hintText: 'dd-mm-yyyy',
                                 initialDate: state.td2Date,
                                 firstDate:
-                                    (state.td1Date ?? _lastTd1DateFromDb) ??
+                                (state.td1Date ?? _lastTd1DateFromDb) ??
                                     DateTime(1900),
                                 lastDate: DateTime.now(),
                                 readOnly: (() {
@@ -1755,41 +1755,41 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
                             Opacity(
                               opacity:
-                                  (() {
-                                    if (state.tdBoosterDate != null) {
-                                      return false;
-                                    }
-                                    if (state.td1Date != null) {
-                                      return true;
-                                    }
-                                    bool td2Eligible = false;
-                                    final inspect =
-                                        state.dateOfInspection ??
+                              (() {
+                                if (state.tdBoosterDate != null) {
+                                  return false;
+                                }
+                                if (state.td1Date != null) {
+                                  return true;
+                                }
+                                bool td2Eligible = false;
+                                final inspect =
+                                    state.dateOfInspection ??
                                         DateTime.now();
-                                    final td1 =
-                                        state.td1Date ?? _lastTd1DateFromDb;
-                                    if (inspect != null && td1 != null) {
-                                      final days = inspect
-                                          .difference(td1)
-                                          .inDays;
-                                      td2Eligible = days >= 28;
-                                    }
-                                    if (td2Eligible) {
-                                      return true;
-                                    }
-                                    final p = _prevLmpFromEc;
-                                    final c = state.lmpDate;
-                                    if (p != null && c != null) {
-                                      final years = _fullYearsBetween(p, c);
-                                      return years > 3;
-                                    }
-                                    return state.gravida < 2;
-                                  })()
+                                final td1 =
+                                    state.td1Date ?? _lastTd1DateFromDb;
+                                if (inspect != null && td1 != null) {
+                                  final days = inspect
+                                      .difference(td1)
+                                      .inDays;
+                                  td2Eligible = days >= 28;
+                                }
+                                if (td2Eligible) {
+                                  return true;
+                                }
+                                final p = _prevLmpFromEc;
+                                final c = state.lmpDate;
+                                if (p != null && c != null) {
+                                  final years = _fullYearsBetween(p, c);
+                                  return years > 3;
+                                }
+                                return state.gravida < 2;
+                              })()
                                   ? 0.5
                                   : 1.0,
                               child: CustomDatePicker(
                                 labelText:
-                                    l10n?.tdBoosterDateLabel ??
+                                l10n?.tdBoosterDateLabel ??
                                     'Date of T.D(Tetanus and adult diphtheria) booster',
                                 hintText: 'dd-mm-yyyy',
                                 initialDate: state.tdBoosterDate,
@@ -1838,7 +1838,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     int.tryParse(
                                       state.weeksOfPregnancy ?? '0',
                                     ) ??
-                                    0;
+                                        0;
 
                                 // Show Folic Acid field only when weeks < 12
                                 if (weeks < 12) {
@@ -1847,10 +1847,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                                       // Folic Acid Tablets Field
                                       CustomTextField(
                                         labelText:
-                                            l10n?.folicAcidTabletsLabel ??
+                                        l10n?.folicAcidTabletsLabel ??
                                             'Number of Folic Acid tablets given',
                                         hintText:
-                                            l10n?.folicAcidTabletsLabel ??
+                                        l10n?.folicAcidTabletsLabel ??
                                             'Enter number of Folic Acid tablets',
                                         initialValue: state.folicAcidTablets,
                                         keyboardType: TextInputType.number,
@@ -1870,13 +1870,13 @@ class _AncvisitformState extends State<Ancvisitform> {
                                       // Iron & Folic Acid Tablets Field
                                       CustomTextField(
                                         labelText:
-                                            l10n?.folicAcidTabletsLabel ??
+                                        l10n?.folicirAcidTabletsLabel ??
                                             'Number of Folic Acid tablets given',
                                         hintText:
-                                            l10n?.folicAcidTabletsLabel ??
+                                        l10n?.folicirAcidTabletsLabel ??
                                             'Enter number of Folic Acid tablets',
                                         initialValue:
-                                            state.ironFolicAcidTablets,
+                                        state.ironFolicAcidTablets,
                                         keyboardType: TextInputType.number,
                                         onChanged: (v) => bloc.add(
                                           IronFolicAcidTabletsChanged(v),
@@ -1901,10 +1901,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                               ),
                               CustomTextField(
                                 labelText:
-                                    l10n?.calciumVitaminD3TabletsLabel ??
+                                l10n?.calciumVitaminD3TabletsLabel ??
                                     'Number of Calcium and Vitamin D3 tablets given',
                                 hintText:
-                                    l10n?.calciumVitaminD3TabletsLabel ??
+                                l10n?.calciumVitaminD3TabletsLabel ??
                                     'Enter number of Calcium and Vitamin D3 tablets',
                                 initialValue: state.calciumVitaminD3Tablets,
                                 keyboardType: TextInputType.number,
@@ -1923,10 +1923,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                               items: [
                                 MultiSelectItem(
                                   label:
-                                      l10n?.tuberculosisLabel ??
+                                  l10n?.tuberculosisLabel ??
                                       'Turbeculosis (TB)',
                                   value:
-                                      l10n?.tuberculosisLabel ??
+                                  l10n?.tuberculosisLabel ??
                                       'Turbeculosis (TB)',
                                 ),
                                 MultiSelectItem(
@@ -1945,13 +1945,14 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   label: l10n?.highBP ?? 'High BP',
                                   value: l10n?.highBP ?? 'High BP',
                                 ),
-                                MultiSelectItem(
-                                  label: l10n?.stirti ?? 'STI/RTI',
-                                  value: l10n?.stirti ?? 'STI/RTI',
-                                ),
+
                                 MultiSelectItem(
                                   label: l10n?.heartDisease ?? 'Heart Disease',
                                   value: l10n?.heartDisease ?? 'Heart Disease',
+                                ),
+                                MultiSelectItem(
+                                  label: l10n?.stirti ?? 'STI/RTI',
+                                  value: l10n?.stirti ?? 'STI/RTI',
                                 ),
                                 MultiSelectItem(
                                   label: l10n?.diseaseLiver ?? 'Liver Disease',
@@ -1959,9 +1960,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 ),
                                 MultiSelectItem(
                                   label:
-                                      l10n?.diseaseKidney ?? 'Kidney Disease',
+                                  l10n?.diseaseKidney ?? 'Kidney Disease',
                                   value:
-                                      l10n?.diseaseKidney ?? 'Kidney Disease',
+                                  l10n?.diseaseKidney ?? 'Kidney Disease',
                                 ),
                                 MultiSelectItem(
                                   label: l10n?.diseaseEpilepsy ?? 'Epilepsy',
@@ -1974,7 +1975,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                               ],
                               selectedValues: state.selectedDiseases,
                               labelText:
-                                  l10n?.preExistingDiseaseLabel ??
+                              l10n?.preExistingDiseaseLabel ??
                                   'Pre - Existing disease',
                               hintText: l10n?.select ?? 'Select',
 
@@ -2007,8 +2008,8 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     bloc.add(OtherDiseaseChanged(v)),
                                 validator: (value) {
                                   if (state.selectedDiseases.contains(
-                                        l10n?.diseaseOther ?? 'Other',
-                                      ) &&
+                                    l10n?.diseaseOther ?? 'Other',
+                                  ) &&
                                       (value == null || value.isEmpty)) {
                                     return l10n?.requiredField ??
                                         'This field is required';
@@ -2063,9 +2064,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
                             CustomTextField(
                               labelText:
-                                  l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
+                              l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
                               hintText:
-                                  l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
+                              l10n?.hemoglobinLabel ?? 'Hemoglobin (HB)',
                               initialValue: state.hemoglobin,
                               keyboardType: TextInputType.number,
                               onChanged: (v) => bloc.add(HemoglobinChanged(v)),
@@ -2079,7 +2080,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                             ),
                             ApiDropdown<String>(
                               labelText:
-                                  l10n?.anyHighRiskProblemLabel ??
+                              l10n?.anyHighRiskProblemLabel ??
                                   'Is there any high risk problem?',
                               items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
                               value: state.highRisk.isEmpty
@@ -2098,69 +2099,69 @@ class _AncvisitformState extends State<Ancvisitform> {
                               ),
                               MultiSelect<String>(
                                 items:
-                                    const [
-                                          'riskSevereAnemia',
-                                          'riskPIH',
-                                          'riskInfections',
-                                          'riskGestationalDiabetes',
-                                          'riskHypothyroidism',
-                                          'riskTeenagePregnancy',
-                                          'riskTwins',
-                                          'riskMalPresentation',
-                                          'riskPreviousCesarean',
-                                          'riskPreviousHistory',
-                                          'riskRhNegative',
-                                        ]
-                                        .map(
-                                          (risk) => MultiSelectItem<String>(
-                                            label: () {
-                                              switch (risk) {
-                                                case 'riskSevereAnemia':
-                                                  return l10n
-                                                          ?.riskSevereAnemia ??
-                                                      '';
-                                                case 'riskPIH':
-                                                  return l10n?.riskPIH ?? '';
-                                                case 'riskInfections':
-                                                  return l10n?.riskInfections ??
-                                                      '';
-                                                case 'riskGestationalDiabetes':
-                                                  return l10n
-                                                          ?.riskGestationalDiabetes ??
-                                                      '';
-                                                case 'riskHypothyroidism':
-                                                  return l10n
-                                                          ?.riskHypothyroidism ??
-                                                      '';
-                                                case 'riskTeenagePregnancy':
-                                                  return l10n
-                                                          ?.riskTeenagePregnancy ??
-                                                      '';
-                                                case 'riskTwins':
-                                                  return l10n?.riskTwins ?? '';
-                                                case 'riskMalPresentation':
-                                                  return l10n
-                                                          ?.riskMalPresentation ??
-                                                      '';
-                                                case 'riskPreviousCesarean':
-                                                  return l10n
-                                                          ?.riskPreviousCesarean ??
-                                                      '';
-                                                case 'riskPreviousHistory':
-                                                  return l10n
-                                                          ?.riskPreviousHistory ??
-                                                      '';
-                                                case 'riskRhNegative':
-                                                  return l10n?.riskRhNegative ??
-                                                      '';
-                                                default:
-                                                  return risk;
-                                              }
-                                            }(),
-                                            value: risk,
-                                          ),
-                                        )
-                                        .toList(),
+                                const [
+                                  'riskSevereAnemia',
+                                  'riskPIH',
+                                  'riskInfections',
+                                  'riskGestationalDiabetes',
+                                  'riskHypothyroidism',
+                                  'riskTeenagePregnancy',
+                                  'riskTwins',
+                                  'riskMalPresentation',
+                                  'riskPreviousCesarean',
+                                  'riskPreviousHistory',
+                                  'riskRhNegative',
+                                ]
+                                    .map(
+                                      (risk) => MultiSelectItem<String>(
+                                    label: () {
+                                      switch (risk) {
+                                        case 'riskSevereAnemia':
+                                          return l10n
+                                              ?.riskSevereAnemia ??
+                                              '';
+                                        case 'riskPIH':
+                                          return l10n?.riskPIH ?? '';
+                                        case 'riskInfections':
+                                          return l10n?.riskInfections ??
+                                              '';
+                                        case 'riskGestationalDiabetes':
+                                          return l10n
+                                              ?.riskGestationalDiabetes ??
+                                              '';
+                                        case 'riskHypothyroidism':
+                                          return l10n
+                                              ?.riskHypothyroidism ??
+                                              '';
+                                        case 'riskTeenagePregnancy':
+                                          return l10n
+                                              ?.riskTeenagePregnancy ??
+                                              '';
+                                        case 'riskTwins':
+                                          return l10n?.riskTwins ?? '';
+                                        case 'riskMalPresentation':
+                                          return l10n
+                                              ?.riskMalPresentation ??
+                                              '';
+                                        case 'riskPreviousCesarean':
+                                          return l10n
+                                              ?.riskPreviousCesarean ??
+                                              '';
+                                        case 'riskPreviousHistory':
+                                          return l10n
+                                              ?.riskPreviousHistory ??
+                                              '';
+                                        case 'riskRhNegative':
+                                          return l10n?.riskRhNegative ??
+                                              '';
+                                        default:
+                                          return risk;
+                                      }
+                                    }(),
+                                    value: risk,
+                                  ),
+                                )
+                                    .toList(),
                                 selectedValues: state.selectedRisks,
                                 labelText: l10n?.selectRisks ?? 'Select risks',
                                 hintText: l10n?.selectRisks ?? 'Select risks',
@@ -2178,12 +2179,12 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 height: 0,
                               ),
                               if (!(int.tryParse(state.weeksOfPregnancy) !=
-                                      null &&
+                                  null &&
                                   int.parse(state.weeksOfPregnancy) > 30)) ...[
                                 const SizedBox(height: 8),
                                 ApiDropdown<String>(
                                   labelText:
-                                      l10n?.abortionComplication ??
+                                  l10n?.abortionComplication ??
                                       'Any complication leading to abortion?',
                                   items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
                                   value: state.hasAbortionComplication.isEmpty
@@ -2200,10 +2201,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 const SizedBox(height: 16),
                                 CustomDatePicker(
                                   labelText:
-                                      l10n?.dateOfAbortion ??
+                                  l10n?.dateOfAbortion ??
                                       'Date of Abortion',
                                   hintText:
-                                      l10n?.dateOfAbortion ??
+                                  l10n?.dateOfAbortion ??
                                       'Date of Abortion',
                                   initialDate: state.abortionDate,
                                   onDateChanged: (d) =>
@@ -2220,7 +2221,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 int.parse(state.weeksOfPregnancy) > 30) ...[
                               ApiDropdown<String>(
                                 labelText:
-                                    l10n?.didPregnantWomanGiveBirth ??
+                                l10n?.didPregnantWomanGiveBirth ??
                                     'Did the pregnant woman give birth to a baby?',
                                 items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
                                 value: state.givesBirthToBaby.isEmpty
@@ -2241,7 +2242,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   (l10n?.yes ?? 'Yes')) ...[
                                 ApiDropdown<String>(
                                   labelText:
-                                      l10n?.deliveryOutcomeLabel ??
+                                  l10n?.deliveryOutcomeLabel ??
                                       'Delivery outcome *',
                                   items: [
                                     "Live birth",
@@ -2281,7 +2282,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                         (l10n?.yes ?? 'Yes')) ...[
                                   ApiDropdown<String>(
                                     labelText:
-                                        l10n?.numberOfChildrenLabel ??
+                                    l10n?.numberOfChildrenLabel ??
                                         'Number of Children *',
                                     items: ["One Child", "Twins", "Triplets"],
                                     value: state.numberOfChildren.isEmpty
@@ -2318,9 +2319,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   // Baby 1 Name
                                   CustomTextField(
                                     labelText:
-                                        l10n?.babysName ?? "Baby's Name *",
+                                    l10n?.babysName ?? "Baby's Name *",
                                     hintText:
-                                        l10n?.enterBabyName ??
+                                    l10n?.enterBabyName ??
                                         "Enter Baby's Name",
                                     initialValue: state.baby1Name,
                                     onChanged: (v) =>
@@ -2336,7 +2337,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   // Baby 1 Gender
                                   ApiDropdown<String>(
                                     labelText:
-                                        l10n?.babyGenderLabel ??
+                                    l10n?.babyGenderLabel ??
                                         "Baby's Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby1Gender.isEmpty
@@ -2368,10 +2369,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   // Baby 1 Weight
                                   CustomTextField(
                                     labelText:
-                                        l10n?.babyWeightLabel ??
+                                    l10n?.babyWeightLabel ??
                                         "Baby's Weight (1200–4000gms) *",
                                     hintText:
-                                        l10n?.enterBabyWeight ??
+                                    l10n?.enterBabyWeight ??
                                         "Enter Baby's Weight",
                                     initialValue: state.baby1Weight,
                                     keyboardType: TextInputType.number,
@@ -2391,10 +2392,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                                     state.deliveryOutcome == "Live birth") ...[
                                   CustomTextField(
                                     labelText:
-                                        l10n?.firstBabyName ??
+                                    l10n?.firstBabyName ??
                                         "First Baby  Name *",
                                     hintText:
-                                        l10n?.enterFirstBabyName ??
+                                    l10n?.enterFirstBabyName ??
                                         "Enter First Baby  Name",
                                     initialValue: state.baby1Name,
                                     onChanged: (v) =>
@@ -2409,7 +2410,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   ApiDropdown<String>(
                                     labelText:
-                                        l10n?.firstBabyGender ??
+                                    l10n?.firstBabyGender ??
                                         "First Baby  Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby1Gender.isEmpty
@@ -2440,10 +2441,10 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   CustomTextField(
                                     labelText:
-                                        l10n?.firstBabyWeight ??
+                                    l10n?.firstBabyWeight ??
                                         "First Baby Weight (1200–4000gms) *",
                                     hintText:
-                                        l10n?.enterFirstBabyWeight ??
+                                    l10n?.enterFirstBabyWeight ??
                                         "Enter First Baby  Weight",
                                     initialValue: state.baby1Weight,
                                     keyboardType: TextInputType.number,
@@ -2460,10 +2461,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   // ========== BABY 2 ==========
                                   CustomTextField(
                                     labelText:
-                                        l10n?.secondBabyName ??
+                                    l10n?.secondBabyName ??
                                         "Second Baby  Name *",
                                     hintText:
-                                        l10n?.enterSecondBabyName ??
+                                    l10n?.enterSecondBabyName ??
                                         "Enter Second Baby Name",
                                     initialValue: state.baby2Name,
                                     onChanged: (v) =>
@@ -2478,7 +2479,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   ApiDropdown<String>(
                                     labelText:
-                                        l10n?.secondBabyGender ??
+                                    l10n?.secondBabyGender ??
                                         "Second Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby2Gender.isEmpty
@@ -2509,10 +2510,10 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   CustomTextField(
                                     labelText:
-                                        l10n?.secondBabyWeight ??
+                                    l10n?.secondBabyWeight ??
                                         "Second Baby Weight (1200–4000gms) *",
                                     hintText:
-                                        l10n?.enterSecondBabyWeight ??
+                                    l10n?.enterSecondBabyWeight ??
                                         "Enter Second Baby Weight",
                                     initialValue: state.baby2Weight,
                                     keyboardType: TextInputType.number,
@@ -2533,10 +2534,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   // ========== BABY 1 ==========
                                   CustomTextField(
                                     labelText:
-                                        l10n?.firstBabyName ??
+                                    l10n?.firstBabyName ??
                                         "First Baby  Name *",
                                     hintText:
-                                        l10n?.enterFirstBabyName ??
+                                    l10n?.enterFirstBabyName ??
                                         "Enter First Baby  Name",
                                     initialValue: state.baby1Name,
                                     onChanged: (v) =>
@@ -2551,7 +2552,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   ApiDropdown<String>(
                                     labelText:
-                                        l10n?.firstBabyGender ??
+                                    l10n?.firstBabyGender ??
                                         "First Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby1Gender.isEmpty
@@ -2582,10 +2583,10 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   CustomTextField(
                                     labelText:
-                                        l10n?.firstBabyWeight ??
+                                    l10n?.firstBabyWeight ??
                                         "First Baby Weight (1200–4000gms) *",
                                     hintText:
-                                        l10n?.enterFirstBabyWeight ??
+                                    l10n?.enterFirstBabyWeight ??
                                         "Enter First Baby Weight",
                                     initialValue: state.baby1Weight,
                                     keyboardType: TextInputType.number,
@@ -2602,10 +2603,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   // ========== BABY 2 ==========
                                   CustomTextField(
                                     labelText:
-                                        l10n?.secondBabyName ??
+                                    l10n?.secondBabyName ??
                                         "Second Baby Name *",
                                     hintText:
-                                        l10n?.enterSecondBabyName ??
+                                    l10n?.enterSecondBabyName ??
                                         "Enter Second Baby Name",
                                     initialValue: state.baby2Name,
                                     onChanged: (v) =>
@@ -2620,7 +2621,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   ApiDropdown<String>(
                                     labelText:
-                                        l10n?.secondBabyGender ??
+                                    l10n?.secondBabyGender ??
                                         "Second Baby Gender *",
                                     items: ["Male", "Female", "Transgender"],
                                     value: state.baby2Gender.isEmpty
@@ -2640,10 +2641,10 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   CustomTextField(
                                     labelText:
-                                        l10n?.secondBabyWeight ??
+                                    l10n?.secondBabyWeight ??
                                         "Second Baby Weight (1200–4000gms) *",
                                     hintText:
-                                        l10n?.enterSecondBabyWeight ??
+                                    l10n?.enterSecondBabyWeight ??
                                         "Enter Second Baby Weight",
                                     initialValue: state.baby2Weight,
                                     keyboardType: TextInputType.number,
@@ -2660,10 +2661,10 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   // ========== BABY 3 ==========
                                   CustomTextField(
                                     labelText:
-                                        l10n?.thirdBabyName ??
+                                    l10n?.thirdBabyName ??
                                         "Third Baby Name *",
                                     hintText:
-                                        l10n?.enterThirdBabyName ??
+                                    l10n?.enterThirdBabyName ??
                                         "Enter Third Baby Name",
                                     initialValue: state.baby3Name,
                                     onChanged: (v) =>
@@ -2707,10 +2708,10 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                                   CustomTextField(
                                     labelText:
-                                        l10n?.thirdBabyWeight ??
+                                    l10n?.thirdBabyWeight ??
                                         "Third Baby Weight (1200–4000gms) *",
                                     hintText:
-                                        l10n?.enterThirdBabyWeight ??
+                                    l10n?.enterThirdBabyWeight ??
                                         "Enter Third Baby Weight",
                                     initialValue: state.baby3Weight,
                                     keyboardType: TextInputType.number,
@@ -2729,7 +2730,7 @@ class _AncvisitformState extends State<Ancvisitform> {
 
                             ApiDropdown<String>(
                               labelText:
-                                  l10n?.beneficiaryAbsentLabel ??
+                              l10n?.beneficiaryAbsentLabel ??
                                   'Is Beneficiary Absent?',
                               items: [l10n?.yes ?? 'Yes', l10n?.no ?? 'No'],
                               value: state.beneficiaryAbsent.isEmpty
@@ -2759,7 +2760,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                 onChanged: (v) =>
                                     bloc.add(AbsenceReasonChanged(v)),
                                 validator:
-                                    null, // Made non-mandatory as requested
+                                null, // Made non-mandatory as requested
                               ),
 
                             Divider(
@@ -2800,9 +2801,9 @@ class _AncvisitformState extends State<Ancvisitform> {
                                           widget
                                               .beneficiaryData?['BeneficiaryID']
                                               ?.toString() ??
-                                          widget.beneficiaryData?['unique_key']
-                                              ?.toString() ??
-                                          '';
+                                              widget.beneficiaryData?['unique_key']
+                                                  ?.toString() ??
+                                              '';
                                       Navigator.pushNamed(
                                         context,
                                         Route_Names.Previousvisit,

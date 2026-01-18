@@ -49,7 +49,7 @@ class ChildDetailsTab extends StatefulWidget {
 
 class _ChildDetailsTabState extends State<ChildDetailsTab> {
   String? _breastfeedingTime;
-  
+
   // FocusNodes for text fields that need validation focus
   final FocusNode _babyNameFocusNode = FocusNode();
   final FocusNode _weightAtBirthFocusNode = FocusNode();
@@ -57,7 +57,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
   final FocusNode _firstBreastfeedCustomTimeFocusNode = FocusNode();
   final FocusNode _firstFeedOtherFocusNode = FocusNode();
   final FocusNode _congenitalAbnormalityOtherFocusNode = FocusNode();
-  
+
   @override
   void initState() {
     super.initState();
@@ -223,20 +223,20 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
         return BlocConsumer<HbncVisitBloc, HbncVisitState>(
           listenWhen: (previous, current) =>
           previous.newbornDetailsList != current.newbornDetailsList ||
-          previous.focusedErrorField != current.focusedErrorField ||
-          previous.validationTick != current.validationTick,
+              previous.focusedErrorField != current.focusedErrorField ||
+              previous.validationTick != current.validationTick,
           listener: (context, state) {
             print('ChildDetails (from state): ${state.newbornDetailsList}');
-            
+
             // Handle focus for text fields when validation occurs
             if (state.focusedErrorField != null && mounted) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!mounted) return;
-                
+
                 // Add a small delay to ensure widget tree is fully built for conditionally rendered fields
                 Future.delayed(const Duration(milliseconds: 100), () {
                   if (!mounted) return;
-                  
+
                   switch (state.focusedErrorField) {
                     case 'babyName':
                       if (_babyNameFocusNode.canRequestFocus) {
@@ -317,890 +317,890 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                   children: [
                     ...baseChildren,
 
-                  CustomTextField(
-                    key: ChildDetailsTab.fieldKeys['babyName'],
-                    labelText: "${t.babyNameLabel} *",
-                    hintText: t.babyNameLabel,
-                    validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
-                    initialValue: s(c['babyName']),
-                    focusNode: _babyNameFocusNode,
-                    autofocus: state.focusedErrorField == 'babyName',
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'babyName', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  ApiDropdown<String>(
-                    key: ChildDetailsTab.fieldKeys['gender'],
-                    labelText: "${t.babyGenderLabel} *",
-                    hintText: t.babyGenderLabel,
-                    validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
-                    items: const ['Male', 'Female'],
-                    getLabel: (s) {
-                      switch (s) {
-                        case 'Male':
-                          return t.genderMale;
-                        case 'Female':
-                          return t.genderFemale;
-                        default:
-                          return s;
-                      }
-                    },
-                    value: s(c['gender']),
-                    autoOpenTick: state.focusedErrorField == 'gender' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(
-                        field: 'gender',
-                        value: val,
-                        childIndex: widget.childIndex,
-                      ),
-                    ),
-                  ),
-
-                  const Divider(height: 0,),
-
-                  CustomTextField(
-                    key: ChildDetailsTab.fieldKeys['weightAtBirth'],
-                    labelText: "${t.newbornWeightGramLabel} *",
-                    hintText: t.newbornWeightGramLabel,
-                    keyboardType: TextInputType.number,
-                    validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
-                    initialValue: s(c['weightAtBirth']),
-                    focusNode: _weightAtBirthFocusNode,
-                    autofocus: state.focusedErrorField == 'weightAtBirth',
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'weightAtBirth', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  CustomTextField(
-                    key: ChildDetailsTab.fieldKeys['temperature'],
-                    labelText: "${t.newbornTemperatureLabel} *",
-                    hintText: t.hintTemp,
-                    keyboardType: TextInputType.number,
-                    validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
-                    initialValue: s(c['temperature']),
-                    focusNode: _temperatureFocusNode,
-                    autofocus: state.focusedErrorField == 'temperature',
-                    onChanged: (val) {
-                      context.read<HbncVisitBloc>().add(
-                        NewbornDetailsChanged(
-                          field: 'temperature',
-                          value: val,
-                          childIndex: widget.childIndex,
-                        ),
-                      );
-
-                      if (val.length >= 2) {
-                        _validateTemperature(
-                          context: context,
-                          tempValue: val,
-                          unit: s(c['tempUnit']),
-                        );
-                      }
-                    },
-                  ),
-
-                  const Divider(height: 0,),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 10),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: t.infantTemperatureUnitLabel,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black, // label color
-                                ),
-                              ),
-                              const TextSpan(
-                                text: ' *',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.red,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Radio<String>(
-                            value: 'Celsius',
-                            groupValue: s(c['tempUnit']),
-                            onChanged: (val) {
-                              context.read<HbncVisitBloc>().add(
-                                NewbornDetailsChanged(
-                                  field: 'tempUnit',
-                                  value: val,
-                                  childIndex: widget.childIndex,
-                                ),
-                              );
-
-                              _validateTemperature(
-                                context: context,
-                                tempValue: s(c['temperature']),
-                                unit: val,
-                              );
-                            },
-                          ),
-                          Text(t.temperatureUnitCelsius),
-
-                          const SizedBox(width: 24),
-
-                          Radio<String>(
-                            value: 'Fahrenheit',
-                            groupValue: s(c['tempUnit']),
-                            onChanged: (val) {
-                              context.read<HbncVisitBloc>().add(
-                                NewbornDetailsChanged(
-                                  field: 'tempUnit',
-                                  value: val,
-                                  childIndex: widget.childIndex,
-                                ),
-                              );
-
-                              _validateTemperature(
-                                context: context,
-                                tempValue: s(c['temperature']),
-                                unit: val,
-                              );
-                            },
-                          ),
-                          Text(t.temperatureUnitFahrenheit),
-                        ],
-                      ),
-                    ],
-                  ),
-
-
-                  const Divider(height: 0,),
-                  ApiDropdown<String>(
-                    labelText: "${t.weightColorMatchLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['weightColorMatch']),
-                    autoOpenTick: state.focusedErrorField == 'weightColorMatch' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'weightColorMatch', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-
-                  ApiDropdown<String>(
-                    labelText: "${t.weighingScaleColorLabel} *",
-                    items: const ['Red', 'Yellow','Green'],
-                    getLabel: (e) => e == 'Green' ? t.colorGreen : (e == 'Yellow' ? t.colorYellow : t.colorRed),
-                    value: s(c['weighingScaleColor']),
-                    autoOpenTick: state.focusedErrorField == 'weighingScaleColor' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'weighingScaleColor', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-
-                  ApiDropdown<String>(
-                    labelText: "${t.motherReportsTempOrChestIndrawingLabel} *",
-                    labelMaxLines: 4,
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['motherReportsTempOrChestIndrawing']),
-                    autoOpenTick: state.focusedErrorField == 'motherReportsTempOrChestIndrawing' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'motherReportsTempOrChestIndrawing', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-
-                  // Breastfeeding-related fields
-                  ApiDropdown<String>(
-                    labelText: "${t.exclusiveBreastfeedingStartedLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['exclusiveBreastfeedingStarted']),
-                    autoOpenTick: state.focusedErrorField == 'exclusiveBreastfeedingStarted' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'exclusiveBreastfeedingStarted', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  ApiDropdown<String>(
-                    labelText: "${t.firstBreastfeedTimingLabel} *",
-                    hintText: t.selectOption,
-                    items: const [
-                      'Within 30 minutes of birth',
-                      'Within 1 hour of birth',
-                      'Within 6 hours of birth',
-                      'Within 24 hours of birth',
-                      'Other',
-                      'Not breastfed'
-                    ],
-                    getLabel: (s) {
-                      switch (s) {
-                        case 'Within 30 minutes of birth':
-                          return t.within30Minutes;
-                        case 'Within 1 hour of birth':
-                          return t.within1Hour;
-                        case 'Within 6 hours of birth':
-                          return t.within6Hours;
-                        case 'Within 24 hours of birth':
-                          return t.within24Hours;
-                        case 'Other':
-                          return t.other;
-                        case 'Not breastfed':
-                          return t.notBreastfed;
-                        default:
-                          return s;
-                      }
-                    },
-                    value: c['firstBreastfeedTiming'],
-                    autoOpenTick: state.focusedErrorField == 'firstBreastfeedTiming' ? state.validationTick : null,
-                    onChanged: (val) {
-                      context.read<HbncVisitBloc>().add(
-                        NewbornDetailsChanged(
-                          field: 'firstBreastfeedTiming',
-                          value: val,
-                          childIndex: widget.childIndex,
-                        ),
-                      );
-
-                      if (val != 'Other') {
-                        context.read<HbncVisitBloc>().add(
-                          NewbornDetailsChanged(
-                            field: 'firstBreastfeedCustomTime',
-                            value: null, // or ''
-                            childIndex: widget.childIndex,
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                  const Divider(height: 0,),
-                  if (c['firstBreastfeedTiming'] == 'Other')
-
                     CustomTextField(
-                      labelText: t.breastfeedingTime,
-                      hintText: 'hh:mm',
-                      keyboardType: TextInputType.number,
-                      initialValue: c['firstBreastfeedCustomTime'] ?? '',
-                      focusNode: _firstBreastfeedCustomTimeFocusNode,
-                      autofocus: state.focusedErrorField == 'firstBreastfeedCustomTime',
-                      onChanged: (val) {
-                        context.read<HbncVisitBloc>().add(
-                          NewbornDetailsChanged(
-                            field: 'firstBreastfeedCustomTime',
-                            value: val,
-                            childIndex: widget.childIndex,
-                          ),
-                        );
-                      },
+                      key: ChildDetailsTab.fieldKeys['babyName'],
+                      labelText: "${t.babyNameLabel} *",
+                      hintText: t.babyNameLabel,
+                      validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
+                      initialValue: s(c['babyName']),
+                      focusNode: _babyNameFocusNode,
+                      autofocus: state.focusedErrorField == 'babyName',
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'babyName', value: val, childIndex: widget.childIndex),
+                      ),
                     ),
-                  const Divider(height: 0,),
+                    const Divider(height: 0,),
 
-                  if (c['firstBreastfeedTiming'] != 'Not breastfed')
                     ApiDropdown<String>(
-                      labelText: "${t.howWasBreastfedLabel} *",
-                      hintText: t.selectOption,
-                      items: const [
-                        'Normal',
-                        'Forcefully',
-                        'With weakness',
-                        'Could not breast feed but had to be fed with spoon',
-                        'Could neither breast feed nor take given by spoon'
-                      ],
+                      key: ChildDetailsTab.fieldKeys['gender'],
+                      labelText: "${t.babyGenderLabel} *",
+                      hintText: t.babyGenderLabel,
+                      validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
+                      items: const ['Male', 'Female'],
                       getLabel: (s) {
                         switch (s) {
-                          case 'Normal':
-                            return t.normal;
-                          case 'Forcefully':
-                            return t.forcefully;
-                          case 'With weakness':
-                            return t.withWeakness;
-                          case 'Could not breast feed but had to be fed with spoon':
-                            return t.couldNotBreastfeedButSpoon;
-                          case 'Could neither breast feed nor take given by spoon':
-                            return t.couldNeitherBreastfeedNorSpoon;
+                          case 'Male':
+                            return t.genderMale;
+                          case 'Female':
+                            return t.genderFemale;
                           default:
                             return s;
                         }
                       },
-                      value: c['howWasBreastfed'],
-                      autoOpenTick: state.focusedErrorField == 'howWasBreastfed' ? state.validationTick : null,
+                      value: s(c['gender']),
+                      autoOpenTick: state.focusedErrorField == 'gender' ? state.validationTick : null,
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
                         NewbornDetailsChanged(
-                          field: 'howWasBreastfed',
+                          field: 'gender',
                           value: val,
                           childIndex: widget.childIndex,
                         ),
                       ),
                     ),
-                  const Divider(height: 0,),
 
-                  ApiDropdown<String>(
-                    labelText: "${t.firstFeedGivenAfterBirthLabel} *",
-                    hintText: t.selectOption,
-                    items: const ['First Breastfeeding','Water','Honey','Mishri Water / Sugar Syrup', 'Goat Milk','Cow Milk', 'Other' ],
-                    getLabel: (s) {
-                      switch (s) {
-                        case 'First Breastfeeding':
-                          return t.firstBreastfeeding;
-                        case 'Water':
-                          return t.water;
-                        case 'Honey':
-                          return t.honey;
-                        case 'Mishri Water / Sugar Syrup':
-                          return t.mishriWater;
-                        case 'Goat Milk':
-                          return t.goatMilk;
-                        case 'Cow Milk':
-                          return t.cowMilk;
-                        case 'Other':
-                          return t.other;
-                        default:
-                          return s;
-                      }
-                    },
-                    value: s(c['firstFeedGivenAfterBirth']),
-                    autoOpenTick: state.focusedErrorField == 'firstFeedGivenAfterBirth' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'firstFeedGivenAfterBirth', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
                     const Divider(height: 0,),
-                  if (c['firstFeedGivenAfterBirth'] == 'Other')
+
                     CustomTextField(
-                      labelText: "${t.enter_other_feeding_option} *",
-                      initialValue: s(c['firstFeedOther']) ?? '',
-                      focusNode: _firstFeedOtherFocusNode,
-                      autofocus: state.focusedErrorField == 'firstFeedOther',
+                      key: ChildDetailsTab.fieldKeys['weightAtBirth'],
+                      labelText: "${t.newbornWeightGramLabel} *",
+                      hintText: t.newbornWeightGramLabel,
+                      keyboardType: TextInputType.number,
+                      validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
+                      initialValue: s(c['weightAtBirth']),
+                      focusNode: _weightAtBirthFocusNode,
+                      autofocus: state.focusedErrorField == 'weightAtBirth',
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        NewbornDetailsChanged(field: 'firstFeedOther', value: val, childIndex: widget.childIndex),
+                        NewbornDetailsChanged(field: 'weightAtBirth', value: val, childIndex: widget.childIndex),
                       ),
                     ),
-                  const Divider(height: 0,),
-
-                  ApiDropdown<String>(
-                    labelText: "${t.adequatelyFedSevenToEightTimesLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['adequatelyFedSevenToEightTimes']),
-                    autoOpenTick: state.focusedErrorField == 'adequatelyFedSevenToEightTimes' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'adequatelyFedSevenToEightTimes', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                    const Divider(height: 0,),
-                  if (c['adequatelyFedSevenToEightTimes'] == 'No')
-                    ApiDropdown<String>(
-                      labelText: "${t.counsellingAdviceNeeded} *",
-                      items: const ['Yes', 'No'],
-                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                      value: yn(c['adequatelyFedCounseling']),
-                      onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        NewbornDetailsChanged(field: 'adequatelyFedCounseling', value: val, childIndex: widget.childIndex),
-                      ),
-                    ),
-                  const Divider(height: 0,),
-
-                  ApiDropdown<String>(
-                    labelText: "${t.babyDrinkingLessMilkLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['babyDrinkingLessMilk']),
-                    autoOpenTick: state.focusedErrorField == 'babyDrinkingLessMilk' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'babyDrinkingLessMilk', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  ApiDropdown<String>(
-                    labelText: "${t.breastfeedingStoppedLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['breastfeedingStopped']),
-                    autoOpenTick: state.focusedErrorField == 'breastfeedingStopped' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'breastfeedingStopped', value: val, childIndex: widget.childIndex),
-                    ),),
-                  const Divider(height: 0,),
-
-                  ApiDropdown<String>(
-                    labelText: "${t.bloatedStomachOrFrequentVomitingLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['bloatedStomachOrFrequentVomiting']),
-                    autoOpenTick: state.focusedErrorField == 'bloatedStomachOrFrequentVomiting' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'bloatedStomachOrFrequentVomiting', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-                   ApiDropdown<String>(
-                    labelText: "${t.bleedingUmbilicalCordLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['bleedingUmbilicalCord']),
-                    autoOpenTick: state.focusedErrorField == 'bleedingUmbilicalCord' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'bleedingUmbilicalCord', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  if (c['bleedingUmbilicalCord'] == 'Yes')
-                    ApiDropdown<String>(
-                      labelText: "${t.is_navel_tied_with_thread} *",
-                      items: const ['Yes', 'No'],
-                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                      value: yn(c['navelTiedByAshaAnm']),
-                      onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        NewbornDetailsChanged(field: 'navelTiedByAshaAnm', value: val, childIndex: widget.childIndex),
-                      ),
-                    ),
-                  if (c['bleedingUmbilicalCord'] == 'Yes')
                     const Divider(height: 0,),
 
-                  ApiDropdown<String>(
-                    labelText: "${t.pusInNavelLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['pusInNavel']),
-                    autoOpenTick: state.focusedErrorField == 'pusInNavel' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'pusInNavel', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-
-                  ApiDropdown<String>(
-                    labelText: "${t.routineCareDoneLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['routineCareDone']),
-                    autoOpenTick: state.focusedErrorField == 'routineCareDone' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'routineCareDone', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  ApiDropdown<String>(
-                    labelText:"${t.babyWipedWithCleanCloth} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['wipedWithCleanCloth']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'wipedWithCleanCloth', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  ApiDropdown<String>(
-                    labelText: "${t.is_child_kept_warm} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['keptWarm']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'keptWarm', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  // New Question 3: Given bath
-                  ApiDropdown<String>(
-                    labelText: "${t.babyGivenBath} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['givenBath']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'givenBath', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  // New Question 4: Wrapped and placed near mother
-                  ApiDropdown<String>(
-                    labelText: "${t.babyWrappedAndPlacedNearMother} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['wrappedAndPlacedNearMother']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'wrappedAndPlacedNearMother', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  ApiDropdown<String>(
-                    labelText: "${t.breathingRapidLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['breathingRapid']),
-                    autoOpenTick: state.focusedErrorField == 'breathingRapid' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'breathingRapid', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-
-                  ApiDropdown<String>(
-                    labelText: "${t.lethargicLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['lethargic']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'lethargic', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-
-                  ApiDropdown<String>(
-                    labelText: "${t.congenitalAbnormalitiesLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['congenitalAbnormalities']),
-                    autoOpenTick: state.focusedErrorField == 'congenitalAbnormalities' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'congenitalAbnormalities', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  if (c['congenitalAbnormalities'] == 'Yes') ...[
-                    ApiDropdown<String>(
-                      labelText: "Select abnormality *",
-                      hintText: t.selectOption,
-                      items: const ['Curved limbs', 'Clift lip / palate', 'Other'],
-                      getLabel: (e) => e,
-                      value: c['congenitalAbnormalityType'],
+                    CustomTextField(
+                      key: ChildDetailsTab.fieldKeys['temperature'],
+                      labelText: "${t.newbornTemperatureLabel} *",
+                      hintText: t.hintTemp,
+                      keyboardType: TextInputType.number,
+                      validator: (v) => v == null || v.isEmpty ? t.requiredField : null,
+                      initialValue: s(c['temperature']),
+                      focusNode: _temperatureFocusNode,
+                      autofocus: state.focusedErrorField == 'temperature',
                       onChanged: (val) {
                         context.read<HbncVisitBloc>().add(
                           NewbornDetailsChanged(
-                            field: 'congenitalAbnormalityType',
+                            field: 'temperature',
+                            value: val,
+                            childIndex: widget.childIndex,
+                          ),
+                        );
+
+                        if (val.length >= 2) {
+                          _validateTemperature(
+                            context: context,
+                            tempValue: val,
+                            unit: s(c['tempUnit']),
+                          );
+                        }
+                      },
+                    ),
+
+                    const Divider(height: 0,),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: t.infantTemperatureUnitLabel,
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black, // label color
+                                  ),
+                                ),
+                                const TextSpan(
+                                  text: ' *',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Radio<String>(
+                              value: 'Celsius',
+                              groupValue: s(c['tempUnit']),
+                              onChanged: (val) {
+                                context.read<HbncVisitBloc>().add(
+                                  NewbornDetailsChanged(
+                                    field: 'tempUnit',
+                                    value: val,
+                                    childIndex: widget.childIndex,
+                                  ),
+                                );
+
+                                _validateTemperature(
+                                  context: context,
+                                  tempValue: s(c['temperature']),
+                                  unit: val,
+                                );
+                              },
+                            ),
+                            Text(t.temperatureUnitCelsius),
+
+                            const SizedBox(width: 24),
+
+                            Radio<String>(
+                              value: 'Fahrenheit',
+                              groupValue: s(c['tempUnit']),
+                              onChanged: (val) {
+                                context.read<HbncVisitBloc>().add(
+                                  NewbornDetailsChanged(
+                                    field: 'tempUnit',
+                                    value: val,
+                                    childIndex: widget.childIndex,
+                                  ),
+                                );
+
+                                _validateTemperature(
+                                  context: context,
+                                  tempValue: s(c['temperature']),
+                                  unit: val,
+                                );
+                              },
+                            ),
+                            Text(t.temperatureUnitFahrenheit),
+                          ],
+                        ),
+                      ],
+                    ),
+
+
+                    const Divider(height: 0,),
+                    ApiDropdown<String>(
+                      labelText: "${t.weightColorMatchLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['weightColorMatch']),
+                      autoOpenTick: state.focusedErrorField == 'weightColorMatch' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'weightColorMatch', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText: "${t.weighingScaleColorLabel} *",
+                      items: const ['Red', 'Yellow','Green'],
+                      getLabel: (e) => e == 'Green' ? t.colorGreen : (e == 'Yellow' ? t.colorYellow : t.colorRed),
+                      value: s(c['weighingScaleColor']),
+                      autoOpenTick: state.focusedErrorField == 'weighingScaleColor' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'weighingScaleColor', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText: "${t.motherReportsTempOrChestIndrawingLabel} *",
+                      labelMaxLines: 4,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['motherReportsTempOrChestIndrawing']),
+                      autoOpenTick: state.focusedErrorField == 'motherReportsTempOrChestIndrawing' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'motherReportsTempOrChestIndrawing', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+
+                    // Breastfeeding-related fields
+                    ApiDropdown<String>(
+                      labelText: "${t.exclusiveBreastfeedingStartedLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['exclusiveBreastfeedingStarted']),
+                      autoOpenTick: state.focusedErrorField == 'exclusiveBreastfeedingStarted' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'exclusiveBreastfeedingStarted', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: "${t.firstBreastfeedTimingLabel} *",
+                      hintText: t.selectOption,
+                      items: const [
+                        'Within 30 minutes of birth',
+                        'Within 1 hour of birth',
+                        'Within 6 hours of birth',
+                        'Within 24 hours of birth',
+                        'Other',
+                        'Not breastfed'
+                      ],
+                      getLabel: (s) {
+                        switch (s) {
+                          case 'Within 30 minutes of birth':
+                            return t.within30Minutes;
+                          case 'Within 1 hour of birth':
+                            return t.within1Hour;
+                          case 'Within 6 hours of birth':
+                            return t.within6Hours;
+                          case 'Within 24 hours of birth':
+                            return t.within24Hours;
+                          case 'Other':
+                            return t.other;
+                          case 'Not breastfed':
+                            return t.notBreastfed;
+                          default:
+                            return s;
+                        }
+                      },
+                      value: c['firstBreastfeedTiming'],
+                      autoOpenTick: state.focusedErrorField == 'firstBreastfeedTiming' ? state.validationTick : null,
+                      onChanged: (val) {
+                        context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(
+                            field: 'firstBreastfeedTiming',
                             value: val,
                             childIndex: widget.childIndex,
                           ),
                         );
 
                         if (val != 'Other') {
-
                           context.read<HbncVisitBloc>().add(
                             NewbornDetailsChanged(
-                              field: 'congenitalAbnormalityOther',
-                              value: '',
+                              field: 'firstBreastfeedCustomTime',
+                              value: null, // or ''
                               childIndex: widget.childIndex,
                             ),
                           );
                         }
                       },
                     ),
-                  ],
-                   const Divider(height: 0,),
-                  if (c['congenitalAbnormalityType'] == 'Other')
-                    CustomTextField(
-                      labelText: "Please enter abnormality",
-                      hintText: "Please enter abnormality",
-                      initialValue: c['congenitalAbnormalityOther'] ?? '',
-                      focusNode: _congenitalAbnormalityOtherFocusNode,
-                      autofocus: state.focusedErrorField == 'congenitalAbnormalityOther',
-                      onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        NewbornDetailsChanged(
-                          field: 'congenitalAbnormalityOther',
-                          value: val,
-                          childIndex: widget.childIndex,
-                        ),
+                    const Divider(height: 0,),
+                    if (c['firstBreastfeedTiming'] == 'Other')
+
+                      CustomTextField(
+                        labelText: t.breastfeedingTime,
+                        hintText: 'hh:mm',
+                        keyboardType: TextInputType.number,
+                        initialValue: c['firstBreastfeedCustomTime'] ?? '',
+                        focusNode: _firstBreastfeedCustomTimeFocusNode,
+                        autofocus: state.focusedErrorField == 'firstBreastfeedCustomTime',
+                        onChanged: (val) {
+                          context.read<HbncVisitBloc>().add(
+                            NewbornDetailsChanged(
+                              field: 'firstBreastfeedCustomTime',
+                              value: val,
+                              childIndex: widget.childIndex,
+                            ),
+                          );
+                        },
                       ),
-                    ),
-                  if (c['congenitalAbnormalities'] == 'Yes')
                     const Divider(height: 0,),
 
-
-                  ApiDropdown<String>(
-                    labelText: "${t.eyesNormalLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['eyesNormal']),
-                    autoOpenTick: state.focusedErrorField == 'eyesNormal' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'eyesNormal', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-                  if (c['eyesNormal'] == 'No')
-
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: ApiDropdown<String>(
-                      labelText:"${t.selectEyeProblemTypeLabel} *",
-                      items: const ['Swelling', 'Oozing pus'],
-                      getLabel: (e) => e,
-                      value: c['eyesProblemType'],
-                      onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        NewbornDetailsChanged(field: 'eyesProblemType', value: val, childIndex: widget.childIndex),
-                      ),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-
-                  ApiDropdown<String>(
-                    labelText: "${t.eyesSwollenOrPusLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['eyesSwollenOrPus']),
-                    autoOpenTick: state.focusedErrorField == 'eyesSwollenOrPus' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'eyesSwollenOrPus', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-
-                  ApiDropdown<String>(
-                    labelText:"${ t.skinFoldRednessLabel} *",
-                    labelMaxLines: 3,
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['skinFoldRedness']),
-                    autoOpenTick: state.focusedErrorField == 'skinFoldRedness' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'skinFoldRedness', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-
-                  ApiDropdown<String>(
-                    labelText: "${t.newbornJaundiceLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['jaundice']),
-                    autoOpenTick: state.focusedErrorField == 'jaundice' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'jaundice', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-
-                  ApiDropdown<String>(
-                    labelText: "${t.pusBumpsOrBoilLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['pusBumpsOrBoil']),
-                    autoOpenTick: state.focusedErrorField == 'pusBumpsOrBoil' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'pusBumpsOrBoil', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-                  ApiDropdown<String>(
-                    labelText: "${t.newbornSeizuresLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['seizures']),
-                    autoOpenTick: state.focusedErrorField == 'seizures' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'seizures', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-                  ApiDropdown<String>(
-                    labelText: "${t.cryingConstantlyOrLessUrineLabel} *",
-                    labelMaxLines: 3,
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['cryingConstantlyOrLessUrine']),
-                    autoOpenTick: state.focusedErrorField == 'cryingConstantlyOrLessUrine' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'cryingConstantlyOrLessUrine', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                    const Divider(height: 0,),
-                  if (c['cryingConstantlyOrLessUrine'] == 'Yes')
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: ApiDropdown<String>(
-                        labelText: "${t.counsellingBreastfeeding} *",
-                        items: const ['Yes', 'No'],
-                        getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                        value: yn(c['cryingCounseling']),
+                    if (c['firstBreastfeedTiming'] != 'Not breastfed')
+                      ApiDropdown<String>(
+                        labelText: "${t.howWasBreastfedLabel} *",
+                        hintText: t.selectOption,
+                        items: const [
+                          'Normal',
+                          'Forcefully',
+                          'With weakness',
+                          'Could not breast feed but had to be fed with spoon',
+                          'Could neither breast feed nor take given by spoon'
+                        ],
+                        getLabel: (s) {
+                          switch (s) {
+                            case 'Normal':
+                              return t.normal;
+                            case 'Forcefully':
+                              return t.forcefully;
+                            case 'With weakness':
+                              return t.withWeakness;
+                            case 'Could not breast feed but had to be fed with spoon':
+                              return t.couldNotBreastfeedButSpoon;
+                            case 'Could neither breast feed nor take given by spoon':
+                              return t.couldNeitherBreastfeedNorSpoon;
+                            default:
+                              return s;
+                          }
+                        },
+                        value: c['howWasBreastfed'],
+                        autoOpenTick: state.focusedErrorField == 'howWasBreastfed' ? state.validationTick : null,
                         onChanged: (val) => context.read<HbncVisitBloc>().add(
-                          NewbornDetailsChanged(field: 'cryingCounseling', value: val, childIndex: widget.childIndex),
+                          NewbornDetailsChanged(
+                            field: 'howWasBreastfed',
+                            value: val,
+                            childIndex: widget.childIndex,
+                          ),
                         ),
                       ),
-                    ),
-                  const Divider(height: 0,),
-
-
-                  ApiDropdown<String>(
-                    labelText: "${t.cryingSoftlyLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['cryingSoftly']),
-                    autoOpenTick: state.focusedErrorField == 'cryingSoftly' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'cryingSoftly', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  ApiDropdown<String>(
-                    labelText: "${t.stoppedCryingLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['stoppedCrying']),
-                    autoOpenTick: state.focusedErrorField == 'stoppedCrying' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'stoppedCrying', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  ApiDropdown<String>(
-                    labelText: "${t.newbornReferredByAshaLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['referredByASHA']),
-                    autoOpenTick: state.focusedErrorField == 'referredByASHA' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'referredByASHA', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-                  if (c['referredByASHA'] == 'Yes') ...[
+                    const Divider(height: 0,),
 
                     ApiDropdown<String>(
-                      labelText:"${t.referredByASHA} *",
-                      items:  [t.hsc,t.aphc,t.phc,t.chc,t.rhLabel,t.sdh,t.dhLabel],
-                      getLabel: (e) => e,
-                      value: s(c['referredByASHAFacility']),
+                      labelText: "${t.firstFeedGivenAfterBirthLabel} *",
+                      hintText: t.selectOption,
+                      items: const ['First Breastfeeding','Water','Honey','Mishri Water / Sugar Syrup', 'Goat Milk','Cow Milk', 'Other' ],
+                      getLabel: (s) {
+                        switch (s) {
+                          case 'First Breastfeeding':
+                            return t.firstBreastfeeding;
+                          case 'Water':
+                            return t.water;
+                          case 'Honey':
+                            return t.honey;
+                          case 'Mishri Water / Sugar Syrup':
+                            return t.mishriWater;
+                          case 'Goat Milk':
+                            return t.goatMilk;
+                          case 'Cow Milk':
+                            return t.cowMilk;
+                          case 'Other':
+                            return t.other;
+                          default:
+                            return s;
+                        }
+                      },
+                      value: s(c['firstFeedGivenAfterBirth']),
+                      autoOpenTick: state.focusedErrorField == 'firstFeedGivenAfterBirth' ? state.validationTick : null,
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        NewbornDetailsChanged(field: 'referredByASHAFacility', value: val, childIndex: widget.childIndex),
+                        NewbornDetailsChanged(field: 'firstFeedGivenAfterBirth', value: val, childIndex: widget.childIndex),
                       ),
                     ),
-                  ],
-                  const Divider(height: 0,),
+                    const Divider(height: 0,),
+                    if (c['firstFeedGivenAfterBirth'] == 'Other')
+                      CustomTextField(
+                        labelText: "${t.enter_other_feeding_option} *",
+                        initialValue: s(c['firstFeedOther']) ?? '',
+                        focusNode: _firstFeedOtherFocusNode,
+                        autofocus: state.focusedErrorField == 'firstFeedOther',
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(field: 'firstFeedOther', value: val, childIndex: widget.childIndex),
+                        ),
+                      ),
+                    const Divider(height: 0,),
 
-
-                  ApiDropdown<String>(
-                    labelText: "${t.birthRegisteredLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['birthRegistered']),
-                    autoOpenTick: state.focusedErrorField == 'birthRegistered' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'birthRegistered', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-
-                  ApiDropdown<String>(
-                    labelText: "${t.birthCertificateIssuedLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['birthCertificateIssued']),
-                    autoOpenTick: state.focusedErrorField == 'birthCertificateIssued' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'birthCertificateIssued', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-
-                  ApiDropdown<String>(
-                    labelText: "${t.birthDoseVaccinationLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['birthDoseVaccination']),
-                    autoOpenTick: state.focusedErrorField == 'birthDoseVaccination' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'birthDoseVaccination', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-                  if (c['birthDoseVaccination'] == 'Yes') ...[
-                    VaccineTable(),
-                    Divider(height: 0,),
-                    SizedBox(height: 5,)
-                  ],
-                  ApiDropdown<String>(
-                    labelText:"${ t.mcpCardAvailableLabel} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['mcpCardAvailable']),
-                    autoOpenTick: state.focusedErrorField == 'mcpCardAvailable' ? state.validationTick : null,
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'mcpCardAvailable', value: val, childIndex: widget.childIndex),
-                    ),
-                  ),
-                  const Divider(height: 0,),
-
-
-                  if (c['mcpCardAvailable'] == 'Yes')
                     ApiDropdown<String>(
-                      labelText: "${t.babyWeightRecordedInMPC} *",
+                      labelText: "${t.adequatelyFedSevenToEightTimesLabel} *",
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                      value: yn(c['weightRecordedInMcpCard']),
+                      value: yn(c['adequatelyFedSevenToEightTimes']),
+                      autoOpenTick: state.focusedErrorField == 'adequatelyFedSevenToEightTimes' ? state.validationTick : null,
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        NewbornDetailsChanged(field: 'weightRecordedInMcpCard', value: val, childIndex: widget.childIndex),
+                        NewbornDetailsChanged(field: 'adequatelyFedSevenToEightTimes', value: val, childIndex: widget.childIndex),
                       ),
                     ),
-                  if (c['mcpCardAvailable'] == 'Yes')
+                    const Divider(height: 0,),
+                    if (c['adequatelyFedSevenToEightTimes'] == 'No')
+                      ApiDropdown<String>(
+                        labelText: "${t.counsellingAdviceNeeded} *",
+                        items: const ['Yes', 'No'],
+                        getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                        value: yn(c['adequatelyFedCounseling']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(field: 'adequatelyFedCounseling', value: val, childIndex: widget.childIndex),
+                        ),
+                      ),
                     const Divider(height: 0,),
 
-                  // Refer to hospital field
-                  ApiDropdown<String>(
-                    labelText: "${t.refer_to_hospital} *",
-                    items: const ['Yes', 'No'],
-                    getLabel: (e) => e == 'Yes' ? t.yes : t.no,
-                    value: yn(c['referToHospital']),
-                    onChanged: (val) => context.read<HbncVisitBloc>().add(
-                      NewbornDetailsChanged(field: 'referToHospital', value: val, childIndex: widget.childIndex),
+                    ApiDropdown<String>(
+                      labelText: "${t.babyDrinkingLessMilkLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['babyDrinkingLessMilk']),
+                      autoOpenTick: state.focusedErrorField == 'babyDrinkingLessMilk' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'babyDrinkingLessMilk', value: val, childIndex: widget.childIndex),
+                      ),
                     ),
-                  ),
-                  if (c['referToHospital'] == 'Yes') ...[
+                    const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: "${t.breastfeedingStoppedLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['breastfeedingStopped']),
+                      autoOpenTick: state.focusedErrorField == 'breastfeedingStopped' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'breastfeedingStopped', value: val, childIndex: widget.childIndex),
+                      ),),
+                    const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: "${t.bloatedStomachOrFrequentVomitingLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['bloatedStomachOrFrequentVomiting']),
+                      autoOpenTick: state.focusedErrorField == 'bloatedStomachOrFrequentVomiting' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'bloatedStomachOrFrequentVomiting', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
                     const Divider(height: 0,),
                     ApiDropdown<String>(
-                      labelText: "${t.referToLabel} *",
-                      items:  [
-                        t.visitTypePhc,
-                        t.chc,
-                        t.rhLabel,
-                        t.sdh,
-                        t.dhLabel,
-                        t.mchLabel,
-                      ],
-                      getLabel: (e) => e,
-                      value: s(c['referToHospitalFacility']),
+                      labelText: "${t.bleedingUmbilicalCordLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['bleedingUmbilicalCord']),
+                      autoOpenTick: state.focusedErrorField == 'bleedingUmbilicalCord' ? state.validationTick : null,
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
-                        NewbornDetailsChanged(field: 'referToHospitalFacility', value: val, childIndex: widget.childIndex),
+                        NewbornDetailsChanged(field: 'bleedingUmbilicalCord', value: val, childIndex: widget.childIndex),
                       ),
                     ),
-                  ],
-                  const Divider(height: 0,),
+                    const Divider(height: 0,),
 
-                ],
+                    if (c['bleedingUmbilicalCord'] == 'Yes')
+                      ApiDropdown<String>(
+                        labelText: "${t.is_navel_tied_with_thread} *",
+                        items: const ['Yes', 'No'],
+                        getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                        value: yn(c['navelTiedByAshaAnm']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(field: 'navelTiedByAshaAnm', value: val, childIndex: widget.childIndex),
+                        ),
+                      ),
+                    if (c['bleedingUmbilicalCord'] == 'Yes')
+                      const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: "${t.pusInNavelLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['pusInNavel']),
+                      autoOpenTick: state.focusedErrorField == 'pusInNavel' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'pusInNavel', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText: "${t.routineCareDoneLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['routineCareDone']),
+                      autoOpenTick: state.focusedErrorField == 'routineCareDone' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'routineCareDone', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText:"${t.babyWipedWithCleanCloth} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['wipedWithCleanCloth']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'wipedWithCleanCloth', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: "${t.is_child_kept_warm} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['keptWarm']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'keptWarm', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+                    // New Question 3: Given bath
+                    ApiDropdown<String>(
+                      labelText: "${t.babyGivenBath} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['givenBath']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'givenBath', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+                    // New Question 4: Wrapped and placed near mother
+                    ApiDropdown<String>(
+                      labelText: "${t.babyWrappedAndPlacedNearMother} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['wrappedAndPlacedNearMother']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'wrappedAndPlacedNearMother', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: "${t.breathingRapidLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['breathingRapid']),
+                      autoOpenTick: state.focusedErrorField == 'breathingRapid' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'breathingRapid', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText: "${t.lethargicLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['lethargic']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'lethargic', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText: "${t.congenitalAbnormalitiesLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['congenitalAbnormalities']),
+                      autoOpenTick: state.focusedErrorField == 'congenitalAbnormalities' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'congenitalAbnormalities', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+                    if (c['congenitalAbnormalities'] == 'Yes') ...[
+                      ApiDropdown<String>(
+                        labelText: "Select abnormality *",
+                        hintText: t.selectOption,
+                        items: const ['Curved limbs', 'Clift lip / palate', 'Other'],
+                        getLabel: (e) => e,
+                        value: c['congenitalAbnormalityType'],
+                        onChanged: (val) {
+                          context.read<HbncVisitBloc>().add(
+                            NewbornDetailsChanged(
+                              field: 'congenitalAbnormalityType',
+                              value: val,
+                              childIndex: widget.childIndex,
+                            ),
+                          );
+
+                          if (val != 'Other') {
+
+                            context.read<HbncVisitBloc>().add(
+                              NewbornDetailsChanged(
+                                field: 'congenitalAbnormalityOther',
+                                value: '',
+                                childIndex: widget.childIndex,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                    const Divider(height: 0,),
+                    if (c['congenitalAbnormalityType'] == 'Other')
+                      CustomTextField(
+                        labelText: "Please enter abnormality",
+                        hintText: "Please enter abnormality",
+                        initialValue: c['congenitalAbnormalityOther'] ?? '',
+                        focusNode: _congenitalAbnormalityOtherFocusNode,
+                        autofocus: state.focusedErrorField == 'congenitalAbnormalityOther',
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(
+                            field: 'congenitalAbnormalityOther',
+                            value: val,
+                            childIndex: widget.childIndex,
+                          ),
+                        ),
+                      ),
+                    if (c['congenitalAbnormalities'] == 'Yes')
+                      const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText: "${t.eyesNormalLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['eyesNormal']),
+                      autoOpenTick: state.focusedErrorField == 'eyesNormal' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'eyesNormal', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+                    if (c['eyesNormal'] == 'No')
+
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: ApiDropdown<String>(
+                          labelText:"${t.selectEyeProblemTypeLabel} *",
+                          items: const ['Swelling', 'Oozing pus'],
+                          getLabel: (e) => e,
+                          value: c['eyesProblemType'],
+                          onChanged: (val) => context.read<HbncVisitBloc>().add(
+                            NewbornDetailsChanged(field: 'eyesProblemType', value: val, childIndex: widget.childIndex),
+                          ),
+                        ),
+                      ),
+                    const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText: "${t.eyesSwollenOrPusLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['eyesSwollenOrPus']),
+                      autoOpenTick: state.focusedErrorField == 'eyesSwollenOrPus' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'eyesSwollenOrPus', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText:"${ t.skinFoldRednessLabel} *",
+                      labelMaxLines: 3,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['skinFoldRedness']),
+                      autoOpenTick: state.focusedErrorField == 'skinFoldRedness' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'skinFoldRedness', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText: "${t.newbornJaundiceLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['jaundice']),
+                      autoOpenTick: state.focusedErrorField == 'jaundice' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'jaundice', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText: "${t.pusBumpsOrBoilLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['pusBumpsOrBoil']),
+                      autoOpenTick: state.focusedErrorField == 'pusBumpsOrBoil' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'pusBumpsOrBoil', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+                    ApiDropdown<String>(
+                      labelText: "${t.newbornSeizuresLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['seizures']),
+                      autoOpenTick: state.focusedErrorField == 'seizures' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'seizures', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+                    ApiDropdown<String>(
+                      labelText: "${t.cryingConstantlyOrLessUrineLabel} *",
+                      labelMaxLines: 3,
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['cryingConstantlyOrLessUrine']),
+                      autoOpenTick: state.focusedErrorField == 'cryingConstantlyOrLessUrine' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'cryingConstantlyOrLessUrine', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+                    if (c['cryingConstantlyOrLessUrine'] == 'Yes')
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: ApiDropdown<String>(
+                          labelText: "${t.counsellingBreastfeeding} *",
+                          items: const ['Yes', 'No'],
+                          getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                          value: yn(c['cryingCounseling']),
+                          onChanged: (val) => context.read<HbncVisitBloc>().add(
+                            NewbornDetailsChanged(field: 'cryingCounseling', value: val, childIndex: widget.childIndex),
+                          ),
+                        ),
+                      ),
+                    const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText: "${t.cryingSoftlyLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['cryingSoftly']),
+                      autoOpenTick: state.focusedErrorField == 'cryingSoftly' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'cryingSoftly', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: "${t.stoppedCryingLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['stoppedCrying']),
+                      autoOpenTick: state.focusedErrorField == 'stoppedCrying' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'stoppedCrying', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+                    ApiDropdown<String>(
+                      labelText: "${t.newbornReferredByAshaLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['referredByASHA']),
+                      autoOpenTick: state.focusedErrorField == 'referredByASHA' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'referredByASHA', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+                    if (c['referredByASHA'] == 'Yes') ...[
+
+                      ApiDropdown<String>(
+                        labelText:"${t.referredByASHA} *",
+                        items:  [t.hsc,t.aphc,t.phc,t.chc,t.rhLabel,t.sdh,t.dhLabel],
+                        getLabel: (e) => e,
+                        value: s(c['referredByASHAFacility']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(field: 'referredByASHAFacility', value: val, childIndex: widget.childIndex),
+                        ),
+                      ),
+                    ],
+                    const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText: "${t.birthRegisteredLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['birthRegistered']),
+                      autoOpenTick: state.focusedErrorField == 'birthRegistered' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'birthRegistered', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText: "${t.birthCertificateIssuedLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['birthCertificateIssued']),
+                      autoOpenTick: state.focusedErrorField == 'birthCertificateIssued' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'birthCertificateIssued', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+
+                    ApiDropdown<String>(
+                      labelText: "${t.birthDoseVaccinationLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['birthDoseVaccination']),
+                      autoOpenTick: state.focusedErrorField == 'birthDoseVaccination' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'birthDoseVaccination', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+                    if (c['birthDoseVaccination'] == 'Yes') ...[
+                      VaccineTable(),
+                      Divider(height: 0,),
+                      SizedBox(height: 5,)
+                    ],
+                    ApiDropdown<String>(
+                      labelText:"${ t.mcpCardAvailableLabel} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['mcpCardAvailable']),
+                      autoOpenTick: state.focusedErrorField == 'mcpCardAvailable' ? state.validationTick : null,
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'mcpCardAvailable', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    const Divider(height: 0,),
+
+
+                    if (c['mcpCardAvailable'] == 'Yes')
+                      ApiDropdown<String>(
+                        labelText: "${t.babyWeightRecordedInMPC} *",
+                        items: const ['Yes', 'No'],
+                        getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                        value: yn(c['weightRecordedInMcpCard']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(field: 'weightRecordedInMcpCard', value: val, childIndex: widget.childIndex),
+                        ),
+                      ),
+                    if (c['mcpCardAvailable'] == 'Yes')
+                      const Divider(height: 0,),
+
+                    // Refer to hospital field
+                    ApiDropdown<String>(
+                      labelText: "${t.refer_to_hospital} *",
+                      items: const ['Yes', 'No'],
+                      getLabel: (e) => e == 'Yes' ? t.yes : t.no,
+                      value: yn(c['referToHospital']),
+                      onChanged: (val) => context.read<HbncVisitBloc>().add(
+                        NewbornDetailsChanged(field: 'referToHospital', value: val, childIndex: widget.childIndex),
+                      ),
+                    ),
+                    if (c['referToHospital'] == 'Yes') ...[
+                      const Divider(height: 0,),
+                      ApiDropdown<String>(
+                        labelText: "${t.referToLabel} *",
+                        items:  [
+                          t.visitTypePhc,
+                          t.chc,
+                          t.rhLabel,
+                          t.sdh,
+                          t.dhLabel,
+                          t.mchLabel,
+                        ],
+                        getLabel: (e) => e,
+                        value: s(c['referToHospitalFacility']),
+                        onChanged: (val) => context.read<HbncVisitBloc>().add(
+                          NewbornDetailsChanged(field: 'referToHospitalFacility', value: val, childIndex: widget.childIndex),
+                        ),
+                      ),
+                    ],
+                    const Divider(height: 0,),
+
+                  ],
                 ),
               ),
             );
