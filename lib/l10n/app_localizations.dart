@@ -5102,7 +5102,7 @@ abstract class AppLocalizations {
   /// No description provided for @whoseMobileLabel.
   ///
   /// In en, this message translates to:
-  /// **'Whose mobile no.'**
+  /// **'Whose mobile no.?'**
   String get whoseMobileLabel;
 
   /// No description provided for @widowed.
@@ -11198,7 +11198,7 @@ abstract class AppLocalizations {
   /// No description provided for @abortionComplication.
   ///
   /// In en, this message translates to:
-  /// **'Any complication leading to abortion?'**
+  /// **'Is there any complications leading to abortion?'**
   String get abortionComplication;
 
   /// No description provided for @deliveryOutcomeLabel.

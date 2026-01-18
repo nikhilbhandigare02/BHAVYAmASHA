@@ -2523,7 +2523,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightKgLabel => 'Weight (Kg)';
 
   @override
-  String get whoseMobileLabel => 'Whose mobile no.';
+  String get whoseMobileLabel => 'Whose mobile no.?';
 
   @override
   String get widowed => 'Widowed';
@@ -5575,7 +5575,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dateOfAbortion => 'Date of Abortion';
 
   @override
-  String get abortionComplication => 'Any complication leading to abortion?';
+  String get abortionComplication => 'Is there any complications leading to abortion?';
 
   @override
   String get deliveryOutcomeLabel => 'Delivery outcome *';

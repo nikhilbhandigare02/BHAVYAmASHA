@@ -171,9 +171,7 @@ class _AncvisitformState extends State<Ancvisitform> {
     _bloc.add(
       PlaceOfAncChanged(formData['place_of_anc'] ?? ''),
     ); // Don't auto-fill place of ANC
-    _bloc.add(
-      DateOfInspectionChanged(_parseDate(formData['date_of_inspection'])),
-    );
+    // Date of inspection is always set to current date, not loaded from form data
     _bloc.add(
       HouseNumberChanged(
         formData['house_no'] ??
@@ -854,6 +852,9 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
     await _loadPreviousLmpFromEligibleCouple();
     await _loadLastTd1DateFromDb();
+    
+    // Set date of inspection to current date
+    _bloc.add(DateOfInspectionChanged(DateTime.now()));
   }
 
   Future<void> _loadPreviousLmpFromEligibleCouple() async {
@@ -1405,17 +1406,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   'Date of inspection *',
                               initialDate:
                                   state.dateOfInspection ?? DateTime.now(),
-                              onDateChanged: (d) {
-                                bloc.add(DateOfInspectionChanged(d));
-                                final lmp = bloc.state.lmpDate;
-                                if (lmp != null && d != null) {
-                                  final difference = d.difference(lmp).inDays;
-                                  final weeks = (difference / 7).floor() + 1;
-                                  bloc.add(
-                                    WeeksOfPregnancyChanged(weeks.toString()),
-                                  );
-                                }
-                              },
+                              readOnly: true,
                               validator: (date) => validateDateRequired(date),
                             ),
 
