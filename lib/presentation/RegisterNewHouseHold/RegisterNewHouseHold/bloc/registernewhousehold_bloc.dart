@@ -185,7 +185,7 @@ class RegisterNewHouseholdBloc
                   <String, dynamic>{
                     'houseNo': headForm['houseNo'],
                     'headName': headForm['headName'],
-                    'fatherName': headForm['fatherName'],
+                    'father_name': headForm['father_name'],
                     'gender': headForm['gender'],
                     'dob': headForm['dob'],
                     'age_by': headForm['age_by'],
@@ -427,9 +427,9 @@ class RegisterNewHouseholdBloc
                             headForm['sp_spouseName'] ??
                             headForm['headName'],
 
-                        'fatherName':
-                            spDetails['fatherName'] ??
-                            headForm['sp_fatherName'],
+                        'father_name':
+                            spDetails['father_name'] ??
+                            headForm['sp_father_name'],
                         'age_by': spDetails['useDob'] ?? headForm['sp_useDob'],
                         'dob': spDetails['dob'] ?? headForm['sp_dob'],
                         'edd': spDetails['edd'] ?? headForm['sp_edd'],
@@ -807,7 +807,7 @@ class RegisterNewHouseholdBloc
                 headInfo
                   ..['houseNo'] = headForm['houseNo']
                   ..['headName'] = headForm['headName']
-                  ..['fatherName'] = headForm['fatherName']
+                  ..['father_name'] = headForm['father_name']
                   ..['gender'] = headForm['gender']
                   ..['dob'] = headForm['dob']
                   ..['years'] = headForm['years']
@@ -922,7 +922,7 @@ class RegisterNewHouseholdBloc
                     ..['ageAtMarriage'] = spDetails['ageAtMarriage'] ?? headForm['sp_ageAtMarriage'] ?? headForm['ageAtMarriage']
                     ..['RichIDChanged'] = spDetails['RichIDChanged'] ?? headForm['sp_RichIDChanged']
                     ..['spouseName'] = spDetails['spouseName'] ?? headForm['sp_spouseName'] ?? headForm['headName']
-                    ..['fatherName'] = spDetails['fatherName'] ?? headForm['sp_fatherName']
+                    ..['father_name'] = spDetails['father_name'] ?? headForm['sp_father_name']
                     ..['useDob'] = spDetails['useDob'] ?? headForm['sp_useDob'] ?? true
                     ..['dob'] = spDetails['dob'] ?? headForm['sp_dob']
                     ..['antraDate'] = spDetails['antraDate'] ?? headForm['sp_antraDate']
