@@ -800,7 +800,7 @@
   "userHscLabel": "HSC:",
   "userNameLabel": "Name:",
   "userRoleLabel": "Role:",
-  "userVillageLabel": "Village:",
+  "userVillageLabel": "Village",
   "usernameEmpty": "Username cannot be empty",
   "usernameLabel": "Username",
   "viewDetails": "View Details",
