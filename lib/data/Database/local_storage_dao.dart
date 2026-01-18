@@ -377,7 +377,7 @@ class LocalStorageDao {
         where:
             "server_id IS NOT NULL AND TRIM(server_id) != '' AND current_user_key = ?",
         whereArgs: [ashaUniqueKey],
-        orderBy: "created_date_time DESC",
+        orderBy: "id DESC",
         limit: 1,
       );
 
@@ -669,6 +669,45 @@ class LocalStorageDao {
     } catch (e) {
       print('Error getting ANC forms: $e');
       return [];
+    }
+  }
+
+
+  Future<Map<String, dynamic>?> getBeneficiaryByServerKey(
+      String serverKey,
+      ) async {
+    try {
+
+      if(serverKey=='696b76644239d35553728f27' || serverKey == '696b766f99764a6a83a22a21' || serverKey == '696b766f99764a6a83a22a23'){
+        print('aa');
+      }
+      final db = await _db;
+      /* final rows = await db.query(
+        'beneficiaries_new',
+        where:
+            'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND (is_death = 0 OR is_death IS NULL)',
+        whereArgs: [uniqueKey],
+        limit: 1,
+      );*/
+      final rows = await db.query(
+        'beneficiaries_new',
+        where:
+        'server_id = ?',
+        whereArgs: [serverKey],
+        limit: 1,
+      );
+      if (rows.isEmpty) return null;
+      final mapped = Map<String, dynamic>.from(rows.first);
+      mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
+      mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
+      mapped['death_details'] = safeJsonDecode(mapped['death_details']);
+      mapped['device_details'] = safeJsonDecode(mapped['device_details']);
+      mapped['app_details'] = safeJsonDecode(mapped['app_details']);
+      mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+      return mapped;
+    } catch (e) {
+      print('Error getting beneficiary by unique_key: $e');
+      rethrow;
     }
   }
 
@@ -3815,7 +3854,7 @@ extension LocalStorageDaoReads on LocalStorageDao {
         where:
             "server_id IS NOT NULL AND TRIM(server_id) != '' AND current_user_key = ?",
         whereArgs: [ashaUniqueKey],
-        orderBy: "created_date_time DESC",
+        orderBy: "id DESC",
         limit: 1,
       );
 
