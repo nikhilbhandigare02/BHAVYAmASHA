@@ -84,9 +84,18 @@ class ANCVisitModel {
     DateTime? parseDate(String? dateString) {
       if (dateString == null) return null;
       
+      // Try ISO 8601 format first (handles dates with time like "2025-12-17T17:01:32.294+05:30")
       var date = DateTime.tryParse(dateString);
       if (date != null) return date;
       
+      // Try parsing just the date part if ISO format fails
+      if (dateString.contains('T')) {
+        final dateOnly = dateString.split('T')[0];
+        date = DateTime.tryParse(dateOnly);
+        if (date != null) return date;
+      }
+      
+      // Try basic DD-MM-YYYY format
       final parts = dateString.split('-');
       if (parts.length == 3) {
         final day = int.tryParse(parts[0]);

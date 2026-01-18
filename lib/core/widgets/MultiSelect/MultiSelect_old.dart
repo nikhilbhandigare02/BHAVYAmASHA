@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:medixcel_new/core/config/themes/CustomColors.dart';
 import 'package:medixcel_new/core/utils/responsive_font.dart';
@@ -38,159 +37,18 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
   @override
   void initState() {
     super.initState();
-    //_selectedItems = List<T>.from(widget.selectedValues);
-    _selectedItems = _resolveSelectedValues(
-      widget.selectedValues.map(_normalizeValue).toList(),
-    );
+    _selectedItems = List<T>.from(widget.selectedValues);
   }
 
   @override
   void didUpdateWidget(MultiSelect<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.selectedValues != widget.selectedValues) {
-      setState(() {
-        _selectedItems = _resolveSelectedValues(
-          widget.selectedValues.map(_normalizeValue).toList(),
-        );
-      });
-    }
-  }
-
-  T _normalizeValue<T>(T value) {
-    if (value is String) {
-      final v = value
-          .replaceAll('[', '')
-          .replaceAll(']', '')
-          .trim();
-
-      switch (v) {
-        case 'tb':
-          return 'Tuberculosis (TB)' as T;
-        case 'hep_b':
-          return 'Hepetitis - B' as T;
-        case 'sti_rti':
-          return 'STI/RTI' as T;
-        case 'hep_b':
-          return 'Hepetitis - B' as T;
-
-
-      // 🔹 High-risk pregnancy conditions
-        case 'severe_anemia':
-          return 'Severe Anemia' as T;
-
-        case 'pih_pe_eclampsia':
-          return 'Pregnancy Induced Hypertension, Pre-eclampsia, Eclampsia' as T;
-
-        case 'symphilis_hiv_hep_b_hep_c':
-          return 'Syphilis, HIV Positive, Hepatitis-B, Hepatitis-C' as T;
-
-        case 'gestational_diabetes':
-          return 'Gestational Diabetes' as T;
-
-        case 'hypothyroidism':
-          return 'Hypothyroidism' as T;
-
-        case 'teenage_pregnancy':
-          return 'Teenage Pregnancy (< 20 years) / Pregnancy After 35 Years' as T;
-
-        case 'twins_or_more':
-          return 'Pregnant With Twins Or More' as T;
-
-        case 'mal_presentation_of_baby':
-          return 'Mal Presentation of Baby (Breech / Transverse / Oblique)' as T;
-
-        case 'previous_c_section':
-          return 'Previous Cesarean Delivery' as T;
-
-        case 'plecenta_previa':
-          return 'Placenta Previa' as T;
-
-        case 'complex_history':
-          return 'Previous History of Neo-Natal Death, Still Birth, Premature Births, Repeated Abortions, PIH, PPH, APH, Obstructed Labour' as T;
-
-        case 'rh_negative':
-          return 'RH Negative' as T;
-
-      }
-    }
-    return value;
-  }
-
-
-
-
-  /*@override
-  void didUpdateWidget(MultiSelect<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
     if (oldWidget.selectedValues != widget.selectedValues) {
       print('🔍 MultiSelect didUpdateWidget: selectedValues changed from ${oldWidget.selectedValues} to ${widget.selectedValues}');
       setState(() {
-       // _selectedItems = List<T>.from(widget.selectedValues);
-        _selectedItems = _resolveSelectedValues(widget.selectedValues);
+        _selectedItems = List<T>.from(widget.selectedValues);
       });
     }
-  }*/
-
-  String _sanitizeRaw(dynamic raw) {
-    return raw
-        .toString()
-        .replaceAll('[', '')
-        .replaceAll(']', '')
-        .replaceAll('"', '')
-        .trim();
-  }
-
-
-  List<T> _resolveSelectedValues(List<dynamic> rawValues) {
-    final List<T> resolved = [];
-
-    for (final raw in rawValues) {
-      final cleanedRaw = _sanitizeRaw(raw);
-
-      for (final item in widget.items) {
-        if (_matchesValue(item, cleanedRaw)) {
-          resolved.add(item.value);
-          break;
-        }
-      }
-    }
-    return resolved;
-  }
-
-
-
-  /*List<T> _resolveSelectedValues(List<T> rawValues) {
-    final List<T> resolved = [];
-
-    for (final raw in rawValues) {
-      for (final item in widget.items) {
-        if (_matchesValue(item, raw)) {
-          resolved.add(item.value);
-          break;
-        }
-      }
-    }
-    return resolved;
-  }*/
-
-  String _normalize(String value) {
-    return value
-        .toLowerCase()
-        .replaceAll('_', ' ')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
-  }
-
-  bool _matchesValue(MultiSelectItem<T> item, dynamic rawValue) {
-    if (rawValue == null) return false;
-
-    final normalizedRaw = _normalize(rawValue.toString());
-    final normalizedValue = _normalize(item.value.toString());
-    final normalizedLabel = _normalize(item.label);
-
-    return normalizedRaw == normalizedValue ||
-        normalizedRaw == normalizedLabel;
   }
 
   Future<void> _showMultiSelect() async {
@@ -233,13 +91,9 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: widget.items.map((item) {
-                      final selected = localSelectedItems.any(
-                            (e) => _matchesValue(item, _sanitizeRaw(e)),
-                      );
-
-                      /* final selected =
+                      final selected =
                       localSelectedItems.contains(item.value);
-*/
+
                       return CheckboxListTile(
                         title: Text(
                           item.label,
@@ -253,19 +107,10 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                         onChanged: (bool? value) {
                           setDialogState(() {
                             if (value == true) {
-                              if (!localSelectedItems.any((e) => _matchesValue(item, e))) {
-                                localSelectedItems.add(item.value);
-                              }
-                            } else {
-                              localSelectedItems.removeWhere(
-                                    (e) => _matchesValue(item, _sanitizeRaw(e)),
-                              );
-                            }
-                            /*if (value == true) {
                               localSelectedItems.add(item.value);
                             } else {
                               localSelectedItems.remove(item.value);
-                            }*/
+                            }
                           });
                         },
                         controlAffinity:
@@ -385,36 +230,12 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
                           ? widget.hintText
                           : _selectedItems
                           .map((item) {
-                        final foundItem = widget.items.firstWhere(
-                              (e) => _matchesValue(e, _sanitizeRaw(item)),
-                          orElse: () => MultiSelectItem(
-                            label: item.toString(),
-                            value: item,
-                          ),
-                        );
-                        return foundItem.label;
-                      })
-                          .join(', ');
-
-                      /*final displayText = _selectedItems.isEmpty
-                          ? widget.hintText
-                          : _selectedItems
-                          .map((item) {
-                            *//*final foundItem = widget.items
+                            final foundItem = widget.items
                                 .where((e) => e.value == item)
-                                .firstOrNull;*//*
-                        final foundItem = widget.items
-                            .firstWhere(
-                              (e) => _matchesValue(e, item),
-                          orElse: () => MultiSelectItem(
-                            label: item.toString(),
-                            value: item,
-                          ),
-                        );
-
-                        return foundItem?.label ?? item.toString();
+                                .firstOrNull;
+                            return foundItem?.label ?? item.toString();
                           })
-                          .join(', ');*/
+                          .join(', ');
                       
                       print('🔍 MultiSelect build: _selectedItems=$_selectedItems, displayText="$displayText"');
                       

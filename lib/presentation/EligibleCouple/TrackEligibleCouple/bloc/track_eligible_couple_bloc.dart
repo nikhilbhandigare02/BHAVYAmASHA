@@ -163,43 +163,73 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         final formData = event.formData;
         DateTime? parseDate(dynamic dateValue) {
           if (dateValue == null) return null;
-          if (dateValue is String) {
-            return DateTime.parse(dateValue);
+          if (dateValue is String && dateValue.isNotEmpty) {
+            try {
+              return DateTime.parse(dateValue);
+            } catch (_) {}
           }
           if (dateValue is int) {
-            return DateTime.fromMillisecondsSinceEpoch(dateValue);
+            try {
+              return DateTime.fromMillisecondsSinceEpoch(dateValue);
+            } catch (_) {}
           }
           return null;
         }
 
-        final isPregnant = null;
-        final lmpDate = null;
-        final eddDate = null;
-        final fpAdopting = formData['fp_adopting'] as bool? ?? state.fpAdopting;
-        final fpMethod = _normalizeFpMethod(formData['fp_method']?.toString());
-        final condom = formData['condom_quantity']?.toString();
-        final mala = formData['mala_quantity']?.toString();
-        final chhaya = formData['chhaya_quantity']?.toString();
-        final ecp = formData['ecp_quantity']?.toString();
-        final removalReason = formData['removal_reason']?.toString();
-        final removalDate = parseDate(formData['removal_date']);
-        final fpAdoptionDate = parseDate(formData['fp_adoption_date']);
-        final antraInjectionDate = parseDate(formData['antra_injection_date']);
+        final shouldFallback =
+            isProtected && (state.fpMethod == null || state.fpMethod!.isEmpty);
+
+        final parsedFpMethod = _normalizeFpMethod(
+            (formData['fp_method'] ?? formData['method_of_contraception'])?.toString());
+        final parsedRemovalReason =
+        (formData['removal_reason'] ?? formData['reason'])?.toString();
+        final parsedRemovalDate =
+        parseDate(formData['removal_date'] ?? formData['removal_date']?.toString());
+        final parsedFpAdoptionDate = parseDate(formData['fp_adoption_date']);
+        final parsedAntraInjectionDate =
+        parseDate(formData['antra_injection_date'] ?? formData['date_of_antra']);
+
+        final nextFpMethod =
+        (state.fpMethod == null || state.fpMethod!.isEmpty)
+            ? parsedFpMethod
+            : state.fpMethod;
+        final nextRemovalReason =
+        (state.removalReasonChanged == null ||
+            (state.removalReasonChanged?.isEmpty ?? true))
+            ? parsedRemovalReason
+            : state.removalReasonChanged;
+        final nextRemovalDate =
+        state.removalDate == null ? parsedRemovalDate : state.removalDate;
+        final nextAntraDate = state.antraInjectionDateChanged == null
+            ? parsedAntraInjectionDate
+            : state.antraInjectionDateChanged;
+
+        final nextFpAdopting =
+            state.fpAdopting ?? (shouldFallback ? true : state.fpAdopting);
+
+        final condomVal = (formData['condom_quantity'] ??
+            formData['quantity_of_condoms'])
+            ?.toString();
+        final malaVal = (formData['mala_quantity'] ??
+            formData['quantity_of_mala_n_daily'])
+            ?.toString();
+        final chhayaVal = (formData['chhaya_quantity'] ??
+            formData['quantity_of_chhaya_weekly'])
+            ?.toString();
+        final ecpVal =
+        (formData['ecp_quantity'] ?? formData['quantity_of_ecp'])?.toString();
 
         emit(state.copyWith(
-          isPregnant: isPregnant,
-          lmpDate: lmpDate,
-          eddDate: eddDate,
-          fpAdopting: fpAdopting,
-          fpMethod: fpMethod,
-          condom: condom,
-          mala: mala,
-          chhaya: chhaya,
-          ecp: ecp,
-          removalReasonChanged: removalReason,
-          removalDate: removalDate,
-          fpAdoptionDate: fpAdoptionDate,
-          antraInjectionDateChanged: antraInjectionDate,
+          fpAdopting: nextFpAdopting,
+          fpMethod: nextFpMethod,
+          removalReasonChanged: nextRemovalReason,
+          removalDate: nextRemovalDate,
+          fpAdoptionDate: parsedFpAdoptionDate ?? state.fpAdoptionDate,
+          antraInjectionDateChanged: nextAntraDate,
+          condom: state.condom ?? condomVal,
+          mala: state.mala ?? malaVal,
+          chhaya: state.chhaya ?? chhayaVal,
+          ecp: state.ecp ?? ecpVal,
         ));
       } catch (e, stackTrace) {
         print('Error in LoadPreviousFormData handler: $e');
@@ -707,9 +737,22 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
       final s = r['form_json']?.toString() ?? '';
       if (s.isEmpty) return;
       final decoded = jsonDecode(s);
-      if (decoded is Map && decoded['form_data'] is Map) {
-        final fd = Map<String, dynamic>.from(decoded['form_data']);
-        add(LoadPreviousFormData(fd));
+      if (decoded is Map) {
+        Map<String, dynamic>? fd;
+        if (decoded['form_data'] is Map) {
+          fd = Map<String, dynamic>.from(decoded['form_data']);
+        } else if (decoded['eligible_couple_tracking_due_from'] is Map) {
+          fd = Map<String, dynamic>.from(decoded['eligible_couple_tracking_due_from']);
+        }
+        if (fd == null && decoded['form_data'] is Map) {
+          final inner = Map<String, dynamic>.from(decoded['form_data']);
+          if (inner['eligible_couple_tracking_due_from'] is Map) {
+            fd = Map<String, dynamic>.from(inner['eligible_couple_tracking_due_from']);
+          }
+        }
+        if (fd != null) {
+          add(LoadPreviousFormData(fd));
+        }
       }
     } catch (_) {}
   }
@@ -834,7 +877,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
       if (info.isEmpty) return;
 
       final fpMethod = _normalizeFpMethod((info['fpMethod'] ?? info['sp_fpMethod'])?.toString());
-      final antraRaw = info['antraDate'] ?? info['hpantraDate'];
+      final antraRaw = info['antraDate'] ?? info['hpantrgit aDate'];
       final removalDateRaw = info['removalDate'] ?? info['sp_removalDate'] ?? info['hpremovalDate'];
       final removalReasonRaw = info['removalReason'] ?? info['sp_removalReason'] ?? info['hpremovalReason'];
 

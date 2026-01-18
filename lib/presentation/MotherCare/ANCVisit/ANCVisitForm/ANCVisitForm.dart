@@ -171,9 +171,7 @@ class _AncvisitformState extends State<Ancvisitform> {
     _bloc.add(
       PlaceOfAncChanged(formData['place_of_anc'] ?? ''),
     ); // Don't auto-fill place of ANC
-    _bloc.add(
-      DateOfInspectionChanged(_parseDate(formData['date_of_inspection'])),
-    );
+    // Date of inspection is always set to current date, not loaded from form data
     _bloc.add(
       HouseNumberChanged(
         formData['house_no'] ??
@@ -210,8 +208,8 @@ class _AncvisitformState extends State<Ancvisitform> {
       _bloc.add(IsBreastFeedingChanged(isBreastFeeding ? 'Yes' : 'No'));
     }
 
-    if (formData['is_high_risk'] != null) {
-      final v = formData['is_high_risk'];
+    if (formData['high_risk'] != null) {
+      final v = formData['high_risk'];
       final s = v.toString().toLowerCase();
       final yesNo = (v == true || s == 'yes' || s == 'true' || s == '1')
           ? 'Yes'
@@ -219,11 +217,11 @@ class _AncvisitformState extends State<Ancvisitform> {
       _bloc.add(HighRiskChanged(yesNo));
     }
 
-    if (formData['high_risk_details'] is List) {
+    if (formData['selected_risks'] is List) {
       final risks = List<String>.from(
-        (formData['high_risk_details'] as List).map((e) => e.toString()),
+        (formData['selected_risks'] as List).map((e) => e.toString()),
       );
-      final hr = formData['is_high_risk'];
+      final hr = formData['high_risk'];
       final hrStr = (hr?.toString() ?? '').toLowerCase();
       final isHigh =
           hr == true || hrStr == 'yes' || hrStr == 'true' || hrStr == '1';
@@ -232,9 +230,9 @@ class _AncvisitformState extends State<Ancvisitform> {
       }
     }
 
-    _bloc.add(Td1DateChanged(_parseDate(formData['date_of_td1'])));
-    _bloc.add(Td2DateChanged(_parseDate(formData['date_of_td2'])));
-    _bloc.add(TdBoosterDateChanged(_parseDate(formData['date_of_td_booster'])));
+    _bloc.add(Td1DateChanged(_parseDate(formData['td1_date'])));
+    _bloc.add(Td2DateChanged(_parseDate(formData['td2_date'])));
+    _bloc.add(TdBoosterDateChanged(_parseDate(formData['td_booster_date'])));
 
     print('🔍 Loading tablet fields...');
     final folicAcidValue =
@@ -517,15 +515,37 @@ class _AncvisitformState extends State<Ancvisitform> {
 
           if (formData['form_json'] != null) {
             try {
-              final formJson = jsonDecode(formData['form_json'] as String);
-              if (formJson is Map && formJson['anc_form'] is Map) {
+              final decoded = jsonDecode(formData['form_json'] as String);
+
+              Map<String, dynamic> formDataMap;
+
+              if (decoded is Map<String, dynamic>) {
+                // Case 1: wrapped inside "formJson"
+                if (decoded.containsKey('formJson') && decoded['formJson'] is Map) {
+                  formDataMap = Map<String, dynamic>.from(decoded['formJson']);
+                }
+                // Case 2: form data is directly in the map
+                else {
+                  formDataMap = decoded;
+                }
+
+                final formDataMapData =
+                Map<String, dynamic>.from(formDataMap['form_data']);
+
+                print('📝 Loaded form data: $formDataMap');
+
+                _updateFormWithData(formDataMapData);
+
+              }
+             /* final formJson = jsonDecode(formData['form_json'] as String);
+              if (formJson is Map && formJson['formJson'] is Map) {
                 final formDataMap =
-                    formJson['anc_form'] as Map<String, dynamic>;
+                    formJson['formJson'] as Map<String, dynamic>;
                 print('📝 Loaded form data: $formDataMap');
 
                 // Update the form with the loaded data
                 _updateFormWithData(formDataMap);
-              }
+              }*/
             } catch (e) {
               print('❌ Error parsing form JSON: $e');
             }
@@ -854,6 +874,9 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
     await _loadPreviousLmpFromEligibleCouple();
     await _loadLastTd1DateFromDb();
+    
+    // Set date of inspection to current date
+    _bloc.add(DateOfInspectionChanged(DateTime.now()));
   }
 
   Future<void> _loadPreviousLmpFromEligibleCouple() async {
@@ -1405,17 +1428,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                                   'Date of inspection *',
                               initialDate:
                                   state.dateOfInspection ?? DateTime.now(),
-                              onDateChanged: (d) {
-                                bloc.add(DateOfInspectionChanged(d));
-                                final lmp = bloc.state.lmpDate;
-                                if (lmp != null && d != null) {
-                                  final difference = d.difference(lmp).inDays;
-                                  final weeks = (difference / 7).floor() + 1;
-                                  bloc.add(
-                                    WeeksOfPregnancyChanged(weeks.toString()),
-                                  );
-                                }
-                              },
+                              readOnly: true,
                               validator: (date) => validateDateRequired(date),
                             ),
 
