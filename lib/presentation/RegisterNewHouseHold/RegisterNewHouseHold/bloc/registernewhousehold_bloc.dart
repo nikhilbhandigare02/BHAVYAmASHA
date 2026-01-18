@@ -702,7 +702,6 @@ class RegisterNewHouseholdBloc
                     try {
                       final db = await DatabaseProvider.instance.database;
 
-                      // Check if eligible_couple record already exists
                       final existingEC = await db.query(
                         'eligible_couple_activities',
                         where: 'beneficiary_ref_key = ? AND eligible_couple_state = ?',

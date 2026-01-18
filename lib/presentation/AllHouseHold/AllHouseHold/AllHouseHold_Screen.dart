@@ -316,13 +316,11 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
               memberType == 'Child' ||
               relation == 'daughter';
 
-
           final dob =
               info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
           if (dob != null && dob.toString().isNotEmpty) {
             DateTime? birthDate;
 
-            // Use same date parsing logic as RegisterChildListScreen
             String dateStr = dob.toString();
             birthDate = DateTime.tryParse(dateStr);
 

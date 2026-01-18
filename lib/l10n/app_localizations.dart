@@ -10952,7 +10952,7 @@ abstract class AppLocalizations {
   /// No description provided for @isBeneficiaryAbsent.
   ///
   /// In en, this message translates to:
-  /// **'Is Beneficiary Absent'**
+  /// **'Is Beneficiary Absent?'**
   String get isBeneficiaryAbsent;
 
   /// No description provided for @quantityOfMalaN.
@@ -15274,6 +15274,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Household updated successfully'**
   String get householdUpdatedSuccessfully;
+
+  /// No description provided for @dontNO.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t Know'**
+  String get dontNO;
+
+  /// No description provided for @dateOfvisitTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of visit'**
+  String get dateOfvisitTracking;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

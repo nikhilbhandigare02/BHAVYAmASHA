@@ -7613,4 +7613,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get householdUpdatedSuccessfully => 'घरेलू सफलतापूर्वक अपडेट किया गया';
+
+  @override
+  String get dontNO => 'Don\'t Know';
+
+  @override
+  String get dateOfvisitTracking => 'Date of visit';
 }
