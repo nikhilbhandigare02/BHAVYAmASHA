@@ -87,8 +87,8 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
           .toSet();
 
-    //  final deliveredBeneficiaryIds = await _getDeliveredBeneficiaryIds();
-     // print('ℹ️ Delivered: ${deliveredBeneficiaryIds.length}');
+      //  final deliveredBeneficiaryIds = await _getDeliveredBeneficiaryIds();
+      // print('ℹ️ Delivered: ${deliveredBeneficiaryIds.length}');
 
       for (final row in rows) {
         try {
@@ -326,34 +326,50 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
   Future<DateTime?> _extractLmpDate(Map<String, dynamic> data) async {
     try {
+      final beneficiaryId = data['BeneficiaryID']?.toString() ??
+          data['unique_key']?.toString() ??
+          (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['unique_key']?.toString() : null);
+
+      print('🔍 Extracting LMP date for beneficiary: $beneficiaryId');
+      print('📋 Available data keys: ${data.keys.toList()}');
+
       // First try to get LMP from beneficiary_info (beneficiaries_new table)
       dynamic rawInfo = data['beneficiary_info'];
       Map<String, dynamic> info;
-      
+
       if (rawInfo is String && rawInfo.isNotEmpty) {
         info = jsonDecode(rawInfo) as Map<String, dynamic>;
       } else if (rawInfo is Map) {
         info = Map<String, dynamic>.from(rawInfo as Map);
       } else {
         info = <String, dynamic>{};
+        print('⚠️ No beneficiary_info found for beneficiary: $beneficiaryId');
       }
 
+      print('🔍 Beneficiary info keys: ${info.keys.toList()}');
       final lmpRaw = info['lmp']?.toString();
-      if (lmpRaw != null && lmpRaw.isNotEmpty) {
+      print('📅 Raw LMP value: "$lmpRaw"');
+
+      if (lmpRaw != null && lmpRaw.isNotEmpty && lmpRaw != 'null') {
         String dateStr = lmpRaw;
         if (dateStr.contains('T')) {
           dateStr = dateStr.split('T')[0];
         }
         final lmpDate = DateTime.tryParse(dateStr);
         if (lmpDate != null) {
-          print('✅ Found LMP date from beneficiaries_new: ${_formatDate(lmpDate)}');
+          print('✅ Found LMP date from beneficiaries_new: ${_formatDate(lmpDate)} for beneficiary: $beneficiaryId');
           return lmpDate;
+        } else {
+          print('⚠️ Failed to parse LMP date: "$dateStr" for beneficiary: $beneficiaryId');
         }
       }
 
       // Fallback: try to get from _rawRow if available
       final rawRow = data['_rawRow'] as Map<String, dynamic>?;
       if (rawRow != null) {
+        print('🔍 Checking _rawRow for beneficiary: $beneficiaryId');
+        print('📋 _rawRow keys: ${rawRow.keys.toList()}');
+
         rawInfo = rawRow['beneficiary_info'];
         if (rawInfo is String && rawInfo.isNotEmpty) {
           info = jsonDecode(rawInfo) as Map<String, dynamic>;
@@ -361,31 +377,39 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
           info = Map<String, dynamic>.from(rawInfo as Map);
         } else {
           info = <String, dynamic>{};
+          print('⚠️ No beneficiary_info in _rawRow for beneficiary: $beneficiaryId');
         }
 
         final lmpRaw = info['lmp']?.toString();
-        if (lmpRaw != null && lmpRaw.isNotEmpty) {
+        print('📅 Raw LMP value from _rawRow: "$lmpRaw"');
+
+        if (lmpRaw != null && lmpRaw.isNotEmpty && lmpRaw != 'null') {
           String dateStr = lmpRaw;
           if (dateStr.contains('T')) {
             dateStr = dateStr.split('T')[0];
           }
           final lmpDate = DateTime.tryParse(dateStr);
           if (lmpDate != null) {
-            print('✅ Found LMP date from _rawRow: ${_formatDate(lmpDate)}');
+            print('✅ Found LMP date from _rawRow: ${_formatDate(lmpDate)} for beneficiary: $beneficiaryId');
             return lmpDate;
+          } else {
+            print('⚠️ Failed to parse LMP date from _rawRow: "$dateStr" for beneficiary: $beneficiaryId');
           }
         }
+      } else {
+        print('⚠️ No _rawRow available for beneficiary: $beneficiaryId');
       }
 
       // If not found in beneficiaries_new, check followup forms
-      print('⚠️ No LMP found in beneficiaries_new, checking followup forms...');
+      print('⚠️ No LMP found in beneficiaries_new or _rawRow, checking followup forms for beneficiary: $beneficiaryId...');
       final lmpFromFollowup = await _getLmpFromFollowupForm(data);
       if (lmpFromFollowup != null) {
-        print('✅ Found LMP date from followup form: ${_formatDate(lmpFromFollowup)}');
+        print('✅ Found LMP date from followup form: ${_formatDate(lmpFromFollowup)} for beneficiary: $beneficiaryId');
         return lmpFromFollowup;
       }
 
-      print('⚠️ No LMP date found in beneficiaries_new or followup forms');
+      print('❌ No LMP date found anywhere for beneficiary: $beneficiaryId');
+      print('📊 Complete data structure for debugging: ${data.toString()}');
       return null;
     } catch (e) {
       print('⚠️ Error extracting LMP date: $e');
@@ -401,111 +425,134 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
               ? (data['_rawRow'] as Map)['unique_key']?.toString()
               : null);
 
-      final hhId = data['hhId']?.toString() ??
-          data['household_ref_key']?.toString() ??
-          (data['_rawRow'] is Map
-              ? (data['_rawRow'] as Map)['household_ref_key']?.toString()
-              : null);
-
-      if (benId == null || benId.isEmpty || hhId == null || hhId.isEmpty) {
-        print('⚠️ Missing beneficiary ID or household ID for followup form LMP lookup');
+      if (benId == null || benId.isEmpty) {
+        print('⚠️ Missing beneficiary ID for followup form LMP lookup');
         print('   benId: $benId');
-        print('   hhId: $hhId');
         print('   data keys: ${data.keys}');
         return null;
       }
 
-      print('🔍 Looking for followup forms with benId: $benId, hhId: $hhId');
+      print('🔍 Looking for followup forms with benId: $benId');
 
-      final dao = LocalStorageDao();
-      final forms = await dao.getFollowupFormsByHouseholdAndBeneficiary(
-        formType: FollowupFormDataTable.eligibleCoupleTrackingDue,
-        householdId: hhId,
-        beneficiaryId: benId,
-      );
+      try {
+        final db = await DatabaseProvider.instance.database;
+        final formKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue];
+        print('🔍 Querying with formKey: $formKey, benId: $benId');
 
-      if (forms.isEmpty) {
-        print('ℹ️ No eligible couple tracking due forms found for beneficiary');
+        final result = await db.query(
+          FollowupFormDataTable.table,
+          where: 'forms_ref_key = ? AND beneficiary_ref_key = ?',
+          whereArgs: [formKey, benId],
+          orderBy: 'created_date_time DESC',
+        );
+
+        print('📋 Found ${result.length} followup forms for beneficiary: $benId');
+
+        if (result.isEmpty) {
+          print('ℹ️ No eligible couple tracking due forms found for beneficiary: $benId');
+
+          // Debug: Let's check what forms exist for this beneficiary
+          final allForms = await db.query(
+            FollowupFormDataTable.table,
+            where: 'beneficiary_ref_key = ?',
+            whereArgs: [benId],
+            orderBy: 'created_date_time DESC',
+          );
+          print('🔍 DEBUG: All forms for beneficiary $benId:');
+          for (int i = 0; i < allForms.length; i++) {
+            final form = allForms[i];
+            print('   Form ${i + 1}: forms_ref_key=${form['forms_ref_key']}, household_ref_key=${form['household_ref_key']}');
+          }
+
+          return null;
+        }
+
+        print('📋 Found ${result.length} followup forms to process for beneficiary: $benId');
+
+        for (int i = 0; i < result.length; i++) {
+          final form = result[i];
+          final formJsonStr = form['form_json']?.toString();
+          final formHouseholdId = form['household_ref_key']?.toString();
+          final formBeneficiaryId = form['beneficiary_ref_key']?.toString();
+
+          print('📄 Processing form ${i + 1}/${result.length}: household=$formHouseholdId, beneficiary=$formBeneficiaryId');
+
+          if (formJsonStr == null || formJsonStr.isEmpty) {
+            print('⚠️ Empty form_json in form ${i + 1}, skipping');
+            continue;
+          }
+
+          try {
+            final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
+            print('🔍 Parsing followup form JSON ${i + 1}: ${root.keys}');
+
+            String? lmpStr;
+
+            /// ✅ EXISTING CONDITION (DO NOT REMOVE)
+            final trackingData = root['eligible_couple_tracking_due_from'];
+            if (trackingData is Map) {
+              final val = trackingData['lmp_date']?.toString();
+              if (val != null && val.isNotEmpty && val != 'null') {
+                lmpStr = val;
+                print('✅ Found LMP in eligible_couple_tracking_due_from (form ${i + 1}): "$lmpStr"');
+              } else {
+                print('⚠️ LMP date in eligible_couple_tracking_due_from is empty or null: "$val"');
+              }
+            } else {
+              print('⚠️ No eligible_couple_tracking_due_from found in form ${i + 1}');
+            }
+
+            /// ✅ NEW CONDITION (ADDED SAFELY)
+            if ((lmpStr == null || lmpStr.isEmpty || lmpStr == 'null') &&
+                root['form_data'] is Map) {
+              final formData = root['form_data'] as Map<String, dynamic>;
+              final val = formData['lmp_date']?.toString();
+              // Check for null, empty, or just empty string
+              if (val != null && val.isNotEmpty && val != '""' && val != 'null') {
+                lmpStr = val;
+                print('✅ Found LMP in form_data (form ${i + 1}): "$lmpStr"');
+              } else {
+                print('⚠️ LMP date in form_data is empty or invalid (form ${i + 1}): "$val"');
+              }
+            }
+
+            if (lmpStr != null && lmpStr.isNotEmpty && lmpStr != 'null') {
+              try {
+                // Handle different date formats
+                String dateStr = lmpStr;
+                if (dateStr.contains('T')) {
+                  // For ISO 8601 format, extract just the date part or parse as-is
+                  try {
+                    final lmpDate = DateTime.parse(dateStr);
+                    print('✅ Successfully parsed LMP date (form ${i + 1}): $lmpDate');
+                    return lmpDate;
+                  } catch (e) {
+                    // If full parsing fails, try date part only
+                    dateStr = dateStr.split('T')[0];
+                    print('⚠️ Full date parsing failed, trying date part only (form ${i + 1}): "$dateStr"');
+                  }
+                }
+
+                final lmpDate = DateTime.parse(dateStr);
+                print('✅ Successfully parsed LMP date (form ${i + 1}): $lmpDate');
+                return lmpDate;
+              } catch (e) {
+                print('⚠️ Error parsing LMP date "$lmpStr" (form ${i + 1}): $e');
+              }
+            } else {
+              print('⚠️ No valid LMP date found in form data (form ${i + 1})');
+            }
+          } catch (e) {
+            print('⚠️ Error parsing followup form JSON (form ${i + 1}): $e');
+          }
+        }
+
+        print('ℹ️ No LMP date found in any eligible couple tracking due forms for beneficiary: $benId');
+        return null;
+      } catch (e) {
+        print('❌ Error loading LMP from followup form: $e');
         return null;
       }
-
-      print('📋 Found ${forms.length} followup forms to process');
-
-      for (final form in forms) {
-        final formJsonStr = form['form_json']?.toString();
-        final formHouseholdId = form['household_ref_key']?.toString();
-        final formBeneficiaryId = form['beneficiary_ref_key']?.toString();
-        
-        print('📄 Processing form: household=$formHouseholdId, beneficiary=$formBeneficiaryId');
-        
-        if (formJsonStr == null || formJsonStr.isEmpty) {
-          print('⚠️ Empty form_json, skipping');
-          continue;
-        }
-
-        try {
-          final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
-          print('🔍 Parsing followup form JSON: ${root.keys}');
-
-          String? lmpStr;
-
-          /// ✅ EXISTING CONDITION (DO NOT REMOVE)
-          final trackingData = root['eligible_couple_tracking_due_from'];
-          if (trackingData is Map) {
-            final val = trackingData['lmp_date']?.toString();
-            if (val != null && val.isNotEmpty) {
-              lmpStr = val;
-              print('✅ Found LMP in eligible_couple_tracking_due_from: $lmpStr');
-            }
-          }
-
-          /// ✅ NEW CONDITION (ADDED SAFELY)
-          if ((lmpStr == null || lmpStr.isEmpty) &&
-              root['form_data'] is Map) {
-            final formData = root['form_data'] as Map<String, dynamic>;
-            final val = formData['lmp_date']?.toString();
-            // Check for null, empty, or just empty string
-            if (val != null && val.isNotEmpty && val != '""') {
-              lmpStr = val;
-              print('✅ Found LMP in form_data: $lmpStr');
-            } else {
-              print('⚠️ LMP date in form_data is empty or invalid: $val');
-            }
-          }
-
-          if (lmpStr != null && lmpStr.isNotEmpty) {
-            try {
-              // Handle different date formats
-              String dateStr = lmpStr;
-              if (dateStr.contains('T')) {
-                // For ISO 8601 format, extract just the date part or parse as-is
-                try {
-                  final lmpDate = DateTime.parse(dateStr);
-                  print('✅ Successfully parsed LMP date: $lmpDate');
-                  return lmpDate;
-                } catch (e) {
-                  // If full parsing fails, try date part only
-                  dateStr = dateStr.split('T')[0];
-                  print('⚠️ Full date parsing failed, trying date part only: $dateStr');
-                }
-              }
-              
-              final lmpDate = DateTime.parse(dateStr);
-              print('✅ Successfully parsed LMP date: $lmpDate');
-              return lmpDate;
-            } catch (e) {
-              print('⚠️ Error parsing LMP date "$lmpStr": $e');
-            }
-          } else {
-            print('⚠️ No LMP date found in form data');
-          }
-        } catch (e) {
-          print('⚠️ Error parsing followup form JSON: $e');
-        }
-      }
-
-      print('ℹ️ No LMP date found in any eligible couple tracking due forms');
-      return null;
     } catch (e) {
       print('❌ Error loading LMP from followup form: $e');
       return null;
@@ -610,7 +657,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
               Icon(Icons.pregnant_woman, size: 48, color: Colors.grey[400]),
               const SizedBox(height: 16),
               Text(
-               l10n!.noPregnantWomenFound,
+                l10n!.noPregnantWomenFound,
                 style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
               const SizedBox(height: 8),
@@ -819,7 +866,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
                                 color: Colors.red[50],
-                               // border: Border.all(color: Colors.red[700]!),
+                                // border: Border.all(color: Colors.red[700]!),
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
@@ -942,9 +989,11 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
                       // First try to get LMP date from the processed data
                       final lmpDateFromData = data['lmpDate'] as DateTime?;
-                      
+                      print('🔍 UI Check - Beneficiary: ${data['BeneficiaryID']}, LMP from data: ${lmpDateFromData != null ? _formatDate(lmpDateFromData) : 'null'}');
+
                       // If we have LMP date from data, use it directly
                       if (lmpDateFromData != null) {
+                        print('✅ UI - Using LMP from processed data for beneficiary: ${data['BeneficiaryID']}');
                         final ancRanges = _calculateAncDateRanges(lmpDateFromData);
                         return Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -963,13 +1012,14 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                       }
 
                       // If no LMP date from data, use FutureBuilder to extract it
+                      print('⚠️ UI - No LMP in processed data, using FutureBuilder for beneficiary: ${data['BeneficiaryID']}');
                       return FutureBuilder<DateTime?>(
                         future: _extractLmpDate(data),
                         builder: (context, lmpSnapshot) {
                           final lmpDate = lmpSnapshot.data;
 
                           if (lmpDate == null) {
-                            print('⚠️ No LMP date found for beneficiary ${data['BeneficiaryID']}');
+                            print('❌ UI - No LMP date found for beneficiary: ${data['BeneficiaryID']} - Showing "Not Available"');
                             // Show "Not Available" for all ANC dates when LMP is not found
                             return Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -986,7 +1036,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
                               ],
                             );
                           } else {
-                            print('✅ Using LMP date: ${_formatDate(lmpDate)} for beneficiary ${data['BeneficiaryID']}');
+                            print('✅ UI - Using LMP date: ${_formatDate(lmpDate)} for beneficiary: ${data['BeneficiaryID']}');
                           }
 
                           final ancRanges = _calculateAncDateRanges(lmpDate);
@@ -1050,7 +1100,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
 
     DateTime displayEndDate = endDate;
     DateTime displayStartDate = startDate;
-    
+
     if (label.toLowerCase().contains('4th') || label.toLowerCase().contains('fourth')) {
       displayEndDate = startDate.add(const Duration(days: 15));
     }
