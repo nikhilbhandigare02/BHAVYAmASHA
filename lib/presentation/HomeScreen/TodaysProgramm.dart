@@ -1087,21 +1087,25 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                   '';
 
           if (ecFormKey.isNotEmpty) {
-            // 1. Get all EC Tracking Due forms created OR modified TODAY only
+            // 1. Get all EC Tracking Due forms created before 1 month ago AND modified today
+            final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
             String queryForms =
                 'SELECT * FROM ${FollowupFormDataTable.table} '
                 'WHERE forms_ref_key = ? '
                 'AND (is_deleted IS NULL OR is_deleted = 0) '
-                'AND (DATE(created_date_time) = DATE(?) OR DATE(modified_date_time) = DATE(?))';
+                'AND DATE(created_date_time) < DATE(?) '
+                'AND DATE(modified_date_time) = DATE(?)';
 
-            List<dynamic> argsForms = [ecFormKey, todayStr, todayStr];
+            List<dynamic> argsForms = [ecFormKey, 
+                '${oneMonthAgo.year.toString().padLeft(4, '0')}-${oneMonthAgo.month.toString().padLeft(2, '0')}-${oneMonthAgo.day.toString().padLeft(2, '0')}', 
+                todayStr];
 
             if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
               queryForms += ' AND current_user_key = ?';
               argsForms.add(ashaUniqueKey);
             }
 
-            queryForms += ' ORDER BY created_date_time DESC';
+            queryForms += ' ORDER BY modified_date_time DESC';
 
             print('=== EC Completed Query ===');
             print('Query: $queryForms');
@@ -1149,30 +1153,32 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               print('Is Pregnant: $isPregnant');
               print('================================');
 
-              // Include all submitted forms (regardless of activity state) but only for today
-              // The fact that it was submitted today means it should be in completed list
-              // But only show for current day, not permanently
+              // Include forms that were created before 1 month ago AND modified today
+              // This ensures only older records that were updated today are shown in completed list
 
-              // Check if form was created OR modified today
-              bool isFromToday = false;
+              // Check if form was created before 1 month ago AND modified today
+              bool meetsCriteria = false;
               try {
                 final now = DateTime.now();
+                final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
                 
-                // Check created_date_time
+                // Check created_date_time is before 1 month ago
+                bool createdBeforeOneMonth = false;
                 if (row['created_date_time'] != null) {
                   final createdDate = DateTime.parse(row['created_date_time'].toString());
-                  isFromToday = createdDate.year == now.year &&
-                      createdDate.month == now.month &&
-                      createdDate.day == now.day;
+                  createdBeforeOneMonth = createdDate.isBefore(oneMonthAgo);
                 }
                 
-                // If not from today based on created_date_time, check modified_date_time
-                if (!isFromToday && row['modified_date_time'] != null) {
+                // Check modified_date_time is today
+                bool modifiedToday = false;
+                if (row['modified_date_time'] != null) {
                   final modifiedDate = DateTime.parse(row['modified_date_time'].toString());
-                  isFromToday = modifiedDate.year == now.year &&
+                  modifiedToday = modifiedDate.year == now.year &&
                       modifiedDate.month == now.month &&
                       modifiedDate.day == now.day;
                 }
+                
+                meetsCriteria = createdBeforeOneMonth && modifiedToday;
               } catch (e) {
                 print('Error parsing dates: $e');
               }
@@ -1180,12 +1186,13 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               print('=== DEBUG: Date Check ===');
               print('Created Date: ${row['created_date_time']}');
               print('Modified Date: ${row['modified_date_time']}');
-              print('Is From Today: $isFromToday');
+              print('One Month Ago: ${DateTime.now().subtract(const Duration(days: 30))}');
+              print('Meets Criteria (created < 1 month ago AND modified today): $meetsCriteria');
               print('================================');
 
-              // Only include if created OR modified today
-              if (!isFromToday) {
-                print('❌ SKIPPED: Form not from today (neither created nor modified today)');
+              // Only include if created before 1 month ago AND modified today
+              if (!meetsCriteria) {
+                print('❌ SKIPPED: Form does not meet criteria (not created before 1 month ago AND modified today)');
                 continue;
               }
 
@@ -1193,9 +1200,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               processedBeneficiaries.add(beneficiaryId);
 
               if (isPregnant) {
-                print('✅ INCLUDING: Pregnant woman found in completed forms (today only)');
+                print('✅ INCLUDING: Pregnant woman found in completed forms (created before 1 month ago AND modified today)');
               } else {
-                print('✅ INCLUDING: Non-pregnant woman found in completed forms (today only)');
+                print('✅ INCLUDING: Non-pregnant woman found in completed forms (created before 1 month ago AND modified today)');
               }
 
               final fields = await _getBeneficiaryFields(beneficiaryId);
