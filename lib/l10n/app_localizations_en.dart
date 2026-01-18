@@ -6106,6 +6106,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get member_status_label => 'Member Status *';
 
   @override
+  String get member_status_head => 'Member Status';
+
+  @override
   String get death => 'Death';
 
   @override
@@ -7606,7 +7609,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectChildren => 'Select Children';
 
   @override
-  String get nextancduedate => 'Next anc due date';
+  String get nextancduedate => 'Next ANC due date';
 
   @override
   String get householdUpdatedSuccessfully => 'Household updated successfully';

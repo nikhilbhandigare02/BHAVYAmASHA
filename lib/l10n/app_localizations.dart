@@ -12257,6 +12257,12 @@ abstract class AppLocalizations {
   /// **'Member Status *'**
   String get member_status_label;
 
+  /// No description provided for @member_status_head.
+  ///
+  /// In en, this message translates to:
+  /// **'Member Status'**
+  String get member_status_head;
+
   /// No description provided for @death.
   ///
   /// In en, this message translates to:
@@ -15260,7 +15266,7 @@ abstract class AppLocalizations {
   /// No description provided for @nextancduedate.
   ///
   /// In en, this message translates to:
-  /// **'Next anc due date'**
+  /// **'Next ANC due date'**
   String get nextancduedate;
 
   /// No description provided for @householdUpdatedSuccessfully.

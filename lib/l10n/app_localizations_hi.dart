@@ -6106,6 +6106,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get member_status_label => 'सदस्य की स्थिति *';
 
   @override
+  String get member_status_head => 'सदस्य की स्थिति';
+
+  @override
   String get death => 'मृत्यू';
 
   @override

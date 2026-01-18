@@ -443,27 +443,29 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             if (widget.isEdit) ...[
               _Section(
                 child: ApiDropdown<String>(
-                  labelText: 'Member Status',
-                  items: const ['alive', 'death'],
+                  labelText: l.member_status_head,
+                  items: const ['Alive', 'Death'],
                   getLabel: (s) {
                     switch (s) {
-                      case 'alive':
-                        return 'Alive';
-                      case 'death':
-                        return 'Death';
+                      case 'Alive':
+                        return l.alive;
+                      case 'Death':
+                        return l.death;
                       default:
                         return s;
                     }
                   },
-                  value: state.memberStatus,
-                  onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
-                    AfhUpdateMemberStatus(v),
-                  ),
+                  value: state.memberStatus?.isEmpty == true
+                      ? null
+                      : state.memberStatus,
+                  hintText: l.selectOption,
+                  onChanged: (v) => context
+                      .read<AddFamilyHeadBloc>()
+                      .add(AfhUpdateMemberStatus(v)),
                 ),
               ),
-              Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
             ],
-
             _Section(
               child: CustomTextField(
                 labelText: '${l.nameOfFamilyHeadLabel} *',

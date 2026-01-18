@@ -277,6 +277,13 @@ class UpdateDaysChanged extends SpousEvent {
   List<Object?> get props => [value];
 }
 
+class SpUpdateMemberStatus extends SpousEvent {
+  final String? value;
+  const SpUpdateMemberStatus(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
 class SpLMPChange extends SpousEvent {
   final DateTime? value;
   const SpLMPChange(this.value);

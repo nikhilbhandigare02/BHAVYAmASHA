@@ -797,6 +797,33 @@ class _SpousdetailsState extends State<Spousdetails>
             padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
             child: Column(
               children: [
+                // Member Status Dropdown - only shown in edit mode
+                if (widget.isEdit) ...[
+                  _section(
+                     ApiDropdown<String>(
+                      labelText: l.member_status_head,
+                      items: const ['Alive', 'Death'],
+                      getLabel: (s) {
+                        switch (s) {
+                          case 'Alive':
+                            return l.alive;
+                          case 'Death':
+                            return l.death;
+                          default:
+                            return s;
+                        }
+                      },
+                      value: state.memberStatus?.isEmpty == true
+                          ? null
+                          : state.memberStatus,
+                      hintText: l.selectOption,
+                      onChanged: (v) => context
+                          .read<SpousBloc>()
+                          .add(SpUpdateMemberStatus(v)),
+                    ),
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+                ],
                 _section(
                   IgnorePointer(
                     ignoring: widget.isEdit || !widget.isMemberDetails,

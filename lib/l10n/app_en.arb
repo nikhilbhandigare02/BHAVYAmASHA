@@ -2077,6 +2077,7 @@
   "childrenDetails": "Children Details",
   "spouseDetails": "Spouse Details",
   "member_status_label": "Member Status *",
+  "member_status_head": "Member Status",
   "death": "Death",
   "please_select_date_of_death": "Please select date of death",
   "enter_place_of_death": "Enter place of death",

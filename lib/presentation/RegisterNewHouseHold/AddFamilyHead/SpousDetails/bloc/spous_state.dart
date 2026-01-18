@@ -45,7 +45,7 @@ class SpousState extends Equatable {
     this.malaQuantity,
     this.chhayaQuantity,
     this.ecpQuantity,
-
+    this.memberStatus,
   });
 
   final String? relation;
@@ -91,6 +91,7 @@ class SpousState extends Equatable {
   final String? malaQuantity;
   final String? chhayaQuantity;
   final String? ecpQuantity;
+  final String? memberStatus;
 
 
   SpousState copyWith({
@@ -137,6 +138,7 @@ class SpousState extends Equatable {
     String? malaQuantity,
     String? chhayaQuantity,
     String? ecpQuantity,
+    String? memberStatus,
   }) {
     return SpousState(
       relation: relation ?? this.relation,
@@ -184,6 +186,7 @@ class SpousState extends Equatable {
       malaQuantity: malaQuantity ?? this.malaQuantity,
       chhayaQuantity: chhayaQuantity ?? this.chhayaQuantity,
       ecpQuantity: ecpQuantity ?? this.ecpQuantity,
+      memberStatus: memberStatus ?? this.memberStatus,
     );
   }
 
@@ -230,6 +233,7 @@ class SpousState extends Equatable {
         malaQuantity,
         chhayaQuantity,
         ecpQuantity,
+        memberStatus,
       ];
 
   Map<String, dynamic> toJson() {
@@ -273,6 +277,7 @@ class SpousState extends Equatable {
       'malaQuantity': malaQuantity,
       'chhayaQuantity': chhayaQuantity,
       'ecpQuantity': ecpQuantity,
+      'memberStatus': memberStatus,
     };
   }
 }
