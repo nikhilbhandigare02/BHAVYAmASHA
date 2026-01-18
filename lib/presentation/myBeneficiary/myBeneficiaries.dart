@@ -702,21 +702,21 @@ ORDER BY d.created_date_time DESC
   Future<int> _getAbortionListCount() async {
     try {
       final dbForms = await LocalStorageDao.instance.getAbortionFollowupForms();
-      
+
       print('Total abortion records fetched for count: ${dbForms.length}');
-      
+
       int count = 0;
       for (final row in dbForms) {
         try {
           final formData = row['form_data'] as Map<String, dynamic>;
-          
+
           // Beneficiary info is already fetched by DAO
           final beneficiaryData = row['beneficiary_data'] as Map<String, dynamic>?;
           final beneficiaryInfo = beneficiaryData?['beneficiary_info'] as Map<String, dynamic>? ?? {};
-          
+
           final dobStr = beneficiaryInfo['dob']?.toString();
           final gender = beneficiaryInfo['gender']?.toString() ?? formData['gender'] ?? 'Female';
-          
+
           // Map fields - same logic as AbortionList.dart
           final visitData = {
             'id': row['beneficiary_ref_key']?.toString(),
@@ -739,17 +739,16 @@ ORDER BY d.created_date_time DESC
             'has_abortion_complication': true,
             'abortion_date': formData['date_of_abortion'] ?? formData['abortion_date'],
           };
-          
+
           // Only count if we have valid abortion data
-          if (visitData['woman_name'] != null && visitData['abortion_date'] != null) {
-            count++;
-            print('Added abortion count for: ${formData['pw_name']}');
-          }
+          // DAO already filters for valid abortion_date and is_abortion/complication flag
+          count++;
+          print('Added abortion count for: ${formData['pw_name']}');
         } catch (e) {
           print('Error mapping abortion row for count: $e');
         }
       }
-      
+
       print('Total abortion count calculated: $count');
       return count;
     } catch (e) {

@@ -49,20 +49,25 @@ class _AbortionlistState extends State<Abortionlist> {
         try {
           final formData = row['form_data'] as Map<String, dynamic>;
 
-          // Beneficiary info is already fetched by DAO
           final beneficiaryData = row['beneficiary_data'] as Map<String, dynamic>?;
           final beneficiaryInfo = beneficiaryData?['beneficiary_info'] as Map<String, dynamic>? ?? {};
 
           final dobStr = beneficiaryInfo['dob']?.toString();
           final gender = beneficiaryInfo['gender']?.toString() ?? formData['gender'] ?? 'Female';
 
-          // Map fields
           final visitData = {
             'id': row['beneficiary_ref_key']?.toString(),
             'hhId': beneficiaryData?['household_ref_key']?.toString(),
             'house_number': formData['house_no'] ?? formData['house_number'],
-            'woman_name': formData['pw_name'],
-            'husband_name': formData['husband_name'],
+            'woman_name': (beneficiaryInfo['memberName'] ??
+                beneficiaryInfo['name'] ??
+                beneficiaryInfo['headName'] ??
+                beneficiaryInfo['spouseName'] ??
+                formData['pw_name'])
+                ?.toString(),
+            'husband_name':
+            (beneficiaryInfo['spouseName'] ?? formData['husband_name'])
+                ?.toString(),
             'rch_number': formData['rch_reg_no_of_pw'] ?? formData['rch_number'],
             'visit_type': formData['visit_type'],
             'high_risk': (formData['is_high_risk'] == 'yes') || (formData['high_risk'] == true),
@@ -274,7 +279,7 @@ class _AbortionlistState extends State<Abortionlist> {
                   // Name
                   _infoRow(
                     '',
-                    visit.womanName ?? 'No Name',
+                    visit.womanName ?? l10n!.na,
                     textStyle:  TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
