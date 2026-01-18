@@ -112,6 +112,85 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
     return false;
   }
 
+  Future<int> _getEligibleCoupleCount() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
+
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) return 0;
+
+      final query = '''
+      SELECT DISTINCT b.*, e.eligible_couple_state, 
+               e.created_date_time as registration_date
+        FROM beneficiaries_new b
+        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+        WHERE b.is_deleted = 0 
+          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+          AND (b.is_death = 0 OR b.is_death IS NULL)
+          AND e.eligible_couple_state = 'eligible_couple'
+          AND e.is_deleted = 0
+          AND e.current_user_key = ?
+    ''';
+
+      final rows = await db.rawQuery(query, [ashaUniqueKey]);
+
+      int count = 0;
+
+      for (final row in rows) {
+        try {
+          final beneficiaryInfo =
+              row['beneficiary_info']?.toString() ?? '{}';
+
+          final Map<String, dynamic> info =
+          beneficiaryInfo.isNotEmpty
+              ? Map<String, dynamic>.from(
+              jsonDecode(beneficiaryInfo))
+              : <String, dynamic>{};
+
+          /// -------- SKIP CHILD --------
+          final memberType =
+              info['memberType']?.toString().toLowerCase() ?? '';
+          if (memberType == 'child') continue;
+
+          /// -------- AGE CALCULATION --------
+          final dob = info['dob']?.toString();
+          final age = _calculateAgeFromDob(dob);
+          if (age == null) continue;
+
+          final gender =
+              info['gender']?.toString().toLowerCase() ?? '';
+
+          /// -------- AGE ELIGIBILITY --------
+          /*if (gender == 'female' && (age < 15 || age > 49)) continue;
+          if (gender == 'male' && (age < 15 || age > 54)) continue;
+*/
+          /// -------- STERILIZATION CHECK --------
+          final beneficiaryKey = row['unique_key']?.toString() ?? '';
+          final hasSterilization =
+          await _hasSterilizationRecord(
+            db,
+            beneficiaryKey,
+            ashaUniqueKey,
+          );
+
+          if (hasSterilization) continue;
+
+          /// -------- COUNT VALID ELIGIBLE --------
+          count++;
+        } catch (_) {
+          // Ignore malformed rows safely
+          continue;
+        }
+      }
+
+      return count;
+    } catch (e) {
+      return 0;
+    }
+  }
+
 
   Future<void> _loadCounts() async {
     if (mounted) {
@@ -150,7 +229,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
       final rows = await db.rawQuery(query, [ashaUniqueKey]);
 
       int count = 0;
-      for (final row in rows) {
+      /*for (final row in rows) {
         try {
           final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
           final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty
@@ -164,7 +243,9 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         } catch (_) {
           count++;
         }
-      }
+      }*/
+
+      count = await _getEligibleCoupleCount();
 
       final updatedCouples = await _localStorageDao.getUpdatedEligibleCouples();
 

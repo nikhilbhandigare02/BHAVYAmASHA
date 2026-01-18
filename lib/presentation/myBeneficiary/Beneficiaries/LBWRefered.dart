@@ -43,6 +43,7 @@ class _Lbwrefered extends State<Lbwrefered> {
         'beneficiaries_new',
         where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL) AND current_user_key = ?',
         whereArgs: [ashaUniqueKey], // Pass the key as an argument
+        orderBy: 'id DESC',
       );
 
       print('🔎 Beneficiaries fetched: ${rows.length}');
