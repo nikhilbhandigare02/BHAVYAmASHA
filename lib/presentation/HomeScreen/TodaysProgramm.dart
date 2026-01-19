@@ -1106,9 +1106,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 'AND DATE(created_date_time) < DATE(?) '
                 'AND DATE(modified_date_time) = DATE(?)';
 
-            List<dynamic> argsForms = [ecFormKey, 
-                '${oneMonthAgo.year.toString().padLeft(4, '0')}-${oneMonthAgo.month.toString().padLeft(2, '0')}-${oneMonthAgo.day.toString().padLeft(2, '0')}', 
-                todayStr];
+            List<dynamic> argsForms = [ecFormKey,
+              '${oneMonthAgo.year.toString().padLeft(4, '0')}-${oneMonthAgo.month.toString().padLeft(2, '0')}-${oneMonthAgo.day.toString().padLeft(2, '0')}',
+              todayStr];
 
             if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
               queryForms += ' AND current_user_key = ?';
@@ -1171,14 +1171,14 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
               try {
                 final now = DateTime.now();
                 final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
-                
+
                 // Check created_date_time is before 1 month ago
                 bool createdBeforeOneMonth = false;
                 if (row['created_date_time'] != null) {
                   final createdDate = DateTime.parse(row['created_date_time'].toString());
                   createdBeforeOneMonth = createdDate.isBefore(oneMonthAgo);
                 }
-                
+
                 // Check modified_date_time is today
                 bool modifiedToday = false;
                 if (row['modified_date_time'] != null) {
@@ -1187,7 +1187,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                       modifiedDate.month == now.month &&
                       modifiedDate.day == now.day;
                 }
-                
+
                 meetsCriteria = createdBeforeOneMonth && modifiedToday;
               } catch (e) {
                 print('Error parsing dates: $e');
@@ -1938,8 +1938,44 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           activeWindowEnd = fourthEnd;
         }
 
-        // ❌ Today is not in ANY ANC window
-        if (activeWindowStart == null || activeWindowEnd == null) {
+        // ---------- Check if today is within or after ANC windows ----------
+        String currentAncDueDate = '';
+        bool shouldIncludeInList = false;
+
+        print('🔍 DEBUG ANC Date Check for beneficiary: $beneficiaryKey');
+        print('   Today: ${_formatDate(todayDate)}');
+        print('   4th ANC End: ${fourthEnd != null ? _formatDate(fourthEnd!) : 'null'}');
+
+        if (activeWindowStart != null && activeWindowEnd != null) {
+          // Today is within an ANC window
+          shouldIncludeInList = true;
+          currentAncDueDate = _formatAncDateOnly(activeWindowEnd.toIso8601String());
+          print('   ✅ Today is within ANC window: ${_formatDate(activeWindowStart)} to ${_formatDate(activeWindowEnd)}');
+        } else {
+          // Check if today is after the 4th ANC window
+          final fourthStart = ancRanges['4th_anc_start'];
+          final fourthEnd = ancRanges['4th_anc_end'];
+
+          if (fourthEnd != null) {
+            final fourthEndDateOnly = DateTime(fourthEnd.year, fourthEnd.month, fourthEnd.day);
+            print('   Fourth End Date Only: ${_formatDate(fourthEndDateOnly)}');
+            print('   Is today after fourth end? ${todayDate.isAfter(fourthEndDateOnly)}');
+
+            if (todayDate.isAfter(fourthEndDateOnly)) {
+              // Today is after the 4th ANC window - include and show current date
+              shouldIncludeInList = true;
+              currentAncDueDate = _formatDate(todayDate);
+              print('   ✅ Today is after 4th ANC window, showing current date: $currentAncDueDate');
+            } else {
+              print('   ❌ Today is NOT after 4th ANC window');
+            }
+          } else {
+            print('   ❌ Fourth ANC end date is null');
+          }
+        }
+
+        // ❌ Don't include if not within window and not after 4th window
+        if (!shouldIncludeInList) {
           continue;
         }
 
@@ -1963,7 +1999,14 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           final DateTime? dob =
           DateTime.tryParse(info['dob'].toString().split('T')[0]);
           if (dob != null) {
-            ageText = '${today.year - dob.year} Y';
+            int age = today.year - dob.year;
+            // Check if birthday hasn't occurred yet this year
+            final todayMonthDay = DateTime(today.year, today.month, today.day);
+            final birthdayThisYear = DateTime(today.year, dob.month, dob.day);
+            if (todayMonthDay.isBefore(birthdayThisYear)) {
+              age--;
+            }
+            ageText = '${age} Y';
           }
         }
 
@@ -1984,9 +2027,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           'age': ageText,
           'gender': 'Female',
           'last Visit date':
-          _formatAncDateOnly(activeWindowStart.toIso8601String()),
-          'Current ANC last due date':
-          _formatAncDateOnly(activeWindowEnd.toIso8601String()),
+          activeWindowStart != null ? _formatAncDateOnly(activeWindowStart.toIso8601String()) : currentAncDueDate,
+          'Current ANC last due date': currentAncDueDate,
           'mobile': info['mobileNo'] ?? '-',
           'badge': 'ANC',
           'beneficiary_info': jsonEncode(info),
@@ -3075,7 +3117,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
           // Get last visit date from child_care_activities for infant_pnc or tracking_due states
           final lastVisitDate = await _getLatestTrackingDueDate(beneficiaryRefKey);
-          final formattedLastVisitDate = lastVisitDate != null 
+          final formattedLastVisitDate = lastVisitDate != null
               ? _formatDateOnly(lastVisitDate.toIso8601String())
               : '-';
 
