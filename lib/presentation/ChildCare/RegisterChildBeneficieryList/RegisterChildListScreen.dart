@@ -745,7 +745,6 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                       )),
                     ],
                   ),
-
                 ],
               ),
             ),

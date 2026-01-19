@@ -9,6 +9,7 @@ import 'package:medixcel_new/core/widgets/Dropdown/dropdown.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/config/themes/CustomColors.dart';
+import '../../../core/widgets/AttentionBox/AttentionBox.dart';
 import '../../../core/widgets/DatePicker/timepicker.dart';
 import '../../../core/widgets/RoundButton/RoundButton.dart';
 import '../../../data/Database/local_storage_dao.dart';
@@ -182,11 +183,24 @@ class _OutcomeFormView extends StatelessWidget {
                         }
 
                         final weeks = _getWeeksOfPregnancy(formData);
-                        if (weeks.isNotEmpty) {
-                          context.read<OutcomeFormBloc>().add(
-                            GestationWeeksChanged(weeks),
-                          );
-                        } else {
+                         if (weeks.isNotEmpty) {
+                           context.read<OutcomeFormBloc>().add(
+                             GestationWeeksChanged(weeks),
+                           );
+                          final w = int.tryParse(weeks) ?? 0;
+                          if (w > 0 && w < 37) {
+                            final bloc = context.read<OutcomeFormBloc>();
+                            if (!bloc.state.pretermDialogShown) {
+                              bloc.add(const PretermDialogShown());
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return const PretermDialog();
+                                },
+                              );
+                            }
+                          }
+                         } else {
                           // Try to calculate week from LMP date if not available in form data
                           final beneficiaryId = beneficiaryData['BeneficiaryID']?.toString() ??
                               beneficiaryData['beneficiaryId']?.toString() ??
@@ -204,16 +218,28 @@ class _OutcomeFormView extends StatelessWidget {
                               }
 
                               final calculatedWeeks = _calculateWeeksOfPregnancy(lmpDate, deliveryDate);
-                              final weeksString = calculatedWeeks.toString();
-                              context.read<OutcomeFormBloc>().add(
-                                GestationWeeksChanged(weeksString),
-                              );
-                              print('✅ Calculated gestation weeks: $weeksString from LMP: $lmpDate');
+                               final weeksString = calculatedWeeks.toString();
+                               context.read<OutcomeFormBloc>().add(
+                                 GestationWeeksChanged(weeksString),
+                               );
+                               print('✅ Calculated gestation weeks: $weeksString from LMP: $lmpDate');
+                              if (calculatedWeeks > 0 && calculatedWeeks < 37) {
+                                final bloc = context.read<OutcomeFormBloc>();
+                                if (!bloc.state.pretermDialogShown) {
+                                  bloc.add(const PretermDialogShown());
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return const PretermDialog();
+                                    },
+                                  );
+                                }
+                              }
                             } else {
                               print('ℹ️ Could not calculate gestation weeks - no LMP date found');
                             }
                           }
-                        }
+                         }
 
                         // Derive children count from children_arr array or other fields
                         final childCount = _getChildCount(formData);
@@ -838,29 +864,28 @@ class _OutcomeFormFields extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              SizedBox(
-                width: 25,
-                height: 25,
-                child: InkWell(
-                  onTap: () {
-                    final n = int.tryParse(state.outcomeCount) ?? 0;
-                    final v = n > 0 ? (n - 1).toString() : '0';
-                    bloc.add(OutcomeCountChanged(v));
-                  },
-                  child: Container(
-
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-
-                      borderRadius: BorderRadius.zero,
-
+              if (state.outcomeCount.isEmpty) ...[
+                SizedBox(
+                  width: 25,
+                  height: 25,
+                  child: InkWell(
+                    onTap: () {
+                      final n = int.tryParse(state.outcomeCount) ?? 0;
+                      final v = n > 0 ? (n - 1).toString() : '0';
+                      bloc.add(OutcomeCountChanged(v));
+                    },
+                    child: Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.zero,
+                      ),
+                      child: const Icon(Icons.remove, size: 18,color: Colors.white,),
                     ),
-                    child: const Icon(Icons.remove, size: 18,color: Colors.white,),
                   ),
                 ),
-              ),
-              const SizedBox(width: 6),
+                const SizedBox(width: 6),
+              ],
               SizedBox(
                 width: 50,
                 child: TextField(
@@ -886,26 +911,28 @@ class _OutcomeFormFields extends StatelessWidget {
                   controller: TextEditingController(text: state.outcomeCount),
                 ),
               ),
-              const SizedBox(width: 6),
-              SizedBox(
-                width: 25,
-                height: 25,
-                child: InkWell(
-                  onTap: () {
-                    final n = int.tryParse(state.outcomeCount) ?? 0;
-                    final v = (n + 1).toString();
-                    bloc.add(OutcomeCountChanged(v));
-                  },
-                  child: Container(
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.zero,
+              if (state.outcomeCount.isEmpty) ...[
+                const SizedBox(width: 6),
+                SizedBox(
+                  width: 25,
+                  height: 25,
+                  child: InkWell(
+                    onTap: () {
+                      final n = int.tryParse(state.outcomeCount) ?? 0;
+                      final v = (n + 1).toString();
+                      bloc.add(OutcomeCountChanged(v));
+                    },
+                    child: Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.zero,
+                      ),
+                      child: const Icon(Icons.add, size: 18, color: Colors.white,),
                     ),
-                    child: const Icon(Icons.add, size: 18, color: Colors.white,),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

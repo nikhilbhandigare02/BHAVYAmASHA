@@ -651,6 +651,232 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   }
 
   Future<void> _loadBeneficiariesCount() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final beneficiaries = <Map<String, dynamic>>[];
+    final seenUniqueKeys = <String>{};
+
+    try {
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries(
+        isMigrated: 0,
+      );
+
+      print('=== AllBeneficiary Screen - Data Loading ===');
+      print('Total records from database: ${rows.length}');
+
+      for (final row in rows) {
+
+        final String uniqueKey = row['unique_key']?.toString() ?? '';
+
+        // 🚫 SKIP DUPLICATE BENEFICIARY
+        if (uniqueKey.isEmpty || seenUniqueKeys.contains(uniqueKey)) {
+          print('⛔ Skipping duplicate beneficiary: $uniqueKey');
+          continue;
+        }
+        seenUniqueKeys.add(uniqueKey);
+
+        final int isMigrated = row['is_migrated'] ?? 0;
+        if (isMigrated == 1) continue;
+
+        // ---------------- PARSE beneficiary_info SAFELY ----------------
+        Map<String, dynamic> info;
+        try {
+          final rawInfo = row['beneficiary_info'];
+          if (rawInfo is String && rawInfo.isNotEmpty) {
+            info = jsonDecode(rawInfo) as Map<String, dynamic>;
+          } else if (rawInfo is Map) {
+            info = Map<String, dynamic>.from(rawInfo);
+          } else {
+            info = <String, dynamic>{};
+          }
+        } catch (e) {
+          print('⚠️ Error parsing beneficiary info: $e');
+          info = <String, dynamic>{};
+        }
+
+        final t = AppLocalizations.of(context);
+
+        final String hhId = row['household_ref_key']?.toString() ?? '';
+        final String createdDate = row['created_date_time']?.toString() ?? '';
+        final String gender = info['gender']?.toString().toLowerCase() ?? '';
+
+        final String richId =
+            info['RichIDChanged']?.toString() ??
+                info['richIdChanged']?.toString() ??
+                '';
+
+        final String displayName =
+        (info['name'] ??
+            info['memberName'] ??
+            info['headName'] ??
+            '')
+            .toString();
+
+        final String beneficiaryId =
+        uniqueKey.length > 11 ? uniqueKey.substring(uniqueKey.length - 11) : uniqueKey;
+
+        final String relation =
+            info['relation_to_head']?.toString() ??
+                info['relation']?.toString() ??
+                'N/A';
+
+        final bool isChild =
+            info['memberType']?.toString().toLowerCase() == 'child' ||
+                relation.toLowerCase() == 'child';
+
+        final String registrationType = isChild ? 'Child' : 'General';
+
+        final fatherName =
+            _nonEmpty(info['father_name']) ??
+                _nonEmpty(info['fatherName']) ??
+                t!.na;
+
+        beneficiaries.add({
+          'db_id': row['id'],
+          'hhId': hhId,
+          'unique_key': uniqueKey,
+          'created_date_time': createdDate,
+          'RegitrationDate': createdDate,
+          'RegitrationType': registrationType,
+          'BeneficiaryID': beneficiaryId,
+          'Tola/Mohalla': info['mohalla']?.toString() ?? '',
+          'village': info['village']?.toString() ?? '',
+          'RichID': richId,
+          'Gender': gender,
+          'Name': displayName,
+          'Age|Gender': _formatAgeGender(
+            info['dob'],
+            info['gender'],
+            row['is_death'] ?? 0,
+            row['death_details'],
+            row['modified_date_time'],
+          ),
+          'Mobileno.': info['mobileNo']?.toString() ?? '',
+          'FatherName': fatherName,
+          'MotherName': info['motherName']?.toString() ??
+              info['mother_name']?.toString() ??
+              '',
+          'SpouseName': info['spouseName']?.toString() ??
+              info['spouse_name']?.toString() ??
+              '',
+          'Relation': relation,
+          'MaritalStatus': info['maritalStatus']?.toString() ?? '',
+          'is_synced': row['is_synced'] ?? 0,
+          'is_death': row['is_death'] ?? 0,
+          '_rawInfo': info,
+        });
+      }
+
+      beneficiaries.sort((a, b) {
+        final int idA = int.tryParse(a['db_id']?.toString() ?? '') ?? 0;
+        final int idB = int.tryParse(b['db_id']?.toString() ?? '') ?? 0;
+
+        return idB.compareTo(idA);
+      });
+
+
+    } catch (e) {
+      print('❌ Error loading data: $e');
+    }
+
+    setState(() {
+      beneficiariesCount = beneficiaries.length;
+      _isLoading = false;
+    });
+
+    print('✅ Final unique beneficiaries: ${beneficiaries.length}');
+  }
+
+  String _formatAgeGender(dynamic dobRaw, dynamic genderRaw, int isDeath, dynamic deathDetailsRaw, dynamic modifiedDateTimeRaw) {
+    String age = 'N/A';
+    String gender = (genderRaw?.toString().toLowerCase() ?? '');
+    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
+      DateTime? dob;
+      try {
+        dob = DateTime.tryParse(dobRaw.toString());
+      } catch (_) {}
+      if (dob != null) {
+        DateTime referenceDate = DateTime.now();
+
+        // Only calculate age using death date if is_death equals 1
+        if (isDeath == 1) {
+          DateTime? deathDate;
+
+          // First try to get date from death_details
+          if (deathDetailsRaw != null) {
+            Map<String, dynamic> deathDetails = {};
+            try {
+              if (deathDetailsRaw is String) {
+                deathDetails = jsonDecode(deathDetailsRaw as String) as Map<String, dynamic>;
+              } else if (deathDetailsRaw is Map) {
+                deathDetails = Map<String, dynamic>.from(deathDetailsRaw as Map);
+              }
+
+              // Parse date of death
+              String deathDateStr = (deathDetails['date_of_death'] ?? '').toString();
+              if (deathDateStr.isNotEmpty && deathDateStr != 'null') {
+                try {
+                  deathDate = DateTime.parse(deathDateStr);
+                } catch (_) {
+                  // Try parsing as timestamp
+                  final timestamp = int.tryParse(deathDateStr);
+                  if (timestamp != null && timestamp > 0) {
+                    deathDate = DateTime.fromMillisecondsSinceEpoch(
+                      timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+                      isUtc: true,
+                    );
+                  }
+                }
+              }
+            } catch (e) {
+              print('Error parsing death details: $e');
+            }
+          }
+
+          // If death date not found, try modified_date_time
+          if (deathDate == null && modifiedDateTimeRaw != null) {
+            print('🔍 Debug: modifiedDateTimeRaw = $modifiedDateTimeRaw');
+            try {
+              final modifiedDateStr = modifiedDateTimeRaw.toString();
+              if (modifiedDateStr.isNotEmpty) {
+                deathDate = DateTime.parse(modifiedDateStr);
+                print('✅ Debug: Successfully parsed modified_date_time: $deathDate');
+              }
+            } catch (_) {
+              print('❌ Debug: Failed to parse modified_date_time as string, trying timestamp...');
+              // Try parsing as timestamp
+              final timestamp = int.tryParse(modifiedDateTimeRaw.toString());
+              if (timestamp != null && timestamp > 0) {
+                deathDate = DateTime.fromMillisecondsSinceEpoch(
+                  timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+                  isUtc: true,
+                );
+                print('✅ Debug: Successfully parsed modified_date_time as timestamp: $deathDate');
+              }
+            }
+          }
+
+          // Use death date if found, otherwise use current date
+          if (deathDate != null) {
+            referenceDate = deathDate;
+          }
+        }
+
+        age = '${referenceDate.difference(dob).inDays ~/ 365}';
+      }
+    }
+    String displayGender = gender == 'm' || gender == 'male'
+        ? 'Male'
+        : gender == 'f' || gender == 'female'
+        ? 'Female'
+        : 'Other';
+    return '$age Y | $displayGender';
+  }
+
+
+  /*Future<void> _loadBeneficiariesCount() async {
     try {
       final rows = await LocalStorageDao.instance.getAllBeneficiaries(
         isMigrated: 0,
@@ -669,13 +895,234 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         });
       }
     }
+  }*/
+
+  String? _nonEmpty(dynamic v) {
+    if (v == null) return null;
+    final s = v.toString().trim();
+    return s.isEmpty ? null : s;
   }
 
 
   Future<void> _loadEligibleCouplesCount() async {
     try {
+      //setState(() => _isLoading = true);
+
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
+
+      if (currentUserKey.isEmpty) {
+        print('❌ Error: Current user key not found');
+        setState(() {
+          /*_filtered = [];
+          _isLoading = false;*/
+        });
+        return;
+      }
+
+      final query = '''
+      SELECT 
+        b.*, 
+        e.eligible_couple_state,
+        e.created_date_time AS registration_date
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e
+        ON b.unique_key = e.beneficiary_ref_key
+      WHERE b.is_deleted = 0
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND (b.is_death = 0 OR b.is_death IS NULL)
+        AND e.eligible_couple_state = 'eligible_couple'
+        AND e.is_deleted = 0
+        AND e.current_user_key = ?
+      ORDER BY b.created_date_time DESC
+    ''';
+
+      final rows = await db.rawQuery(query, [currentUserKey]);
+      print('🔍 Raw eligible couple rows: ${rows.length}');
+
+      if (rows.isEmpty) {
+        setState(() {
+          // eligibleCouplesCount = [];
+          //_isLoading = false;
+        });
+        return;
+      }
+
+      final List<Map<String, dynamic>> couples = [];
+      final Set<String> seenBeneficiaries = {};
+
+      for (final row in rows) {
+        final Map<String, dynamic> member =
+        Map<String, dynamic>.from(row);
+
+        Map<String, dynamic> info = {};
+        try {
+          final raw = member['beneficiary_info'];
+          if (raw is String && raw.isNotEmpty) {
+            info = jsonDecode(raw) as Map<String, dynamic>;
+          } else if (raw is Map) {
+            info = Map<String, dynamic>.from(raw);
+          }
+        } catch (e) {
+          print('⚠️ JSON parse error: $e');
+          continue;
+        }
+
+        final String beneficiaryKey =
+            member['unique_key']?.toString() ?? '';
+
+        if (beneficiaryKey.isEmpty) {
+          print('⚠️ Beneficiary unique_key missing');
+          continue;
+        }
+
+        final String memberType =
+            info['memberType']?.toString().toLowerCase() ?? '';
+
+        // 🚫 Skip children
+        if (memberType == 'child') {
+          print('⛔ Skipping child record');
+          continue;
+        }
+
+        final beneficiaryKeya = row['unique_key']?.toString() ?? '';
+        final hasSterilization =
+        await _hasSterilizationRecord(
+          db,
+          beneficiaryKeya,
+          currentUserKey,
+        );
+
+        if (hasSterilization) continue;
+
+        // 🚫 Skip duplicate beneficiary
+        if (seenBeneficiaries.contains(beneficiaryKey)) {
+          print('⛔ Duplicate beneficiary skipped: $beneficiaryKey');
+          continue;
+        }
+
+        seenBeneficiaries.add(beneficiaryKey);
+
+        couples.add(
+          _formatCoupleData(
+            _toStringMap(member),
+            info,
+            <String, dynamic>{},
+            isHead: true,
+            shouldShowGuestBadge: false,
+          ),
+        );
+      }
+
+      print('✅ Final eligible couples (unique beneficiaries): ${couples.length}');
+
+      setState(() {
+        eligibleCouplesCount = couples.length;
+        // _isLoading = false;
+      });
+    } catch (e, stackTrace) {
+      print('❌ Error in _loadEligibleCouples: $e');
+      print(stackTrace);
+      setState(() {
+        //eligibleCouplesCount = 0;
+        // _isLoading = false;
+      });
+    }
+  }
+
+  Map<String, dynamic> _toStringMap(dynamic map) {
+    if (map == null) return {};
+    if (map is Map<String, dynamic>) return map;
+    if (map is Map) {
+      return Map<String, dynamic>.from(map);
+    }
+    return {};
+  }
+
+
+  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead, bool shouldShowGuestBadge = false}) {
+    final hhId = row['household_ref_key']?.toString() ?? '';
+    final uniqueKey = row['unique_key']?.toString() ?? '';
+    final createdDate = row['registration_date']?.toString() ?? '';
+    final info = _toStringMap(row['beneficiary_info']);
+    final head = _toStringMap(info['head_details']);
+    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
+    final gender = female['gender']?.toString().toLowerCase();
+    final displayGender = gender?.isNotEmpty == true ? gender![0].toUpperCase() + gender!.substring(1) : 'Not Available';
+    final age = _calculateAge(female['dob']);
+    final richId = female['RichID']?.toString() ?? '';
+    final mobile = female['mobile_no']?.toString() ?? female['mobileNo']?.toString() ?? 'Not Available';
+    final husbandName = female['spouseName']?.toString() ??
+        (isHead
+            ? (headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString())
+            : (headOrSpouse['headName']?.toString() ?? headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString()))
+        ?? '';
+
+    final dynamic childrenRaw = info['children_details'] ?? head['childrendetails'] ?? head['childrenDetails'];
+    String last11(String s) => s.length > 11 ? s.substring(s.length - 11) : s;
+
+    Map<String, dynamic>? childrenSummary;
+    if (childrenRaw != null) {
+      final childrenMap = _toStringMap(childrenRaw);
+      childrenSummary = {
+        'totalBorn': childrenMap['totalBorn'],
+        'totalLive': childrenMap['totalLive'],
+        'totalMale': childrenMap['totalMale'],
+        'totalFemale': childrenMap['totalFemale'],
+        'youngestAge': childrenMap['youngestAge'],
+        'ageUnit': childrenMap['ageUnit'],
+        'youngestGender': childrenMap['youngestGender'],
+      }..removeWhere((k, v) => v == null);
+    }
+    return {
+      'hhId': hhId,
+      'hhIdShort': last11(hhId),
+      'RegistrationDate': _formatDate(createdDate),
+      'RegistrationType': 'General',
+      'BeneficiaryID': uniqueKey,
+      'BeneficiaryIDShort': last11(uniqueKey) ,
+      'Name': name,
+      'age': age > 0 ? '$age Y | $displayGender' : 'N/A',
+      'RCH ID': richId.isNotEmpty ? richId : 'Not Available',
+      'mobileno': mobile,
+      'HusbandName': husbandName.isNotEmpty ? husbandName : 'Not Available',
+      'childrenSummary': childrenSummary,
+      '_rawRow': row,
+      'fullHhId': hhId,
+      'fullBeneficiaryId': uniqueKey,
+      'shouldShowGuestBadge': shouldShowGuestBadge,
+    };
+  }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    try {
+      final dt = DateTime.tryParse(dateStr);
+      if (dt == null) return '';
+      return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  int _calculateAge(dynamic dobRaw) {
+    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
+    try {
+      final dob = DateTime.tryParse(dobRaw.toString());
+      if (dob == null) return 0;
+      return DateTime.now().difference(dob).inDays ~/ 365;
+    } catch (_) {
+      return 0;
+    }
+  }
+/*
+
+  Future<void> _loadEligibleCouplesCount() async {
+    try {
 
       final ecCount = await _getEligibleCoupleCount();
+*/
 /*
 
       final db = await DatabaseProvider.instance.database;
@@ -724,7 +1171,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           //count++;
         }
       }
-*/
+*//*
+
 
       if (mounted) {
         setState(() {
@@ -740,6 +1188,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       }
     }
   }
+*/
 
   Future<int> _getEligibleCoupleCount() async {
     try {

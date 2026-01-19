@@ -12,10 +12,8 @@ class AddBeneficiaryRepository {
 
   Future<dynamic> addBeneficiary(Map<String, dynamic> payload) async {
     try {
-      // Get authentication token
       String? token = await _getAuthToken();
       
-      // Set up headers with auth token
       final headers = <String, String>{
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -24,7 +22,6 @@ class AddBeneficiaryRepository {
 
       print('Sending beneficiary data to API...');
       
-      // Make the API call
       final response = await _api.postApi(
         Endpoints.addBeneficiary,
         payload,

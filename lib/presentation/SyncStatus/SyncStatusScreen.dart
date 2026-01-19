@@ -67,7 +67,7 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         _loadHouseholdCount();
         // Get total household count for current user
-      /*  final householdTotalResult = await db.rawQuery(
+        /*  final householdTotalResult = await db.rawQuery(
           'SELECT COUNT(*) as count FROM households WHERE is_deleted = 0 AND current_user_key = ?',
           [ashaUniqueKey],
         );
@@ -153,11 +153,11 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
       // }
 
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-       // getMotherCareTotalCount();
+        // getMotherCareTotalCount();
         final totalResult = await db.rawQuery(
-            'SELECT COUNT(*) AS count FROM ( SELECT DISTINCT mca.beneficiary_ref_key FROM mother_care_activities mca INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key WHERE mca.is_deleted = 0 AND bn.is_deleted = 0 AND bn.is_death = 0 AND bn.is_migrated = 0 AND mca.mother_care_state IN (?, ?, ?) AND mca.current_user_key = ?) AS t;',
-            ['anc_due', 'delivery_outcome', 'pnc_mother', ashaUniqueKey],
-          );
+          'SELECT COUNT(*) AS count FROM ( SELECT DISTINCT mca.beneficiary_ref_key FROM mother_care_activities mca INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key WHERE mca.is_deleted = 0 AND bn.is_deleted = 0 AND bn.is_death = 0 AND bn.is_migrated = 0 AND mca.mother_care_state IN (?, ?, ?) AND mca.current_user_key = ?) AS t;',
+          ['anc_due', 'delivery_outcome', 'pnc_mother', ashaUniqueKey],
+        );
         _motherCareTotal = totalResult.first['count'] as int? ?? 0;
 
         final syncedResult = await db.rawQuery(
@@ -233,7 +233,7 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
 
   Future<void> _loadHouseholdCount() async {
     try {
-      
+
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       final households = await LocalStorageDao.instance.getAllHouseholds();
 
@@ -280,7 +280,145 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
     }
   }
 
+
   Future<void> _loadEligibleCouplesCount() async {
+    try {
+      //setState(() => _isLoading = true);
+      int totalCount = 0;
+      int syncedCount = 0;
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
+
+      if (currentUserKey.isEmpty) {
+        print('❌ Error: Current user key not found');
+        setState(() {
+          /*_filtered = [];
+          _isLoading = false;*/
+        });
+        return;
+      }
+
+      final query = '''
+      SELECT 
+        b.*, 
+        e.eligible_couple_state,
+        e.created_date_time AS registration_date
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e
+        ON b.unique_key = e.beneficiary_ref_key
+      WHERE b.is_deleted = 0
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND (b.is_death = 0 OR b.is_death IS NULL)
+        AND e.eligible_couple_state = 'eligible_couple'
+        AND e.is_deleted = 0
+        AND e.current_user_key = ?
+      ORDER BY b.created_date_time DESC
+    ''';
+
+      final rows = await db.rawQuery(query, [currentUserKey]);
+      print('🔍 Raw eligible couple rows: ${rows.length}');
+
+      if (rows.isEmpty) {
+        setState(() {
+          // eligibleCouplesCount = [];
+          //_isLoading = false;
+        });
+        return;
+      }
+
+      final List<Map<String, dynamic>> couples = [];
+      final Set<String> seenBeneficiaries = {};
+
+      for (final row in rows) {
+        final Map<String, dynamic> member =
+        Map<String, dynamic>.from(row);
+
+        Map<String, dynamic> info = {};
+        try {
+          final raw = member['beneficiary_info'];
+          if (raw is String && raw.isNotEmpty) {
+            info = jsonDecode(raw) as Map<String, dynamic>;
+          } else if (raw is Map) {
+            info = Map<String, dynamic>.from(raw);
+          }
+        } catch (e) {
+          print('⚠️ JSON parse error: $e');
+          continue;
+        }
+
+        final String beneficiaryKey =
+            member['unique_key']?.toString() ?? '';
+
+        if (beneficiaryKey.isEmpty) {
+          print('⚠️ Beneficiary unique_key missing');
+          continue;
+        }
+
+        final String memberType =
+            info['memberType']?.toString().toLowerCase() ?? '';
+
+        // 🚫 Skip children
+        if (memberType == 'child') {
+          print('⛔ Skipping child record');
+          continue;
+        }
+
+        final beneficiaryKeya = row['unique_key']?.toString() ?? '';
+        final hasSterilization =
+        await _hasSterilizationRecord(
+          db,
+          beneficiaryKeya,
+          currentUserKey,
+        );
+
+        if (hasSterilization) continue;
+
+        // 🚫 Skip duplicate beneficiary
+        if (seenBeneficiaries.contains(beneficiaryKey)) {
+          print('⛔ Duplicate beneficiary skipped: $beneficiaryKey');
+          continue;
+        }
+
+        seenBeneficiaries.add(beneficiaryKey);
+
+        totalCount++;
+
+        // Check if synced
+        final isSynced = (row['is_synced'] ?? 0) == 1;
+        if (isSynced) {
+          syncedCount++;
+        }
+
+      /*  couples.add(
+          _formatCoupleData(
+            _toStringMap(member),
+            info,
+            <String, dynamic>{},
+            isHead: true,
+            shouldShowGuestBadge: false,
+          ),
+        );*/
+      }
+
+      print('✅ Final eligible couples (unique beneficiaries): ${couples.length}');
+
+      setState(() {
+        _eligibleCoupleTotal = totalCount;
+        _eligibleCoupleSynced = syncedCount;
+      });
+    } catch (e, stackTrace) {
+      print('❌ Error in _loadEligibleCouples: $e');
+      print(stackTrace);
+      setState(() {
+        //eligibleCouplesCount = 0;
+        // _isLoading = false;
+      });
+    }
+  }
+
+
+  /*Future<void> _loadEligibleCouplesCount() async {
     try {
       print('🔍 Starting to load eligible couples count...');
       final db = await DatabaseProvider.instance.database;
@@ -298,12 +436,12 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
       }
 
       final query = '''
-        SELECT DISTINCT b.*, e.eligible_couple_state, 
+        SELECT DISTINCT b.*, e.eligible_couple_state,
                e.created_date_time as registration_date,
                e.is_synced as e_is_synced
         FROM beneficiaries_new b
         INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
-        WHERE b.is_deleted = 0 
+        WHERE b.is_deleted = 0
           AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
           AND e.eligible_couple_state = 'eligible_couple'
           AND e.is_deleted = 0
@@ -361,7 +499,7 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
         });
       }
     }
-  }
+  }*/
 
   int? _calculateAgeFromDob(String? dob) {
     if (dob == null || dob.isEmpty) return null;
@@ -443,58 +581,78 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       final totalResult = await db.rawQuery('''
-        SELECT COUNT(*) as count
-        FROM beneficiaries_new B
-        INNER JOIN child_care_activities CCA ON B.unique_key = CCA.beneficiary_ref_key
-        WHERE 
-          B.is_deleted = 0
-          AND B.is_adult = 0
-          AND B.is_migrated = 0
-          AND B.current_user_key = ?
-          AND CCA.child_care_state IN ('registration_due', 'tracking_due')
-          AND (
-            B.beneficiary_info LIKE '%"memberType":"child"%' OR
-            B.beneficiary_info LIKE '%"memberType":"Child"%'
-          )
-      ''', [ashaUniqueKey]);
+      WITH latest_cca AS (
+        SELECT
+          cca.*,
+          ROW_NUMBER() OVER (
+            PARTITION BY cca.beneficiary_ref_key
+            ORDER BY datetime(cca.created_date_time) DESC, cca.rowid DESC
+          ) AS rn
+        FROM child_care_activities cca
+      )
+      SELECT COUNT(*) AS count
+      FROM beneficiaries_new B
+      INNER JOIN latest_cca CCA
+        ON B.unique_key = CCA.beneficiary_ref_key
+      WHERE
+        CCA.rn = 1
+        AND B.is_deleted = 0
+        AND B.is_adult = 0
+        AND B.is_migrated = 0
+        AND B.current_user_key = ?
+        AND CCA.child_care_state IN ('registration_due', 'tracking_due', 'infant_pnc')
+        AND (
+          B.beneficiary_info LIKE '%"memberType":"child"%'
+          OR B.beneficiary_info LIKE '%"memberType":"Child"%'
+        )
+    ''', [ashaUniqueKey]);
 
-      // Get synced count with child care activities filtering
       final syncedResult = await db.rawQuery('''
-        SELECT COUNT(*) as count
-        FROM beneficiaries_new B
-        INNER JOIN child_care_activities CCA ON B.unique_key = CCA.beneficiary_ref_key
-        WHERE 
-          B.is_deleted = 0
-          AND B.is_adult = 0
-          AND B.is_migrated = 0
-          AND B.current_user_key = ?
-          AND CCA.child_care_state IN ('registration_due', 'tracking_due')
-          AND (
-            B.beneficiary_info LIKE '%"memberType":"child"%' OR
-            B.beneficiary_info LIKE '%"memberType":"Child"%'
-          )
-          AND B.is_synced = 1
-      ''', [ashaUniqueKey]);
+      WITH latest_cca AS (
+        SELECT
+          cca.*,
+          ROW_NUMBER() OVER (
+            PARTITION BY cca.beneficiary_ref_key
+            ORDER BY datetime(cca.created_date_time) DESC, cca.rowid DESC
+          ) AS rn
+        FROM child_care_activities cca
+      )
+      SELECT COUNT(*) AS count
+      FROM beneficiaries_new B
+      INNER JOIN latest_cca CCA
+        ON B.unique_key = CCA.beneficiary_ref_key
+      WHERE
+        CCA.rn = 1
+        AND B.is_deleted = 0
+        AND B.is_adult = 0
+        AND B.is_migrated = 0
+        AND B.current_user_key = ?
+        AND CCA.child_care_state IN ('registration_due', 'tracking_due', 'infant_pnc')
+        AND (
+          B.beneficiary_info LIKE '%"memberType":"child"%'
+          OR B.beneficiary_info LIKE '%"memberType":"Child"%'
+        )
+        AND B.is_synced = 1
+    ''', [ashaUniqueKey]);
 
       final totalCount = totalResult.first['count'] as int? ?? 0;
       final syncedCount = syncedResult.first['count'] as int? ?? 0;
 
-      print('✅ Child Care Counts - Total: $totalCount, Synced: $syncedCount');
+      print('✅ Child Care Counts (Latest State Only) - Total: $totalCount, Synced: $syncedCount');
 
       return {
         'total': totalCount,
         'synced': syncedCount,
       };
-
-    } catch (e, stackTrace) {
-      print('Error in getRegisteredChildCount: $e');
+    } catch (e) {
+      print('❌ Error in getRegisteredChildCount: $e');
       return {
         'total': 0,
         'synced': 0,
       };
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -507,7 +665,7 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
             backgroundColor: AppColors.primary,
             elevation: 0,
             title: Text(
-             l10n?.syncStatus ?? 'Sync Status',
+              l10n?.syncStatus ?? 'Sync Status',
               style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.background),
             ),
             leading: IconButton(
@@ -527,15 +685,15 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Padding(
-                    padding: EdgeInsets.all(3.w),
-                    child: _isLoading
-                    ? Center(
+                      padding: EdgeInsets.all(3.w),
+                      child: _isLoading
+                          ? Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 4.h),
                           child: const CircularProgressIndicator(color: Colors.white),
                         ),
                       )
-                    : Column(
+                          : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [

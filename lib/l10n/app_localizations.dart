@@ -2426,7 +2426,7 @@ abstract class AppLocalizations {
   /// No description provided for @fatherNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Father name'**
+  /// **'Father Name'**
   String get fatherNameLabel;
 
   /// No description provided for @fatherSpouseHint.
@@ -11144,7 +11144,7 @@ abstract class AppLocalizations {
   /// No description provided for @riskInfections.
   ///
   /// In en, this message translates to:
-  /// **'Syphilis, HIV Positive, Hepatitis B, Hepatitis C'**
+  /// **'Syphilis, HIV Positive, Hepatitis-B, Hepatitis C'**
   String get riskInfections;
 
   /// No description provided for @riskGestationalDiabetes.

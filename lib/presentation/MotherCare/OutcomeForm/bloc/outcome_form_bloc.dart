@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import '../../../../core/utils/device_info_utils.dart';
-import '../../../../core/utils/id_generator_utils.dart';
 import '../../../../core/utils/geolocation_utils.dart';
+import '../../../../core/utils/id_generator_utils.dart';
 import '../../../../data/Database/User_Info.dart';
 import '../../../../data/Database/database_provider.dart';
 import '../../../../data/Database/local_storage_dao.dart';
@@ -116,6 +116,9 @@ class OutcomeFormBloc extends Bloc<OutcomeFormEvent, OutcomeFormState> {
     });
     on<OtherTransitPlaceNameChanged>((event, emit) {
       emit(state.copyWith(otherTransitPlaceName: event.value, errorMessage: null));
+    });
+    on<PretermDialogShown>((event, emit) {
+      emit(state.copyWith(pretermDialogShown: true));
     });
     on<OtherComplicationNameChanged>((event, emit) {
       emit(state.copyWith(otherComplicationName: event.value, errorMessage: null));

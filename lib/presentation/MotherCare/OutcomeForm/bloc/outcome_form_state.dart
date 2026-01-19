@@ -38,6 +38,7 @@ class OutcomeFormState extends Equatable {
   final String? otherTransitPlaceName;
   final String? complicationType;
   final String? otherComplicationName;
+  final bool pretermDialogShown;
 
   const OutcomeFormState({
     this.householdId,
@@ -77,6 +78,7 @@ class OutcomeFormState extends Equatable {
     this.otherTransitPlaceName,
     this.complicationType,
     this.otherComplicationName,
+    this.pretermDialogShown = false,
   });
 
   factory OutcomeFormState.initial() => const OutcomeFormState(
@@ -117,6 +119,7 @@ class OutcomeFormState extends Equatable {
     otherTransitPlaceName: null,
     complicationType: null,
     otherComplicationName: null,
+    pretermDialogShown: false,
   );
 
   OutcomeFormState copyWith({
@@ -157,6 +160,7 @@ class OutcomeFormState extends Equatable {
     String? otherTransitPlaceName,
     String? complicationType,
     String? otherComplicationName,
+    bool? pretermDialogShown,
   }) {
     return OutcomeFormState(
       householdId: householdId ?? this.householdId,
@@ -197,6 +201,7 @@ class OutcomeFormState extends Equatable {
       otherTransitPlaceName: otherTransitPlaceName ?? this.otherTransitPlaceName,
       complicationType: complicationType ?? this.complicationType,
       otherComplicationName: otherComplicationName ?? this.otherComplicationName,
+      pretermDialogShown: pretermDialogShown ?? this.pretermDialogShown,
     );
   }
 
@@ -239,5 +244,6 @@ class OutcomeFormState extends Equatable {
     otherTransitPlaceName,
     complicationType,
     otherComplicationName,
+    pretermDialogShown,
   ];
 }

@@ -51,10 +51,19 @@ class ClusterMeetingScreenForm extends StatefulWidget {
 class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
   List<dynamic> _ashaList = [];
   List<bool> _presentList = [];
-  int get presentCount => _presentList.where((e) => e == true).length;
-  int get absentCount => _presentList.where((e) => e == false).length;
+
+  int get presentCount =>
+      _presentList
+          .where((e) => e == true)
+          .length;
+
+  int get absentCount =>
+      _presentList
+          .where((e) => e == false)
+          .length;
   int _ashaPresentCount = 0;
   int _ashaAbsentCount = 0;
+
   List<TableRow> _buildAshaRows() {
     return List.generate(_ashaList.length, (index) {
       final item = _ashaList[index];
@@ -69,6 +78,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       );
     });
   }
+
   String format24Hour(TimeOfDay time) {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
@@ -113,8 +123,10 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       padding: EdgeInsets.zero, // remove inner spacing
       child: Checkbox(
         materialTapTargetSize:
-            MaterialTapTargetSize.shrinkWrap, // small checkbox
-        visualDensity: VisualDensity.compact, // reduce padding around checkbox
+        MaterialTapTargetSize.shrinkWrap,
+        // small checkbox
+        visualDensity: VisualDensity.compact,
+        // reduce padding around checkbox
         value: value,
 
         fillColor: MaterialStateProperty.resolveWith<Color>((states) {
@@ -182,10 +194,16 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
   DateTime? _selectedMonthYear;
 
   Future<void> _selectMonthYear(BuildContext context) async {
-    int selectedMonth = _selectedMonthYear?.month ?? DateTime.now().month;
-    int selectedYear = _selectedMonthYear?.year ?? DateTime.now().year;
+    int selectedMonth = _selectedMonthYear?.month ?? DateTime
+        .now()
+        .month;
+    int selectedYear = _selectedMonthYear?.year ?? DateTime
+        .now()
+        .year;
     final l10n = AppLocalizations.of(context);
-    final currentYear = DateTime.now().year;
+    final currentYear = DateTime
+        .now()
+        .year;
     // Month Column index
     int monthIndex = selectedMonth - 1;
 
@@ -198,115 +216,127 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
 
     await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text(
-          l10n?.selectMonthYear ?? "Select Month & Year",
-          textAlign: TextAlign.center,
-        ),
-        content: SizedBox(
-          width: 280,
-          height: 240,
-          child: Row(
-            children: [
-              // Month Column (1 to 12)
-              Expanded(
-                child: ListWheelScrollView.useDelegate(
-                  itemExtent: 50,
-                  controller: monthController,
-                  perspective: 0.005,
-                  diameterRatio: 1.8,
-                  physics: const FixedExtentScrollPhysics(),
-                  onSelectedItemChanged: (index) => selectedMonth = index + 1,
-                  childDelegate: ListWheelChildBuilderDelegate(
-                    childCount: 12,
-                    builder: (context, index) {
-                      final month = (index + 1).toString().padLeft(2, '0');
-                      return Center(
-                        child: Text(
-                          month,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      );
-                    },
+      builder: (context) =>
+          AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)),
+            title: Text(
+              l10n?.selectMonthYear ?? "Select Month & Year",
+              textAlign: TextAlign.center,
+            ),
+            content: SizedBox(
+              width: 280,
+              height: 240,
+              child: Row(
+                children: [
+                  // Month Column (1 to 12)
+                  Expanded(
+                    child: ListWheelScrollView.useDelegate(
+                      itemExtent: 50,
+                      controller: monthController,
+                      perspective: 0.005,
+                      diameterRatio: 1.8,
+                      physics: const FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) =>
+                      selectedMonth = index + 1,
+                      childDelegate: ListWheelChildBuilderDelegate(
+                        childCount: 12,
+                        builder: (context, index) {
+                          final month = (index + 1).toString().padLeft(2, '0');
+                          return Center(
+                            child: Text(
+                              month,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  "-",
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                ),
-              ),
-              // Year Column (2025 → 1925)
-              Expanded(
-                child: ListWheelScrollView.useDelegate(
-                  itemExtent: 50,
-                  controller: yearController,
-                  perspective: 0.005,
-                  diameterRatio: 1.8,
-                  physics: const FixedExtentScrollPhysics(),
-                  onSelectedItemChanged: (index) =>
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      "-",
+                      style: TextStyle(
+                          fontSize: 28, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  // Year Column (2025 → 1925)
+                  Expanded(
+                    child: ListWheelScrollView.useDelegate(
+                      itemExtent: 50,
+                      controller: yearController,
+                      perspective: 0.005,
+                      diameterRatio: 1.8,
+                      physics: const FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) =>
                       selectedYear = currentYear - index,
-                  childDelegate: ListWheelChildBuilderDelegate(
-                    childCount: 101,
-                    builder: (context, index) {
-                      final year = currentYear - index;
-                      return Center(
-                        child: Text(
-                          year.toString(),
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      );
-                    },
+                      childDelegate: ListWheelChildBuilderDelegate(
+                        childCount: 101,
+                        builder: (context, index) {
+                          final year = currentYear - index;
+                          return Center(
+                            child: Text(
+                              year.toString(),
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  l10n?.cancel ?? "Cancel",
+                  style: TextStyle(color: AppColors.primary),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _selectedMonthYear = DateTime(selectedYear, selectedMonth);
+                  });
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  l10n?.ok ?? "OK",
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              l10n?.cancel ?? "Cancel",
-              style: TextStyle(color: AppColors.primary),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedMonthYear = DateTime(selectedYear, selectedMonth);
-              });
-              Navigator.pop(context);
-            },
-            child: Text(
-              l10n?.ok ?? "OK",
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
   Future<void> _selectTime(BuildContext context, bool isFromTime) async {
     int selectedHour = isFromTime
-        ? (_fromTime?.hour ?? TimeOfDay.now().hour)
-        : (_toTime?.hour ?? TimeOfDay.now().hour);
+        ? (_fromTime?.hour ?? TimeOfDay
+        .now()
+        .hour)
+        : (_toTime?.hour ?? TimeOfDay
+        .now()
+        .hour);
     int selectedMinute = isFromTime
-        ? (_fromTime?.minute ?? TimeOfDay.now().minute)
-        : (_toTime?.minute ?? TimeOfDay.now().minute);
+        ? (_fromTime?.minute ?? TimeOfDay
+        .now()
+        .minute)
+        : (_toTime?.minute ?? TimeOfDay
+        .now()
+        .minute);
     final l10n = AppLocalizations.of(context);
 
     // Use controllers for exact initial position
@@ -319,111 +349,116 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
 
     await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text(
-          isFromTime
-              ? (l10n?.fromTimeLabel ?? "From Time")
-              : (l10n?.toTimeLabel ?? "To Time"),
-          textAlign: TextAlign.center,
-        ),
-        content: SizedBox(
-          width: 280,
-          height: 240,
-          child: Row(
-            children: [
-              // Hour Wheel
-              Expanded(
-                child: ListWheelScrollView.useDelegate(
-                  controller: hourController,
-                  itemExtent: 50,
-                  perspective: 0.005,
-                  diameterRatio: 1.8,
-                  physics: const FixedExtentScrollPhysics(),
-                  onSelectedItemChanged: (index) => selectedHour = index,
-                  childDelegate: ListWheelChildBuilderDelegate(
-                    childCount: 24,
-                    builder: (context, index) => Center(
-                      child: Text(
-                        index.toString().padLeft(2, '0'),
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
-                        ),
+      builder: (context) =>
+          AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)),
+            title: Text(
+              isFromTime
+                  ? (l10n?.fromTimeLabel ?? "From Time")
+                  : (l10n?.toTimeLabel ?? "To Time"),
+              textAlign: TextAlign.center,
+            ),
+            content: SizedBox(
+              width: 280,
+              height: 240,
+              child: Row(
+                children: [
+                  // Hour Wheel
+                  Expanded(
+                    child: ListWheelScrollView.useDelegate(
+                      controller: hourController,
+                      itemExtent: 50,
+                      perspective: 0.005,
+                      diameterRatio: 1.8,
+                      physics: const FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) => selectedHour = index,
+                      childDelegate: ListWheelChildBuilderDelegate(
+                        childCount: 24,
+                        builder: (context, index) =>
+                            Center(
+                              child: Text(
+                                index.toString().padLeft(2, '0'),
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
                       ),
                     ),
                   ),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  ":",
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                ),
-              ),
-              // Minute Wheel
-              Expanded(
-                child: ListWheelScrollView.useDelegate(
-                  controller: minuteController,
-                  itemExtent: 50,
-                  perspective: 0.005,
-                  diameterRatio: 1.8,
-                  physics: const FixedExtentScrollPhysics(),
-                  onSelectedItemChanged: (index) => selectedMinute = index,
-                  childDelegate: ListWheelChildBuilderDelegate(
-                    childCount: 60, // 0 to 59 minutes
-                    builder: (context, index) => Center(
-                      child: Text(
-                        index.toString().padLeft(2, '0'),
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
-                        ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      ":",
+                      style: TextStyle(
+                          fontSize: 28, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  // Minute Wheel
+                  Expanded(
+                    child: ListWheelScrollView.useDelegate(
+                      controller: minuteController,
+                      itemExtent: 50,
+                      perspective: 0.005,
+                      diameterRatio: 1.8,
+                      physics: const FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) => selectedMinute = index,
+                      childDelegate: ListWheelChildBuilderDelegate(
+                        childCount: 60, // 0 to 59 minutes
+                        builder: (context, index) =>
+                            Center(
+                              child: Text(
+                                index.toString().padLeft(2, '0'),
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
                       ),
                     ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  l10n?.cancel ?? "Cancel",
+                  style: TextStyle(
+                    fontWeight: FontWeight.normal,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  final time = TimeOfDay(
+                    hour: selectedHour,
+                    minute: selectedMinute,
+                  );
+                  setState(() {
+                    if (isFromTime) {
+                      _fromTime = time;
+                    } else {
+                      _toTime = time;
+                    }
+                  });
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  l10n?.ok ?? "Ok",
+                  style: TextStyle(
+                    fontWeight: FontWeight.normal,
+                    color: AppColors.primary,
                   ),
                 ),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              l10n?.cancel ?? "Cancel",
-              style: TextStyle(
-                fontWeight: FontWeight.normal,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              final time = TimeOfDay(
-                hour: selectedHour,
-                minute: selectedMinute,
-              );
-              setState(() {
-                if (isFromTime) {
-                  _fromTime = time;
-                } else {
-                  _toTime = time;
-                }
-              });
-              Navigator.pop(context);
-            },
-            child: Text(
-              l10n?.ok ?? "Ok",
-              style: TextStyle(
-                fontWeight: FontWeight.normal,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -454,6 +489,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
   String? uniqueKey; // To store existing unique_key when editing
   Map<String, dynamic>? userData;
   bool isLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -478,7 +514,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
 
     final nameData = userData!['name'] as Map<String, dynamic>?;
     final workingLocation =
-        userData!['working_location'] as Map<String, dynamic>?;
+    userData!['working_location'] as Map<String, dynamic>?;
 
     final firstName = nameData?['first_name']?.toString().trim() ?? '';
     final middleName = nameData?['middle_name']?.toString().trim() ?? '';
@@ -493,10 +529,14 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
     final blockName = workingLocation?['block']?.toString().trim() ?? '';
 
     // Only fill if the field is currently empty
-    if (_ashaFacilitatorNameController.text.trim().isEmpty) {
+    if (_ashaFacilitatorNameController.text
+        .trim()
+        .isEmpty) {
       _ashaFacilitatorNameController.text = fullName;
     }
-    if (_villageNameController.text.trim().isEmpty) {
+    if (_villageNameController.text
+        .trim()
+        .isEmpty) {
       _villageNameController.text = villageName;
     }
     // if (_blockNameController.text.trim().isEmpty) {
@@ -513,7 +553,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       developer.log('Loading user data from secure storage...', name: 'Drawer');
 
       Map<String, dynamic>? data =
-          await SecureStorageService.getCurrentUserData();
+      await SecureStorageService.getCurrentUserData();
 
       if (data == null || data.isEmpty) {
         developer.log(
@@ -632,7 +672,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
         final dayName = formJson["day_of_week"];
         if (dayName != null) {
           selectedDay = days.firstWhere(
-            (d) => d.name.toLowerCase() == dayName.toString().toLowerCase(),
+                (d) => d.name.toLowerCase() == dayName.toString().toLowerCase(),
             orElse: () => days[0],
           );
         }
@@ -648,7 +688,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
             int.tryParse(
               formJson["cluster_meetings_this_month"]?.toString() ?? "0",
             ) ??
-            0;
+                0;
 
         // Month-Year
         final monthYearStr = formJson["month_year"];
@@ -674,31 +714,45 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
         // Load sub-topics from saved data
         _selectedSubTopics = {};
         final immunizationSubTopic = formJson["immunization_discussion_topic"];
-        if (immunizationSubTopic != null && immunizationSubTopic.toString().isNotEmpty) {
+        if (immunizationSubTopic != null && immunizationSubTopic
+            .toString()
+            .isNotEmpty) {
           _selectedSubTopics[1] = immunizationSubTopic.toString();
         }
         final pregnantWomenSubTopic = formJson["pregnant_women_discussion_topic"];
-        if (pregnantWomenSubTopic != null && pregnantWomenSubTopic.toString().isNotEmpty) {
+        if (pregnantWomenSubTopic != null && pregnantWomenSubTopic
+            .toString()
+            .isNotEmpty) {
           _selectedSubTopics[2] = pregnantWomenSubTopic.toString();
         }
         final deathsSubTopic = formJson["deaths_discussion_topic"];
-        if (deathsSubTopic != null && deathsSubTopic.toString().isNotEmpty) {
+        if (deathsSubTopic != null && deathsSubTopic
+            .toString()
+            .isNotEmpty) {
           _selectedSubTopics[8] = deathsSubTopic.toString();
         }
         final familyPlanningSubTopic = formJson["family_planning_discussion_topic"];
-        if (familyPlanningSubTopic != null && familyPlanningSubTopic.toString().isNotEmpty) {
+        if (familyPlanningSubTopic != null && familyPlanningSubTopic
+            .toString()
+            .isNotEmpty) {
           _selectedSubTopics[10] = familyPlanningSubTopic.toString();
         }
         final otherPublicHealthSubTopic = formJson["other_public_health_program_discussion_topic"];
-        if (otherPublicHealthSubTopic != null && otherPublicHealthSubTopic.toString().isNotEmpty) {
+        if (otherPublicHealthSubTopic != null && otherPublicHealthSubTopic
+            .toString()
+            .isNotEmpty) {
           _selectedSubTopics[11] = otherPublicHealthSubTopic.toString();
         }
         final administrativeSubTopic = formJson["administrative_discussion_topic"];
-        if (administrativeSubTopic != null && administrativeSubTopic.toString().isNotEmpty) {
+        if (administrativeSubTopic != null && administrativeSubTopic
+            .toString()
+            .isNotEmpty) {
           _selectedSubTopics[12] = administrativeSubTopic.toString();
         }
         final trainingSupportSubTopic = formJson["training_and_support_discussion_topic"];
-        if (trainingSupportSubTopic != null && trainingSupportSubTopic.toString().isNotEmpty) {
+        if (trainingSupportSubTopic != null && trainingSupportSubTopic
+            .toString()
+            .isNotEmpty) {
           _selectedSubTopics[13] = trainingSupportSubTopic.toString();
         }
 
@@ -714,15 +768,19 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
         List<bool> restored = List<bool>.filled(_ashaList.length, false);
 
         for (
-          int i = 0;
-          i < savedPresentList.length && i < _ashaList.length;
-          i++
+        int i = 0;
+        i < savedPresentList.length && i < _ashaList.length;
+        i++
         ) {
           restored[i] = savedPresentList[i] == true;
         }
         _presentList = restored;
-        _ashaPresentCount = _presentList.where((e) => e).length;
-        _ashaAbsentCount = _presentList.where((e) => !e).length;
+        _ashaPresentCount = _presentList
+            .where((e) => e)
+            .length;
+        _ashaAbsentCount = _presentList
+            .where((e) => !e)
+            .length;
       });
 
       // Convert topic names to IDs after build completes (since discussionTopics is populated in build())
@@ -740,7 +798,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
     final topicIds = <int>{};
     for (final topicName in _selectedTopics) {
       final topic = discussionTopics.firstWhere(
-        (t) => t.name.toLowerCase() == topicName.toLowerCase(),
+            (t) => t.name.toLowerCase() == topicName.toLowerCase(),
         orElse: () => const DiscussionTopic(id: -1, name: ''),
       );
       if (topic.id != -1) {
@@ -790,86 +848,93 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => StatefulBuilder(
-        builder: (context, setStateDialog) => AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      builder: (_) =>
+          StatefulBuilder(
+            builder: (context, setStateDialog) =>
+                AlertDialog(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4)),
 
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-              const Divider(height: 2),
-            ],
-          ),
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const Divider(height: 2),
+                    ],
+                  ),
 
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 350),
-            child: SingleChildScrollView(
-              child: Column(
-                children: options.map((e) {
-                  return RadioListTile<String>(
-                    title: Text(e, style: const TextStyle(fontSize: 14)),
-                    value: e,
-                    groupValue: tempValue,
-                    dense: true,
-                    visualDensity: const VisualDensity(vertical: -4),
-                    onChanged: (val) {
-                      setStateDialog(() {
-                        tempValue = val;
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-
-          actions: [
-            const Divider(height: 1),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    l10n?.cancel ?? 'CANCEL',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).primaryColor,
+                  content: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 350),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: options.map((e) {
+                          return RadioListTile<String>(
+                            title: Text(
+                                e, style: const TextStyle(fontSize: 14)),
+                            value: e,
+                            groupValue: tempValue,
+                            dense: true,
+                            visualDensity: const VisualDensity(vertical: -4),
+                            onChanged: (val) {
+                              setStateDialog(() {
+                                tempValue = val;
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    onSubmit(tempValue);
-                    Navigator.pop(context);
-                  },
-                  child: Text(
-                    l10n?.ok ?? 'OK',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).primaryColor,
+
+                  actions: [
+                    const Divider(height: 1),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            l10n?.cancel ?? 'CANCEL',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Theme
+                                  .of(context)
+                                  .primaryColor,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            onSubmit(tempValue);
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            l10n?.ok ?? 'OK',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Theme
+                                  .of(context)
+                                  .primaryColor,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
-
 
 
   Future<void> _showTopicsDialog(BuildContext context) async {
@@ -879,104 +944,112 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => StatefulBuilder(
-        builder: (context, setStateDialog) => AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n?.discussionTopicProgram ?? "Select Discussion Topics",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-              const Divider(height: 2),
-            ],
-          ),
+      builder: (_) =>
+          StatefulBuilder(
+            builder: (context, setStateDialog) =>
+                AlertDialog(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4)),
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n?.discussionTopicProgram ??
+                            "Select Discussion Topics",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const Divider(height: 2),
+                    ],
+                  ),
 
-          /// 🔹 CONTENT WITH HEIGHT LIMIT
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 350),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: discussionTopics.map((topic) {
-                  final isChecked = currentIds.contains(topic.id);
+                  /// 🔹 CONTENT WITH HEIGHT LIMIT
+                  content: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 350),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: discussionTopics.map((topic) {
+                          final isChecked = currentIds.contains(topic.id);
 
-                  return CheckboxListTile(
-                    title: Text(
-                      topic.name,
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    value: isChecked,
-                    dense: true,
-                    visualDensity: const VisualDensity(vertical: -4),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    onChanged: (checked) {
-                      setStateDialog(() {
-                        if (checked == true) {
-                          currentIds.add(topic.id);
-                        } else {
-                          currentIds.remove(topic.id);
-                          _selectedSubTopics.remove(topic.id);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-
-          /// 🔹 DIVIDER + BUTTON ROW (LIKE OLD APP)
-          actions: [
-            const Divider(height: 1),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    FocusManager.instance.primaryFocus?.unfocus();
-                    Navigator.pop(context);
-                  },
-                  child: Text(
-                    l10n?.cancel ?? 'CANCEL',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).primaryColor,
+                          return CheckboxListTile(
+                            title: Text(
+                              topic.name,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            value: isChecked,
+                            dense: true,
+                            visualDensity: const VisualDensity(vertical: -4),
+                            controlAffinity: ListTileControlAffinity.leading,
+                            onChanged: (checked) {
+                              setStateDialog(() {
+                                if (checked == true) {
+                                  currentIds.add(topic.id);
+                                } else {
+                                  currentIds.remove(topic.id);
+                                  _selectedSubTopics.remove(topic.id);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _selectedTopicIds = currentIds;
-                      _showOtherTopicField = _selectedTopicIds.contains(
-                        14,
-                      ); // Other
-                    });
-                    FocusManager.instance.primaryFocus?.unfocus();
-                    Navigator.pop(context);
-                  },
-                  child: Text(
-                    l10n?.ok ?? 'OK',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).primaryColor,
+
+                  /// 🔹 DIVIDER + BUTTON ROW (LIKE OLD APP)
+                  actions: [
+                    const Divider(height: 1),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            l10n?.cancel ?? 'CANCEL',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Theme
+                                  .of(context)
+                                  .primaryColor,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _selectedTopicIds = currentIds;
+                              _showOtherTopicField = _selectedTopicIds.contains(
+                                14,
+                              ); // Other
+                            });
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            l10n?.ok ?? 'OK',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Theme
+                                  .of(context)
+                                  .primaryColor,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ],
-        ),
-      ),
+          ),
     );
 
     FocusManager.instance.primaryFocus?.unfocus();
@@ -986,6 +1059,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isEdit = widget.isEditMode;
+
     days = [
       Day(id: 1, name: l10n?.monday ?? 'Monday'),
       Day(id: 2, name: l10n?.tuesday ?? 'Tuesday'),
@@ -995,6 +1069,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       Day(id: 6, name: l10n?.saturday ?? 'Saturday'),
       Day(id: 7, name: l10n?.sunday ?? 'Sunday'),
     ];
+
     discussionTopics = [
       DiscussionTopic(id: 1, name: l10n?.immunization ?? "Immunization"),
       DiscussionTopic(id: 2, name: l10n?.pregnantWomen ?? "Pregnant Women"),
@@ -1023,6 +1098,7 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       ),
       DiscussionTopic(id: 14, name: l10n?.other ?? "Other"),
     ];
+
     final Map<int, List<String>> subTopicsByTopicId = {
       1: [ // Immunization
         l10n.immunizationDueListPreparation,
@@ -1035,14 +1111,12 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
         l10n.immunizationDocumentation,
         l10n.immunizationOther,
       ],
-
       2: [ // Pregnant Women
         l10n.pregnantWomenANC,
         l10n.pregnantWomenRegistartionForANC,
         l10n.pregnantWomenDangerSigns,
         l10n.pregnantWomenOther,
       ],
-
       8: [
         l10n.deathMaternalDeath,
         l10n.deathChild,
@@ -1055,7 +1129,6 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       10: [ // Family Planning
         l10n.familyPlanningEligibleCouple,
       ],
-
       11: [ // Other Public Health Program
         l10n.otherPublicHealthProgramTuberculosis,
         l10n.otherPublicHealthProgramLeprosy,
@@ -1072,7 +1145,6 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
         l10n.otherPublicHealthProgramDogBite,
         l10n.otherPublicHealthProgramKilkari,
       ],
-
       12: [ // Administrative
         l10n.administrativeRegisters,
         l10n.administrativeDrugs,
@@ -1082,7 +1154,6 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
         l10n.administrativeImmunizationCardsMCPCards,
         l10n.administrativeHealthPromotionalMaterial,
       ],
-
       13: [ // Training and Support
         l10n.trainingAndSupportTrainingSupport,
         l10n.trainingAndSupportMentoringSupport,
@@ -1097,647 +1168,675 @@ class _ClusterMeetingScreenFormState extends State<ClusterMeetingScreenForm> {
       backgroundColor: AppColors.surface,
       appBar: AppHeader(
         screenTitle:
-            l10n?.ashaFacilitatorClusterMeeting ??
+        l10n?.ashaFacilitatorClusterMeeting ??
             "ASHA Facilitator Cluster Meeting",
         showBack: true,
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              CustomTextField(
-                controller: _phcNameController,
-                labelText: l10n?.phcName ?? "PHC Name",
-                hintText: l10n?.phcName ?? "PHC Name",
-                readOnly: false,
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-              // Subcenter Name
-              CustomTextField(
-                controller: _subcenterNameController,
-                labelText: l10n?.subcenterName ?? "Subcenter Name",
-                hintText: l10n?.subcenterName ?? "Subcenter Name",
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-
-              // ASHA Facilitator Name (pre-filled)
-              CustomTextField(
-                controller: _ashaFacilitatorNameController,
-                labelText: l10n?.ashaFacilitatorName ?? "ASHA Facilitator Name",
-                hintText: l10n?.ashaFacilitatorName ?? "ASHA Facilitator Name",
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-
-              // ASHA Incharge Name
-              CustomTextField(
-                controller: _ashaInchargeNameController,
-                labelText: l10n?.ashaInchargeName ?? "ASHA Incharge Name",
-                hintText: l10n?.ashaInchargeName ?? "ASHA Incharge Name",
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-
-              // AWW Name
-              CustomTextField(
-                controller: _awwNameController,
-                labelText: l10n?.awwName ?? "AWW Name",
-                hintText: l10n?.awwName ?? "AWW Name",
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-
-              // AWC Number (Numeric)
-              CustomTextField(
-                controller: _awcNumberController,
-                labelText: l10n?.awcNumber ?? "AWC Number",
-                hintText: l10n?.awcNumber ?? "AWC Number",
-                keyboardType: TextInputType.number,
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-
-              // Village Name
-              CustomTextField(
-                controller: _villageNameController,
-                labelText: l10n?.villageName ?? "Village Name",
-                hintText: l10n?.villageName ?? "Village Name",
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-
-              // Ward Name
-              CustomTextField(
-                controller: _wardNameController,
-                labelText: l10n?.wardName ?? "Ward Name",
-                hintText: l10n?.wardName ?? "Ward Name",
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-
-              // Ward Number (Numeric)
-              CustomTextField(
-                controller: _wardNumberController,
-                labelText: l10n?.wardNumber ?? "Ward Number",
-                hintText: l10n?.wardNumber ?? "Ward Number",
-                keyboardType: TextInputType.number,
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-
-              // Block Name
-              CustomTextField(
-                controller: _blockNameController,
-                labelText: l10n?.blockName ?? "Block Name",
-                hintText: l10n?.blockName ?? "Block Name",
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-
-              // Date of the Meeting
-              CustomDatePicker(
-                labelText: "${l10n?.dateOfMeeting} *",
-
-                hintText: l10n?.dateHint ?? "dd-mm-yyyy",
-                initialDate: _meetingDate,
-                onDateChanged: (date) {
-                  setState(() {
-                    _meetingDate = date;
-                  });
-                },
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-              ApiDropdown<Day>(
-                labelText: l10n?.day ?? "Day",
-                items: days,
-                value: selectedDay,
-                getLabel: (day) => day.name,
-                hintText: l10n?.day ?? "Day",
-                onChanged: (Day? newValue) {
-                  setState(() {
-                    selectedDay = newValue;
-                  });
-                },
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-              // From Time Field
-              GestureDetector(
-                onTap: () => _selectTime(context, true),
-                child: AbsorbPointer(
-                  child: CustomTextField(
-                    labelText: l10n?.fromTime ?? "From (HH:MM)",
-                    hintText: l10n?.deliveryTimeHint,
-                    initialValue: _fromTime != null
-                        ? format24Hour(_fromTime!)
-                        : "",
-
-                    readOnly: true,
-                  ),
-                ),
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-              // To Time Field
-              GestureDetector(
-                onTap: () => _selectTime(context, false),
-                child: AbsorbPointer(
-                  child: CustomTextField(
-                    labelText: l10n?.toTime ?? "To (HH:MM)",
-                    hintText: l10n?.deliveryTimeHint,
-                    initialValue: _toTime != null
-                        ? format24Hour(_toTime!)
-                        : "",
-
-                    readOnly: true,
-                  ),
-                ),
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-              // 1. No. of hours
-              // No. of hours (Auto-calculated)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Column(
+        children: [
+          // Scrollable form content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: Text(
-                      l10n?.noOfHours ?? "No. of hours",
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                  CustomTextField(
+                    controller: _phcNameController,
+                    labelText: l10n?.phcName ?? "PHC Name",
+                    hintText: l10n?.phcName ?? "PHC Name",
+                    readOnly: false,
                   ),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.divider),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      _calculateHours(),
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-              // 2. Total no. of ASHA under facilitator
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n?.totalAshaUnderFacilitator ??
-                          "Total Number of ASHA's under the Facilitator",
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.divider),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      _ashaList.length.toString(),
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Table(
-                  columnWidths: const {
-                    0: FixedColumnWidth(60),
-                    1: FlexColumnWidth(),
-                    2: FixedColumnWidth(90),
-                  },
-                  border: TableBorder(
-                    horizontalInside: BorderSide(color: Colors.grey),
-                    verticalInside: BorderSide(color: Colors.grey),
-                  ),
-                  children: [
-                    /// Header Row
-                    TableRow(
-                      children: [
-                        _tableHeaderCell(l10n?.sr_No ?? "Sr.No."),
-                        _tableHeaderCell(l10n?.nameLabel ?? "Name"),
-                        _tableHeaderCell(l10n?.present ?? "Present?"),
-                      ],
-                    ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
 
-                    /// Dynamically Generated ASHA Rows
-                    ..._buildAshaRows(),
-                  ],
-                ),
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n?.ashaPresentCount ??
-                          "No. of ASHA present in this meeting",
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
+                  CustomTextField(
+                    controller: _subcenterNameController,
+                    labelText: l10n?.subcenterName ?? "Subcenter Name",
+                    hintText: l10n?.subcenterName ?? "Subcenter Name",
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  CustomTextField(
+                    controller: _ashaFacilitatorNameController,
+                    labelText: l10n?.ashaFacilitatorName ??
+                        "ASHA Facilitator Name",
+                    hintText: l10n?.ashaFacilitatorName ??
+                        "ASHA Facilitator Name",
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  CustomTextField(
+                    controller: _ashaInchargeNameController,
+                    labelText: l10n?.ashaInchargeName ?? "ASHA Incharge Name",
+                    hintText: l10n?.ashaInchargeName ?? "ASHA Incharge Name",
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  CustomTextField(
+                    controller: _awwNameController,
+                    labelText: l10n?.awwName ?? "AWW Name",
+                    hintText: l10n?.awwName ?? "AWW Name",
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  CustomTextField(
+                    controller: _awcNumberController,
+                    labelText: l10n?.awcNumber ?? "AWC Number",
+                    hintText: l10n?.awcNumber ?? "AWC Number",
+                    keyboardType: TextInputType.number,
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  CustomTextField(
+                    controller: _villageNameController,
+                    labelText: l10n?.villageName ?? "Village Name",
+                    hintText: l10n?.villageName ?? "Village Name",
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  CustomTextField(
+                    controller: _wardNameController,
+                    labelText: l10n?.wardName ?? "Ward Name",
+                    hintText: l10n?.wardName ?? "Ward Name",
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  CustomTextField(
+                    controller: _wardNumberController,
+                    labelText: l10n?.wardNumber ?? "Ward Number",
+                    hintText: l10n?.wardNumber ?? "Ward Number",
+                    keyboardType: TextInputType.number,
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  CustomTextField(
+                    controller: _blockNameController,
+                    labelText: l10n?.blockName ?? "Block Name",
+                    hintText: l10n?.blockName ?? "Block Name",
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  CustomDatePicker(
+                    labelText: "${l10n?.dateOfMeeting} *",
+                    hintText: l10n?.dateHint ?? "dd-mm-yyyy",
+                    initialDate: _meetingDate,
+                    onDateChanged: (date) {
+                      setState(() {
+                        _meetingDate = date;
+                      });
+                    },
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  ApiDropdown<Day>(
+                    labelText: l10n?.day ?? "Day",
+                    items: days,
+                    value: selectedDay,
+                    getLabel: (day) => day.name,
+                    hintText: l10n?.day ?? "Day",
+                    onChanged: (Day? newValue) {
+                      setState(() {
+                        selectedDay = newValue;
+                      });
+                    },
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  GestureDetector(
+                    onTap: () => _selectTime(context, true),
+                    child: AbsorbPointer(
+                      child: CustomTextField(
+                        labelText: l10n?.fromTime ?? "From (HH:MM)",
+                        hintText: l10n?.deliveryTimeHint,
+                        initialValue: _fromTime != null
+                            ? format24Hour(_fromTime!)
+                            : "",
+                        readOnly: true,
                       ),
                     ),
                   ),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.divider),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      presentCount.toString(),
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  GestureDetector(
+                    onTap: () => _selectTime(context, false),
+                    child: AbsorbPointer(
+                      child: CustomTextField(
+                        labelText: l10n?.toTime ?? "To (HH:MM)",
+                        hintText: l10n?.deliveryTimeHint,
+                        initialValue: _toTime != null
+                            ? format24Hour(_toTime!)
+                            : "",
+                        readOnly: true,
                       ),
                     ),
                   ),
-                ],
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n?.noOfASHAAbsentInThisMeeting ??
-                          "No. of ASHA absent in this meeting",
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.divider),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      absentCount.toString(),
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n?.clusterMeetingsCountThisMonth ??
-                          "No. of cluster meetings conducted in this month",
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
 
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            if (clusterMeetingsCount > 0)
-                              clusterMeetingsCount--;
-                          });
-                        },
-                        child: Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            color: clusterMeetingsCount > 0
-                                ? AppColors.primary
-                                : Colors.grey.shade200,
-                            border: Border.all(color: AppColors.divider),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          alignment: Alignment.center,
-                          child: Icon(
-                            Icons.remove,
-                            size: 18,
-                            color: clusterMeetingsCount > 0
-                                ? Colors.white
-                                : Colors.white,
+                      Expanded(
+                        child: Text(
+                          l10n?.noOfHours ?? "No. of hours",
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
-
-                      const SizedBox(width: 2),
-
-                      // Count Box
                       Container(
-                        width: 30,
-                        height: 30,
+                        width: 36,
+                        height: 36,
                         decoration: BoxDecoration(
                           border: Border.all(color: AppColors.divider),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          clusterMeetingsCount.toString(),
+                          _calculateHours(),
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: 2),
-
-                      // Plus Button
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            clusterMeetingsCount++;
-                          });
-                        },
-                        child: Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            border: Border.all(color: AppColors.divider),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.add,
-                            size: 18,
-                            color: Colors.white,
                           ),
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-              GestureDetector(
-                onTap: () => _selectMonthYear(context),
-                child: AbsorbPointer(
-                  child: CustomTextField(
-                    labelText: l10n?.month ?? "Month",
-                    hintText: "mm-yyyy",
-                    initialValue: _selectedMonthYear != null
-                        ? "${_selectedMonthYear!.month.toString().padLeft(2, '0')}-${_selectedMonthYear!.year}"
-                        : "",
-                    readOnly: true,
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n?.totalAshaUnderFacilitator ??
+                              "Total Number of ASHA's under the Facilitator",
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.divider),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          _ashaList.length.toString(),
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              Divider(color: AppColors.divider, thickness: 0.5),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// 1️⃣ MAIN DISCUSSION TOPIC DROPDOWN
-                  GestureDetector(
-                    onTap: () => _showTopicsDialog(context),
-                    child: AbsorbPointer(
-                      child: Stack(
-                        alignment: Alignment.centerRight,
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Table(
+                      columnWidths: const {
+                        0: FixedColumnWidth(60),
+                        1: FlexColumnWidth(),
+                        2: FixedColumnWidth(90),
+                      },
+                      border: TableBorder(
+                        horizontalInside: BorderSide(color: Colors.grey),
+                        verticalInside: BorderSide(color: Colors.grey),
+                      ),
+                      children: [
+                        TableRow(
+                          children: [
+                            _tableHeaderCell(l10n?.sr_No ?? "Sr.No."),
+                            _tableHeaderCell(l10n?.nameLabel ?? "Name"),
+                            _tableHeaderCell(l10n?.present ?? "Present?"),
+                          ],
+                        ),
+                        ..._buildAshaRows(),
+                      ],
+                    ),
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n?.ashaPresentCount ??
+                              "No. of ASHA present in this meeting",
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.divider),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          presentCount.toString(),
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n?.noOfASHAAbsentInThisMeeting ??
+                              "No. of ASHA absent in this meeting",
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.divider),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          absentCount.toString(),
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n?.clusterMeetingsCountThisMonth ??
+                              "No. of cluster meetings conducted in this month",
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Row(
                         children: [
-                          CustomTextField(
-                            labelText:
-                                l10n?.discussionTopicProgram ??
-                                "Discussion Topic/Program",
-                            hintText: l10n?.selectOptionLabel ?? "Select",
-
-                            /// ✅ SHOW SELECTED TOPICS
-                            initialValue: _selectedTopicIds.isEmpty
-                                ? null
-                                : discussionTopics
-                                      .where(
-                                        (e) => _selectedTopicIds.contains(e.id),
-                                      )
-                                      .map((e) => e.name)
-                                      .join(", "),
-
-                            /// ✅ COLOR BASED ON SAME SOURCE
-                            textStyle: TextStyle(
-                              color: _selectedTopicIds.isEmpty
-                                  ? Colors.grey
-                                  : Colors.black,
-                              fontWeight: FontWeight.bold,
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (clusterMeetingsCount > 0)
+                                  clusterMeetingsCount--;
+                              });
+                            },
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: clusterMeetingsCount > 0
+                                    ? AppColors.primary
+                                    : Colors.grey.shade200,
+                                border: Border.all(color: AppColors.divider),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              alignment: Alignment.center,
+                              child: Icon(
+                                Icons.remove,
+                                size: 18,
+                                color: clusterMeetingsCount > 0
+                                    ? Colors.white
+                                    : Colors.white,
+                              ),
                             ),
                           ),
-                          const Positioned(
-                            right: 12,
-                            child: Icon(
-                              Icons.arrow_drop_down,
-                              color: Colors.grey,
+                          const SizedBox(width: 2),
+                          Container(
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppColors.divider),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              clusterMeetingsCount.toString(),
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                clusterMeetingsCount++;
+                              });
+                            },
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                border: Border.all(color: AppColors.divider),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              alignment: Alignment.center,
+                              child: const Icon(
+                                Icons.add,
+                                size: 18,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ),
-
                   Divider(color: AppColors.divider, thickness: 0.5),
 
-                  /// 2️⃣ DYNAMIC SUB-TOPIC DROPDOWNS (THIS IS WHERE YOUR CODE GOES)
+                  GestureDetector(
+                    onTap: () => _selectMonthYear(context),
+                    child: AbsorbPointer(
+                      child: CustomTextField(
+                        labelText: l10n?.month ?? "Month",
+                        hintText: "mm-yyyy",
+                        initialValue: _selectedMonthYear != null
+                            ? "${_selectedMonthYear!.month.toString().padLeft(
+                            2, '0')}-${_selectedMonthYear!.year}"
+                            : "",
+                        readOnly: true,
+                      ),
+                    ),
+                  ),
+                  Divider(color: AppColors.divider, thickness: 0.5),
+
                   Column(
-                    children: _selectedTopicIds.map((topicId) {
-                      final topic = discussionTopics.firstWhere((e) => e.id == topicId);
-                      final subTopics = subTopicsByTopicId[topicId];
-
-                      if (subTopics == null) return const SizedBox.shrink();
-
-                      return Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: GestureDetector(
-                              onTap: () {
-                                showMultiSelectDialog(
-                                  context: context,
-                                  title: "${topic.name}_${l10n.discussionTopic}",
-                                  options: subTopics,
-                                  selected: _selectedSubTopics[topicId], // single String
-                                  onSubmit: (val) {
-                                    setState(() {
-                                      _selectedSubTopics[topicId] = val ?? ''; // save as string
-                                    });
-                                  },
-                                );
-                              },
-                              child: AbsorbPointer(
-                                child: CustomTextField(
-                                  labelText: "${topic.name}_${l10n.discussionTopic}",
-                                  hintText: l10n?.select ?? "Select",
-                                  initialValue: _selectedSubTopics[topicId] ?? '',
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GestureDetector(
+                        onTap: () => _showTopicsDialog(context),
+                        child: AbsorbPointer(
+                          child: Stack(
+                            alignment: Alignment.centerRight,
+                            children: [
+                              CustomTextField(
+                                labelText:
+                                l10n?.discussionTopicProgram ??
+                                    "Discussion Topic/Program",
+                                hintText: l10n?.selectOptionLabel ?? "Select",
+                                initialValue: _selectedTopicIds.isEmpty
+                                    ? null
+                                    : discussionTopics
+                                    .where(
+                                      (e) => _selectedTopicIds.contains(e.id),
+                                )
+                                    .map((e) => e.name)
+                                    .join(", "),
+                                textStyle: TextStyle(
+                                  color: _selectedTopicIds.isEmpty
+                                      ? Colors.grey
+                                      : Colors.black,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
+                              const Positioned(
+                                right: 12,
+                                child: Icon(
+                                  Icons.arrow_drop_down,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
                           ),
-                          const Divider(
-                            color: AppColors.divider,
-                            thickness: 0.5,
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                  /// 3️⃣ OTHER TEXT FIELD (UNCHANGED)
-                  if (_showOtherTopicField) ...[
-                    const SizedBox(height: 8),
-                    CustomTextField(
-                      controller: _otherTopicController,
-                      labelText:
+                        ),
+                      ),
+                      Divider(color: AppColors.divider, thickness: 0.5),
+
+                      Column(
+                        children: _selectedTopicIds.map((topicId) {
+                          final topic = discussionTopics.firstWhere((e) =>
+                          e.id == topicId);
+                          final subTopics = subTopicsByTopicId[topicId];
+
+                          if (subTopics == null) return const SizedBox.shrink();
+
+                          return Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    showMultiSelectDialog(
+                                      context: context,
+                                      title: "${topic.name}_${l10n
+                                          .discussionTopic}",
+                                      options: subTopics,
+                                      selected: _selectedSubTopics[topicId],
+                                      onSubmit: (val) {
+                                        setState(() {
+                                          _selectedSubTopics[topicId] =
+                                              val ?? '';
+                                        });
+                                      },
+                                    );
+                                  },
+                                  child: AbsorbPointer(
+                                    child: CustomTextField(
+                                      labelText: "${topic.name}_${l10n
+                                          .discussionTopic}",
+                                      hintText: l10n?.select ?? "Select",
+                                      initialValue: _selectedSubTopics[topicId] ??
+                                          '',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const Divider(
+                                color: AppColors.divider,
+                                thickness: 0.5,
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+
+                      if (_showOtherTopicField) ...[
+                        const SizedBox(height: 8),
+                        CustomTextField(
+                          controller: _otherTopicController,
+                          labelText:
                           l10n?.otherDiscussionSubTopicProgram ??
-                          "Other_Discussion Sub Topic/Program",
-                      hintText: l10n?.select,
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    Divider(color: AppColors.divider, thickness: 0.5),
-                  ],
+                              "Other_Discussion Sub Topic/Program",
+                          hintText: l10n?.select,
+                          onChanged: (_) => setState(() {}),
+                        ),
+                        Divider(color: AppColors.divider, thickness: 0.5),
+                      ],
+                    ],
+                  ),
+
+                  CustomTextField(
+                    controller: _decisionTakenController,
+                    labelText:
+                    l10n?.decisionTakenDuringMeeting ??
+                        "Decision Taken During the Meeting",
+                    hintText:
+                    l10n?.decisionTakenDuringMeeting ??
+                        "Decision Taken During the Meeting",
+                  ),
+
+                  // Add bottom padding to prevent content being hidden behind button
+                  const SizedBox(height: 80),
                 ],
               ),
-              // Decision Taken During the Meeting
-              CustomTextField(
-                controller: _decisionTakenController,
-                labelText:
-                    l10n?.decisionTakenDuringMeeting ??
-                    "Decision Taken During the Meeting",
-                hintText:
-                    l10n?.decisionTakenDuringMeeting ??
-                    "Decision Taken During the Meeting",
-              ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SizedBox(
-          height: 34,
-          child: ElevatedButton(
-            onPressed: () async {
-              if (_meetingDate == null) {
-                showAppSnackBar(context, "Please select Date of the Meeting");
-                return;
-              }
-
-              final formData = {
-                'phc_name': _phcNameController.text.trim(),
-                'subcenter_name': _subcenterNameController.text.trim(),
-                'asha_facilitator_name': _ashaFacilitatorNameController.text
-                    .trim(),
-                'asha_incharge_name': _ashaInchargeNameController.text.trim(),
-                'aww_name': _awwNameController.text.trim(),
-                'awc_number': _awcNumberController.text.trim(),
-                'village_name': _villageNameController.text.trim(),
-                'ward_name': _wardNameController.text.trim(),
-                'ward_number': _wardNumberController.text.trim(),
-                'block_name': _blockNameController.text.trim(),
-                'meeting_date': _meetingDate?.toIso8601String(),
-                'day_of_week': selectedDay?.name,
-                'from_time': _fromTime?.format(context),
-                'to_time': _toTime?.format(context),
-                'no_of_hours': _calculateHours(),
-                'total_asha_under_facilitator': "0",
-                'asha_present': presentCount.toString(),
-                'asha_absent': absentCount.toString(),
-                'asha_present_list': _presentList,
-                'cluster_meetings_this_month': clusterMeetingsCount,
-                'month_year': _selectedMonthYear != null
-                    ? "${_selectedMonthYear!.month.toString().padLeft(2, '0')}-${_selectedMonthYear!.year}"
-                    : null,
-                'discussion_topics': _selectedTopicIds.map((id) {
-                  final topic = discussionTopics.firstWhere(
-                    (t) => t.id == id,
-                    orElse: () => const DiscussionTopic(id: -1, name: ''),
-                  );
-                  return topic.id != -1 ? topic.name : '';
-                }).where((name) => name.isNotEmpty).join(", "),
-                'immunization_discussion_topic': _selectedSubTopics[1] ?? '',
-                'pregnant_women_discussion_topic': _selectedSubTopics[2] ?? '',
-                'deaths_discussion_topic': _selectedSubTopics[8] ?? '',
-                'family_planning_discussion_topic': _selectedSubTopics[10] ?? '',
-                'other_public_health_program_discussion_topic': _selectedSubTopics[11] ?? '',
-                'administrative_discussion_topic': _selectedSubTopics[12] ?? '',
-                'training_and_support_discussion_topic': _selectedSubTopics[13] ?? '',
-                'other_topic_details': _otherTopicController.text.trim(),
-                'decision_taken': _decisionTakenController.text.trim(),
-                'saved_at': DateTime.now().toIso8601String(),
-              };
-              print("Form Data to Save: ${jsonEncode(formData)}");
-              try {
-                if (widget.isEditMode && uniqueKey != null) {
-                  await LocalStorageDao.instance.updateClusterMeeting(
-                    uniqueKey: uniqueKey!,
-                    formJson: formData,
-                  );
-
-                  showAppSnackBar(context, l10n.householdUpdatedSuccessfully);
-                } else {
-                  final deviceInfo = await DeviceInfo.getDeviceInfo();
-                  final newUniqueKey = await IdGenerator.generateUniqueId(
-                    deviceInfo,
-                  );
-
-                  await LocalStorageDao.instance.insertClusterMeeting({
-                    'unique_key': newUniqueKey,
-                    'form_json': jsonEncode(formData),
-                    'created_by': 'current_user',
-                  });
-                  showAppSnackBar(context, l10n.saveSuccess);
-                }
-                // Go back and refresh list
-                if (mounted) Navigator.pop(context);
-                Navigator.pop(context);
-              } catch (e) {
-                showAppSnackBar(context, "Error: $e");
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            child: Text(
-              isEdit
-                  ? (l10n?.updateButton ?? "UPDATE")
-                  : (l10n?.saveButton ?? "SAVE"),
-              style: TextStyle(
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
             ),
           ),
-        ),
+
+          // Fixed bottom button
+          Container(
+            padding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 10,
+              bottom: 10 + MediaQuery
+                  .of(context)
+                  .padding
+                  .bottom,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: SizedBox(
+              height: 35,
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  if (_meetingDate == null) {
+                    showAppSnackBar(
+                        context, "Please select Date of the Meeting");
+                    return;
+                  }
+
+                  final formData = {
+                    'phc_name': _phcNameController.text.trim(),
+                    'subcenter_name': _subcenterNameController.text.trim(),
+                    'asha_facilitator_name': _ashaFacilitatorNameController.text
+                        .trim(),
+                    'asha_incharge_name': _ashaInchargeNameController.text
+                        .trim(),
+                    'aww_name': _awwNameController.text.trim(),
+                    'awc_number': _awcNumberController.text.trim(),
+                    'village_name': _villageNameController.text.trim(),
+                    'ward_name': _wardNameController.text.trim(),
+                    'ward_number': _wardNumberController.text.trim(),
+                    'block_name': _blockNameController.text.trim(),
+                    'meeting_date': _meetingDate?.toIso8601String(),
+                    'day_of_week': selectedDay?.name,
+                    'from_time': _fromTime?.format(context),
+                    'to_time': _toTime?.format(context),
+                    'no_of_hours': _calculateHours(),
+                    'total_asha_under_facilitator': "0",
+                    'asha_present': presentCount.toString(),
+                    'asha_absent': absentCount.toString(),
+                    'asha_present_list': _presentList,
+                    'cluster_meetings_this_month': clusterMeetingsCount,
+                    'month_year': _selectedMonthYear != null
+                        ? "${_selectedMonthYear!.month.toString().padLeft(
+                        2, '0')}-${_selectedMonthYear!.year}"
+                        : null,
+                    'discussion_topics': _selectedTopicIds.map((id) {
+                      final topic = discussionTopics.firstWhere(
+                            (t) => t.id == id,
+                        orElse: () => const DiscussionTopic(id: -1, name: ''),
+                      );
+                      return topic.id != -1 ? topic.name : '';
+                    }).where((name) => name.isNotEmpty).join(", "),
+                    'immunization_discussion_topic': _selectedSubTopics[1] ??
+                        '',
+                    'pregnant_women_discussion_topic': _selectedSubTopics[2] ??
+                        '',
+                    'deaths_discussion_topic': _selectedSubTopics[8] ?? '',
+                    'family_planning_discussion_topic': _selectedSubTopics[10] ??
+                        '',
+                    'other_public_health_program_discussion_topic': _selectedSubTopics[11] ??
+                        '',
+                    'administrative_discussion_topic': _selectedSubTopics[12] ??
+                        '',
+                    'training_and_support_discussion_topic': _selectedSubTopics[13] ??
+                        '',
+                    'other_topic_details': _otherTopicController.text.trim(),
+                    'decision_taken': _decisionTakenController.text.trim(),
+                    'saved_at': DateTime.now().toIso8601String(),
+                  };
+
+                  print("Form Data to Save: ${jsonEncode(formData)}");
+
+                  try {
+                    if (widget.isEditMode && uniqueKey != null) {
+                      await LocalStorageDao.instance.updateClusterMeeting(
+                        uniqueKey: uniqueKey!,
+                        formJson: formData,
+                      );
+                      showAppSnackBar(
+                          context, l10n.householdUpdatedSuccessfully);
+                    } else {
+                      final deviceInfo = await DeviceInfo.getDeviceInfo();
+                      final newUniqueKey = await IdGenerator.generateUniqueId(
+                          deviceInfo);
+
+                      await LocalStorageDao.instance.insertClusterMeeting({
+                        'unique_key': newUniqueKey,
+                        'form_json': jsonEncode(formData),
+                        'created_by': 'current_user',
+                      });
+                      showAppSnackBar(context, l10n.saveSuccess);
+                    }
+
+                    if (mounted) Navigator.pop(context);
+                    Navigator.pop(context);
+                  } catch (e) {
+                    showAppSnackBar(context, "Error: $e");
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme
+                      .of(context)
+                      .colorScheme
+                      .primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  isEdit
+                      ? (l10n?.updateButton ?? "UPDATE")
+                      : (l10n?.saveButton ?? "SAVE"),
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
