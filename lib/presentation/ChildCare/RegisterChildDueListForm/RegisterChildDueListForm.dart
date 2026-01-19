@@ -559,9 +559,9 @@ class _RegisterChildDueListFormScreen
       if (ownerLabel != null && ownerLabel.isNotEmpty) {
         bloc.add(WhoseMobileNumberChanged(ownerLabel));
       }
-      if (data.fatherName != null) {
+      if (data.fatherName != null && data.fatherName!.trim().isNotEmpty) {
         bloc.add(FatherNameChanged(data.fatherName!));
-      } else if (data.spouseName != null && data.spouseName!.isNotEmpty) {
+      } else if (data.spouseName != null && data.spouseName!.trim().isNotEmpty) {
         bloc.add(FatherNameChanged(data.spouseName!));
       }
       if (data.motherName != null) {
@@ -616,9 +616,9 @@ class _RegisterChildDueListFormScreen
       if (args['mobile'] != null) {
         bloc.add(MobileNumberChanged(args['mobile'].toString()));
       }
-      if (args['fatherName'] != null) {
+      if (args['fatherName'] != null && args['fatherName'].toString().trim().isNotEmpty) {
         bloc.add(FatherNameChanged(args['fatherName'].toString()));
-      } else if (args['spouseName'] != null) {
+      } else if (args['spouseName'] != null && args['spouseName'].toString().trim().isNotEmpty) {
         bloc.add(FatherNameChanged(args['spouseName'].toString()));
       }
       if (args['rchId'] != null) {

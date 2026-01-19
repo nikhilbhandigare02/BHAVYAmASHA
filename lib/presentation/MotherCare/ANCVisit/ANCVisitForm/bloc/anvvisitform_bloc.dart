@@ -51,7 +51,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         emit(state.copyWith(lmpDate: null, eddDate: null, weeksOfPregnancy: ''));
         return;
       }
-      // EDD = LMP + 8 months and 10 days (same as TrackEligibleCouple)
+      // EDD = LMP + 277 days (same as SpousDetails)
       final edd = _calculateEddFromLmp(e.value!);
       
       // Calculate weeks of pregnancy
@@ -178,14 +178,8 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
   }
 
   DateTime _calculateEddFromLmp(DateTime lmp) {
-    int year = lmp.year;
-    int month = lmp.month + 8;
-    if (month > 12) {
-      year += (month - 1) ~/ 12;
-      month = ((month - 1) % 12) + 1;
-    }
-    final base = DateTime(year, month, lmp.day);
-    return base.add(const Duration(days: 10));
+    // EDD = LMP + 277 days (same as SpousDetails)
+    return lmp.add(const Duration(days: 277));
   }
 
   Future<void> _onSubmit(SubmitPressed e, Emitter<AnvvisitformState> emit) async {
