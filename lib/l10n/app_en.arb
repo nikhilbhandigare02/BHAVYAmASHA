@@ -1578,7 +1578,7 @@
   "no_pregnancy_cases_found": "No pregnancy cases found",
   "no_hbnc_beneficiaries_found": "No HBNC beneficiaries found",
   "no_high_risk_anc_visits_found": "No high-risk ANC visits found",
-  "hrp": "HRP",
+  "hrp": "High Risk",
   "no_name": "No Name",
   "search_by_id_name_contact": "Search by ID/Name/Contact",
   "close": "Close",
@@ -2629,9 +2629,6 @@
   "motherNameLabelchild":"Mother name",
   "fatherNameLabelchild":"Father name"
 
-  "dateOfvisitTracking":"Date of visit",
-  "motherNameLabelchild":"Mother name",
-  "fatherNameLabelchild":"Father name"
 
 
 }

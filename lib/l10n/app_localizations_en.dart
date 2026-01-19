@@ -4630,7 +4630,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get no_high_risk_anc_visits_found => 'No high-risk ANC visits found';
 
   @override
-  String get hrp => 'HRP';
+  String get hrp => 'High Risk';
 
   @override
   String get no_name => 'No Name';
@@ -5548,7 +5548,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get riskPIH => 'Pregnancy Induced Hypertension, pre-eclampsia, Eclampsia';
 
   @override
-  String get riskInfections => 'Syphilis, HIV Positive, Hepatitis-B, Hepatitis C';
+  String get riskInfections => 'Syphilis, HIV Positive, Hepatitis B, Hepatitis C';
 
   @override
   String get riskGestationalDiabetes => 'Gestational Diabetes';

@@ -9308,7 +9308,7 @@ abstract class AppLocalizations {
   /// No description provided for @hrp.
   ///
   /// In en, this message translates to:
-  /// **'HRP'**
+  /// **'High Risk'**
   String get hrp;
 
   /// No description provided for @no_name.
@@ -11144,7 +11144,7 @@ abstract class AppLocalizations {
   /// No description provided for @riskInfections.
   ///
   /// In en, this message translates to:
-  /// **'Syphilis, HIV Positive, Hepatitis-B, Hepatitis C'**
+  /// **'Syphilis, HIV Positive, Hepatitis B, Hepatitis C'**
   String get riskInfections;
 
   /// No description provided for @riskGestationalDiabetes.

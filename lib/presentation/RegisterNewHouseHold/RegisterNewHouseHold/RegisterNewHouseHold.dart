@@ -333,7 +333,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           amenities['type_of_toilet'],
         );
         info['typeOfToilet'] =
-            amenities['other_type_of_toilet']; // Maps to "Other" type
+            amenities['other_type_of_toilet'];
         info['toiletPlace'] = mapValue(
           'toiletPlace',
           amenities['where_do_you_go_for_toilet'],

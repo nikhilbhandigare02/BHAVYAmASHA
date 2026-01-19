@@ -30,6 +30,83 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
   bool _isLoading = true;
   Map<String, dynamic>? _headForm;
   final List<Map<String, String>> _members = [];
+  List<Map<String, dynamic>> _households = []; // Store households data for fallback
+
+  // Helper method to extract house number from household address
+  String _extractHouseNumberFromAddress(Map<String, dynamic> addressData) {
+    if (addressData.isEmpty) return '';
+    
+    // Try common house number fields in address data
+    final houseNoFields = [
+      'houseNo',
+      'house_no',
+      'houseNumber',
+      'house_number',
+      'houseno',
+      'building_no',
+      'buildingNumber',
+      'building_no',
+      'address_line1',
+      'addressLine1',
+    ];
+    
+    for (final field in houseNoFields) {
+      final value = addressData[field]?.toString().trim();
+      if (value != null && value.isNotEmpty) {
+        return value;
+      }
+    }
+    
+    // If no specific field found, try to extract from full address
+    final fullAddress = addressData['full_address']?.toString() ?? 
+                       addressData['address']?.toString() ?? 
+                       addressData['complete_address']?.toString() ?? '';
+    
+    if (fullAddress.isNotEmpty) {
+      // Try to extract house number from the beginning of address
+      final lines = fullAddress.split(',');
+      for (final line in lines) {
+        final trimmed = line.trim();
+        // Look for patterns like "House No: 123", "H.No. 123", "123", etc.
+        if (RegExp(r'^\d+').hasMatch(trimmed) || 
+            RegExp(r'(?i)house\s*(no|number)?\s*[:\-]?\s*\d+').hasMatch(trimmed) ||
+            RegExp(r'(?i)h\.?\.?\s*no\.?\s*[:\-]?\s*\d+').hasMatch(trimmed)) {
+          return trimmed;
+        }
+      }
+    }
+    
+    return '';
+  }
+
+  // Helper method to get house number with fallback logic
+  String _getHouseNumber(Map<String, dynamic> data, List<Map<String, dynamic>> households) {
+    // First try to get from beneficiary_new table
+    final beneficiaryHouseNo = data['houseNo']?.toString() ?? 
+                              data['_raw']['beneficiary_info']?['houseNo']?.toString() ?? '';
+    
+    if (beneficiaryHouseNo.isNotEmpty && beneficiaryHouseNo != '0') {
+      return beneficiaryHouseNo;
+    }
+    
+    // If not found in beneficiary_new, try households table
+    final householdRefKey = data['_raw']['household_ref_key']?.toString() ?? '';
+    if (householdRefKey.isNotEmpty) {
+      for (final household in households) {
+        if (household['unique_key']?.toString() == householdRefKey) {
+          final addressData = household['address'] as Map<String, dynamic>?;
+          if (addressData != null) {
+            final houseNoFromAddress = _extractHouseNumberFromAddress(addressData);
+            if (houseNoFromAddress.isNotEmpty) {
+              return houseNoFromAddress;
+            }
+          }
+        }
+      }
+    }
+    
+    return '';
+  }
 
   @override
   void initState() {
@@ -168,6 +245,9 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
+
+      // Get households data with proper JSON parsing using LocalStorageDao
+      _households = await LocalStorageDao.instance.getAllHouseholds();
 
       final households = await db.query(
         'households',
@@ -433,7 +513,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         }
       }).toList();
 
-      /// --------- MAP TO UI MODEL ----------
       final mapped = familyHeads.map<Map<String, dynamic>>((r) {
         final info = Map<String, dynamic>.from(
           (r['beneficiary_info'] is String
@@ -560,12 +639,20 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
         debugPrint('AllHouseHold: Mapping for household $householdRefKeyFromRaw - Pregnant women: $pregnantWomenCount');
 
+        // Create a temporary data map to use with the helper method
+        final tempData = {
+          'houseNo': info['houseNo'] ?? 0,
+          '_raw': r,
+        };
+        
+        final houseNumber = _getHouseNumber(tempData, _households);
+
         return {
           'name': (info['headName'] ?? info['memberName'] ?? info['name'] ?? '')
               .toString(),
           'mobile': (info['mobileNo'] ?? '').toString(),
           'hhId': headId,
-          'houseNo': info['houseNo'] ?? 0,
+          'houseNo': houseNumber.isNotEmpty ? houseNumber : 0,
           'totalMembers': membersForHousehold.length,
           'elderly': elderlyCountMap[householdRefKeyFromRaw] ?? 0,
           'pregnantWomen': pregnantWomenCount,
@@ -634,9 +721,19 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
         String mobile =
             (headInfo['mobile_no_of_family_head'] ?? headInfo['mobileNo'] ?? '')
                 .toString();
-        String houseNo =
-            (headInfo['house_no'] ?? headInfo['houseNo'] ?? hh['address'] ?? '')
-                .toString();
+        
+        // Use the helper method to get house number with fallback logic
+        String houseNo = (headInfo['house_no'] ?? headInfo['houseNo'] ?? '').toString();
+        if (houseNo.isEmpty) {
+          // Try to get from household address using the helper method
+          final householdData = _households.where((h) => h['unique_key']?.toString() == hhRefKey).firstOrNull;
+          if (householdData != null) {
+            final addressData = householdData['address'] as Map<String, dynamic>?;
+            if (addressData != null) {
+              houseNo = _extractHouseNumberFromAddress(addressData);
+            }
+          }
+        }
 
         int totalMembers = 1;
         final allMembersRaw = hhInfo['all_members'];
@@ -904,7 +1001,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                     ),
                   ),
                   Text(
-                    '${l10n?.houseNoLabel ?? 'House No.'} : ${data['houseNo'] ?? data['_raw']['beneficiary_info']?['houseNo'] ?? ''}',
+                    '${l10n?.houseNoLabel ?? 'House No.'} : ${_getHouseNumber(data, _households)}',
                     style: TextStyle(
                       color: primary,
                       fontWeight: FontWeight.w700,

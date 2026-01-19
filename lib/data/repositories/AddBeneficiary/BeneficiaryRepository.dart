@@ -419,7 +419,7 @@ class BeneficiaryRepository {
       'religion': info['religion'],
       'category': info['category'],
 
-      'hasChildren': info['have_children'] ?? 'no',
+      'hasChildren': info['have_children'],
       'isPregnant': info['is_women_pregenant'] ?? '',
       'lmp': info['lmp_date']?.toString(),
       'edd': info['edd_date']?.toString(),
