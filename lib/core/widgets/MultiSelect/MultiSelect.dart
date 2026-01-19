@@ -112,6 +112,21 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
         case 'rh_negative':
           return 'RH Negative' as T;
 
+        case 'lpg':
+          return 'LPG' as T;
+        case 'firewood':
+          return 'Firewood' as T;
+        case 'coal':
+          return 'Coal' as T;
+        case 'kerosene':
+          return 'Kerosene' as T;
+        case 'crop_residue':
+          return 'Crop Residue' as T;
+        case 'dunk_cake':
+          return 'Dung Cake' as T;
+        case 'other':
+          return 'Other' as T;
+
       }
     }
     return value;

@@ -227,6 +227,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       FROM followup_form_data
       WHERE form_json LIKE '%"reason_of_death":%'
         AND current_user_key = ?
+         ORDER BY id
     ''', [ashaUniqueKey]);
 
       final Set<String> deceasedIds = {};
@@ -261,7 +262,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
       final childCareRecords = await db.rawQuery('''
       SELECT beneficiary_ref_key, created_date_time
       FROM child_care_activities
-      ORDER BY created_date_time ASC
+      ORDER BY id ASC
     ''');
 
       for (final record in childCareRecords) {
@@ -283,7 +284,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
         AND B.is_migrated = 0
         AND B.current_user_key = ?
         AND CCA.child_care_state IN ('registration_due', 'tracking_due', 'infant_pnc')
-      ORDER BY B.created_date_time DESC
+      ORDER BY B.id DESC
     ''', [ashaUniqueKey]);
 
       final List<Map<String, dynamic>> childBeneficiaries = [];
@@ -741,7 +742,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
                             ? data['FatherName']
                             : (data['SpouseName']?.toString().isNotEmpty == true
                                 ? data['SpouseName']
-                                : 'N/A'),
+                                : l10n!.na),
                       )),
                     ],
                   ),
