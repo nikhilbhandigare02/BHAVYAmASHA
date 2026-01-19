@@ -3630,6 +3630,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get memberDetails => 'MEMBER DETAILS';
 
   @override
+  String get memberDetailsTitle => 'Member Details';
+
+  @override
   String get hello => 'Hello';
 
   @override

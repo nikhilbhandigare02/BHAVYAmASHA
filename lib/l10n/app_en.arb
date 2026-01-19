@@ -1217,6 +1217,7 @@
   "deceasedChildDetails": "Deceased Child Details",
   "childDetails": "CHILD DETAILS",
   "memberDetails": "MEMBER DETAILS",
+  "memberDetailsTitle": "Member Details",
   "hello": "Hello",
   "welcome": "Welcome",
   "login_button": "Login",

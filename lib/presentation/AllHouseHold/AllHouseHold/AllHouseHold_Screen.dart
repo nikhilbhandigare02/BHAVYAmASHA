@@ -615,11 +615,11 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           final matchesMother =
               motherName.isNotEmpty && parentNames.contains(motherName);
           if (matchesFather || matchesMother) {
-            recordedChildren += 1;
+            recordedChildren++;
           }
         }
 
-        final remainingChildren = totalExpectedChildren - recordedChildren;
+        final remainingChildren = recordedChildren;
         final hasChildrenTarget = totalExpectedChildren > 0;
 
         final uniqueKey = (r['unique_key'] ?? '').toString();
@@ -662,7 +662,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
           'child1to2': child1to2Map[householdRefKeyFromRaw] ?? 0,
           'child2to5': child2to5Map[householdRefKeyFromRaw] ?? 0,
           'hasChildrenTarget': hasChildrenTarget,
-          'remainingChildren': remainingChildren < 0 ? 0 : remainingChildren,
+          'remainingChildren': remainingChildren,
           '_raw': r,
         };
       }).toList();
