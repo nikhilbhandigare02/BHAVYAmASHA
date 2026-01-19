@@ -285,7 +285,7 @@ class _RegisterChildDueListState extends State<RegisterChildDueList> {
   INNER JOIN beneficiaries_new bn
       ON bn.unique_key = ranked.beneficiary_ref_key
   WHERE ranked.rn = 1
-  ORDER BY datetime(ranked.created_date_time) DESC
+  ORDER BY datetime(ranked.id) DESC
   ''',
         [
           'registration_due',

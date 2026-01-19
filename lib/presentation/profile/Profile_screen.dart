@@ -1014,12 +1014,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Divider(color: AppColors.divider, thickness: 0.5),
                     BlocBuilder<ProfileBloc, ProfileState>(
                       buildWhen: (previous, current) =>
-                      previous.hwcName != current.hwcName,
+                      previous.hwcName != current.hwcName ||
+                          previous.appRoleId != current.appRoleId,
                       builder: (context, state) {
+                        final isRole4 = state.appRoleId == 4;
+
                         return CustomTextField(
                           key: ValueKey('hwc_name_field_${state.hwcName}'),
-                          labelText: l10n.hwcNameLabel,
-                          hintText: l10n.hwcNameHint,
+                          labelText: isRole4 ? l10n.hwcLabel : l10n.hwcNameLabel,
+                          hintText: isRole4 ? l10n.hwcHint : l10n.hwcNameHint,
                           initialValue: state.hwcName,
                           onChanged: (v) => bloc.add(HwcNameChanged(v)),
                           readOnly: true,
@@ -1029,12 +1032,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Divider(color: AppColors.divider, thickness: 0.5),
                     BlocBuilder<ProfileBloc, ProfileState>(
                       buildWhen: (previous, current) =>
-                      previous.hscName != current.hscName,
+                      previous.hscName != current.hscName ||
+                          previous.appRoleId != current.appRoleId,
                       builder: (context, state) {
+                        final isRole4 = state.appRoleId == 4;
+
                         return CustomTextField(
                           key: ValueKey('hsc_name_field_${state.hscName}'),
-                          labelText: l10n.hscNameLabel,
-                          hintText: l10n.hscNameHint,
+                          labelText: isRole4 ? l10n.hscLabel : l10n.hscNameLabel,
+                          hintText: isRole4 ? l10n.hscHint : l10n.hscNameHint,
                           initialValue: state.hscName,
                           onChanged: (v) => bloc.add(HscNameChanged(v)),
                           readOnly: true,

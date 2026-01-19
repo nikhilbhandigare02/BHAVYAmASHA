@@ -1022,13 +1022,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get divorced => 'Divorced';
 
   @override
-  String get dobLabel => 'Date of Birth';
+  String get dobLabel => 'Date of birth';
 
   @override
   String get dobShort => 'DOB';
 
   @override
-  String get dojLabel => 'Date of Joining';
+  String get dojLabel => 'Date of joining';
 
   @override
   String get drawerAboutUs => 'About Us';
@@ -6929,6 +6929,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hwcNameLabel => 'HWC Name';
+
+  @override
+  String get hscHint => 'HSC';
+
+  @override
+  String get hscLabel => 'HSC';
+
+  @override
+  String get hwcHint => 'HWC';
+
+  @override
+  String get hwcLabel => 'HWC';
 
   @override
   String get moveForward => 'Move forward?';

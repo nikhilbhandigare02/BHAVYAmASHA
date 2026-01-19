@@ -72,6 +72,33 @@ class ApiDropdown<T> extends StatefulWidget {
           return 'Medical College Hospital(MCH)' as T;
         case 'pmsma_site':
           return 'PMSMA Site' as T;
+
+
+      // 🔹 House Type cases
+        case 'none':
+          return 'None' as T;
+        case 'kachcha':
+          return 'Kuchcha House' as T;
+        case 'semi_pakka_house':
+          return 'Semi Pucca House' as T;
+        case 'pakka_house':
+          return 'Pucca House' as T;
+        case 'thrust_house':
+          return 'Thrust House' as T;
+        case 'other':
+          return 'Other' as T;
+
+      // 🔹 Toilet Facility cases
+        case 'flush_with_water':
+          return 'Flush toilet with running water' as T;
+        case 'flush_without_water':
+          return 'Flush toilet without water' as T;
+        case 'pit_toilet_with_water':
+          return 'Pit toilet with running water supply' as T;
+        case 'pit_toilet_without_water':
+          return 'Pit toilet without water supply' as T;
+
+
       }
     }
     return value;
