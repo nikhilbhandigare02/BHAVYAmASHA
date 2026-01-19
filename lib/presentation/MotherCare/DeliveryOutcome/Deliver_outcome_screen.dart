@@ -255,23 +255,6 @@ ORDER BY d.created_date_time DESC
     }
   }
 
-  bool _isEligibleFemale(Map<String, dynamic> person, {Map<String, dynamic>? head}) {
-    if (person.isEmpty) return false;
-
-
-    if (person['gives_birth_to_baby']?.toString().toLowerCase() == 'yes') {
-      return true;
-    }
-
-    final genderRaw = person['gender']?.toString().toLowerCase() ?? '';
-    final maritalStatusRaw = person['maritalStatus']?.toString().toLowerCase() ?? head?['maritalStatus']?.toString().toLowerCase() ?? '';
-    final gender = genderRaw == 'f' || genderRaw == 'female';
-    final maritalStatus = maritalStatusRaw == 'married';
-    final dob = person['dob'];
-    final age = _calculateAge(dob);
-
-    return gender && maritalStatus && age >= 15 && age <= 49;
-  }
 
   Future<Map<String, dynamic>> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead, Map<String, dynamic>? beneficiaryRow}) async {
     try {
@@ -458,7 +441,7 @@ ORDER BY d.created_date_time DESC
           }
           ageYearsDisplay = ageYears > 0 ? ageYears.toString() : '';
 
-          gender = 'F';
+          gender = 'Female';
 
           final m = (info['mobileNo']?.toString() ?? info['mobile']?.toString() ?? info['phone']?.toString() ?? '').trim();
           if (m.isNotEmpty) {
@@ -626,7 +609,6 @@ ORDER BY d.created_date_time DESC
     final primary = Theme.of(context).primaryColor;
     final t = AppLocalizations.of(context);
 
-    // Extract the data directly from the formatted data
     final hhId = data['hhId']?.toString() ?? 'N/A';
     final registrationDate = data['RegistrationDate']?.toString() ?? 'N/A';
     final registrationType = data['RegistrationType']?.toString() ?? 'General';
@@ -850,7 +832,7 @@ ORDER BY d.created_date_time DESC
                                       age -= 1;
                                     }
                                     if (gender.isNotEmpty) {
-                                      computed = '$age | $gender';
+                                      computed = '$age | Female';
                                     } else {
                                       computed = '$age';
                                     }

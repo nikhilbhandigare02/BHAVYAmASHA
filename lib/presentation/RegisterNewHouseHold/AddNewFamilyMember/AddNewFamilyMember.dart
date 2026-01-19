@@ -2647,7 +2647,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     : '${l.fatherGuardianNameLabel} *',
                                                 hintText: l.fatherGuardianNameLabel,
                                                 initialValue: state.fatherName ?? '',
+                                                readOnly: _isEdit, // 👈 make readonly in edit mode
                                                 onChanged: (v) {
+                                                  if (_isEdit) return; // extra safety
                                                   context.read<AddnewfamilymemberBloc>().add(
                                                     AnmUpdateFatherName(v.trim()),
                                                   );
@@ -2660,6 +2662,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   return null;
                                                 },
                                               ),
+
                                             ],
                                           ],
                                         )
@@ -2784,6 +2787,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 ? l.motherNameLabel
                                                 : "${l.motherNameLabel} *",
                                             hintText: l.motherNameLabel,
+                                            readOnly: _isEdit,
                                             initialValue: state.motherName ?? '',
                                             onChanged: (v) {
                                               context.read<AddnewfamilymemberBloc>().add(
@@ -2924,6 +2928,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     : '${l.fatherGuardianNameLabel} *',
                                                 hintText: l.fatherGuardianNameLabel,
                                                 initialValue: state.fatherName ?? '',
+                                                readOnly: _isEdit,
+
                                                 onChanged: (v) {
                                                   context.read<AddnewfamilymemberBloc>().add(
                                                     AnmUpdateFatherName(v.trim()),
@@ -3061,6 +3067,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 ? l.motherNameLabel
                                                 : "${l.motherNameLabel} *",
                                             hintText: l.motherNameLabel,
+                                            readOnly: _isEdit, // 👈 make readonly in edit mode
+
                                             initialValue: state.motherName ?? '',
                                             onChanged: (v) {
                                               context.read<AddnewfamilymemberBloc>().add(

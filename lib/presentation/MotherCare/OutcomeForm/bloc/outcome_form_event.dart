@@ -272,6 +272,10 @@ class RemovalReasonChanged extends OutcomeFormEvent {
   List<Object?> get props => [reason];
 }
 
+class PretermDialogShown extends OutcomeFormEvent {
+  const PretermDialogShown();
+}
+
 class CondomQuantityChanged extends OutcomeFormEvent {
   final String? quantity;
 

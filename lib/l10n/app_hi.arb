@@ -2486,7 +2486,9 @@
   "private": "प्राइवेट",
   "nextancduedate":"Next anc due date",
   "householdUpdatedSuccessfully": "घरेलू सफलतापूर्वक अपडेट किया गया",
-  "saveSuccess": "प्रपत्र सफलतापूर्वक संरक्षित किया गया"
+  "saveSuccess": "प्रपत्र सफलतापूर्वक संरक्षित किया गया",
+  "motherNameLabelchild":"माता का नाम",
+  "fatherNameLabelchild":"पिता का नाम"
 
 
 }

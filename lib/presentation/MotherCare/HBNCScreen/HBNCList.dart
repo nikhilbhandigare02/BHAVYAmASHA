@@ -949,7 +949,8 @@ class _HBNCListScreenState
                         Expanded(
                           child: _rowText(
                             t.ageGenderLabel,
-                            '${data['age']?.toString() ?? '0'} Y | ${data['gender']?.toString() ?? t!.na}',
+                            // '${data['age']?.toString() ?? '0'} Y | ${data['gender']?.toString() ?? t!.na}',
+                            '${data['age']?.toString() ?? '0'} Y | Female',
                           ),
                         ),
                         const SizedBox(width: 12),

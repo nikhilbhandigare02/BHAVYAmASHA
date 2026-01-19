@@ -7625,4 +7625,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get dateOfvisitTracking => 'Date of visit';
+
+  @override
+  String get motherNameLabelchild => 'माता का नाम';
+
+  @override
+  String get fatherNameLabelchild => 'पिता का नाम';
 }

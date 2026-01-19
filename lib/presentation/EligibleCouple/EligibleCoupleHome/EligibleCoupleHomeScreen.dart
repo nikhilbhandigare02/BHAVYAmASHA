@@ -33,6 +33,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
   void initState() {
     super.initState();
     _loadCounts();
+    _loadCountsUpdated();
     // _printEligibleCoupleActivities();
   }
 
@@ -193,11 +194,224 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
 
 
   Future<void> _loadCounts() async {
+    try {
+      //setState(() => _isLoading = true);
+
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
+
+      if (currentUserKey.isEmpty) {
+        print('❌ Error: Current user key not found');
+        setState(() {
+          /*_filtered = [];
+          _isLoading = false;*/
+        });
+        return;
+      }
+
+      final query = '''
+      SELECT 
+        b.*, 
+        e.eligible_couple_state,
+        e.created_date_time AS registration_date
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e
+        ON b.unique_key = e.beneficiary_ref_key
+      WHERE b.is_deleted = 0
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND (b.is_death = 0 OR b.is_death IS NULL)
+        AND e.eligible_couple_state = 'eligible_couple'
+        AND e.is_deleted = 0
+        AND e.current_user_key = ?
+      ORDER BY b.created_date_time DESC
+    ''';
+
+      final rows = await db.rawQuery(query, [currentUserKey]);
+      print('🔍 Raw eligible couple rows: ${rows.length}');
+
+      if (rows.isEmpty) {
+        setState(() {
+         // eligibleCouplesCount = [];
+          //_isLoading = false;
+        });
+        return;
+      }
+
+      final List<Map<String, dynamic>> couples = [];
+      final Set<String> seenBeneficiaries = {};
+
+      for (final row in rows) {
+        final Map<String, dynamic> member =
+        Map<String, dynamic>.from(row);
+
+        Map<String, dynamic> info = {};
+        try {
+          final raw = member['beneficiary_info'];
+          if (raw is String && raw.isNotEmpty) {
+            info = jsonDecode(raw) as Map<String, dynamic>;
+          } else if (raw is Map) {
+            info = Map<String, dynamic>.from(raw);
+          }
+        } catch (e) {
+          print('⚠️ JSON parse error: $e');
+          continue;
+        }
+
+        final String beneficiaryKey =
+            member['unique_key']?.toString() ?? '';
+
+        if (beneficiaryKey.isEmpty) {
+          print('⚠️ Beneficiary unique_key missing');
+          continue;
+        }
+
+        final String memberType =
+            info['memberType']?.toString().toLowerCase() ?? '';
+
+        // 🚫 Skip children
+        if (memberType == 'child') {
+          print('⛔ Skipping child record');
+          continue;
+        }
+
+        final beneficiaryKeya = row['unique_key']?.toString() ?? '';
+        final hasSterilization =
+        await _hasSterilizationRecord(
+          db,
+          beneficiaryKeya,
+          currentUserKey,
+        );
+
+        if (hasSterilization) continue;
+
+        // 🚫 Skip duplicate beneficiary
+        if (seenBeneficiaries.contains(beneficiaryKey)) {
+          print('⛔ Duplicate beneficiary skipped: $beneficiaryKey');
+          continue;
+        }
+
+        seenBeneficiaries.add(beneficiaryKey);
+
+        couples.add(
+          _formatCoupleData(
+            _toStringMap(member),
+            info,
+            <String, dynamic>{},
+            isHead: true,
+            shouldShowGuestBadge: false,
+          ),
+        );
+      }
+
+      print('✅ Final eligible couples (unique beneficiaries): ${couples.length}');
+
+      setState(() {
+        eligibleCouplesCount = couples.length;
+       // _isLoading = false;
+      });
+    } catch (e, stackTrace) {
+      print('❌ Error in _loadEligibleCouples: $e');
+      print(stackTrace);
+      setState(() {
+        //eligibleCouplesCount = 0;
+       // _isLoading = false;
+      });
+    }
+  }
+
+  Map<String, dynamic> _toStringMap(dynamic map) {
+    if (map == null) return {};
+    if (map is Map<String, dynamic>) return map;
+    if (map is Map) {
+      return Map<String, dynamic>.from(map);
+    }
+    return {};
+  }
+
+
+  Map<String, dynamic> _formatCoupleData(Map<String, dynamic> row, Map<String, dynamic> female, Map<String, dynamic> headOrSpouse, {required bool isHead, bool shouldShowGuestBadge = false}) {
+    final hhId = row['household_ref_key']?.toString() ?? '';
+    final uniqueKey = row['unique_key']?.toString() ?? '';
+    final createdDate = row['registration_date']?.toString() ?? '';
+    final info = _toStringMap(row['beneficiary_info']);
+    final head = _toStringMap(info['head_details']);
+    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? '';
+    final gender = female['gender']?.toString().toLowerCase();
+    final displayGender = gender?.isNotEmpty == true ? gender![0].toUpperCase() + gender!.substring(1) : 'Not Available';
+    final age = _calculateAge(female['dob']);
+    final richId = female['RichID']?.toString() ?? '';
+    final mobile = female['mobile_no']?.toString() ?? female['mobileNo']?.toString() ?? 'Not Available';
+    final husbandName = female['spouseName']?.toString() ??
+        (isHead
+            ? (headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString())
+            : (headOrSpouse['headName']?.toString() ?? headOrSpouse['memberName']?.toString() ?? headOrSpouse['spouseName']?.toString()))
+        ?? '';
+
+    final dynamic childrenRaw = info['children_details'] ?? head['childrendetails'] ?? head['childrenDetails'];
+    String last11(String s) => s.length > 11 ? s.substring(s.length - 11) : s;
+
+    Map<String, dynamic>? childrenSummary;
+    if (childrenRaw != null) {
+      final childrenMap = _toStringMap(childrenRaw);
+      childrenSummary = {
+        'totalBorn': childrenMap['totalBorn'],
+        'totalLive': childrenMap['totalLive'],
+        'totalMale': childrenMap['totalMale'],
+        'totalFemale': childrenMap['totalFemale'],
+        'youngestAge': childrenMap['youngestAge'],
+        'ageUnit': childrenMap['ageUnit'],
+        'youngestGender': childrenMap['youngestGender'],
+      }..removeWhere((k, v) => v == null);
+    }
+    return {
+      'hhId': hhId,
+      'hhIdShort': last11(hhId),
+      'RegistrationDate': _formatDate(createdDate),
+      'RegistrationType': 'General',
+      'BeneficiaryID': uniqueKey,
+      'BeneficiaryIDShort': last11(uniqueKey) ,
+      'Name': name,
+      'age': age > 0 ? '$age Y | $displayGender' : 'N/A',
+      'RCH ID': richId.isNotEmpty ? richId : 'Not Available',
+      'mobileno': mobile,
+      'HusbandName': husbandName.isNotEmpty ? husbandName : 'Not Available',
+      'childrenSummary': childrenSummary,
+      '_rawRow': row,
+      'fullHhId': hhId,
+      'fullBeneficiaryId': uniqueKey,
+      'shouldShowGuestBadge': shouldShowGuestBadge,
+    };
+  }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    try {
+      final dt = DateTime.tryParse(dateStr);
+      if (dt == null) return '';
+      return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  int _calculateAge(dynamic dobRaw) {
+    if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
+    try {
+      final dob = DateTime.tryParse(dobRaw.toString());
+      if (dob == null) return 0;
+      return DateTime.now().difference(dob).inDays ~/ 365;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<void> _loadCountsUpdated() async {
     if (mounted) {
       setState(() => isLoading = true);
     }
     try {
-      final db = await DatabaseProvider.instance.database;
+     /* final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
@@ -229,7 +443,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
       final rows = await db.rawQuery(query, [ashaUniqueKey]);
 
       int count = 0;
-      /*for (final row in rows) {
+      for (final row in rows) {
         try {
           final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
           final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty
@@ -243,15 +457,15 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
         } catch (_) {
           count++;
         }
-      }*/
+      }
 
       count = await _getEligibleCoupleCount();
-
+*/
       final updatedCouples = await _localStorageDao.getUpdatedEligibleCouples();
 
       if (mounted) {
         setState(() {
-          eligibleCouplesCount = count;
+         // eligibleCouplesCount = count;
           updatedEligibleCouplesCount = updatedCouples.length;
         });
       }
@@ -259,7 +473,7 @@ class _EligibleCoupleHomeScreenState extends State<EligibleCoupleHomeScreen> {
       print('Error loading counts: $e');
       if (mounted) {
         setState(() {
-          eligibleCouplesCount = 0;
+         // eligibleCouplesCount = 0;
           updatedEligibleCouplesCount = 0;
         });
       }

@@ -886,7 +886,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
                           l10n?.fatherNameLabel ?? 'Father\'s Name',
                           data['FatherName']?.isNotEmpty == true
                               ? data['FatherName']
-                              : 'N/A',
+                              : l10n!.na,
                         ),
                       ),
                     ],

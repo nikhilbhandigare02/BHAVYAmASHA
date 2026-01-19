@@ -920,7 +920,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cookingFuelTitle => 'Cooking Fuel';
 
   @override
-  String get cookingFuelTypeLabel => 'Type of Fuel used for cooking';
+  String get cookingFuelTypeLabel => 'Type of fuel used for cooking';
 
   @override
   String get currentAgeLabel => 'Current age (in years)';
@@ -1183,7 +1183,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fatherInLaw => 'Father in Law';
 
   @override
-  String get fatherNameLabel => 'Father name';
+  String get fatherNameLabel => 'Father Name';
 
   @override
   String get fatherSpouseHint => 'Father/Spouse Name';
@@ -1617,7 +1617,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get isWomanPregnantQuestion => 'Is the Woman Pregnant?';
 
   @override
-  String get kitchenInsideLabel => 'Is the kitchen inside the house';
+  String get kitchenInsideLabel => 'Is the kitchen inside the house?';
 
   @override
   String get legendCompleted => 'Completed';
@@ -5548,7 +5548,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get riskPIH => 'Pregnancy Induced Hypertension, pre-eclampsia, Eclampsia';
 
   @override
-  String get riskInfections => 'Syphilis, HIV Positive, Hepatitis B, Hepatitis C';
+  String get riskInfections => 'Syphilis, HIV Positive, Hepatitis-B, Hepatitis C';
 
   @override
   String get riskGestationalDiabetes => 'Gestational Diabetes';
@@ -7625,4 +7625,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dateOfvisitTracking => 'Date of visit';
+
+  @override
+  String get motherNameLabelchild => 'Mother name';
+
+  @override
+  String get fatherNameLabelchild => 'Father name';
 }

@@ -592,11 +592,8 @@ class _RegisterChildDueListFormScreen
           debugPrint('Error parsing date of birth: $e');
         }
       }
-      DateTime? regDt;
-      if (data.createdDate != null) {
-        regDt = DateTime.tryParse(data.createdDate!);
-      }
-      bloc.add(DateOfRegistrationChanged(regDt ?? DateTime.now()));
+      // Always use current date for registration, don't auto-fetch from beneficiary data
+      bloc.add(DateOfRegistrationChanged(DateTime.now()));
       if (data.weightGrams != null && data.weightGrams!.isNotEmpty) {
         bloc.add(WeightGramsChanged(data.weightGrams!));
       }
@@ -739,9 +736,9 @@ class _RegisterChildDueListFormScreen
                     child: Text(
                       'DETAILS',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -827,9 +824,9 @@ class _RegisterChildDueListFormScreen
                             CustomTextField(
                               labelText: l10n?.rchChildSerialHint ??
                                   'Register Serial Number',
-                               hintText: l10n?.rchChildSerialHint,
-                               initialValue: state.registerSerialNumber,
-                               onChanged: (v) =>
+                              hintText: l10n?.rchChildSerialHint,
+                              initialValue: state.registerSerialNumber,
+                              onChanged: (v) =>
                                   bloc.add(SerialNumberOFRegister(v)),
                             ),
                             Divider(
@@ -943,7 +940,7 @@ class _RegisterChildDueListFormScreen
                             Container(
                               key: _keyMotherName,
                               child: CustomTextField(
-                                labelText: "${l10n?.motherNameLabel} *" ??
+                                labelText: "${l10n?.motherNameLabelchild} *" ??
                                     "Mother's name*",
                                 hintText: l10n?.enterMothersName,
                                 initialValue: state.motherName,
@@ -966,7 +963,7 @@ class _RegisterChildDueListFormScreen
 
                             CustomTextField(
                               labelText:
-                              l10n?.fatherNameLabel ?? "Father's name",
+                              l10n?.fatherNameLabelchild ?? "Father's name",
                               hintText: l10n?.fatherNameHint,
                               initialValue: state.fatherName,
                               onChanged: (v) => bloc.add(FatherNameChanged(v)),
@@ -1261,7 +1258,7 @@ class _RegisterChildDueListFormScreen
                                               labelText: l10n?.birthWeightRange ?? 'Birth weight',
                                               hintText: l10n?.birthWeightRange ?? 'Enter birth weight',
                                               initialValue: state.birthWeightGrams,
-                                               maxLength: 4,
+                                              maxLength: 4,
                                               keyboardType: TextInputType.number,
                                               onChanged: (v) => bloc.add(BirthWeightGramsChanged(v)),
                                               validator: (value) {
@@ -1367,21 +1364,21 @@ class _RegisterChildDueListFormScreen
                                       const EdgeInsets.only(top: 8.0),
                                       child: (_beneficiaryData?.otherReligion?.isNotEmpty ?? false)
                                           ? Opacity(
-                                              opacity: 0.7,
-                                              child: CustomTextField(
-                                                labelText: l10n?.specifyReligionLabel,
-                                                hintText: l10n?.enterReligion,
-                                                initialValue: state.customReligion,
-                                                readOnly: true,
-                                                onChanged: (v) => bloc.add(CustomReligionChanged(v)),
-                                              ),
-                                            )
+                                        opacity: 0.7,
+                                        child: CustomTextField(
+                                          labelText: l10n?.specifyReligionLabel,
+                                          hintText: l10n?.enterReligion,
+                                          initialValue: state.customReligion,
+                                          readOnly: true,
+                                          onChanged: (v) => bloc.add(CustomReligionChanged(v)),
+                                        ),
+                                      )
                                           : CustomTextField(
-                                              labelText: l10n?.specifyReligionLabel,
-                                              hintText: l10n?.enterReligion,
-                                              initialValue: state.customReligion,
-                                              onChanged: (v) => bloc.add(CustomReligionChanged(v)),
-                                            ),
+                                        labelText: l10n?.specifyReligionLabel,
+                                        hintText: l10n?.enterReligion,
+                                        initialValue: state.customReligion,
+                                        onChanged: (v) => bloc.add(CustomReligionChanged(v)),
+                                      ),
                                     ),
                                 ],
                               ),
@@ -1462,21 +1459,21 @@ class _RegisterChildDueListFormScreen
                                       const EdgeInsets.only(top: 8.0),
                                       child: (_beneficiaryData?.otherCategory?.isNotEmpty ?? false)
                                           ? Opacity(
-                                              opacity: 0.7,
-                                              child: CustomTextField(
-                                                labelText: l10n.specifyCategoryShort,
-                                                hintText: l10n.enter_category,
-                                                initialValue: state.customCaste,
-                                                readOnly: true,
-                                                onChanged: (v) => bloc.add(CustomCasteChanged(v)),
-                                              ),
-                                            )
+                                        opacity: 0.7,
+                                        child: CustomTextField(
+                                          labelText: l10n.specifyCategoryShort,
+                                          hintText: l10n.enter_category,
+                                          initialValue: state.customCaste,
+                                          readOnly: true,
+                                          onChanged: (v) => bloc.add(CustomCasteChanged(v)),
+                                        ),
+                                      )
                                           : CustomTextField(
-                                              labelText: l10n.specifyCategoryShort,
-                                              hintText: l10n.enter_category,
-                                              initialValue: state.customCaste,
-                                              onChanged: (v) => bloc.add(CustomCasteChanged(v)),
-                                            ),
+                                        labelText: l10n.specifyCategoryShort,
+                                        hintText: l10n.enter_category,
+                                        initialValue: state.customCaste,
+                                        onChanged: (v) => bloc.add(CustomCasteChanged(v)),
+                                      ),
                                     ),
                                 ],
                               ),

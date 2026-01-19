@@ -430,7 +430,7 @@ class AddnewfamilymemberBloc
           mobileNo: _firstString(['mobileNo', 'mobile_no', 'mobile']),
           voterId: allData['voterId'] as String?,
           rationId: allData['rationId'] as String? ?? allData['rationCardId'] as String?,
-          phId: allData['phId'] as String?,
+          phId: _firstString(['phId', 'personalHealthId']),
           beneficiaryType: allData['beneficiaryType'] as String?,
           maritalStatus: _firstString(['maritalStatus', 'marital_status']),
           ageAtMarriage: allData['ageAtMarriage'] as String?,
