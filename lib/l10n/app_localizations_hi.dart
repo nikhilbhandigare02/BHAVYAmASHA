@@ -2388,7 +2388,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get trainingTitle => 'भाव्या एम-आशा प्रशिक्षण';
 
   @override
-  String get trainingTypeLabel => 'प्रशिक्षण का प्रकार';
+  String get trainingTypeLabel => 'प्रशिक्षण प्रकार';
 
   @override
   String get unmarried => 'अविवाहित';

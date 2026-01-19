@@ -1886,7 +1886,7 @@
   "selectRisks": "Select risks",
   "riskSevereAnemia": "Severe Anemia",
   "riskPIH": "Pregnancy Induced Hypertension, pre-eclampsia, Eclampsia",
-  "riskInfections": "Syphilis, HIV Positive, Hepatitis-B, Hepatitis C",
+  "riskInfections": "Syphilis, HIV Positive, Hepatitis B, Hepatitis C",
   "riskGestationalDiabetes": "Gestational Diabetes",
   "riskHypothyroidism": "Hypothyroidism",
   "riskTeenagePregnancy": "Teenage Pregnancy (<20 year)/ Pregnancy after 35 Year",
@@ -2629,6 +2629,9 @@
   "motherNameLabelchild":"Mother name",
   "fatherNameLabelchild":"Father name"
 
+  "dateOfvisitTracking":"Date of visit",
+  "motherNameLabelchild":"Mother name",
+  "fatherNameLabelchild":"Father name"
 
 
 }
