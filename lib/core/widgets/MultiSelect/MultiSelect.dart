@@ -59,6 +59,7 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
 
   T _normalizeValue<T>(T value) {
     if (value is String) {
+
       final v = value
           .replaceAll('[', '')
           .replaceAll(']', '')

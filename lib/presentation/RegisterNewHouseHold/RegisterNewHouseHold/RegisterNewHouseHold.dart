@@ -307,9 +307,13 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           info['houseKitchen'] = '';
         }
 
-        info['cookingFuel'] = mapValue(
+       /* info['cookingFuel'] = mapValue(
           'cookingFuel',
           amenities['type_of_fuel_used_for_cooking'],
+        );*/
+        info['cookingFuel'] = mapValue(
+          'cookingFuel',
+          (amenities['type_of_fuel_used_for_cooking'] as List).join(', '),
         );
         info['otherCookingFuel'] =
             amenities['other_type_of_fuel_used_for_cooking'];
