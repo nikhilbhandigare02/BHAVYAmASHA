@@ -3561,7 +3561,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get sixteenYear => '16 YEAR';
 
   @override
-  String get dateOfVisit => 'व्हिजिट की दिनांक';
+  String get dateOfVisit => 'विज़िट की दिनांक';
 
   @override
   String get weightLabel => ' वजन (500–1200 ग्राम)';
@@ -5197,7 +5197,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get richId => 'RICH आईडी';
 
   @override
-  String get mothersName => 'माता का नाम';
+  String get mothersName => 'मा का नाम';
 
   @override
   String get wifesName => 'पत्नी का नाम';
@@ -6706,31 +6706,31 @@ class AppLocalizationsHi extends AppLocalizations {
   String get birth_Doses => 'Birth Doses';
 
   @override
-  String get doses16Year => '16 वर्ष की खुराक';
+  String get doses16Year => 'खुराक';
 
   @override
   String get dateOfVisits => 'दौरे की तिथियाँ';
 
   @override
-  String get six_WeekDoses => '6 सप्ताह की खुराक';
+  String get six_WeekDoses => 'खुराक';
 
   @override
-  String get ten_WeekDoses => '10 सप्ताह की खुराक';
+  String get ten_WeekDoses => 'खुराक';
 
   @override
-  String get fourteen_WeekDoses => '14 सप्ताह की खुराक';
+  String get fourteen_WeekDoses => 'खुराक';
 
   @override
-  String get nineMonthDoses => '9 महीने की खुराक';
+  String get nineMonthDoses => 'खुराक';
 
   @override
-  String get sixteenToTwentyFourMonthDoses => '16-24 महीने की खुराक';
+  String get sixteenToTwentyFourMonthDoses => 'खुराक';
 
   @override
-  String get fiveToSixYearDoses => '5-6 वर्ष की खुराक';
+  String get fiveToSixYearDoses => 'खुराक';
 
   @override
-  String get tenYearDoses => '10 वर्ष की खुराक';
+  String get tenYearDoses => 'खुराक';
 
   @override
   String get report => 'रिपोर्ट';
@@ -6929,6 +6929,18 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get hwcNameLabel => 'एच.डब्ल्यू.सी. का नाम';
+
+  @override
+  String get hscHint => 'एच.एस.सी.';
+
+  @override
+  String get hscLabel => 'एच.एस.सी.';
+
+  @override
+  String get hwcHint => 'एच.डब्ल्यू.सी.';
+
+  @override
+  String get hwcLabel => 'एच.डब्ल्यू.सी.';
 
   @override
   String get moveForward => 'आगे बढ़ें?';
@@ -7276,13 +7288,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get bcg => 'बी. सी. जी';
 
   @override
-  String get hepatitis => 'हिपॅटायटीस बी - 0';
+  String get hepatitis => 'हेपेटाइटिस बी - 0';
 
   @override
   String get opv => 'ओ. पी. वी - 0';
 
   @override
-  String get vit => 'व्हिटामिन के';
+  String get vit => 'विटामिन - के';
 
   @override
   String get caseClosure => 'केस बंद';
@@ -7357,7 +7369,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dpt1 => 'डी.पी.टी. - 1';
 
   @override
-  String get pentavalent1 => 'पेंटावैलेंट - 1';
+  String get pentavalent1 => 'पेंटावेलेंट - 1';
 
   @override
   String get rota1 => 'रोटा - 1';
@@ -7372,7 +7384,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get opv2 => 'ओ.पी.वी. - 2';
 
   @override
-  String get pentavalent2 => 'पेंटावैलेंट - 2';
+  String get pentavalent2 => 'पेंटावेलेंट - 2';
 
   @override
   String get rota2 => 'रोटा - 2';
@@ -7390,7 +7402,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get opv3 => 'ओ.पी.वी. - 3';
 
   @override
-  String get pentavalent3 => 'पेंटावैलेंट - 3';
+  String get pentavalent3 => 'पेंटावेलेंट - 3';
 
   @override
   String get rota3 => 'रोटा - 3';
@@ -7408,7 +7420,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get jeVaccine1 => 'जे.ई. वैक्सीन  - 1';
 
   @override
-  String get pcvBooster => 'पी.सी.वी. बूस्टर';
+  String get pcvBooster => 'पी.सी.वी. - बूस्टर';
 
   @override
   String get fipv3 => 'एफ.आई.पी.वी. - 3';
@@ -7432,7 +7444,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dptBooster2 => 'डी.पी.टी. बूस्टर - 2';
 
   @override
-  String get tdVaccine => 'टेटनस डिफ्थीरिया (टी.डी.)';
+  String get tdVaccine => 'टेटनस डिप्थीरिया (टी.डी.)';
 
   @override
   String get currentAncDueDate => 'वर्तमान प्रसव पूर्व जांच की अंतिम तिथि';

@@ -2108,7 +2108,7 @@ abstract class AppLocalizations {
   /// No description provided for @dobLabel.
   ///
   /// In en, this message translates to:
-  /// **'Date of Birth'**
+  /// **'Date of birth'**
   String get dobLabel;
 
   /// No description provided for @dobShort.
@@ -2120,7 +2120,7 @@ abstract class AppLocalizations {
   /// No description provided for @dojLabel.
   ///
   /// In en, this message translates to:
-  /// **'Date of Joining'**
+  /// **'Date of joining'**
   String get dojLabel;
 
   /// No description provided for @drawerAboutUs.
@@ -13906,6 +13906,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'HWC Name'**
   String get hwcNameLabel;
+
+  /// No description provided for @hscHint.
+  ///
+  /// In en, this message translates to:
+  /// **'HSC'**
+  String get hscHint;
+
+  /// No description provided for @hscLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'HSC'**
+  String get hscLabel;
+
+  /// No description provided for @hwcHint.
+  ///
+  /// In en, this message translates to:
+  /// **'HWC'**
+  String get hwcHint;
+
+  /// No description provided for @hwcLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'HWC'**
+  String get hwcLabel;
 
   /// No description provided for @moveForward.
   ///
