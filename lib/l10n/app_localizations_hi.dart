@@ -1213,6 +1213,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get firstAncLabel => 'पहला एएनसी';
 
   @override
+  String get folicirAcidTabletsLabel => 'Number of Iron & Folic Acid tablets given';
+
+  @override
   String get folicAcidTabletsLabel => 'आयरन और फोलिक एसिड की दी गई गोलियों की संख्या';
 
   @override
@@ -1319,6 +1322,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get hbncListTitle => 'एचबीएनसी का दौरा ';
+
+  @override
+  String get hbncVisit => 'HBNC Visit';
 
   @override
   String get hbncMotherTitle => 'एचबीएनसी माता';
@@ -6106,6 +6112,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get member_status_label => 'सदस्य की स्थिति *';
 
   @override
+  String get member_status_head => 'सदस्य की स्थिति';
+
+  @override
   String get death => 'मृत्यू';
 
   @override
@@ -7610,4 +7619,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get householdUpdatedSuccessfully => 'घरेलू सफलतापूर्वक अपडेट किया गया';
+
+  @override
+  String get dontNO => 'Don\'t Know';
+
+  @override
+  String get dateOfvisitTracking => 'Date of visit';
 }

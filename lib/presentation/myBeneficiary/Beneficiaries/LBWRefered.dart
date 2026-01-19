@@ -30,182 +30,98 @@ class _Lbwrefered extends State<Lbwrefered> {
     _loadLbwChildren();
   }
 
-  int? normalizeToGrams(dynamic value) {
-    if (value == null) return null;
-
-    final num? v = num.tryParse(value.toString());
-    if (v == null || v <= 0) return null;
-
-    // ✅ Convert ONLY newborn-range kg values (≤ 3 kg)
-    if (v > 0 && v <= 3) {
-      return (v * 1000).round(); // kg → grams
-    }
-
-    // ✅ Already grams (typical gram range)
-    if (v > 100) {
-      return v.round();
-    }
-
-    // ❌ Ignore values like 8, 10, etc. (kg for older child)
-    return null;
-  }
-
-  bool _isBelowOrEqualTwoYears(
-      Map<String, dynamic> info, dynamic dobRaw) {
-    // Prefer explicit age fields
-    final years = int.tryParse(info['years']?.toString() ?? '');
-    final months = int.tryParse(info['months']?.toString() ?? '');
-
-    if (years != null) {
-      if (years > 2) return false;
-      if (years < 2) return true;
-      if (months != null && months > 0) return false;
-      return true;
-    }
-
-    // Fallback to DOB
-    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
-      try {
-        DateTime? dob = DateTime.tryParse(dobRaw.toString());
-
-        if (dob == null) {
-          final ts = int.tryParse(dobRaw.toString());
-          if (ts != null) {
-            dob = DateTime.fromMillisecondsSinceEpoch(
-              ts > 1000000000000 ? ts : ts * 1000,
-              isUtc: true,
-            );
-          }
-        }
-
-        if (dob != null) {
-          final now = DateTime.now();
-          final ageInMonths =
-              (now.year - dob.year) * 12 + (now.month - dob.month);
-          return ageInMonths <= 24;
-        }
-      } catch (_) {}
-    }
-
-    return false;
-  }
-
-
   Future<void> _loadLbwChildren() async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey =
-      currentUserData?['unique_key']?.toString();
+    final db = await DatabaseProvider.instance.database;
 
-      print('🔍 Loading LBW children (≤ 2 years only)');
+    final currentUserData = await SecureStorageService.getCurrentUserData();
+    String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+    try {
+      print('🔍 Loading LBW children from beneficiaries table (flexible thresholds)');
 
       final rows = await db.query(
         'beneficiaries_new',
-        where:
-        'is_deleted = 0 '
-            'AND (is_adult = 0 OR is_adult IS NULL) '
-            'AND current_user_key = ? '
-            'AND is_death = 0 '
-            'AND is_migrated = 0',
-        whereArgs: [ashaUniqueKey],
+        where: 'is_deleted = 0 AND (is_adult = 0 OR is_adult IS NULL) AND current_user_key = ?',
+        whereArgs: [ashaUniqueKey], // Pass the key as an argument
+        orderBy: 'id DESC',
       );
 
-      print('📦 Total child beneficiaries fetched: ${rows.length}');
+      print('🔎 Beneficiaries fetched: ${rows.length}');
 
       final List<Map<String, dynamic>> lbwChildren = [];
+      int passed = 0;
 
       for (final row in rows) {
         try {
-          // ---------- Parse beneficiary_info ----------
+          final hhId = row['household_ref_key']?.toString() ?? '';
+          final beneficiaryKey = row['unique_key']?.toString() ?? '';
+          if (hhId.isEmpty) continue;
+
           final infoStr = row['beneficiary_info']?.toString();
           if (infoStr == null || infoStr.isEmpty) continue;
 
-          final Map<String, dynamic> info =
-          jsonDecode(infoStr) as Map<String, dynamic>;
+          Map<String, dynamic>? info;
+          try {
+            final decoded = jsonDecode(infoStr);
+            if (decoded is Map) info = Map<String, dynamic>.from(decoded);
+          } catch (_) {}
+          if (info == null || info.isEmpty) continue;
 
-          // 🚫 Skip if child age > 2 years
-          final bool isUnderTwo =
-          _isBelowOrEqualTwoYears(info, info['dob'] ?? info['dateOfBirth']);
-          if (!isUnderTwo) continue;
-
-          final int? weightGm = normalizeToGrams(info['weight']);
-          final int? birthWeightGm =
-          normalizeToGrams(info['birthWeight']);
+          var weight = _parseNumFlexible(info['weight'])?.toDouble();
+          var birthWeight = _parseNumFlexible(info['birthWeight'])?.toDouble();
 
           bool isLbw = false;
-          if (weightGm != null && weightGm <= 1600) isLbw = true;
-          if (birthWeightGm != null && birthWeightGm <= 1600) isLbw = true;
+
+          if (weight != null && birthWeight != null) {
+            isLbw = (weight < 1.6 && birthWeight <= 1600);
+          } else if (weight != null && birthWeight == null) {
+            isLbw = (weight < 1.6);
+          } else if (weight == null && birthWeight != null) {
+            isLbw = (birthWeight <= 1600);
+          }
 
           if (!isLbw) continue;
+          passed++;
 
-          // ---------- UI DATA ----------
-          final String name =
-          (info['name'] ?? info['memberName'] ?? 'Unknown').toString();
+          final name = (info['name'] ?? info['memberName'] ?? '').toString();
+          final genderRaw = info['gender'];
+          final dobRaw = info['dob'] ?? info['dateOfBirth'];
 
-          final ageGender = _formatAgeGender(
-            info['dob'] ?? info['dateOfBirth'],
-            info['gender'],
-            info: info,
-          );
+          final ageGender = _formatAgeGender(dobRaw, genderRaw);
+          int toGrams(dynamic value) {
+            if (value == null) return 0;
 
-          dynamic rawWeight;
-          bool isBirthWeight = false;
+            final w = double.tryParse(value.toString()) ?? 0;
 
-          if (info['weight'] != null &&
-              info['weight'].toString().trim().isNotEmpty) {
-            rawWeight = info['weight'];
-          } else if (info['birthWeight'] != null &&
-              info['birthWeight'].toString().trim().isNotEmpty) {
-            rawWeight = info['birthWeight'];
-            isBirthWeight = true;
+            // If value looks like kg (e.g. 2.5), convert to grams
+            return w < 20 ? (w * 1000).round() : w.round();
           }
 
-          String formatWeight(dynamic value, {bool isBirthWeight = false}) {
-            if (value == null) return '--';
+          final weightDisplay =
+              '${toGrams(weight ?? birthWeight)} gms';
 
-            final num? v = num.tryParse(value.toString());
-            if (v == null || v <= 0) return '--';
-
-            // Birth weight → always grams
-            if (isBirthWeight) {
-              return '${v.round()} gms';
-            }
-
-            // grams
-            if (v > 100) {
-              return '${v.round()} g';
-            }
-
-            // kg
-            return '${v.toString()} kg';
-          }
 
           lbwChildren.add({
-            'hhId': row['household_ref_key']?.toString(),
-            'beneficiaryKey': row['unique_key']?.toString(),
-            'name': name,
+            'hhId': hhId,
+            'beneficiaryKey': beneficiaryKey,
+            'name': name.isEmpty ? 'Unknown' : name,
             'age_gender': ageGender,
-            'weight_display': formatWeight(
-              rawWeight,
-              isBirthWeight: isBirthWeight,
-            ),
+            'weight_display': weightDisplay,
             'status': 'LBW',
             '_raw': row,
           });
         } catch (e) {
-          print('⚠️ Error processing LBW row: $e');
+          print('Error processing beneficiary LBW row: $e');
         }
       }
 
-      print('✅ Final LBW children count (≤2 years): ${lbwChildren.length}');
+      print('✅ Beneficiaries passing flexible LBW filter: $passed');
 
       setState(() {
         _filtered = lbwChildren;
       });
-    } catch (e, st) {
-      print('❌ LBW load error: $e');
-      print(st);
+    } catch (e) {
+      print('Error loading LBW children: $e');
       setState(() {
         _filtered = [];
       });
@@ -214,27 +130,11 @@ class _Lbwrefered extends State<Lbwrefered> {
 
 
 
-  String _formatAgeGender(dynamic dobRaw, dynamic genderRaw, {Map<String, dynamic>? info}) {
+  String _formatAgeGender(dynamic dobRaw, dynamic genderRaw) {
     String age = 'Not Available';
     String gender = (genderRaw?.toString().toLowerCase() ?? '');
 
-    // 🔹 Use explicit age fields if available (more reliable than DOB calculation)
-    if (info != null) {
-      final years = int.tryParse(info['years']?.toString() ?? '');
-      final months = int.tryParse(info['months']?.toString() ?? '');
-      final days = int.tryParse(info['days']?.toString() ?? '');
-      
-      if (years != null && years > 0) {
-        age = '$years Y';
-      } else if (months != null && months > 0) {
-        age = '$months M';
-      } else if (days != null && days > 0) {
-        age = '$days D';
-      }
-    }
-
-    // 🔹 Fallback to DOB calculation if no explicit age fields
-    if (age == 'Not Available' && dobRaw != null && dobRaw.toString().isNotEmpty) {
+    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
       try {
         String dateStr = dobRaw.toString();
         DateTime? dob;
@@ -300,6 +200,31 @@ class _Lbwrefered extends State<Lbwrefered> {
     return '$age | $displayGender';
   }
 
+  num? _parseNumFlexible(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v;
+    String s = v.toString().trim().toLowerCase();
+    if (s.isEmpty) return null;
+    s = s.replaceAll(RegExp(r'[^0-9\.-]'), '');
+    if (s.isEmpty) return null;
+    final d = double.tryParse(s);
+    if (d != null) return d;
+    final i = int.tryParse(s);
+    if (i != null) return i;
+    return null;
+  }
+
+  String _formatWeight(double? weight, double? birthWeight) {
+    if (weight != null) {
+      // Show current weight in kg with one decimal place
+      return '${weight.toStringAsFixed(1)} kg';
+    }
+    if (birthWeight != null) {
+      // Show birth weight in grams, rounded to nearest gram
+      return '${birthWeight.round()} g';
+    }
+    return 'N/A';
+  }
 
   @override
   void dispose() {
@@ -324,15 +249,15 @@ class _Lbwrefered extends State<Lbwrefered> {
           _filtered.isEmpty
               ? _buildNoRecordCard(context)
               : Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                    itemCount: _filtered.length,
-                    itemBuilder: (context, index) {
-                      final data = _filtered[index];
-                      return _householdCard(context, data);
-                    },
-                  ),
-                ),
+            child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              itemCount: _filtered.length,
+              itemBuilder: (context, index) {
+                final data = _filtered[index];
+                return _householdCard(context, data);
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -436,15 +361,15 @@ class _Lbwrefered extends State<Lbwrefered> {
                     ),
                   ),
                   const SizedBox(height: 4),
-      _infoRow(
-        '',
-        data['age_gender'] ?? '',
-        // 🔹 Updated Line: Checks if data exists, then adds label
-        trailing: (data['weight_display'] != null && data['weight_display'].toString().isNotEmpty)
-            ? '${'Weight'}: ${data['weight_display']}'
-            : '',
-        isWrappable: true,
-      ),
+                  _infoRow(
+                    '',
+                    data['age_gender'] ?? '',
+                    // 🔹 Updated Line: Checks if data exists, then adds label
+                    trailing: (data['weight_display'] != null && data['weight_display'].toString().isNotEmpty)
+                        ? '${'Weight'}: ${data['weight_display']}'
+                        : '',
+                    isWrappable: true,
+                  ),
                 ],
               ),
             ),

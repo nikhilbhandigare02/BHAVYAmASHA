@@ -842,7 +842,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           } else {
             age = _extractYearsFromApprox(result['approxAge']);
           }
-          final String father = (result['fatherName'] ?? '').toString();
+          final String father = (result['father_name'] ?? '').toString();
           final String totalChildren =
               (result['children'] != null &&
                   result['children'].toString().isNotEmpty)
@@ -901,7 +901,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               'Age': spouseAge,
               'Gender': spouseGender,
               'Relation': 'Wife',
-              'Father': (_headForm?['sp_fatherName'] ?? '').toString(),
+              'Father': (_headForm?['sp_father_name'] ?? '').toString(),
               'Spouse': name,
               'Total Children': totalChildren,
             });
@@ -1068,7 +1068,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           }
           final String gender = (result['gender'] ?? '').toString();
           final String relation = (result['relation'] ?? '').toString();
-          final String father = (result['fatherName'] ?? '').toString();
+          final String father = (result['father_name'] ?? '').toString();
           final String spouse = (result['spouseName'] ?? '').toString();
           final String totalChildren =
               (result['children'] != null &&
@@ -1128,7 +1128,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                 );
               }
               if (spMap != null) {
-                spouseFather = (spMap['fatherName'] ?? '').toString();
+                spouseFather = (spMap['father_name'] ?? '').toString();
 
                 // Extract spouse age from spousedetails - always extract since we start with empty
                 // First try to get the pre-calculated age
@@ -1577,7 +1577,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   }
                   final String gender = (result['gender'] ?? '').toString();
                   final String relation = (result['relation'] ?? '').toString();
-                  final String father = (result['fatherName'] ?? '').toString();
+                  final String father = (result['father_name'] ?? '').toString();
                   final String spouse = (result['spouseName'] ?? '').toString();
                   final String totalChildren =
                       (result['children'] != null &&
@@ -1720,7 +1720,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                           spMap = Map<String, dynamic>.from(jsonDecode(spRaw));
                         }
                         if (spMap != null) {
-                          spouseFather = (spMap['fatherName'] ?? '').toString();
+                          spouseFather = (spMap['father_name'] ?? '').toString();
 
                           // Extract spouse age from spousedetails - this should take precedence
                           // First try to get the pre-calculated age
@@ -1779,7 +1779,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                           spMap = Map<String, dynamic>.from(jsonDecode(spRaw));
                         }
                         if (spMap != null) {
-                          spouseFather = (spMap['fatherName'] ?? '').toString();
+                          spouseFather = (spMap['father_name'] ?? '').toString();
 
                           // Extract spouse age from spousedetails - this should take precedence
                           // First try to get the pre-calculated age
@@ -1934,7 +1934,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                     age = (result['approxAge'] ?? '').toString();
                   }
                   final String gender = (result['gender'] ?? '').toString();
-                  final String father = (result['fatherName'] ?? '').toString();
+                  final String father = (result['father_name'] ?? '').toString();
                   final String spouse = (result['spouseName'] ?? '').toString();
                   final String totalChildren =
                       (result['children'] != null &&
@@ -2007,7 +2007,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                         'Age': spouseAge,
                         'Gender': spouseGender,
                         'Relation': _members[spouseIndex]['Relation'] ?? 'Wife',
-                        'Father': (_headForm?['sp_fatherName'] ?? '')
+                        'Father': (_headForm?['sp_father_name'] ?? '')
                             .toString(),
                         'Spouse': name,
                         'Total Children': totalChildren,

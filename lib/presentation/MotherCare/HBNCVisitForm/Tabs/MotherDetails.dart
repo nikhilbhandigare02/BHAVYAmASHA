@@ -44,7 +44,7 @@ class MotherDetailsTab extends StatefulWidget {
 
 class _MotherDetailsTabState extends State<MotherDetailsTab> {
   bool _isMotherStatusLocked = false;
-  
+
   // FocusNodes for text fields that need validation focus
   final FocusNode _reasonOfDeathOtherFocusNode = FocusNode();
   final FocusNode _breastfeedingProblemDescriptionFocusNode = FocusNode();
@@ -142,21 +142,21 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
   Widget build(BuildContext context) {
     return BlocConsumer<HbncVisitBloc, HbncVisitState>(
       listenWhen: (previous, current) =>
-          previous.motherDetails != current.motherDetails ||
+      previous.motherDetails != current.motherDetails ||
           previous.focusedErrorField != current.focusedErrorField ||
           previous.validationTick != current.validationTick,
       listener: (context, state) {
         print('MotherDetails (from state): ${state.motherDetails}');
-        
+
         // Handle focus for text fields when validation occurs
         if (state.focusedErrorField != null && mounted) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
-            
+
             // Add a small delay to ensure widget tree is fully built for conditionally rendered fields
             Future.delayed(const Duration(milliseconds: 100), () {
               if (!mounted) return;
-              
+
               switch (state.focusedErrorField) {
                 case 'reasonOfDeathOther':
                   if (_reasonOfDeathOtherFocusNode.canRequestFocus) {
@@ -205,11 +205,11 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                         onChanged: _isMotherStatusLocked
                             ? null
                             : (val) => context.read<HbncVisitBloc>().add(
-                                  MotherDetailsChanged(
-                                    field: 'motherStatus',
-                                    value: val,
-                                  ),
-                                ),
+                          MotherDetailsChanged(
+                            field: 'motherStatus',
+                            value: val,
+                          ),
+                        ),
                       ),
                       const Divider(height: 0),
                       if (m['motherStatus'] == 'death') ...[
@@ -371,7 +371,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                           value: _asString(m['breastfeedingProblems']),
-                           autoOpenTick: state.focusedErrorField == 'breastfeedingProblems' ? state.validationTick : null,
+                          autoOpenTick: state.focusedErrorField == 'breastfeedingProblems' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             MotherDetailsChanged(
                               field: 'breastfeedingProblems',
@@ -472,7 +472,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             switch (s) {
                               case 'Temperature upto 102 degree F(38.9 degree C)':
                                 return t.temp_upto_102;
-                              case 'Temperure More that102 degree F (38.9 degree C)':
+                              case 'Temperature More than 102 degree F(38.9 degree C)':
                                 return t.temp_more_than_102;
                               default:
                                 return s;

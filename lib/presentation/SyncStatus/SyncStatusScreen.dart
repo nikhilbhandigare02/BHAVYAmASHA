@@ -132,7 +132,7 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
           [ashaUniqueKey],
         );
         _eligibleCoupleTotal = eligibleTotalResult.first['count'] as int? ?? 0;
-sfgfdd
+
         // Get synced count
         final eligibleSyncedResult = await db.rawQuery(
           'SELECT COUNT(*) as count FROM eligible_couple_activities WHERE is_deleted = 0 AND is_synced = 1 AND current_user_key = ?',
@@ -152,20 +152,17 @@ sfgfdd
       //   _eligibleCoupleSynced = eligibleSyncedResult.first['count'] as int? ?? 0;
       // }
 
-      // Get mother care counts directly from the table
-      // Get total count
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
        // getMotherCareTotalCount();
         final totalResult = await db.rawQuery(
-          'SELECT COUNT(*) AS count FROM ( SELECT DISTINCT beneficiary_ref_key, mother_care_state FROM mother_care_activities WHERE is_deleted = 0 AND current_user_key = ?) AS t;',
-          [ashaUniqueKey],
-        );
+            'SELECT COUNT(*) AS count FROM ( SELECT DISTINCT mca.beneficiary_ref_key FROM mother_care_activities mca INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key WHERE mca.is_deleted = 0 AND bn.is_deleted = 0 AND bn.is_death = 0 AND bn.is_migrated = 0 AND mca.mother_care_state IN (?, ?, ?) AND mca.current_user_key = ?) AS t;',
+            ['anc_due', 'delivery_outcome', 'pnc_mother', ashaUniqueKey],
+          );
         _motherCareTotal = totalResult.first['count'] as int? ?? 0;
 
-        // Get synced count
         final syncedResult = await db.rawQuery(
-          'SELECT COUNT(*) AS count FROM ( SELECT DISTINCT beneficiary_ref_key, mother_care_state FROM mother_care_activities WHERE is_deleted = 0 AND is_synced = 1 AND current_user_key = ?) AS t;',
-          [ashaUniqueKey],
+          'SELECT COUNT(*) AS count FROM ( SELECT DISTINCT mca.beneficiary_ref_key FROM mother_care_activities mca INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key WHERE mca.is_deleted = 0 AND mca.is_synced = 1 AND bn.is_deleted = 0 AND bn.is_death = 0 AND bn.is_migrated = 0 AND mca.mother_care_state IN (?, ?, ?) AND mca.current_user_key = ?) AS t;',
+          ['anc_due', 'delivery_outcome', 'pnc_mother', ashaUniqueKey],
         );
         _motherCareSynced = syncedResult.first['count'] as int? ?? 0;
       }
@@ -182,21 +179,11 @@ sfgfdd
       //   _motherCareSynced = syncedResult.first['count'] as int? ?? 0;
       // }
 
-      // Get child care counts directly from the table
-      // Get total count
+      // Get child care counts using separate function
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        final childTotalResult = await db.rawQuery(
-          'SELECT COUNT(*) as count FROM child_care_activities WHERE is_deleted = 0 AND current_user_key = ?',
-          [ashaUniqueKey],
-        );
-        _childCareTotal = childTotalResult.first['count'] as int? ?? 0;
-
-        // Get synced count
-        final childSyncedResult = await db.rawQuery(
-          'SELECT COUNT(*) as count FROM child_care_activities WHERE is_deleted = 0 AND  is_synced = 1 AND current_user_key = ?',
-          [ashaUniqueKey],
-        );
-        _childCareSynced = childSyncedResult.first['count'] as int? ?? 0;
+        final childCareCounts = await _getRegisteredChildCountTotalAndSync();
+        _childCareTotal = childCareCounts['total'] ?? 0;
+        _childCareSynced = childCareCounts['synced'] ?? 0;
       }
       // else {
       //   final childTotalResult = await db.rawQuery(
@@ -210,7 +197,6 @@ sfgfdd
       //   _childCareSynced = childSyncedResult.first['count'] as int? ?? 0;
       // }
 
-      // Get follow-up counts from all records (not filtered by user)
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         // Followup total
         final followupTotalResult = await db.rawQuery(
@@ -219,7 +205,6 @@ sfgfdd
         );
         _followupTotal = followupTotalResult.first['count'] as int? ?? 0;
 
-        // Followup synced
         final followupSyncedResult = await db.rawQuery(
           'SELECT COUNT(*) as count FROM followup_form_data WHERE is_synced = 1 AND current_user_key = ?',
           [ashaUniqueKey],
@@ -244,170 +229,11 @@ sfgfdd
     }
   }
 
-  //  Future<int> getMotherCareTotalCount() async {
-  //   try {
-  //     final db = await DatabaseProvider.instance.database;
-  //
-  //     final ancDueRecords = await db.rawQuery('''
-  //       SELECT DISTINCT mca.beneficiary_ref_key
-  //       FROM mother_care_activities mca
-  //       INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
-  //       WHERE mca.mother_care_state = 'anc_due' AND bn.is_deleted = 0
-  //     ''');
-  //
-  //     final ancAllRecords = await db.rawQuery('''
-  //       SELECT DISTINCT mca.beneficiary_ref_key
-  //       FROM mother_care_activities mca
-  //       INNER JOIN beneficiaries_new bn ON mca.beneficiary_ref_key = bn.unique_key
-  //       WHERE mca.mother_care_state = 'anc_due' AND bn.is_deleted = 0
-  //     ''');
-  //
-  //     final Set<String> ancDueBeneficiaryIds = ancDueRecords
-  //         .map((e) => e['beneficiary_ref_key']?.toString() ?? '')
-  //         .where((id) => id.isNotEmpty)
-  //         .toSet();
-  //
-  //     final deliveryOutcomes = await db.query(
-  //       'followup_form_data',
-  //       where: "forms_ref_key = 'bt7gs9rl1a5d26mz' AND form_json LIKE '%\"gives_birth_to_baby\":\"Yes\"%'",
-  //       columns: ['beneficiary_ref_key'],
-  //     );
-  //
-  //     final Set<String?> deliveredBeneficiaryIds = deliveryOutcomes
-  //         .map((e) => e['beneficiary_ref_key']?.toString())
-  //         .where((id) => id != null && id.isNotEmpty)
-  //         .toSet();
-  //
-  //     final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-  //     final Set<String> ancUniqueBeneficiaries = {};
-  //     for (final row in rows) {
-  //       try {
-  //         final dynamic rawInfo = row['beneficiary_info'];
-  //         if (rawInfo == null) continue;
-  //         Map<String, dynamic> info = rawInfo is String
-  //             ? jsonDecode(rawInfo) as Map<String, dynamic>
-  //             : Map<String, dynamic>.from(rawInfo as Map);
-  //         final isPregnant = info['isPregnant']?.toString().toLowerCase() == 'yes';
-  //         final gender = info['gender']?.toString().toLowerCase() ?? '';
-  //         final beneficiaryId = row['unique_key']?.toString() ?? '';
-  //         final isAncDue = ancDueBeneficiaryIds.contains(beneficiaryId);
-  //         if (deliveredBeneficiaryIds.contains(beneficiaryId)) {
-  //           continue;
-  //         }
-  //         if ((isPregnant || isAncDue) && (gender == 'f' || gender == 'female')) {
-  //           if (beneficiaryId.isNotEmpty) {
-  //             ancUniqueBeneficiaries.add(beneficiaryId);
-  //           }
-  //         }
-  //       } catch (_) {}
-  //     }
-  //     for (final id in ancDueBeneficiaryIds) {
-  //       if (id.isNotEmpty && !deliveredBeneficiaryIds.contains(id)) {
-  //         ancUniqueBeneficiaries.add(id);
-  //       }
-  //     }
-  //     final int ancCount = ancUniqueBeneficiaries.length;
-  //
-  //     final int ancCountSync = rows.where((r) {
-  //       final id = r['unique_key']?.toString() ?? '';
-  //       final isSynced = (r['is_synced'] ?? 0) == 1;
-  //
-  //       return ancUniqueBeneficiaries.contains(id) && isSynced;
-  //     }).length;
-  //
-  //     const ancRefKey = 'bt7gs9rl1a5d26mz';
-  //     final ancForms = await db.rawQuery('''
-  //       SELECT f.beneficiary_ref_key, f.form_json, f.household_ref_key, f.forms_ref_key, f.created_date_time, f.id as form_id, f.is_synced
-  //       FROM followup_form_data f
-  //       WHERE f.forms_ref_key = '$ancRefKey' AND f.form_json LIKE '%"gives_birth_to_baby":"Yes"%' AND f.is_deleted = 0
-  //       ORDER BY f.created_date_time DESC
-  //     ''');
-  //     final String deliveryOutcomeKey = '4r7twnycml3ej1vg';
-  //     final Set<String> beneficiariesNeedingOutcome = {};
-  //     final Set<String> beneficiariesProcessed = {};
-  //     for (final form in ancForms) {
-  //       try {
-  //         final beneficiaryRefKey = form['beneficiary_ref_key']?.toString();
-  //         if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) continue;
-  //         if (beneficiariesProcessed.contains(beneficiaryRefKey)) continue;
-  //         beneficiariesProcessed.add(beneficiaryRefKey);
-  //         final existingOutcome = await db.query(
-  //           'followup_form_data',
-  //           where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND is_deleted = 0',
-  //           whereArgs: [deliveryOutcomeKey, beneficiaryRefKey],
-  //           limit: 1,
-  //         );
-  //         if (existingOutcome.isNotEmpty) continue;
-  //         beneficiariesNeedingOutcome.add(beneficiaryRefKey);
-  //       } catch (_) {}
-  //     }
-  //     final int deliveryOutcomeCount = beneficiariesNeedingOutcome.length;
-  //
-  //     final int deliveryOutcomeSyncedCount = ancDueRecords.where((r) {
-  //       final id = (r['unique_key'] ?? '').toString();
-  //       final isSynced = (r['is_synced'] ?? 0) == 1;
-  //
-  //       return beneficiariesNeedingOutcome.contains(id) && isSynced;
-  //     }).length;
-  //
-  //
-  //     final dbOutcomes = await db.query(
-  //       'followup_form_data',
-  //       where: 'forms_ref_key = ?',
-  //       whereArgs: [deliveryOutcomeKey],
-  //     );
-  //     final Set<String> processedBeneficiaries = <String>{};
-  //     for (final outcome in dbOutcomes) {
-  //       try {
-  //         final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
-  //         if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) continue;
-  //         if (processedBeneficiaries.contains(beneficiaryRefKey)) continue;
-  //         final beneficiaryResults = await db.query(
-  //           'beneficiaries_new',
-  //           where: 'unique_key = ?',
-  //           whereArgs: [beneficiaryRefKey],
-  //         );
-  //         if (beneficiaryResults.isEmpty) continue;
-  //         final beneficiaryInfoRaw = beneficiaryResults.first['beneficiary_info'] as String? ?? '{}';
-  //         try {
-  //           jsonDecode(beneficiaryInfoRaw) as Map<String, dynamic>;
-  //           processedBeneficiaries.add(beneficiaryRefKey);
-  //         } catch (_) {}
-  //       } catch (_) {}
-  //     }
-  //     final int hbcnMotherCount = processedBeneficiaries.length;
-  //
-  //     final int hbcnMotherSyncedCount = dbOutcomes.where((r) {
-  //       final id = (r['unique_key'] ?? '').toString();
-  //       if (id.isEmpty) return false;
-  //
-  //       final isSynced = (r['is_synced'] ?? 0) == 1;
-  //
-  //       return processedBeneficiaries.contains(id) && isSynced;
-  //     }).length;
-  //
-  //     _motherCareSynced = ancCountSync + deliveryOutcomeSyncedCount +hbcnMotherSyncedCount;
-  //     _motherCareTotal = ancCount + deliveryOutcomeCount + hbcnMotherCount;
-  //
-  //
-  //     setState(() {
-  //       _motherCareSynced;
-  //       _motherCareTotal;
-  //     });
-  //     return ancCount + deliveryOutcomeCount + hbcnMotherCount;
-  //   } catch (e) {
-  //     return 0;
-  //   }
-  // }
 
 
   Future<void> _loadHouseholdCount() async {
     try {
-      // Use households table count directly so the dashboard value
-      // matches the total number of household records shown in the
-      // All Household screen.
-      // Mirror AllHouseholdScreen logic so that the dashboard count is
-      // based on the same derived family-head list.
+      
       final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       final households = await LocalStorageDao.instance.getAllHouseholds();
 
@@ -456,10 +282,10 @@ sfgfdd
 
   Future<void> _loadEligibleCouplesCount() async {
     try {
+      print('🔍 Starting to load eligible couples count...');
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey =
-      currentUserData?['unique_key']?.toString();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
         if (mounted) {
@@ -472,19 +298,18 @@ sfgfdd
       }
 
       final query = '''
-      SELECT DISTINCT b.*, 
-             e.eligible_couple_state,
-             e.is_synced AS e_is_synced
-      FROM beneficiaries_new b
-      INNER JOIN eligible_couple_activities e 
-        ON b.unique_key = e.beneficiary_ref_key
-      WHERE b.is_deleted = 0
-        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
-        AND (b.is_death = 0 OR b.is_death IS NULL)
-        AND e.eligible_couple_state IN ('eligible_couple')
-        AND e.is_deleted = 0
-        AND e.current_user_key = ?
-    ''';
+        SELECT DISTINCT b.*, e.eligible_couple_state, 
+               e.created_date_time as registration_date,
+               e.is_synced as e_is_synced
+        FROM beneficiaries_new b
+        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+        WHERE b.is_deleted = 0 
+          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+          AND e.eligible_couple_state = 'eligible_couple'
+          AND e.is_deleted = 0
+          AND b.is_death = 0
+          AND e.current_user_key = ?
+      ''';
 
       final rows = await db.rawQuery(query, [ashaUniqueKey]);
 
@@ -493,52 +318,33 @@ sfgfdd
 
       for (final row in rows) {
         try {
-          /// ---------- PARSE BENEFICIARY INFO ----------
-          final beneficiaryInfoStr = row['beneficiary_info'];
-
-          final Map<String, dynamic> info =
-          beneficiaryInfoStr is String && beneficiaryInfoStr.isNotEmpty
-              ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfoStr))
+          final beneficiaryInfo = row['beneficiary_info']?.toString() ?? '{}';
+          final Map<String, dynamic> info = beneficiaryInfo.isNotEmpty
+              ? Map<String, dynamic>.from(jsonDecode(beneficiaryInfo))
               : <String, dynamic>{};
 
-          final memberType =
-              info['memberType']?.toString().toLowerCase() ?? '';
-          final maritalStatus =
-              info['maritalStatus']?.toString().toLowerCase() ?? '';
-          if (memberType == 'child') continue;
+          final memberType = info['memberType']?.toString().toLowerCase() ?? '';
+          if (memberType != 'child') {
+            totalCount++;
 
-          /// ---------- AGE ----------
-          final dob = info['dob']?.toString();
-          final age = _calculateAgeFromDob(dob);
-          if (age == null) continue;
-
-          final gender =
-              info['gender']?.toString().toLowerCase() ?? '';
-
-          /// ---------- AGE ELIGIBILITY ----------
-          if (gender == 'female' && (age < 15 || age > 49)) continue;
-
-          final beneficiaryKey = row['unique_key']?.toString() ?? '';
-          final hasSterilization = await _hasSterilizationRecord(
-            db,
-            beneficiaryKey,
-            ashaUniqueKey,
-          );
-
-          if (hasSterilization) continue;
-
-          /// ---------- COUNT ----------
+            // Check if synced
+            final isSynced = (row['e_is_synced'] ?? 0) == 1;
+            if (isSynced) {
+              syncedCount++;
+            }
+          }
+        } catch (_) {
           totalCount++;
-
+          // If there's an error parsing beneficiary_info, still count it
+          // and check sync status from the activity record
           final isSynced = (row['e_is_synced'] ?? 0) == 1;
           if (isSynced) {
             syncedCount++;
           }
-        } catch (_) {
-          // ignore malformed rows
-          continue;
         }
       }
+
+      print('✅ Setting counts - Total: $totalCount, Synced: $syncedCount');
 
       if (mounted) {
         setState(() {
@@ -556,6 +362,7 @@ sfgfdd
       }
     }
   }
+
   int? _calculateAgeFromDob(String? dob) {
     if (dob == null || dob.isEmpty) return null;
 
@@ -628,6 +435,65 @@ sfgfdd
 
     return false;
   }
+
+  Future<Map<String, int>> _getRegisteredChildCountTotalAndSync() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      final totalResult = await db.rawQuery('''
+        SELECT COUNT(*) as count
+        FROM beneficiaries_new B
+        INNER JOIN child_care_activities CCA ON B.unique_key = CCA.beneficiary_ref_key
+        WHERE 
+          B.is_deleted = 0
+          AND B.is_adult = 0
+          AND B.is_migrated = 0
+          AND B.current_user_key = ?
+          AND CCA.child_care_state IN ('registration_due', 'tracking_due')
+          AND (
+            B.beneficiary_info LIKE '%"memberType":"child"%' OR
+            B.beneficiary_info LIKE '%"memberType":"Child"%'
+          )
+      ''', [ashaUniqueKey]);
+
+      // Get synced count with child care activities filtering
+      final syncedResult = await db.rawQuery('''
+        SELECT COUNT(*) as count
+        FROM beneficiaries_new B
+        INNER JOIN child_care_activities CCA ON B.unique_key = CCA.beneficiary_ref_key
+        WHERE 
+          B.is_deleted = 0
+          AND B.is_adult = 0
+          AND B.is_migrated = 0
+          AND B.current_user_key = ?
+          AND CCA.child_care_state IN ('registration_due', 'tracking_due')
+          AND (
+            B.beneficiary_info LIKE '%"memberType":"child"%' OR
+            B.beneficiary_info LIKE '%"memberType":"Child"%'
+          )
+          AND B.is_synced = 1
+      ''', [ashaUniqueKey]);
+
+      final totalCount = totalResult.first['count'] as int? ?? 0;
+      final syncedCount = syncedResult.first['count'] as int? ?? 0;
+
+      print('✅ Child Care Counts - Total: $totalCount, Synced: $syncedCount');
+
+      return {
+        'total': totalCount,
+        'synced': syncedCount,
+      };
+
+    } catch (e, stackTrace) {
+      print('Error in getRegisteredChildCount: $e');
+      return {
+        'total': 0,
+        'synced': 0,
+      };
+    }
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -695,8 +561,8 @@ sfgfdd
                               SyncCard(title:l10n?.beneficiary ?? 'Beneficiary', total: _beneficiaryTotal, synced: _beneficiarySynced),
                               SyncCard(title:l10n?.followUpLabel ?? 'Follow Up', total: _followupTotal, synced: _followupSynced),
                               SyncCard(title:l10n?.gridEligibleCoupleASHA ?? 'Eligible Couple', total: _eligibleCoupleTotal, synced: _eligibleCoupleSynced),
-                              SyncCard(title:l10n?.gridMotherCare ?? 'Mother Care', total: Constant.motherCareTotal, synced: Constant.motherCareSynced),
-                              SyncCard(title:l10n?.gridChildCare ?? 'Child Care', total: Constant.childRegisteredtotal, synced: Constant.childRegisteredtotalSync),],
+                              SyncCard(title:l10n?.gridMotherCare ?? 'Mother Care', total: _motherCareTotal, synced: _motherCareSynced),
+                              SyncCard(title:l10n?.gridChildCare ?? 'Child Care', total: _childCareTotal, synced: _childCareSynced),],
                           ),
 
                           // SizedBox(height: 2.h),

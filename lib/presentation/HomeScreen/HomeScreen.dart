@@ -516,52 +516,52 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       }
 
       /// ---------- FAMILY HEAD FROM BENEFICIARIES ----------
-      final Set<String> householdKeysFromBeneficiaries = beneficiaries
-          .where((r) {
-            try {
-              final householdRefKey = (r['household_ref_key'] ?? '').toString();
-              final uniqueKey = (r['unique_key'] ?? '').toString();
-              if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
-
-              if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
-
-              final rawInfo = r['beneficiary_info'];
-              Map<String, dynamic> info;
-              if (rawInfo is Map) {
-                info = Map<String, dynamic>.from(rawInfo);
-              } else if (rawInfo is String && rawInfo.isNotEmpty) {
-                info = Map<String, dynamic>.from(jsonDecode(rawInfo));
-              } else {
-                info = {};
-              }
-
-              final configuredHeadKey = headKeyByHousehold[householdRefKey];
-
-              final bool isConfiguredHead =
-                  configuredHeadKey != null && configuredHeadKey == uniqueKey;
-
-              final relation =
-                  (info['relation_to_head'] ?? info['relation'] ?? '')
-                      .toString()
-                      .toLowerCase();
-
-              final bool isHeadByRelation =
-                  relation == 'head' || relation == 'self';
-
-              final bool isFamilyHead =
-                  info['isFamilyHead'] == true ||
-                  info['isFamilyHead']?.toString().toLowerCase() == 'true';
-
-              return isConfiguredHead || isHeadByRelation || isFamilyHead;
-            } catch (_) {
-              return false;
-            }
-          })
-          .map((r) {
-            return (r['household_ref_key'] ?? '').toString();
-          })
-          .where((k) => k.isNotEmpty)
-          .toSet();
+      // final Set<String> householdKeysFromBeneficiaries = beneficiaries
+      //     .where((r) {
+      //       try {
+      //         final householdRefKey = (r['household_ref_key'] ?? '').toString();
+      //         final uniqueKey = (r['unique_key'] ?? '').toString();
+      //         if (householdRefKey.isEmpty || uniqueKey.isEmpty) return false;
+      //
+      //         if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
+      //
+      //         final rawInfo = r['beneficiary_info'];
+      //         Map<String, dynamic> info;
+      //         if (rawInfo is Map) {
+      //           info = Map<String, dynamic>.from(rawInfo);
+      //         } else if (rawInfo is String && rawInfo.isNotEmpty) {
+      //           info = Map<String, dynamic>.from(jsonDecode(rawInfo));
+      //         } else {
+      //           info = {};
+      //         }
+      //
+      //         final configuredHeadKey = headKeyByHousehold[householdRefKey];
+      //
+      //         final bool isConfiguredHead =
+      //             configuredHeadKey != null && configuredHeadKey == uniqueKey;
+      //
+      //         final relation =
+      //             (info['relation_to_head'] ?? info['relation'] ?? '')
+      //                 .toString()
+      //                 .toLowerCase();
+      //
+      //         final bool isHeadByRelation =
+      //             relation == 'head' || relation == 'self';
+      //
+      //         final bool isFamilyHead =
+      //             info['isFamilyHead'] == true ||
+      //             info['isFamilyHead']?.toString().toLowerCase() == 'true';
+      //
+      //         return isConfiguredHead || isHeadByRelation || isFamilyHead;
+      //       } catch (_) {
+      //         return false;
+      //       }
+      //     })
+      //     .map((r) {
+      //       return (r['household_ref_key'] ?? '').toString();
+      //     })
+      //     .where((k) => k.isNotEmpty)
+      //     .toSet();
 
       /// ---------- FALLBACK HOUSEHOLDS (SAME AS _loadData) ----------
       final Set<String> householdKeysWithBeneficiaries = beneficiaries
@@ -671,8 +671,13 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     }
   }
 
+
   Future<void> _loadEligibleCouplesCount() async {
     try {
+
+      final ecCount = await _getEligibleCoupleCount();
+/*
+
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
@@ -686,6 +691,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         }
         return;
       }
+
 
       final query = '''
         SELECT DISTINCT b.*, e.eligible_couple_state, 
@@ -715,13 +721,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             count++;
           }
         } catch (_) {
-          count++;
+          //count++;
         }
       }
+*/
 
       if (mounted) {
         setState(() {
-          eligibleCouplesCount = count;
+          eligibleCouplesCount = ecCount;
         });
       }
     } catch (e) {
@@ -734,8 +741,190 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     }
   }
 
+  Future<int> _getEligibleCoupleCount() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
 
-  int _calculateEcAge(dynamic dobRaw) {
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) return 0;
+
+      final query = '''
+      SELECT DISTINCT b.*, e.eligible_couple_state, 
+               e.created_date_time as registration_date
+        FROM beneficiaries_new b
+        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+        WHERE b.is_deleted = 0 
+          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+          AND (b.is_death = 0 OR b.is_death IS NULL)
+          AND e.eligible_couple_state = 'eligible_couple'
+          AND e.is_deleted = 0
+          AND e.current_user_key = ?
+    ''';
+
+      final rows = await db.rawQuery(query, [ashaUniqueKey]);
+
+      int count = 0;
+
+      for (final row in rows) {
+        try {
+          final beneficiaryInfo =
+              row['beneficiary_info']?.toString() ?? '{}';
+
+          final Map<String, dynamic> info =
+          beneficiaryInfo.isNotEmpty
+              ? Map<String, dynamic>.from(
+              jsonDecode(beneficiaryInfo))
+              : <String, dynamic>{};
+
+          /// -------- SKIP CHILD --------
+          final memberType =
+              info['memberType']?.toString().toLowerCase() ?? '';
+          if (memberType == 'child') continue;
+
+          /// -------- AGE CALCULATION --------
+          final dob = info['dob']?.toString();
+          final age = _calculateAgeFromDob(dob);
+          if (age == null) continue;
+
+          final gender =
+              info['gender']?.toString().toLowerCase() ?? '';
+
+          /// -------- AGE ELIGIBILITY --------
+          /*if (gender == 'female' && (age < 15 || age > 49)) continue;
+          if (gender == 'male' && (age < 15 || age > 54)) continue;
+*/
+          /// -------- STERILIZATION CHECK --------
+          final beneficiaryKey = row['unique_key']?.toString() ?? '';
+          final hasSterilization =
+          await _hasSterilizationRecord(
+            db,
+            beneficiaryKey,
+            ashaUniqueKey,
+          );
+
+          if (hasSterilization) continue;
+
+          /// -------- COUNT VALID ELIGIBLE --------
+          count++;
+        } catch (_) {
+          // Ignore malformed rows safely
+          continue;
+        }
+      }
+
+      return count;
+    } catch (e) {
+      return 0;
+    }
+  }
+  int? _calculateAgeFromDob(String? dob) {
+    if (dob == null || dob.isEmpty) return null;
+
+    try {
+      final DateTime dobDate = DateTime.parse(dob);
+      final DateTime today = DateTime.now();
+
+      int age = today.year - dobDate.year;
+
+      if (today.month < dobDate.month ||
+          (today.month == dobDate.month && today.day < dobDate.day)) {
+        age--;
+      }
+
+      return age;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<bool> _hasSterilizationRecord(
+      Database db,
+      String beneficiaryKey,
+      String ashaUniqueKey,
+      ) async {
+    final rows = await db.query(
+      ffd.FollowupFormDataTable.table,
+      where: '''
+      beneficiary_ref_key = ?
+      AND current_user_key = ?
+      AND is_deleted = 0
+      AND forms_ref_key = ?
+    ''',
+      whereArgs: [
+        beneficiaryKey,
+        ashaUniqueKey,
+        ffd.FollowupFormDataTable
+            .formUniqueKeys[ffd.FollowupFormDataTable.eligibleCoupleTrackingDue],
+      ],
+    );
+
+    for (final row in rows) {
+      try {
+
+        if(beneficiaryKey =='157525ca6a78894e_86020250115073242'){
+          print('aa');
+        }
+        final formJsonStr = row['form_json']?.toString();
+        if (formJsonStr == null || formJsonStr.isEmpty) continue;
+        final Map<String, dynamic> formJson =
+        Map<String, dynamic>.from(jsonDecode(formJsonStr));
+
+        final formType = formJson['form_type'];
+
+        if (formType == 'eligible_couple_tracking_due') {
+          final formData = formJson['form_data'];
+
+          if (formData is Map<String, dynamic>) {
+            final method = formData['fp_method']
+                ?.toString()
+                .toLowerCase();
+
+            if (method == 'female_sterilization' ||
+                method == 'male_sterilization' ||
+                method == 'female sterilization' ||
+                method == 'male sterilization') {
+              return true;
+            }
+          }
+        }
+
+        return false;
+
+        /* final formJsonStr = row['form_json']?.toString();
+        if (formJsonStr == null || formJsonStr.isEmpty) continue;
+
+        final Map<String, dynamic> formJson =
+        Map<String, dynamic>.from(jsonDecode(formJsonStr));
+
+        final trackingDue =
+        formJson['eligible_couple_tracking_due'];
+
+        if (trackingDue is Map<String, dynamic>) {
+
+
+          final method =
+          trackingDue['fp_method']
+              ?.toString()
+              .toLowerCase();
+
+          if (
+          (method == 'female_sterilization' ||
+              method == 'male_sterilization' || method == 'male sterilization' || method == 'female sterilization')) {
+            return true;
+          }
+        }*/
+      } catch (_) {
+        continue;
+      }
+    }
+
+    return false;
+  }
+
+
+ /* int _calculateEcAge(dynamic dobRaw) {
     if (dobRaw == null || dobRaw.toString().isEmpty) return 0;
     try {
       final dob = DateTime.tryParse(dobRaw.toString());
@@ -798,7 +987,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     }
 
     return false;
-  }
+  }*/
 
   Future<void> _loadAncVisitCount() async {
     try {

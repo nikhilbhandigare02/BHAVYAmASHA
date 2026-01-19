@@ -439,6 +439,32 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             ),
             Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
+            if (widget.isEdit) ...[
+              _Section(
+                child: ApiDropdown<String>(
+                  labelText: l.member_status_head,
+                  items: const ['Alive', 'Death'],
+                  getLabel: (s) {
+                    switch (s) {
+                      case 'Alive':
+                        return l.alive;
+                      case 'Death':
+                        return l.death;
+                      default:
+                        return s;
+                    }
+                  },
+                  value: state.memberStatus?.isEmpty == true
+                      ? null
+                      : state.memberStatus,
+                  hintText: l.selectOption,
+                  onChanged: (v) => context
+                      .read<AddFamilyHeadBloc>()
+                      .add(AfhUpdateMemberStatus(v)),
+                ),
+              ),
+              Divider(color: AppColors.divider, thickness: 0.5, height: 0),
+            ],
             _Section(
               child: CustomTextField(
                 labelText: '${l.nameOfFamilyHeadLabel} *',
@@ -714,46 +740,44 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
 
             _Section(
-              child: IgnorePointer(
-                ignoring: widget.isEdit,
-                child: ApiDropdown<String>(
-                  labelText: l.occupationLabel,
-                  items: const [
-                    'Unemployed',
-                    'Housewife',
-                    'Daily Wage Labor',
-                    'Agriculture',
-                    'Salaried',
-                    'Business',
-                    'Retired',
-                    'Other',
-                  ],
-                  getLabel: (s) {
-                    switch (s) {
-                      case 'Unemployed':
-                        return l.occupationUnemployed;
-                      case 'Housewife':
-                        return l.occupationHousewife;
-                      case 'Daily Wage Labor':
-                        return l.occupationDailyWageLabor;
-                      case 'Agriculture':
-                        return l.occupationAgriculture;
-                      case 'Salaried':
-                        return l.occupationSalaried;
-                      case 'Business':
-                        return l.occupationBusiness;
-                      case 'Retired':
-                        return l.occupationRetired;
-                      case 'Other':
-                        return l.occupationOther;
-                      default:
-                        return s;
-                    }
-                  },
-                  value: state.occupation,
-                  onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
-                    AfhUpdateOccupation(v),
-                  ),
+              child: ApiDropdown<String>(
+                labelText: l.occupationLabel,
+
+                items: const [
+                  'Unemployed',
+                  'Housewife',
+                  'Daily Wage Labor',
+                  'Agriculture',
+                  'Salaried',
+                  'Business',
+                  'Retired',
+                  'Other',
+                ],
+                getLabel: (s) {
+                  switch (s) {
+                    case 'Unemployed':
+                      return l.occupationUnemployed;
+                    case 'Housewife':
+                      return l.occupationHousewife;
+                    case 'Daily Wage Labor':
+                      return l.occupationDailyWageLabor;
+                    case 'Agriculture':
+                      return l.occupationAgriculture;
+                    case 'Salaried':
+                      return l.occupationSalaried;
+                    case 'Business':
+                      return l.occupationBusiness;
+                    case 'Retired':
+                      return l.occupationRetired;
+                    case 'Other':
+                      return l.occupationOther;
+                    default:
+                      return s;
+                  }
+                },
+                value: state.occupation,
+                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                  AfhUpdateOccupation(v),
                 ),
               ),
             ),
@@ -776,6 +800,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             _Section(
               child: ApiDropdown<String>(
                 labelText: l.educationLabel,
+                hintText: l.selectOptionLabel,
                 items: const [
                   'No Schooling',
                   'Primary',
@@ -805,7 +830,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       return s;
                   }
                 },
-                value: state.education,
+                value: (state.education == null || state.education?.isEmpty == true) ? null : state.education,
                 onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
                   AfhUpdateEducation(v),
                 ),
@@ -816,6 +841,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             _Section(
               child: ApiDropdown<String>(
                 labelText: l.religionLabel,
+                hintText: l.selectOptionLabel,
                 items: const [
                   'Do not want to disclose',
                   'Hindu',
@@ -851,7 +877,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       return s;
                   }
                 },
-                value: state.religion,
+                value: (state.religion == null || state.religion?.isEmpty == true) ? null : state.religion,
                 onChanged: (v) =>
                     context.read<AddFamilyHeadBloc>().add(AfhUpdateReligion(v)),
               ),
@@ -875,6 +901,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             _Section(
               child: ApiDropdown<String>(
                 labelText: l.categoryLabel,
+                hintText: l.selectOptionLabel,
                 items: const [
                   'Do not want to disclose',
                   'General',
@@ -913,7 +940,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       return s;
                   }
                 },
-                value: state.category,
+                value: (state.category == null || state.category?.isEmpty == true) ? null : state.category,
                 onChanged: (v) =>
                     context.read<AddFamilyHeadBloc>().add(AfhUpdateCategory(v)),
               ),
@@ -1101,6 +1128,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               child: _Section(
                 child: ApiDropdown<String>(
                   labelText: '${l.whoseMobileLabel} *',
+                  hintText: l.selectOptionLabel,
                   items: _getMobileOwnerList(state.gender ?? ''),
                   getLabel: (s) {
                     switch (s) {
@@ -1145,7 +1173,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     }
                   },
 
-                  value: state.mobileOwner,
+                  value: (state.mobileOwner == null || state.mobileOwner?.isEmpty == true) ? null : state.mobileOwner,
                   onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
                     AfhUpdateMobileOwner(v),
                   ),
@@ -1385,6 +1413,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             _Section(
               child: ApiDropdown<String>(
                 labelText: l.beneficiaryTypeLabel,
+                hintText: l.selectOptionLabel,
                 items: const ['StayingInHouse', 'SeasonalMigrant'],
                 getLabel: (s) {
                   switch (s) {
@@ -1396,7 +1425,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       return s;
                   }
                 },
-                value: state.beneficiaryType,
+                value: (state.beneficiaryType == null || state.beneficiaryType?.isEmpty == true) ? null : state.beneficiaryType,
                 onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
                   AfhUpdateBeneficiaryType(v),
                 ),
@@ -1407,13 +1436,15 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             _Section(
               child: ApiDropdown<String>(
                 labelText: '${l.maritalStatusLabel} *',
+                hintText: l.selectOptionLabel,
                 items: const [
                   'Unmarried',
                   'Married',
                   'Divorced',
                   'Separated',
-                  'Widow',
                   'Widower',
+                  'Widow',
+
                 ],
                 getLabel: (s) {
                   switch (s) {
@@ -1433,7 +1464,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       return s;
                   }
                 },
-                value: state.maritalStatus,
+                value: (state.maritalStatus == null || state.maritalStatus?.isEmpty == true) ? null : state.maritalStatus,
                 onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
                   AfhUpdateMaritalStatus(v),
                 ),
@@ -1476,9 +1507,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   _Section(
                     child: ApiDropdown<String>(
                       labelText: '${l.isWomanPregnantQuestion} *',
+                      hintText: l.selectOptionLabel,
                       items: const ['Yes', 'No'],
                       getLabel: (s) => s == 'Yes' ? l.yes : l.no,
-                      value: state.isPregnant,
+                      value: (state.isPregnant == null || state.isPregnant?.isEmpty == true) ? null : state.isPregnant,
                       onChanged: (v) {
                         final bloc = context.read<AddFamilyHeadBloc>();
                         bloc.add(AfhUpdateIsPregnant(v));
@@ -1563,9 +1595,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     _Section(
                       child: ApiDropdown<String>(
                         labelText: '${l.fpAdoptingLabel} *',
+                        hintText: l.selectOptionLabel,
                         items: const ['Yes', 'No'],
                         getLabel: (s) => s == 'Yes' ? l.yes : l.no,
-                        value: state.hpfamilyPlanningCounseling,
+                        value: (state.hpfamilyPlanningCounseling == null || state.hpfamilyPlanningCounseling?.isEmpty == true) ? null : state.hpfamilyPlanningCounseling,
                         onChanged: (v) {
                           context.read<AddFamilyHeadBloc>().add(
                             HeadFamilyPlanningCounselingChanged(v!),
@@ -1586,6 +1619,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       _Section(
                         child: ApiDropdown<String>(
                           labelText: '${l.methodOfContra} *',
+                          hintText: l.selectOptionLabel,
                           items: const [
                             'Condom',
                             'Mala -N (Daily Contraceptive pill)',
@@ -1629,7 +1663,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                 return s;
                             }
                           },
-                          value: state.hpMethod,
+                          value: (state.hpMethod == null || state.hpMethod?.isEmpty == true) ? null : state.hpMethod,
                           onChanged: (v) {
                             if (v != null) {
                               context.read<AddFamilyHeadBloc>().add(
@@ -1741,9 +1775,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                 _Section(
                   child: ApiDropdown<String>(
                     labelText: l.haveChildrenQuestion,
+                    hintText: l.selectOptionLabel,
                     items: const ['Yes', 'No'],
                     getLabel: (s) => s == 'Yes' ? l.yes : l.no,
-                    value: state.hasChildren,
+                    value: (state.hasChildren == null || state.hasChildren?.isEmpty == true) ? null : state.hasChildren,
                     onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
                       AfhUpdateHasChildren(v),
                     ),
@@ -1830,7 +1865,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   AddFamilyHeadState(
                     houseNo: m['houseNo'],
                     headName: m['headName'],
-                    fatherName: m['fatherName'],
+                    fatherName: m['father_name'],
                     AfhABHAChange: m['AfhABHAChange'],
                     children: m['children'],
                     useDob: m.containsKey('age_by')
@@ -1857,6 +1892,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     otherReligion: m['religion'] == 'Other'
                         ? m['other_religion']
                         : null,
+                     memberStatus: (m['is_death'] == 1) ? 'death' : m['memberStatus'],
                   ),
                 ),
               );
@@ -1871,7 +1907,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   AddFamilyHeadState(
                     houseNo: m['houseNo'] ?? m['house_no'] ?? m['houseNumber'],
                     headName: m['headName'],
-                    fatherName: m['fatherName'],
+                    fatherName: m['father_name'],
                     AfhABHAChange: m['AfhABHAChange'],
                     children: m['children'],
                     useDob: m.containsKey('age_by')
@@ -1914,6 +1950,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     mobileNo: m['mobileNo'],
                     village: m['village'],
                     ward: m['ward'],
+                    wardNo: m['wardNo'],
                     mohalla: m['mohalla'],
                     bankAcc:
                         m['bankAcc'] ??
@@ -1955,6 +1992,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     hpremovalDate: _parseDate(m['hpremovalDate'] as String?),
                     hpremovalReason: m['hpremovalReason'],
                     hpcondomQuantity: m['hpcondomQuantity'],
+                    memberStatus: (m['is_death'] == 1) ? 'death' : m['memberStatus'],
                   ),
                 ),
               );
@@ -1984,7 +2022,6 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   }
                 } catch (_) {}
 
-                // Fallback to DB user details when secure storage lacks data
                 try {
                   final dbUser = await UserInfo.getCurrentUser();
                   final details = dbUser?['details'];
@@ -2011,12 +2048,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             final m = widget.initial;
             if (m == null || m.isEmpty) return SpousBloc();
 
-            // Use specific accessors to prevent leaking Head data into Spouse form
             dynamic getSpouseVal(String key) {
-              // Try with sp_ prefix first
               if (m.containsKey('sp_$key')) return m['sp_$key'];
 
-              // Try alternative keys if specific fields
               if (key == 'bankAcc') {
                 return m['sp_bankAccountNumber'] ??
                     m['sp_account_number'] ??
@@ -2099,10 +2133,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   getSpouseVal('spouseName') ??
                   getHeadVal('headName') ??
                   getHeadVal('memberName'),
-              fatherName: getSpouseVal('fatherName'),
-              useDob:
-                  (getSpouseVal('useDob') == true ||
-                  getSpouseVal('useDob') == 'true'),
+              fatherName: getSpouseVal('father_name'),
+              useDob: getSpouseVal('age_by') != null
+                  ? getSpouseVal('age_by') == 'by_dob'
+                  : (getSpouseVal('useDob') == true ||
+                      getSpouseVal('useDob') == 'true'),
               dob: _parseDate(getSpouseVal('dob')?.toString()),
               edd: _parseDate(getSpouseVal('edd')?.toString()),
               lmp: _parseDate(getSpouseVal('lmp')?.toString()),

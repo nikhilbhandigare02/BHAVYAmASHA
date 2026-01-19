@@ -342,7 +342,7 @@ final formType = formJsonValue['form_type'];
             'lmp_date': src['lmp_date'],
             'edd_date': src['edd_date'],
             'fp_adopting': src['fp_adopting'],
-            'fp_method': src['fp_method'],
+            'fp_method': src['method_of_contraception'],
             'fp_adoption_date': src['fp_adoption_date'],
             'protection_status': src['protection_status'],
             'condom_quantity': src['condom_quantity'],

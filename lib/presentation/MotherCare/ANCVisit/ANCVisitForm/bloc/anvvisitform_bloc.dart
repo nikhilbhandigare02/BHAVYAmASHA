@@ -24,33 +24,6 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
 
   final DatabaseProvider _databaseProvider = DatabaseProvider.instance;
 
-  Future<String?> _getHouseNumber(String householdRefKey) async {
-    try {
-      final db = await _databaseProvider.database;
-      final result = await db.query(
-        'beneficiaries_new',
-        where: 'household_ref_key = ?',
-        whereArgs: [householdRefKey],
-      );
-
-      if (result.isNotEmpty) {
-        for (final row in result) {
-          try {
-            final beneficiaryInfo = jsonDecode(row['beneficiary_info'] as String? ?? '{}') as Map<String, dynamic>;
-            if (beneficiaryInfo.containsKey('houseNo') && beneficiaryInfo['houseNo'] != null) {
-              return beneficiaryInfo['houseNo'].toString();
-            }
-          } catch (e) {
-            print('Error parsing beneficiary info: $e');
-          }
-        }
-      }
-      return null;
-    } catch (e) {
-      print('Error fetching house number: $e');
-      return null;
-    }
-  }
 
   AnvvisitformBloc({
     required this.beneficiaryId,
@@ -123,8 +96,23 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     on<SystolicChanged>((e, emit) => emit(state.copyWith(systolic: e.value)));
     on<DiastolicChanged>((e, emit) => emit(state.copyWith(diastolic: e.value)));
     on<HemoglobinChanged>((e, emit) => emit(state.copyWith(hemoglobin: e.value)));
-    on<HighRiskChanged>((e, emit) => emit(state.copyWith(highRisk: e.value)));
-    on<SelectedRisksChanged>((e, emit) => emit(state.copyWith(selectedRisks: e.selectedRisks)));
+    on<HighRiskChanged>((e, emit) {
+      // Clear selected risks when high risk is changed to "No"
+      if (e.value == 'No') {
+        print('🔍 HighRiskChanged: Clearing selected risks because value is "No"');
+        emit(state.copyWith(
+          highRisk: e.value,
+          selectedRisks: [],
+        ));
+      } else {
+        print('🔍 HighRiskChanged: Setting high risk to "${e.value}", keeping existing risks: ${state.selectedRisks}');
+        emit(state.copyWith(highRisk: e.value));
+      }
+    });
+    on<SelectedRisksChanged>((e, emit) {
+      print('🔍 SelectedRisksChanged: Updating selected risks to: ${e.selectedRisks}');
+      emit(state.copyWith(selectedRisks: e.selectedRisks));
+    });
     on<HasAbortionComplicationChanged>((e, emit) => emit(state.copyWith(hasAbortionComplication: e.value)));
     on<AbortionDateChanged>((e, emit) => emit(state.copyWith(abortionDate: e.value)));
     on<BeneficiaryAbsentChanged>((e, emit) => emit(state.copyWith(beneficiaryAbsent: e.value)));

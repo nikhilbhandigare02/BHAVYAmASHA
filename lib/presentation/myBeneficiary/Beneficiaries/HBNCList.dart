@@ -170,7 +170,7 @@ class _HBNCListBeneficiariesState extends State<HBNCListBeneficiaries> {
               ? '${rawGender[0].toUpperCase()}${rawGender.substring(1).toLowerCase()}'
               : 'N/A';
 
-          final hhId = beneficiary['household_ref_key']?.toString() ?? 'N/A';
+          final hhId = beneficiary['unique_key']?.toString() ?? 'N/A';
           final displayHhId = hhId.length > 11 ? hhId.substring(hhId.length - 11) : hhId;
 
           // 🔹 2. Grab the date from the outcome record (usually created_date_time or modified_date_time)

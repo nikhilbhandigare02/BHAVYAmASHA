@@ -241,6 +241,41 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
           (event, emit) => emit(state.copyWith(isPregnant: event.value)),
     );
 
+
+    on<AfhUpdateMemberStatus>((event, emit) async {
+      emit(state.copyWith(memberStatus: event.value));
+
+      if (event.value == 'death') {
+        try {
+          final spouseData = state.toJson();
+          final spouseUniqueKey = spouseData['unique_key'] ?? spouseData['spouse_unique_key'];
+
+          if (spouseUniqueKey != null) {
+            await LocalStorageDao.instance.updateBeneficiaryDeathStatus(
+              uniqueKey: spouseUniqueKey,
+              isDeath: 1,
+            );
+          }
+        } catch (e) {
+          print('Error updating spouse beneficiary death status: $e');
+        }
+      } else if (event.value == 'alive') {
+        try {
+          final spouseData = state.toJson();
+          final spouseUniqueKey = spouseData['unique_key'] ?? spouseData['spouse_unique_key'];
+
+          if (spouseUniqueKey != null) {
+            await LocalStorageDao.instance.updateBeneficiaryDeathStatus(
+              uniqueKey: spouseUniqueKey,
+              isDeath: 0,
+            );
+          }
+        } catch (e) {
+          print('Error updating spouse beneficiary death status: $e');
+        }
+      }
+    });
+
     on<LMPChange>((event, emit) {
       final lmp = event.value;
       final edd = lmp != null ? lmp.add(const Duration(days: 5)) : null;
@@ -435,8 +470,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
 
       if (state.mobileNo == null || state.mobileNo!.trim().length < 10)
         errors.add('Please enter valid mobile number');
-      // if (state.mobileOwner == null || state.mobileOwner!.trim().length < 10)
-      //   errors.add('Please select whose mobile number');
+
       if (state.useDob) {
         if (state.dob == null) {
           errors.add('Please enter valid Date of Birth');
@@ -472,7 +506,6 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         errors.add('Please select Marital status ');
       }
 
-      // Pregnancy validations: only when Female + Married
       final isFemale = state.gender == 'Female';
       final isMarried = state.maritalStatus == 'Married';
       if (isFemale && isMarried) {
@@ -499,8 +532,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         );
         return;
       }
-      // All DB insert/update + API sync is now handled in RegisterNewHouseholdBloc.SaveHousehold.
-      // Here we only indicate that validation passed.
+
       emit(
         state.copyWith(
           postApiStatus: PostApiStatus.success,
@@ -709,6 +741,7 @@ extension _AddFamilyHeadBlocHelpers on AddFamilyHeadBloc {
       'relaton_with_family_head':
       info['relaton_with_family_head'] ?? info['relation_to_head'] ?? 'self',
       'member_status': info['member_status'] ?? 'alive',
+      'father_name': info['father_name'] ?? '',
       'member_name': info['member_name'] ?? info['headName'] ?? info['memberName'] ?? info['name'],
       'father_or_spouse_name':
       info['father_or_spouse_name'] ?? info['fatherName'] ?? info['spouseName'] ?? '',

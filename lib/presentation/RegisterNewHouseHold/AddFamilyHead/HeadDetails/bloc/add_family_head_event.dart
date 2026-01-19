@@ -236,6 +236,11 @@ final class AfhUpdateIsPregnant extends AddFamilyHeadEvent {
   AfhUpdateIsPregnant(this.value);
 }
 
+final class AfhUpdateMemberStatus extends AddFamilyHeadEvent {
+  final String? value;
+  AfhUpdateMemberStatus(this.value);
+}
+
 
 final class AfhHydrate extends AddFamilyHeadEvent {
   final AddFamilyHeadState value;

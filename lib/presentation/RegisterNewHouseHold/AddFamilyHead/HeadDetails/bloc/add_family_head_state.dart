@@ -81,7 +81,7 @@ class AddFamilyHeadState extends Equatable {
   final DateTime? hpremovalDate;
   final String? hpremovalReason;
   final String? hpcondomQuantity;
-
+  final String? memberStatus;
 
   const AddFamilyHeadState({
     this.houseNo,
@@ -158,6 +158,7 @@ class AddFamilyHeadState extends Equatable {
     this.hpremovalDate,
     this.hpremovalReason,
     this.hpcondomQuantity,
+    this.memberStatus,
   });
 
   AddFamilyHeadState copyWith({
@@ -235,6 +236,7 @@ class AddFamilyHeadState extends Equatable {
     DateTime? hpremovalDate,
     String? hpremovalReason,
     String? hpcondomQuantity,
+    String? memberStatus,
     bool clearError = false,
   }) {
     return AddFamilyHeadState(
@@ -313,6 +315,7 @@ class AddFamilyHeadState extends Equatable {
       hpremovalDate: hpremovalDate ?? this.hpremovalDate,
       hpremovalReason: hpremovalReason ?? this.hpremovalReason,
       hpcondomQuantity: hpcondomQuantity ?? this.hpcondomQuantity,
+      memberStatus: memberStatus ?? this.memberStatus,
     );
   }
 
@@ -392,6 +395,7 @@ class AddFamilyHeadState extends Equatable {
     hpremovalDate,
     hpremovalReason,
     hpcondomQuantity,
+    memberStatus,
   ];
 
   Map<String, dynamic> toJson() {
@@ -399,7 +403,7 @@ class AddFamilyHeadState extends Equatable {
       'houseNo': houseNo,
       'headName': headName,
       'children': children,
-      'fatherName': fatherName,
+      'father_name': fatherName,
       'AfhABHAChange': AfhABHAChange,
       'useDob': useDob,
       'dob': dob?.toIso8601String(),
@@ -468,6 +472,7 @@ class AddFamilyHeadState extends Equatable {
       'hpremovalDate': hpremovalDate?.toIso8601String(),
       'hpremovalReason': hpremovalReason,
       'hpcondomQuantity': hpcondomQuantity,
+      'memberStatus': memberStatus,
     }..removeWhere((key, value) => value == null || (value is String && value.trim().isEmpty));
   }
 }

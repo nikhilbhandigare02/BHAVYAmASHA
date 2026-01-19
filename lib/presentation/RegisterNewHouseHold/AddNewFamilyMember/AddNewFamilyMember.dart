@@ -3612,6 +3612,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   hintText: '0',
                                                   maxLength: 3,
                                                   controller: yearsController,
+                                                  readOnly: widget.isEdit,
                                                   keyboardType:
                                                       TextInputType.number,
                                                   inputFormatters: [
@@ -3685,6 +3686,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   hintText: '0',
                                                   maxLength: 2,
                                                   controller: monthsController,
+                                                  readOnly: widget.isEdit,
                                                   keyboardType:
                                                       TextInputType.number,
                                                   inputFormatters: [
@@ -3719,6 +3721,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   hintText: '0',
                                                   maxLength: 2,
                                                   controller: daysController,
+                                                  readOnly: widget.isEdit,
                                                   keyboardType:
                                                       TextInputType.number,
                                                   inputFormatters: [
@@ -4115,6 +4118,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                         labelText:
                                             l?.is_birth_certificate_issued ??
                                             'is birth certificate issued?',
+
                                         items: const ['Yes', 'No'],
                                         getLabel: (s) {
                                           switch (s) {
@@ -5054,8 +5058,8 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           'Married',
                                           'Divorced',
                                           'Separated',
-                                          'Widow',
                                           'Widower',
+                                          'Widow',
                                         ],
                                         getLabel: (s) {
                                           switch (s) {

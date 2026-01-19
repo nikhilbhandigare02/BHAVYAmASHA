@@ -13,7 +13,8 @@ import 'package:medixcel_new/data/Database/local_storage_dao.dart';
 class BeneficiaryRepository {
   final NetworkServiceApi _api = NetworkServiceApi();
 
-  Future<Map<String, dynamic>> fetchAndStoreBeneficiaries({required String lastId, int pageSize = 20}) async {
+  Future<Map<String, dynamic>> fetchAndStoreBeneficiaries({required String lastId, int pageSize = 100}) async {
+
     final currentUser = await UserInfo.getCurrentUser();
     final userDetails = currentUser?['details'] is String
         ? jsonDecode(currentUser?['details'] ?? '{}')
@@ -43,6 +44,7 @@ class BeneficiaryRepository {
         Endpoints.getBeneficiary,
         {
           'last_id': effectiveLastId,
+          "limit": 20
         },
         headers: headers,
       );
@@ -53,7 +55,7 @@ class BeneficiaryRepository {
           headers: headers,
           queryParams: {
             'last_id': effectiveLastId,
-            'page_size': pageSize.toString(),
+            "limit": 20
           },
         );
       } catch (_) {
@@ -62,7 +64,7 @@ class BeneficiaryRepository {
           headers: headers,
           queryParams: {
             'last_id': effectiveLastId,
-            'page_size': pageSize.toString(),
+            "limit": 20
           },
         );
       }
@@ -78,42 +80,50 @@ class BeneficiaryRepository {
     for (final rec in dataList) {
       try {
         final serverId = rec['_id']?.toString();
-        if (serverId == null || serverId.isEmpty) continue;
-
-        final info = _mapBeneficiaryInfo(rec);
+        if (serverId == null || serverId.isEmpty) {
+          print('Skipping record with missing server_id');
+          continue;
+        }
 
         final hhRefKey = rec['household_ref_key']?.toString();
         final benUniqueKey = rec['unique_key']?.toString();
-        if (hhRefKey != null && hhRefKey.isNotEmpty) {
-          final existingHh = await LocalStorageDao.instance.getHouseholdByUniqueKey(hhRefKey);
-          if (existingHh == null || existingHh.isEmpty) {
-            final householdInfo = <String, dynamic>{};
-            final beneficiaryInfo = info;
-
-            householdInfo['houseNo'] = beneficiaryInfo['houseNo'];
-            householdInfo['headName'] = beneficiaryInfo['headName'] ?? beneficiaryInfo['name'];
-
-            final toInsertHh = <String, dynamic>{
-              'server_id': null,
-              'unique_key': hhRefKey,
-              'address': beneficiaryInfo['address'] ?? {},
-              'geo_location': rec['geo_location'] ?? {},
-              'head_id': benUniqueKey,
-              'household_info': householdInfo,
-              'device_details': rec['device_details'] ?? {},
-              'app_details': rec['app_details'] ?? {},
-              'parent_user': rec['parent_user'] ?? {},
-              'current_user_key': rec['current_user_key']?.toString(),
-              'facility_id': _toInt(rec['facility_id']),
-              'created_date_time': rec['created_date_time']?.toString(),
-              'modified_date_time': rec['modified_date_time']?.toString(),
-              'is_synced': 1,
-              'is_deleted': _toInt(rec['is_deleted']),
-            };
-
-            await LocalStorageDao.instance.insertHousehold(toInsertHh);
-          }
+        
+        if (benUniqueKey == null || benUniqueKey.isEmpty) {
+          print('Skipping record with missing unique_key: $serverId');
+          continue;
         }
+
+        final info = _mapBeneficiaryInfo(rec);
+        // if (hhRefKey != null && hhRefKey.isNotEmpty) {
+        //   final existingHh = await LocalStorageDao.instance.getHouseholdByUniqueKey(hhRefKey);
+        //   if (existingHh == null || existingHh.isEmpty) {
+        //     final householdInfo = <String, dynamic>{};
+        //     final beneficiaryInfo = info;
+        //
+        //     householdInfo['houseNo'] = beneficiaryInfo['houseNo'];
+        //     householdInfo['headName'] = beneficiaryInfo['headName'] ?? beneficiaryInfo['name'];
+        //
+        //     final toInsertHh = <String, dynamic>{
+        //       'server_id': null,
+        //       'unique_key': hhRefKey,
+        //       'address': beneficiaryInfo['address'] ?? {},
+        //       'geo_location': rec['geo_location'] ?? {},
+        //       'head_id': benUniqueKey,
+        //       'household_info': householdInfo,
+        //       'device_details': rec['device_details'] ?? {},
+        //       'app_details': rec['app_details'] ?? {},
+        //       'parent_user': rec['parent_user'] ?? {},
+        //       'current_user_key': rec['current_user_key']?.toString(),
+        //       'facility_id': _toInt(rec['facility_id']),
+        //       'created_date_time': rec['created_date_time']?.toString(),
+        //       'modified_date_time': rec['modified_date_time']?.toString(),
+        //       'is_synced': 1,
+        //       'is_deleted': _toInt(rec['is_deleted']),
+        //     };
+        //
+        //     await LocalStorageDao.instance.insertHousehold(toInsertHh);
+        //   }
+        // }
 
         final row = <String, dynamic>{
           'server_id': serverId,
@@ -144,22 +154,44 @@ class BeneficiaryRepository {
           'is_deleted': _toInt(rec['is_deleted']),
         };
 
-        final uniqueKey = row['unique_key']?.toString();
+        final uniqueKey = row['server_id']?.toString();
         if (uniqueKey != null && uniqueKey.isNotEmpty) {
-          final existing = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(uniqueKey);
-          if (existing != null && existing.isNotEmpty) {
+          if(uniqueKey=='696b76644239d35553728f27' || uniqueKey == '696b766f99764a6a83a22a21' || uniqueKey == '696b766f99764a6a83a22a23'){
+            print('aa');
+          }
+          final existing = await LocalStorageDao.instance.getBeneficiaryByServerKey(uniqueKey);
+         /* if (existing != null && existing.isNotEmpty) {
             final existingSynced = (existing['is_synced'] == 1) || (existing['is_synced']?.toString() == '1');
             if (existingSynced) {
+              print('Skipping already synced beneficiary: $uniqueKey');
               skipped++;
               continue;
             }
+            print('Skipping beneficiary with existing record: $uniqueKey');
             skipped++;
             continue;
+          }*/
+
+          if (existing == null || existing.isEmpty) {
+            print('Inserting beneficiary: server_id=$serverId, unique_key=$uniqueKey');
+            try {
+              await LocalStorageDao.instance.insertBeneficiary(row);
+              print('Inserted beneficiary: server_id=$serverId, unique_key=$uniqueKey');
+            }
+                catch(e){
+
+              print('Failed inserted');
+                }
+          }
+          else {
+            print("BenifSkip db else ${uniqueKey}");
           }
         }
-        await LocalStorageDao.instance.insertBeneficiary(row);
+        else {
+          print("BenifSkip uniqueKey else ${uniqueKey}");
+        }
 
-        
+        //print('Successfully inserted beneficiary: $uniqueKey');
         inserted++;
       } catch (e) {
         print('Error inserting beneficiary: $e');
@@ -310,11 +342,41 @@ class BeneficiaryRepository {
       if (dob == null) return null;
 
       try {
-        final parsed = DateTime.tryParse(dob.toString());
+        String dobString = dob.toString().trim();
+        if (dobString.isEmpty) return null;
+        
+        // Try ISO format first
+        DateTime? parsed = DateTime.tryParse(dobString);
+        
+        // If ISO parsing fails, try common formats
+        if (parsed == null) {
+          // Try DD/MM/YYYY or DD-MM-YYYY
+          final regex1 = RegExp(r'^(\d{2})[/-](\d{2})[/-](\d{4})$');
+          final match1 = regex1.firstMatch(dobString);
+          if (match1 != null) {
+            final day = int.parse(match1.group(1)!);
+            final month = int.parse(match1.group(2)!);
+            final year = int.parse(match1.group(3)!);
+            parsed = DateTime(year, month, day);
+          }
+          
+          // Try YYYY/MM/DD or YYYY-MM-DD
+          if (parsed == null) {
+            final regex2 = RegExp(r'^(\d{4})[/-](\d{2})[/-](\d{2})$');
+            final match2 = regex2.firstMatch(dobString);
+            if (match2 != null) {
+              final year = int.parse(match2.group(1)!);
+              final month = int.parse(match2.group(2)!);
+              final day = int.parse(match2.group(3)!);
+              parsed = DateTime(year, month, day);
+            }
+          }
+        }
+        
         if (parsed == null) return null;
-
         return DateFormat('yyyy-MM-dd').format(parsed);
-      } catch (_) {
+      } catch (e) {
+        print('Error normalizing DOB: $e');
         return null;
       }
     }
@@ -333,17 +395,18 @@ class BeneficiaryRepository {
       'useDob': info['age_by'],
       'dob': _normalizeDob(info['dob'] ?? info['date_of_birth']),
       'approxAge': info['age'],
-      'years': info['dob_day'],
+      'years': info['dob_year'],
       'months': info['dob_month'],
-      'days': info['dob_year'],
+      'days': info['dob_day'],
       'updateDay': DateTime.now().day,
       'updateMonth': DateTime.now().month,
       'updateYear': DateTime.now().year,
 
-      'children': info['total_live_children'],
+      'children': info['total_children'],
       'birthOrder': info['birth_order'],
       'totalBorn': info['total_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),
       'totalLive': info['total_live_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),
+      'totalLiveChildren': info['total_live_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),
       'totalMale': info['total_male_children'] ?? 0,
       'totalFemale': info['total_female_children'] ?? 0,
       'youngestAge': info['age_of_youngest_child'],
@@ -389,7 +452,6 @@ class BeneficiaryRepository {
       'district': addr['district'] ?? '',
       'block': addr['block'] ?? '',
 
-      // Misc fields - API mapping
       'weight': info['weight'],
       'birthWeight': info['weight_at_birth'],
       'childSchool': info['is_school_going_child'],
@@ -397,7 +459,6 @@ class BeneficiaryRepository {
       'memberStatus': info['member_status'] ?? '',
       'relation_to_head': info['relaton_with_family_head'] ?? info['relationToHead'] ?? '',
       
-      // Additional API-specific fields
       'is_abha_verified': info['is_abha_verified'] ?? false,
       'is_rch_id_verified': info['is_rch_id_verified'] ?? false,
       'is_fetched_from_abha': info['is_fetched_from_abha'] ?? false,
@@ -409,8 +470,8 @@ class BeneficiaryRepository {
       'type_of_beneficiary': info['type_of_beneficiary'] ?? '',
       
       // Family planning fields
-      'is_family_planning': info['is_family_planning'] ?? 0,
-      'method_of_contraception': info['method_of_contraception'],
+      'fp_adopting': info['is_family_planning'] ?? 0,
+      'fp_method': info['method_of_contraception'],
       
       // Bank details
       'bankName': info['bank_name'],
@@ -440,15 +501,15 @@ class BeneficiaryRepository {
       'is_migrated': info['is_migrated'],
       
       // Contraception quantities
-      'quantity_of_condoms': info['quantity_of_condoms'],
-      'quantity_of_mala_n_daily': info['quantity_of_mala_n_daily'],
-      'quantity_of_chhaya_weekly': info['quantity_of_chhaya_weekly'],
-      'quantity_of_ecp': info['quantity_of_ecp'],
+      'condom_quantity': info['quantity_of_condoms'],
+      'mala_quantity': info['quantity_of_mala_n_daily'],
+      'chhaya_quantity': info['quantity_of_chhaya_weekly'],
+      'ecp_quantity': info['quantity_of_ecp'],
       
       // Family planning dates
-      'date_of_antra': info['date_of_antra'],
+      'antra_injection_date': info['date_of_antra'],
       'removal_date': info['removal_date'],
-      'reason': info['reason'],
+      'removal_reason': info['reason'],
     };
 
     mapped.removeWhere((key, value) => value == null);

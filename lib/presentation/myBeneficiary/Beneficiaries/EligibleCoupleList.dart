@@ -58,7 +58,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
         AND e.eligible_couple_state = 'eligible_couple'
         AND e.is_deleted = 0
         AND e.current_user_key = ?
-      ORDER BY b.created_date_time DESC
+      ORDER BY b.id DESC
     ''';
 
       final rows = await db.rawQuery(query, [ashaUniqueKey]);

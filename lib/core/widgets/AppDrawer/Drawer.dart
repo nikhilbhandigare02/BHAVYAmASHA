@@ -51,7 +51,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
     if (mounted) {
       setState(() {
         // _appVersion = version;
-        _appVersion = '1.1.8';
+        _appVersion = '1.1.9';
       });
     }
   }
@@ -387,7 +387,9 @@ class _CustomDrawerState extends State<CustomDrawer> {
                                 if (_appRoleId != 4) ...[
                                   _UserInfoRow(
                                     label: l10n.userVillageLabel,
-                                    value: _getWorkingLocation('village'),
+                                    value: (_getWorkingLocation('village') ?? '').trim().isEmpty
+                                        ? '-'
+                                        : _getWorkingLocation('village'),
                                   ),
                                   _UserInfoRow(
                                     label: l10n.userHscLabel,
@@ -422,7 +424,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     final screenSize = MediaQuery.of(context).size;
                     final isLandscape = screenSize.width > screenSize.height;
                     final buttonHeight = isLandscape 
-                        ? screenSize.height * 0.07  // Slightly taller in landscape
+                        ? screenSize.height * 0.07
                         : screenSize.height * 0.065; // Standard height in portrait
                     
                     return Container(

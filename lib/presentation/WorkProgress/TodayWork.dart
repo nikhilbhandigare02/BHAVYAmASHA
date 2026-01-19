@@ -12,6 +12,7 @@ import 'package:sqflite/sqflite.dart';
 import 'dart:math' as math;
 import '../../data/Database/database_provider.dart';
 import '../../data/Database/local_storage_dao.dart';
+import '../../data/Database/tables/eligible_couple_activities_table.dart';
 import '../../data/Database/tables/followup_form_data_table.dart';
 import 'bloc/todays_work_bloc.dart';
 
@@ -82,2752 +83,6 @@ class _TodayworkState extends State<Todaywork> {
     } catch (e) {
       debugPrint('Error loading data: $e');
     }
-  }
-
-
-  Future<void> _loadFamilySurveyItems() async {
-    try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final households = await LocalStorageDao.instance.getAllHouseholds();
-
-      final List<Map<String, dynamic>> items = [];
-
-      final Map<String, String> headKeyByHousehold = {};
-      for (final hh in households) {
-        final hhRefKey = (hh['unique_key'] ?? '').toString();
-        final headId = (hh['head_id'] ?? '').toString();
-        if (hhRefKey.isNotEmpty && headId.isNotEmpty) {
-          headKeyByHousehold[hhRefKey] = headId;
-        }
-      }
-
-      final DateTime now = DateTime.now();
-      final DateTime sixMonthsAgo = now.subtract(const Duration(days: 180));
-      final String todayStr =
-          '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-
-      for (final row in rows) {
-        try {
-          if (ashaUniqueKey != null &&
-              ashaUniqueKey.isNotEmpty &&
-              row['current_user_key']?.toString() != ashaUniqueKey) {
-            continue;
-          }
-
-          if (row['is_death'] == 1 ||
-              row['is_migrated'] == 1 ||
-              row['is_deleted'] == 1) continue;
-
-          final String householdRefKey =
-              row['household_ref_key']?.toString() ?? '';
-          final String uniqueKey =
-              row['unique_key']?.toString() ?? '';
-
-          if (householdRefKey.isEmpty || uniqueKey.isEmpty) continue;
-
-          // ------------------ BENEFICIARY INFO ------------------
-          final infoRaw = row['beneficiary_info'];
-          if (infoRaw == null) continue;
-
-          final Map<String, dynamic> info =
-          infoRaw is Map<String, dynamic>
-              ? infoRaw
-              : Map<String, dynamic>.from(infoRaw);
-
-          final bool isFamilyHeadFromInfo =
-              info['isFamilyhead'] == true ||
-                  info['isFamilyHead']?.toString() == 'true';
-
-          final String? configuredHeadKey =
-          headKeyByHousehold[householdRefKey];
-
-          final bool isHouseholdHead =
-              configuredHeadKey != null &&
-                  configuredHeadKey == uniqueKey;
-
-          // ❌ If neither condition matches → skip
-          if (!isHouseholdHead && !isFamilyHeadFromInfo) continue;
-
-          // ------------------ DATE CHECK (6 MONTHS) ------------------
-          DateTime? createdDt;
-          DateTime? modifiedDt;
-
-          try {
-            if (row['created_date_time'] != null &&
-                row['created_date_time'].toString().isNotEmpty) {
-              String dateStr = row['created_date_time'].toString();
-              // Handle both "YYYY-MM-DD HH:MM:SS" and "YYYY-MM-DDTHH:MM:SS" formats
-              if (dateStr.contains(' ')) {
-                dateStr = dateStr.split(' ')[0];
-              } else if (dateStr.contains('T')) {
-                dateStr = dateStr.split('T')[0];
-              }
-              createdDt = DateTime.parse(dateStr);
-            }
-
-            if (row['modified_date_time'] != null &&
-                row['modified_date_time'].toString().isNotEmpty) {
-              String dateStr = row['modified_date_time'].toString();
-              // Handle both "YYYY-MM-DD HH:MM:SS" and "YYYY-MM-DDTHH:MM:SS" formats
-              if (dateStr.contains(' ')) {
-                dateStr = dateStr.split(' ')[0];
-              } else if (dateStr.contains('T')) {
-                dateStr = dateStr.split('T')[0];
-              }
-              modifiedDt = DateTime.parse(dateStr);
-            }
-          } catch (_) {}
-
-          final bool isEligible =
-              (modifiedDt != null && modifiedDt.isBefore(sixMonthsAgo)) ||
-                  (modifiedDt == null &&
-                      createdDt != null &&
-                      createdDt.isBefore(sixMonthsAgo));
-
-          if (!isEligible) continue;
-
-          // ------------------ CHECK IF MODIFIED TODAY ------------------
-          bool isModifiedToday = false;
-          final String? rawModifiedDate = row['modified_date_time']?.toString();
-
-          if (rawModifiedDate != null && rawModifiedDate.isNotEmpty) {
-            try {
-              String dateStr = rawModifiedDate;
-              // Handle both "YYYY-MM-DD HH:MM:SS" and "YYYY-MM-DDTHH:MM:SS" formats
-              if (dateStr.contains(' ')) {
-                dateStr = dateStr.split(' ')[0];
-              } else if (dateStr.contains('T')) {
-                dateStr = dateStr.split('T')[0];
-              }
-              if (dateStr == todayStr) {
-                isModifiedToday = true;
-                print('📋 Record was modified today - excluding from to-do list');
-              }
-            } catch (e) {
-              // If parsing fails, try to extract date part
-              if (rawModifiedDate.contains(' ')) {
-                final datePart = rawModifiedDate.split(' ')[0];
-                if (datePart == todayStr) {
-                  isModifiedToday = true;
-                  print('📋 Record was modified today (fallback) - excluding from to-do list');
-                }
-              } else if (rawModifiedDate.contains('T')) {
-                final datePart = rawModifiedDate.split('T')[0];
-                if (datePart == todayStr) {
-                  isModifiedToday = true;
-                  print('📋 Record was modified today (fallback) - excluding from to-do list');
-                }
-              }
-            }
-          }
-
-          // Skip if modified today (these go to completed tab)
-          if (isModifiedToday) continue;
-
-          // ------------------ LAST SURVEY DATE ------------------
-          final DateTime? lastSurveyDt = modifiedDt ?? createdDt;
-          final String lastSurveyDate = lastSurveyDt != null
-              ? '${lastSurveyDt.day}-${lastSurveyDt.month}-${lastSurveyDt.year}'
-              : '-';
-
-          // ------------------ DISPLAY DATA ------------------
-          final String name =
-              (info['headName'] ?? info['memberName'] ?? info['name'])
-                  ?.toString()
-                  .trim() ??
-                  '';
-          if (name.isEmpty) continue;
-
-          final String gender = (info['gender']?.toString() ?? '-')
-              .toLowerCase()
-              .replaceFirstMapped(RegExp(r'^\w'), (match) => match.group(0)!.toUpperCase());
-
-          String ageText = '-';
-          final String? dobRaw = info['dob']?.toString();
-          if (dobRaw != null && dobRaw.isNotEmpty) {
-            final dob = DateTime.tryParse(dobRaw.split('T')[0]);
-            if (dob != null) {
-              int age = now.year - dob.year;
-              if (now.month < dob.month ||
-                  (now.month == dob.month && now.day < dob.day)) {
-                age--;
-              }
-              if (age >= 0) ageText = '${age}Y';
-            }
-          } else if (info['age'] != null) {
-            ageText = '${info['age']}y';
-          }
-
-          final String mobile =
-              info['mobileNo']?.toString() ??
-                  info['phone']?.toString() ??
-                  '-';
-
-          String displayId = uniqueKey;
-          if (displayId.length > 11) {
-            displayId = displayId.substring(displayId.length - 11);
-          }
-
-          final rawCreatedDate = row['created_date_time']?.toString();
-
-          print('=== DEBUG: Adding Family Survey Item ===');
-          print('Name: $name');
-          print('Raw Created Date: $rawCreatedDate');
-          print('Raw Modified Date: $rawModifiedDate');
-          print('Last Survey Date: $lastSurveyDate');
-          print('=====================================');
-
-          items.add({
-            'id': displayId,
-            'household_ref_key': householdRefKey,
-            'name': name,
-            'age': ageText,
-            'gender': gender,
-            'last survey date': lastSurveyDate,
-            'lastSurveyDate': lastSurveyDate, // Add this field for UI display
-            'Next HBNC due date': '-',
-            'mobile': mobile,
-            'badge': 'Family',
-            // Add raw date fields for completed tab filtering
-            'created_date': rawCreatedDate,
-            'modified_date': rawModifiedDate,
-          });
-        } catch (_) {
-          continue;
-        }
-      }
-
-      if (mounted) {
-        setState(() {
-          _familySurveyItems = items;
-        });
-        _saveTodayWorkCountsToStorage();
-      }
-    } catch (e) {
-      debugPrint('Family survey load error: $e');
-    }
-  }
-
-
-  Future<void> _loadEligibleCoupleItems() async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
-      final ecFormKey =
-          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
-              .eligibleCoupleTrackingDue] ??
-              '';
-
-      if (ecFormKey.isEmpty) return;
-
-      // Get current date and 1 month ago date
-      final now = DateTime.now();
-      final oneMonthAgo = now.subtract(const Duration(days: 30));
-      final oneMonthAgoStr = oneMonthAgo.toIso8601String().split('T')[0];
-      final todayStr = now.toIso8601String().split('T')[0];
-
-      // Step 1: Get all eligible_couple records with state = 'eligible_couple'
-      // and created/modified before 1 month ago
-      String whereClause =
-          'eligible_couple_state = ? AND (is_deleted IS NULL OR is_deleted = 0)';
-      List<dynamic> whereArgs = ['eligible_couple'];
-
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        whereClause += ' AND current_user_key = ?';
-        whereArgs.add(ashaUniqueKey);
-      }
-
-      final eligibleCoupleRows = await db.query(
-        'eligible_couple_activities',
-        columns: [
-          'beneficiary_ref_key',
-          'created_date_time',
-          'modified_date_time',
-        ],
-        where: whereClause,
-        whereArgs: whereArgs,
-      );
-
-      // Filter records where created_date_time or modified_date_time is before 1 month ago
-      final eligibleBeneficiaryKeys = <String>{};
-      for (final row in eligibleCoupleRows) {
-        final beneficiaryKey = row['beneficiary_ref_key']?.toString();
-        if (beneficiaryKey == null || beneficiaryKey.isEmpty) continue;
-
-        final createdDateStr = row['created_date_time']?.toString();
-        final modifiedDateStr = row['modified_date_time']?.toString();
-
-        bool isOldEnough = false;
-
-        // Check created_date_time
-        if (createdDateStr != null && createdDateStr.isNotEmpty) {
-          try {
-            final createdDate = DateTime.parse(createdDateStr);
-            if (createdDate.isBefore(oneMonthAgo)) {
-              isOldEnough = true;
-            }
-          } catch (e) {
-            print('Error parsing created_date_time: $e');
-          }
-        }
-
-        // Check modified_date_time if created_date_time is not old enough
-        if (!isOldEnough &&
-            modifiedDateStr != null &&
-            modifiedDateStr.isNotEmpty) {
-          try {
-            final modifiedDate = DateTime.parse(modifiedDateStr);
-            if (modifiedDate.isBefore(oneMonthAgo)) {
-              isOldEnough = true;
-            }
-          } catch (e) {
-            print('Error parsing modified_date_time: $e');
-          }
-        }
-
-        if (isOldEnough) {
-          eligibleBeneficiaryKeys.add(beneficiaryKey);
-        }
-      }
-
-      if (eligibleBeneficiaryKeys.isEmpty) {
-        _eligibleCoupleItems.clear();
-        if (mounted) {
-          setState(() {});
-          // _saveTodayWorkCountsToStorage();
-        }
-        return;
-      }
-
-      final placeholders = List.filled(
-        eligibleBeneficiaryKeys.length,
-        '?',
-      ).join(',');
-
-      // Step 2: Check followup_form_table for entries created TODAY only
-      final todayForms = await db.rawQuery(
-        '''
-        SELECT DISTINCT beneficiary_ref_key
-        FROM ${FollowupFormDataTable.table}
-        WHERE forms_ref_key = ?
-        AND beneficiary_ref_key IN ($placeholders)
-        AND (is_deleted IS NULL OR is_deleted = 0)
-        AND DATE(created_date_time) = DATE(?)
-        ''',
-        [ecFormKey, ...eligibleBeneficiaryKeys, todayStr],
-      );
-
-      // Create a set of beneficiaries with today's followup forms
-      final beneficiariesWithTodayForms = todayForms
-          .map((row) => row['beneficiary_ref_key']?.toString())
-          .whereType<String>()
-          .toSet();
-
-      // Step 3: Only show beneficiaries that have today's followup forms
-      final keysToShow = beneficiariesWithTodayForms;
-
-      if (keysToShow.isEmpty) {
-        _eligibleCoupleItems.clear();
-        if (mounted) {
-          setState(() {});
-          // _saveTodayWorkCountsToStorage();
-        }
-        return;
-      }
-
-      final placeholdersShow = List.filled(keysToShow.length, '?').join(',');
-      final rows = await db.query(
-        'beneficiaries_new',
-        where:
-        'unique_key IN ($placeholdersShow) AND (is_deleted IS NULL OR is_deleted = 0) AND (is_migrated IS NULL OR is_migrated = 0)',
-        whereArgs: keysToShow.toList(),
-      );
-
-      _eligibleCoupleItems.clear();
-
-      // Group by household to find spouse/head relations for complete data
-      final households = <String, List<Map<String, dynamic>>>{};
-      for (final row in rows) {
-        final hhKey = row['household_ref_key']?.toString() ?? '';
-        households.putIfAbsent(hhKey, () => []).add(row);
-      }
-
-      for (final household in households.values) {
-        Map<String, dynamic>? head;
-        Map<String, dynamic>? spouse;
-
-        // Identify Head and Spouse
-        for (final member in household) {
-          try {
-            final dynamic infoRaw = member['beneficiary_info'];
-            final Map<String, dynamic> info = infoRaw is String
-                ? jsonDecode(infoRaw)
-                : Map<String, dynamic>.from(infoRaw ?? {});
-
-            final relation =
-            (info['relation_to_head'] ?? info['relation'] ?? '')
-                .toString()
-                .toLowerCase();
-            if (relation.contains('head') || relation == 'self') {
-              head = info;
-            } else if (relation == 'spouse' ||
-                relation == 'wife' ||
-                relation == 'husband') {
-              spouse = info;
-            }
-          } catch (_) {}
-        }
-
-        for (final member in household) {
-          final dynamic infoRaw = member['beneficiary_info'];
-          if (infoRaw == null) continue;
-
-          final Map<String, dynamic> info = infoRaw is String
-              ? jsonDecode(infoRaw)
-              : Map<String, dynamic>.from(infoRaw ?? {});
-
-          final uniqueKey = member['unique_key']?.toString() ?? '';
-          final hhKey = member['household_ref_key']?.toString() ?? '';
-          // Only show if this member is in our target list
-          if (!keysToShow.contains(uniqueKey)) continue;
-
-          final isHead = info == head;
-          final isSpouse = info == spouse;
-          final Map<String, dynamic> counterpart = isHead && spouse != null
-              ? spouse!
-              : isSpouse && head != null
-              ? head!
-              : <String, dynamic>{};
-
-          final name =
-              info['memberName']?.toString() ??
-                  info['headName']?.toString() ??
-                  info['name']?.toString() ??
-                  '';
-          final dob = info['dob']?.toString() ?? '';
-
-          // Use _calculateAge if available, or parse manually
-          int age = 0;
-          try {
-            if (dob.isNotEmpty) {
-              final birthDate = DateTime.tryParse(
-                dob.contains('T') ? dob.split('T')[0] : dob,
-              );
-              if (birthDate != null) {
-                final now = DateTime.now();
-                age = now.year - birthDate.year;
-                if (now.month < birthDate.month ||
-                    (now.month == birthDate.month && now.day < birthDate.day)) {
-                  age--;
-                }
-              }
-            }
-          } catch (_) {}
-
-          String ageText = age > 0 ? '$age' : (info['age']?.toString() ?? '-');
-
-          final gender = (info['gender']?.toString().toLowerCase() ?? 'female');
-          final mobile = info['mobileNo']?.toString() ?? 'Not Available';
-
-          String lastVisitDate = '-';
-          final modified = member['modified_date_time']?.toString();
-          final created = member['created_date_time']?.toString();
-          if (modified != null && modified.isNotEmpty) {
-            lastVisitDate = _formatDateOnly(modified);
-          } else if (created != null && created.isNotEmpty) {
-            lastVisitDate = _formatDateOnly(created);
-          }
-
-          _eligibleCoupleItems.add({
-            'id': member['id'] ?? '',
-            'household_ref_key': hhKey,
-            'hhId': hhKey,
-            'unique_key': uniqueKey,
-            'BeneficiaryID': uniqueKey,
-            'name': name,
-            'gender': gender,
-            'age': ageText,
-            'mobile': mobile,
-            'badge': 'EligibleCouple',
-            'last Visit date': lastVisitDate,
-            '_rawRow': member,
-            'spouse_name': counterpart.isNotEmpty
-                ? (counterpart['memberName'] ??
-                counterpart['headName'] ??
-                counterpart['name'])
-                : '',
-          });
-        }
-      }
-
-      if (mounted) {
-        setState(() {});
-        //_saveTodayWorkCountsToStorage();
-      }
-    } catch (e) {
-      debugPrint('EC load error: $e');
-    }
-  }
-
-  Future<void> _loadFamilySurveyCompletedItems() async {
-    try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
-      final households = await LocalStorageDao.instance.getAllHouseholds();
-
-      final List<Map<String, dynamic>> items = [];
-
-      final Map<String, String> headKeyByHousehold = {};
-      for (final hh in households) {
-        final hhRefKey = (hh['unique_key'] ?? '').toString();
-        final headId = (hh['head_id'] ?? '').toString();
-        if (hhRefKey.isNotEmpty && headId.isNotEmpty) {
-          headKeyByHousehold[hhRefKey] = headId;
-        }
-      }
-
-      final DateTime now = DateTime.now();
-      final String todayStr =
-          '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-
-      print('=== DEBUG: Loading Family Survey Completed Items ===');
-      print('Today String: $todayStr');
-
-      for (final row in rows) {
-        try {
-          if (ashaUniqueKey != null &&
-              ashaUniqueKey.isNotEmpty &&
-              row['current_user_key']?.toString() != ashaUniqueKey) {
-            continue;
-          }
-
-          if (row['is_death'] == 1 ||
-              row['is_migrated'] == 1 ||
-              row['is_deleted'] == 1) continue;
-
-          final String householdRefKey =
-              row['household_ref_key']?.toString() ?? '';
-          final String uniqueKey =
-              row['unique_key']?.toString() ?? '';
-
-          if (householdRefKey.isEmpty || uniqueKey.isEmpty) continue;
-
-          // ------------------ BENEFICIARY INFO ------------------
-          final infoRaw = row['beneficiary_info'];
-          if (infoRaw == null) continue;
-
-          final Map<String, dynamic> info =
-          infoRaw is Map<String, dynamic>
-              ? infoRaw
-              : Map<String, dynamic>.from(infoRaw);
-
-          final bool isFamilyHeadFromInfo =
-              info['isFamilyhead'] == true ||
-                  info['isFamilyHead']?.toString() == 'true';
-
-          final String? configuredHeadKey =
-          headKeyByHousehold[householdRefKey];
-
-          final bool isHouseholdHead =
-              configuredHeadKey != null &&
-                  configuredHeadKey == uniqueKey;
-
-          // ❌ If neither condition matches → skip
-          if (!isHouseholdHead && !isFamilyHeadFromInfo) continue;
-
-          // ------------------ CHECK IF MODIFIED TODAY ------------------
-          bool isModifiedToday = false;
-          final String? rawModifiedDate = row['modified_date_time']?.toString();
-
-          if (rawModifiedDate != null && rawModifiedDate.isNotEmpty) {
-            try {
-              String dateStr = rawModifiedDate;
-              // Handle both "YYYY-MM-DD HH:MM:SS" and "YYYY-MM-DDTHH:MM:SS" formats
-              if (dateStr.contains(' ')) {
-                dateStr = dateStr.split(' ')[0];
-              } else if (dateStr.contains('T')) {
-                dateStr = dateStr.split('T')[0];
-              }
-              if (dateStr == todayStr) {
-                isModifiedToday = true;
-                print('📋 Record modified today - including in completed list');
-              }
-            } catch (e) {
-              // If parsing fails, try to extract date part
-              if (rawModifiedDate.contains(' ')) {
-                final datePart = rawModifiedDate.split(' ')[0];
-                if (datePart == todayStr) {
-                  isModifiedToday = true;
-                  print('📋 Record modified today (fallback) - including in completed list');
-                }
-              } else if (rawModifiedDate.contains('T')) {
-                final datePart = rawModifiedDate.split('T')[0];
-                if (datePart == todayStr) {
-                  isModifiedToday = true;
-                  print('📋 Record modified today (fallback) - including in completed list');
-                }
-              }
-            }
-          }
-
-          // Only include if modified today
-          if (!isModifiedToday) continue;
-
-          // ------------------ DATE PARSING ------------------
-          DateTime? createdDt;
-          DateTime? modifiedDt;
-
-          try {
-            if (row['created_date_time'] != null &&
-                row['created_date_time'].toString().isNotEmpty) {
-              String dateStr = row['created_date_time'].toString();
-              if (dateStr.contains(' ')) {
-                dateStr = dateStr.split(' ')[0];
-              } else if (dateStr.contains('T')) {
-                dateStr = dateStr.split('T')[0];
-              }
-              createdDt = DateTime.parse(dateStr);
-            }
-
-            if (row['modified_date_time'] != null &&
-                row['modified_date_time'].toString().isNotEmpty) {
-              String dateStr = row['modified_date_time'].toString();
-              if (dateStr.contains(' ')) {
-                dateStr = dateStr.split(' ')[0];
-              } else if (dateStr.contains('T')) {
-                dateStr = dateStr.split('T')[0];
-              }
-              modifiedDt = DateTime.parse(dateStr);
-            }
-          } catch (_) {}
-
-          // ------------------ LAST SURVEY DATE ------------------
-          final DateTime? lastSurveyDt = modifiedDt ?? createdDt;
-          final String lastSurveyDate = lastSurveyDt != null
-              ? '${lastSurveyDt.day}-${lastSurveyDt.month}-${lastSurveyDt.year}'
-              : '-';
-
-          // ------------------ DISPLAY DATA ------------------
-          final String name =
-              (info['headName'] ?? info['memberName'] ?? info['name'])
-                  ?.toString()
-                  .trim() ??
-                  '';
-          if (name.isEmpty) continue;
-
-          final String gender = (info['gender']?.toString() ?? '-')
-              .toLowerCase()
-              .replaceFirstMapped(RegExp(r'^\w'), (match) => match.group(0)!.toUpperCase());
-
-          String ageText = '-';
-          final String? dobRaw = info['dob']?.toString();
-          if (dobRaw != null && dobRaw.isNotEmpty) {
-            final dob = DateTime.tryParse(dobRaw.split('T')[0]);
-            if (dob != null) {
-              int age = now.year - dob.year;
-              if (now.month < dob.month ||
-                  (now.month == dob.month && now.day < dob.day)) {
-                age--;
-              }
-              if (age >= 0) ageText = '${age}Y';
-            }
-          } else if (info['age'] != null) {
-            ageText = '${info['age']}y';
-          }
-
-          final String mobile =
-              info['mobileNo']?.toString() ??
-                  info['phone']?.toString() ??
-                  '-';
-
-          String displayId = uniqueKey;
-          if (displayId.length > 11) {
-            displayId = displayId.substring(displayId.length - 11);
-          }
-
-          // ------------------ ADD ITEM ------------------
-          final rawCreatedDate = row['created_date_time']?.toString();
-
-          print('=== DEBUG: Adding Family Survey Completed Item ===');
-          print('Name: $name');
-          print('Raw Created Date: $rawCreatedDate');
-          print('Raw Modified Date: $rawModifiedDate');
-          print('Last Survey Date: $lastSurveyDate');
-          print('=============================================');
-
-          items.add({
-            'id': displayId,
-            'household_ref_key': householdRefKey,
-            'name': name,
-            'age': ageText,
-            'gender': gender,
-            'last survey date': lastSurveyDate,
-            'lastSurveyDate': lastSurveyDate,
-            'Next HBNC due date': '-',
-            'mobile': mobile,
-            'badge': 'Family',
-            'created_date': rawCreatedDate,
-            'modified_date': rawModifiedDate,
-          });
-        } catch (_) {
-          continue;
-        }
-      }
-
-      if (mounted) {
-        setState(() {
-          _familySurveyCompletedItems = items;
-        });
-        print('=== DEBUG: Family Survey Completed Items Loaded ===');
-        print('Total Completed Items: ${items.length}');
-        print('===============================================');
-      }
-    } catch (e) {
-      debugPrint('Family survey completed load error: $e');
-    }
-  }
-
-
-  Future<void> _loadAncItems() async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
-      final ancFormKey =
-          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
-              .ancDueRegistration] ??
-              '';
-
-      final List<Map<String, dynamic>> items = [];
-      final Set<String> processedBeneficiaries = {};
-
-      final excludedStates = await db.query(
-        'mother_care_activities',
-        where:
-        "mother_care_state IN ('delivery_outcome', 'hbnc_visit', 'pnc_mother')",
-        columns: ['beneficiary_ref_key'],
-        distinct: true,
-      );
-
-      final excludedBeneficiaryIds = excludedStates
-          .map((e) => e['beneficiary_ref_key']?.toString())
-          .where((id) => id != null && id.isNotEmpty)
-          .toSet();
-
-      debugPrint('Excluded beneficiary IDs: $excludedBeneficiaryIds');
-
-      // Get all beneficiaries with anc_due state that are not in excluded states
-      String query =
-      '''
-  SELECT 
-    mca.*, 
-    bn.*, 
-    bn.id AS beneficiary_id, 
-    mca.id AS mca_id,
-    bn.household_ref_key
-  FROM mother_care_activities mca
-  INNER JOIN beneficiaries_new bn 
-      ON mca.beneficiary_ref_key = bn.unique_key
-  WHERE (mca.mother_care_state = 'anc_due' 
-         OR mca.mother_care_state = 'anc_due')
-    AND bn.is_deleted = 0
-    ${excludedBeneficiaryIds.isNotEmpty ? 'AND mca.beneficiary_ref_key NOT IN (${excludedBeneficiaryIds.map((_) => '?').join(',')})' : ''}
-''';
-
-      List<dynamic> args = excludedBeneficiaryIds.isNotEmpty
-          ? excludedBeneficiaryIds.toList()
-          : [];
-
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        query += ' AND bn.current_user_key = ?';
-        args.add(ashaUniqueKey);
-      }
-
-      query += ' ORDER BY mca.created_date_time DESC';
-
-      debugPrint('Executing query: $query');
-      debugPrint('With parameters: $args');
-
-      final ancDueRecords = await db.rawQuery(query, args);
-
-      debugPrint(
-        'Found ${ancDueRecords.length} ANC due records after filtering',
-      );
-
-      // Process the filtered rows
-      for (final row in ancDueRecords) {
-        final beneficiaryId = row['beneficiary_ref_key']?.toString() ?? '';
-        if (beneficiaryId.isEmpty ||
-            processedBeneficiaries.contains(beneficiaryId)) {
-          continue; // Skip if already processed or no beneficiary ID
-        }
-        try {
-          processedBeneficiaries.add(beneficiaryId);
-          final uniqueKeyFull = row['unique_key']?.toString() ?? '';
-          final isDeath = row['is_death'] == 1;
-          final isMigrated = row['is_migrated'] == 1;
-          if (isDeath || isMigrated) continue;
-
-          // Check if beneficiary has abortion followup form with is_abortion = 'yes'
-          final abortionForms = await db.query(
-            'followup_form_data',
-            where: "forms_ref_key = 'bt7gs9rl1a5d26mz' AND beneficiary_ref_key = ? AND form_json LIKE '%\"is_abortion\"%'",
-            whereArgs: [beneficiaryId],
-          );
-
-          bool hasAbortion = false;
-          for (final form in abortionForms) {
-            try {
-              final formJson = form['form_json']?.toString();
-              if (formJson != null && formJson.isNotEmpty) {
-                final decoded = jsonDecode(formJson);
-                if (decoded is Map<String, dynamic>) {
-                  final ancForm = decoded['anc_form'];
-                  if (ancForm is Map<String, dynamic>) {
-                    final isAbortion = ancForm['is_abortion']?.toString().toLowerCase();
-                    if (isAbortion == 'yes' || isAbortion == 'true' || isAbortion == '1') {
-                      hasAbortion = true;
-                      break;
-                    }
-                  }
-                }
-              }
-            } catch (e) {
-              debugPrint('Error checking abortion form: $e');
-            }
-          }
-
-          if (hasAbortion) {
-            debugPrint('Excluding beneficiary $beneficiaryId - has abortion record');
-            continue;
-          }
-
-          // Parse beneficiary_info
-          final infoRaw = row['beneficiary_info'];
-          if (infoRaw == null) continue;
-
-          Map<String, dynamic> info = {};
-          try {
-            info = infoRaw is String
-                ? jsonDecode(infoRaw) as Map<String, dynamic>
-                : Map<String, dynamic>.from(infoRaw as Map);
-          } catch (e) {
-            debugPrint('Error parsing beneficiary_info: $e');
-            continue;
-          }
-          final isPregnant =
-              info['isPregnant']?.toString().toLowerCase() == 'yes';
-          final genderRaw = info['gender']?.toString().toLowerCase() ?? '';
-
-          // For ANC due records, we still want to show them even if not marked as pregnant
-          if (!isPregnant && genderRaw != 'f' && genderRaw != 'female')
-            continue;
-
-          final name =
-          (info['memberName'] ??
-              info['headName'] ??
-              info['name'] ??
-              'Unknown')
-              .toString()
-              .trim();
-
-          String ageText = '-';
-          final dobRaw =
-              info['dob']?.toString() ?? info['dateOfBirth']?.toString();
-          if (dobRaw != null && dobRaw.isNotEmpty) {
-            try {
-              String dateStr = dobRaw;
-              if (dateStr.contains('T')) {
-                dateStr = dateStr.split('T')[0];
-              }
-              final birthDate = DateTime.tryParse(dateStr);
-              if (birthDate != null) {
-                final now = DateTime.now();
-                int years = now.year - birthDate.year;
-                int months = now.month - birthDate.month;
-                int days = now.day - birthDate.day;
-
-                if (days < 0) {
-                  final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
-                  final lastMonthYear = now.month - 1 < 1
-                      ? now.year - 1
-                      : now.year;
-                  final daysInLastMonth = DateTime(
-                    lastMonthYear,
-                    lastMonth + 1,
-                    0,
-                  ).day;
-                  days += daysInLastMonth;
-                  months--;
-                }
-
-                if (months < 0) {
-                  months += 12;
-                  years--;
-                }
-
-                if (years > 0) {
-                  ageText = '$years Y';
-                } else if (months > 0) {
-                  ageText = '$months M';
-                } else {
-                  ageText = '$days D';
-                }
-              }
-            } catch (_) {}
-          }
-
-          if (ageText == '-') {
-            final years = info['years']?.toString();
-            final approxAge = info['approxAge']?.toString();
-            ageText = (years != null && years.isNotEmpty)
-                ? '${years} Y'
-                : (approxAge != null && approxAge.isNotEmpty)
-                ? '${approxAge} Y'
-                : '-';
-          }
-
-          final mobile = (info['mobileNo'] ?? info['phone'])?.toString();
-
-          String lastVisitDate = '-';
-          DateTime? lastVisitDt;
-
-          String? modifiedRaw = row['modified_date_time']?.toString();
-          String? createdRaw = row['created_date_time']?.toString();
-
-          String? pickDateStr(String? raw) {
-            if (raw == null || raw.isEmpty) return null;
-            String s = raw;
-            if (s.contains('T')) {
-              s = s.split('T')[0];
-            }
-            return s;
-          }
-
-          String? modifiedStr = pickDateStr(modifiedRaw);
-          String? createdStr = pickDateStr(createdRaw);
-
-          if (modifiedStr != null) {
-            lastVisitDt = DateTime.tryParse(modifiedStr);
-            lastVisitDate = _formatAncDateOnly(modifiedStr);
-          } else if (createdStr != null) {
-            lastVisitDt = DateTime.tryParse(createdStr);
-            lastVisitDate = _formatAncDateOnly(createdStr);
-          }
-
-          // Extract LMP date using the comprehensive logic from ANCVisitListScreen
-          DateTime? lmpDate = await _extractLmpDate(row);
-
-          // Also try to get LMP from beneficiary info directly (same as RoutineScreen)
-          if (lmpDate == null) {
-            final lmpStr = info['lmp']?.toString();
-            if (lmpStr != null && lmpStr.isNotEmpty) {
-              lmpDate = DateTime.tryParse(lmpStr.split('T')[0]);
-            }
-          }
-
-          if (lmpDate == null) {
-            print('⚠️ No LMP date found for beneficiary $uniqueKeyFull, will show N/A');
-            String nextAncDueDate = '${AppLocalizations.of(context)!.na}';
-
-            final householdRefKey = row['household_ref_key']?.toString() ?? '';
-            String rawId = row['unique_key']?.toString() ?? '';
-            if (rawId.length > 11) {
-              rawId = rawId.substring(rawId.length - 11);
-            }
-            final uniqueKey = row['unique_key']?.toString() ?? '';
-
-            items.add({
-              'id': rawId,
-              'household_ref_key': householdRefKey,
-              'hhId': householdRefKey,
-              'unique_key': uniqueKey,
-              'BeneficiaryID': uniqueKey,
-              'name': name,
-              'age': ageText,
-              'gender': 'Female',
-              'last Visit date': lastVisitDate,
-              'Current ANC last due date': nextAncDueDate,
-              'mobile': mobile ?? '-',
-              'badge': 'ANC',
-              'beneficiary_info': jsonEncode(info),
-              '_rawRow': row,
-            });
-            continue;
-          } else {
-            print('✅ Using LMP date for beneficiary $uniqueKeyFull: ${_formatDate(lmpDate)}');
-          }
-
-          final ancRanges = _calculateAncDateRanges(lmpDate);
-
-          final today = DateTime.now();
-          final todayDate = DateTime(today.year, today.month, today.day);
-
-          bool _isTodayInWindow(DateTime start, DateTime end) {
-            final startDate = DateTime(start.year, start.month, start.day);
-            final endDate = DateTime(end.year, end.month, end.day);
-            return (todayDate.isAtSameMomentAs(startDate) ||
-                todayDate.isAfter(startDate)) &&
-                (todayDate.isAtSameMomentAs(endDate) ||
-                    todayDate.isBefore(endDate));
-          }
-
-          bool _hasFormInWindow(
-              List<Map<String, dynamic>> forms,
-              DateTime start,
-              DateTime end,
-              ) {
-            for (final formRow in forms) {
-              try {
-                final formJsonRaw = formRow['form_json']?.toString();
-                String? dateRaw;
-
-                if (formJsonRaw != null && formJsonRaw.isNotEmpty) {
-                  final decoded = jsonDecode(formJsonRaw);
-                  if (decoded is Map && decoded['form_data'] is Map) {
-                    final formData = Map<String, dynamic>.from(
-                      decoded['form_data'] as Map,
-                    );
-                    dateRaw = formData['date_of_inspection']?.toString();
-                  }
-                }
-
-                dateRaw ??= formRow['created_date_time']?.toString();
-                if (dateRaw == null || dateRaw.isEmpty) {
-                  return true;
-                }
-
-                String dateStr = dateRaw;
-                if (dateStr.contains('T')) {
-                  dateStr = dateStr.split('T')[0];
-                }
-                final dt = DateTime.tryParse(dateStr);
-                if (dt == null) {
-                  return true;
-                }
-
-                final d = DateTime(dt.year, dt.month, dt.day);
-                final startDate = DateTime(start.year, start.month, start.day);
-                final endDate = DateTime(end.year, end.month, end.day);
-                final within =
-                    (d.isAtSameMomentAs(startDate) || d.isAfter(startDate)) &&
-                        (d.isAtSameMomentAs(endDate) || d.isBefore(endDate));
-                if (within) return true;
-              } catch (_) {}
-            }
-            return false;
-          }
-
-          List<Map<String, dynamic>> existingForms = [];
-          if (ancFormKey.isNotEmpty && uniqueKeyFull.isNotEmpty) {
-            existingForms = await db.query(
-              FollowupFormDataTable.table,
-              columns: ['form_json', 'created_date_time'],
-              where: 'forms_ref_key = ? AND beneficiary_ref_key = ? ',
-              whereArgs: [ancFormKey, uniqueKeyFull],
-            );
-          }
-
-          DateTime? dueVisitStartDate;
-          DateTime? dueVisitEndDate;
-          String? currentAncVisitName;
-
-          final firstStart = ancRanges['1st_anc_start'];
-          final firstEnd = ancRanges['1st_anc_end'];
-          final secondStart = ancRanges['2nd_anc_start'];
-          final secondEnd = ancRanges['2nd_anc_end'];
-          final thirdStart = ancRanges['3rd_anc_start'];
-          final thirdEnd = ancRanges['3rd_anc_end'];
-          final fourthStart = ancRanges['4th_anc_start'];
-          final fourthEnd = ancRanges['4th_anc_end'];
-
-          bool hasDueVisit = false;
-
-          if (!hasDueVisit &&
-              firstStart != null &&
-              firstEnd != null &&
-              _isTodayInWindow(firstStart, firstEnd)) {
-            if (!_hasFormInWindow(existingForms, firstStart, firstEnd)) {
-              hasDueVisit = true;
-              dueVisitStartDate = firstStart;
-              dueVisitEndDate = firstEnd;
-            }
-          }
-
-          if (!hasDueVisit &&
-              secondStart != null &&
-              secondEnd != null &&
-              _isTodayInWindow(secondStart, secondEnd)) {
-            if (!_hasFormInWindow(existingForms, secondStart, secondEnd)) {
-              hasDueVisit = true;
-              dueVisitStartDate = secondStart;
-              dueVisitEndDate = secondEnd;
-            }
-          }
-
-          if (!hasDueVisit &&
-              thirdStart != null &&
-              thirdEnd != null &&
-              _isTodayInWindow(thirdStart, thirdEnd)) {
-            if (!_hasFormInWindow(existingForms, thirdStart, thirdEnd)) {
-              hasDueVisit = true;
-              dueVisitStartDate = thirdStart;
-              dueVisitEndDate = thirdEnd;
-            }
-          }
-
-          if (!hasDueVisit &&
-              fourthStart != null &&
-              fourthEnd != null &&
-              _isTodayInWindow(fourthStart, fourthEnd)) {
-            if (!_hasFormInWindow(existingForms, fourthStart, fourthEnd)) {
-              hasDueVisit = true;
-              dueVisitStartDate = fourthStart;
-              dueVisitEndDate = fourthEnd;
-            }
-          }
-
-          if (!hasDueVisit ||
-              dueVisitStartDate == null ||
-              dueVisitEndDate == null) {
-            continue;
-          }
-
-          final visitCount = await _getVisitCountFromFollowupForm(uniqueKeyFull);
-          print('🔍 Visit count for beneficiary $uniqueKeyFull: $visitCount');
-
-          final visitData = await _getVisitCount(uniqueKeyFull);
-          final dbVisitCount = visitData['count'] ?? 0;
-          print('🔍 DB visit count for beneficiary $uniqueKeyFull: $dbVisitCount');
-
-          // Calculate next ANC due date using the same logic as RoutineScreen
-          String nextAncDueDate = 'N/A';
-          try {
-            // Use the LMP date that was already extracted above
-            nextAncDueDate = _getNextAncDueDate(lmpDate, dbVisitCount);
-            print('✅ Next ANC due date for beneficiary $uniqueKeyFull: $nextAncDueDate');
-          } catch (e) {
-            print('Error calculating next ANC due date: $e');
-          }
-
-          // Check if the due date is up to today's date
-          bool shouldShowRecord = false;
-          if (nextAncDueDate != 'N/A' && nextAncDueDate != AppLocalizations.of(context)!.na) {
-            try {
-              final dueDate = DateTime.parse(nextAncDueDate);
-              final today = DateTime.now();
-              final todayDate = DateTime(today.year, today.month, today.day);
-
-              // Only show record if due date is today or in the future (not past due)
-              if (dueDate.isAtSameMomentAs(todayDate) || dueDate.isAfter(todayDate)) {
-                shouldShowRecord = true;
-                print('✅ ANC record $uniqueKeyFull: Due date $nextAncDueDate is valid (today or future)');
-              } else {
-                print('⚠️ ANC record $uniqueKeyFull: Due date $nextAncDueDate is past, skipping');
-              }
-            } catch (e) {
-              print('Error parsing due date for comparison: $e');
-              shouldShowRecord = true; // Show record if date parsing fails
-            }
-          } else {
-            print('⚠️ ANC record $uniqueKeyFull: No valid due date, skipping');
-          }
-
-          // Only add record if it should be shown (due date is today or future)
-          if (!shouldShowRecord) {
-            continue; // Skip this record
-          }
-
-          // Use the same next ANC due date logic as RoutineScreen for "Current ANC last due date"
-          String currentAncLastDueDateText = nextAncDueDate;
-
-          final householdRefKey = row['household_ref_key']?.toString() ?? '';
-
-          String rawId = row['unique_key']?.toString() ?? '';
-          if (rawId.length > 11) {
-            rawId = rawId.substring(rawId.length - 11);
-          }
-
-          final uniqueKey = row['unique_key']?.toString() ?? '';
-
-          items.add({
-            'id': rawId,
-            'household_ref_key': householdRefKey, // full household key
-            'hhId': householdRefKey,
-            'unique_key': uniqueKey,
-            'BeneficiaryID': uniqueKey,
-            'name': name,
-            'age': ageText,
-            'gender': 'Female',
-            'last Visit date': lastVisitDate,
-            'Current ANC last due date': currentAncLastDueDateText,
-            'mobile': mobile ?? '-',
-            'badge': 'ANC',
-            'beneficiary_info': jsonEncode(info),
-            '_rawRow': row,
-          });
-        } catch (_) {
-          continue;
-        }
-      }
-
-      // Removed duplicate ANC due items query as we're now handling this in the main query above
-
-      if (mounted) {
-        setState(() {
-          _ancItems = items; // Use the already filtered items list
-        });
-        _saveTodayWorkCountsToStorage();
-        debugPrint('Updated _ancItems with ${items.length} filtered records');
-      }
-    } catch (_) {}
-  }
-
-
-  String _getNextAncDueDate(DateTime? lmpDate, int visitCount) {
-    if (lmpDate == null) return AppLocalizations.of(context)!.na;
-
-    final t = AppLocalizations.of(context);
-    final now = DateTime.now();
-    final ancRanges = _calculateAncDateRanges(lmpDate);
-
-    String? nextAncKey;
-
-    if (visitCount == 0) {
-      // First ANC is due
-      nextAncKey = '1st_anc_end';
-    } else if (visitCount == 1) {
-      // Second ANC is due
-      nextAncKey = '2nd_anc_end';
-    } else if (visitCount == 2) {
-      // Third ANC is due
-      nextAncKey = '3rd_anc_end';
-    } else if (visitCount == 3) {
-      // Fourth ANC is due
-      nextAncKey = '4th_anc_end';
-    } else {
-      nextAncKey = '4th_anc_end';
-    }
-
-    if (nextAncKey != null && ancRanges.containsKey(nextAncKey)) {
-      final dueDate = ancRanges[nextAncKey];
-      if (dueDate != null) {
-        return _formatDate(dueDate);
-      }
-    }
-
-    return AppLocalizations.of(context)!.na;
-  }
-
-
-  Future<int> _getVisitCountFromFollowupForm(String beneficiaryId) async {
-    try {
-      if (beneficiaryId.isEmpty) {
-        print('⚠️ Empty beneficiary ID provided to _getVisitCountFromFollowupForm');
-        return 0;
-      }
-
-      final db = await DatabaseProvider.instance.database;
-      final ancFormKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
-
-      if (ancFormKey.isEmpty) {
-        print('⚠️ ANC form key is empty');
-        return 0;
-      }
-
-      // Get the most recent ANC form for this beneficiary
-      final result = await db.query(
-        FollowupFormDataTable.table,
-        where: 'forms_ref_key = ? AND beneficiary_ref_key = ? ',
-        whereArgs: [ancFormKey, beneficiaryId],
-        orderBy: 'created_date_time DESC',
-        limit: 1,
-      );
-
-      if (result.isEmpty) {
-        print('ℹ️ No ANC followup forms found for beneficiary: $beneficiaryId');
-        return 0;
-      }
-
-      final formJsonStr = result.first['form_json']?.toString();
-      if (formJsonStr == null || formJsonStr.isEmpty) {
-        print('⚠️ No form_json found in followup form for beneficiary: $beneficiaryId');
-        return 0;
-      }
-
-      try {
-        final formJson = jsonDecode(formJsonStr) as Map<String, dynamic>;
-
-        // Try to get visit_count from anc_form structure
-        final ancForm = formJson['anc_form'] as Map<String, dynamic>?;
-        if (ancForm != null) {
-          final visitCount = ancForm['anc_visit'] as int?;
-          if (visitCount != null) {
-            print('✅ Found visit count $visitCount in anc_form for beneficiary: $beneficiaryId');
-            return visitCount;
-          }
-        }
-
-        // Try alternative structure (form_data)
-        final formData = formJson['form_data'] as Map<String, dynamic>?;
-        if (formData != null) {
-          final visitCount = formData['anc_visit'] as int?;
-          if (visitCount != null) {
-            print('✅ Found visit count $visitCount in form_data for beneficiary: $beneficiaryId');
-            return visitCount;
-          }
-        }
-
-        // Try top level
-        final visitCount = formJson['anc_visit'] as int?;
-        if (visitCount != null) {
-          print('✅ Found visit count $visitCount at top level for beneficiary: $beneficiaryId');
-          return visitCount;
-        }
-
-        print('⚠️ No visit count found in followup form for beneficiary: $beneficiaryId');
-        return 0;
-      } catch (e) {
-        print('❌ Error parsing followup form JSON for beneficiary $beneficiaryId: $e');
-        return 0;
-      }
-    } catch (e) {
-      print('❌ Error in _getVisitCountFromFollowupForm for $beneficiaryId: $e');
-      return 0;
-    }
-  }
-
-  Future<Map<String, dynamic>> _getVisitCount(String beneficiaryId) async {
-    try {
-      if (beneficiaryId.isEmpty) {
-        print('⚠️ Empty beneficiary ID provided to _getVisitCount');
-        return {'count': 0, 'isHighRisk': false};
-      }
-
-      print(
-        '🔍 Fetching visit count and high-risk status for beneficiary: $beneficiaryId',
-      );
-      final result = await LocalStorageDao.instance.getANCVisitCount(
-        beneficiaryId,
-      );
-      print('✅ Visit details for $beneficiaryId: $result');
-      return result;
-    } catch (e) {
-      print('❌ Error in _getVisitCount for $beneficiaryId: $e');
-      return {'count': 0, 'isHighRisk': false};
-    }
-  }
-
-  String _formatAncDateOnly(String? dateTime) {
-    if (dateTime == null || dateTime.isEmpty) return '-';
-    try {
-      final dt = DateTime.parse(dateTime);
-      return DateFormat('dd-MM-yyyy').format(dt);
-    } catch (_) {
-      return '-';
-    }
-  }
-
-
-  Future<DateTime?> _extractLmpDate(Map<String, dynamic> data) async {
-    try {
-      dynamic rawInfo = data['beneficiary_info'];
-      Map<String, dynamic> info;
-
-      if (rawInfo is String && rawInfo.isNotEmpty) {
-        info = jsonDecode(rawInfo) as Map<String, dynamic>;
-      } else if (rawInfo is Map) {
-        info = Map<String, dynamic>.from(rawInfo as Map);
-      } else {
-        info = <String, dynamic>{};
-      }
-
-      final lmpRaw = info['lmp']?.toString();
-      if (lmpRaw != null && lmpRaw.isNotEmpty) {
-        String dateStr = lmpRaw;
-        if (dateStr.contains('T')) {
-          dateStr = dateStr.split('T')[0];
-        }
-        final lmpDate = DateTime.tryParse(dateStr);
-        if (lmpDate != null) {
-          print('✅ Found LMP date from beneficiaries_new: ${_formatDate(lmpDate)}');
-          return lmpDate;
-        }
-      }
-
-      // Fallback: try to get from _rawRow if available
-      final rawRow = data['_rawRow'] as Map<String, dynamic>?;
-      if (rawRow != null) {
-        rawInfo = rawRow['beneficiary_info'];
-        if (rawInfo is String && rawInfo.isNotEmpty) {
-          info = jsonDecode(rawInfo) as Map<String, dynamic>;
-        } else if (rawInfo is Map) {
-          info = Map<String, dynamic>.from(rawInfo as Map);
-        } else {
-          info = <String, dynamic>{};
-        }
-
-        final lmpRaw = info['lmp']?.toString();
-        if (lmpRaw != null && lmpRaw.isNotEmpty) {
-          String dateStr = lmpRaw;
-          if (dateStr.contains('T')) {
-            dateStr = dateStr.split('T')[0];
-          }
-          final lmpDate = DateTime.tryParse(dateStr);
-          if (lmpDate != null) {
-            print('✅ Found LMP date from _rawRow: ${_formatDate(lmpDate)}');
-            return lmpDate;
-          }
-        }
-      }
-
-      // If not found in beneficiaries_new, check followup forms
-      print('⚠️ No LMP found in beneficiaries_new, checking followup forms...');
-      final lmpFromFollowup = await _getLmpFromFollowupForm(data);
-      if (lmpFromFollowup != null) {
-        print('✅ Found LMP date from followup form: ${_formatDate(lmpFromFollowup)}');
-        return lmpFromFollowup;
-      }
-
-      print('⚠️ No LMP date found in beneficiaries_new or followup forms');
-      return null;
-    } catch (e) {
-      print('⚠️ Error extracting LMP date: $e');
-      return null;
-    }
-  }
-
-  Future<DateTime?> _getLmpFromFollowupForm(Map<String, dynamic> data) async {
-    try {
-      final benId = data['BeneficiaryID']?.toString() ??
-          data['unique_key']?.toString() ??
-          (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['unique_key']?.toString() : null);
-
-      final hhId = data['hhId']?.toString() ??
-          (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['household_ref_key']?.toString() : null);
-
-      if (benId == null || benId.isEmpty || hhId == null || hhId.isEmpty) {
-        print('⚠️ Missing beneficiary ID or household ID for followup form LMP lookup');
-        return null;
-      }
-
-      final dao = LocalStorageDao();
-      final forms = await dao.getFollowupFormsByHouseholdAndBeneficiary(
-        formType: FollowupFormDataTable.eligibleCoupleTrackingDue,
-        householdId: hhId,
-        beneficiaryId: benId,
-      );
-
-      if (forms.isEmpty) {
-        print('ℹ️ No eligible couple tracking due forms found for beneficiary');
-        return null;
-      }
-
-      for (final form in forms) {
-        final formJsonStr = form['form_json']?.toString();
-        if (formJsonStr == null || formJsonStr.isEmpty) {
-          continue;
-        }
-
-        try {
-          final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
-
-          // Check for LMP date in eligible_couple_tracking_due_from structure
-          final trackingData = root['eligible_couple_tracking_due_from'];
-          if (trackingData is Map) {
-            final lmpStr = trackingData['lmp_date']?.toString();
-
-            if (lmpStr != null && lmpStr.isNotEmpty) {
-              try {
-                final lmpDate = DateTime.parse(lmpStr);
-                print('✅ Found LMP date from followup form: $lmpDate');
-                return lmpDate;
-              } catch (e) {
-                print('⚠️ Error parsing LMP date from followup form: $e');
-              }
-            }
-          }
-        } catch (e) {
-          print('⚠️ Error parsing followup form JSON: $e');
-        }
-      }
-
-      print('ℹ️ No LMP date found in any eligible couple tracking due forms');
-      return null;
-    } catch (e) {
-      print('❌ Error loading LMP from followup form: $e');
-      return null;
-    }
-  }
-
-
-
-  Map<String, DateTime> _calculateAncDateRanges(DateTime lmp) {
-    final ranges = <String, DateTime>{};
-
-    ranges['1st_anc_start'] = lmp;
-    ranges['1st_anc_end'] = _dateAfterWeeks(lmp, 12);
-
-    ranges['2nd_anc_start'] = _dateAfterWeeks(lmp, 14);
-    ranges['2nd_anc_end'] = _dateAfterWeeks(lmp, 24);
-    ranges['3rd_anc_start'] = _dateAfterWeeks(lmp, 26);
-    ranges['3rd_anc_end'] = _dateAfterWeeks(lmp, 34);
-
-    ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
-    ranges['4th_anc_end'] = _calculateEdd(lmp);
-
-    ranges['pmsma_start'] = ranges['1st_anc_end']!.add(const Duration(days: 1));
-    ranges['pmsma_end'] = ranges['2nd_anc_start']!.subtract(const Duration(days: 1));
-
-    return ranges;
-  }
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
-  }
-
-  DateTime _dateAfterWeeks(DateTime startDate, int noOfWeeks) {
-    final days = noOfWeeks * 7;
-    return startDate.add(Duration(days: days));
-  }
-
-  DateTime _calculateEdd(DateTime lmp) {
-    return _dateAfterWeeks(lmp, 40);
-  }
-
-
-  Future<void> _loadHbncItems() async {
-    try {
-      setState(() => _isLoading = true);
-      _hbncItems = [];
-
-      final Set<String> processedBeneficiaries = <String>{};
-
-      final db = await DatabaseProvider.instance.database;
-      final deliveryOutcomeKey =
-          '4r7twnycml3ej1vg';
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
-      String whereClause = 'forms_ref_key = ?';
-      List<dynamic> whereArgs = [deliveryOutcomeKey];
-
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        whereClause += ' AND current_user_key = ?';
-        whereArgs.add(ashaUniqueKey);
-      }
-
-      final dbOutcomes = await db.query(
-        'followup_form_data',
-        where: whereClause,
-        whereArgs: whereArgs,
-      );
-
-      debugPrint('Found ${dbOutcomes.length} delivery outcomes');
-
-      for (final outcome in dbOutcomes) {
-        try {
-          final formJson = jsonDecode(outcome['form_json'] as String? ?? '{}');
-          final formData = formJson['form_data'] ?? {};
-          final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
-
-          if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
-            debugPrint(
-              '⚠️ Missing beneficiary_ref_key in outcome: ${outcome['id']}',
-            );
-            continue;
-          }
-
-          // Skip if already processed
-          if (processedBeneficiaries.contains(beneficiaryRefKey)) {
-            debugPrint(
-              'ℹ️ Skipping duplicate outcome for beneficiary: $beneficiaryRefKey',
-            );
-            continue;
-          }
-          processedBeneficiaries.add(beneficiaryRefKey);
-
-          // Get beneficiary details
-          String benWhere =
-              'unique_key = ? AND (is_deleted = 0 OR is_deleted IS NULL)';
-          List<dynamic> benArgs = [beneficiaryRefKey];
-
-          if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-            benWhere += ' AND current_user_key = ?';
-            benArgs.add(ashaUniqueKey);
-          }
-
-          final beneficiaryResults = await db.query(
-            'beneficiaries_new',
-            where: benWhere,
-            whereArgs: benArgs,
-          );
-
-          if (beneficiaryResults.isEmpty) {
-            debugPrint('⚠️ No beneficiary found for key: $beneficiaryRefKey');
-            continue;
-          }
-
-          final beneficiary = beneficiaryResults.first;
-          final beneficiaryInfoRaw =
-              beneficiary['beneficiary_info'] as String? ?? '{}';
-
-          Map<String, dynamic> beneficiaryInfo;
-          try {
-            beneficiaryInfo = jsonDecode(beneficiaryInfoRaw);
-          } catch (e) {
-            debugPrint('Error parsing beneficiary info: $e');
-            continue;
-          }
-
-          // Extract data
-          final name =
-              beneficiaryInfo['memberName']?.toString() ??
-                  beneficiaryInfo['headName']?.toString() ??
-                  'N/A';
-          final dob = beneficiaryInfo['dob']?.toString();
-          final age = _calculateAge(dob);
-          final gender =
-          (beneficiaryInfo['gender']?.toString() ?? 'female')
-              .toLowerCase() ==
-              'female'
-              ? 'Female'
-              : 'Male';
-          final mobile = beneficiaryInfo['mobileNo']?.toString() ?? '-';
-          final spouseName = beneficiaryInfo['spouseName']?.toString() ?? '-';
-          final householdRefKey =
-              beneficiary['household_ref_key']?.toString() ?? '';
-
-          // Get registration date from mother_care_activities table for pnc_mother state
-          String registrationDate = beneficiary['created_date_time']?.toString() ?? '';
-          try {
-            final mcaResult = await db.query(
-              'mother_care_activities',
-              where: 'beneficiary_ref_key = ? AND mother_care_state = ? AND is_deleted = 0',
-              whereArgs: [beneficiaryRefKey, 'pnc_mother'],
-              orderBy: 'created_date_time DESC',
-              limit: 1,
-            );
-
-            if (mcaResult.isNotEmpty) {
-              final mcaCreatedDate = mcaResult.first['created_date_time']?.toString() ?? '';
-              if (mcaCreatedDate.isNotEmpty) {
-                registrationDate = mcaCreatedDate;
-              }
-            }
-          } catch (e) {
-            print('⚠️ Error fetching registration date from mother_care_activities: $e');
-            // Fallback to beneficiary created date
-          }
-
-          // Use HBNCList logic for visit count and dates
-          final visitCount = await _getHbncVisitCountFromHBNCList(beneficiaryRefKey);
-          final previousHBNCDate = await _getHbncLastVisitDateFromHBNCList(beneficiaryRefKey);
-          final deliveryDate = formData['delivery_date']?.toString();
-          print('📅 Passing delivery date to _getHbncNextVisitDateFromHBNCList: $deliveryDate');
-          print('📊 Passing visit count to _getHbncNextVisitDateFromHBNCList: $visitCount');
-          final nextHBNCDate = await _getHbncNextVisitDateFromHBNCList(
-            beneficiaryRefKey,
-            deliveryDate,
-            visitCount,
-            registrationDate,
-          );
-
-          print('📊 Final values for beneficiary $beneficiaryRefKey:');
-          print('  - Visit Count: $visitCount');
-          print('  - Previous HBNC Date: $previousHBNCDate');
-          print('  - Next HBNC Date: $nextHBNCDate');
-
-          // Get visit number for filtering logic (keep existing logic)
-          final visitNumber = await _getHbncVisitNumber(beneficiaryRefKey);
-
-          // Apply filtering logic based on visit number
-          if (visitNumber != null) {
-            // Handle visit number 0 case - show record if today's date matches any criteria
-            if (visitNumber == 0) {
-              debugPrint(
-                '✅ Including HBNC record for $beneficiaryRefKey - visit number 0',
-              );
-            } else {
-              // For other visit numbers, apply specific filtering
-              final specificVisitNumbers = [3, 7, 14, 21, 28, 42];
-              if (!specificVisitNumbers.contains(visitNumber)) {
-                debugPrint(
-                  '🗑️ Skipping HBNC record for $beneficiaryRefKey - visit number $visitNumber not in specific list',
-                );
-                continue;
-              }
-
-              // Check if next visit date is today, in the past, or matches today's date
-              if (nextHBNCDate != null && nextHBNCDate.isNotEmpty) {
-                final nextDate = _parseDate(nextHBNCDate);
-                if (nextDate != null) {
-                  final now = DateTime.now();
-                  final today = DateTime(now.year, now.month, now.day);
-                  final nextDateOnly = DateTime(
-                    nextDate.year,
-                    nextDate.month,
-                    nextDate.day,
-                  );
-
-                  // Show if next visit date is today, in the past, or exactly matches today
-                  if (nextDateOnly.isAfter(today)) {
-                    debugPrint(
-                      '🗑️ Skipping HBNC record for $beneficiaryRefKey - next visit date $nextHBNCDate is in the future',
-                    );
-                    continue;
-                  }
-
-                  // If next visit date is today or in the past, show the record
-                  if (nextDateOnly.isBefore(today) ||
-                      nextDateOnly.isAtSameMomentAs(today)) {
-                    debugPrint(
-                      '✅ Including HBNC record for $beneficiaryRefKey - next visit date $nextHBNCDate is today or in the past',
-                    );
-                  } else {
-                    debugPrint(
-                      '🗑️ Skipping HBNC record for $beneficiaryRefKey - next visit date $nextHBNCDate is in the future',
-                    );
-                    continue;
-                  }
-                }
-              }
-            }
-          }
-          // If visitNumber is null, show all records (existing behavior)
-
-          // Check if beneficiary already has a completed HBNC form (to exclude from to-do list)
-          final hasCompletedHbncForm = await _hasCompletedHbncForm(
-            beneficiaryRefKey,
-          );
-          if (hasCompletedHbncForm) {
-            debugPrint(
-              '🗑️ Skipping HBNC record for $beneficiaryRefKey - already has completed HBNC form',
-            );
-            continue;
-          }
-
-          // Check if visit count will change between current date and next HBNC visit date
-          final shouldRemoveFromList =
-          await _shouldRemoveHbncRecordDueToCountChange(
-            beneficiaryRefKey,
-            formData['delivery_date']?.toString(),
-            visitCount,
-          );
-
-          // If count will change, skip adding this record to list
-          if (shouldRemoveFromList) {
-            debugPrint(
-              '🗑️ Removing HBNC record for $beneficiaryRefKey - visit count will change before next visit',
-            );
-            continue;
-          }
-
-          // Format the data for display
-          // In the _loadHbncItems method, update the formattedData map to include the 'badge' field
-          final formattedData = {
-            'id': _last11(beneficiaryRefKey),
-            'unique_key': beneficiaryRefKey,
-            'name': name,
-            'age': _formatAgeWithSuffix(age),
-            'gender': gender,
-            'mobile': mobile,
-            // spouse_name removed as requested
-            'household_ref_key': householdRefKey,
-            'delivery_date': formData['delivery_date']?.toString() ?? '-',
-            'last_visit_date': previousHBNCDate ?? '-',
-            'next_visit_date': nextHBNCDate ?? '-',
-            'visit_count': visitCount,
-            'is_hbnc': true,
-            'beneficiary_info': jsonEncode(beneficiaryInfo),
-            'form_data': formData,
-            'badge': 'HBNC', // Add this line to ensure the badge shows "HBNC"
-            'last Visit date':
-            previousHBNCDate ??
-                '-', // Ensure this matches the card's expected field name
-            'next hbnc visit due date':
-            nextHBNCDate ??
-                '-', // Changed from 'Current HBNC last due date' to 'next hbnc visit due date'
-            'fullBeneficiaryId': beneficiaryRefKey, // Add this for navigation
-            'fullHhId': householdRefKey, // Add this for navigation
-          };
-
-          setState(() {
-            _hbncItems.add(formattedData);
-          });
-        } catch (e) {
-          debugPrint('❌ Error processing outcome ${outcome['id']}: $e');
-        }
-      }
-    } catch (e) {
-      debugPrint('❌ Error in _loadHbncItems: $e');
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-  Future<int> _getHbncVisitCountFromHBNCList(String beneficiaryId) async {
-    try {
-      if (beneficiaryId.isEmpty) {
-        print('⚠️ Empty beneficiaryId provided to _getHbncVisitCountFromHBNCList');
-        return 0;
-      }
-
-      final db = await DatabaseProvider.instance.database;
-      final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
-
-      // Get the latest visit record to extract visit number
-      final latestVisitRows = await db.query(
-        FollowupFormDataTable.table,
-        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? ',
-        whereArgs: [beneficiaryId, hbncVisitKey],
-        orderBy: 'created_date_time DESC',
-        limit: 1,
-      );
-
-      if (latestVisitRows.isNotEmpty) {
-        final result = latestVisitRows.first;
-        try {
-          final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
-
-          if (formJson.containsKey('hbyc_form')) {
-            final hbycForm = formJson['hbyc_form'] as Map<String, dynamic>? ?? {};
-
-            if (hbycForm.containsKey('visitDetails')) {
-              final visitDetails = hbycForm['visitDetails'] as Map<String, dynamic>? ?? {};
-              final visitNumber = visitDetails['visitNumber']?.toString();
-
-              if (visitNumber != null) {
-                final number = int.tryParse(visitNumber);
-                if (number != null) {
-                  print('🔢 Found visit number from hbyc_form.visitDetails: $number for beneficiary $beneficiaryId');
-                  return number;
-                }
-              }
-            }
-          }
-
-          final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
-
-          if (formData.containsKey('visitDetails')) {
-            final visitDetails = formData['visitDetails'] as Map<String, dynamic>? ?? {};
-            final visitNumber = visitDetails['visitNumber']?.toString() ??
-                visitDetails['visit_number']?.toString();
-
-            if (visitNumber != null) {
-              final number = int.tryParse(visitNumber);
-              if (number != null) {
-                print('🔢 Found visit number from form_data.visitDetails: $number for beneficiary $beneficiaryId');
-                return number;
-              }
-            }
-          }
-        } catch (e) {
-          print('❌ Error parsing visit number: $e');
-        }
-      }
-
-      // Fallback 1: Check home_visit_day from pnc_infant_form
-      if (latestVisitRows.isNotEmpty) {
-        final result = latestVisitRows.first;
-        try {
-          final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
-          print('🔍 Full form JSON keys: ${formJson.keys.toList()}');
-
-          // Check for both pnc_mother_form and pnc_infant_form structures
-          List<String> formKeysToCheck = ['pnc_mother_form', 'pnc_infant_form'];
-
-          for (final formKey in formKeysToCheck) {
-            if (formJson.containsKey(formKey)) {
-              final formData = formJson[formKey] as Map<String, dynamic>? ?? {};
-              print('🔍 Found $formKey structure');
-              print('🔍 $formKey keys: ${formData.keys.toList()}');
-
-              final homeVisitDay = formData['home_visit_day']?.toString();
-              print('📊 Extracted home_visit_day from $formKey: $homeVisitDay');
-              print('📊 home_visit_day type: ${homeVisitDay.runtimeType}');
-
-              if (homeVisitDay != null && homeVisitDay.isNotEmpty) {
-                final number = int.tryParse(homeVisitDay);
-                print('🔢 Parsed home_visit_day as integer: $number');
-                if (number != null && number > 0) {
-                  print('🔢 Found visit number from $formKey.home_visit_day: $number for beneficiary $beneficiaryId');
-                  return number;
-                } else {
-                  print('⚠️ home_visit_day is null or <= 0: $number');
-                }
-              } else {
-                print('⚠️ home_visit_day is null or empty in $formKey: $homeVisitDay');
-              }
-            }
-          }
-        } catch (e) {
-          print('❌ Error parsing pnc_infant_form: $e');
-          print('🔍 Raw form_json: ${result['form_json']}');
-        }
-      } else {
-        print('⚠️ No latest visit rows found for pnc_infant_form check');
-      }
-
-      // Fallback 2: Counting total records
-      final countRows = await db.query(
-        FollowupFormDataTable.table,
-        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
-        whereArgs: [beneficiaryId, hbncVisitKey],
-        columns: ['id'],
-      );
-      final count = countRows.length;
-      print('🔢 HBNC visit record count for $beneficiaryId: $count');
-      return count;
-    } catch (e) {
-      print('❌ Error in _getHbncVisitCountFromHBNCList for $beneficiaryId: $e');
-      return 0;
-    }
-  }
-  Future<String?> _getHbncLastVisitDateFromHBNCList(String beneficiaryId) async {
-    try {
-      print('🔍 Fetching last visit date for beneficiary: $beneficiaryId');
-      final db = await DatabaseProvider.instance.database;
-
-      final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
-      print('🔑 Using form reference key: $hbncVisitKey');
-
-      final results = await db.query(
-        FollowupFormDataTable.table,
-        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? ',
-        whereArgs: [beneficiaryId, hbncVisitKey],
-        orderBy: 'created_date_time DESC',
-        limit: 1,
-      );
-
-      print('📋 Found ${results.length} HBNC visit records');
-
-      if (results.isNotEmpty) {
-        final result = results.first;
-        print('📋 Found HBNC visit record with ID: ${result['id']}');
-
-        // Directly use created_date_time as the previous HBNC date
-        final createdDate = result['created_date_time'];
-        if (createdDate != null && createdDate.toString().isNotEmpty) {
-          print('⏰ Using created_date_time as previous HBNC date: $createdDate');
-          final formattedDate = _formatDateFromString(createdDate.toString());
-          print('✅ Previous HBNC date: $formattedDate');
-          return formattedDate;
-        } else {
-          print('⚠️ created_date_time is null or empty');
-          return null;
-        }
-      } else {
-        print('ℹ️ No HBNC visit records found for beneficiary');
-      }
-    } catch (e) {
-      print('❌ Error in _getHbncLastVisitDateFromHBNCList: $e');
-    }
-    return null;
-  }
-
-  Future<String?> _getHbncNextVisitDateFromHBNCList(
-      String beneficiaryId,
-      String? deliveryDate,
-      int visitCount,
-      String registrationDate,
-      ) async {
-    try {
-      print('🔍 Calculating next visit date for beneficiary: $beneficiaryId');
-      print('📊 Visit count: $visitCount');
-      print('📅 Registration date: $registrationDate');
-
-      /// 🔹 CASE 1: No HBNC visits done yet
-      /// → Show registration date
-      if (visitCount == 0) {
-        if (registrationDate.isNotEmpty) {
-          final parsedRegDate = DateTime.tryParse(registrationDate);
-          if (parsedRegDate != null) {
-            final formatted = _formatDateFromString(parsedRegDate.toString());
-            print('📅 Visit count 0 → Next HBNC = Registration Date: $formatted');
-            return formatted;
-          }
-        }
-
-        // Fallback safety
-        print('⚠️ Invalid registration date, using today');
-        return _formatDateFromString(DateTime.now().toString());
-      }
-
-      /// 🔹 CASE 2: Visit count >= 1
-      final db = await DatabaseProvider.instance.database;
-
-      final possibleFormKeys = [
-        FollowupFormDataTable.formUniqueKeys[
-        FollowupFormDataTable.pncMother],
-        '4r7twnycml3ej1vg',
-        '695fdc026276645a01e9c800',
-      ];
-
-      final latestVisitRows = await db.query(
-        FollowupFormDataTable.table,
-        where:
-        'beneficiary_ref_key = ? AND (forms_ref_key = ? OR forms_ref_key = ? OR forms_ref_key = ?)',
-        whereArgs: [beneficiaryId, ...possibleFormKeys],
-        orderBy: 'created_date_time DESC',
-        limit: 1,
-      );
-
-      DateTime baseDate;
-
-      if (latestVisitRows.isNotEmpty) {
-        final createdDateTime =
-        latestVisitRows.first['created_date_time']?.toString();
-        baseDate =
-            DateTime.tryParse(createdDateTime ?? '') ?? DateTime.now();
-        print('📅 Base date from last visit: $baseDate');
-      } else {
-        baseDate = DateTime.now();
-        print('⚠️ No visit found, using today as base date');
-      }
-
-      /// Visit 1 → +2 days
-      if (visitCount == 1) {
-        final nextVisit = baseDate.add(const Duration(days: 2));
-        return _formatDateFromString(nextVisit.toString());
-      }
-
-      /// Visit 2+ → use your existing rule
-      final nextVisitDate =
-      _calculateNextVisitDate(visitCount, baseDate);
-
-      return nextVisitDate != null
-          ? _formatDateFromString(nextVisitDate.toString())
-          : null;
-    } catch (e) {
-      print('❌ Error calculating next visit date: $e');
-      return null;
-    }
-  }
-
-  DateTime? _calculateNextVisitDate(int currentVisitNumber, DateTime currentVisitDate) {
-    switch (currentVisitNumber) {
-      case 0: // Day 0 → Day 1 (within 24 hours of birth)
-      case 1: // Day 1 → Day 3 (after 2 days)
-        return currentVisitDate.add(const Duration(days: 2));
-      case 3: // Day 3 → Day 7 (after 4 days)
-        return currentVisitDate.add(const Duration(days: 4));
-      case 7: // Day 7 → Day 14 (after 7 days)
-        return currentVisitDate.add(const Duration(days: 7));
-      case 14: // Day 14 → Day 21 (after 7 days)
-        return currentVisitDate.add(const Duration(days: 7));
-      case 21: // Day 21 → Day 28 (after 7 days)
-        return currentVisitDate.add(const Duration(days: 7));
-      case 28: // Day 28 → Day 42 (after 14 days)
-        return currentVisitDate.add(const Duration(days: 14));
-      default:
-      // For any other visit number, add 7 days as default
-        return currentVisitDate.add(const Duration(days: 7));
-    }
-  }
-
-  // Helper method to parse date strings in different formats
-  DateTime? _parseDate(String dateStr) {
-    if (dateStr.isEmpty) return null;
-    try {
-
-      if (dateStr.contains('-')) {
-        return DateTime.tryParse(dateStr);
-      }
-
-      // Format: dd-MM-yyyy
-      if (RegExp(r'\d{2}-\d{2}-\d{4}').hasMatch(dateStr)) {
-        final parts = dateStr.split('-');
-        if (parts.length == 3) {
-          final day = int.tryParse(parts[0]);
-          final month = int.tryParse(parts[1]);
-          final year = int.tryParse(parts[2]);
-          if (day != null && month != null && year != null) {
-            return DateTime(year, month, day);
-          }
-        }
-      }
-
-      return null;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  int _calculateAge(String? dob) {
-    if (dob == null || dob.isEmpty) return 0;
-    try {
-      DateTime? birthDate;
-
-      // Try parsing the date string
-      if (dob.contains('T')) {
-        birthDate = DateTime.tryParse(dob.split('T')[0]);
-      } else {
-        birthDate = DateTime.tryParse(dob);
-      }
-
-      if (birthDate == null) {
-        // If parsing fails, try to extract date parts manually
-        final parts = dob.split(RegExp(r'[^0-9]'));
-        if (parts.length >= 3) {
-          final year = int.tryParse(parts[0]) ?? 0;
-          final month = int.tryParse(parts[1]) ?? 1;
-          final day = int.tryParse(parts[2]) ?? 1;
-          birthDate = DateTime(year, month, day);
-        } else {
-          return 0;
-        }
-      }
-
-      final now = DateTime.now();
-      int age = now.year - birthDate.year;
-
-      // Adjust age if birthday hasn't occurred yet this year
-      if (now.month < birthDate.month ||
-          (now.month == birthDate.month && now.day < birthDate.day)) {
-        age--;
-      }
-
-      return age > 0 ? age : 0;
-    } catch (e) {
-      print('Error calculating age: $e');
-      return 0;
-    }
-  }
-  // Helper method to get visit number from latest HBNC record
-  Future<int?> _getHbncVisitNumber(String beneficiaryId) async {
-    try {
-      if (beneficiaryId.isEmpty) {
-        return null;
-      }
-
-      final db = await DatabaseProvider.instance.database;
-      final hbncVisitKey =
-      FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
-      if (hbncVisitKey == null || hbncVisitKey.isEmpty) {
-        return null;
-      }
-
-      final results = await db.query(
-        FollowupFormDataTable.table,
-        where:
-        'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
-        whereArgs: [beneficiaryId, hbncVisitKey],
-        orderBy: 'created_date_time DESC',
-        limit: 1,
-      );
-
-      if (results.isEmpty) {
-        return null;
-      }
-
-      try {
-        final latestRecord = results.first;
-        final formJson = jsonDecode(
-          latestRecord['form_json'] as String? ?? '{}',
-        );
-
-        // Check for hbyc_form structure first (based on sample data)
-        if (formJson.containsKey('hbyc_form')) {
-          final hbycForm = formJson['hbyc_form'] as Map<String, dynamic>? ?? {};
-          if (hbycForm.containsKey('visitDetails')) {
-            final visitDetails =
-                hbycForm['visitDetails'] as Map<String, dynamic>? ?? {};
-            final visitNumber = visitDetails['visitNumber']?.toString();
-            if (visitNumber != null) {
-              final number = int.tryParse(visitNumber);
-              if (number != null) {
-                return number;
-              }
-            }
-          }
-        }
-
-        // Fallback to form_data structure
-        final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
-
-        if (formData.containsKey('visitDetails')) {
-          final visitDetails =
-              formData['visitDetails'] as Map<String, dynamic>? ?? {};
-          final visitNumber =
-              visitDetails['visitNumber']?.toString() ??
-                  visitDetails['visit_number']?.toString();
-          if (visitNumber != null) {
-            final number = int.tryParse(visitNumber);
-            if (number != null) {
-              return number;
-            }
-          }
-        }
-      } catch (_) {}
-      return null;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<bool> _hasCompletedHbncForm(String beneficiaryRefKey) async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
-
-      final hbncFormKey =
-          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
-              .pncMother] ??
-              '';
-
-      if (hbncFormKey.isEmpty) return false;
-
-      String whereClause =
-          'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND created_date_time IS NOT NULL AND created_date_time != ""';
-      List<dynamic> whereArgs = [hbncFormKey, beneficiaryRefKey];
-
-      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
-        whereClause += ' AND current_user_key = ?';
-        whereArgs.add(ashaUniqueKey);
-      }
-
-      final result = await db.query(
-        FollowupFormDataTable.table,
-        where: whereClause,
-        whereArgs: whereArgs,
-        limit: 1,
-      );
-
-      return result.isNotEmpty;
-    } catch (e) {
-      debugPrint(
-        'Error checking completed HBNC form for $beneficiaryRefKey: $e',
-      );
-      return false;
-    }
-  }
-  Future<String?> _getHbncNextVisitDateForDisplay(
-      String beneficiaryId,
-      String? deliveryDate,
-      ) async {
-    try {
-      // First try to get next visit date from the latest HBNC form data
-      final db = await DatabaseProvider.instance.database;
-      final hbncVisitKey =
-      FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
-
-      if (hbncVisitKey != null && hbncVisitKey.isNotEmpty) {
-        final results = await db.query(
-          FollowupFormDataTable.table,
-          where:
-          'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0',
-          whereArgs: [beneficiaryId, hbncVisitKey],
-          orderBy: 'created_date_time DESC',
-          limit: 1,
-        );
-
-        if (results.isNotEmpty) {
-          final latestRecord = results.first;
-          final formJson = jsonDecode(
-            latestRecord['form_json'] as String? ?? '{}',
-          );
-          final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
-
-          if (formData.containsKey('visitDetails')) {
-            final visitDetails =
-                formData['visitDetails'] as Map<String, dynamic>? ?? {};
-            final nextVisitDate = visitDetails['nextVisitDate']?.toString();
-
-            // If nextVisitDate is null, assume current date as next visit date
-            if (nextVisitDate != null && nextVisitDate.isNotEmpty) {
-              return _formatHbncDate(nextVisitDate);
-            }
-          }
-        }
-      }
-
-      // Fallback to calculated next visit date if nextVisitDate is null or not found
-      final nextRaw = await _getNextHbncVisitDate(
-        db,
-        beneficiaryId,
-        deliveryDate,
-      );
-      if (nextRaw == null || nextRaw.isEmpty) {
-        return null;
-      }
-
-      return _formatHbncDate(nextRaw);
-    } catch (_) {}
-    return null;
-  }
-
-  Future<String?> _getNextHbncVisitDate(
-      Database db,
-      String beneficiaryId,
-      String? deliveryDate,
-      ) async {
-    if (deliveryDate == null || deliveryDate.isEmpty) return null;
-    try {
-      final d = DateTime.tryParse(deliveryDate);
-      if (d == null) return null;
-
-      final schedule = <int>[1, 3, 7, 14, 21, 28, 42];
-      final visitCount = await _getHbncVisitCount(beneficiaryId);
-
-      int? nextDay;
-      if (visitCount <= 0) {
-        // No visits yet -> first step (day 1)
-        nextDay = schedule.first;
-      } else {
-        final idx = schedule.indexOf(visitCount);
-        if (idx >= 0 && idx < schedule.length - 1) {
-          nextDay = schedule[idx + 1];
-        } else {
-          // Already completed last scheduled visit (42 days) or
-          // visitCount not in schedule -> no further HBNC due
-          return null;
-        }
-      }
-
-      final next = d.add(Duration(days: nextDay!));
-      return '${next.year.toString().padLeft(4, '0')}-${next.month.toString().padLeft(2, '0')}-${next.day.toString().padLeft(2, '0')}';
-    } catch (_) {
-      return null;
-    }
-  }
-
-  String _formatHbncDate(String dateStr) {
-    if (dateStr.isEmpty) return '';
-    try {
-      final dt = DateTime.tryParse(dateStr);
-      if (dt == null) return '';
-      return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
-    } catch (_) {
-      return '';
-    }
-  }
-  Future<bool> _shouldRemoveHbncRecordDueToCountChange(
-      String beneficiaryId,
-      String? deliveryDate,
-      int currentVisitCount,
-      ) async {
-    try {
-      if (deliveryDate == null || deliveryDate.isEmpty) return false;
-
-      final db = await DatabaseProvider.instance.database;
-      final hbncVisitKey =
-      FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
-      if (hbncVisitKey == null || hbncVisitKey.isEmpty) return false;
-
-      // Parse delivery date
-      final deliveryDt = DateTime.tryParse(deliveryDate);
-      if (deliveryDt == null) return false;
-
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-
-      final schedule = <int>[1, 3, 7, 14, 21, 28, 42];
-      final futureVisitDates = <DateTime>[];
-
-      for (final day in schedule) {
-        final visitDate = deliveryDt.add(Duration(days: day));
-        if (visitDate.isAfter(today) || visitDate.isAtSameMomentAs(today)) {
-          futureVisitDates.add(visitDate);
-        }
-      }
-
-      if (futureVisitDates.isEmpty) return false;
-
-      final existingVisits = await db.query(
-        FollowupFormDataTable.table,
-        where:
-        'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
-        whereArgs: [beneficiaryId, hbncVisitKey],
-        orderBy: 'created_date_time ASC',
-      );
-
-      for (final futureVisitDate in futureVisitDates) {
-        int visitsByFutureDate = 0;
-
-        for (final visit in existingVisits) {
-          final visitCreatedDate = DateTime.tryParse(
-            visit['created_date_time']?.toString() ?? '',
-          );
-          if (visitCreatedDate != null) {
-            final visitDateOnly = DateTime(
-              visitCreatedDate.year,
-              visitCreatedDate.month,
-              visitCreatedDate.day,
-            );
-            if (visitDateOnly.isBefore(futureVisitDate) ||
-                visitDateOnly.isAtSameMomentAs(futureVisitDate)) {
-              visitsByFutureDate++;
-            }
-          }
-        }
-
-        // Calculate expected visit count based on schedule
-        int expectedCount = 0;
-        for (int i = 0; i < schedule.length; i++) {
-          final scheduledDate = deliveryDt.add(Duration(days: schedule[i]));
-          if (scheduledDate.isBefore(futureVisitDate) ||
-              scheduledDate.isAtSameMomentAs(futureVisitDate)) {
-            expectedCount = i + 1;
-          } else {
-            break;
-          }
-        }
-
-        // If counts don't match, the record should be removed
-        if (visitsByFutureDate != expectedCount) {
-          debugPrint(
-            '📊 Count mismatch for $beneficiaryId by ${_formatHbncDate(futureVisitDate.toIso8601String())}: expected=$expectedCount, actual=$visitsByFutureDate',
-          );
-          return true;
-        }
-      }
-
-      return false;
-    } catch (e) {
-      debugPrint('❌ Error checking HBNC count change: $e');
-      return false;
-    }
-  }
-
-  Future<int> _getHbncVisitCount(String beneficiaryId) async {
-    try {
-      if (beneficiaryId.isEmpty) {
-        return 0;
-      }
-
-      final db = await DatabaseProvider.instance.database;
-      final hbncVisitKey =
-      FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
-      if (hbncVisitKey == null || hbncVisitKey.isEmpty) {
-        return 0;
-      }
-
-      final List<Map<String, dynamic>> results = await db.query(
-        FollowupFormDataTable.table,
-        where:
-        'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
-        whereArgs: [beneficiaryId, hbncVisitKey],
-        orderBy: 'created_date_time DESC',
-      );
-
-      if (results.isEmpty) {
-        return 0;
-      }
-
-      try {
-        final latestRecord = results.first;
-        final formJson = jsonDecode(
-          latestRecord['form_json'] as String? ?? '{}',
-        );
-        final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
-
-        if (formData.containsKey('visitDetails')) {
-          final visitDetails =
-              formData['visitDetails'] as Map<String, dynamic>? ?? {};
-          final visitNumber = visitDetails['visitNumber'] as int? ?? 0;
-          return visitNumber;
-        }
-      } catch (_) {}
-      return results.length;
-    } catch (_) {
-      return 0;
-    }
-  }
-
-  String _formatAgeWithSuffix(int age) {
-    if (age <= 0) return '0 Y';
-
-    final now = DateTime.now();
-    // We need to calculate more precise age, so let's use the same logic as _formatAgeGender
-    // But since we only have years, we'll just show years with Y suffix
-    return '$age Y';
-  }
-
-  Future<DateTime?> _getLatestTrackingDueDate(
-      String beneficiaryKey,
-      ) async {
-    final db = await DatabaseProvider.instance.database;
-
-    final result = await db.rawQuery(
-      '''
-    SELECT created_date_time
-    FROM child_care
-    WHERE beneficiaries_registration_ref_key = ?
-      AND child_care_type = 'tracking_due'
-      AND is_deleted = 0
-    ORDER BY datetime(created_date_time) DESC
-    LIMIT 1
-    ''',
-      [beneficiaryKey],
-    );
-
-    if (result.isEmpty) {
-      print('❌ No tracking_due for $beneficiaryKey');
-      return null;
-    }
-
-    print('✅ tracking_due found for $beneficiaryKey → ${result.first['created_date_time']}');
-
-    return DateTime.parse(result.first['created_date_time'] as String);
-  }
-
-  Future<void> _loadRoutineImmunizationItems() async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey =
-      currentUserData?['unique_key']?.toString();
-
-      final rows = await db.rawQuery(
-        '''
-      SELECT *
-      FROM beneficiaries_new
-      WHERE is_deleted = 0
-        AND is_adult = 0
-        AND is_migrated = 0
-        AND current_user_key = ?
-      ORDER BY created_date_time DESC
-      ''',
-        [ashaUniqueKey],
-      );
-
-      final List<Map<String, dynamic>> items = [];
-      final Set<String> seenBeneficiaries = {};
-
-      for (final row in rows) {
-        try {
-          final beneficiaryRefKey = row['unique_key']?.toString() ?? '';
-          if (beneficiaryRefKey.isEmpty) continue;
-          if (!seenBeneficiaries.add(beneficiaryRefKey)) continue;
-
-          final Map<String, dynamic>? info =
-          row['beneficiary_info'] is String
-              ? jsonDecode(row['beneficiary_info'] as String)
-          as Map<String, dynamic>?
-              : row['beneficiary_info'] as Map<String, dynamic>?;
-
-
-          if (info == null) continue;
-
-          final memberType =
-              info['memberType']?.toString().toLowerCase() ?? '';
-          final relation =
-              info['relation']?.toString().toLowerCase() ?? '';
-
-          if (!(memberType == 'child' ||
-              relation == 'child' ||
-              relation == 'daughter')) {
-            continue;
-          }
-
-          // 🔹 Must have tracking_due
-          final hasTrackingDue =
-          await _hasTrackingDueStatus(beneficiaryRefKey);
-          if (!hasTrackingDue) continue;
-
-          // 🔹 6 MONTH EXCLUSION LOGIC
-          final trackingDueDate =
-          await _getLatestTrackingDueDate(beneficiaryRefKey);
-
-          if (trackingDueDate != null) {
-            final hasFollowupIn6Months =
-            await _hasFollowupWithinSixMonths(
-              beneficiaryKey: beneficiaryRefKey,
-              trackingDueDate: trackingDueDate,
-            );
-
-            if (hasFollowupIn6Months) {
-              print('❌ Excluding $beneficiaryRefKey → RI done within 6 months');
-              continue;
-            }
-          }
-
-
-          // 🔹 Extract display data
-          final name =
-              info['name'] ??
-                  info['memberName'] ??
-                  info['member_name'] ??
-                  '';
-
-          final mobile =
-              info['mobileNo'] ??
-                  info['mobile'] ??
-                  info['mobile_number'] ??
-                  '-';
-
-          final dob =
-              info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
-
-          final genderRaw =
-              info['gender']?.toString().toLowerCase() ?? '';
-
-          final gender = genderRaw == 'male' || genderRaw == 'm'
-              ? 'Male'
-              : genderRaw == 'female' || genderRaw == 'f'
-              ? 'Female'
-              : 'Other';
-
-          final age = _formatAgeOnly(dob);
-
-          final hhId = row['household_ref_key']?.toString() ?? '';
-
-          items.add({
-            'id': _last11(beneficiaryRefKey),
-            'household_ref_key': hhId,
-            'hhId': hhId,
-            'BeneficiaryID': beneficiaryRefKey,
-            'name': name,
-            'age': age,
-            'gender': gender,
-            'mobile': mobile,
-            'badge': 'RI',
-          });
-        } catch (e) {
-          print('⚠️ Error processing beneficiary record: $e');
-          continue;
-        }
-      }
-
-      if (mounted) {
-        setState(() {
-          _riItems = items;
-        });
-        // _saveTodayWorkCountsToStorage();
-      }
-    } catch (_) {}
-  }
-
-  Future<bool> _hasFollowupWithinSixMonths({
-    required String beneficiaryKey,
-    required DateTime trackingDueDate,
-  }) async {
-    final db = await DatabaseProvider.instance.database;
-
-    final sixMonthEnd = DateTime(
-      trackingDueDate.year,
-      trackingDueDate.month + 6,
-      trackingDueDate.day,
-    );
-
-    print('🟢 ENTERED _hasFollowupWithinSixMonths for $beneficiaryKey');
-    print('📅 Window: $trackingDueDate → $sixMonthEnd');
-
-    final result = await db.rawQuery(
-      '''
-    SELECT 1
-    FROM followup_form_data
-    WHERE forms_ref_key = ?
-      AND beneficiary_ref_key = ?
-      AND is_deleted = 0
-      AND datetime(created_date_time)
-          BETWEEN datetime(?) AND datetime(?)
-    LIMIT 1
-    ''',
-      [
-        FollowupFormDataTable
-            .formUniqueKeys[FollowupFormDataTable.childTrackingDue],
-        beneficiaryKey,
-        trackingDueDate.toIso8601String(),
-        sixMonthEnd.toIso8601String(),
-      ],
-    );
-
-    return result.isNotEmpty;
-  }
-
-  Future<bool> _hasTrackingDueStatus(String beneficiaryRefKey) async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-      final rows = await db.query(
-        'child_care_activities',
-        where:
-        'beneficiary_ref_key = ? AND child_care_state = ? AND is_deleted = 0',
-        whereArgs: [beneficiaryRefKey, 'tracking_due'],
-        limit: 1,
-      );
-      return rows.isNotEmpty;
-    } catch (e) {
-      print('Error checking tracking_due status for $beneficiaryRefKey: $e');
-      return false;
-    }
-  }
-
-  String _formatDateFromString(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return 'Not Available';
-    try {
-      final date = DateTime.parse(dateStr);
-      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
-    } catch (e) {
-      return dateStr;
-    }
-  }
-
-  String _formatAgeOnly(dynamic dobRaw) {
-    String age = 'Not Available';
-
-    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
-      try {
-        String dateStr = dobRaw.toString();
-        DateTime? dob;
-
-        dob = DateTime.tryParse(dateStr);
-
-        if (dob == null) {
-          final timestamp = int.tryParse(dateStr);
-          if (timestamp != null && timestamp > 0) {
-            dob = DateTime.fromMillisecondsSinceEpoch(
-              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
-              isUtc: true,
-            );
-          }
-        }
-
-        if (dob != null) {
-          final now = DateTime.now();
-          int years = now.year - dob.year;
-          int months = now.month - dob.month;
-          int days = now.day - dob.day;
-
-          if (days < 0) {
-            final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
-            final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
-            final daysInLastMonth = DateTime(
-              lastMonthYear,
-              lastMonth + 1,
-              0,
-            ).day;
-            days += daysInLastMonth;
-            months--;
-          }
-
-          if (months < 0) {
-            months += 12;
-            years--;
-          }
-
-          if (years > 0) {
-            age = '$years Y';
-          } else if (months > 0) {
-            age = '$months M';
-          } else {
-            age = '$days D';
-          }
-        }
-      } catch (e) {
-        debugPrint('Error parsing date of birth: $e');
-      }
-    }
-
-    return age;
   }
 
   Future<void> _loadCompletedVisitsCount() async {
@@ -2974,21 +229,25 @@ class _TodayworkState extends State<Todaywork> {
                   '';
 
           if (ecFormKey.isNotEmpty) {
-            // 1. Get all EC Tracking Due forms created TODAY only
+            // 1. Get all EC Tracking Due forms created before 1 month ago AND modified today
+            final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
             String queryForms =
                 'SELECT * FROM ${FollowupFormDataTable.table} '
                 'WHERE forms_ref_key = ? '
                 'AND (is_deleted IS NULL OR is_deleted = 0) '
-                'AND DATE(created_date_time) = DATE(?)';
+                'AND DATE(created_date_time) < DATE(?) '
+                'AND DATE(modified_date_time) = DATE(?)';
 
-            List<dynamic> argsForms = [ecFormKey, todayStr];
+            List<dynamic> argsForms = [ecFormKey,
+              '${oneMonthAgo.year.toString().padLeft(4, '0')}-${oneMonthAgo.month.toString().padLeft(2, '0')}-${oneMonthAgo.day.toString().padLeft(2, '0')}',
+              todayStr];
 
             if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
               queryForms += ' AND current_user_key = ?';
               argsForms.add(ashaUniqueKey);
             }
 
-            queryForms += ' ORDER BY created_date_time DESC';
+            queryForms += ' ORDER BY modified_date_time DESC';
 
             print('=== EC Completed Query ===');
             print('Query: $queryForms');
@@ -3010,8 +269,12 @@ class _TodayworkState extends State<Todaywork> {
               final beneficiaryId =
                   row['beneficiary_ref_key']?.toString() ?? '';
               if (beneficiaryId.isEmpty ||
-                  processedBeneficiaries.contains(beneficiaryId))
+                  processedBeneficiaries.contains(beneficiaryId)) {
+                if (processedBeneficiaries.contains(beneficiaryId)) {
+                  print('⚠️ SKIPPED: Beneficiary $beneficiaryId already processed');
+                }
                 continue;
+              }
 
               print('=== DEBUG: Processing EC Form ===');
               print('Beneficiary ID: $beneficiaryId');
@@ -3032,42 +295,68 @@ class _TodayworkState extends State<Todaywork> {
               print('Is Pregnant: $isPregnant');
               print('================================');
 
-              // Include all submitted forms (regardless of activity state) but only for today
-              // The fact that it was submitted today means it should be in completed list
-              // But only show for current day, not permanently
+              // Include forms that were created before 1 month ago AND modified today
+              // This ensures only older records that were updated today are shown in completed list
 
-              // Check if form was created today (not just any time today)
-              bool isCreatedToday = false;
+              // Check if form was created before 1 month ago AND modified today
+              bool meetsCriteria = false;
               try {
-                final createdDate = DateTime.parse(row['created_date_time'].toString());
                 final now = DateTime.now();
-                isCreatedToday = createdDate.year == now.year &&
-                    createdDate.month == now.month &&
-                    createdDate.day == now.day;
+                final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
+
+                // Check created_date_time is before 1 month ago
+                bool createdBeforeOneMonth = false;
+                if (row['created_date_time'] != null) {
+                  final createdDate = DateTime.parse(row['created_date_time'].toString());
+                  createdBeforeOneMonth = createdDate.isBefore(oneMonthAgo);
+                }
+
+                // Check modified_date_time is today
+                bool modifiedToday = false;
+                if (row['modified_date_time'] != null) {
+                  final modifiedDate = DateTime.parse(row['modified_date_time'].toString());
+                  modifiedToday = modifiedDate.year == now.year &&
+                      modifiedDate.month == now.month &&
+                      modifiedDate.day == now.day;
+                }
+
+                meetsCriteria = createdBeforeOneMonth && modifiedToday;
               } catch (e) {
-                print('Error parsing created date: $e');
+                print('Error parsing dates: $e');
               }
 
               print('=== DEBUG: Date Check ===');
               print('Created Date: ${row['created_date_time']}');
-              print('Is Created Today: $isCreatedToday');
+              print('Modified Date: ${row['modified_date_time']}');
+              print('One Month Ago: ${DateTime.now().subtract(const Duration(days: 30))}');
+              print('Meets Criteria (created < 1 month ago AND modified today): $meetsCriteria');
               print('================================');
 
-              // Only include if created today
-              if (!isCreatedToday) {
-                print('❌ SKIPPED: Form not created today');
+              // Only include if created before 1 month ago AND modified today
+              if (!meetsCriteria) {
+                print('❌ SKIPPED: Form does not meet criteria (not created before 1 month ago AND modified today)');
                 continue;
               }
 
-              if (isPregnant) {
-                print('✅ INCLUDING: Pregnant woman found in completed forms (today only)');
-              } else {
-                print('✅ INCLUDING: Non-pregnant woman found in completed forms (today only)');
-              }
-
+              // Mark beneficiary as processed BEFORE adding to list
               processedBeneficiaries.add(beneficiaryId);
 
+              if (isPregnant) {
+                print('✅ INCLUDING: Pregnant woman found in completed forms (created before 1 month ago AND modified today)');
+              } else {
+                print('✅ INCLUDING: Non-pregnant woman found in completed forms (created before 1 month ago AND modified today)');
+              }
+
               final fields = await _getBeneficiaryFields(beneficiaryId);
+
+              // Check if this beneficiary is already in the completed list
+              final alreadyInCompletedList = _eligibleCompletedCoupleItems
+                  .any((item) => item['BeneficiaryID'] == beneficiaryId);
+
+              if (alreadyInCompletedList) {
+                print('⚠️ SKIPPED: Beneficiary $beneficiaryId already in completed list');
+                continue;
+              }
 
               _eligibleCompletedCoupleItems.add({
                 'id': row['id'] ?? '',
@@ -3380,6 +669,122 @@ class _TodayworkState extends State<Todaywork> {
       }
     }
   }
+
+  String _formatAncDateOnly(String? dateTime) {
+    if (dateTime == null || dateTime.isEmpty) return '-';
+    try {
+      final dt = DateTime.parse(dateTime);
+      return DateFormat('dd-MM-yyyy').format(dt);
+    } catch (_) {
+      return '-';
+    }
+  }
+
+  int _calculateAge(String? dob) {
+    if (dob == null || dob.isEmpty) return 0;
+    try {
+      DateTime? birthDate;
+
+      // Try parsing the date string
+      if (dob.contains('T')) {
+        birthDate = DateTime.tryParse(dob.split('T')[0]);
+      } else {
+        birthDate = DateTime.tryParse(dob);
+      }
+
+      if (birthDate == null) {
+        // If parsing fails, try to extract date parts manually
+        final parts = dob.split(RegExp(r'[^0-9]'));
+        if (parts.length >= 3) {
+          final year = int.tryParse(parts[0]) ?? 0;
+          final month = int.tryParse(parts[1]) ?? 1;
+          final day = int.tryParse(parts[2]) ?? 1;
+          birthDate = DateTime(year, month, day);
+        } else {
+          return 0;
+        }
+      }
+
+      final now = DateTime.now();
+      int age = now.year - birthDate.year;
+
+      // Adjust age if birthday hasn't occurred yet this year
+      if (now.month < birthDate.month ||
+          (now.month == birthDate.month && now.day < birthDate.day)) {
+        age--;
+      }
+
+      return age > 0 ? age : 0;
+    } catch (e) {
+      print('Error calculating age: $e');
+      return 0;
+    }
+  }
+
+  Future<Map<String, String>> _getBeneficiaryFields(String uniqueKey) async {
+    final rec = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(
+      uniqueKey,
+    );
+    if (rec == null) {
+      return {'name': '', 'age': '', 'gender': '', 'mobile': '-'};
+    }
+
+    dynamic info = rec['beneficiary_info'];
+    Map<String, dynamic> m = {};
+    if (info is Map) {
+      m = Map<String, dynamic>.from(info);
+    } else if (info is String && info.isNotEmpty) {
+      try {
+        m = Map<String, dynamic>.from(jsonDecode(info));
+      } catch (_) {}
+    }
+
+    final name =
+        (m['name']?.toString()?.trim().isNotEmpty == true
+            ? m['name']?.toString()
+            : null) ??
+            m['memberName']?.toString() ??
+            m['headName']?.toString() ??
+            '';
+
+    final dob = m['dob']?.toString() ?? m['date_of_birth']?.toString();
+    var ageYears = _calculateAge(dob);
+    if (ageYears == 0) {
+      final updateYearStr = m['updateYear']?.toString() ?? '';
+      final approxAgeStr = m['approxAge']?.toString() ?? '';
+      final parsedUpdateYear = int.tryParse(updateYearStr);
+      if (parsedUpdateYear != null && parsedUpdateYear > 0) {
+        ageYears = parsedUpdateYear;
+      } else if (approxAgeStr.isNotEmpty) {
+        final matches = RegExp(r"\d+").allMatches(approxAgeStr).toList();
+        if (matches.isNotEmpty) {
+          ageYears = int.tryParse(matches.first.group(0) ?? '') ?? 0;
+        }
+      }
+    }
+
+    final gender = m['gender']?.toString() ?? '';
+    final mobile =
+        (m['mobileNo'] ?? m['mobile'] ?? m['phone'])?.toString() ?? '-';
+
+    return {
+      'name': name,
+      'age': ageYears > 0 ? ageYears.toString() : '',
+      'gender': gender,
+      'mobile': mobile.isNotEmpty ? mobile : '-',
+    };
+  }
+
+
+  String _formatDateOnly(String? dateTime) {
+    if (dateTime == null || dateTime.isEmpty) return '-';
+    try {
+      final dt = DateTime.parse(dateTime);
+      return DateFormat('dd-MM-yyyy').format(dt);
+    } catch (_) {
+      return '-';
+    }
+  }
   void _printCompletedItemsCount() {
     final ancCount = _ancCompletedItems.length;
     final hbncCount = _hbncCompletedItems.length;
@@ -3400,6 +805,2407 @@ class _TodayworkState extends State<Todaywork> {
     print('============================');
   }
 
+  Future<void> _loadFamilySurveyItems() async {
+    try {
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final households = await LocalStorageDao.instance.getAllHouseholds();
+
+      final List<Map<String, dynamic>> items = [];
+
+      final Map<String, String> headKeyByHousehold = {};
+      for (final hh in households) {
+        final hhRefKey = (hh['unique_key'] ?? '').toString();
+        final headId = (hh['head_id'] ?? '').toString();
+        if (hhRefKey.isNotEmpty && headId.isNotEmpty) {
+          headKeyByHousehold[hhRefKey] = headId;
+        }
+      }
+
+      final DateTime now = DateTime.now();
+      final DateTime sixMonthsAgo = now.subtract(const Duration(days: 180));
+      final String todayStr =
+          '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+      for (final row in rows) {
+        try {
+          if (ashaUniqueKey != null &&
+              ashaUniqueKey.isNotEmpty &&
+              row['current_user_key']?.toString() != ashaUniqueKey) {
+            continue;
+          }
+
+          if (row['is_death'] == 1 ||
+              row['is_migrated'] == 1 ||
+              row['is_deleted'] == 1) continue;
+
+          final String householdRefKey =
+              row['household_ref_key']?.toString() ?? '';
+          final String uniqueKey =
+              row['unique_key']?.toString() ?? '';
+
+          if (householdRefKey.isEmpty || uniqueKey.isEmpty) continue;
+
+          // ------------------ BENEFICIARY INFO ------------------
+          final infoRaw = row['beneficiary_info'];
+          if (infoRaw == null) continue;
+
+          final Map<String, dynamic> info =
+          infoRaw is Map<String, dynamic>
+              ? infoRaw
+              : Map<String, dynamic>.from(infoRaw);
+
+          final bool isFamilyHeadFromInfo =
+              info['isFamilyhead'] == true ||
+                  info['isFamilyHead']?.toString() == 'true';
+
+          final String? configuredHeadKey =
+          headKeyByHousehold[householdRefKey];
+
+          final bool isHouseholdHead =
+              configuredHeadKey != null &&
+                  configuredHeadKey == uniqueKey;
+
+          // ❌ If neither condition matches → skip
+          if (!isHouseholdHead && !isFamilyHeadFromInfo) continue;
+
+          DateTime? createdDt;
+          DateTime? modifiedDt;
+
+          try {
+            // if (row['created_date_time'] != null &&
+            //     row['created_date_time'].toString().isNotEmpty) {
+            //   String dateStr = row['created_date_time'].toString();
+            //   // Handle both "YYYY-MM-DD HH:MM:SS" and "YYYY-MM-DDTHH:MM:SS" formats
+            //   if (dateStr.contains(' ')) {
+            //     dateStr = dateStr.split(' ')[0];
+            //   } else if (dateStr.contains('T')) {
+            //     dateStr = dateStr.split('T')[0];
+            //   }
+            //   createdDt = DateTime.parse(dateStr);
+            // }
+
+            if (row['modified_date_time'] != null &&
+                row['modified_date_time'].toString().isNotEmpty) {
+              String dateStr = row['modified_date_time'].toString();
+              // Handle both "YYYY-MM-DD HH:MM:SS" and "YYYY-MM-DDTHH:MM:SS" formats
+              if (dateStr.contains(' ')) {
+                dateStr = dateStr.split(' ')[0];
+              } else if (dateStr.contains('T')) {
+                dateStr = dateStr.split('T')[0];
+              }
+              modifiedDt = DateTime.parse(dateStr);
+            }
+          } catch (_) {}
+
+          final bool isEligible =
+              modifiedDt != null && modifiedDt.isBefore(sixMonthsAgo);
+
+          if (!isEligible) continue;
+
+          // ------------------ CHECK IF MODIFIED TODAY ------------------
+          bool isModifiedToday = false;
+          final String? rawModifiedDate = row['modified_date_time']?.toString();
+
+          if (rawModifiedDate != null && rawModifiedDate.isNotEmpty) {
+            try {
+              String dateStr = rawModifiedDate;
+              if (dateStr.contains(' ')) {
+                dateStr = dateStr.split(' ')[0];
+              } else if (dateStr.contains('T')) {
+                dateStr = dateStr.split('T')[0];
+              }
+              if (dateStr == todayStr) {
+                isModifiedToday = true;
+                print('📋 Record was modified today - excluding from to-do list');
+              }
+            } catch (e) {
+              // If parsing fails, try to extract date part
+              if (rawModifiedDate.contains(' ')) {
+                final datePart = rawModifiedDate.split(' ')[0];
+                if (datePart == todayStr) {
+                  isModifiedToday = true;
+                  print('📋 Record was modified today (fallback) - excluding from to-do list');
+                }
+              } else if (rawModifiedDate.contains('T')) {
+                final datePart = rawModifiedDate.split('T')[0];
+                if (datePart == todayStr) {
+                  isModifiedToday = true;
+                  print('📋 Record was modified today (fallback) - excluding from to-do list');
+                }
+              }
+            }
+          }
+
+          // Skip if modified today (these go to completed tab)
+          if (isModifiedToday) continue;
+
+          // ------------------ LAST SURVEY DATE ------------------
+          final String lastSurveyDate = modifiedDt != null
+              ? '${modifiedDt.day}-${modifiedDt.month}-${modifiedDt.year}'
+              : '-';
+
+          // ------------------ DISPLAY DATA ------------------
+          final String name =
+              (info['headName'])
+                  ?.toString()
+                  .trim() ??
+                  '';
+          if (name.isEmpty) continue;
+
+          final String gender = (info['gender']?.toString() ?? '-')
+              .toLowerCase()
+              .replaceFirstMapped(RegExp(r'^\w'), (match) => match.group(0)!.toUpperCase());
+
+          String ageText = '-';
+          final String? dobRaw = info['dob']?.toString();
+          if (dobRaw != null && dobRaw.isNotEmpty) {
+            final dob = DateTime.tryParse(dobRaw.split('T')[0]);
+            if (dob != null) {
+              int age = now.year - dob.year;
+              if (now.month < dob.month ||
+                  (now.month == dob.month && now.day < dob.day)) {
+                age--;
+              }
+              if (age >= 0) ageText = '${age}Y';
+            }
+          } else if (info['age'] != null) {
+            ageText = '${info['age']}y';
+          }
+
+          final String mobile =
+              info['mobileNo']?.toString() ??
+                  info['phone']?.toString() ??
+                  '-';
+
+          String displayId = uniqueKey;
+          if (displayId.length > 11) {
+            displayId = displayId.substring(displayId.length - 11);
+          }
+
+          final rawCreatedDate = row['created_date_time']?.toString();
+
+          print('=== DEBUG: Adding Family Survey Item ===');
+          print('Name: $name');
+          print('Raw Modified Date: $rawModifiedDate');
+          print('Last Survey Date (based on modified date): $lastSurveyDate');
+          print('Note: Only modified date is checked for 6+ month eligibility');
+          print('=====================================');
+
+          items.add({
+            'id': displayId,
+            'beneficiary_ref_key': uniqueKey,
+            'household_ref_key': householdRefKey,
+            'name': name,
+            'age': ageText,
+            'gender': gender,
+            'last survey date': lastSurveyDate,
+            'lastSurveyDate': lastSurveyDate, // Add this field for UI display
+            'Next HBNC due date': '-',
+            'mobile': mobile,
+            'badge': 'Family',
+            // Add raw date fields for completed tab filtering
+            'created_date': rawCreatedDate,
+            'modified_date': rawModifiedDate,
+          });
+        } catch (_) {
+          continue;
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _familySurveyItems = items;
+        });
+        _saveTodayWorkCountsToStorage();
+      }
+    } catch (e) {
+      debugPrint('Family survey load error: $e');
+    }
+  }
+
+  Future<void> _loadEligibleCoupleItems() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
+
+      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) return;
+
+      final DateTime oneMonthAgo =
+      DateTime.now().subtract(const Duration(days: 30));
+
+      final ecRows = await db.query(
+        EligibleCoupleActivitiesTable.table,
+        columns: [
+          'beneficiary_ref_key',
+          'created_date_time',
+          'modified_date_time',
+        ],
+        where: '''
+        eligible_couple_state = ?
+        AND current_user_key = ?
+        AND (is_deleted IS NULL OR is_deleted = 0)
+      ''',
+        whereArgs: ['tracking_due', ashaUniqueKey],
+      );
+
+      // ------------------ STEP 2: FILTER 1 MONTH OLD ------------------
+      final Set<String> eligibleBeneficiaryKeys = {};
+
+      for (final row in ecRows) {
+        final String? beneficiaryKey =
+        row['beneficiary_ref_key']?.toString();
+        if (beneficiaryKey == null || beneficiaryKey.isEmpty) continue;
+
+        DateTime? createdDate;
+        DateTime? modifiedDate;
+
+        try {
+          if (row['created_date_time'] != null &&
+              row['created_date_time'].toString().isNotEmpty) {
+            createdDate =
+                DateTime.parse(row['created_date_time'].toString());
+          }
+
+          if (row['modified_date_time'] != null &&
+              row['modified_date_time'].toString().isNotEmpty) {
+            modifiedDate =
+                DateTime.parse(row['modified_date_time'].toString());
+          }
+        } catch (_) {
+          continue;
+        }
+
+        final bool isValid =
+            createdDate != null &&
+                createdDate.isBefore(oneMonthAgo) &&
+                (modifiedDate == null ||
+                    modifiedDate.isBefore(oneMonthAgo));
+
+        if (isValid) {
+          eligibleBeneficiaryKeys.add(beneficiaryKey);
+        }
+      }
+
+      if (eligibleBeneficiaryKeys.isEmpty) {
+        _eligibleCoupleItems.clear();
+        if (mounted) setState(() {});
+        _saveTodayWorkCountsToStorage();
+        return;
+      }
+
+      // ------------------ STEP 3: FILTER OUT COMPLETED TODAY ------------------
+      final now = DateTime.now();
+      final todayStr =
+          '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+      final ecFormKey =
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+              .eligibleCoupleTrackingDue] ?? '';
+
+      if (ecFormKey.isNotEmpty) {
+        final completedTodayQuery = '''
+          SELECT DISTINCT beneficiary_ref_key 
+          FROM ${FollowupFormDataTable.table} 
+          WHERE forms_ref_key LIKE ? 
+          AND DATE(created_date_time) = DATE(?)
+          AND (is_deleted IS NULL OR is_deleted = 0)
+        ''';
+
+        final completedTodayRows = await db.rawQuery(
+          completedTodayQuery,
+          [ecFormKey, todayStr],
+        );
+
+        print('=== DEBUG: EC Completed Today Filter ===');
+        print('Form Key: $ecFormKey');
+        print('Today String: $todayStr');
+        print('Completed Today Query: $completedTodayQuery');
+        print('Completed Today Rows: ${completedTodayRows.length}');
+        for (final row in completedTodayRows) {
+          print('  - Beneficiary: ${row['beneficiary_ref_key']}, Form Key: ${row['forms_ref_key']}, Created: ${row['created_date_time']}');
+        }
+        print('=====================================');
+
+        final Set<String> completedTodayBeneficiaries = completedTodayRows
+            .map((row) => row['beneficiary_ref_key']?.toString() ?? '')
+            .where((key) => key.isNotEmpty)
+            .toSet();
+
+        print('Completed Today Beneficiaries: $completedTodayBeneficiaries');
+        print('Before Filter - Eligible Beneficiary Keys: $eligibleBeneficiaryKeys');
+
+        // Remove completed beneficiaries from eligible list
+        eligibleBeneficiaryKeys.removeAll(completedTodayBeneficiaries);
+
+        print('After Filter - Eligible Beneficiary Keys: $eligibleBeneficiaryKeys');
+        print('Removed ${completedTodayBeneficiaries.length} beneficiaries from eligible list');
+        print('=====================================');
+      }
+
+      // ------------------ STEP 4: FETCH BENEFICIARIES ------------------
+      final placeholders =
+      List.filled(eligibleBeneficiaryKeys.length, '?').join(',');
+
+      final beneficiaryRows = await db.query(
+        'beneficiaries_new',
+        where: '''
+        unique_key IN ($placeholders)
+        AND (is_deleted IS NULL OR is_deleted = 0)
+        AND (is_migrated IS NULL OR is_migrated = 0)
+      ''',
+        whereArgs: eligibleBeneficiaryKeys.toList(),
+      );
+
+      _eligibleCoupleItems.clear();
+
+      // ------------------ STEP 4: BUILD FINAL LIST ------------------
+      for (final member in beneficiaryRows) {
+        final dynamic infoRaw = member['beneficiary_info'];
+        if (infoRaw == null) continue;
+
+        Map<String, dynamic> info = {};
+        try {
+          info = infoRaw is String
+              ? jsonDecode(infoRaw)
+              : Map<String, dynamic>.from(infoRaw);
+        } catch (_) {}
+
+        final String beneficiaryId =
+            member['unique_key']?.toString() ?? '';
+
+        // -------- AGE --------
+        String ageText = '-';
+        final String dob = info['dob']?.toString() ?? '';
+
+        if (dob.isNotEmpty) {
+          final int age = _calculateAgeFromDob(dob);
+          if (age > 0) ageText = age.toString();
+        } else if (info['age'] != null &&
+            info['age'].toString().isNotEmpty) {
+          ageText = info['age'].toString();
+        }
+
+        // -------- LAST VISIT FROM FOLLOWUP --------
+        final String lastVisitDate =
+        await _getLastVisitDate(
+          beneficiaryId: beneficiaryId,
+          formRefKey: '0g5au2h46icwjlvr',
+        );
+
+        _eligibleCoupleItems.add({
+          'id': member['id'],
+          'unique_key': beneficiaryId,
+
+          'beneficiary_id': beneficiaryId,
+          'beneficiaryId': beneficiaryId,
+          'BeneficiaryID': beneficiaryId,
+
+          'household_ref_key': member['household_ref_key'],
+          'name': info['memberName'] ??
+              info['headName'] ??
+              info['name'] ??
+              '',
+          'gender':
+          info['gender']?.toString().toLowerCase() ?? 'female',
+          'age': ageText,
+          'mobile':
+          info['mobileNo']?.toString() ?? 'Not Available',
+          'badge': 'EligibleCouple',
+
+          // ✅ CORRECT LAST VISIT DATE
+          'last Visit date': lastVisitDate,
+
+          '_rawRow': member,
+        });
+      }
+
+      if (mounted) {
+        setState(() {});
+        _saveTodayWorkCountsToStorage();
+      }
+    } catch (e) {
+      debugPrint('Eligible Couple load error: $e');
+    }
+  }
+
+  Future<void> _loadFamilySurveyCompletedItems() async {
+    try {
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+      final households = await LocalStorageDao.instance.getAllHouseholds();
+
+      final List<Map<String, dynamic>> items = [];
+
+      final Map<String, String> headKeyByHousehold = {};
+      for (final hh in households) {
+        final hhRefKey = (hh['unique_key'] ?? '').toString();
+        final headId = (hh['head_id'] ?? '').toString();
+        if (hhRefKey.isNotEmpty && headId.isNotEmpty) {
+          headKeyByHousehold[hhRefKey] = headId;
+        }
+      }
+
+      final DateTime now = DateTime.now();
+      final String todayStr =
+          '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+      print('=== DEBUG: Loading Family Survey Completed Items ===');
+      print('Today String: $todayStr');
+      print('Filter Criteria: Created before 6 months AND modified today');
+
+      for (final row in rows) {
+        try {
+          if (ashaUniqueKey != null &&
+              ashaUniqueKey.isNotEmpty &&
+              row['current_user_key']?.toString() != ashaUniqueKey) {
+            continue;
+          }
+
+          if (row['is_death'] == 1 ||
+              row['is_migrated'] == 1 ||
+              row['is_deleted'] == 1) continue;
+
+          final String householdRefKey =
+              row['household_ref_key']?.toString() ?? '';
+          final String uniqueKey =
+              row['unique_key']?.toString() ?? '';
+
+          if (householdRefKey.isEmpty || uniqueKey.isEmpty) continue;
+
+          // ------------------ BENEFICIARY INFO ------------------
+          final infoRaw = row['beneficiary_info'];
+          if (infoRaw == null) continue;
+
+          final Map<String, dynamic> info =
+          infoRaw is Map<String, dynamic>
+              ? infoRaw
+              : Map<String, dynamic>.from(infoRaw);
+
+          final bool isFamilyHeadFromInfo =
+              info['isFamilyhead'] == true ||
+                  info['isFamilyHead']?.toString() == 'true';
+
+          final String? configuredHeadKey =
+          headKeyByHousehold[householdRefKey];
+
+          final bool isHouseholdHead =
+              configuredHeadKey != null &&
+                  configuredHeadKey == uniqueKey;
+
+          // ❌ If neither condition matches → skip
+          if (!isHouseholdHead && !isFamilyHeadFromInfo) continue;
+
+          // ------------------ CHECK IF CREATED BEFORE 6 MONTHS AND MODIFIED TODAY ------------------
+          final sixMonthsAgo = DateTime.now().subtract(const Duration(days: 180));
+          bool meetsCriteria = false;
+          final String? rawModifiedDate = row['modified_date_time']?.toString();
+          final String? rawCreatedDate = row['created_date_time']?.toString();
+
+          if (rawModifiedDate != null && rawModifiedDate.isNotEmpty && rawCreatedDate != null && rawCreatedDate.isNotEmpty) {
+            try {
+              // Check if modified today
+              bool isModifiedToday = false;
+              String modifiedDateStr = rawModifiedDate;
+              if (modifiedDateStr.contains(' ')) {
+                modifiedDateStr = modifiedDateStr.split(' ')[0];
+              } else if (modifiedDateStr.contains('T')) {
+                modifiedDateStr = modifiedDateStr.split('T')[0];
+              }
+              if (modifiedDateStr == todayStr) {
+                isModifiedToday = true;
+              }
+
+              // Check if created before 6 months
+              bool createdBeforeSixMonths = false;
+              String createdDateStr = rawCreatedDate;
+              if (createdDateStr.contains(' ')) {
+                createdDateStr = createdDateStr.split(' ')[0];
+              } else if (createdDateStr.contains('T')) {
+                createdDateStr = createdDateStr.split('T')[0];
+              }
+              final createdDate = DateTime.parse(createdDateStr);
+              createdBeforeSixMonths = createdDate.isBefore(sixMonthsAgo);
+
+              meetsCriteria = isModifiedToday && createdBeforeSixMonths;
+
+              print('=== DEBUG: Family Survey Date Check ===');
+              print('Created Date: $rawCreatedDate');
+              print('Modified Date: $rawModifiedDate');
+              print('Six Months Ago: $sixMonthsAgo');
+              print('Created Before 6 Months: $createdBeforeSixMonths');
+              print('Modified Today: $isModifiedToday');
+              print('Meets Criteria: $meetsCriteria');
+              print('====================================');
+            } catch (e) {
+              print('Error parsing dates for family survey: $e');
+            }
+          }
+
+          // Only include if created before 6 months AND modified today
+          if (!meetsCriteria) continue;
+
+          // ------------------ DATE PARSING ------------------
+          DateTime? createdDt;
+          DateTime? modifiedDt;
+
+          try {
+            if (row['created_date_time'] != null &&
+                row['created_date_time'].toString().isNotEmpty) {
+              String dateStr = row['created_date_time'].toString();
+              if (dateStr.contains(' ')) {
+                dateStr = dateStr.split(' ')[0];
+              } else if (dateStr.contains('T')) {
+                dateStr = dateStr.split('T')[0];
+              }
+              createdDt = DateTime.parse(dateStr);
+            }
+
+            if (row['modified_date_time'] != null &&
+                row['modified_date_time'].toString().isNotEmpty) {
+              String dateStr = row['modified_date_time'].toString();
+              if (dateStr.contains(' ')) {
+                dateStr = dateStr.split(' ')[0];
+              } else if (dateStr.contains('T')) {
+                dateStr = dateStr.split('T')[0];
+              }
+              modifiedDt = DateTime.parse(dateStr);
+            }
+          } catch (_) {}
+
+          // ------------------ LAST SURVEY DATE ------------------
+          final String lastSurveyDate = modifiedDt != null
+              ? '${modifiedDt.day}-${modifiedDt.month}-${modifiedDt.year}'
+              : '-';
+
+          // ------------------ DISPLAY DATA ------------------
+          final String name =
+              (info['headName'])
+                  ?.toString()
+                  .trim() ??
+                  '';
+          if (name.isEmpty) continue;
+
+          final String gender = (info['gender']?.toString() ?? '-')
+              .toLowerCase()
+              .replaceFirstMapped(RegExp(r'^\w'), (match) => match.group(0)!.toUpperCase());
+
+          String ageText = '-';
+          final String? dobRaw = info['dob']?.toString();
+          if (dobRaw != null && dobRaw.isNotEmpty) {
+            final dob = DateTime.tryParse(dobRaw.split('T')[0]);
+            if (dob != null) {
+              int age = now.year - dob.year;
+              if (now.month < dob.month ||
+                  (now.month == dob.month && now.day < dob.day)) {
+                age--;
+              }
+              if (age >= 0) ageText = '${age}Y';
+            }
+          } else if (info['age'] != null) {
+            ageText = '${info['age']}y';
+          }
+
+          final String mobile =
+              info['mobileNo']?.toString() ??
+                  info['phone']?.toString() ??
+                  '-';
+
+          String displayId = uniqueKey;
+          if (displayId.length > 11) {
+            displayId = displayId.substring(displayId.length - 11);
+          }
+
+          print('=== DEBUG: Adding Family Survey Completed Item ===');
+          print('Name: $name');
+          print('Raw Created Date: $rawCreatedDate');
+          print('Raw Modified Date: $rawModifiedDate');
+          print('Last Survey Date: $lastSurveyDate');
+          print('Criteria: Created before 6 months AND modified today');
+          print('=============================================');
+
+          items.add({
+            'id': displayId,
+            'household_ref_key': householdRefKey,
+            'name': name,
+            'age': ageText,
+            'gender': gender,
+            'last survey date': lastSurveyDate,
+            'lastSurveyDate': lastSurveyDate,
+            'Next HBNC due date': '-',
+            'mobile': mobile,
+            'badge': 'Family',
+            'created_date': rawCreatedDate,
+            'modified_date': rawModifiedDate,
+          });
+        } catch (_) {
+          continue;
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _familySurveyCompletedItems = items;
+        });
+        print('=== DEBUG: Family Survey Completed Items Loaded ===');
+        print('Total Completed Items: ${items.length}');
+        print('===============================================');
+      }
+    } catch (e) {
+      debugPrint('Family survey completed load error: $e');
+    }
+  }
+
+  Future<void> _loadAncItems() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
+
+      final List<Map<String, dynamic>> items = [];
+      final Set<String> processedBeneficiaries = {};
+
+      String query = '''
+      SELECT 
+        mca.*,
+        bn.*,
+        bn.household_ref_key
+      FROM mother_care_activities mca
+      INNER JOIN beneficiaries_new bn
+        ON mca.beneficiary_ref_key = bn.unique_key
+      WHERE mca.mother_care_state = 'anc_due'
+        AND bn.is_deleted = 0
+    ''';
+
+      final List<dynamic> args = [];
+
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        query += ' AND bn.current_user_key = ?';
+        args.add(ashaUniqueKey);
+      }
+
+      query += ' ORDER BY mca.created_date_time DESC';
+
+      final List<Map<String, Object?>> rows =
+      await db.rawQuery(query, args);
+
+      final DateTime today = DateTime.now();
+      final DateTime todayDate =
+      DateTime(today.year, today.month, today.day);
+
+      bool isTodayInsideWindow(DateTime start, DateTime end) {
+        final s = DateTime(start.year, start.month, start.day);
+        final e = DateTime(end.year, end.month, end.day);
+        return (todayDate.isAtSameMomentAs(s) ||
+            todayDate.isAfter(s)) &&
+            (todayDate.isAtSameMomentAs(e) ||
+                todayDate.isBefore(e));
+      }
+
+      // ---------- Process each row ----------
+      for (final row in rows) {
+        final String beneficiaryKey =
+            row['beneficiary_ref_key']?.toString() ?? '';
+
+        if (beneficiaryKey.isEmpty ||
+            processedBeneficiaries.contains(beneficiaryKey)) {
+          continue;
+        }
+        processedBeneficiaries.add(beneficiaryKey);
+
+        // Skip death / migrated
+        if (row['is_death'] == 1 || row['is_migrated'] == 1) continue;
+
+        // ---------- Parse beneficiary info ----------
+        final Object? infoRaw = row['beneficiary_info'];
+        if (infoRaw == null) continue;
+
+        late Map<String, dynamic> info;
+        try {
+          info = infoRaw is String
+              ? jsonDecode(infoRaw) as Map<String, dynamic>
+              : Map<String, dynamic>.from(infoRaw as Map);
+        } catch (_) {
+          continue;
+        }
+
+        final bool isPregnant =
+            info['isPregnant']?.toString().toLowerCase() == 'yes';
+        final String gender =
+            info['gender']?.toString().toLowerCase() ?? '';
+
+        if (!isPregnant && gender != 'f' && gender != 'female') continue;
+
+        // ---------- Extract LMP ----------
+        DateTime? lmpDate = await _extractLmpDate(row);
+        lmpDate ??= info['lmp'] != null
+            ? DateTime.tryParse(info['lmp'].toString().split('T')[0])
+            : null;
+
+        if (lmpDate == null) continue;
+
+        // ---------- Calculate ANC windows ----------
+        final Map<String, DateTime?> ancRanges =
+        _calculateAncDateRanges(lmpDate);
+
+        DateTime? activeWindowStart;
+        DateTime? activeWindowEnd;
+
+        final DateTime? firstStart =
+        ancRanges['1st_anc_start'];
+        final DateTime? firstEnd =
+        ancRanges['1st_anc_end'];
+
+        final DateTime? secondStart =
+        ancRanges['2nd_anc_start'];
+        final DateTime? secondEnd =
+        ancRanges['2nd_anc_end'];
+
+        final DateTime? thirdStart =
+        ancRanges['3rd_anc_start'];
+        final DateTime? thirdEnd =
+        ancRanges['3rd_anc_end'];
+
+        final DateTime? fourthStart =
+        ancRanges['4th_anc_start'];
+        final DateTime? fourthEnd =
+        ancRanges['4th_anc_end'];
+
+        if (firstStart != null &&
+            firstEnd != null &&
+            isTodayInsideWindow(firstStart, firstEnd)) {
+          activeWindowStart = firstStart;
+          activeWindowEnd = firstEnd;
+        } else if (secondStart != null &&
+            secondEnd != null &&
+            isTodayInsideWindow(secondStart, secondEnd)) {
+          activeWindowStart = secondStart;
+          activeWindowEnd = secondEnd;
+        } else if (thirdStart != null &&
+            thirdEnd != null &&
+            isTodayInsideWindow(thirdStart, thirdEnd)) {
+          activeWindowStart = thirdStart;
+          activeWindowEnd = thirdEnd;
+        } else if (fourthStart != null &&
+            fourthEnd != null &&
+            isTodayInsideWindow(fourthStart, fourthEnd)) {
+          activeWindowStart = fourthStart;
+          activeWindowEnd = fourthEnd;
+        }
+
+        // ---------- Check if today is within or after ANC windows ----------
+        String currentAncDueDate = '';
+        bool shouldIncludeInList = false;
+
+        print('🔍 DEBUG ANC Date Check for beneficiary: $beneficiaryKey');
+        print('   Today: ${_formatDate(todayDate)}');
+        print('   4th ANC End: ${fourthEnd != null ? _formatDate(fourthEnd!) : 'null'}');
+
+        if (activeWindowStart != null && activeWindowEnd != null) {
+          // Today is within an ANC window
+          shouldIncludeInList = true;
+          currentAncDueDate = _formatAncDateOnly(activeWindowEnd.toIso8601String());
+          print('   ✅ Today is within ANC window: ${_formatDate(activeWindowStart)} to ${_formatDate(activeWindowEnd)}');
+        } else {
+          // Check if today is after the 4th ANC window
+          final fourthStart = ancRanges['4th_anc_start'];
+          final fourthEnd = ancRanges['4th_anc_end'];
+
+          if (fourthEnd != null) {
+            final fourthEndDateOnly = DateTime(fourthEnd.year, fourthEnd.month, fourthEnd.day);
+            print('   Fourth End Date Only: ${_formatDate(fourthEndDateOnly)}');
+            print('   Is today after fourth end? ${todayDate.isAfter(fourthEndDateOnly)}');
+
+            if (todayDate.isAfter(fourthEndDateOnly)) {
+              // Today is after the 4th ANC window - include and show current date
+              shouldIncludeInList = true;
+              currentAncDueDate = _formatDate(todayDate);
+              print('   ✅ Today is after 4th ANC window, showing current date: $currentAncDueDate');
+            } else {
+              print('   ❌ Today is NOT after 4th ANC window');
+            }
+          } else {
+            print('   ❌ Fourth ANC end date is null');
+          }
+        }
+
+        // ❌ Don't include if not within window and not after 4th window
+        if (!shouldIncludeInList) {
+          continue;
+        }
+
+        // ---------- Check if ANC followup form already exists ----------
+        final ancFormKey = 'bt7gs9rl1a5d26mz'; // ANC due registration form key
+        final followupFormsQuery = await db.query(
+          FollowupFormDataTable.table,
+          where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+          whereArgs: [ancFormKey, beneficiaryKey],
+          limit: 1, // Only need to check if at least one record exists
+        );
+
+        if (followupFormsQuery.isNotEmpty) {
+          // ANC followup form already exists, exclude from todo list
+          continue;
+        }
+
+        // ---------- Age ----------
+        String ageText = '-';
+        if (info['dob'] != null) {
+          final DateTime? dob =
+          DateTime.tryParse(info['dob'].toString().split('T')[0]);
+          if (dob != null) {
+            int age = today.year - dob.year;
+            // Check if birthday hasn't occurred yet this year
+            final todayMonthDay = DateTime(today.year, today.month, today.day);
+            final birthdayThisYear = DateTime(today.year, dob.month, dob.day);
+            if (todayMonthDay.isBefore(birthdayThisYear)) {
+              age--;
+            }
+            ageText = '${age} Y';
+          }
+        }
+
+        final String uniqueKey =
+            row['unique_key']?.toString() ?? '';
+        final String householdRefKey =
+            row['household_ref_key']?.toString() ?? '';
+
+        // ---------- Add record ----------
+        items.add({
+          'id': uniqueKey.length > 11
+              ? uniqueKey.substring(uniqueKey.length - 11)
+              : uniqueKey,
+          'unique_key': uniqueKey,
+          'household_ref_key': householdRefKey,
+          'name':
+          info['memberName'] ?? info['name'] ?? 'Unknown',
+          'age': ageText,
+          'gender': 'Female',
+          'last Visit date':
+          activeWindowStart != null ? _formatAncDateOnly(activeWindowStart.toIso8601String()) : currentAncDueDate,
+          'Current ANC last due date': currentAncDueDate,
+          'mobile': info['mobileNo'] ?? '-',
+          'badge': 'ANC',
+          'beneficiary_info': jsonEncode(info),
+          '_rawRow': row,
+        });
+      }
+
+      if (mounted) {
+        setState(() => _ancItems = items);
+        _saveTodayWorkCountsToStorage();
+      }
+    } catch (e) {
+      debugPrint('ANC load error: $e');
+    }
+  }
+
+
+  Future<void> _loadHbncItems() async {
+    try {
+      setState(() => _isLoading = true);
+      _hbncItems = [];
+
+      final Set<String> processedBeneficiaries = <String>{};
+
+      final db = await DatabaseProvider.instance.database;
+      final deliveryOutcomeKey =
+          '4r7twnycml3ej1vg';
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      String whereClause = 'forms_ref_key = ?';
+      List<dynamic> whereArgs = [deliveryOutcomeKey];
+
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        whereClause += ' AND current_user_key = ?';
+        whereArgs.add(ashaUniqueKey);
+      }
+
+      final dbOutcomes = await db.query(
+        'followup_form_data',
+        where: whereClause,
+        whereArgs: whereArgs,
+      );
+
+      debugPrint('Found ${dbOutcomes.length} delivery outcomes');
+
+      for (final outcome in dbOutcomes) {
+        try {
+          final formJson = jsonDecode(outcome['form_json'] as String? ?? '{}');
+          final formData = formJson['form_data'] ?? {};
+          final beneficiaryRefKey = outcome['beneficiary_ref_key']?.toString();
+
+          if (beneficiaryRefKey == null || beneficiaryRefKey.isEmpty) {
+            debugPrint(
+              '⚠️ Missing beneficiary_ref_key in outcome: ${outcome['id']}',
+            );
+            continue;
+          }
+
+          // Skip if already processed
+          if (processedBeneficiaries.contains(beneficiaryRefKey)) {
+            debugPrint(
+              'ℹ️ Skipping duplicate outcome for beneficiary: $beneficiaryRefKey',
+            );
+            continue;
+          }
+          processedBeneficiaries.add(beneficiaryRefKey);
+
+          // Get beneficiary details
+          String benWhere =
+              'unique_key = ? AND (is_deleted = 0 OR is_deleted IS NULL)';
+          List<dynamic> benArgs = [beneficiaryRefKey];
+
+          if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+            benWhere += ' AND current_user_key = ?';
+            benArgs.add(ashaUniqueKey);
+          }
+
+          final beneficiaryResults = await db.query(
+            'beneficiaries_new',
+            where: benWhere,
+            whereArgs: benArgs,
+          );
+
+          if (beneficiaryResults.isEmpty) {
+            debugPrint('⚠️ No beneficiary found for key: $beneficiaryRefKey');
+            continue;
+          }
+
+          final beneficiary = beneficiaryResults.first;
+          final beneficiaryInfoRaw =
+              beneficiary['beneficiary_info'] as String? ?? '{}';
+
+          Map<String, dynamic> beneficiaryInfo;
+          try {
+            beneficiaryInfo = jsonDecode(beneficiaryInfoRaw);
+          } catch (e) {
+            debugPrint('Error parsing beneficiary info: $e');
+            continue;
+          }
+
+          // Extract data
+          final name =
+              beneficiaryInfo['memberName']?.toString() ??
+                  beneficiaryInfo['headName']?.toString() ??
+                  'N/A';
+          final dob = beneficiaryInfo['dob']?.toString();
+          final age = _calculateAge(dob);
+          final gender =
+          (beneficiaryInfo['gender']?.toString() ?? 'female')
+              .toLowerCase() ==
+              'female'
+              ? 'Female'
+              : 'Male';
+          final mobile = beneficiaryInfo['mobileNo']?.toString() ?? '-';
+          final spouseName = beneficiaryInfo['spouseName']?.toString() ?? '-';
+          final householdRefKey =
+              beneficiary['household_ref_key']?.toString() ?? '';
+
+          // Get registration date from mother_care_activities table for pnc_mother state
+          String registrationDate = beneficiary['created_date_time']?.toString() ?? '';
+          try {
+            final mcaResult = await db.query(
+              'mother_care_activities',
+              where: 'beneficiary_ref_key = ? AND mother_care_state = ? AND is_deleted = 0',
+              whereArgs: [beneficiaryRefKey, 'pnc_mother'],
+              orderBy: 'created_date_time DESC',
+              limit: 1,
+            );
+
+            if (mcaResult.isNotEmpty) {
+              final mcaCreatedDate = mcaResult.first['created_date_time']?.toString() ?? '';
+              if (mcaCreatedDate.isNotEmpty) {
+                registrationDate = mcaCreatedDate;
+              }
+            }
+          } catch (e) {
+            print('⚠️ Error fetching registration date from mother_care_activities: $e');
+            // Fallback to beneficiary created date
+          }
+
+          // Use HBNCList logic for visit count and dates
+          final visitCount = await _getHbncVisitCountFromHBNCList(beneficiaryRefKey);
+          final previousHBNCDate = await _getHbncLastVisitDateFromHBNCList(beneficiaryRefKey);
+          final deliveryDate = formData['delivery_date']?.toString();
+          print('📅 Passing delivery date to _getHbncNextVisitDateFromHBNCList: $deliveryDate');
+          print('📊 Passing visit count to _getHbncNextVisitDateFromHBNCList: $visitCount');
+          final nextHBNCDate = await _getHbncNextVisitDateFromHBNCList(
+            beneficiaryRefKey,
+            deliveryDate,
+            visitCount,
+            registrationDate,
+          );
+
+          print('📊 Final values for beneficiary $beneficiaryRefKey:');
+          print('  - Visit Count: $visitCount');
+          print('  - Previous HBNC Date: $previousHBNCDate');
+          print('  - Next HBNC Date: $nextHBNCDate');
+
+          // Get visit number for filtering logic (keep existing logic)
+          final visitNumber = await _getHbncVisitNumber(beneficiaryRefKey);
+
+          // Apply filtering logic based on visit number
+          if (visitNumber != null) {
+            // Handle visit number 0 case - show record if today's date matches any criteria
+            if (visitNumber == 0) {
+              debugPrint(
+                '✅ Including HBNC record for $beneficiaryRefKey - visit number 0',
+              );
+            } else {
+              // For other visit numbers, apply specific filtering
+              final specificVisitNumbers = [3, 7, 14, 21, 28, 42];
+              if (!specificVisitNumbers.contains(visitNumber)) {
+                debugPrint(
+                  '🗑️ Skipping HBNC record for $beneficiaryRefKey - visit number $visitNumber not in specific list',
+                );
+                continue;
+              }
+
+              // Check if next visit date is today, in the past, or matches today's date
+              if (nextHBNCDate != null && nextHBNCDate.isNotEmpty) {
+                final nextDate = _parseDate(nextHBNCDate);
+                if (nextDate != null) {
+                  final now = DateTime.now();
+                  final today = DateTime(now.year, now.month, now.day);
+                  final nextDateOnly = DateTime(
+                    nextDate.year,
+                    nextDate.month,
+                    nextDate.day,
+                  );
+
+                  // Show if next visit date is today, in the past, or exactly matches today
+                  if (nextDateOnly.isAfter(today)) {
+                    debugPrint(
+                      '🗑️ Skipping HBNC record for $beneficiaryRefKey - next visit date $nextHBNCDate is in the future',
+                    );
+                    continue;
+                  }
+
+                  // If next visit date is today or in the past, show the record
+                  if (nextDateOnly.isBefore(today) ||
+                      nextDateOnly.isAtSameMomentAs(today)) {
+                    debugPrint(
+                      '✅ Including HBNC record for $beneficiaryRefKey - next visit date $nextHBNCDate is today or in the past',
+                    );
+                  } else {
+                    debugPrint(
+                      '🗑️ Skipping HBNC record for $beneficiaryRefKey - next visit date $nextHBNCDate is in the future',
+                    );
+                    continue;
+                  }
+                }
+              }
+            }
+          }
+          // If visitNumber is null, show all records (existing behavior)
+
+          // Check if beneficiary already has a completed HBNC form (to exclude from to-do list)
+          final hasCompletedHbncForm = await _hasCompletedHbncForm(
+            beneficiaryRefKey,
+          );
+          if (hasCompletedHbncForm) {
+            debugPrint(
+              '🗑️ Skipping HBNC record for $beneficiaryRefKey - already has completed HBNC form',
+            );
+            continue;
+          }
+
+          // Check if visit count will change between current date and next HBNC visit date
+          final shouldRemoveFromList =
+          await _shouldRemoveHbncRecordDueToCountChange(
+            beneficiaryRefKey,
+            formData['delivery_date']?.toString(),
+            visitCount,
+          );
+
+          // If count will change, skip adding this record to list
+          if (shouldRemoveFromList) {
+            debugPrint(
+              '🗑️ Removing HBNC record for $beneficiaryRefKey - visit count will change before next visit',
+            );
+            continue;
+          }
+
+          // Format the data for display
+          // In the _loadHbncItems method, update the formattedData map to include the 'badge' field
+          final formattedData = {
+            'id': _last11(beneficiaryRefKey),
+            'unique_key': beneficiaryRefKey,
+            'name': name,
+            'age': _formatAgeWithSuffix(age),
+            'gender': gender,
+            'mobile': mobile,
+            // spouse_name removed as requested
+            'household_ref_key': householdRefKey,
+            'delivery_date': formData['delivery_date']?.toString() ?? '-',
+            'last_visit_date': previousHBNCDate ?? '-',
+            'next_visit_date': nextHBNCDate ?? '-',
+            'visit_count': visitCount,
+            'is_hbnc': true,
+            'beneficiary_info': jsonEncode(beneficiaryInfo),
+            'form_data': formData,
+            'badge': 'HBNC', // Add this line to ensure the badge shows "HBNC"
+            'last Visit date':
+            previousHBNCDate ??
+                '-', // Ensure this matches the card's expected field name
+            'next hbnc visit due date':
+            nextHBNCDate ??
+                '-', // Changed from 'Current HBNC last due date' to 'next hbnc visit due date'
+            'fullBeneficiaryId': beneficiaryRefKey, // Add this for navigation
+            'fullHhId': householdRefKey, // Add this for navigation
+          };
+
+          setState(() {
+            _hbncItems.add(formattedData);
+          });
+        } catch (e) {
+          debugPrint('❌ Error processing outcome ${outcome['id']}: $e');
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Error in _loadHbncItems: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<DateTime?> _extractLmpDate(Map<String, dynamic> data) async {
+    try {
+      // First try to get LMP from beneficiary_info (beneficiaries_new table)
+      dynamic rawInfo = data['beneficiary_info'];
+      Map<String, dynamic> info;
+
+      if (rawInfo is String && rawInfo.isNotEmpty) {
+        info = jsonDecode(rawInfo) as Map<String, dynamic>;
+      } else if (rawInfo is Map) {
+        info = Map<String, dynamic>.from(rawInfo as Map);
+      } else {
+        info = <String, dynamic>{};
+      }
+
+      final lmpRaw = info['lmp']?.toString();
+      if (lmpRaw != null && lmpRaw.isNotEmpty) {
+        String dateStr = lmpRaw;
+        if (dateStr.contains('T')) {
+          dateStr = dateStr.split('T')[0];
+        }
+        final lmpDate = DateTime.tryParse(dateStr);
+        if (lmpDate != null) {
+          print(
+            '✅ Found LMP date from beneficiaries_new: ${_formatDate(lmpDate)}',
+          );
+          return lmpDate;
+        }
+      }
+
+      // Fallback: try to get from _rawRow if available
+      final rawRow = data['_rawRow'] as Map<String, dynamic>?;
+      if (rawRow != null) {
+        rawInfo = rawRow['beneficiary_info'];
+        if (rawInfo is String && rawInfo.isNotEmpty) {
+          info = jsonDecode(rawInfo) as Map<String, dynamic>;
+        } else if (rawInfo is Map) {
+          info = Map<String, dynamic>.from(rawInfo as Map);
+        } else {
+          info = <String, dynamic>{};
+        }
+
+        final lmpRaw = info['lmp']?.toString();
+        if (lmpRaw != null && lmpRaw.isNotEmpty) {
+          String dateStr = lmpRaw;
+          if (dateStr.contains('T')) {
+            dateStr = dateStr.split('T')[0];
+          }
+          final lmpDate = DateTime.tryParse(dateStr);
+          if (lmpDate != null) {
+            print('✅ Found LMP date from _rawRow: ${_formatDate(lmpDate)}');
+            return lmpDate;
+          }
+        }
+      }
+
+      // If not found in beneficiaries_new, check followup forms
+      print('⚠️ No LMP found in beneficiaries_new, checking followup forms...');
+      final lmpFromFollowup = await _getLmpFromFollowupForm(data);
+      if (lmpFromFollowup != null) {
+        print(
+          '✅ Found LMP date from followup form: ${_formatDate(lmpFromFollowup)}',
+        );
+        return lmpFromFollowup;
+      }
+
+      print('⚠️ No LMP date found in beneficiaries_new or followup forms');
+      return null;
+    } catch (e) {
+      print('⚠️ Error extracting LMP date: $e');
+      return null;
+    }
+  }
+
+  Future<DateTime?> _getLmpFromFollowupForm(Map<String, dynamic> data) async {
+    try {
+      final benId = data['BeneficiaryID']?.toString() ??
+          data['unique_key']?.toString() ??
+          (data['_rawRow'] is Map
+              ? (data['_rawRow'] as Map)['unique_key']?.toString()
+              : null);
+
+      if (benId == null || benId.isEmpty) {
+        print('⚠️ Missing beneficiary ID for followup form LMP lookup');
+        print('   benId: $benId');
+        print('   data keys: ${data.keys}');
+        return null;
+      }
+
+      print('🔍 Looking for followup forms with benId: $benId');
+
+      final db = await DatabaseProvider.instance.database;
+      final formKey = FollowupFormDataTable
+          .formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue];
+
+      print('🔍 Querying with formKey: $formKey, benId: $benId');
+
+      final result = await db.query(
+        FollowupFormDataTable.table,
+        where: 'forms_ref_key = ? AND beneficiary_ref_key = ?',
+        whereArgs: [formKey, benId],
+        orderBy: 'created_date_time DESC',
+      );
+
+      print('📋 Found ${result.length} followup forms for beneficiary: $benId');
+
+      if (result.isEmpty) {
+        print('ℹ️ No eligible couple tracking due forms found for beneficiary: $benId');
+
+        final allForms = await db.query(
+          FollowupFormDataTable.table,
+          where: 'beneficiary_ref_key = ?',
+          whereArgs: [benId],
+          orderBy: 'created_date_time DESC',
+        );
+
+        print('🔍 DEBUG: All forms for beneficiary $benId:');
+        for (int i = 0; i < allForms.length; i++) {
+          final form = allForms[i];
+          print(
+            '   Form ${i + 1}: forms_ref_key=${form['forms_ref_key']}, '
+                'household_ref_key=${form['household_ref_key']}',
+          );
+        }
+
+        return null;
+      }
+
+      // ✅ try block is now properly closed above
+      for (int i = 0; i < result.length; i++) {
+        final form = result[i];
+        final formJsonStr = form['form_json']?.toString();
+        final formHouseholdId = form['household_ref_key']?.toString();
+        final formBeneficiaryId = form['beneficiary_ref_key']?.toString();
+
+        print(
+          '📄 Processing form ${i + 1}/${result.length}: '
+              'household=$formHouseholdId, beneficiary=$formBeneficiaryId',
+        );
+
+        if (formJsonStr == null || formJsonStr.isEmpty) {
+          print('⚠️ Empty form_json in form ${i + 1}, skipping');
+          continue;
+        }
+
+        try {
+          final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
+          print('🔍 Parsing followup form JSON ${i + 1}: ${root.keys}');
+
+          String? lmpStr;
+
+          /// ✅ EXISTING CONDITION
+          final trackingData = root['eligible_couple_tracking_due_from'];
+          if (trackingData is Map) {
+            final val = trackingData['lmp_date']?.toString();
+            if (val != null && val.isNotEmpty && val != 'null') {
+              lmpStr = val;
+              print(
+                '✅ Found LMP in eligible_couple_tracking_due_from (form ${i + 1}): "$lmpStr"',
+              );
+            }
+          }
+
+          /// ✅ NEW CONDITION
+          if ((lmpStr == null || lmpStr.isEmpty || lmpStr == 'null') &&
+              root['form_data'] is Map) {
+            final formData = root['form_data'] as Map<String, dynamic>;
+            final val = formData['lmp_date']?.toString();
+            if (val != null && val.isNotEmpty && val != '""' && val != 'null') {
+              lmpStr = val;
+              print('✅ Found LMP in form_data (form ${i + 1}): "$lmpStr"');
+            }
+          }
+
+          if (lmpStr != null && lmpStr.isNotEmpty && lmpStr != 'null') {
+            try {
+              if (lmpStr.contains('T')) {
+                final lmpDate = DateTime.parse(lmpStr);
+                print('✅ Successfully parsed LMP date (form ${i + 1}): $lmpDate');
+                return lmpDate;
+              }
+
+              final lmpDate = DateTime.parse(lmpStr);
+              print('✅ Successfully parsed LMP date (form ${i + 1}): $lmpDate');
+              return lmpDate;
+            } catch (e) {
+              print('⚠️ Error parsing LMP date "$lmpStr": $e');
+            }
+          }
+        } catch (e) {
+          print('⚠️ Error parsing followup form JSON (form ${i + 1}): $e');
+        }
+      }
+
+      print('ℹ️ No LMP date found in any eligible couple tracking due forms');
+      return null;
+    } catch (e) {
+      print('❌ Error loading LMP from followup form: $e');
+      return null;
+    }
+  }
+
+
+  String _getNextAncDueDate(DateTime? lmpDate, int visitCount) {
+    if (lmpDate == null) return AppLocalizations.of(context)!.na;
+
+    final t = AppLocalizations.of(context);
+    final now = DateTime.now();
+    final ancRanges = _calculateAncDateRanges(lmpDate);
+
+    String? nextAncKey;
+
+    if (visitCount == 0) {
+      // First ANC is due
+      nextAncKey = '1st_anc_end';
+    } else if (visitCount == 1) {
+      // Second ANC is due
+      nextAncKey = '2nd_anc_end';
+    } else if (visitCount == 2) {
+      // Third ANC is due
+      nextAncKey = '3rd_anc_end';
+    } else if (visitCount == 3) {
+      // Fourth ANC is due
+      nextAncKey = '4th_anc_end';
+    } else {
+      nextAncKey = '4th_anc_end';
+    }
+
+    if (nextAncKey != null && ancRanges.containsKey(nextAncKey)) {
+      final dueDate = ancRanges[nextAncKey];
+      if (dueDate != null) {
+        return _formatDate(dueDate);
+      }
+    }
+
+    return AppLocalizations.of(context)!.na;
+  }
+
+  Future<Map<String, dynamic>> _getVisitCount(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiary ID provided to _getVisitCount');
+        return {'count': 0, 'isHighRisk': false};
+      }
+
+      print(
+        '🔍 Fetching visit count and high-risk status for beneficiary: $beneficiaryId',
+      );
+      final result = await LocalStorageDao.instance.getANCVisitCount(
+        beneficiaryId,
+      );
+      print('✅ Visit details for $beneficiaryId: $result');
+      return result;
+    } catch (e) {
+      print('❌ Error in _getVisitCount for $beneficiaryId: $e');
+      return {'count': 0, 'isHighRisk': false};
+    }
+  }
+
+  Future<int> _getVisitCountFromFollowupForm(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiary ID provided to _getVisitCountFromFollowupForm');
+        return 0;
+      }
+
+      final db = await DatabaseProvider.instance.database;
+      final ancFormKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+
+      if (ancFormKey.isEmpty) {
+        print('⚠️ ANC form key is empty');
+        return 0;
+      }
+
+      // Get the most recent ANC form for this beneficiary
+      final result = await db.query(
+        FollowupFormDataTable.table,
+        where: 'forms_ref_key = ? AND beneficiary_ref_key = ? ',
+        whereArgs: [ancFormKey, beneficiaryId],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      if (result.isEmpty) {
+        print('ℹ️ No ANC followup forms found for beneficiary: $beneficiaryId');
+        return 0;
+      }
+
+      final formJsonStr = result.first['form_json']?.toString();
+      if (formJsonStr == null || formJsonStr.isEmpty) {
+        print('⚠️ No form_json found in followup form for beneficiary: $beneficiaryId');
+        return 0;
+      }
+
+      try {
+        final formJson = jsonDecode(formJsonStr) as Map<String, dynamic>;
+
+        final ancForm = formJson['anc_form'] as Map<String, dynamic>?;
+        if (ancForm != null) {
+          final visitCount = ancForm['anc_visit'] as int?;
+          if (visitCount != null) {
+            print('✅ Found visit count $visitCount in anc_form for beneficiary: $beneficiaryId');
+            return visitCount;
+          }
+        }
+
+        // Try alternative structure (form_data)
+        final formData = formJson['form_data'] as Map<String, dynamic>?;
+        if (formData != null) {
+          final visitCount = formData['anc_visit'] as int?;
+          if (visitCount != null) {
+            print('✅ Found visit count $visitCount in form_data for beneficiary: $beneficiaryId');
+            return visitCount;
+          }
+        }
+
+        // Try top level
+        final visitCount = formJson['anc_visit'] as int?;
+        if (visitCount != null) {
+          print('✅ Found visit count $visitCount at top level for beneficiary: $beneficiaryId');
+          return visitCount;
+        }
+
+        print('⚠️ No visit count found in followup form for beneficiary: $beneficiaryId');
+        return 0;
+      } catch (e) {
+        print('❌ Error parsing followup form JSON for beneficiary $beneficiaryId: $e');
+        return 0;
+      }
+    } catch (e) {
+      print('❌ Error in _getVisitCountFromFollowupForm for $beneficiaryId: $e');
+      return 0;
+    }
+  }
+
+
+  Map<String, DateTime> _calculateAncDateRanges(DateTime lmp) {
+    final ranges = <String, DateTime>{};
+
+    ranges['1st_anc_start'] = lmp;
+    ranges['1st_anc_end'] = _dateAfterWeeks(lmp, 12);
+
+    ranges['2nd_anc_start'] = _dateAfterWeeks(lmp, 14);
+    ranges['2nd_anc_end'] = _dateAfterWeeks(lmp, 24);
+    ranges['3rd_anc_start'] = _dateAfterWeeks(lmp, 26);
+    ranges['3rd_anc_end'] = _dateAfterWeeks(lmp, 34);
+
+    ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
+    ranges['4th_anc_end'] = _calculateEdd(lmp);
+
+    ranges['pmsma_start'] = ranges['1st_anc_end']!.add(const Duration(days: 1));
+    ranges['pmsma_end'] = ranges['2nd_anc_start']!.subtract(
+      const Duration(days: 1),
+    );
+
+    return ranges;
+  }
+
+
+
+
+  Future<int> _getHbncVisitCountFromHBNCList(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiaryId provided to _getHbncVisitCountFromHBNCList');
+        return 0;
+      }
+
+      final db = await DatabaseProvider.instance.database;
+      final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+
+      // Get the latest visit record to extract visit number
+      final latestVisitRows = await db.query(
+        FollowupFormDataTable.table,
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? ',
+        whereArgs: [beneficiaryId, hbncVisitKey],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      if (latestVisitRows.isNotEmpty) {
+        final result = latestVisitRows.first;
+        try {
+          final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
+
+          if (formJson.containsKey('hbyc_form')) {
+            final hbycForm = formJson['hbyc_form'] as Map<String, dynamic>? ?? {};
+
+            if (hbycForm.containsKey('visitDetails')) {
+              final visitDetails = hbycForm['visitDetails'] as Map<String, dynamic>? ?? {};
+              final visitNumber = visitDetails['visitNumber']?.toString();
+
+              if (visitNumber != null) {
+                final number = int.tryParse(visitNumber);
+                if (number != null) {
+                  print('🔢 Found visit number from hbyc_form.visitDetails: $number for beneficiary $beneficiaryId');
+                  return number;
+                }
+              }
+            }
+          }
+
+          final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
+
+          if (formData.containsKey('visitDetails')) {
+            final visitDetails = formData['visitDetails'] as Map<String, dynamic>? ?? {};
+            final visitNumber = visitDetails['visitNumber']?.toString() ??
+                visitDetails['visit_number']?.toString();
+
+            if (visitNumber != null) {
+              final number = int.tryParse(visitNumber);
+              if (number != null) {
+                print('🔢 Found visit number from form_data.visitDetails: $number for beneficiary $beneficiaryId');
+                return number;
+              }
+            }
+          }
+        } catch (e) {
+          print('❌ Error parsing visit number: $e');
+        }
+      }
+
+      // Fallback 1: Check home_visit_day from pnc_infant_form
+      if (latestVisitRows.isNotEmpty) {
+        final result = latestVisitRows.first;
+        try {
+          final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
+          print('🔍 Full form JSON keys: ${formJson.keys.toList()}');
+
+          // Check for both pnc_mother_form and pnc_infant_form structures
+          List<String> formKeysToCheck = ['pnc_mother_form', 'pnc_infant_form'];
+
+          for (final formKey in formKeysToCheck) {
+            if (formJson.containsKey(formKey)) {
+              final formData = formJson[formKey] as Map<String, dynamic>? ?? {};
+              print('🔍 Found $formKey structure');
+              print('🔍 $formKey keys: ${formData.keys.toList()}');
+
+              final homeVisitDay = formData['home_visit_day']?.toString();
+              print('📊 Extracted home_visit_day from $formKey: $homeVisitDay');
+              print('📊 home_visit_day type: ${homeVisitDay.runtimeType}');
+
+              if (homeVisitDay != null && homeVisitDay.isNotEmpty) {
+                final number = int.tryParse(homeVisitDay);
+                print('🔢 Parsed home_visit_day as integer: $number');
+                if (number != null && number > 0) {
+                  print('🔢 Found visit number from $formKey.home_visit_day: $number for beneficiary $beneficiaryId');
+                  return number;
+                } else {
+                  print('⚠️ home_visit_day is null or <= 0: $number');
+                }
+              } else {
+                print('⚠️ home_visit_day is null or empty in $formKey: $homeVisitDay');
+              }
+            }
+          }
+        } catch (e) {
+          print('❌ Error parsing pnc_infant_form: $e');
+          print('🔍 Raw form_json: ${result['form_json']}');
+        }
+      } else {
+        print('⚠️ No latest visit rows found for pnc_infant_form check');
+      }
+
+      // Fallback 2: Counting total records
+      final countRows = await db.query(
+        FollowupFormDataTable.table,
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
+        whereArgs: [beneficiaryId, hbncVisitKey],
+        columns: ['id'],
+      );
+      final count = countRows.length;
+      print('🔢 HBNC visit record count for $beneficiaryId: $count');
+      return count;
+    } catch (e) {
+      print('❌ Error in _getHbncVisitCountFromHBNCList for $beneficiaryId: $e');
+      return 0;
+    }
+  }
+
+  Future<String?> _getHbncNextVisitDateFromHBNCList(
+      String beneficiaryId,
+      String? deliveryDate,
+      int visitCount,
+      String registrationDate,
+      ) async {
+    try {
+      print('🔍 Calculating next visit date for beneficiary: $beneficiaryId');
+      print('📊 Visit count: $visitCount');
+      print('📅 Registration date: $registrationDate');
+
+      /// 🔹 CASE 1: No HBNC visits done yet
+      /// → Show registration date
+      if (visitCount == 0) {
+        if (registrationDate.isNotEmpty) {
+          final parsedRegDate = DateTime.tryParse(registrationDate);
+          if (parsedRegDate != null) {
+            final formatted = _formatDateFromString(parsedRegDate.toString());
+            print('📅 Visit count 0 → Next HBNC = Registration Date: $formatted');
+            return formatted;
+          }
+        }
+
+        // Fallback safety
+        print('⚠️ Invalid registration date, using today');
+        return _formatDateFromString(DateTime.now().toString());
+      }
+
+      /// 🔹 CASE 2: Visit count >= 1
+      final db = await DatabaseProvider.instance.database;
+
+      final possibleFormKeys = [
+        FollowupFormDataTable.formUniqueKeys[
+        FollowupFormDataTable.pncMother],
+        '4r7twnycml3ej1vg',
+        '695fdc026276645a01e9c800',
+      ];
+
+      final latestVisitRows = await db.query(
+        FollowupFormDataTable.table,
+        where:
+        'beneficiary_ref_key = ? AND (forms_ref_key = ? OR forms_ref_key = ? OR forms_ref_key = ?)',
+        whereArgs: [beneficiaryId, ...possibleFormKeys],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      DateTime baseDate;
+
+      if (latestVisitRows.isNotEmpty) {
+        final createdDateTime =
+        latestVisitRows.first['created_date_time']?.toString();
+        baseDate =
+            DateTime.tryParse(createdDateTime ?? '') ?? DateTime.now();
+        print('📅 Base date from last visit: $baseDate');
+      } else {
+        baseDate = DateTime.now();
+        print('⚠️ No visit found, using today as base date');
+      }
+
+      /// Visit 1 → +2 days
+      if (visitCount == 1) {
+        final nextVisit = baseDate.add(const Duration(days: 2));
+        return _formatDateFromString(nextVisit.toString());
+      }
+
+      /// Visit 2+ → use your existing rule
+      final nextVisitDate =
+      _calculateNextVisitDate(visitCount, baseDate);
+
+      return nextVisitDate != null
+          ? _formatDateFromString(nextVisitDate.toString())
+          : null;
+    } catch (e) {
+      print('❌ Error calculating next visit date: $e');
+      return null;
+    }
+  }
+
+  // Helper method to get visit number from latest HBNC record
+  Future<int?> _getHbncVisitNumber(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) {
+        return null;
+      }
+
+      final db = await DatabaseProvider.instance.database;
+      final hbncVisitKey =
+      FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+      if (hbncVisitKey == null || hbncVisitKey.isEmpty) {
+        return null;
+      }
+
+      final results = await db.query(
+        FollowupFormDataTable.table,
+        where:
+        'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        whereArgs: [beneficiaryId, hbncVisitKey],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      if (results.isEmpty) {
+        return null;
+      }
+
+      try {
+        final latestRecord = results.first;
+        final formJson = jsonDecode(
+          latestRecord['form_json'] as String? ?? '{}',
+        );
+
+        // Check for hbyc_form structure first (based on sample data)
+        if (formJson.containsKey('hbyc_form')) {
+          final hbycForm = formJson['hbyc_form'] as Map<String, dynamic>? ?? {};
+          if (hbycForm.containsKey('visitDetails')) {
+            final visitDetails =
+                hbycForm['visitDetails'] as Map<String, dynamic>? ?? {};
+            final visitNumber = visitDetails['visitNumber']?.toString();
+            if (visitNumber != null) {
+              final number = int.tryParse(visitNumber);
+              if (number != null) {
+                return number;
+              }
+            }
+          }
+        }
+
+        // Fallback to form_data structure
+        final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
+
+        if (formData.containsKey('visitDetails')) {
+          final visitDetails =
+              formData['visitDetails'] as Map<String, dynamic>? ?? {};
+          final visitNumber =
+              visitDetails['visitNumber']?.toString() ??
+                  visitDetails['visit_number']?.toString();
+          if (visitNumber != null) {
+            final number = int.tryParse(visitNumber);
+            if (number != null) {
+              return number;
+            }
+          }
+        }
+      } catch (_) {}
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // Helper method to parse date strings in different formats
+  DateTime? _parseDate(String dateStr) {
+    if (dateStr.isEmpty) return null;
+    try {
+      // Try parsing in different formats
+      // ISO format: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss
+      if (dateStr.contains('-')) {
+        return DateTime.tryParse(dateStr);
+      }
+
+      // Format: dd-MM-yyyy
+      if (RegExp(r'\d{2}-\d{2}-\d{4}').hasMatch(dateStr)) {
+        final parts = dateStr.split('-');
+        if (parts.length == 3) {
+          final day = int.tryParse(parts[0]);
+          final month = int.tryParse(parts[1]);
+          final year = int.tryParse(parts[2]);
+          if (day != null && month != null && year != null) {
+            return DateTime(year, month, day);
+          }
+        }
+      }
+
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<String?> _getHbncLastVisitDateFromHBNCList(String beneficiaryId) async {
+    try {
+      print('🔍 Fetching last visit date for beneficiary: $beneficiaryId');
+      final db = await DatabaseProvider.instance.database;
+
+      final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+      print('🔑 Using form reference key: $hbncVisitKey');
+
+      final results = await db.query(
+        FollowupFormDataTable.table,
+        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? ',
+        whereArgs: [beneficiaryId, hbncVisitKey],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      print('📋 Found ${results.length} HBNC visit records');
+
+      if (results.isNotEmpty) {
+        final result = results.first;
+        print('📋 Found HBNC visit record with ID: ${result['id']}');
+
+        // Directly use created_date_time as the previous HBNC date
+        final createdDate = result['created_date_time'];
+        if (createdDate != null && createdDate.toString().isNotEmpty) {
+          print('⏰ Using created_date_time as previous HBNC date: $createdDate');
+          final formattedDate = _formatDateFromString(createdDate.toString());
+          print('✅ Previous HBNC date: $formattedDate');
+          return formattedDate;
+        } else {
+          print('⚠️ created_date_time is null or empty');
+          return null;
+        }
+      } else {
+        print('ℹ️ No HBNC visit records found for beneficiary');
+      }
+    } catch (e) {
+      print('❌ Error in _getHbncLastVisitDateFromHBNCList: $e');
+    }
+    return null;
+  }
+
+  String _formatDateFromString(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'Not Available';
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  Future<bool> _hasCompletedHbncForm(String beneficiaryRefKey) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
+
+      final hbncFormKey =
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
+              .pncMother] ??
+              '';
+
+      if (hbncFormKey.isEmpty) return false;
+
+      final now = DateTime.now();
+      final todayStr =
+          '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+      String whereClause =
+          'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND created_date_time LIKE ?';
+      List<dynamic> whereArgs = [hbncFormKey, beneficiaryRefKey, '$todayStr%'];
+
+      if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        whereClause += ' AND current_user_key = ?';
+        whereArgs.add(ashaUniqueKey);
+      }
+
+      final result = await db.query(
+        FollowupFormDataTable.table,
+        where: whereClause,
+        whereArgs: whereArgs,
+        limit: 1,
+      );
+
+      return result.isNotEmpty;
+    } catch (e) {
+      debugPrint(
+        'Error checking completed HBNC form for $beneficiaryRefKey: $e',
+      );
+      return false;
+    }
+  }
+  Future<bool> _shouldRemoveHbncRecordDueToCountChange(
+      String beneficiaryId,
+      String? deliveryDate,
+      int currentVisitCount,
+      ) async {
+    try {
+      if (deliveryDate == null || deliveryDate.isEmpty) return false;
+
+      final db = await DatabaseProvider.instance.database;
+      final hbncVisitKey =
+      FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
+      if (hbncVisitKey == null || hbncVisitKey.isEmpty) return false;
+
+      // Parse delivery date
+      final deliveryDt = DateTime.tryParse(deliveryDate);
+      if (deliveryDt == null) return false;
+
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      final schedule = <int>[1, 3, 7, 14, 21, 28, 42];
+      final futureVisitDates = <DateTime>[];
+
+      for (final day in schedule) {
+        final visitDate = deliveryDt.add(Duration(days: day));
+        if (visitDate.isAfter(today) || visitDate.isAtSameMomentAs(today)) {
+          futureVisitDates.add(visitDate);
+        }
+      }
+
+      if (futureVisitDates.isEmpty) return false;
+
+      final existingVisits = await db.query(
+        FollowupFormDataTable.table,
+        where:
+        'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        whereArgs: [beneficiaryId, hbncVisitKey],
+        orderBy: 'created_date_time ASC',
+      );
+
+      for (final futureVisitDate in futureVisitDates) {
+        int visitsByFutureDate = 0;
+
+        for (final visit in existingVisits) {
+          final visitCreatedDate = DateTime.tryParse(
+            visit['created_date_time']?.toString() ?? '',
+          );
+          if (visitCreatedDate != null) {
+            final visitDateOnly = DateTime(
+              visitCreatedDate.year,
+              visitCreatedDate.month,
+              visitCreatedDate.day,
+            );
+            if (visitDateOnly.isBefore(futureVisitDate) ||
+                visitDateOnly.isAtSameMomentAs(futureVisitDate)) {
+              visitsByFutureDate++;
+            }
+          }
+        }
+
+        // Calculate expected visit count based on schedule
+        int expectedCount = 0;
+        for (int i = 0; i < schedule.length; i++) {
+          final scheduledDate = deliveryDt.add(Duration(days: schedule[i]));
+          if (scheduledDate.isBefore(futureVisitDate) ||
+              scheduledDate.isAtSameMomentAs(futureVisitDate)) {
+            expectedCount = i + 1;
+          } else {
+            break;
+          }
+        }
+
+        // If counts don't match, the record should be removed
+        if (visitsByFutureDate != expectedCount) {
+          debugPrint(
+            '📊 Count mismatch for $beneficiaryId by ${_formatHbncDate(futureVisitDate.toIso8601String())}: expected=$expectedCount, actual=$visitsByFutureDate',
+          );
+          return true;
+        }
+      }
+
+      return false;
+    } catch (e) {
+      debugPrint('❌ Error checking HBNC count change: $e');
+      return false;
+    }
+  }
+  String _formatAgeWithSuffix(int age) {
+    if (age <= 0) return '0 Y';
+
+    final now = DateTime.now();
+    // We need to calculate more precise age, so let's use the same logic as _formatAgeGender
+    // But since we only have years, we'll just show years with Y suffix
+    return '$age Y';
+  }
+  DateTime? _calculateNextVisitDate(int currentVisitNumber, DateTime currentVisitDate) {
+    switch (currentVisitNumber) {
+      case 0: // Day 0 → Day 1 (within 24 hours of birth)
+      case 1: // Day 1 → Day 3 (after 2 days)
+        return currentVisitDate.add(const Duration(days: 2));
+      case 3: // Day 3 → Day 7 (after 4 days)
+        return currentVisitDate.add(const Duration(days: 4));
+      case 7: // Day 7 → Day 14 (after 7 days)
+        return currentVisitDate.add(const Duration(days: 7));
+      case 14: // Day 14 → Day 21 (after 7 days)
+        return currentVisitDate.add(const Duration(days: 7));
+      case 21: // Day 21 → Day 28 (after 7 days)
+        return currentVisitDate.add(const Duration(days: 7));
+      case 28: // Day 28 → Day 42 (after 14 days)
+        return currentVisitDate.add(const Duration(days: 14));
+      default:
+      // For any other visit number, add 7 days as default
+        return currentVisitDate.add(const Duration(days: 7));
+    }
+  }
+
+  String _formatHbncDate(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    try {
+      final dt = DateTime.tryParse(dateStr);
+      if (dt == null) return '';
+      return '${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  Future<void> _loadRoutineImmunizationItems() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final currentUserData = await SecureStorageService.getCurrentUserData();
+      final String? ashaUniqueKey =
+      currentUserData?['unique_key']?.toString();
+
+      final rows = await db.rawQuery(
+        '''
+      SELECT *
+      FROM beneficiaries_new
+      WHERE is_deleted = 0
+        AND is_adult = 0
+        AND is_migrated = 0
+        AND current_user_key = ?
+      ORDER BY created_date_time DESC
+      ''',
+        [ashaUniqueKey],
+      );
+
+      final List<Map<String, dynamic>> items = [];
+      final Set<String> seenBeneficiaries = {};
+
+      for (final row in rows) {
+        try {
+          final beneficiaryRefKey = row['unique_key']?.toString() ?? '';
+          if (beneficiaryRefKey.isEmpty) continue;
+          if (!seenBeneficiaries.add(beneficiaryRefKey)) continue;
+
+          final Map<String, dynamic>? info =
+          row['beneficiary_info'] is String
+              ? jsonDecode(row['beneficiary_info'] as String)
+          as Map<String, dynamic>?
+              : row['beneficiary_info'] as Map<String, dynamic>?;
+
+
+          if (info == null) continue;
+
+          final memberType =
+              info['memberType']?.toString().toLowerCase() ?? '';
+          final relation =
+              info['relation']?.toString().toLowerCase() ?? '';
+
+          if (!(memberType == 'child' ||
+              relation == 'child' ||
+              relation == 'daughter')) {
+            continue;
+          }
+
+
+          final hasTrackingDue =
+          await _hasTrackingDueStatus(beneficiaryRefKey);
+          if (!hasTrackingDue) continue;
+
+
+          final trackingDueDate =
+          await _getLatestTrackingDueDate(beneficiaryRefKey);
+
+          if (trackingDueDate != null) {
+            final hasFollowupIn6Months =
+            await _hasFollowupWithinSixMonths(
+              beneficiaryKey: beneficiaryRefKey,
+              trackingDueDate: trackingDueDate,
+            );
+
+            if (hasFollowupIn6Months) {
+              print('❌ Excluding $beneficiaryRefKey → RI done within 6 months');
+              continue;
+            }
+          }
+
+
+          // 🔹 Extract display data
+          final name =
+              info['name'] ??
+                  info['memberName'] ??
+                  info['member_name'] ??
+                  '';
+
+          final mobile =
+              info['mobileNo'] ??
+                  info['mobile'] ??
+                  info['mobile_number'] ??
+                  '-';
+
+          final dob =
+              info['dob'] ?? info['dateOfBirth'] ?? info['date_of_birth'];
+
+          final genderRaw =
+              info['gender']?.toString().toLowerCase() ?? '';
+
+          final gender = genderRaw == 'male' || genderRaw == 'm'
+              ? 'Male'
+              : genderRaw == 'female' || genderRaw == 'f'
+              ? 'Female'
+              : 'Other';
+
+          final age = _formatAgeOnly(dob);
+
+          final hhId = row['household_ref_key']?.toString() ?? '';
+
+          // Get last visit date from child_care_activities for infant_pnc or tracking_due states
+          final lastVisitDate = await _getLatestTrackingDueDate(beneficiaryRefKey);
+          final formattedLastVisitDate = lastVisitDate != null
+              ? _formatDateOnly(lastVisitDate.toIso8601String())
+              : '-';
+
+          items.add({
+            'id': _last11(beneficiaryRefKey),
+            'household_ref_key': hhId,
+            'hhId': hhId,
+            'BeneficiaryID': beneficiaryRefKey,
+            'name': name,
+            'age': age,
+            'gender': gender,
+            'mobile': mobile,
+            'badge': 'RI',
+            'last Visit date': formattedLastVisitDate,
+          });
+        } catch (e) {
+          print('⚠️ Beneficiary error: $e');
+        }
+      }
+
+      if (mounted) {
+        setState(() => _riItems = items);
+        _saveTodayWorkCountsToStorage();
+      }
+    } catch (e) {
+      print('❌ RI load error: $e');
+    }
+  }
+
+
+  Future<bool> _hasTrackingDueStatus(String beneficiaryKey) async {
+    final db = await DatabaseProvider.instance.database;
+
+    final result = await db.rawQuery(
+      '''
+    SELECT 1
+    FROM child_care_activities
+    WHERE beneficiary_ref_key = ?
+      AND child_care_state = 'tracking_due'
+      AND is_deleted = 0
+    LIMIT 1
+    ''',
+      [beneficiaryKey],
+    );
+
+    return result.isNotEmpty;
+  }
+
+  Future<bool> _hasFollowupWithinSixMonths({
+    required String beneficiaryKey,
+    required DateTime trackingDueDate,
+  }) async {
+    final db = await DatabaseProvider.instance.database;
+
+    final sixMonthEnd = DateTime(
+      trackingDueDate.year,
+      trackingDueDate.month + 6,
+      trackingDueDate.day,
+    );
+
+    print('🟢 ENTERED _hasFollowupWithinSixMonths for $beneficiaryKey');
+    print('📅 Window: $trackingDueDate → $sixMonthEnd');
+
+    final result = await db.rawQuery(
+      '''
+    SELECT 1
+    FROM followup_form_data
+    WHERE forms_ref_key = ?
+      AND beneficiary_ref_key = ?
+      AND is_deleted = 0
+      AND datetime(created_date_time)
+          BETWEEN datetime(?) AND datetime(?)
+    LIMIT 1
+    ''',
+      [
+        FollowupFormDataTable
+            .formUniqueKeys[FollowupFormDataTable.childTrackingDue],
+        beneficiaryKey,
+        trackingDueDate.toIso8601String(),
+        sixMonthEnd.toIso8601String(),
+      ],
+    );
+
+    return result.isNotEmpty;
+  }
+
+  Future<DateTime?> _getLatestTrackingDueDate(
+      String beneficiaryKey,
+      ) async {
+    final db = await DatabaseProvider.instance.database;
+
+    final result = await db.rawQuery(
+      '''
+    WITH ranked AS (
+      SELECT
+          cca.created_date_time,
+          ROW_NUMBER() OVER (
+              PARTITION BY cca.beneficiary_ref_key
+              ORDER BY datetime(cca.created_date_time) DESC, cca.rowid DESC
+          ) AS rn
+      FROM child_care_activities cca
+      WHERE cca.is_deleted = 0
+        AND cca.beneficiary_ref_key = ?
+        AND cca.child_care_state IN ('tracking_due', 'infant_pnc')
+    )
+    SELECT created_date_time
+    FROM ranked
+    WHERE rn = 1
+    ''',
+      [beneficiaryKey],
+    );
+
+    if (result.isEmpty) {
+      print('❌ No tracking_due for $beneficiaryKey');
+      return null;
+    }
+
+    print('✅ tracking_due found for $beneficiaryKey → ${result.first['created_date_time']}');
+
+    return DateTime.parse(result.first['created_date_time'] as String);
+  }
+
+  String _formatAgeOnly(dynamic dobRaw) {
+    String age = 'Not Available';
+
+    if (dobRaw != null && dobRaw.toString().isNotEmpty) {
+      try {
+        String dateStr = dobRaw.toString();
+        DateTime? dob;
+
+        dob = DateTime.tryParse(dateStr);
+
+        if (dob == null) {
+          final timestamp = int.tryParse(dateStr);
+          if (timestamp != null && timestamp > 0) {
+            dob = DateTime.fromMillisecondsSinceEpoch(
+              timestamp > 1000000000000 ? timestamp : timestamp * 1000,
+              isUtc: true,
+            );
+          }
+        }
+
+        if (dob != null) {
+          final now = DateTime.now();
+          int years = now.year - dob.year;
+          int months = now.month - dob.month;
+          int days = now.day - dob.day;
+
+          if (days < 0) {
+            final lastMonth = now.month - 1 < 1 ? 12 : now.month - 1;
+            final lastMonthYear = now.month - 1 < 1 ? now.year - 1 : now.year;
+            final daysInLastMonth = DateTime(
+              lastMonthYear,
+              lastMonth + 1,
+              0,
+            ).day;
+            days += daysInLastMonth;
+            months--;
+          }
+
+          if (months < 0) {
+            months += 12;
+            years--;
+          }
+
+          if (years > 0) {
+            age = '$years Y';
+          } else if (months > 0) {
+            age = '$months M';
+          } else {
+            age = '$days D';
+          }
+        }
+      } catch (e) {
+        debugPrint('Error parsing date of birth: $e');
+      }
+    }
+
+    return age;
+  }
+
+  DateTime _dateAfterWeeks(DateTime startDate, int noOfWeeks) {
+    final days = noOfWeeks * 7;
+    return startDate.add(Duration(days: days));
+  }
+
+  DateTime _calculateEdd(DateTime lmp) {
+    return _dateAfterWeeks(lmp, 40);
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+  }
+  Future<String> _getLastVisitDate({
+    required String beneficiaryId,
+    required String formRefKey,
+  }) async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+
+      final result = await db.rawQuery(
+        '''
+      SELECT MAX(created_date_time) AS last_visit
+      FROM ${FollowupFormDataTable.table}
+      WHERE beneficiary_ref_key = ?
+        AND forms_ref_key = ?
+        AND (is_deleted IS NULL OR is_deleted = 0)
+      ''',
+        [beneficiaryId, formRefKey],
+      );
+
+      final String? rawDate =
+      result.first['last_visit']?.toString();
+
+      if (rawDate == null || rawDate.isEmpty) {
+        return '-';
+      }
+
+      return _formatDateOnly(rawDate);
+    } catch (e) {
+      debugPrint('Last visit error: $e');
+      return '-';
+    }
+  }
+
+  int _calculateAgeFromDob(String dob) {
+    try {
+      final DateTime birthDate = DateTime.parse(
+        dob.contains('T') ? dob.split('T')[0] : dob,
+      );
+
+      final DateTime today = DateTime.now();
+      int age = today.year - birthDate.year;
+
+      if (today.month < birthDate.month ||
+          (today.month == birthDate.month &&
+              today.day < birthDate.day)) {
+        age--;
+      }
+      return age;
+    } catch (_) {
+      return 0;
+    }
+  }
 
   String _formatAgeGenderFromDob(dynamic dobRaw, dynamic genderRaw) {
     String age = 'Not Available';
@@ -3476,60 +3282,6 @@ class _TodayworkState extends State<Todaywork> {
   }
 
 
-  Future<Map<String, String>> _getBeneficiaryFields(String uniqueKey) async {
-    final rec = await LocalStorageDao.instance.getBeneficiaryByUniqueKey(
-      uniqueKey,
-    );
-    if (rec == null) {
-      return {'name': '', 'age': '', 'gender': '', 'mobile': '-'};
-    }
-
-    dynamic info = rec['beneficiary_info'];
-    Map<String, dynamic> m = {};
-    if (info is Map) {
-      m = Map<String, dynamic>.from(info);
-    } else if (info is String && info.isNotEmpty) {
-      try {
-        m = Map<String, dynamic>.from(jsonDecode(info));
-      } catch (_) {}
-    }
-
-    final name =
-        (m['name']?.toString()?.trim().isNotEmpty == true
-            ? m['name']?.toString()
-            : null) ??
-            m['memberName']?.toString() ??
-            m['headName']?.toString() ??
-            '';
-
-    final dob = m['dob']?.toString() ?? m['date_of_birth']?.toString();
-    var ageYears = _calculateAge(dob);
-    if (ageYears == 0) {
-      final updateYearStr = m['updateYear']?.toString() ?? '';
-      final approxAgeStr = m['approxAge']?.toString() ?? '';
-      final parsedUpdateYear = int.tryParse(updateYearStr);
-      if (parsedUpdateYear != null && parsedUpdateYear > 0) {
-        ageYears = parsedUpdateYear;
-      } else if (approxAgeStr.isNotEmpty) {
-        final matches = RegExp(r"\d+").allMatches(approxAgeStr).toList();
-        if (matches.isNotEmpty) {
-          ageYears = int.tryParse(matches.first.group(0) ?? '') ?? 0;
-        }
-      }
-    }
-
-    final gender = m['gender']?.toString() ?? '';
-    final mobile =
-        (m['mobileNo'] ?? m['mobile'] ?? m['phone'])?.toString() ?? '-';
-
-    return {
-      'name': name,
-      'age': ageYears > 0 ? ageYears.toString() : '',
-      'gender': gender,
-      'mobile': mobile.isNotEmpty ? mobile : '-',
-    };
-  }
-
 
   Future<void> _saveTodayWorkCountsToStorage() async {
     try {
@@ -3556,7 +3308,7 @@ class _TodayworkState extends State<Todaywork> {
           : 0;
 
       // Save to secure storage
-      print('=== TodayWork Saving to Storage ===');
+      print('=== TodaysProgramm Saving to Storage ===');
       print('Family To-Do Count: $familyCount');
       print('Family Completed Count: $familyCompletedCount');
       print('To-Do Count: $toDoCount');
@@ -3567,13 +3319,12 @@ class _TodayworkState extends State<Todaywork> {
         toDo: toDoCount,
         completed: completedCount,
       );
-
       // Update the UI with the latest counts
       if (mounted) {
         setState(() {
           // Ensure the UI reflects the same values we saved
           _completedVisitsCount = completedCount;
-          _toDoVisitsCount = toDoCount;
+          _toDoVisitsCount = toDoCount +completedCount;
           _pendingCountVisitsCount = toDoCount;
         });
         print('=== TodayWork After setState ===');
@@ -3594,79 +3345,6 @@ class _TodayworkState extends State<Todaywork> {
     }
   }
 
-  String _formatDateOnly(String? dateTime) {
-    if (dateTime == null || dateTime.isEmpty) return '-';
-    try {
-      final dt = DateTime.parse(dateTime);
-      return DateFormat('dd-MM-yyyy').format(dt);
-    } catch (_) {
-      return '-';
-    }
-  }
-
-  Future<String?> _getHbncLastVisitDateForDisplay(String beneficiaryId) async {
-    try {
-      final db = await DatabaseProvider.instance.database;
-
-      final hbncVisitKey =
-      FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
-
-      final results = await db.query(
-        FollowupFormDataTable.table,
-        where:
-        'beneficiary_ref_key = ? AND forms_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
-        whereArgs: [beneficiaryId, hbncVisitKey],
-        orderBy: 'created_date_time DESC',
-        limit: 1,
-      );
-
-      if (results.isNotEmpty) {
-        final result = results.first;
-        try {
-          final formJson = jsonDecode(result['form_json'] as String? ?? '{}');
-          final formData = formJson['form_data'] as Map<String, dynamic>? ?? {};
-
-          if (formData.containsKey('visitDetails')) {
-            final visitDetails = formData['visitDetails'];
-            if (visitDetails is Map) {
-              final visitDate =
-                  visitDetails['visitDate'] ??
-                      visitDetails['visit_date'] ??
-                      visitDetails['dateOfVisit'] ??
-                      visitDetails['date_of_visit'];
-
-              if (visitDate != null && visitDate.toString().isNotEmpty) {
-                return _formatHbncDate(visitDate.toString());
-              }
-            }
-          }
-
-          final visitDate =
-              formData['visit_date'] ??
-                  formData['visitDate'] ??
-                  formData['dateOfVisit'] ??
-                  formData['date_of_visit'] ??
-                  formData['visitDate'];
-
-          if (visitDate != null && visitDate.toString().isNotEmpty) {
-            return _formatHbncDate(visitDate.toString());
-          }
-
-          final createdDate = result['created_date_time'];
-          if (createdDate != null && createdDate.toString().isNotEmpty) {
-            return _formatHbncDate(createdDate.toString());
-          }
-        } catch (_) {
-          final createdDate = result['created_date_time'];
-          if (createdDate != null && createdDate.toString().isNotEmpty) {
-            return _formatHbncDate(createdDate.toString());
-          }
-          return null;
-        }
-      }
-    } catch (_) {}
-    return null;
-  }
 
   String _last11(String? input) {
     if (input == null || input.isEmpty) return '-';

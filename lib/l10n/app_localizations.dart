@@ -326,7 +326,7 @@ abstract class AppLocalizations {
   /// No description provided for @religionBuddhism.
   ///
   /// In en, this message translates to:
-  /// **'Buddhism'**
+  /// **'Buddism'**
   String get religionBuddhism;
 
   /// No description provided for @religionJainism.
@@ -2483,6 +2483,12 @@ abstract class AppLocalizations {
   /// **'First ANC'**
   String get firstAncLabel;
 
+  /// No description provided for @folicirAcidTabletsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of Iron & Folic Acid tablets given'**
+  String get folicirAcidTabletsLabel;
+
   /// No description provided for @folicAcidTabletsLabel.
   ///
   /// In en, this message translates to:
@@ -2699,6 +2705,12 @@ abstract class AppLocalizations {
   /// **'HBNC List'**
   String get hbncListTitle;
 
+  /// No description provided for @hbncVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'HBNC Visit'**
+  String get hbncVisit;
+
   /// No description provided for @hbncMotherTitle.
   ///
   /// In en, this message translates to:
@@ -2906,7 +2918,7 @@ abstract class AppLocalizations {
   /// No description provided for @houseNoLabel.
   ///
   /// In en, this message translates to:
-  /// **'House no'**
+  /// **'House No.'**
   String get houseNoLabel;
 
   /// No description provided for @houseNone.
@@ -4886,7 +4898,7 @@ abstract class AppLocalizations {
   /// No description provided for @userVillageLabel.
   ///
   /// In en, this message translates to:
-  /// **'Village:'**
+  /// **'Village'**
   String get userVillageLabel;
 
   /// No description provided for @usernameEmpty.
@@ -5102,7 +5114,7 @@ abstract class AppLocalizations {
   /// No description provided for @whoseMobileLabel.
   ///
   /// In en, this message translates to:
-  /// **'Whose mobile no.'**
+  /// **'Whose mobile no.?'**
   String get whoseMobileLabel;
 
   /// No description provided for @widowed.
@@ -5426,7 +5438,7 @@ abstract class AppLocalizations {
   /// No description provided for @babyNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Baby\'s name'**
+  /// **'Baby\'s Name'**
   String get babyNameLabel;
 
   /// No description provided for @babyGenderLabel.
@@ -5498,13 +5510,13 @@ abstract class AppLocalizations {
   /// No description provided for @bleedingUmbilicalCordLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is Umbilical cord bleeding'**
+  /// **'Is umbilical cord bleeding?'**
   String get bleedingUmbilicalCordLabel;
 
   /// No description provided for @newbornSeizuresLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the child having seizures?'**
+  /// **'Is the child having Seizures?'**
   String get newbornSeizuresLabel;
 
   /// No description provided for @stoppedCryingLabel.
@@ -5516,7 +5528,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeVisitDayLabel.
   ///
   /// In en, this message translates to:
-  /// **'Home Visit Day *'**
+  /// **'Home visit day *'**
   String get homeVisitDayLabel;
 
   /// No description provided for @highRisk.
@@ -5540,7 +5552,7 @@ abstract class AppLocalizations {
   /// No description provided for @mcpCardAvailableLabelMother.
   ///
   /// In en, this message translates to:
-  /// **'Is there availability of \'Mother Child Protection (MCP) card? *'**
+  /// **'Is there availability of \'Mother Child Protection (MCP)\' card? *'**
   String get mcpCardAvailableLabelMother;
 
   /// No description provided for @postDeliveryProblemNone.
@@ -5588,7 +5600,7 @@ abstract class AppLocalizations {
   /// No description provided for @mealsPerDayLabel.
   ///
   /// In en, this message translates to:
-  /// **'No. of times mother takes full meal in 24 hours?'**
+  /// **'No. of times mother takes full meal in 24 hrs'**
   String get mealsPerDayLabel;
 
   /// No description provided for @padsPerDayLabel.
@@ -5948,13 +5960,13 @@ abstract class AppLocalizations {
   /// No description provided for @firstFeedGivenAfterBirthLabel.
   ///
   /// In en, this message translates to:
-  /// **'What was given as the baby first feed to baby after birth?'**
+  /// **'What was given as the first feed to baby after birth?'**
   String get firstFeedGivenAfterBirthLabel;
 
   /// No description provided for @adequatelyFedSevenToEightTimesLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)?'**
+  /// **'Is the baby being fed properly (Whenever hungry or at least 7–8 times in 24 hrs)?'**
   String get adequatelyFedSevenToEightTimesLabel;
 
   /// No description provided for @babyDrinkingLessMilkLabel.
@@ -7634,7 +7646,7 @@ abstract class AppLocalizations {
   /// No description provided for @dob.
   ///
   /// In en, this message translates to:
-  /// **'Date Of Birth'**
+  /// **'Date Of birth'**
   String get dob;
 
   /// No description provided for @enterDob.
@@ -8768,7 +8780,7 @@ abstract class AppLocalizations {
   /// No description provided for @dateOfBirth.
   ///
   /// In en, this message translates to:
-  /// **'Date Of Birth'**
+  /// **'Date Of birth'**
   String get dateOfBirth;
 
   /// No description provided for @others.
@@ -10094,7 +10106,7 @@ abstract class AppLocalizations {
   /// No description provided for @wardName.
   ///
   /// In en, this message translates to:
-  /// **'Ward Name'**
+  /// **'Ward name'**
   String get wardName;
 
   /// No description provided for @wardNumber.
@@ -10652,7 +10664,7 @@ abstract class AppLocalizations {
   /// No description provided for @nippleCracksPainOrEngorgedLabel.
   ///
   /// In en, this message translates to:
-  /// **'is the mother having cracked nipples/ painful and / or engorged breasts'**
+  /// **'Is the mother having cracked nipples/ painful and / or engorged breast'**
   String get nippleCracksPainOrEngorgedLabel;
 
   /// No description provided for @tabGeneralDetails.
@@ -10700,7 +10712,7 @@ abstract class AppLocalizations {
   /// No description provided for @breathingRapidLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the breath of the baby going fast (60 or more per minute)'**
+  /// **'Is the breath of the baby going fast (60 or more per minute)?'**
   String get breathingRapidLabel;
 
   /// No description provided for @lethargicLabel.
@@ -10712,7 +10724,7 @@ abstract class AppLocalizations {
   /// No description provided for @congenitalAbnormalitiesLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the baby having any congenital physical abnormality'**
+  /// **'Is the baby having any congenital physical abnormality?'**
   String get congenitalAbnormalitiesLabel;
 
   /// No description provided for @eyesNormalLabel.
@@ -10730,19 +10742,19 @@ abstract class AppLocalizations {
   /// No description provided for @skinFoldRednessLabel.
   ///
   /// In en, this message translates to:
-  /// **'Are there any cracks/redness on the skin fold (thigh/ Axilla / Buttock)'**
+  /// **'Are there any cracks/redness on the skin fold. (thigh/ Axilla / Buttock)'**
   String get skinFoldRednessLabel;
 
   /// No description provided for @newbornJaundiceLabel.
   ///
   /// In en, this message translates to:
-  /// **'Yellowness in skin/ palm/ sole/eyes: Jaudice'**
+  /// **'Yellowness in skin/ palm/ sole/eyes: Jaundice'**
   String get newbornJaundiceLabel;
 
   /// No description provided for @pusBumpsOrBoilLabel.
   ///
   /// In en, this message translates to:
-  /// **'More than ten pus- filled pustules or a large boil'**
+  /// **'More than ten pus-filled pustules or a large boil'**
   String get pusBumpsOrBoilLabel;
 
   /// No description provided for @pusInNavelLabel.
@@ -10790,7 +10802,7 @@ abstract class AppLocalizations {
   /// No description provided for @mcpCardAvailableLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is there availability of \'Mother Child Protection (MCP) card?'**
+  /// **'Is there availability of \'Mother Child Protection (MCP)\' card?'**
   String get mcpCardAvailableLabel;
 
   /// No description provided for @formUpdatedSuccessfully.
@@ -10952,7 +10964,7 @@ abstract class AppLocalizations {
   /// No description provided for @isBeneficiaryAbsent.
   ///
   /// In en, this message translates to:
-  /// **'Is Beneficiary Absent'**
+  /// **'Is Beneficiary Absent?'**
   String get isBeneficiaryAbsent;
 
   /// No description provided for @quantityOfMalaN.
@@ -11114,7 +11126,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectRisks.
   ///
   /// In en, this message translates to:
-  /// **'Select Risks'**
+  /// **'Select risks'**
   String get selectRisks;
 
   /// No description provided for @riskSevereAnemia.
@@ -11186,7 +11198,7 @@ abstract class AppLocalizations {
   /// No description provided for @didPregnantWomanGiveBirth.
   ///
   /// In en, this message translates to:
-  /// **'Did the pregnant woman give birth to a baby?'**
+  /// **'Has the Pregnant woman given birth to a child?'**
   String get didPregnantWomanGiveBirth;
 
   /// No description provided for @dateOfAbortion.
@@ -11198,7 +11210,7 @@ abstract class AppLocalizations {
   /// No description provided for @abortionComplication.
   ///
   /// In en, this message translates to:
-  /// **'Any complication leading to abortion?'**
+  /// **'Is there any complications leading to abortion?'**
   String get abortionComplication;
 
   /// No description provided for @deliveryOutcomeLabel.
@@ -11726,7 +11738,7 @@ abstract class AppLocalizations {
   /// No description provided for @notBreastfed.
   ///
   /// In en, this message translates to:
-  /// **'Not breastfed'**
+  /// **'Not Breastfed'**
   String get notBreastfed;
 
   /// No description provided for @howWasBreastfed.
@@ -11774,7 +11786,7 @@ abstract class AppLocalizations {
   /// No description provided for @couldNeitherBreastfeedNorSpoon.
   ///
   /// In en, this message translates to:
-  /// **'Could neither breast feed nor take given by spoon'**
+  /// **'Could neither breast feed nor take milk given by spoon'**
   String get couldNeitherBreastfeedNorSpoon;
 
   /// No description provided for @firstFeedGivenAfterBirth.
@@ -11930,7 +11942,7 @@ abstract class AppLocalizations {
   /// No description provided for @referToLabel.
   ///
   /// In en, this message translates to:
-  /// **'Refer to'**
+  /// **'Refer to?'**
   String get referToLabel;
 
   /// No description provided for @mchLabel.
@@ -12092,13 +12104,13 @@ abstract class AppLocalizations {
   /// No description provided for @temp_upto_102.
   ///
   /// In en, this message translates to:
-  /// **'Temperature upto 102°F (38.9°C)'**
+  /// **'Temperature upto 102 degree F(38.9 degree C)'**
   String get temp_upto_102;
 
   /// No description provided for @temp_more_than_102.
   ///
   /// In en, this message translates to:
-  /// **'Temperature more than 102°F (38.9°C)'**
+  /// **'Temperature More than 102 degree F(38.9 degree C)'**
   String get temp_more_than_102;
 
   /// No description provided for @paracetamolGivenLabel.
@@ -12256,6 +12268,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Member Status *'**
   String get member_status_label;
+
+  /// No description provided for @member_status_head.
+  ///
+  /// In en, this message translates to:
+  /// **'Member Status'**
+  String get member_status_head;
 
   /// No description provided for @death.
   ///
@@ -14462,7 +14480,7 @@ abstract class AppLocalizations {
   /// No description provided for @calciumVitaminD3TabletsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Number of Calcium and Vitamin D3 tablets given'**
+  /// **'Number of calcium and vitamin D3 tablets given'**
   String get calciumVitaminD3TabletsLabel;
 
   /// No description provided for @selectVisitTypeError.
@@ -15260,7 +15278,7 @@ abstract class AppLocalizations {
   /// No description provided for @nextancduedate.
   ///
   /// In en, this message translates to:
-  /// **'Next anc due date'**
+  /// **'Next ANC due date'**
   String get nextancduedate;
 
   /// No description provided for @householdUpdatedSuccessfully.
@@ -15268,6 +15286,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Household updated successfully'**
   String get householdUpdatedSuccessfully;
+
+  /// No description provided for @dontNO.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t Know'**
+  String get dontNO;
+
+  /// No description provided for @dateOfvisitTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of visit'**
+  String get dateOfvisitTracking;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

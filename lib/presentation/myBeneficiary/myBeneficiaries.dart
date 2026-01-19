@@ -363,16 +363,16 @@ ORDER BY d.created_date_time DESC
       if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) return 0;
 
       final query = '''
-      SELECT DISTINCT b.*
-      FROM beneficiaries_new b
-      INNER JOIN eligible_couple_activities e
-        ON b.unique_key = e.beneficiary_ref_key
-      WHERE b.is_deleted = 0
-        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
-        AND (b.is_death = 0 OR b.is_death IS NULL)
-        AND e.eligible_couple_state = 'eligible_couple'
-        AND e.is_deleted = 0
-        AND e.current_user_key = ?
+      SELECT DISTINCT b.*, e.eligible_couple_state, 
+               e.created_date_time as registration_date
+        FROM beneficiaries_new b
+        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
+        WHERE b.is_deleted = 0 
+          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+          AND (b.is_death = 0 OR b.is_death IS NULL)
+          AND e.eligible_couple_state = 'eligible_couple'
+          AND e.is_deleted = 0
+          AND e.current_user_key = ?
     ''';
 
       final rows = await db.rawQuery(query, [ashaUniqueKey]);
@@ -619,7 +619,7 @@ ORDER BY d.created_date_time DESC
       final String? ashaUniqueKey =
       currentUserData?['unique_key']?.toString();
 
-      print('🔍 Calculating LBW children count (≤2 years only)');
+      print('🔍 Calculating LBW children count (flexible thresholds)');
 
       final rows = await db.query(
         'beneficiaries_new',
@@ -638,26 +638,35 @@ ORDER BY d.created_date_time DESC
 
       for (final row in rows) {
         try {
-          // ---------- Parse beneficiary_info ----------
           final infoStr = row['beneficiary_info']?.toString();
           if (infoStr == null || infoStr.isEmpty) continue;
 
-          final Map<String, dynamic> info =
-          jsonDecode(infoStr) as Map<String, dynamic>;
+          final decoded = jsonDecode(infoStr);
+          if (decoded is! Map) continue;
 
-          // 🚫 Skip if child age > 2 years
+          final Map<String, dynamic> info =
+          Map<String, dynamic>.from(decoded);
+
+          // 🚫 Skip if age > 2 years
           final bool isUnderTwo =
           _isBelowOrEqualTwoYears(info, info['dob'] ?? info['dateOfBirth']);
           if (!isUnderTwo) continue;
 
-          // ---------- LBW check ----------
-          final int? weightGm = normalizeToGrams(info['weight']);
-          final int? birthWeightGm =
-          normalizeToGrams(info['birthWeight']);
+          // ---------- SAME FLEXIBLE LBW LOGIC ----------
+          final double? weight =
+          _parseNumFlexible(info['weight'])?.toDouble();
+          final double? birthWeight =
+          _parseNumFlexible(info['birthWeight'])?.toDouble();
 
           bool isLbw = false;
-          if (weightGm != null && weightGm <= 1600) isLbw = true;
-          if (birthWeightGm != null && birthWeightGm <= 1600) isLbw = true;
+
+          if (weight != null && birthWeight != null) {
+            isLbw = (weight <= 1.6 && birthWeight <= 1600);
+          } else if (weight != null && birthWeight == null) {
+            isLbw = (weight <= 1.6);
+          } else if (weight == null && birthWeight != null) {
+            isLbw = (birthWeight <= 1600);
+          }
 
           if (!isLbw) continue;
 
@@ -676,26 +685,38 @@ ORDER BY d.created_date_time DESC
     }
   }
 
+  num? _parseNumFlexible(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v;
+    String s = v.toString().trim().toLowerCase();
+    if (s.isEmpty) return null;
+    s = s.replaceAll(RegExp(r'[^0-9\.-]'), '');
+    if (s.isEmpty) return null;
+    final d = double.tryParse(s);
+    if (d != null) return d;
+    final i = int.tryParse(s);
+    if (i != null) return i;
+    return null;
+  }
 
   Future<int> _getAbortionListCount() async {
     try {
-      // Get abortion visits from followup forms directly - same logic as AbortionList.dart
       final dbForms = await LocalStorageDao.instance.getAbortionFollowupForms();
-      
+
       print('Total abortion records fetched for count: ${dbForms.length}');
-      
+
       int count = 0;
       for (final row in dbForms) {
         try {
           final formData = row['form_data'] as Map<String, dynamic>;
-          
+
           // Beneficiary info is already fetched by DAO
           final beneficiaryData = row['beneficiary_data'] as Map<String, dynamic>?;
           final beneficiaryInfo = beneficiaryData?['beneficiary_info'] as Map<String, dynamic>? ?? {};
-          
+
           final dobStr = beneficiaryInfo['dob']?.toString();
           final gender = beneficiaryInfo['gender']?.toString() ?? formData['gender'] ?? 'Female';
-          
+
           // Map fields - same logic as AbortionList.dart
           final visitData = {
             'id': row['beneficiary_ref_key']?.toString(),
@@ -718,17 +739,16 @@ ORDER BY d.created_date_time DESC
             'has_abortion_complication': true,
             'abortion_date': formData['date_of_abortion'] ?? formData['abortion_date'],
           };
-          
+
           // Only count if we have valid abortion data
-          if (visitData['woman_name'] != null && visitData['abortion_date'] != null) {
-            count++;
-            print('Added abortion count for: ${formData['pw_name']}');
-          }
+          // DAO already filters for valid abortion_date and is_abortion/complication flag
+          count++;
+          print('Added abortion count for: ${formData['pw_name']}');
         } catch (e) {
           print('Error mapping abortion row for count: $e');
         }
       }
-      
+
       print('Total abortion count calculated: $count');
       return count;
     } catch (e) {

@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -248,6 +247,69 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       }
     });
   }
+  Future<bool> _prefillWeightsFromRegistrationForm(
+    String householdId,
+    String beneficiaryId,
+  ) async {
+    try {
+      final rows = await LocalStorageDao.instance.getFollowupFormsByHouseholdAndBeneficiary(
+        formType: FollowupFormDataTable.childRegistrationDue,
+        householdId: householdId,
+        beneficiaryId: beneficiaryId,
+      );
+      if (rows.isEmpty) {
+        return false;
+      }
+
+      final latest = rows.first;
+      final formJsonStr = latest['form_json']?.toString() ?? '';
+      if (formJsonStr.isEmpty) {
+        return false;
+      }
+
+      Map<String, dynamic>? formRoot;
+      try {
+        formRoot = jsonDecode(formJsonStr) as Map<String, dynamic>?;
+      } catch (_) {}
+      if (formRoot == null) {
+        return false;
+      }
+
+      Map<String, dynamic>? formDataMap;
+
+      if (formRoot['form_data'] is Map<String, dynamic>) {
+        formDataMap = Map<String, dynamic>.from(formRoot['form_data'] as Map);
+      } else if (formRoot[FollowupFormDataTable.childRegistrationDue] is Map<String, dynamic>) {
+        formDataMap =
+            Map<String, dynamic>.from(formRoot[FollowupFormDataTable.childRegistrationDue] as Map);
+      } else {
+        formDataMap = Map<String, dynamic>.from(formRoot);
+      }
+
+      final latestWeight = formDataMap['weight_grams']?.toString() ?? '';
+      final latestBirthWeight = formDataMap['birth_weight_grams']?.toString() ?? '';
+
+      if (latestWeight.isEmpty && latestBirthWeight.isEmpty) {
+        return false;
+      }
+
+      setState(() {
+        if (latestWeight.isNotEmpty) {
+          _formData['weight_grams'] = latestWeight;
+        }
+        if (latestBirthWeight.isNotEmpty) {
+          _formData['birth_weight_grams'] = latestBirthWeight;
+        }
+        _getWeightMode();
+      });
+
+      return true;
+    } catch (e) {
+      debugPrint('Error pre-filling weights from registration form: $e');
+      return false;
+    }
+  }
+
   Future<void> _prefillWeightsFromDb() async {
     try {
       final householdId = _formData['household_id']?.toString().trim().isNotEmpty == true
@@ -265,8 +327,11 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         beneficiaryId: beneficiaryId,
       );
       if (rows.isEmpty) {
-        // If no followup forms found, try beneficiary table
-        await _prefillDataFromBeneficiaryTable(beneficiaryId);
+        final fromRegistration =
+            await _prefillWeightsFromRegistrationForm(householdId, beneficiaryId);
+        if (!fromRegistration) {
+          await _prefillDataFromBeneficiaryTable(beneficiaryId);
+        }
         return;
       }
       final latest = rows.first;
@@ -290,8 +355,11 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       }
       final latestWeight = formDataMap['weight_grams']?.toString() ?? '';
       final latestBirthWeight = formDataMap['birth_weight_grams']?.toString() ?? '';
-      final latestWeightMode = formDataMap['weight_mode']?.toString().trim().toLowerCase() ?? '';
-      if (latestWeight.isNotEmpty || latestBirthWeight.isNotEmpty || (latestWeightMode == 'kg' || latestWeightMode == 'gms')) {
+      final latestWeightMode =
+          formDataMap['weight_mode']?.toString().trim().toLowerCase() ?? '';
+      if (latestWeight.isNotEmpty ||
+          latestBirthWeight.isNotEmpty ||
+          (latestWeightMode == 'kg' || latestWeightMode == 'gms')) {
         setState(() {
           if (latestWeight.isNotEmpty) {
             _formData['weight_grams'] = latestWeight;
@@ -306,8 +374,11 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
           }
         });
       } else {
-        // If followup form has no weight data, try beneficiary table
-        await _prefillDataFromBeneficiaryTable(beneficiaryId);
+        final fromRegistration =
+            await _prefillWeightsFromRegistrationForm(householdId, beneficiaryId);
+        if (!fromRegistration) {
+          await _prefillDataFromBeneficiaryTable(beneficiaryId);
+        }
       }
     } catch (e) {
       debugPrint('Error pre-filling weights: $e');
@@ -816,14 +887,6 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                                 _formData['weight_grams'] = value;
                                 _formData['weight_mode'] = 'kg';
                               },
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) return null;
-                                final n = double.tryParse(value.trim());
-                                if (n == null || n < 1.2 || n > 90) {
-                                  return 'Enter value between 1.2 to 90';
-                                }
-                                return null;
-                              },
                             ),
                             const Divider(),
                           ],
@@ -843,14 +906,6 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                               onChanged: (value) {
                                 _formData['weight_grams'] = value;
                                 _formData['weight_mode'] = 'gms';
-                              },
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) return null;
-                                final n = double.tryParse(value.trim());
-                                if (n == null || n < 500 || n > 12500) {
-                                  return 'Enter value between 500 to 12500';
-                                }
-                                return null;
                               },
                             ),
                             const Divider(),

@@ -24,18 +24,31 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
   final bool isProtected;
   static const _secureStorage = FlutterSecureStorage();
 
+  static const List<String> _fpMethodItems = [
+    'Condom',
+    'Mala -N (Daily contraceptive pill)',
+    'Atra Injection',
+    'Copper -T (IUCD)',
+    'Chhaya (Weekly contraceptive pill)',
+    'ECP (Emergency contraceptive pill)',
+    'Male Sterilization',
+    'Female Sterilization',
+    'Any Other Specify',
+  ];
+
   TrackEligibleCoupleBloc({
     required this.beneficiaryId,
     this.beneficiaryRefKey,
     this.isProtected = false,
   }) : super(TrackEligibleCoupleState.initial(
-          beneficiaryId: beneficiaryId,
-          beneficiaryRefKey: beneficiaryRefKey,
-          isProtected: isProtected,
-        )) {
+    beneficiaryId: beneficiaryId,
+    beneficiaryRefKey: beneficiaryRefKey,
+    isProtected: isProtected,
+  )) {
 
     if (isProtected) {
       _loadPreviousFormData();
+      _prefillFromBeneficiaryInfo();
     }
     _loadPreviousFormDataFromDb();
     on<VisitDateChanged>((event, emit) {
@@ -150,45 +163,73 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
         final formData = event.formData;
         DateTime? parseDate(dynamic dateValue) {
           if (dateValue == null) return null;
-          if (dateValue is String) {
-            return DateTime.parse(dateValue);
+          if (dateValue is String && dateValue.isNotEmpty) {
+            try {
+              return DateTime.parse(dateValue);
+            } catch (_) {}
           }
           if (dateValue is int) {
-            return DateTime.fromMillisecondsSinceEpoch(dateValue);
+            try {
+              return DateTime.fromMillisecondsSinceEpoch(dateValue);
+            } catch (_) {}
           }
           return null;
         }
 
-        final financialYear = formData['financial_year']?.toString() ?? state.financialYear;
-        final isPregnant = null;
-        final lmpDate = null;
-        final eddDate = null;
-        final fpAdopting = formData['fp_adopting'] as bool? ?? state.fpAdopting;
-        final fpMethod = formData['fp_method']?.toString();
-        final condom = formData['condom_quantity']?.toString();
-        final mala = formData['mala_quantity']?.toString();
-        final chhaya = formData['chhaya_quantity']?.toString();
-        final ecp = formData['ecp_quantity']?.toString();
-        final removalReason = formData['removal_reason']?.toString();
-        final removalDate = parseDate(formData['removal_date']);
-        final fpAdoptionDate = parseDate(formData['fp_adoption_date']);
-        final antraInjectionDate = parseDate(formData['antra_injection_date']);
+        final shouldFallback =
+            isProtected && (state.fpMethod == null || state.fpMethod!.isEmpty);
+
+        final parsedFpMethod = _normalizeFpMethod(
+            (formData['fp_method'] ?? formData['method_of_contraception'])?.toString());
+        final parsedRemovalReason =
+        (formData['removal_reason'] ?? formData['reason'])?.toString();
+        final parsedRemovalDate =
+        parseDate(formData['removal_date'] ?? formData['removal_date']?.toString());
+        final parsedFpAdoptionDate = parseDate(formData['fp_adoption_date']);
+        final parsedAntraInjectionDate =
+        parseDate(formData['antra_injection_date'] ?? formData['date_of_antra']);
+
+        final nextFpMethod =
+        (state.fpMethod == null || state.fpMethod!.isEmpty)
+            ? parsedFpMethod
+            : state.fpMethod;
+        final nextRemovalReason =
+        (state.removalReasonChanged == null ||
+            (state.removalReasonChanged?.isEmpty ?? true))
+            ? parsedRemovalReason
+            : state.removalReasonChanged;
+        final nextRemovalDate =
+        state.removalDate == null ? parsedRemovalDate : state.removalDate;
+        final nextAntraDate = state.antraInjectionDateChanged == null
+            ? parsedAntraInjectionDate
+            : state.antraInjectionDateChanged;
+
+        final nextFpAdopting =
+            state.fpAdopting ?? (shouldFallback ? true : state.fpAdopting);
+
+        final condomVal = (formData['condom_quantity'] ??
+            formData['quantity_of_condoms'])
+            ?.toString();
+        final malaVal = (formData['mala_quantity'] ??
+            formData['quantity_of_mala_n_daily'])
+            ?.toString();
+        final chhayaVal = (formData['chhaya_quantity'] ??
+            formData['quantity_of_chhaya_weekly'])
+            ?.toString();
+        final ecpVal =
+        (formData['ecp_quantity'] ?? formData['quantity_of_ecp'])?.toString();
 
         emit(state.copyWith(
-          financialYear: financialYear,
-          isPregnant: isPregnant,
-          lmpDate: lmpDate,
-          eddDate: eddDate,
-          fpAdopting: fpAdopting,
-          fpMethod: fpMethod,
-          condom: condom,
-          mala: mala,
-          chhaya: chhaya,
-          ecp: ecp,
-          removalReasonChanged: removalReason,
-          removalDate: removalDate,
-          fpAdoptionDate: fpAdoptionDate,
-          antraInjectionDateChanged: antraInjectionDate,
+          fpAdopting: nextFpAdopting,
+          fpMethod: nextFpMethod,
+          removalReasonChanged: nextRemovalReason,
+          removalDate: nextRemovalDate,
+          fpAdoptionDate: parsedFpAdoptionDate ?? state.fpAdoptionDate,
+          antraInjectionDateChanged: nextAntraDate,
+          condom: state.condom ?? condomVal,
+          mala: state.mala ?? malaVal,
+          chhaya: state.chhaya ?? chhayaVal,
+          ecp: state.ecp ?? ecpVal,
         ));
       } catch (e, stackTrace) {
         print('Error in LoadPreviousFormData handler: $e');
@@ -218,24 +259,24 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           'form_name': formName,
           'unique_key': formsRefKey,
           'form_data': {
-              'visit_date': state.visitDate?.toIso8601String(),
-              'financial_year': state.financialYear,
-              'is_pregnant': state.isPregnant,
-              'lmp_date': state.lmpDate?.toIso8601String(),
-              'edd_date': state.eddDate?.toIso8601String(),
-              'fp_adopting': state.fpAdopting,
-              'fp_method': state.fpMethod,
-              'fp_adoption_date': state.fpAdoptionDate?.toIso8601String(),
-              'protection_status': state.fpAdopting == true ? 'Protected' : 'Unprotected',
-              'condom_quantity': state.condom,
-              'mala_quantity': state.mala,
-              'chhaya_quantity': state.chhaya,
-              'ecp_quantity': state.ecp,
-              'removal_reason': state.removalReasonChanged,
-              'beneficiary_absent': state.beneficiaryAbsentCHanged,
-              'beneficiary_absent_reason': state.beneficiaryAbsentReason,
-              'antra_injection_date': state.antraInjectionDateChanged?.toIso8601String(),
-              'removal_date': state.removalDate?.toIso8601String(),
+            'visit_date': state.visitDate?.toIso8601String(),
+            'financial_year': state.financialYear,
+            'is_pregnant': state.isPregnant,
+            'lmp_date': state.lmpDate?.toIso8601String(),
+            'edd_date': state.eddDate?.toIso8601String(),
+            'fp_adopting': state.fpAdopting,
+            'fp_method': state.fpMethod,
+            'fp_adoption_date': state.fpAdoptionDate?.toIso8601String(),
+            'protection_status': state.fpAdopting == true ? 'Protected' : 'Unprotected',
+            'condom_quantity': state.condom,
+            'mala_quantity': state.mala,
+            'chhaya_quantity': state.chhaya,
+            'ecp_quantity': state.ecp,
+            'removal_reason': state.removalReasonChanged,
+            'beneficiary_absent': state.beneficiaryAbsentCHanged,
+            'beneficiary_absent_reason': state.beneficiaryAbsentReason,
+            'antra_injection_date': state.antraInjectionDateChanged?.toIso8601String(),
+            'removal_date': state.removalDate?.toIso8601String(),
           },
 
         };
@@ -276,16 +317,16 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
             if (beneficiaryMaps.isNotEmpty) {
               final beneficiary = Map<String, dynamic>.from(beneficiaryMaps.first);
               final beneficiaryInfo = jsonDecode(beneficiary['beneficiary_info'] ?? '{}');
-              
+
               beneficiaryInfo['isPregnant'] = 'YES';
-              
+
               if (state.lmpDate != null) {
                 beneficiaryInfo['lmp'] = state.lmpDate?.toIso8601String();
               }
               if (state.eddDate != null) {
                 beneficiaryInfo['edd'] = state.eddDate?.toIso8601String();
               }
-              
+
               await db.update(
                 'beneficiaries_new',
                 {
@@ -295,13 +336,82 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
                 where: 'unique_key = ?',
                 whereArgs: [state.beneficiaryRefKey ?? state.beneficiaryId],
               );
-              
+
               print('Updated pregnancy details in beneficiaries table');
             }
           } catch (e) {
             print('Error updating isPregnant in beneficiaries table: $e');
             // Don't fail the whole operation if this update fails
           }
+        }
+        try {
+          final key = state.beneficiaryRefKey ?? state.beneficiaryId;
+          List<Map<String, dynamic>> brows = await db.query(
+            'beneficiaries_new',
+            where: 'unique_key = ?',
+            whereArgs: [key],
+            limit: 1,
+          );
+          if (brows.isEmpty) {
+            final asInt = int.tryParse(key);
+            if (asInt != null) {
+              brows = await db.query(
+                'beneficiaries_new',
+                where: 'id = ?',
+                whereArgs: [asInt],
+                limit: 1,
+              );
+            } else {
+              brows = await db.query(
+                'beneficiaries_new',
+                where: 'unique_key LIKE ?',
+                whereArgs: ['%$key%'],
+                limit: 1,
+              );
+            }
+          }
+          if (brows.isNotEmpty) {
+            final beneficiary = Map<String, dynamic>.from(brows.first);
+            Map<String, dynamic> info;
+            try {
+              info = beneficiary['beneficiary_info'] is String && (beneficiary['beneficiary_info'] as String).isNotEmpty
+                  ? Map<String, dynamic>.from(jsonDecode(beneficiary['beneficiary_info']))
+                  : {};
+            } catch (_) {
+              info = {};
+            }
+            if (state.fpMethod != null && state.fpMethod!.isNotEmpty) {
+              info['fpMethod'] = state.fpMethod;
+              info['sp_fpMethod'] = state.fpMethod;
+            }
+            if (state.antraInjectionDateChanged != null) {
+              final iso = state.antraInjectionDateChanged!.toIso8601String();
+              info['antraDate'] = iso;
+              info['hpantraDate'] = iso;
+            }
+            if (state.removalDate != null) {
+              final iso = state.removalDate!.toIso8601String();
+              info['removalDate'] = iso;
+              info['sp_removalDate'] = iso;
+              info['hpremovalDate'] = iso;
+            }
+            if (state.removalReasonChanged != null && state.removalReasonChanged!.isNotEmpty) {
+              info['removalReason'] = state.removalReasonChanged;
+              info['sp_removalReason'] = state.removalReasonChanged;
+              info['hpremovalReason'] = state.removalReasonChanged;
+            }
+            await db.update(
+              'beneficiaries_new',
+              {
+                'beneficiary_info': jsonEncode(info),
+                'modified_date_time': nowIso,
+              },
+              where: 'unique_key = ?',
+              whereArgs: [key],
+            );
+          }
+        } catch (e) {
+          print('Error updating FP info in beneficiaries table: $e');
         }
 
         late DeviceInfo deviceInfo;
@@ -359,7 +469,7 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
           try {
             // Check if eligible couple activity already exists for this beneficiary
             final existingEligibleActivity = await LocalStorageDao.instance.getEligibleCoupleActivityByBeneficiary(state.beneficiaryRefKey ?? state.beneficiaryId);
-            
+
             final eligibleCoupleActivityData = {
               'eligible_couple_state': 'tracking_due',
               'device_details': jsonEncode({
@@ -421,8 +531,8 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
               {'is_deleted': 1},
               where:
               'beneficiary_ref_key = ?  AND is_deleted = 0',              whereArgs: [
-                state.beneficiaryRefKey ?? state.beneficiaryId,
-              ],
+              state.beneficiaryRefKey ?? state.beneficiaryId,
+            ],
             );
             print('Updated tracking_due state to is_deleted=1 in eligible_couple_activities table');
           } catch (e) {
@@ -550,9 +660,9 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
 
   String _deriveFinancialYear(DateTime? date) {
     if (date == null) return '';
+    // This ensures it returns "2026" instead of "2025-26"
     return date.year.toString();
   }
-
   DateTime _calculateEddFromLmp(DateTime lmp) {
     return lmp.add(const Duration(days: 277));
   }
@@ -627,10 +737,163 @@ class TrackEligibleCoupleBloc extends Bloc<TrackEligibleCoupleEvent, TrackEligib
       final s = r['form_json']?.toString() ?? '';
       if (s.isEmpty) return;
       final decoded = jsonDecode(s);
-      if (decoded is Map && decoded['form_data'] is Map) {
-        final fd = Map<String, dynamic>.from(decoded['form_data']);
-        add(LoadPreviousFormData(fd));
+      if (decoded is Map) {
+        Map<String, dynamic>? fd;
+        if (decoded['form_data'] is Map) {
+          fd = Map<String, dynamic>.from(decoded['form_data']);
+        } else if (decoded['eligible_couple_tracking_due_from'] is Map) {
+          fd = Map<String, dynamic>.from(decoded['eligible_couple_tracking_due_from']);
+        }
+        if (fd == null && decoded['form_data'] is Map) {
+          final inner = Map<String, dynamic>.from(decoded['form_data']);
+          if (inner['eligible_couple_tracking_due_from'] is Map) {
+            fd = Map<String, dynamic>.from(inner['eligible_couple_tracking_due_from']);
+          }
+        }
+        if (fd != null) {
+          add(LoadPreviousFormData(fd));
+        }
       }
+    } catch (_) {}
+  }
+
+  DateTime? _parseFlexibleDate(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is int) {
+      try {
+        return DateTime.fromMillisecondsSinceEpoch(value);
+      } catch (_) {
+        return null;
+      }
+    }
+    final s = value.toString();
+    if (s.isEmpty) return null;
+    try {
+      return DateTime.parse(s);
+    } catch (_) {
+      final m = RegExp(r'^(\d{2})-(\d{2})-(\d{4})$').firstMatch(s);
+      if (m != null) {
+        final d = int.tryParse(m.group(1) ?? '');
+        final mo = int.tryParse(m.group(2) ?? '');
+        final y = int.tryParse(m.group(3) ?? '');
+        if (d != null && mo != null && y != null) {
+          return DateTime(y, mo, d);
+        }
+      }
+      return null;
+    }
+  }
+
+  String? _normalizeFpMethod(String? raw) {
+    if (raw == null) return null;
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
+
+    String norm(String s) => s
+        .toLowerCase()
+        .replaceAll('_', ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
+    final n = norm(trimmed);
+    for (final item in _fpMethodItems) {
+      if (norm(item) == n) return item;
+    }
+
+    // Common variations seen in stored data
+    if (n.contains('antra') || n.contains('antra injection') || n.contains('atra injection')) {
+      return 'Atra Injection';
+    }
+    if (n.contains('copper') || n.contains('iu cd') || n.contains('iucd') || n.contains('cu t') || n.contains('cut')) {
+      return 'Copper -T (IUCD)';
+    }
+    if (n.contains('mala')) {
+      return 'Mala -N (Daily contraceptive pill)';
+    }
+    if (n.contains('chhaya')) {
+      return 'Chhaya (Weekly contraceptive pill)';
+    }
+    if (n.contains('ecp') || n.contains('emergency contraceptive')) {
+      return 'ECP (Emergency contraceptive pill)';
+    }
+    if (n.contains('condom')) {
+      return 'Condom';
+    }
+    if (n.contains('male steril')) {
+      return 'Male Sterilization';
+    }
+    if (n.contains('female steril')) {
+      return 'Female Sterilization';
+    }
+    if (n.contains('any other')) {
+      return 'Any Other Specify';
+    }
+
+    // If we can't map it safely, keep raw value so it can still be displayed.
+    return trimmed;
+  }
+
+  Future<void> _prefillFromBeneficiaryInfo() async {
+    try {
+      final db = await DatabaseProvider.instance.database;
+      final key = state.beneficiaryRefKey ?? state.beneficiaryId;
+      List<Map<String, dynamic>> rows = await db.query(
+        'beneficiaries_new',
+        where: 'unique_key = ?',
+        whereArgs: [key],
+        limit: 1,
+      );
+      if (rows.isEmpty) {
+        final asInt = int.tryParse(key);
+        if (asInt != null) {
+          rows = await db.query(
+            'beneficiaries_new',
+            where: 'id = ?',
+            whereArgs: [asInt],
+            limit: 1,
+          );
+        } else {
+          rows = await db.query(
+            'beneficiaries_new',
+            where: 'unique_key LIKE ?',
+            whereArgs: ['%$key%'],
+            limit: 1,
+          );
+        }
+      }
+      if (rows.isEmpty) return;
+
+      final infoStr = rows.first['beneficiary_info']?.toString() ?? '';
+      if (infoStr.isEmpty) return;
+
+      Map<String, dynamic> info;
+      try {
+        final decoded = jsonDecode(infoStr);
+        info = decoded is Map ? Map<String, dynamic>.from(decoded) : {};
+      } catch (_) {
+        info = {};
+      }
+      if (info.isEmpty) return;
+
+      final fpMethod = _normalizeFpMethod((info['fpMethod'] ?? info['sp_fpMethod'])?.toString());
+      final antraRaw = info['antraDate'] ?? info['hpantrgit aDate'];
+      final removalDateRaw = info['removalDate'] ?? info['sp_removalDate'] ?? info['hpremovalDate'];
+      final removalReasonRaw = info['removalReason'] ?? info['sp_removalReason'] ?? info['hpremovalReason'];
+
+      final antraDate = _parseFlexibleDate(antraRaw);
+      final removalDate = _parseFlexibleDate(removalDateRaw);
+      final removalReason = removalReasonRaw?.toString();
+
+      emit(state.copyWith(
+        fpAdopting: true,
+        fpMethod: fpMethod,
+        antraInjectionDateChanged: antraDate,
+        removalDate: removalDate,
+        removalReasonChanged: removalReason,
+        status: state.isValid ? FormStatus.valid : FormStatus.initial,
+        clearError: true,
+      ));
     } catch (_) {}
   }
 }

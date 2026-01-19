@@ -123,7 +123,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get religionNotDisclosed => 'Do not want to disclose';
 
   @override
-  String get religionBuddhism => 'Buddhism';
+  String get religionBuddhism => 'Buddism';
 
   @override
   String get religionJainism => 'Jainism';
@@ -1213,6 +1213,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get firstAncLabel => 'First ANC';
 
   @override
+  String get folicirAcidTabletsLabel => 'Number of Iron & Folic Acid tablets given';
+
+  @override
   String get folicAcidTabletsLabel => 'Number of Folic Acid tablets given';
 
   @override
@@ -1321,6 +1324,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hbncListTitle => 'HBNC List';
 
   @override
+  String get hbncVisit => 'HBNC Visit';
+
+  @override
   String get hbncMotherTitle => 'HBNC Mother';
 
   @override
@@ -1423,7 +1429,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get houseNoHint => 'House no';
 
   @override
-  String get houseNoLabel => 'House no';
+  String get houseNoLabel => 'House No.';
 
   @override
   String get houseNone => 'None';
@@ -2415,7 +2421,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userRoleLabel => 'Role:';
 
   @override
-  String get userVillageLabel => 'Village:';
+  String get userVillageLabel => 'Village';
 
   @override
   String get usernameEmpty => 'Username cannot be empty';
@@ -2523,7 +2529,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightKgLabel => 'Weight (Kg)';
 
   @override
-  String get whoseMobileLabel => 'Whose mobile no.';
+  String get whoseMobileLabel => 'Whose mobile no.?';
 
   @override
   String get widowed => 'Widowed';
@@ -2685,7 +2691,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get babyConditionLabel => 'Child status';
 
   @override
-  String get babyNameLabel => 'Baby\'s name';
+  String get babyNameLabel => 'Baby\'s Name';
 
   @override
   String get babyGenderLabel => 'Baby\'s gender ';
@@ -2721,16 +2727,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get motherReportsTempOrChestIndrawingLabel => 'The mother tells that the child feels hot or cold when touching and the temperature of the child is more than 37.5° C or less than 35.5° C and the chest is pulled inward while breathing';
 
   @override
-  String get bleedingUmbilicalCordLabel => 'Is Umbilical cord bleeding';
+  String get bleedingUmbilicalCordLabel => 'Is umbilical cord bleeding?';
 
   @override
-  String get newbornSeizuresLabel => 'Is the child having seizures?';
+  String get newbornSeizuresLabel => 'Is the child having Seizures?';
 
   @override
   String get stoppedCryingLabel => 'Has the child stopped crying?';
 
   @override
-  String get homeVisitDayLabel => 'Home Visit Day *';
+  String get homeVisitDayLabel => 'Home visit day *';
 
   @override
   String get highRisk => 'High-Risk Pregnancy List';
@@ -2742,7 +2748,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get motherStatusLabel => 'Mother status *';
 
   @override
-  String get mcpCardAvailableLabelMother => 'Is there availability of \'Mother Child Protection (MCP) card? *';
+  String get mcpCardAvailableLabelMother => 'Is there availability of \'Mother Child Protection (MCP)\' card? *';
 
   @override
   String get postDeliveryProblemNone => 'None';
@@ -2766,7 +2772,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postDeliveryProblemConvulsions => 'Convulsions';
 
   @override
-  String get mealsPerDayLabel => 'No. of times mother takes full meal in 24 hours?';
+  String get mealsPerDayLabel => 'No. of times mother takes full meal in 24 hrs';
 
   @override
   String get padsPerDayLabel => 'How many pads have been changed in a day for bleeding? *';
@@ -2946,10 +2952,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get howWasBreastfedLabel => 'How did the baby breastfed?';
 
   @override
-  String get firstFeedGivenAfterBirthLabel => 'What was given as the baby first feed to baby after birth?';
+  String get firstFeedGivenAfterBirthLabel => 'What was given as the first feed to baby after birth?';
 
   @override
-  String get adequatelyFedSevenToEightTimesLabel => 'Is the baby being fed properly (whenever hungry or at least 7–8 times in 24 hours)?';
+  String get adequatelyFedSevenToEightTimesLabel => 'Is the baby being fed properly (Whenever hungry or at least 7–8 times in 24 hrs)?';
 
   @override
   String get babyDrinkingLessMilkLabel => 'Is the child feeding less?';
@@ -3789,7 +3795,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterPatientFullName => 'Please enter the patient\'s full name';
 
   @override
-  String get dob => 'Date Of Birth';
+  String get dob => 'Date Of birth';
 
   @override
   String get enterDob => 'Please enter the date of birth';
@@ -4360,7 +4366,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseEnterPatientsFullName => 'Please enter the patient\'s full name';
 
   @override
-  String get dateOfBirth => 'Date Of Birth';
+  String get dateOfBirth => 'Date Of birth';
 
   @override
   String get others => 'Others';
@@ -5023,7 +5029,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get villageName => 'Village Name';
 
   @override
-  String get wardName => 'Ward Name';
+  String get wardName => 'Ward name';
 
   @override
   String get wardNumber => 'Ward Number';
@@ -5302,7 +5308,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get milkNotProducingOrLessLabel => 'Mother\'s milk is not being produced after delivery or she thinks less milk is being produced';
 
   @override
-  String get nippleCracksPainOrEngorgedLabel => 'is the mother having cracked nipples/ painful and / or engorged breasts';
+  String get nippleCracksPainOrEngorgedLabel => 'Is the mother having cracked nipples/ painful and / or engorged breast';
 
   @override
   String get tabGeneralDetails => 'BASIC DETAILS';
@@ -5326,13 +5332,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get firstBreastfeedTimingLabel => 'At what time was the baby first breastfed?';
 
   @override
-  String get breathingRapidLabel => 'Is the breath of the baby going fast (60 or more per minute)';
+  String get breathingRapidLabel => 'Is the breath of the baby going fast (60 or more per minute)?';
 
   @override
   String get lethargicLabel => 'Is the baby Lathargic? ';
 
   @override
-  String get congenitalAbnormalitiesLabel => 'Is the baby having any congenital physical abnormality';
+  String get congenitalAbnormalitiesLabel => 'Is the baby having any congenital physical abnormality?';
 
   @override
   String get eyesNormalLabel => 'Eyes: Normal';
@@ -5341,13 +5347,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eyesSwollenOrPusLabel => 'Are the eyes swollen? Is there pus coming out of the eyes?';
 
   @override
-  String get skinFoldRednessLabel => 'Are there any cracks/redness on the skin fold (thigh/ Axilla / Buttock)';
+  String get skinFoldRednessLabel => 'Are there any cracks/redness on the skin fold. (thigh/ Axilla / Buttock)';
 
   @override
-  String get newbornJaundiceLabel => 'Yellowness in skin/ palm/ sole/eyes: Jaudice';
+  String get newbornJaundiceLabel => 'Yellowness in skin/ palm/ sole/eyes: Jaundice';
 
   @override
-  String get pusBumpsOrBoilLabel => 'More than ten pus- filled pustules or a large boil';
+  String get pusBumpsOrBoilLabel => 'More than ten pus-filled pustules or a large boil';
 
   @override
   String get pusInNavelLabel => 'Is pus in the navel?';
@@ -5371,7 +5377,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get birthDoseVaccinationLabel => 'Is the Birthdose vaccination given to baby?';
 
   @override
-  String get mcpCardAvailableLabel => 'Is there availability of \'Mother Child Protection (MCP) card?';
+  String get mcpCardAvailableLabel => 'Is there availability of \'Mother Child Protection (MCP)\' card?';
 
   @override
   String get formUpdatedSuccessfully => 'Form updated successfully';
@@ -5452,7 +5458,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reasonForAbsent => 'Reason for absent';
 
   @override
-  String get isBeneficiaryAbsent => 'Is Beneficiary Absent';
+  String get isBeneficiaryAbsent => 'Is Beneficiary Absent?';
 
   @override
   String get quantityOfMalaN => 'Quantity of Mala -N (Daily contraceptive pill)';
@@ -5533,7 +5539,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get specifyOtherDisease => 'Please specify other disease';
 
   @override
-  String get selectRisks => 'Select Risks';
+  String get selectRisks => 'Select risks';
 
   @override
   String get riskSevereAnemia => 'Severe Anemia';
@@ -5569,13 +5575,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get riskRhNegative => 'RH Negative';
 
   @override
-  String get didPregnantWomanGiveBirth => 'Did the pregnant woman give birth to a baby?';
+  String get didPregnantWomanGiveBirth => 'Has the Pregnant woman given birth to a child?';
 
   @override
   String get dateOfAbortion => 'Date of Abortion';
 
   @override
-  String get abortionComplication => 'Any complication leading to abortion?';
+  String get abortionComplication => 'Is there any complications leading to abortion?';
 
   @override
   String get deliveryOutcomeLabel => 'Delivery outcome *';
@@ -5839,7 +5845,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get within24Hours => 'Within 24 hours of birth';
 
   @override
-  String get notBreastfed => 'Not breastfed';
+  String get notBreastfed => 'Not Breastfed';
 
   @override
   String get howWasBreastfed => 'How was the baby breastfed?';
@@ -5863,7 +5869,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couldNotBreastfeedButSpoon => 'Could not breast feed but had to be fed with spoon';
 
   @override
-  String get couldNeitherBreastfeedNorSpoon => 'Could neither breast feed nor take given by spoon';
+  String get couldNeitherBreastfeedNorSpoon => 'Could neither breast feed nor take milk given by spoon';
 
   @override
   String get firstFeedGivenAfterBirth => 'First feed given after birth';
@@ -5941,7 +5947,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get referToHospital => 'Refer to hospital?';
 
   @override
-  String get referToLabel => 'Refer to';
+  String get referToLabel => 'Refer to?';
 
   @override
   String get mchLabel => 'MCH';
@@ -6022,10 +6028,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get breastfeeding_problem_help => 'If there is a problem in breastfeeding, help the mother to overcome it *';
 
   @override
-  String get temp_upto_102 => 'Temperature upto 102°F (38.9°C)';
+  String get temp_upto_102 => 'Temperature upto 102 degree F(38.9 degree C)';
 
   @override
-  String get temp_more_than_102 => 'Temperature more than 102°F (38.9°C)';
+  String get temp_more_than_102 => 'Temperature More than 102 degree F(38.9 degree C)';
 
   @override
   String get paracetamolGivenLabel => 'Paracetamol tablet given (Temperature up to 102°F / 38.9°C)';
@@ -6104,6 +6110,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get member_status_label => 'Member Status *';
+
+  @override
+  String get member_status_head => 'Member Status';
 
   @override
   String get death => 'Death';
@@ -7207,7 +7216,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseSpecifyOtherDisease => 'Please specify other disease';
 
   @override
-  String get calciumVitaminD3TabletsLabel => 'Number of Calcium and Vitamin D3 tablets given';
+  String get calciumVitaminD3TabletsLabel => 'Number of calcium and vitamin D3 tablets given';
 
   @override
   String get selectVisitTypeError => 'Please select visit type';
@@ -7606,8 +7615,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectChildren => 'Select Children';
 
   @override
-  String get nextancduedate => 'Next anc due date';
+  String get nextancduedate => 'Next ANC due date';
 
   @override
   String get householdUpdatedSuccessfully => 'Household updated successfully';
+
+  @override
+  String get dontNO => 'Don\'t Know';
+
+  @override
+  String get dateOfvisitTracking => 'Date of visit';
 }

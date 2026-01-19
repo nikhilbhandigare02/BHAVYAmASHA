@@ -18,7 +18,6 @@ import 'database_provider.dart';
 
 class LocalStorageDao {
   LocalStorageDao._();
-
   static final LocalStorageDao instance = LocalStorageDao._();
 
   factory LocalStorageDao() => instance;
@@ -95,19 +94,17 @@ class LocalStorageDao {
 
   Future<int> getHouseholdTotalCountLocal() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery('SELECT COUNT(*) FROM households WHERE is_deleted = 0'),
-    );
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM households WHERE is_deleted = 0',
+    ));
     return count ?? 0;
   }
 
   Future<int> getHouseholdSyncedCountLocal() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(*) FROM households WHERE is_deleted = 0 AND is_synced = 1',
-      ),
-    );
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM households WHERE is_deleted = 0 AND is_synced = 1',
+    ));
     return count ?? 0;
   }
 
@@ -171,11 +168,9 @@ class LocalStorageDao {
     }
   }
 
+
   Future<List<Map<String, dynamic>>> getChildTrackingForBirthDose() async {
-    return _getChildTrackingForAgeGroup(
-      '"current_tab"%Birth dose%',
-      'Birth dose',
-    );
+    return _getChildTrackingForAgeGroup('"current_tab"%Birth dose%', 'Birth dose');
   }
 
   Future<List<Map<String, dynamic>>> getChildTrackingFor6Weeks() async {
@@ -186,8 +181,8 @@ class LocalStorageDao {
     final patterns = [
       '"current_tab":"10 WEEK"',
       '"current_tab" : "10 WEEK"', // with spaces around colon
-      'current_tab":"10 WEEK', // missing first quote
-      '10 WEEK', // just the value
+      'current_tab":"10 WEEK',    // missing first quote
+      '10 WEEK'                   // just the value
     ];
 
     for (var pattern in patterns) {
@@ -216,15 +211,11 @@ class LocalStorageDao {
     return _getChildTrackingForAgeGroup('"current_tab"%5-6 YEAR%', '5-6 YEARS');
   }
 
-  Future<List<Map<String, dynamic>>> _getChildTrackingForAgeGroup(
-      String likePattern,
-      String logName,
-      ) async {
+  Future<List<Map<String, dynamic>>> _getChildTrackingForAgeGroup(String likePattern, String logName) async {
     print('Executing query for $logName with pattern: $likePattern');
     try {
       final db = await _db;
-      final rows = await db.rawQuery(
-        '''
+      final rows = await db.rawQuery('''
       WITH LatestEntries AS (
         SELECT 
           beneficiary_ref_key,
@@ -242,15 +233,11 @@ class LocalStorageDao {
       WHERE f.forms_ref_key = '30bycxe4gv7fqnt6'
         AND f.form_json LIKE ?
       ORDER BY f.created_date_time DESC
-    ''',
-        ['%$likePattern%', '%$likePattern%'],
-      );
+    ''', ['%$likePattern%', '%$likePattern%']);
 
       print('Found ${rows.length} latest entries for $logName tracking forms');
       if (rows.isNotEmpty) {
-        print(
-          'First row preview: ${rows.first.toString().substring(0, min(200, rows.first.toString().length))}',
-        );
+        print('First row preview: ${rows.first.toString().substring(0, min(200, rows.first.toString().length))}');
       }
 
       return rows.map((row) {
@@ -286,10 +273,7 @@ class LocalStorageDao {
     }
   }
 
-  Future<int> setBeneficiaryMigratedByUniqueKey({
-    required String uniqueKey,
-    required int isMigrated,
-  }) async {
+  Future<int> setBeneficiaryMigratedByUniqueKey({required String uniqueKey, required int isMigrated}) async {
     try {
       final db = await _db;
       final values = <String, Object?>{
@@ -309,8 +293,7 @@ class LocalStorageDao {
     }
   }
 
-  Future<List<Map<String, dynamic>>>
-  getUnsyncedEligibleCoupleActivities() async {
+  Future<List<Map<String, dynamic>>> getUnsyncedEligibleCoupleActivities() async {
     final db = await _db;
     final rows = await db.query(
       'eligible_couple_activities',
@@ -325,6 +308,7 @@ class LocalStorageDao {
       return mapped;
     }).toList();
   }
+
 
   Future<List<Map<String, dynamic>>> getEligibleCoupleActivities() async {
     final db = await _db;
@@ -342,28 +326,20 @@ class LocalStorageDao {
     }).toList();
   }
 
-  Future<int> markEligibleCoupleActivitySyncedById(
-      int id, {
-        String? serverId,
-      }) async {
+
+
+  Future<int> markEligibleCoupleActivitySyncedById(int id, {String? serverId}) async {
     final db = await _db;
     final values = <String, Object?>{
       'is_synced': 1,
       'modified_date_time': DateTime.now().toIso8601String(),
     };
     if (serverId != null && serverId.isNotEmpty) values['server_id'] = serverId;
-    return db.update(
-      'eligible_couple_activities',
-      values,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return db.update('eligible_couple_activities', values, where: 'id = ?', whereArgs: [id]);
   }
 
   Future<String> getLatestEligibleCoupleActivityServerId() async {
     try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       final db = await _db;
       final rows = await db.query(
         'eligible_couple_activities',
@@ -374,10 +350,8 @@ class LocalStorageDao {
           'id',
           'is_deleted',
         ],
-        where:
-        "server_id IS NOT NULL AND TRIM(server_id) != '' AND current_user_key = ?",
-        whereArgs: [ashaUniqueKey],
-        orderBy: "id DESC",
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "created_date_time DESC",
         limit: 1,
       );
 
@@ -392,8 +366,6 @@ class LocalStorageDao {
 
   Future<String> getLatestChildCareActivityServerId() async {
     try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       final db = await _db;
       final rows = await db.query(
         'child_care_activities',
@@ -404,10 +376,9 @@ class LocalStorageDao {
           'id',
           'is_deleted',
         ],
-        where:
-        "server_id IS NOT NULL AND TRIM(server_id) != ''  AND current_user_key = ?",
-        whereArgs: [ashaUniqueKey],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
         orderBy: "created_date_time DESC",
+
         limit: 1,
       );
 
@@ -422,8 +393,6 @@ class LocalStorageDao {
 
   Future<String> getLatestMotherCareActivityServerId() async {
     try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       final db = await _db;
       final rows = await db.query(
         'mother_care_activities',
@@ -434,9 +403,7 @@ class LocalStorageDao {
           'id',
           'is_deleted',
         ],
-        where:
-        "server_id IS NOT NULL AND TRIM(server_id) != '' AND current_user_key = ?",
-        whereArgs: [ashaUniqueKey],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
         orderBy: "created_date_time DESC",
         limit: 1,
       );
@@ -456,8 +423,7 @@ class LocalStorageDao {
       bool isHighRisk = false;
       String? cutoff;
 
-      final cutoffRows = await db.rawQuery(
-        '''
+      final cutoffRows = await db.rawQuery('''
       SELECT created_date_time
       FROM ${MotherCareActivitiesTable.table}
       WHERE beneficiary_ref_key = ?
@@ -465,9 +431,7 @@ class LocalStorageDao {
         AND is_deleted = 0
       ORDER BY created_date_time DESC
       LIMIT 1
-    ''',
-        [beneficiaryId, 'anc_due'],
-      );
+    ''', [beneficiaryId, 'anc_due']);
 
       if (cutoffRows.isNotEmpty) {
         final v = cutoffRows.first['created_date_time']?.toString();
@@ -477,8 +441,7 @@ class LocalStorageDao {
       }
 
       // Get visit count
-      String countSql =
-      '''
+      String countSql = '''
       SELECT COUNT(*) as count 
       FROM ${FollowupFormDataTable.table} 
       WHERE beneficiary_ref_key = ? 
@@ -487,8 +450,7 @@ class LocalStorageDao {
     ''';
       final countArgs = <Object?>[
         beneficiaryId,
-        FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
-            .ancDueRegistration],
+        FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration],
       ];
       if (cutoff != null && cutoff.isNotEmpty) {
         countSql += ' AND datetime(created_date_time) >= datetime(?)';
@@ -496,8 +458,7 @@ class LocalStorageDao {
       }
       final countResult = await db.rawQuery(countSql, countArgs);
 
-      String riskSql =
-      '''
+      String riskSql = '''
       SELECT form_json
       FROM ${FollowupFormDataTable.table} 
       WHERE beneficiary_ref_key = ? 
@@ -506,8 +467,7 @@ class LocalStorageDao {
     ''';
       final riskArgs = <Object?>[
         beneficiaryId,
-        FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
-            .ancDueRegistration],
+        FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration],
       ];
       if (cutoff != null && cutoff.isNotEmpty) {
         riskSql += ' AND datetime(created_date_time) >= datetime(?)';
@@ -516,9 +476,7 @@ class LocalStorageDao {
       riskSql += ' ORDER BY created_date_time DESC LIMIT 1';
       final riskResult = await db.rawQuery(riskSql, riskArgs);
 
-      print(
-        '🔍 Risk query for $beneficiaryId returned ${riskResult.length} rows',
-      );
+      print('🔍 Risk query for $beneficiaryId returned ${riskResult.length} rows');
       if (riskResult.isNotEmpty) {
         final formJson = riskResult.first['form_json'] as String?;
         print('🔍 Form JSON for $beneficiaryId: $formJson');
@@ -530,21 +488,17 @@ class LocalStorageDao {
             final data = decoded['form_data'] ?? decoded['anc_form'];
             if (data is Map<String, dynamic>) {
               final hr = data['high_risk'] ?? data['is_high_risk'];
-              isHighRisk =
-                  hr == true ||
-                      hr == 1 ||
-                      (hr is String &&
-                          ['true', 'yes', '1'].contains(hr.toLowerCase()));
+              isHighRisk = hr == true ||
+                  hr == 1 ||
+                  (hr is String && ['true', 'yes', '1'].contains(hr.toLowerCase()));
               print('🔍 High risk status from form_data/anc_form: $isHighRisk');
             }
 
             if (!isHighRisk) {
               final hr = decoded['high_risk'] ?? decoded['is_high_risk'];
-              isHighRisk =
-                  hr == true ||
-                      hr == 1 ||
-                      (hr is String &&
-                          ['true', 'yes', '1'].contains(hr.toLowerCase()));
+              isHighRisk = hr == true ||
+                  hr == 1 ||
+                  (hr is String && ['true', 'yes', '1'].contains(hr.toLowerCase()));
               print('🔍 High risk status from top level: $isHighRisk');
             }
 
@@ -568,10 +522,9 @@ class LocalStorageDao {
   Future<String?> getLastANCVisitDate(String beneficiaryId) async {
     try {
       final db = await _db;
-
+      
       // Query to get the latest ANC visit record from followup table
-      final result = await db.rawQuery(
-        '''
+      final result = await db.rawQuery('''
         SELECT created_date_time
         FROM ${FollowupFormDataTable.table}
         WHERE beneficiary_ref_key = ? 
@@ -579,13 +532,10 @@ class LocalStorageDao {
         AND (is_deleted IS NULL OR is_deleted = 0)
         ORDER BY created_date_time DESC
         LIMIT 1
-      ''',
-        [
-          beneficiaryId,
-          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
-              .ancDueRegistration],
-        ],
-      );
+      ''', [
+        beneficiaryId,
+        FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration],
+      ]);
 
       if (result.isNotEmpty) {
         final visitDate = result.first['created_date_time']?.toString();
@@ -607,14 +557,11 @@ class LocalStorageDao {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getAncFormsByBeneficiaryId(
-      String beneficiaryId,
-      ) async {
+  Future<List<Map<String, dynamic>>> getAncFormsByBeneficiaryId(String beneficiaryId) async {
     try {
       final db = await _db;
       String? cutoff;
-      final cutoffRows = await db.rawQuery(
-        '''
+      final cutoffRows = await db.rawQuery('''
       SELECT created_date_time
       FROM ${MotherCareActivitiesTable.table}
       WHERE beneficiary_ref_key = ?
@@ -622,9 +569,7 @@ class LocalStorageDao {
         AND is_deleted = 0
       ORDER BY created_date_time DESC
       LIMIT 1
-    ''',
-        [beneficiaryId, 'anc_due'],
-      );
+    ''', [beneficiaryId, 'anc_due']);
 
       if (cutoffRows.isNotEmpty) {
         final v = cutoffRows.first['created_date_time']?.toString();
@@ -633,11 +578,9 @@ class LocalStorageDao {
         }
       }
 
-      String where =
-          'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)';
+      String where = 'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)';
       final args = <Object?>[
-        FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
-            .ancDueRegistration],
+        FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration],
         beneficiaryId,
       ];
       if (cutoff != null && cutoff.isNotEmpty) {
@@ -672,54 +615,12 @@ class LocalStorageDao {
     }
   }
 
-
-  Future<Map<String, dynamic>?> getBeneficiaryByServerKey(
-      String serverKey,
-      ) async {
-    try {
-
-      if(serverKey=='696b76644239d35553728f27' || serverKey == '696b766f99764a6a83a22a21' || serverKey == '696b766f99764a6a83a22a23'){
-        print('aa');
-      }
-      final db = await _db;
-      /* final rows = await db.query(
-        'beneficiaries_new',
-        where:
-            'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND (is_death = 0 OR is_death IS NULL)',
-        whereArgs: [uniqueKey],
-        limit: 1,
-      );*/
-      final rows = await db.query(
-        'beneficiaries_new',
-        where:
-        'server_id = ?',
-        whereArgs: [serverKey],
-        limit: 1,
-      );
-      if (rows.isEmpty) return null;
-      final mapped = Map<String, dynamic>.from(rows.first);
-      mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
-      mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
-      mapped['death_details'] = safeJsonDecode(mapped['death_details']);
-      mapped['device_details'] = safeJsonDecode(mapped['device_details']);
-      mapped['app_details'] = safeJsonDecode(mapped['app_details']);
-      mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
-      return mapped;
-    } catch (e) {
-      print('Error getting beneficiary by unique_key: $e');
-      rethrow;
-    }
-  }
-
-  Future<Map<String, dynamic>?> getBeneficiaryByUniqueKey(
-      String uniqueKey,
-      ) async {
+  Future<Map<String, dynamic>?> getBeneficiaryByUniqueKey(String uniqueKey) async {
     try {
       final db = await _db;
       final rows = await db.query(
         'beneficiaries_new',
-        where:
-        'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND (is_death = 0 OR is_death IS NULL)',
+        where: 'unique_key = ? AND (is_deleted IS NULL OR is_deleted = 0) AND (is_death = 0 OR is_death IS NULL)',
         whereArgs: [uniqueKey],
         limit: 1,
       );
@@ -780,10 +681,7 @@ class LocalStorageDao {
     }
   }
 
-  Future<int> updateBeneficiaryServerIdByUniqueKey({
-    required String uniqueKey,
-    required String serverId,
-  }) async {
+  Future<int> updateBeneficiaryServerIdByUniqueKey({required String uniqueKey, required String serverId}) async {
     try {
       final db = await _db;
       final changes = await db.update(
@@ -803,10 +701,7 @@ class LocalStorageDao {
     }
   }
 
-  Future<int> updateBeneficiaryParentUserByUniqueKey({
-    required String uniqueKey,
-    required Map<String, dynamic> parentUser,
-  }) async {
+  Future<int> updateBeneficiaryParentUserByUniqueKey({required String uniqueKey, required Map<String, dynamic> parentUser}) async {
     try {
       final db = await _db;
       final changes = await db.update(
@@ -826,25 +721,6 @@ class LocalStorageDao {
     }
   }
 
-  Future<int> updateBeneficiaryDeathStatus({required String uniqueKey, required int isDeath}) async {
-    try {
-      final db = await _db;
-      final changes = await db.update(
-        'beneficiaries_new',
-        {
-          'is_death': isDeath,
-          'modified_date_time': DateTime.now().toIso8601String(),
-        },
-        where: 'unique_key = ?',
-        whereArgs: [uniqueKey],
-      );
-      return changes;
-    } catch (e) {
-      print('Error updating beneficiary death status by unique_key: $e');
-      rethrow;
-    }
-  }
-
   dynamic _encodeIfObject(dynamic v) {
     if (v == null) return null;
     if (v is Map || v is List) return jsonEncode(v);
@@ -859,15 +735,11 @@ class LocalStorageDao {
       final row = <String, dynamic>{
         'server_id': data['server_id'],
         'unique_key': data['unique_key'],
-        'address': data['address'] is String
-            ? data['address']
-            : jsonEncode(data['address'] ?? {}),
-        'geo_location': data['geo_location'] is String
-            ? data['geo_location']
-            : jsonEncode(data['geo_location'] ?? {}),
+        'address': data['address'] is String ? data['address'] : jsonEncode(data['address'] ?? {}),
+        'geo_location': data['geo_location'] is String ? data['geo_location'] : jsonEncode(data['geo_location'] ?? {}),
         'head_id': data['head_id'],
         'household_info': householdInfo is String
-            ? householdInfo // Already a JSON string
+            ? householdInfo  // Already a JSON string
             : jsonEncode(householdInfo ?? {}),
         'device_details': data['device_details'] is String
             ? data['device_details']
@@ -903,12 +775,8 @@ class LocalStorageDao {
 
       final row = <String, dynamic>{
         'server_id': data['server_id'],
-        'address': data['address'] is String
-            ? data['address']
-            : jsonEncode(data['address'] ?? {}),
-        'geo_location': data['geo_location'] is String
-            ? data['geo_location']
-            : jsonEncode(data['geo_location'] ?? {}),
+        'address': data['address'] is String ? data['address'] : jsonEncode(data['address'] ?? {}),
+        'geo_location': data['geo_location'] is String ? data['geo_location'] : jsonEncode(data['geo_location'] ?? {}),
         'head_id': data['head_id'],
         'household_info': householdInfo is String
             ? householdInfo
@@ -946,10 +814,7 @@ class LocalStorageDao {
     }
   }
 
-  Future<int> updateHouseholdServerIdByUniqueKey({
-    required String uniqueKey,
-    required String serverId,
-  }) async {
+  Future<int> updateHouseholdServerIdByUniqueKey({required String uniqueKey, required String serverId}) async {
     try {
       final db = await _db;
       final changes = await db.update(
@@ -969,7 +834,7 @@ class LocalStorageDao {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getUnsyncedHouseholds() async {
+  Future<List<Map<String, dynamic>>> getUnsyncedHouseholds  () async {
     try {
       final db = await _db;
       final rows = await db.query(
@@ -993,10 +858,7 @@ class LocalStorageDao {
     }
   }
 
-  Future<int> markHouseholdSyncedByUniqueKey({
-    required String uniqueKey,
-    String? serverId,
-  }) async {
+  Future<int> markHouseholdSyncedByUniqueKey({required String uniqueKey, String? serverId}) async {
     try {
       final db = await _db;
       final values = <String, Object?>{
@@ -1027,9 +889,7 @@ class LocalStorageDao {
       'unique_key': data['unique_key'],
       'beneficiary_state': data['beneficiary_state'] is List
           ? jsonEncode(data['beneficiary_state'])
-          : data['beneficiary_state'] is Map
-          ? jsonEncode(data['beneficiary_state'])
-          : data['beneficiary_state']?.toString() ?? '[]',
+          : data['beneficiary_state'],
       'pregnancy_count': data['pregnancy_count'],
       'beneficiary_info': _encodeIfObject(data['beneficiary_info']),
       'geo_location': _encodeIfObject(data['geo_location']),
@@ -1060,21 +920,17 @@ class LocalStorageDao {
 
   Future<int> getBeneficiaryTotalCountLocal() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(*) FROM beneficiaries_new WHERE is_deleted = 0',
-      ),
-    );
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM beneficiaries_new WHERE is_deleted = 0',
+    ));
     return count ?? 0;
   }
 
   Future<int> getBeneficiarySyncedCountLocal() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(*) FROM beneficiaries_new WHERE is_deleted = 0 AND is_synced = 1',
-      ),
-    );
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM beneficiaries_new WHERE is_deleted = 0 AND is_synced = 1',
+    ));
     return count ?? 0;
   }
 
@@ -1098,9 +954,7 @@ class LocalStorageDao {
     return db.insert('eligible_couple_activities', row);
   }
 
-  Future<Map<String, dynamic>?> getEligibleCoupleActivityByBeneficiary(
-      String beneficiaryRefKey,
-      ) async {
+  Future<Map<String, dynamic>?> getEligibleCoupleActivityByBeneficiary(String beneficiaryRefKey) async {
     try {
       final db = await _db;
       final rows = await db.query(
@@ -1119,27 +973,21 @@ class LocalStorageDao {
 
   Future<int> getEligibleCoupleTotalCountLocal() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(*) FROM eligible_couple_activities WHERE is_deleted = 0',
-      ),
-    );
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM eligible_couple_activities WHERE is_deleted = 0',
+    ));
     return count ?? 0;
   }
 
   Future<int> getEligibleCoupleSyncedCountLocal() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(*) FROM eligible_couple_activities WHERE is_deleted = 0 AND is_synced = 1',
-      ),
-    );
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM eligible_couple_activities WHERE is_deleted = 0 AND is_synced = 1',
+    ));
     return count ?? 0;
   }
 
-  Future<int> markEligibleCoupleActivitiesDeletedByBeneficiary(
-      String beneficiaryRefKey,
-      ) async {
+  Future<int> markEligibleCoupleActivitiesDeletedByBeneficiary(String beneficiaryRefKey) async {
     try {
       final db = await _db;
       final values = <String, Object?>{
@@ -1149,15 +997,12 @@ class LocalStorageDao {
       final changes = await db.update(
         'eligible_couple_activities',
         values,
-        where:
-        'beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+        where: 'beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
         whereArgs: [beneficiaryRefKey],
       );
       return changes;
     } catch (e) {
-      print(
-        'Error marking eligible couple activities deleted for $beneficiaryRefKey: $e',
-      );
+      print('Error marking eligible couple activities deleted for $beneficiaryRefKey: $e');
       rethrow;
     }
   }
@@ -1168,33 +1013,22 @@ class LocalStorageDao {
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
 
-      final List<Map<String, dynamic>> deceasedBeneficiaries = await db
-          .rawQuery(
+      final List<Map<String, dynamic>> deceasedBeneficiaries = await db.rawQuery(
         '''
       SELECT 
-  b.*,
-  h.household_info AS household_data,
-  h.created_date_time AS household_created_date,
-  h.household_info AS hh_info
-FROM beneficiaries_new b
-LEFT JOIN households h 
-  ON b.household_ref_key = h.unique_key
-WHERE b.is_death = 1
-  AND b.is_deleted = 0
-  AND b.is_migrated = 0
-  AND b.is_adult = 0
-  AND (
-    b.beneficiary_info LIKE '%"memberType":"child"%' OR
-    b.beneficiary_info LIKE '%"memberType":"Child"%'
-  )
-  AND EXISTS (
-    SELECT 1
-    FROM child_care_activities cca
-    WHERE cca.beneficiary_ref_key = b.unique_key
-      AND cca.child_care_state IN ('registration_due', 'tracking_due')
-  )
-  ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
-ORDER BY b.created_date_time DESC;
+        b.*,
+        h.household_info AS household_data,
+        h.created_date_time AS household_created_date,
+        h.household_info AS hh_info
+      FROM beneficiaries_new b
+      LEFT JOIN households h 
+        ON b.household_ref_key = h.unique_key
+      WHERE b.is_death = 1
+        AND b.is_deleted = 0
+        AND b.is_migrated = 0
+        AND b.is_adult = 0
+        ${ashaUniqueKey != null && ashaUniqueKey.isNotEmpty ? 'AND b.current_user_key = ?' : ''}
+      ORDER BY b.created_date_time DESC
       ''',
         ashaUniqueKey != null && ashaUniqueKey.isNotEmpty
             ? [ashaUniqueKey]
@@ -1274,9 +1108,7 @@ ORDER BY b.created_date_time DESC;
     }
   }
 
-  Future<List<Map<String, dynamic>>> getUpdatedEligibleCouplesWithLocalization(
-      AppLocalizations? t,
-      ) async {
+  Future<List<Map<String, dynamic>>> getUpdatedEligibleCouplesWithLocalization(AppLocalizations? t) async {
     print('🔍 Starting to fetch updated eligible couples...');
 
     try {
@@ -1286,8 +1118,7 @@ ORDER BY b.created_date_time DESC;
       final currentUser = await SecureStorageService.getCurrentUserData();
       final ashaUniqueKey = currentUser?['unique_key']?.toString() ?? '';
 
-      String whereClause =
-          'eligible_couple_state = ? AND (is_deleted IS NULL OR is_deleted = 0)';
+      String whereClause = 'eligible_couple_state = ? AND (is_deleted IS NULL OR is_deleted = 0)';
       List<dynamic> whereArgs = ['tracking_due'];
 
       if (ashaUniqueKey.isNotEmpty) {
@@ -1308,29 +1139,21 @@ ORDER BY b.created_date_time DESC;
           .whereType<String>()
           .toSet();
 
-      print(
-        '🔑 Tracking due beneficiaries count: ${trackingDueBeneficiaryKeys.length}',
-      );
+      print('🔑 Tracking due beneficiaries count: ${trackingDueBeneficiaryKeys.length}');
 
       if (trackingDueBeneficiaryKeys.isEmpty) {
         return [];
       }
 
-      final placeholders = List.filled(
-        trackingDueBeneficiaryKeys.length,
-        '?',
-      ).join(',');
+      final placeholders = List.filled(trackingDueBeneficiaryKeys.length, '?').join(',');
       final rows = await db.query(
         'beneficiaries_new',
-        where:
-        'unique_key IN ($placeholders) AND (is_deleted IS NULL OR is_deleted = 0) AND (is_migrated IS NULL OR is_migrated = 0)',
+        where: 'unique_key IN ($placeholders) AND (is_deleted IS NULL OR is_deleted = 0) AND (is_migrated IS NULL OR is_migrated = 0)',
         whereArgs: trackingDueBeneficiaryKeys.toList(),
         orderBy: 'created_date_time DESC',
       );
 
-      print(
-        '📊 Found ${rows.length} beneficiaries matching tracking_due status',
-      );
+      print('📊 Found ${rows.length} beneficiaries matching tracking_due status');
 
       final couples = <Map<String, dynamic>>[];
       final households = <String, List<Map<String, dynamic>>>{};
@@ -1353,16 +1176,11 @@ ORDER BY b.created_date_time DESC;
                 : Map<String, dynamic>.from(infoRaw ?? {});
 
             // Check if this is the head or spouse
-            final relation =
-            (info['relation_to_head'] ?? info['relation'] ?? '')
-                .toString()
-                .toLowerCase();
+            final relation = (info['relation_to_head'] ?? info['relation'] ?? '').toString().toLowerCase();
             if (relation.contains('head') || relation == 'self') {
               head = info;
               head!['_row'] = member;
-            } else if (relation == 'spouse' ||
-                relation == 'wife' ||
-                relation == 'husband') {
+            } else if (relation == 'spouse' || relation == 'wife' || relation == 'husband') {
               spouse = info;
               spouse!['_row'] = member;
             }
@@ -1378,10 +1196,9 @@ ORDER BY b.created_date_time DESC;
                 ? jsonDecode(infoRaw)
                 : Map<String, dynamic>.from(infoRaw ?? {});
 
-            final isFp =
-                member['is_family_planning'] == true ||
-                    member['is_family_planning'] == 1 ||
-                    member['is_family_planning']?.toString().toLowerCase() == 'yes';
+            final isFp = member['is_family_planning'] == true ||
+                member['is_family_planning'] == 1 ||
+                member['is_family_planning']?.toString().toLowerCase() == 'yes';
 
             // Determine if this is the head or spouse to pass the correct counterpart
             final bool isHead = info == head;
@@ -1425,8 +1242,7 @@ ORDER BY b.created_date_time DESC;
       final currentUser = await SecureStorageService.getCurrentUserData();
       final ashaUniqueKey = currentUser?['unique_key']?.toString() ?? '';
 
-      String whereClause =
-          'eligible_couple_state = ? AND (is_deleted IS NULL OR is_deleted = 0)';
+      String whereClause = 'eligible_couple_state = ? AND (is_deleted IS NULL OR is_deleted = 0)';
       List<dynamic> whereArgs = ['tracking_due'];
 
       if (ashaUniqueKey.isNotEmpty) {
@@ -1447,29 +1263,21 @@ ORDER BY b.created_date_time DESC;
           .whereType<String>()
           .toSet();
 
-      print(
-        '🔑 Tracking due beneficiaries count: ${trackingDueBeneficiaryKeys.length}',
-      );
+      print('🔑 Tracking due beneficiaries count: ${trackingDueBeneficiaryKeys.length}');
 
       if (trackingDueBeneficiaryKeys.isEmpty) {
         return [];
       }
 
-      final placeholders = List.filled(
-        trackingDueBeneficiaryKeys.length,
-        '?',
-      ).join(',');
+      final placeholders = List.filled(trackingDueBeneficiaryKeys.length, '?').join(',');
       final rows = await db.query(
         'beneficiaries_new',
-        where:
-        'unique_key IN ($placeholders) AND (is_deleted IS NULL OR is_deleted = 0) AND (is_migrated IS NULL OR is_migrated = 0)',
+        where: 'unique_key IN ($placeholders) AND (is_deleted IS NULL OR is_deleted = 0) AND (is_migrated IS NULL OR is_migrated = 0)',
         whereArgs: trackingDueBeneficiaryKeys.toList(),
         orderBy: 'created_date_time DESC',
       );
 
-      print(
-        '📊 Found ${rows.length} beneficiaries matching tracking_due status',
-      );
+      print('📊 Found ${rows.length} beneficiaries matching tracking_due status');
 
       final couples = <Map<String, dynamic>>[];
       final households = <String, List<Map<String, dynamic>>>{};
@@ -1492,16 +1300,11 @@ ORDER BY b.created_date_time DESC;
                 : Map<String, dynamic>.from(infoRaw ?? {});
 
             // Check if this is the head or spouse
-            final relation =
-            (info['relation_to_head'] ?? info['relation'] ?? '')
-                .toString()
-                .toLowerCase();
+            final relation = (info['relation_to_head'] ?? info['relation'] ?? '').toString().toLowerCase();
             if (relation.contains('head') || relation == 'self') {
               head = info;
               head!['_row'] = member;
-            } else if (relation == 'spouse' ||
-                relation == 'wife' ||
-                relation == 'husband') {
+            } else if (relation == 'spouse' || relation == 'wife' || relation == 'husband') {
               spouse = info;
               spouse!['_row'] = member;
             }
@@ -1517,10 +1320,9 @@ ORDER BY b.created_date_time DESC;
                 ? jsonDecode(infoRaw)
                 : Map<String, dynamic>.from(infoRaw ?? {});
 
-            final isFp =
-                member['is_family_planning'] == true ||
-                    member['is_family_planning'] == 1 ||
-                    member['is_family_planning']?.toString().toLowerCase() == 'yes';
+            final isFp = member['is_family_planning'] == true ||
+                member['is_family_planning'] == 1 ||
+                member['is_family_planning']?.toString().toLowerCase() == 'yes';
 
             // Determine if this is the head or spouse to pass the correct counterpart
             final bool isHead = info == head;
@@ -1547,12 +1349,12 @@ ORDER BY b.created_date_time DESC;
 
       print('🏁 Finished processing. Found ${couples.length} eligible couples');
       return couples;
+
     } catch (e) {
       print('❌ Error in getUpdatedEligibleCouples: $e');
       return [];
     }
   }
-
   Map<String, dynamic> _formatEligibleCoupleData(
       Map<String, dynamic> row,
       Map<String, dynamic> female,
@@ -1565,11 +1367,7 @@ ORDER BY b.created_date_time DESC;
     final uniqueKey = (row['unique_key']?.toString() ?? '');
     final createdDate = row['created_date_time']?.toString() ?? '';
 
-    final name =
-        female['memberName']?.toString() ??
-            female['headName']?.toString() ??
-            t?.na ??
-            'N/A';
+    final name = female['memberName']?.toString() ?? female['headName']?.toString() ?? t?.na ?? 'N/A';
     final dob = female['dob']?.toString() ?? '';
     final age = _calculateAge(dob);
     final gender = (female['gender']?.toString().toLowerCase() ?? 'female');
@@ -1577,12 +1375,7 @@ ORDER BY b.created_date_time DESC;
     final richId = female['RichID']?.toString() ?? t?.na ?? 'N/A';
 
     final spouseName = spouse.isNotEmpty
-        ? (spouse['memberName'] ??
-        spouse['headName'] ??
-        spouse['spouseName'] ??
-        t?.na ??
-        'N/A')
-        .toString()
+        ? (spouse['memberName'] ?? spouse['headName'] ?? spouse['spouseName'] ?? t?.na ?? 'N/A').toString()
         : (female['spouseName']?.toString() ?? t?.na ?? 'N/A');
 
     String last11(String s) => s.length > 11 ? s.substring(s.length - 11) : s;
@@ -1590,9 +1383,7 @@ ORDER BY b.created_date_time DESC;
     return {
       'hhId': last11(hhId),
       'beneficiary_ref': beneficiary_ref,
-      'RegistrationDate': _formatDate(createdDate, t).isNotEmpty
-          ? _formatDate(createdDate, t)
-          : t?.na ?? 'N/A',
+      'RegistrationDate': _formatDate(createdDate, t).isNotEmpty ? _formatDate(createdDate, t) : t?.na ?? 'N/A',
       'RegistrationType': 'General',
       'BeneficiaryID': last11(uniqueKey),
       'Name': name.isNotEmpty ? name : t?.na ?? 'N/A',
@@ -1602,10 +1393,11 @@ ORDER BY b.created_date_time DESC;
       'mobileno': mobile != 'Not Available' ? mobile : t?.na ?? 'N/A',
       'HusbandName': spouseName.isNotEmpty ? spouseName : 'Not Available',
       'spouseName': spouseName.isNotEmpty ? spouseName : t?.na ?? 'N/A',
-      'partnerName': spouseName.isNotEmpty ? spouseName : t?.na ?? 'N/A',
-      // For backward compatibility
+      'partnerName': spouseName.isNotEmpty ? spouseName : t?.na ?? 'N/A',  // For backward compatibility
       'dob': dob,
-      'status': isFamilyPlanning ? 'Protected' : 'Unprotected',
+      'status': isFamilyPlanning
+          ? 'Protected'
+          : 'Unprotected',
       'is_family_planning': isFamilyPlanning,
     };
   }
@@ -1619,8 +1411,7 @@ ORDER BY b.created_date_time DESC;
       final now = DateTime.now();
       int age = now.year - dob.year;
 
-      if (now.month < dob.month ||
-          (now.month == dob.month && now.day < dob.day)) {
+      if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
         age--;
       }
 
@@ -1662,10 +1453,7 @@ ORDER BY b.created_date_time DESC;
     return db.insert('mother_care_activities', row);
   }
 
-  Future<int> updateMotherCareActivity(
-      String beneficiaryRefKey,
-      Map<String, dynamic> data,
-      ) async {
+  Future<int> updateMotherCareActivity(String beneficiaryRefKey, Map<String, dynamic> data) async {
     final db = await _db;
     final row = <String, dynamic>{
       'mother_care_state': data['mother_care_state'],
@@ -1690,29 +1478,25 @@ ORDER BY b.created_date_time DESC;
     );
   }
 
+
+
   Future<int> getMotherCareTotalCountLocal() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(*) FROM mother_care_activities WHERE is_deleted = 0',
-      ),
-    );
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM mother_care_activities WHERE is_deleted = 0',
+    ));
     return count ?? 0;
   }
 
   Future<int> getMotherCareSyncedCountLocal() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(*) FROM mother_care_activities WHERE is_deleted = 0 AND is_synced = 1',
-      ),
-    );
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM mother_care_activities WHERE is_deleted = 0 AND is_synced = 1',
+    ));
     return count ?? 0;
   }
 
-  Future<Map<String, dynamic>?> getMotherCareActivityByBeneficiary(
-      String beneficiaryRefKey,
-      ) async {
+  Future<Map<String, dynamic>?> getMotherCareActivityByBeneficiary(String beneficiaryRefKey) async {
     try {
       final db = await _db;
       final rows = await db.query(
@@ -1755,9 +1539,7 @@ ORDER BY b.created_date_time DESC;
     return db.insert('child_care_activities', row);
   }
 
-  Future<Map<String, dynamic>?> getChildCareActivityByBeneficiary(
-      String beneficiaryRefKey,
-      ) async {
+  Future<Map<String, dynamic>?> getChildCareActivityByBeneficiary(String beneficiaryRefKey) async {
     try {
       final db = await _db;
       final rows = await db.query(
@@ -1774,10 +1556,7 @@ ORDER BY b.created_date_time DESC;
     }
   }
 
-  Future<int> updateChildCareActivity(
-      String beneficiaryRefKey,
-      Map<String, dynamic> data,
-      ) async {
+  Future<int> updateChildCareActivity(String beneficiaryRefKey, Map<String, dynamic> data) async {
     final db = await _db;
     final row = <String, dynamic>{
       'child_care_state': data['child_care_state'],
@@ -1804,21 +1583,17 @@ ORDER BY b.created_date_time DESC;
 
   Future<int> getChildCareTotalCountLocal() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(*) FROM child_care_activities WHERE is_deleted = 0',
-      ),
-    );
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM child_care_activities WHERE is_deleted = 0',
+    ));
     return count ?? 0;
   }
 
   Future<int> getChildCareSyncedCountLocal() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(*) FROM child_care_activities WHERE is_deleted = 0 AND is_synced = 1',
-      ),
-    );
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM child_care_activities WHERE is_deleted = 0 AND is_synced = 1',
+    ));
     return count ?? 0;
   }
 
@@ -1879,31 +1654,22 @@ ORDER BY b.created_date_time DESC;
   //   );
   // }
 
-  Future<int> markMotherCareActivitySyncedById(
-      int id, {
-        String? serverId,
-      }) async {
+  Future<int> markMotherCareActivitySyncedById(int id, {String? serverId}) async {
     final db = await _db;
     final values = <String, Object?>{
       'is_synced': 1,
       'modified_date_time': DateTime.now().toIso8601String(),
     };
     if (serverId != null && serverId.isNotEmpty) values['server_id'] = serverId;
-    return db.update(
-      'mother_care_activities',
-      values,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return db.update('mother_care_activities', values, where: 'id = ?', whereArgs: [id]);
   }
+
 
   Future<List<Map<String, dynamic>>> getUnsyncedMotherCareAncForms() async {
     try {
       final db = await _db;
       final ancFormsRefKey =
-          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
-              .ancDueRegistration] ??
-              '';
+          FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
       if (ancFormsRefKey.isEmpty) return [];
 
       final rows = await db.query(
@@ -1921,10 +1687,7 @@ ORDER BY b.created_date_time DESC;
     }
   }
 
-  Future<int> markMotherCareAncFormSyncedById(
-      int id, {
-        String? serverId,
-      }) async {
+  Future<int> markMotherCareAncFormSyncedById(int id, {String? serverId}) async {
     try {
       final db = await _db;
       final values = <String, Object?>{
@@ -1975,35 +1738,29 @@ ORDER BY b.created_date_time DESC;
 
   Future<int> getFollowupTotalCountLocal() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(*) FROM followup_form_data WHERE is_deleted = 0',
-      ),
-    );
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM followup_form_data WHERE is_deleted = 0',
+    ));
     return count ?? 0;
   }
 
   Future<int> getFollowupSyncedCountLocal() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(*) FROM followup_form_data WHERE is_deleted = 0 AND is_synced = 1',
-      ),
-    );
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM followup_form_data WHERE is_deleted = 0 AND is_synced = 1',
+    ));
     return count ?? 0;
   }
 
   Future<int> getHouseholdCount() async {
     final db = await _db;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery('SELECT COUNT(*) FROM households WHERE is_deleted = 0'),
-    );
+    final count = Sqflite.firstIntValue(await db.rawQuery(
+      'SELECT COUNT(*) FROM households WHERE is_deleted = 0',
+    ));
     return count ?? 0;
   }
 
-  Future<List<Map<String, dynamic>>> getFollowupFormsWithCaseClosure(
-      String formType,
-      ) async {
+  Future<List<Map<String, dynamic>>> getFollowupFormsWithCaseClosure(String formType) async {
     final db = await _db;
 
     final forms = await db.query(
@@ -2023,25 +1780,22 @@ ORDER BY b.created_date_time DESC;
         final formData = jsonDecode(formJson);
 
         if (formData is Map && formData['form_data'] is Map) {
-          final formDataMap = Map<String, dynamic>.from(
-            formData['form_data'] as Map,
-          );
+          final formDataMap = Map<String, dynamic>.from(formData['form_data'] as Map);
           final caseClosure = formDataMap['case_closure'] is Map
               ? Map<String, dynamic>.from(formDataMap['case_closure'] as Map)
               : null;
 
-          if (caseClosure != null && caseClosure['is_case_closure'] == true) {
+          if (caseClosure != null &&
+              caseClosure['is_case_closure'] == true) {
+
             final childDetails = formDataMap['child_details'] is Map
                 ? Map<String, dynamic>.from(formDataMap['child_details'] as Map)
                 : formDataMap;
             final registrationData = formDataMap['registration_data'] is Map
-                ? Map<String, dynamic>.from(
-              formDataMap['registration_data'] as Map,
-            )
+                ? Map<String, dynamic>.from(formDataMap['registration_data'] as Map)
                 : {};
 
-            String beneficiaryRefKey =
-                form['beneficiary_ref_key']?.toString() ?? '';
+            String beneficiaryRefKey = form['beneficiary_ref_key']?.toString() ?? '';
             Map<String, dynamic> beneficiaryData = {};
 
             if (beneficiaryRefKey.isNotEmpty) {
@@ -2059,9 +1813,7 @@ ORDER BY b.created_date_time DESC;
                   if (beneficiaryData['registration_type_followup'] is String) {
                     try {
                       beneficiaryData['registration_type_followup'] =
-                          jsonDecode(
-                            beneficiaryData['registration_type_followup'],
-                          );
+                          jsonDecode(beneficiaryData['registration_type_followup']);
                     } catch (e) {
                       print('Error parsing registration_type_followup: $e');
                     }
@@ -2075,14 +1827,8 @@ ORDER BY b.created_date_time DESC;
               }
             }
 
-            final beneficiaryId =
-                formDataMap['beneficiary_id'] ??
-                    formDataMap['beneficiary_ref_key'] ??
-                    '';
-            final householdId =
-                formDataMap['household_id'] ??
-                    formDataMap['household_ref_key'] ??
-                    '';
+            final beneficiaryId = formDataMap['beneficiary_id'] ?? formDataMap['beneficiary_ref_key'] ?? '';
+            final householdId = formDataMap['household_id'] ?? formDataMap['household_ref_key'] ?? '';
 
             print(' Extracted from formDataMap:');
             print('  beneficiary_id: $beneficiaryId');
@@ -2096,39 +1842,21 @@ ORDER BY b.created_date_time DESC;
               'child_details': childDetails,
               'case_closure': caseClosure,
               'beneficiary_data': beneficiaryData,
-              'name':
-              childDetails['name'] ??
-                  '${childDetails['first_name'] ?? ''} ${childDetails['last_name'] ?? ''}'
-                      .trim(),
+              'name': childDetails['name'] ??
+                  '${childDetails['first_name'] ?? ''} ${childDetails['last_name'] ?? ''}'.trim(),
               'date_of_death': caseClosure['date_of_death'],
-              'cause_of_death':
-              caseClosure['probable_cause_of_death'] ?? 'Not specified',
+              'cause_of_death': caseClosure['probable_cause_of_death'] ?? 'Not specified',
               'death_place': caseClosure['death_place'] ?? 'Not specified',
               'reason': caseClosure['reason_of_death'] ?? 'Not specified',
               'beneficiary_id': beneficiaryId,
               'rch_id': formDataMap['rch_id'] ?? '',
               'household_id': householdId,
-              'mobile_number':
-              formDataMap['mobile_number'] ??
-                  formDataMap['contact_number'] ??
-                  '',
-              'father_name':
-              childDetails['father_name'] ??
-                  formDataMap['father_name'] ??
-                  '',
-              'mother_name':
-              childDetails['mother_name'] ??
-                  formDataMap['mother_name'] ??
-                  '',
-              'age':
-              childDetails['age']?.toString() ??
-                  formDataMap['age']?.toString() ??
-                  '',
+              'mobile_number': formDataMap['mobile_number'] ?? formDataMap['contact_number'] ?? '',
+              'father_name': childDetails['father_name'] ?? formDataMap['father_name'] ?? '',
+              'mother_name': childDetails['mother_name'] ?? formDataMap['mother_name'] ?? '',
+              'age': childDetails['age']?.toString() ?? formDataMap['age']?.toString() ?? '',
               'gender': childDetails['gender'] ?? formDataMap['gender'] ?? '',
-              'registration_date':
-              registrationData['registration_date'] ??
-                  formDataMap['registration_date'] ??
-                  '',
+              'registration_date': registrationData['registration_date'] ?? formDataMap['registration_date'] ?? '',
             });
           }
         }
@@ -2157,29 +1885,23 @@ ORDER BY b.created_date_time DESC;
 
     if (ashaUniqueKey.isEmpty) return [];
 
-    final beneficiaries = await db.rawQuery(
-      '''
-  SELECT DISTINCT B.*
-  FROM beneficiaries_new B
-  INNER JOIN mother_care_activities M
-    ON M.beneficiary_ref_key = B.unique_key
-  WHERE B.is_deleted = 0
-    AND B.is_migrated = 0
-    AND B.current_user_key = ?
-    AND M.is_deleted = 0
-    AND M.current_user_key = ?
-    AND M.mother_care_state = 'anc_due'
-    AND M.created_date_time = (
-      SELECT MAX(created_date_time)
-      FROM mother_care_activities
-      WHERE beneficiary_ref_key = B.unique_key
-        AND is_deleted = 0
-    )
-  ORDER BY datetime(B.created_date_time) DESC
-  ''',
-      [ashaUniqueKey, ashaUniqueKey],
-    );
-
+    final beneficiaries = await db.rawQuery('''
+      SELECT DISTINCT B.*
+      FROM beneficiaries_new B
+      INNER JOIN mother_care_activities M ON M.beneficiary_ref_key = B.unique_key
+      WHERE B.is_deleted = 0
+        AND B.is_migrated = 0
+        AND B.current_user_key = ?
+        AND M.is_deleted = 0
+        AND M.current_user_key = ?
+        AND M.mother_care_state = 'anc_due'
+        AND M.created_date_time = (
+          SELECT MAX(created_date_time)
+          FROM mother_care_activities
+          WHERE beneficiary_ref_key = B.unique_key
+            AND is_deleted = 0
+        )
+    ''', [ashaUniqueKey, ashaUniqueKey]);
 
     final List<Map<String, dynamic>> result = [];
     final Set<String> processedBeneficiaries = {};
@@ -2191,11 +1913,11 @@ ORDER BY b.created_date_time DESC;
 
         final forms = await db.query(
           FollowupFormDataTable.table,
-          where:
-          'is_deleted = 0 AND forms_ref_key = ? AND beneficiary_ref_key = ?',
+          where: 'is_deleted = 0 AND forms_ref_key = ? AND beneficiary_ref_key = ?',
           whereArgs: [
-            FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable
-                .ancDueRegistration],
+            FollowupFormDataTable.formUniqueKeys[
+            FollowupFormDataTable.ancDueRegistration
+            ],
             beneficiaryRefKey,
           ],
           orderBy: 'created_date_time DESC',
@@ -2215,18 +1937,16 @@ ORDER BY b.created_date_time DESC;
         if (data is! Map<String, dynamic>) continue;
 
         final hr = data['high_risk'] ?? data['is_high_risk'];
-        final bool isHighRisk =
-            hr == true ||
-                hr == 1 ||
-                (hr is String && ['true', 'yes', '1'].contains(hr.toLowerCase()));
+        final bool isHighRisk = hr == true ||
+            hr == 1 ||
+            (hr is String && ['true', 'yes', '1'].contains(hr.toLowerCase()));
 
         if (!isHighRisk) continue;
 
         final beneficiaryData = Map<String, dynamic>.from(beneficiary);
         if (beneficiaryData['beneficiary_info'] is String) {
-          beneficiaryData['beneficiary_info'] = jsonDecode(
-            beneficiaryData['beneficiary_info'],
-          );
+          beneficiaryData['beneficiary_info'] =
+              jsonDecode(beneficiaryData['beneficiary_info']);
         }
 
         if (beneficiary.isEmpty) continue;
@@ -2237,28 +1957,25 @@ ORDER BY b.created_date_time DESC;
         Map<String, dynamic>? spouseData;
         final spouseKey = beneficiaryData['spouse_key'];
         if (spouseKey != null) {
-          final spouse = await db.rawQuery(
-            '''
-            SELECT B.*
-            FROM beneficiaries_new B
-            WHERE B.unique_key = ?
-              AND B.is_deleted = 0
-              AND B.is_migrated = 0
-              AND B.current_user_key = ?
-            LIMIT 1
-          ''',
-            [spouseKey, ashaUniqueKey],
-          );
+          final spouse = await db.rawQuery('''
+          SELECT B.*
+          FROM beneficiaries_new B
+          WHERE B.unique_key = ?
+            AND B.is_deleted = 0
+            AND B.is_migrated = 0
+            AND B.current_user_key = ?
+          LIMIT 1
+        ''', [spouseKey, ashaUniqueKey]);
 
           if (spouse.isNotEmpty) {
             spouseData = Map<String, dynamic>.from(spouse.first);
             if (spouseData['beneficiary_info'] is String) {
-              spouseData['beneficiary_info'] = jsonDecode(
-                spouseData['beneficiary_info'],
-              );
+              spouseData['beneficiary_info'] =
+                  jsonDecode(spouseData['beneficiary_info']);
             }
           }
         }
+
 
         result.add({
           'id': form['id'],
@@ -2284,8 +2001,7 @@ ORDER BY b.created_date_time DESC;
 
     final forms = await db.query(
       'followup_form_data',
-      where:
-      "is_deleted = 0 AND forms_ref_key = 'bt7gs9rl1a5d26mz' AND (form_json LIKE '%\"is_abortion\"%' OR form_json LIKE '%\"has_abortion_complication\"%')",
+      where: "is_deleted = 0 AND forms_ref_key = 'bt7gs9rl1a5d26mz'  AND form_json LIKE '%\"is_abortion\"%'",
     );
 
     final List<Map<String, dynamic>> result = [];
@@ -2298,40 +2014,13 @@ ORDER BY b.created_date_time DESC;
         final decoded = safeJsonDecode(formJson);
         if (decoded is! Map<String, dynamic>) continue;
 
-        Map<String, dynamic>? formDataMap;
+        // Structure: {"anc_form": {"is_abortion": "yes", ...}}
         final ancForm = decoded['anc_form'];
-        if (ancForm is Map<String, dynamic>) {
-          formDataMap = Map<String, dynamic>.from(ancForm);
-        } else {
-          final nestedFormData = decoded['form_data'];
-          if (nestedFormData is Map<String, dynamic>) {
-            formDataMap = Map<String, dynamic>.from(nestedFormData);
-          } else {
-            formDataMap = Map<String, dynamic>.from(decoded);
-          }
-        }
+        if (ancForm is! Map<String, dynamic>) continue;
 
-        final isAbortion = formDataMap['is_abortion']?.toString().toLowerCase();
-        final hasComplication =
-        formDataMap['has_abortion_complication']?.toString().toLowerCase();
-
-        final bool isAbortionCase =
-            isAbortion == 'yes' || isAbortion == 'true' || isAbortion == '1';
-        final bool hasComplicationCase = hasComplication == 'yes' ||
-            hasComplication == 'true' ||
-            hasComplication == '1';
-
-        // Must match at least one of the "positive" abortion flags
-        if (!isAbortionCase && !hasComplicationCase) continue;
-
-        final abortionDateRaw =
-        (formDataMap['date_of_abortion'] ?? formDataMap['abortion_date'])
-            ?.toString()
-            .trim();
-        if (abortionDateRaw == null ||
-            abortionDateRaw.isEmpty ||
-            abortionDateRaw == ',' ||
-            abortionDateRaw == 'null') continue;
+        final isAbortion = ancForm['is_abortion']?.toString().toLowerCase();
+        // Check for 'yes', 'true', '1'
+        if (isAbortion != 'yes' && isAbortion != 'true' && isAbortion != '1') continue;
 
         final beneficiaryRefKey = form['beneficiary_ref_key']?.toString();
         if (beneficiaryRefKey == null) continue;
@@ -2348,17 +2037,16 @@ ORDER BY b.created_date_time DESC;
         if (benRows.isNotEmpty) {
           beneficiaryData = Map<String, dynamic>.from(benRows.first);
           if (beneficiaryData['beneficiary_info'] is String) {
-            beneficiaryData['beneficiary_info'] = safeJsonDecode(
-              beneficiaryData['beneficiary_info'],
-            );
+            beneficiaryData['beneficiary_info'] = safeJsonDecode(beneficiaryData['beneficiary_info']);
           }
         }
 
         final resultMap = Map<String, dynamic>.from(form);
-        resultMap['form_data'] = formDataMap;
+        resultMap['form_data'] = ancForm;
         resultMap['beneficiary_data'] = beneficiaryData;
 
         result.add(resultMap);
+
       } catch (e) {
         print('Error processing abortion form: $e');
       }
@@ -2381,12 +2069,10 @@ ORDER BY b.created_date_time DESC;
         whereArgs.add(ashaUniqueKey);
       }
 
-      final rows = await db.query(
-        'households',
-        where: where,
-        whereArgs: whereArgs,
-        orderBy: 'id DESC',
-      );
+      final rows = await db.query('households',
+          where: where,
+          whereArgs: whereArgs,
+          orderBy: 'created_date_time DESC');
 
       final result = rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
@@ -2401,6 +2087,7 @@ ORDER BY b.created_date_time DESC;
         return mapped;
       }).toList();
       return result;
+
     } catch (e, stackTrace) {
       print('Error getting households: $e');
       print('Stack trace: $stackTrace');
@@ -2422,10 +2109,11 @@ ORDER BY b.created_date_time DESC;
         String relationToHead =
         (info['relation_to_head']?.toString().toLowerCase().trim() ?? '');
 
-        householdMap.putIfAbsent(
-          hhId,
-              () => {'hasHead': false, 'hasSpouse': false, 'childrenCount': 0},
-        );
+        householdMap.putIfAbsent(hhId, () => {
+          'hasHead': false,
+          'hasSpouse': false,
+          'childrenCount': 0,
+        });
 
         final bucket = householdMap[hhId]!;
 
@@ -2453,37 +2141,7 @@ ORDER BY b.created_date_time DESC;
     }
   }
 
-  Future<List<Map<String, dynamic>>> getBeneficiariesByHouseholdFamily(
-      String householdId,
-      String beneficiary_ref_key,
-      ) async {
-    try {
-      final db = await _db;
-      final rows = await db.query(
-        'beneficiaries_new',
-        where: 'household_ref_key = ? AND is_deleted = ? And unique_key = ?',
-        whereArgs: [householdId, 0, beneficiary_ref_key],
-      );
-
-      return rows.map((row) {
-        final mapped = Map<String, dynamic>.from(row);
-        mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
-        mapped['geo_location'] = safeJsonDecode(mapped['geo_location']);
-        mapped['death_details'] = safeJsonDecode(mapped['death_details']);
-        mapped['device_details'] = safeJsonDecode(mapped['device_details']);
-        mapped['app_details'] = safeJsonDecode(mapped['app_details']);
-        mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
-        return mapped;
-      }).toList();
-    } catch (e) {
-      print('Error getting beneficiaries by household: $e');
-      rethrow;
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> getBeneficiariesByHousehold(
-      String householdId,
-      ) async {
+  Future<List<Map<String, dynamic>>> getBeneficiariesByHousehold(String householdId) async {
     try {
       final db = await _db;
       final rows = await db.query(
@@ -2491,6 +2149,8 @@ ORDER BY b.created_date_time DESC;
         where: 'household_ref_key = ? AND is_deleted = ?',
         whereArgs: [householdId, 0],
       );
+
+
 
       return rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
@@ -2519,10 +2179,7 @@ ORDER BY b.created_date_time DESC;
     }
 
     try {
-      final totalCount =
-          Sqflite.firstIntValue(
-            await db.rawQuery(
-              '''
+      final totalCount = Sqflite.firstIntValue(await db.rawQuery('''
       SELECT COUNT(DISTINCT b.unique_key)
       FROM beneficiaries_new b
       INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
@@ -2532,17 +2189,10 @@ ORDER BY b.created_date_time DESC;
         AND e.is_deleted = 0
         AND e.current_user_key = ?
         AND (b.beneficiary_info IS NULL OR b.beneficiary_info NOT LIKE '%"gender":"male"%')
-    ''',
-              [currentUserKey],
-            ),
-          ) ??
-              0;
+    ''', [currentUserKey])) ?? 0;
 
       // Get tracking due count
-      final trackingDueCount =
-          Sqflite.firstIntValue(
-            await db.rawQuery(
-              '''
+      final trackingDueCount = Sqflite.firstIntValue(await db.rawQuery('''
       SELECT COUNT(DISTINCT b.unique_key)
       FROM beneficiaries_new b
       INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
@@ -2552,13 +2202,12 @@ ORDER BY b.created_date_time DESC;
         AND e.is_deleted = 0
         AND e.current_user_key = ?
         AND (b.beneficiary_info IS NULL OR b.beneficiary_info NOT LIKE '%"gender":"male"%')
-    ''',
-              [currentUserKey],
-            ),
-          ) ??
-              0;
+    ''', [currentUserKey])) ?? 0;
 
-      return {'total': totalCount, 'tracking_due': trackingDueCount};
+      return {
+        'total': totalCount,
+        'tracking_due': trackingDueCount,
+      };
     } catch (e) {
       print('Error getting eligible couple counts: $e');
       return {'total': 0, 'tracking_due': 0};
@@ -2590,6 +2239,7 @@ ORDER BY b.created_date_time DESC;
       if (row['app_details'] is Map) {
         row['app_details'] = jsonEncode(row['app_details']);
       }
+
 
       row['modified_date_time'] = DateTime.now().toIso8601String();
       // Any local update should mark record as needing re-sync
@@ -2656,9 +2306,7 @@ ORDER BY b.created_date_time DESC;
   //   }
   // }
 
-  Future<List<Map<String, dynamic>>> getAllBeneficiaries({
-    int? isMigrated,
-  }) async {
+  Future<List<Map<String, dynamic>>> getAllBeneficiaries({int? isMigrated}) async {
     try {
       final db = await _db;
       final currentUserData = await SecureStorageService.getCurrentUserData();
@@ -2666,10 +2314,8 @@ ORDER BY b.created_date_time DESC;
 
       String? where;
       List<Object?>? whereArgs;
-      if (isMigrated != null &&
-          ashaUniqueKey != null &&
-          ashaUniqueKey.isNotEmpty) {
-        where = 'is_migrated = ? AND current_user_key = ? AND is_deleted = ?';
+      if (isMigrated != null && ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
+        where = 'is_migrated = ? AND current_user_key = ? AND is_deleted = ?' ;
         whereArgs = [isMigrated, ashaUniqueKey, 0];
       } else if (isMigrated != null) {
         where = 'is_migrated = ?';
@@ -2690,7 +2336,7 @@ ORDER BY b.created_date_time DESC;
         columns: ['DISTINCT unique_key', '*'],
         where: where,
         whereArgs: whereArgs,
-        orderBy: 'id DESC',
+        orderBy: 'created_date_time DESC',
       );
 
       final result = rows.map((row) {
@@ -2758,10 +2404,8 @@ ORDER BY b.created_date_time DESC;
     }
   }
 
-  Future<int> markBeneficiarySyncedByUniqueKey({
-    required String uniqueKey,
-    String? serverId,
-  }) async {
+
+  Future<int> markBeneficiarySyncedByUniqueKey({required String uniqueKey, String? serverId}) async {
     try {
       final db = await _db;
       final values = <String, Object?>{
@@ -2804,7 +2448,10 @@ ORDER BY b.created_date_time DESC;
         limit: 5,
       );
 
-      return {'counts': countResult.first, 'sample_records': sampleRecords};
+      return {
+        'counts': countResult.first,
+        'sample_records': sampleRecords,
+      };
     } catch (e) {
       return {'error': e.toString()};
     }
@@ -2820,48 +2467,40 @@ ORDER BY b.created_date_time DESC;
 
       if (ashaUniqueKey.isEmpty) return [];
 
-      final rows = await db.rawQuery(
-        '''
-          SELECT *
-          FROM ${BeneficiariesTable.table}
-          WHERE id IN (
-            SELECT MAX(id)
-            FROM ${BeneficiariesTable.table}
-            WHERE is_death = 1
-              AND is_deleted = 0
-              AND current_user_key = ?
-            GROUP BY unique_key
-          )
-          ORDER BY id DESC
-          ''',
-        [ashaUniqueKey],
+      final rows = await db.query(
+        BeneficiariesTable.table,
+        where: '''
+        is_death = 1
+        AND is_deleted = 0
+        AND current_user_key = ?
+      ''',
+        whereArgs: [ashaUniqueKey],
+        orderBy: 'created_date_time DESC',
       );
 
       print('✅ [getDeathRecords] Found ${rows.length} death records');
 
-      return rows
-          .map((row) {
+      return rows.map((row) {
         try {
           final mapped = Map<String, dynamic>.from(row);
 
-          mapped['beneficiary_info'] = safeJsonDecode(
-            mapped['beneficiary_info'],
-          );
-          mapped['death_details'] = safeJsonDecode(mapped['death_details']);
-          mapped['device_details'] = safeJsonDecode(
-            mapped['device_details'],
-          );
-          mapped['app_details'] = safeJsonDecode(mapped['app_details']);
-          mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
+          mapped['beneficiary_info'] =
+              safeJsonDecode(mapped['beneficiary_info']);
+          mapped['death_details'] =
+              safeJsonDecode(mapped['death_details']);
+          mapped['device_details'] =
+              safeJsonDecode(mapped['device_details']);
+          mapped['app_details'] =
+              safeJsonDecode(mapped['app_details']);
+          mapped['parent_user'] =
+              safeJsonDecode(mapped['parent_user']);
 
           return mapped;
         } catch (e) {
           print('❌ Error parsing record $row: $e');
           return <String, dynamic>{};
         }
-      })
-          .where((map) => map.isNotEmpty)
-          .toList();
+      }).where((map) => map.isNotEmpty).toList();
     } catch (e, stackTrace) {
       print('❌ [getDeathRecords] Error: $e');
       print('Stack trace: $stackTrace');
@@ -2869,12 +2508,9 @@ ORDER BY b.created_date_time DESC;
     }
   }
 
-  Future<Map<String, String?>?> getHeadReligionAndCategory(
-      String householdRefKey,
-      ) async {
-    print(
-      '🔍 [getHeadReligionAndCategory] Fetching religion/category for household: $householdRefKey',
-    );
+
+  Future<Map<String, String?>?> getHeadReligionAndCategory(String householdRefKey) async {
+    print('🔍 [getHeadReligionAndCategory] Fetching religion/category for household: $householdRefKey');
     try {
       final db = await _db;
 
@@ -2885,9 +2521,7 @@ ORDER BY b.created_date_time DESC;
       );
 
       if (beneficiaries.isEmpty) {
-        print(
-          '❌ [getHeadReligionAndCategory] No beneficiaries found for household: $householdRefKey',
-        );
+        print('❌ [getHeadReligionAndCategory] No beneficiaries found for household: $householdRefKey');
         return null;
       }
 
@@ -2915,9 +2549,8 @@ ORDER BY b.created_date_time DESC;
                 (category != null && category.isNotEmpty) ||
                 (otherReligion != null && otherReligion.isNotEmpty) ||
                 (otherCategory != null && otherCategory.isNotEmpty)) {
-              print(
-                '✅ [getHeadReligionAndCategory] Found head data via relation',
-              );
+
+              print('✅ [getHeadReligionAndCategory] Found head data via relation');
               return {
                 'religion': religion,
                 'other_religion': otherReligion,
@@ -2927,9 +2560,7 @@ ORDER BY b.created_date_time DESC;
             }
           }
         } catch (e) {
-          print(
-            '❌ [getHeadReligionAndCategory] Error parsing beneficiary info: $e',
-          );
+          print('❌ [getHeadReligionAndCategory] Error parsing beneficiary info: $e');
         }
       }
 
@@ -2942,6 +2573,7 @@ ORDER BY b.created_date_time DESC;
           final infoMap = jsonDecode(beneficiaryInfo) as Map<String, dynamic>?;
           if (infoMap == null) continue;
 
+
           if (infoMap['headName'] != null) {
             final religion = infoMap['religion']?.toString();
             final otherReligion = infoMap['other_religion']?.toString();
@@ -2952,9 +2584,8 @@ ORDER BY b.created_date_time DESC;
                 (category != null && category.isNotEmpty) ||
                 (otherReligion != null && otherReligion.isNotEmpty) ||
                 (otherCategory != null && otherCategory.isNotEmpty)) {
-              print(
-                '✅ [getHeadReligionAndCategory] Found head data via headName',
-              );
+
+              print('✅ [getHeadReligionAndCategory] Found head data via headName');
               return {
                 'religion': religion,
                 'other_religion': otherReligion,
@@ -2964,15 +2595,11 @@ ORDER BY b.created_date_time DESC;
             }
           }
         } catch (e) {
-          print(
-            '❌ [getHeadReligionAndCategory] Error parsing beneficiary info (fallback): $e',
-          );
+          print('❌ [getHeadReligionAndCategory] Error parsing beneficiary info (fallback): $e');
         }
       }
 
-      print(
-        'ℹ️ [getHeadReligionAndCategory] No religion/category found in any beneficiary',
-      );
+      print('ℹ️ [getHeadReligionAndCategory] No religion/category found in any beneficiary');
       return null;
     } catch (e) {
       print('❌ [getHeadReligionAndCategory] Error: $e');
@@ -2981,9 +2608,7 @@ ORDER BY b.created_date_time DESC;
   }
 
   Future<String?> getHeadMobileNumber(String householdRefKey) async {
-    print(
-      '🔍 [getHeadMobileNumber] Fetching head mobile for household: $householdRefKey',
-    );
+    print('🔍 [getHeadMobileNumber] Fetching head mobile for household: $householdRefKey');
     try {
       final db = await _db;
 
@@ -2994,9 +2619,7 @@ ORDER BY b.created_date_time DESC;
       );
 
       if (beneficiaries.isEmpty) {
-        print(
-          '❌ [getHeadMobileNumber] No beneficiaries found for household: $householdRefKey',
-        );
+        print('❌ [getHeadMobileNumber] No beneficiaries found for household: $householdRefKey');
         return null;
       }
 
@@ -3021,6 +2644,7 @@ ORDER BY b.created_date_time DESC;
         }
       }
 
+
       for (final beneficiary in beneficiaries) {
         final beneficiaryInfo = beneficiary['beneficiary_info'] as String?;
         if (beneficiaryInfo == null || beneficiaryInfo.isEmpty) continue;
@@ -3032,22 +2656,16 @@ ORDER BY b.created_date_time DESC;
           if (infoMap['headName'] != null) {
             final mobile = infoMap['mobileNo']?.toString();
             if (mobile != null && mobile.isNotEmpty) {
-              print(
-                '✅ [getHeadMobileNumber] Found head mobile by headName: $mobile',
-              );
+              print('✅ [getHeadMobileNumber] Found head mobile by headName: $mobile');
               return mobile;
             }
           }
         } catch (e) {
-          print(
-            '❌ [getHeadMobileNumber] Error parsing beneficiary info (fallback): $e',
-          );
+          print('❌ [getHeadMobileNumber] Error parsing beneficiary info (fallback): $e');
         }
       }
 
-      print(
-        'ℹ️ [getHeadMobileNumber] No head mobile number found in any beneficiary',
-      );
+      print('ℹ️ [getHeadMobileNumber] No head mobile number found in any beneficiary');
       return null;
     } catch (e) {
       print('❌ [getHeadMobileNumber] Error: $e');
@@ -3056,9 +2674,7 @@ ORDER BY b.created_date_time DESC;
   }
 
   Future<String?> getSpouseMobileNumber(String householdRefKey) async {
-    print(
-      '🔍 [getSpouseMobileNumber] Fetching spouse mobile for household: $householdRefKey',
-    );
+    print('🔍 [getSpouseMobileNumber] Fetching spouse mobile for household: $householdRefKey');
     try {
       final db = await _db;
 
@@ -3069,9 +2685,7 @@ ORDER BY b.created_date_time DESC;
       );
 
       if (beneficiaries.isEmpty) {
-        print(
-          '❌ [getSpouseMobileNumber] No beneficiaries found for household: $householdRefKey',
-        );
+        print('❌ [getSpouseMobileNumber] No beneficiaries found for household: $householdRefKey');
         return null;
       }
 
@@ -3089,15 +2703,11 @@ ORDER BY b.created_date_time DESC;
           final mobile = infoMap['mobileNo']?.toString();
 
           // Check if this is a spouse/mother with self-owned mobile
-          if ((relation == 'mother' ||
-              relation == 'spouse' ||
-              relation == 'wife') &&
+          if ((relation == 'mother' || relation == 'spouse' || relation == 'wife') &&
               mobileOwner == 'self' &&
               mobile != null &&
               mobile.isNotEmpty) {
-            print(
-              '✅ [getSpouseMobileNumber] Found spouse with self-owned mobile: $mobile',
-            );
+            print('✅ [getSpouseMobileNumber] Found spouse with self-owned mobile: $mobile');
             return mobile;
           }
         } catch (e) {
@@ -3116,18 +2726,14 @@ ORDER BY b.created_date_time DESC;
           final relation = infoMap['relation']?.toString().toLowerCase();
           final mobile = infoMap['mobileNo']?.toString();
 
-          if ((relation == 'mother' ||
-              relation == 'spouse' ||
-              relation == 'wife') &&
+          if ((relation == 'mother' || relation == 'spouse' || relation == 'wife') &&
               mobile != null &&
               mobile.isNotEmpty) {
             print('ℹ️ [getSpouseMobileNumber] Found spouse mobile: $mobile');
             return mobile;
           }
         } catch (e) {
-          print(
-            '❌ [getSpouseMobileNumber] Error parsing beneficiary info (fallback): $e',
-          );
+          print('❌ [getSpouseMobileNumber] Error parsing beneficiary info (fallback): $e');
         }
       }
 
@@ -3160,25 +2766,18 @@ ORDER BY b.created_date_time DESC;
         BeneficiariesTable.table,
         where: 'is_migrated = 1 AND is_deleted = 0 AND current_user_key = ?',
         whereArgs: [ashaUniqueKey],
-        orderBy: 'id DESC',
+        orderBy: 'created_date_time DESC',
       );
 
-      print(
-        '✅ [getMigratedRecords] Found ${rows.length} migrated records for user $ashaUniqueKey',
-      );
+      print('✅ [getMigratedRecords] Found ${rows.length} migrated records for user $ashaUniqueKey');
 
-      return rows
-          .map((row) {
+      return rows.map((row) {
         try {
           final mapped = Map<String, dynamic>.from(row);
           // Parse JSON fields
-          mapped['beneficiary_info'] = safeJsonDecode(
-            mapped['beneficiary_info'],
-          );
+          mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
           mapped['death_details'] = safeJsonDecode(mapped['death_details']);
-          mapped['device_details'] = safeJsonDecode(
-            mapped['device_details'],
-          );
+          mapped['device_details'] = safeJsonDecode(mapped['device_details']);
           mapped['app_details'] = safeJsonDecode(mapped['app_details']);
           mapped['parent_user'] = safeJsonDecode(mapped['parent_user']);
           return mapped;
@@ -3186,9 +2785,7 @@ ORDER BY b.created_date_time DESC;
           print('❌ Error parsing record $row: $e');
           return <String, dynamic>{}; // Return empty map on parse error
         }
-      })
-          .where((map) => map.isNotEmpty)
-          .toList(); // Filter out any empty maps from failed parses
+      }).where((map) => map.isNotEmpty).toList(); // Filter out any empty maps from failed parses
     } catch (e, stackTrace) {
       print('❌ [getMigratedRecords] Error: $e');
       print('Stack trace: $stackTrace');
@@ -3199,12 +2796,10 @@ ORDER BY b.created_date_time DESC;
   Future<List<Map<String, dynamic>>> getANCList() async {
     try {
       final db = await _db;
-      final rows = await db.query(
-        'beneficiaries_new',
-        where: 'is_deleted = ?',
-        whereArgs: [0],
-        orderBy: 'created_date_time DESC',
-      );
+      final rows = await db.query('beneficiaries_new',
+          where: 'is_deleted = ?',
+          whereArgs: [0],
+          orderBy: 'created_date_time DESC');
       final result = rows.map((row) {
         final mapped = Map<String, dynamic>.from(row);
         mapped['beneficiary_info'] = safeJsonDecode(mapped['beneficiary_info']);
@@ -3225,8 +2820,6 @@ ORDER BY b.created_date_time DESC;
 
   Future<String> getLatestHouseholdServerId() async {
     try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       final db = await _db;
       final rows = await db.query(
         'households',
@@ -3237,10 +2830,8 @@ ORDER BY b.created_date_time DESC;
           'id',
           'is_deleted',
         ],
-        where:
-        "server_id IS NOT NULL AND TRIM(server_id) != '' AND current_user_key = ?",
-        whereArgs: [ashaUniqueKey],
-        orderBy: "id DESC",
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "created_date_time DESC",
         limit: 1,
       );
 
@@ -3274,23 +2865,19 @@ ORDER BY b.created_date_time DESC;
           beneficiaryMap['current_user_key'].toString().trim().isEmpty) {
         beneficiaryMap['current_user_key'] = ashaUniqueKey;
       }
-      if (!beneficiaryMap.containsKey('facility_id') ||
-          (beneficiaryMap['facility_id'] == null)) {
+      if (!beneficiaryMap.containsKey('facility_id') || (beneficiaryMap['facility_id'] == null)) {
         beneficiaryMap['facility_id'] = 0;
       }
-      if (!beneficiaryMap.containsKey('parent_user') ||
-          (beneficiaryMap['parent_user'] == null)) {
+      if (!beneficiaryMap.containsKey('parent_user') || (beneficiaryMap['parent_user'] == null)) {
         beneficiaryMap['parent_user'] = jsonEncode({});
       }
-      if (!beneficiaryMap.containsKey('app_details') ||
-          (beneficiaryMap['app_details'] == null)) {
+      if (!beneficiaryMap.containsKey('app_details') || (beneficiaryMap['app_details'] == null)) {
         beneficiaryMap['app_details'] = jsonEncode({
           'app_name': 'BHAVYAmASHA',
           'version': '1.0.0',
         });
       }
-      if (!beneficiaryMap.containsKey('device_details') ||
-          (beneficiaryMap['device_details'] == null)) {
+      if (!beneficiaryMap.containsKey('device_details') || (beneficiaryMap['device_details'] == null)) {
         beneficiaryMap['device_details'] = jsonEncode({
           'platform': 'mobile',
           'os': 'android',
@@ -3322,21 +2909,11 @@ ORDER BY b.created_date_time DESC;
           if (savedRows.isNotEmpty) {
             final row = Map<String, dynamic>.from(savedRows.first);
             try {
-              row['beneficiary_info'] = safeJsonDecode(
-                row['beneficiary_info']?.toString(),
-              );
-              row['death_details'] = safeJsonDecode(
-                row['death_details']?.toString(),
-              );
-              row['device_details'] = safeJsonDecode(
-                row['device_details']?.toString(),
-              );
-              row['app_details'] = safeJsonDecode(
-                row['app_details']?.toString(),
-              );
-              row['parent_user'] = safeJsonDecode(
-                row['parent_user']?.toString(),
-              );
+              row['beneficiary_info'] = safeJsonDecode(row['beneficiary_info']?.toString());
+              row['death_details'] = safeJsonDecode(row['death_details']?.toString());
+              row['device_details'] = safeJsonDecode(row['device_details']?.toString());
+              row['app_details'] = safeJsonDecode(row['app_details']?.toString());
+              row['parent_user'] = safeJsonDecode(row['parent_user']?.toString());
             } catch (_) {}
             print('Saved beneficiary row (update): ${jsonEncode(row)}');
           }
@@ -3359,21 +2936,11 @@ ORDER BY b.created_date_time DESC;
           if (savedRows.isNotEmpty) {
             final row = Map<String, dynamic>.from(savedRows.first);
             try {
-              row['beneficiary_info'] = safeJsonDecode(
-                row['beneficiary_info']?.toString(),
-              );
-              row['death_details'] = safeJsonDecode(
-                row['death_details']?.toString(),
-              );
-              row['device_details'] = safeJsonDecode(
-                row['device_details']?.toString(),
-              );
-              row['app_details'] = safeJsonDecode(
-                row['app_details']?.toString(),
-              );
-              row['parent_user'] = safeJsonDecode(
-                row['parent_user']?.toString(),
-              );
+              row['beneficiary_info'] = safeJsonDecode(row['beneficiary_info']?.toString());
+              row['death_details'] = safeJsonDecode(row['death_details']?.toString());
+              row['device_details'] = safeJsonDecode(row['device_details']?.toString());
+              row['app_details'] = safeJsonDecode(row['app_details']?.toString());
+              row['parent_user'] = safeJsonDecode(row['parent_user']?.toString());
             } catch (_) {}
             print('Saved beneficiary row (insert): ${jsonEncode(row)}');
           }
@@ -3386,9 +2953,7 @@ ORDER BY b.created_date_time DESC;
     }
   }
 
-  Future<Map<String, dynamic>?> getHouseholdByUniqueKey(
-      String uniqueKey,
-      ) async {
+  Future<Map<String, dynamic>?> getHouseholdByUniqueKey(String uniqueKey) async {
     try {
       final db = await _db;
       final rows = await db.query(
@@ -3463,28 +3028,18 @@ ORDER BY b.created_date_time DESC;
     }).toList();
   }
 
-  Future<int> markChildCareActivitySyncedById(
-      int id, {
-        String? serverId,
-      }) async {
+  Future<int> markChildCareActivitySyncedById(int id, {String? serverId}) async {
     final db = await _db;
     final values = <String, Object?>{
       'is_synced': 1,
       'modified_date_time': DateTime.now().toIso8601String(),
     };
     if (serverId != null && serverId.isNotEmpty) values['server_id'] = serverId;
-    return db.update(
-      'child_care_activities',
-      values,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return db.update('child_care_activities', values, where: 'id = ?', whereArgs: [id]);
   }
 
   Future<String> getLatestFollowupFormServerId() async {
     try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       final db = await _db;
       final rows = await db.query(
         FollowupFormDataTable.table,
@@ -3495,12 +3050,11 @@ ORDER BY b.created_date_time DESC;
           'id',
           'is_deleted',
         ],
-        where:
-        "server_id IS NOT NULL AND TRIM(server_id) != '' AND current_user_key = ?",
-        whereArgs: [ashaUniqueKey],
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
         orderBy: "created_date_time DESC",
         limit: 1,
       );
+
 
       if (rows.isEmpty) return '';
       final sid = rows.first['server_id'];
@@ -3520,8 +3074,7 @@ ORDER BY b.created_date_time DESC;
       final db = await _db;
       final result = await db.query(
         FollowupFormDataTable.table,
-        where:
-        'forms_ref_key = ? AND household_ref_key = ? AND beneficiary_ref_key = ?',
+        where: 'forms_ref_key = ? AND household_ref_key = ? AND beneficiary_ref_key = ?',
         whereArgs: [
           FollowupFormDataTable.formUniqueKeys[formType],
           householdId,
@@ -3537,9 +3090,7 @@ ORDER BY b.created_date_time DESC;
     }
   }
 
-  Future<List<Map<String, dynamic>>> getPncMotherFormsByBeneficiaryId(
-      String beneficiaryId,
-      ) async {
+  Future<List<Map<String, dynamic>>> getPncMotherFormsByBeneficiaryId(String beneficiaryId) async {
     try {
       final db = await _db;
       final result = await db.query(
@@ -3674,11 +3225,8 @@ ORDER BY b.created_date_time DESC;
       final db = await _db;
 
       final row = <String, dynamic>{
-        'unique_key':
-        formData['unique_key'] ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
-        'form_json': jsonEncode(formData['form_json'] ?? {}),
-        // your entire form as JSON
+        'unique_key': formData['unique_key'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        'form_json': jsonEncode(formData['form_json'] ?? {}), // your entire form as JSON
         'created_date_time': DateTime.now().toIso8601String(),
         'created_by': formData['created_by'] ?? 'current_user_key',
         'modified_date_time': null,
@@ -3696,7 +3244,6 @@ ORDER BY b.created_date_time DESC;
       rethrow;
     }
   }
-
   Future<Map<String, dynamic>?> getClusterMeetingById(String uniqueKey) async {
     final db = await _db;
     final List<Map<String, dynamic>> maps = await db.query(
@@ -3711,7 +3258,6 @@ ORDER BY b.created_date_time DESC;
     }
     return null;
   }
-
   Future<void> updateClusterMeeting({
     required String uniqueKey,
     required Map<String, dynamic> formJson,
@@ -3755,7 +3301,6 @@ ORDER BY b.created_date_time DESC;
       return [];
     }
   }
-
   Future<String?> getHeadOfFamilyMobileNumber(String householdRefKey) async {
     try {
       final db = await _db;
@@ -3782,8 +3327,7 @@ ORDER BY b.created_date_time DESC;
 
       if (beneficiaries.isEmpty) return null;
 
-      final beneficiaryInfo =
-      beneficiaries.first['beneficiary_info'] as String?;
+      final beneficiaryInfo = beneficiaries.first['beneficiary_info'] as String?;
       if (beneficiaryInfo == null) return null;
 
       // Parse the JSON to get the mobile number
@@ -3871,16 +3415,12 @@ extension LocalStorageDaoReads on LocalStorageDao {
 
   Future<String> getLatestBeneficiaryServerId() async {
     try {
-      final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey = currentUserData?['unique_key']?.toString();
       final db = await _db;
       final rows = await db.query(
         'beneficiaries_new',
         columns: ['server_id'],
-        where:
-        "server_id IS NOT NULL AND TRIM(server_id) != '' AND current_user_key = ?",
-        whereArgs: [ashaUniqueKey],
-        orderBy: "id DESC",
+        where: "server_id IS NOT NULL AND TRIM(server_id) != ''",
+        orderBy: "created_date_time DESC",
         limit: 1,
       );
 

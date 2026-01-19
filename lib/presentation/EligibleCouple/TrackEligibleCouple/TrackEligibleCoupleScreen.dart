@@ -106,7 +106,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
           children: [
             // Visit Date
             CustomDatePicker(
-              labelText: t?.visitDateLabel ?? 'भ्रमण की तिथि',
+              labelText: t?.dateOfvisitTracking ?? 'भ्रमण की तिथि',
               initialDate: DateTime.now(),
               firstDate: DateTime(1900),
               lastDate: DateTime(2100),
@@ -121,25 +121,21 @@ class _TrackEligibleCoupleView extends StatelessWidget {
             const Divider(thickness: 1, color: Colors.grey),
             const SizedBox(height: 8),
 
-            // Financial Year
             BlocBuilder<TrackEligibleCoupleBloc, TrackEligibleCoupleState>(
               buildWhen: (previous, current) =>
               previous.financialYear != current.financialYear,
               builder: (context, state) {
-                 DateTime? parseFinancialYear(String? yearStr) {
+
+                // 1. HELPER: Parse "2026" back to a DateTime for the picker
+                DateTime? parseFinancialYear(String? yearStr) {
                   if (yearStr == null || yearStr.isEmpty) return null;
                   try {
-                     final year = yearStr.split('-').first;
+                    // .split('-').first handles both "2026" and "2025-26" gracefully
+                    final year = yearStr.split('-').first;
                     return DateTime(int.parse(year));
                   } catch (e) {
                     return null;
                   }
-                }
-
-
-                String formatFinancialYear(DateTime date) {
-                  final year = date.year;
-                  return '$year-${(year + 1).toString().substring(2)}';
                 }
 
                 return Padding(
@@ -158,6 +154,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                       const SizedBox(height: 2),
                       InkWell(
                         onTap: () async {
+                          // Parse current state or default to Now
                           final currentDate = parseFinancialYear(state.financialYear) ?? DateTime.now();
 
                           final DateTime? picked = await showDialog<DateTime>(
@@ -173,7 +170,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                                           padding: const EdgeInsets.all(16),
                                           child: Text(
                                             t?.financialYearLabel ?? 'Select Year',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -184,7 +181,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                                           height: 300,
                                           padding: const EdgeInsets.symmetric(horizontal: 16),
                                           child: YearPicker(
-                                            firstDate: DateTime(DateTime.now().year - 100),
+                                            firstDate: DateTime(DateTime.now().year - 10), // Adjust range as needed
                                             lastDate: DateTime.now(),
                                             initialDate: currentDate,
                                             selectedDate: currentDate,
@@ -200,15 +197,16 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                           );
 
                           if (picked != null) {
-                            // Format the year as YYYY-YY (e.g., 2025-26)
+                            // 2. LOGIC: Just take the year (e.g., "2026")
                             final formattedYear = '${picked.year}';
+
                             if (!context.mounted) return;
                             context.read<TrackEligibleCoupleBloc>()
                                 .add(FinancialYearChanged(formattedYear));
                           }
                         },
                         child: Container(
-                          // padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                          // Add decoration if needed to look like a text field
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -223,7 +221,8 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                                       : Colors.black87,
                                 ),
                               ),
-                              const Icon(Icons.calendar_today, size: 20),
+                              // Optional: Add a dropdown icon
+                              // const Icon(Icons.arrow_drop_down),
                             ],
                           ),
                         ),
@@ -246,23 +245,25 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                   builder: (context, snapshot) {
                     final hasActiveMotherCare = snapshot.data == true;
 
-                    return ApiDropdown<bool>(
+                    return ApiDropdown<bool?>(
                       labelText: t?.isPregnantLabel ?? 'क्या महिला गर्भवती है?',
-                      items: [true, false],
-                      getLabel: (value) =>
-                          value ? (t?.yes ?? 'हाँ') : (t?.no ?? 'नहीं'),
+                      items: [true, false, null],
+                      getLabel: (value) {
+                        if (value == true) return t?.yes ?? 'हाँ';
+                        if (value == false) return t?.no ?? 'नहीं';
+                        return t?.dontNO ?? 'पता नहीं';
+                      },
                       value: state.isPregnant,
                       readOnly: hasActiveMotherCare,
                       onChanged: hasActiveMotherCare
                           ? null
                           : (value) {
-                              if (value != null) {
-                                context
-                                    .read<TrackEligibleCoupleBloc>()
-                                    .add(IsPregnantChanged(value));
-                              }
-                            },
+                        context
+                            .read<TrackEligibleCoupleBloc>()
+                            .add(IsPregnantChanged(value!));
+                      },
                     );
+
                   },
                 );
               },
@@ -345,7 +346,6 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                     const Divider(thickness: 1, color: Colors.grey),
                     const SizedBox(height: 8),
 
-                    // Dependent questions for family planning
                     if (state.fpAdopting == true) ...[
                       ApiDropdown<String>(
                         labelText: t?.methodOfContraception ?? 'Method of contraception',
@@ -598,7 +598,7 @@ class _TrackEligibleCoupleView extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                PreviousVisitsScreen(beneficiaryId: beneficiaryId),
+                                PreviousVisitsScreen(beneficiaryRefKey: state.beneficiaryRefKey ?? beneficiaryId),
                           ),
                         );
                       },

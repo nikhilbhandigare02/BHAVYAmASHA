@@ -51,6 +51,7 @@ class DbMigration {
         "date_of_death",
         "childSchool",
         "fatherName",
+        "father_name",
         "motherName",
         "spouseName",
         "birthCertificate",
@@ -98,8 +99,9 @@ class DbMigration {
         "isFamilyheadWife",
         "weight",
         "birthWeight",
+        "fp_method",
         "totalBorn","totalLive","totalMale","totalFemale","youngestAge","ageUnit","youngestGender",
-"childSchool","type_of_school"
+"childSchool","type_of_school","is_family_planning"
 
       ];
 
@@ -113,6 +115,7 @@ class DbMigration {
         "memberName": "member_name",
         "motherName": "mother_name",
         "fatherName": "father_name",
+        "father_name": "father_name",
         "spouseName": "father_or_spouse_name",
         "dob": "date_of_birth",
         "years": "dob_year",
@@ -159,7 +162,9 @@ class DbMigration {
         "ageUnit": "age_of_youngest_child_unit",
         "youngestGender": "gender_of_younget_child",
         "childSchool":"is_school_going_child",
-        "type_of_school":"type_of_school"
+        "type_of_school":"type_of_school",
+        "fp_method":"method_of_contraception",
+        "is_family_planning":"is_family_planning"
 
       };
 
@@ -170,7 +175,6 @@ class DbMigration {
         final Map<String, dynamic> finalJson = {};
 
         for (final key in beneficiaryKeys) {
-          // 🔹 First priority → same key
           if (form.containsKey(key) &&
               form[key] != null &&
               form[key].toString() != "null") {
@@ -178,7 +182,6 @@ class DbMigration {
             continue;
           }
 
-          // 🔹 Second priority → mapped key
           if (keyMapping.containsKey(key)) {
             final mappedKey = keyMapping[key]!;
             if (form.containsKey(mappedKey) &&
