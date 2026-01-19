@@ -2134,9 +2134,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   getHeadVal('headName') ??
                   getHeadVal('memberName'),
               fatherName: getSpouseVal('father_name'),
-              useDob:
-                  (getSpouseVal('useDob') == true ||
-                  getSpouseVal('useDob') == 'true'),
+              useDob: getSpouseVal('age_by') != null
+                  ? getSpouseVal('age_by') == 'by_dob'
+                  : (getSpouseVal('useDob') == true ||
+                      getSpouseVal('useDob') == 'true'),
               dob: _parseDate(getSpouseVal('dob')?.toString()),
               edd: _parseDate(getSpouseVal('edd')?.toString()),
               lmp: _parseDate(getSpouseVal('lmp')?.toString()),
