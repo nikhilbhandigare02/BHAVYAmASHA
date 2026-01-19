@@ -1904,7 +1904,7 @@ abstract class AppLocalizations {
   /// No description provided for @cookingFuelTypeLabel.
   ///
   /// In en, this message translates to:
-  /// **'Type of Fuel used for cooking'**
+  /// **'Type of fuel used for cooking'**
   String get cookingFuelTypeLabel;
 
   /// No description provided for @currentAgeLabel.
@@ -3290,7 +3290,7 @@ abstract class AppLocalizations {
   /// No description provided for @kitchenInsideLabel.
   ///
   /// In en, this message translates to:
-  /// **'Is the kitchen inside the house'**
+  /// **'Is the kitchen inside the house?'**
   String get kitchenInsideLabel;
 
   /// No description provided for @legendCompleted.
@@ -15298,6 +15298,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Date of visit'**
   String get dateOfvisitTracking;
+
+  /// No description provided for @motherNameLabelchild.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother name'**
+  String get motherNameLabelchild;
+
+  /// No description provided for @fatherNameLabelchild.
+  ///
+  /// In en, this message translates to:
+  /// **'Father name'**
+  String get fatherNameLabelchild;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

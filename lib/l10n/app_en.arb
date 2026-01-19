@@ -2625,7 +2625,9 @@
   "nextancduedate":"Next ANC due date",
   "householdUpdatedSuccessfully": "Household updated successfully",
   "dontNO": "Don't Know",
-  "dateOfvisitTracking":"Date of visit"
+  "dateOfvisitTracking":"Date of visit",
+  "motherNameLabelchild":"Mother name",
+  "fatherNameLabelchild":"Father name"
 
 
 }
