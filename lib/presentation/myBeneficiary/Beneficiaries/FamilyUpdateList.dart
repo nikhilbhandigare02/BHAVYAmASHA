@@ -217,6 +217,24 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           return false;
         }
 
+        Map<String, dynamic> info;
+        try {
+          final rawInfo = r['beneficiary_info'];
+          if (rawInfo is String && rawInfo.isNotEmpty) {
+            info = jsonDecode(rawInfo) as Map<String, dynamic>;
+          } else if (rawInfo is Map) {
+            info = Map<String, dynamic>.from(rawInfo);
+          } else {
+            info = <String, dynamic>{};
+          }
+        } catch (e) {
+          print('⚠️ Error parsing beneficiary info: $e');
+          info = <String, dynamic>{};
+        }
+
+        final isFamilyhead = info['isFamilyhead'];
+        if (isFamilyhead) return true;
+
         return headKeyByHousehold[hhKey] == uniqueKey;
       }).toList();
 
@@ -239,6 +257,8 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           'child0to1': child0to1Map[hhKey] ?? 0,
           'child1to2': child1to2Map[hhKey] ?? 0,
           'child2to5': child2to5Map[hhKey] ?? 0,
+           'mohalla': info['mohalla'] ?? '',
+          'mohallaTola': info['mohallaTola'] ?? '',
           '_raw': r,
         };
       }).toList();

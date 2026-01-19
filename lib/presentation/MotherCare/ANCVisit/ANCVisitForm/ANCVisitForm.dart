@@ -412,22 +412,17 @@ class _AncvisitformState extends State<Ancvisitform> {
         }
       }
 
-      // Process LMP date
-      final lmpDateStr = beneficiaryInfo?['lmp']?.toString();
-      if (lmpDateStr != null && lmpDateStr.isNotEmpty) {
-        try {
-          final lmpDate = DateTime.parse(lmpDateStr);
-          _bloc.add(LmpDateChanged(lmpDate));
+      // Process LMP date using enhanced extraction logic
+      final lmpDate = await _extractLmpDate(widget.beneficiaryData ?? {});
+      if (lmpDate != null) {
+        _bloc.add(LmpDateChanged(lmpDate));
 
-          // Calculate and set weeks of pregnancy
-          final weeksPregnant = _calculateWeeksOfPregnancy(lmpDate);
-          _bloc.add(WeeksOfPregnancyChanged(weeksPregnant.toString()));
+        // Calculate and set weeks of pregnancy
+        final weeksPregnant = _calculateWeeksOfPregnancy(lmpDate);
+        _bloc.add(WeeksOfPregnancyChanged(weeksPregnant.toString()));
 
-          print('✅ Set LMP date from beneficiary data: $lmpDate');
-          print('✅ Calculated weeks of pregnancy: $weeksPregnant');
-        } catch (e) {
-          print('Error parsing LMP date "$lmpDateStr": $e');
-        }
+        print('✅ Set LMP date using enhanced extraction: $lmpDate');
+        print('✅ Calculated weeks of pregnancy: $weeksPregnant');
       }
 
       final eddDateStr = beneficiaryInfo?['edd']?.toString();
@@ -967,194 +962,266 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
   }
 
+  // Format date to dd/MM/yyyy format
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+  }
+
+  Future<DateTime?> _extractLmpDate(Map<String, dynamic> data) async {
+    try {
+      final beneficiaryId = data['BeneficiaryID']?.toString() ??
+          data['unique_key']?.toString() ??
+          (data['_rawRow'] is Map ? (data['_rawRow'] as Map)['unique_key']?.toString() : null);
+
+      print('🔍 Extracting LMP date for beneficiary: $beneficiaryId');
+      print('📋 Available data keys: ${data.keys.toList()}');
+
+      // First try to get LMP from beneficiary_info (beneficiaries_new table)
+      dynamic rawInfo = data['beneficiary_info'];
+      Map<String, dynamic> info;
+
+      if (rawInfo is String && rawInfo.isNotEmpty) {
+        info = jsonDecode(rawInfo) as Map<String, dynamic>;
+      } else if (rawInfo is Map) {
+        info = Map<String, dynamic>.from(rawInfo as Map);
+      } else {
+        info = <String, dynamic>{};
+        print('⚠️ No beneficiary_info found for beneficiary: $beneficiaryId');
+      }
+
+      print('🔍 Beneficiary info keys: ${info.keys.toList()}');
+      final lmpRaw = info['lmp']?.toString();
+      print('📅 Raw LMP value: "$lmpRaw"');
+
+      if (lmpRaw != null && lmpRaw.isNotEmpty && lmpRaw != 'null') {
+        String dateStr = lmpRaw;
+        if (dateStr.contains('T')) {
+          dateStr = dateStr.split('T')[0];
+        }
+        final lmpDate = DateTime.tryParse(dateStr);
+        if (lmpDate != null) {
+          print('✅ Found LMP date from beneficiaries_new: ${_formatDate(lmpDate)} for beneficiary: $beneficiaryId');
+          return lmpDate;
+        } else {
+          print('⚠️ Failed to parse LMP date: "$dateStr" for beneficiary: $beneficiaryId');
+        }
+      }
+
+      // Fallback: try to get from _rawRow if available
+      final rawRow = data['_rawRow'] as Map<String, dynamic>?;
+      if (rawRow != null) {
+        print('🔍 Checking _rawRow for beneficiary: $beneficiaryId');
+        print('📋 _rawRow keys: ${rawRow.keys.toList()}');
+
+        rawInfo = rawRow['beneficiary_info'];
+        if (rawInfo is String && rawInfo.isNotEmpty) {
+          info = jsonDecode(rawInfo) as Map<String, dynamic>;
+        } else if (rawInfo is Map) {
+          info = Map<String, dynamic>.from(rawInfo as Map);
+        } else {
+          info = <String, dynamic>{};
+          print('⚠️ No beneficiary_info in _rawRow for beneficiary: $beneficiaryId');
+        }
+
+        final lmpRaw = info['lmp']?.toString();
+        print('📅 Raw LMP value from _rawRow: "$lmpRaw"');
+
+        if (lmpRaw != null && lmpRaw.isNotEmpty && lmpRaw != 'null') {
+          String dateStr = lmpRaw;
+          if (dateStr.contains('T')) {
+            dateStr = dateStr.split('T')[0];
+          }
+          final lmpDate = DateTime.tryParse(dateStr);
+          if (lmpDate != null) {
+            print('✅ Found LMP date from _rawRow: ${_formatDate(lmpDate)} for beneficiary: $beneficiaryId');
+            return lmpDate;
+          } else {
+            print('⚠️ Failed to parse LMP date from _rawRow: "$dateStr" for beneficiary: $beneficiaryId');
+          }
+        }
+      } else {
+        print('⚠️ No _rawRow available for beneficiary: $beneficiaryId');
+      }
+
+      // If not found in beneficiaries_new, check followup forms
+      print('⚠️ No LMP found in beneficiaries_new or _rawRow, checking followup forms for beneficiary: $beneficiaryId...');
+      final lmpFromFollowup = await _getLmpFromFollowupForm(data);
+      if (lmpFromFollowup != null) {
+        print('✅ Found LMP date from followup form: ${_formatDate(lmpFromFollowup)} for beneficiary: $beneficiaryId');
+        return lmpFromFollowup;
+      }
+
+      print('❌ No LMP date found anywhere for beneficiary: $beneficiaryId');
+      print('📊 Complete data structure for debugging: ${data.toString()}');
+      return null;
+    } catch (e) {
+      print('⚠️ Error extracting LMP date: $e');
+      return null;
+    }
+  }
+
+  Future<DateTime?> _getLmpFromFollowupForm(Map<String, dynamic> data) async {
+    try {
+      final benId = data['BeneficiaryID']?.toString() ??
+          data['unique_key']?.toString() ??
+          (data['_rawRow'] is Map
+              ? (data['_rawRow'] as Map)['unique_key']?.toString()
+              : null);
+
+      if (benId == null || benId.isEmpty) {
+        print('⚠️ Missing beneficiary ID for followup form LMP lookup');
+        print('   benId: $benId');
+        print('   data keys: ${data.keys}');
+        return null;
+      }
+
+      print('🔍 Looking for followup forms with benId: $benId');
+
+      try {
+        final db = await DatabaseProvider.instance.database;
+        final formKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue];
+        print('🔍 Querying with formKey: $formKey, benId: $benId');
+
+        final result = await db.query(
+          FollowupFormDataTable.table,
+          where: 'forms_ref_key = ? AND beneficiary_ref_key = ?',
+          whereArgs: [formKey, benId],
+          orderBy: 'created_date_time DESC',
+        );
+
+        print('📋 Found ${result.length} followup forms for beneficiary: $benId');
+
+        if (result.isEmpty) {
+          print('ℹ️ No eligible couple tracking due forms found for beneficiary: $benId');
+
+          // Debug: Let's check what forms exist for this beneficiary
+          final allForms = await db.query(
+            FollowupFormDataTable.table,
+            where: 'beneficiary_ref_key = ?',
+            whereArgs: [benId],
+            orderBy: 'created_date_time DESC',
+          );
+          print('🔍 DEBUG: All forms for beneficiary $benId:');
+          for (int i = 0; i < allForms.length; i++) {
+            final form = allForms[i];
+            print('   Form ${i + 1}: forms_ref_key=${form['forms_ref_key']}, household_ref_key=${form['household_ref_key']}');
+          }
+
+          return null;
+        }
+
+        print('📋 Found ${result.length} followup forms to process for beneficiary: $benId');
+
+        for (int i = 0; i < result.length; i++) {
+          final form = result[i];
+          final formJsonStr = form['form_json']?.toString();
+          final formHouseholdId = form['household_ref_key']?.toString();
+          final formBeneficiaryId = form['beneficiary_ref_key']?.toString();
+
+          print('📄 Processing form ${i + 1}/${result.length}: household=$formHouseholdId, beneficiary=$formBeneficiaryId');
+
+          if (formJsonStr == null || formJsonStr.isEmpty) {
+            print('⚠️ Empty form_json in form ${i + 1}, skipping');
+            continue;
+          }
+
+          try {
+            final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
+            print('🔍 Parsing followup form JSON ${i + 1}: ${root.keys}');
+
+            String? lmpStr;
+
+            /// ✅ EXISTING CONDITION (DO NOT REMOVE)
+            final trackingData = root['eligible_couple_tracking_due_from'];
+            if (trackingData is Map) {
+              final val = trackingData['lmp_date']?.toString();
+              if (val != null && val.isNotEmpty && val != 'null') {
+                lmpStr = val;
+                print('✅ Found LMP in eligible_couple_tracking_due_from (form ${i + 1}): "$lmpStr"');
+              } else {
+                print('⚠️ LMP date in eligible_couple_tracking_due_from is empty or null: "$val"');
+              }
+            } else {
+              print('⚠️ No eligible_couple_tracking_due_from found in form ${i + 1}');
+            }
+
+            /// ✅ NEW CONDITION (ADDED SAFELY)
+            if ((lmpStr == null || lmpStr.isEmpty || lmpStr == 'null') &&
+                root['form_data'] is Map) {
+              final formData = root['form_data'] as Map<String, dynamic>;
+              final val = formData['lmp_date']?.toString();
+              // Check for null, empty, or just empty string
+              if (val != null && val.isNotEmpty && val != '""' && val != 'null') {
+                lmpStr = val;
+                print('✅ Found LMP in form_data (form ${i + 1}): "$lmpStr"');
+              } else {
+                print('⚠️ LMP date in form_data is empty or invalid (form ${i + 1}): "$val"');
+              }
+            }
+
+            if (lmpStr != null && lmpStr.isNotEmpty && lmpStr != 'null') {
+              try {
+                // Handle different date formats
+                String dateStr = lmpStr;
+                if (dateStr.contains('T')) {
+                  // For ISO 8601 format, extract just the date part or parse as-is
+                  try {
+                    final lmpDate = DateTime.parse(dateStr);
+                    print('✅ Successfully parsed LMP date (form ${i + 1}): $lmpDate');
+                    return lmpDate;
+                  } catch (e) {
+                    // If full parsing fails, try date part only
+                    dateStr = dateStr.split('T')[0];
+                    print('⚠️ Full date parsing failed, trying date part only (form ${i + 1}): "$dateStr"');
+                  }
+                }
+
+                final lmpDate = DateTime.parse(dateStr);
+                print('✅ Successfully parsed LMP date (form ${i + 1}): $lmpDate');
+                return lmpDate;
+              } catch (e) {
+                print('⚠️ Error parsing LMP date "$lmpStr" (form ${i + 1}): $e');
+              }
+            } else {
+              print('⚠️ No valid LMP date found in form data (form ${i + 1})');
+            }
+          } catch (e) {
+            print('⚠️ Error parsing followup form JSON (form ${i + 1}): $e');
+          }
+        }
+
+        print('ℹ️ No LMP date found in any eligible couple tracking due forms for beneficiary: $benId');
+        return null;
+      } catch (e) {
+        print('❌ Error loading LMP from followup form: $e');
+        return null;
+      }
+    } catch (e) {
+      print('❌ Error loading LMP from followup form: $e');
+      return null;
+    }
+  }
+
   Future<void> _loadLmpFromFollowupForm() async {
     print('🔍 Starting LMP lookup from followup forms...');
     print('🔍 Current LMP state: ${_bloc.state.lmpDate}');
 
     try {
-      final benId =
-          widget.beneficiaryData?['BeneficiaryID']?.toString() ??
-              widget.beneficiaryData?['unique_key']?.toString() ??
-              (widget.beneficiaryData?['_rawRow'] is Map
-                  ? (widget.beneficiaryData?['_rawRow'] as Map)['unique_key']
-                  ?.toString()
-                  : null);
-
-      final hhId =
-          widget.beneficiaryData?['hhId']?.toString() ??
-              widget.beneficiaryData?['household_ref_key']?.toString() ??
-              (widget.beneficiaryData?['_rawRow'] is Map
-                  ? (widget.beneficiaryData?['_rawRow'] as Map)['household_ref_key']
-                  ?.toString()
-                  : null);
-
-      print('🔍 Beneficiary ID: $benId');
-      print('🔍 Household ID: $hhId');
-
-      if (benId == null || benId.isEmpty || hhId == null || hhId.isEmpty) {
-        print('⚠️ Missing beneficiary ID or household ID for followup form LMP lookup');
-        return;
+      final data = widget.beneficiaryData ?? {};
+      final lmpDate = await _extractLmpDate(data);
+      
+      if (lmpDate != null) {
+        _bloc.add(LmpDateChanged(lmpDate));
+        final weeks = _calculateWeeksOfPregnancy(lmpDate);
+        _bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
+        print('✅ Set LMP date from enhanced extraction: $lmpDate');
       }
-
-      final dao = LocalStorageDao();
-      final forms = await dao.getFollowupFormsByHouseholdAndBeneficiary(
-        formType: FollowupFormDataTable.eligibleCoupleTrackingDue,
-        householdId: hhId,
-        beneficiaryId: benId,
-      );
-
-      if (forms.isEmpty) {
-        print('ℹ️ No eligible couple tracking due forms found for beneficiary');
-        return;
-      }
-
-      print('🔍 Found ${forms.length} eligible couple tracking due forms');
-
-      for (int i = 0; i < forms.length; i++) {
-        final form = forms[i];
-        print('\n--- Processing Form ${i + 1} ---');
-        print('Form ID: ${form['id']}');
-        print('Forms Ref Key: ${form['forms_ref_key']}');
-        print('Beneficiary Ref Key: ${form['beneficiary_ref_key']}');
-        print('Household Ref Key: ${form['household_ref_key']}');
-
-        final formJsonStr = form['form_json']?.toString();
-        if (formJsonStr == null || formJsonStr.isEmpty) {
-          print('⚠️ No form_json data found');
-          continue;
-        }
-
-        print('🔍 Form JSON (first 500 chars): ${formJsonStr.length > 500 ? formJsonStr.substring(0, 500) + "..." : formJsonStr}');
-
-        try {
-          final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
-          print('🔍 Root keys: ${root.keys.toList()}');
-
-          // Check for LMP date in eligible_couple_tracking_due_from structure
-          final trackingData = root['eligible_couple_tracking_due_from'];
-          if (trackingData is Map) {
-            print('✅ Found eligible_couple_tracking_due_from structure');
-            print('🔍 Tracking data keys: ${trackingData.keys.toList()}');
-
-            final lmpStr = trackingData['lmp_date']?.toString();
-            print('🔍 LMP string: $lmpStr');
-
-            // Check for null, empty, or just empty string
-            if (lmpStr != null && lmpStr.isNotEmpty && lmpStr != '""') {
-              try {
-                final lmpDate = DateTime.parse(lmpStr);
-                print('✅ Successfully parsed LMP date: $lmpDate');
-
-                _bloc.add(LmpDateChanged(lmpDate));
-                final weeks = _calculateWeeksOfPregnancy(lmpDate);
-                _bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
-                print('✅ Set LMP date and calculated weeks: $weeks');
-
-                // Also set EDD if available
-                final eddStr = trackingData['edd_date']?.toString();
-                print('🔍 EDD string: $eddStr');
-                if (eddStr != null && eddStr.isNotEmpty && eddStr != '""') {
-                  try {
-                    final eddDate = DateTime.parse(eddStr);
-                    _bloc.add(EddDateChanged(eddDate));
-                    print('✅ Set EDD date from followup form: $eddDate');
-                  } catch (e) {
-                    print('⚠️ Error parsing EDD date from followup form: $e');
-                  }
-                } else {
-                  print('ℹ️ No EDD date found in tracking data');
-                }
-
-                return; // Found LMP date, exit the method
-              } catch (e) {
-                print('⚠️ Error parsing LMP date from followup form: $e');
-              }
-            } else {
-              print('⚠️ LMP date is null or empty in tracking data');
-            }
-          } else {
-            print('⚠️ No eligible_couple_tracking_due_from structure found');
-            print('🔍 Available root keys: ${root.keys.toList()}');
-
-            /// ✅ NEW CONDITION - Check form_data structure
-            if (root['form_data'] is Map) {
-              final formData = root['form_data'] as Map<String, dynamic>;
-              final lmpStr = formData['lmp_date']?.toString();
-              print('🔍 LMP string from form_data: $lmpStr');
-
-              // Check for null, empty, or just empty string
-              if (lmpStr != null && lmpStr.isNotEmpty && lmpStr != '""') {
-                try {
-                  // Handle different date formats
-                  String dateStr = lmpStr;
-                  if (dateStr.contains('T')) {
-                    try {
-                      final lmpDate = DateTime.parse(dateStr);
-                      print('✅ Successfully parsed LMP date from form_data: $lmpDate');
-
-                      _bloc.add(LmpDateChanged(lmpDate));
-                      final weeks = _calculateWeeksOfPregnancy(lmpDate);
-                      _bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
-                      print('✅ Set LMP date and calculated weeks from form_data: $weeks');
-
-                      // Also set EDD if available
-                      final eddStr = formData['edd_date']?.toString();
-                      if (eddStr != null && eddStr.isNotEmpty && eddStr != '""') {
-                        try {
-                          final eddDate = DateTime.parse(eddStr);
-                          _bloc.add(EddDateChanged(eddDate));
-                          print('✅ Set EDD date from form_data: $eddDate');
-                        } catch (e) {
-                          print('⚠️ Error parsing EDD date from form_data: $e');
-                        }
-                      }
-
-                      return; // Found LMP date, exit the method
-                    } catch (e) {
-                      // If full parsing fails, try date part only
-                      dateStr = dateStr.split('T')[0];
-                      print('⚠️ Full date parsing failed, trying date part only: $dateStr');
-                    }
-                  }
-
-                  final lmpDate = DateTime.parse(dateStr);
-                  print('✅ Successfully parsed LMP date from form_data: $lmpDate');
-
-                  _bloc.add(LmpDateChanged(lmpDate));
-                  final weeks = _calculateWeeksOfPregnancy(lmpDate);
-                  _bloc.add(WeeksOfPregnancyChanged(weeks.toString()));
-                  print('✅ Set LMP date and calculated weeks from form_data: $weeks');
-
-                  return; // Found LMP date, exit the method
-                } catch (e) {
-                  print('⚠️ Error parsing LMP date from form_data: $e');
-                }
-              } else {
-                print('⚠️ LMP date in form_data is empty or invalid: $lmpStr');
-              }
-            }
-
-            // Let's also check if there are other possible structures
-            for (final key in root.keys) {
-              final value = root[key];
-              if (value is Map && value.containsKey('lmp_date')) {
-                print('🔍 Found alternative structure with LMP in key: $key');
-                final altLmpStr = value['lmp_date']?.toString();
-                print('🔍 Alternative LMP string: $altLmpStr');
-              }
-            }
-          }
-        } catch (e) {
-          print('⚠️ Error parsing followup form JSON: $e');
-        }
-      }
-
-      print('ℹ️ No LMP date found in any eligible couple tracking due forms');
     } catch (e) {
-      print('❌ Error loading LMP from followup form: $e');
+      print('❌ Error in enhanced LMP extraction: $e');
     }
   }
 
+  
 
   Future<void> _loadLastTd1DateFromDb() async {
     try {

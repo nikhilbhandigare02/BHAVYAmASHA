@@ -3240,7 +3240,7 @@ ORDER BY b.created_date_time DESC;
         where:
         "server_id IS NOT NULL AND TRIM(server_id) != '' AND current_user_key = ?",
         whereArgs: [ashaUniqueKey],
-        orderBy: "created_date_time DESC",
+        orderBy: "id DESC",
         limit: 1,
       );
 

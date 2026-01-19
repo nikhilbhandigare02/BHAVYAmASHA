@@ -94,36 +94,36 @@ class BeneficiaryRepository {
         }
 
         final info = _mapBeneficiaryInfo(rec);
-        if (hhRefKey != null && hhRefKey.isNotEmpty) {
-          final existingHh = await LocalStorageDao.instance.getHouseholdByUniqueKey(hhRefKey);
-          if (existingHh == null || existingHh.isEmpty) {
-            final householdInfo = <String, dynamic>{};
-            final beneficiaryInfo = info;
-
-            householdInfo['houseNo'] = beneficiaryInfo['houseNo'];
-            householdInfo['headName'] = beneficiaryInfo['headName'] ?? beneficiaryInfo['name'];
-
-            final toInsertHh = <String, dynamic>{
-              'server_id': null,
-              'unique_key': hhRefKey,
-              'address': beneficiaryInfo['address'] ?? {},
-              'geo_location': rec['geo_location'] ?? {},
-              'head_id': benUniqueKey,
-              'household_info': householdInfo,
-              'device_details': rec['device_details'] ?? {},
-              'app_details': rec['app_details'] ?? {},
-              'parent_user': rec['parent_user'] ?? {},
-              'current_user_key': rec['current_user_key']?.toString(),
-              'facility_id': _toInt(rec['facility_id']),
-              'created_date_time': rec['created_date_time']?.toString(),
-              'modified_date_time': rec['modified_date_time']?.toString(),
-              'is_synced': 1,
-              'is_deleted': _toInt(rec['is_deleted']),
-            };
-
-            await LocalStorageDao.instance.insertHousehold(toInsertHh);
-          }
-        }
+        // if (hhRefKey != null && hhRefKey.isNotEmpty) {
+        //   final existingHh = await LocalStorageDao.instance.getHouseholdByUniqueKey(hhRefKey);
+        //   if (existingHh == null || existingHh.isEmpty) {
+        //     final householdInfo = <String, dynamic>{};
+        //     final beneficiaryInfo = info;
+        //
+        //     householdInfo['houseNo'] = beneficiaryInfo['houseNo'];
+        //     householdInfo['headName'] = beneficiaryInfo['headName'] ?? beneficiaryInfo['name'];
+        //
+        //     final toInsertHh = <String, dynamic>{
+        //       'server_id': null,
+        //       'unique_key': hhRefKey,
+        //       'address': beneficiaryInfo['address'] ?? {},
+        //       'geo_location': rec['geo_location'] ?? {},
+        //       'head_id': benUniqueKey,
+        //       'household_info': householdInfo,
+        //       'device_details': rec['device_details'] ?? {},
+        //       'app_details': rec['app_details'] ?? {},
+        //       'parent_user': rec['parent_user'] ?? {},
+        //       'current_user_key': rec['current_user_key']?.toString(),
+        //       'facility_id': _toInt(rec['facility_id']),
+        //       'created_date_time': rec['created_date_time']?.toString(),
+        //       'modified_date_time': rec['modified_date_time']?.toString(),
+        //       'is_synced': 1,
+        //       'is_deleted': _toInt(rec['is_deleted']),
+        //     };
+        //
+        //     await LocalStorageDao.instance.insertHousehold(toInsertHh);
+        //   }
+        // }
 
         final row = <String, dynamic>{
           'server_id': serverId,
@@ -402,10 +402,11 @@ class BeneficiaryRepository {
       'updateMonth': DateTime.now().month,
       'updateYear': DateTime.now().year,
 
-      'children': info['totalBorn'],
+      'children': info['total_children'],
       'birthOrder': info['birth_order'],
       'totalBorn': info['total_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),
       'totalLive': info['total_live_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),
+      'totalLiveChildren': info['total_live_children'] ?? (info['have_children'] == 'yes' ? 1 : 0),
       'totalMale': info['total_male_children'] ?? 0,
       'totalFemale': info['total_female_children'] ?? 0,
       'youngestAge': info['age_of_youngest_child'],

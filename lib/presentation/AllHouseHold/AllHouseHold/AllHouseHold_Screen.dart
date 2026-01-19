@@ -400,13 +400,33 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
           if (r['is_death'] == 1 || r['is_migrated'] == 1) return false;
 
-          // Check if household head_id matches beneficiary unique_key
-          for (final household in households) {
-            final headId = (household['head_id'] ?? '').toString();
-            if (headId == uniqueKey) {
-              return true;
+          Map<String, dynamic> info;
+          try {
+            final rawInfo = r['beneficiary_info'];
+            if (rawInfo is String && rawInfo.isNotEmpty) {
+              info = jsonDecode(rawInfo) as Map<String, dynamic>;
+            } else if (rawInfo is Map) {
+              info = Map<String, dynamic>.from(rawInfo);
+            } else {
+              info = <String, dynamic>{};
             }
+          } catch (e) {
+            print('⚠️ Error parsing beneficiary info: $e');
+            info = <String, dynamic>{};
           }
+
+          final isFamilyhead = info['isFamilyhead'];
+          if (isFamilyhead) return true;
+
+
+
+          // Check if household head_id matches beneficiary unique_key
+         /* for (final household in households) {
+            final headId = (household['head_id'] ?? '').toString();
+           // if (headId == uniqueKey) {
+              return true;
+         //   }
+          }*/
           return false;
         } catch (_) {
           return false;
@@ -508,7 +528,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
               .toLowerCase();
 
           if (fatherName.isEmpty && motherName.isEmpty) {
-            continue;
+          //  continue;
           }
 
           final matchesFather =
@@ -530,7 +550,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
         final householdRefKeyFromRaw = (r['household_ref_key'] ?? '').toString();
 
-        // Count pregnant women in this household by checking beneficiaries with ANC due
         int pregnantWomenCount = 0;
         for (final member in membersForHousehold) {
           final memberUniqueKey = (member['unique_key'] ?? '').toString();
@@ -603,7 +622,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             headInfo['isFamilyhead'] == true ||
             (headInfo['isFamilyhead']?.toString().toLowerCase() == 'true');
         final isHead = isHeadA || isHeadB;
-        if (!isHead) continue;
+       // if (!isHead) continue;
 
         String name =
             (headInfo['name_of_family_head'] ??

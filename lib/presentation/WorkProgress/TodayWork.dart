@@ -87,7 +87,6 @@ class _TodayworkState extends State<Todaywork> {
 
   Future<void> _loadCompletedVisitsCount() async {
     try {
-
       final counts = await SecureStorageService.getTodayWorkCounts();
       if (mounted) {
         setState(() {
@@ -230,21 +229,25 @@ class _TodayworkState extends State<Todaywork> {
                   '';
 
           if (ecFormKey.isNotEmpty) {
-            // 1. Get all EC Tracking Due forms created TODAY only
+            // 1. Get all EC Tracking Due forms created before 1 month ago AND modified today
+            final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
             String queryForms =
                 'SELECT * FROM ${FollowupFormDataTable.table} '
                 'WHERE forms_ref_key = ? '
                 'AND (is_deleted IS NULL OR is_deleted = 0) '
-                'AND DATE(created_date_time) = DATE(?)';
+                'AND DATE(created_date_time) < DATE(?) '
+                'AND DATE(modified_date_time) = DATE(?)';
 
-            List<dynamic> argsForms = [ecFormKey, todayStr];
+            List<dynamic> argsForms = [ecFormKey,
+              '${oneMonthAgo.year.toString().padLeft(4, '0')}-${oneMonthAgo.month.toString().padLeft(2, '0')}-${oneMonthAgo.day.toString().padLeft(2, '0')}',
+              todayStr];
 
             if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
               queryForms += ' AND current_user_key = ?';
               argsForms.add(ashaUniqueKey);
             }
 
-            queryForms += ' ORDER BY created_date_time DESC';
+            queryForms += ' ORDER BY modified_date_time DESC';
 
             print('=== EC Completed Query ===');
             print('Query: $queryForms');
@@ -292,30 +295,46 @@ class _TodayworkState extends State<Todaywork> {
               print('Is Pregnant: $isPregnant');
               print('================================');
 
-              // Include all submitted forms (regardless of activity state) but only for today
-              // The fact that it was submitted today means it should be in completed list
-              // But only show for current day, not permanently
+              // Include forms that were created before 1 month ago AND modified today
+              // This ensures only older records that were updated today are shown in completed list
 
-              // Check if form was created today (not just any time today)
-              bool isCreatedToday = false;
+              // Check if form was created before 1 month ago AND modified today
+              bool meetsCriteria = false;
               try {
-                final createdDate = DateTime.parse(row['created_date_time'].toString());
                 final now = DateTime.now();
-                isCreatedToday = createdDate.year == now.year &&
-                    createdDate.month == now.month &&
-                    createdDate.day == now.day;
+                final oneMonthAgo = DateTime.now().subtract(const Duration(days: 30));
+
+                // Check created_date_time is before 1 month ago
+                bool createdBeforeOneMonth = false;
+                if (row['created_date_time'] != null) {
+                  final createdDate = DateTime.parse(row['created_date_time'].toString());
+                  createdBeforeOneMonth = createdDate.isBefore(oneMonthAgo);
+                }
+
+                // Check modified_date_time is today
+                bool modifiedToday = false;
+                if (row['modified_date_time'] != null) {
+                  final modifiedDate = DateTime.parse(row['modified_date_time'].toString());
+                  modifiedToday = modifiedDate.year == now.year &&
+                      modifiedDate.month == now.month &&
+                      modifiedDate.day == now.day;
+                }
+
+                meetsCriteria = createdBeforeOneMonth && modifiedToday;
               } catch (e) {
-                print('Error parsing created date: $e');
+                print('Error parsing dates: $e');
               }
 
               print('=== DEBUG: Date Check ===');
               print('Created Date: ${row['created_date_time']}');
-              print('Is Created Today: $isCreatedToday');
+              print('Modified Date: ${row['modified_date_time']}');
+              print('One Month Ago: ${DateTime.now().subtract(const Duration(days: 30))}');
+              print('Meets Criteria (created < 1 month ago AND modified today): $meetsCriteria');
               print('================================');
 
-              // Only include if created today
-              if (!isCreatedToday) {
-                print('❌ SKIPPED: Form not created today');
+              // Only include if created before 1 month ago AND modified today
+              if (!meetsCriteria) {
+                print('❌ SKIPPED: Form does not meet criteria (not created before 1 month ago AND modified today)');
                 continue;
               }
 
@@ -323,9 +342,9 @@ class _TodayworkState extends State<Todaywork> {
               processedBeneficiaries.add(beneficiaryId);
 
               if (isPregnant) {
-                print('✅ INCLUDING: Pregnant woman found in completed forms (today only)');
+                print('✅ INCLUDING: Pregnant woman found in completed forms (created before 1 month ago AND modified today)');
               } else {
-                print('✅ INCLUDING: Non-pregnant woman found in completed forms (today only)');
+                print('✅ INCLUDING: Non-pregnant woman found in completed forms (created before 1 month ago AND modified today)');
               }
 
               final fields = await _getBeneficiaryFields(beneficiaryId);
@@ -852,22 +871,21 @@ class _TodayworkState extends State<Todaywork> {
           // ❌ If neither condition matches → skip
           if (!isHouseholdHead && !isFamilyHeadFromInfo) continue;
 
-          // ------------------ DATE CHECK (6 MONTHS) ------------------
           DateTime? createdDt;
           DateTime? modifiedDt;
 
           try {
-            if (row['created_date_time'] != null &&
-                row['created_date_time'].toString().isNotEmpty) {
-              String dateStr = row['created_date_time'].toString();
-              // Handle both "YYYY-MM-DD HH:MM:SS" and "YYYY-MM-DDTHH:MM:SS" formats
-              if (dateStr.contains(' ')) {
-                dateStr = dateStr.split(' ')[0];
-              } else if (dateStr.contains('T')) {
-                dateStr = dateStr.split('T')[0];
-              }
-              createdDt = DateTime.parse(dateStr);
-            }
+            // if (row['created_date_time'] != null &&
+            //     row['created_date_time'].toString().isNotEmpty) {
+            //   String dateStr = row['created_date_time'].toString();
+            //   // Handle both "YYYY-MM-DD HH:MM:SS" and "YYYY-MM-DDTHH:MM:SS" formats
+            //   if (dateStr.contains(' ')) {
+            //     dateStr = dateStr.split(' ')[0];
+            //   } else if (dateStr.contains('T')) {
+            //     dateStr = dateStr.split('T')[0];
+            //   }
+            //   createdDt = DateTime.parse(dateStr);
+            // }
 
             if (row['modified_date_time'] != null &&
                 row['modified_date_time'].toString().isNotEmpty) {
@@ -883,10 +901,7 @@ class _TodayworkState extends State<Todaywork> {
           } catch (_) {}
 
           final bool isEligible =
-              (modifiedDt != null && modifiedDt.isBefore(sixMonthsAgo)) ||
-                  (modifiedDt == null &&
-                      createdDt != null &&
-                      createdDt.isBefore(sixMonthsAgo));
+              modifiedDt != null && modifiedDt.isBefore(sixMonthsAgo);
 
           if (!isEligible) continue;
 
@@ -897,7 +912,6 @@ class _TodayworkState extends State<Todaywork> {
           if (rawModifiedDate != null && rawModifiedDate.isNotEmpty) {
             try {
               String dateStr = rawModifiedDate;
-              // Handle both "YYYY-MM-DD HH:MM:SS" and "YYYY-MM-DDTHH:MM:SS" formats
               if (dateStr.contains(' ')) {
                 dateStr = dateStr.split(' ')[0];
               } else if (dateStr.contains('T')) {
@@ -929,14 +943,13 @@ class _TodayworkState extends State<Todaywork> {
           if (isModifiedToday) continue;
 
           // ------------------ LAST SURVEY DATE ------------------
-          final DateTime? lastSurveyDt = modifiedDt ?? createdDt;
-          final String lastSurveyDate = lastSurveyDt != null
-              ? '${lastSurveyDt.day}-${lastSurveyDt.month}-${lastSurveyDt.year}'
+          final String lastSurveyDate = modifiedDt != null
+              ? '${modifiedDt.day}-${modifiedDt.month}-${modifiedDt.year}'
               : '-';
 
           // ------------------ DISPLAY DATA ------------------
           final String name =
-              (info['headName'] ?? info['memberName'] ?? info['name'])
+              (info['headName'])
                   ?.toString()
                   .trim() ??
                   '';
@@ -976,13 +989,14 @@ class _TodayworkState extends State<Todaywork> {
 
           print('=== DEBUG: Adding Family Survey Item ===');
           print('Name: $name');
-          print('Raw Created Date: $rawCreatedDate');
           print('Raw Modified Date: $rawModifiedDate');
-          print('Last Survey Date: $lastSurveyDate');
+          print('Last Survey Date (based on modified date): $lastSurveyDate');
+          print('Note: Only modified date is checked for 6+ month eligibility');
           print('=====================================');
 
           items.add({
             'id': displayId,
+            'beneficiary_ref_key': uniqueKey,
             'household_ref_key': householdRefKey,
             'name': name,
             'age': ageText,
@@ -1245,6 +1259,7 @@ class _TodayworkState extends State<Todaywork> {
 
       print('=== DEBUG: Loading Family Survey Completed Items ===');
       print('Today String: $todayStr');
+      print('Filter Criteria: Created before 6 months AND modified today');
 
       for (final row in rows) {
         try {
@@ -1288,43 +1303,54 @@ class _TodayworkState extends State<Todaywork> {
           // ❌ If neither condition matches → skip
           if (!isHouseholdHead && !isFamilyHeadFromInfo) continue;
 
-          // ------------------ CHECK IF MODIFIED TODAY ------------------
-          bool isModifiedToday = false;
+          // ------------------ CHECK IF CREATED BEFORE 6 MONTHS AND MODIFIED TODAY ------------------
+          final sixMonthsAgo = DateTime.now().subtract(const Duration(days: 180));
+          bool meetsCriteria = false;
           final String? rawModifiedDate = row['modified_date_time']?.toString();
+          final String? rawCreatedDate = row['created_date_time']?.toString();
 
-          if (rawModifiedDate != null && rawModifiedDate.isNotEmpty) {
+          if (rawModifiedDate != null && rawModifiedDate.isNotEmpty && rawCreatedDate != null && rawCreatedDate.isNotEmpty) {
             try {
-              String dateStr = rawModifiedDate;
-              // Handle both "YYYY-MM-DD HH:MM:SS" and "YYYY-MM-DDTHH:MM:SS" formats
-              if (dateStr.contains(' ')) {
-                dateStr = dateStr.split(' ')[0];
-              } else if (dateStr.contains('T')) {
-                dateStr = dateStr.split('T')[0];
+              // Check if modified today
+              bool isModifiedToday = false;
+              String modifiedDateStr = rawModifiedDate;
+              if (modifiedDateStr.contains(' ')) {
+                modifiedDateStr = modifiedDateStr.split(' ')[0];
+              } else if (modifiedDateStr.contains('T')) {
+                modifiedDateStr = modifiedDateStr.split('T')[0];
               }
-              if (dateStr == todayStr) {
+              if (modifiedDateStr == todayStr) {
                 isModifiedToday = true;
-                print('📋 Record modified today - including in completed list');
               }
+
+              // Check if created before 6 months
+              bool createdBeforeSixMonths = false;
+              String createdDateStr = rawCreatedDate;
+              if (createdDateStr.contains(' ')) {
+                createdDateStr = createdDateStr.split(' ')[0];
+              } else if (createdDateStr.contains('T')) {
+                createdDateStr = createdDateStr.split('T')[0];
+              }
+              final createdDate = DateTime.parse(createdDateStr);
+              createdBeforeSixMonths = createdDate.isBefore(sixMonthsAgo);
+
+              meetsCriteria = isModifiedToday && createdBeforeSixMonths;
+
+              print('=== DEBUG: Family Survey Date Check ===');
+              print('Created Date: $rawCreatedDate');
+              print('Modified Date: $rawModifiedDate');
+              print('Six Months Ago: $sixMonthsAgo');
+              print('Created Before 6 Months: $createdBeforeSixMonths');
+              print('Modified Today: $isModifiedToday');
+              print('Meets Criteria: $meetsCriteria');
+              print('====================================');
             } catch (e) {
-              // If parsing fails, try to extract date part
-              if (rawModifiedDate.contains(' ')) {
-                final datePart = rawModifiedDate.split(' ')[0];
-                if (datePart == todayStr) {
-                  isModifiedToday = true;
-                  print('📋 Record modified today (fallback) - including in completed list');
-                }
-              } else if (rawModifiedDate.contains('T')) {
-                final datePart = rawModifiedDate.split('T')[0];
-                if (datePart == todayStr) {
-                  isModifiedToday = true;
-                  print('📋 Record modified today (fallback) - including in completed list');
-                }
-              }
+              print('Error parsing dates for family survey: $e');
             }
           }
 
-          // Only include if modified today
-          if (!isModifiedToday) continue;
+          // Only include if created before 6 months AND modified today
+          if (!meetsCriteria) continue;
 
           // ------------------ DATE PARSING ------------------
           DateTime? createdDt;
@@ -1355,14 +1381,13 @@ class _TodayworkState extends State<Todaywork> {
           } catch (_) {}
 
           // ------------------ LAST SURVEY DATE ------------------
-          final DateTime? lastSurveyDt = modifiedDt ?? createdDt;
-          final String lastSurveyDate = lastSurveyDt != null
-              ? '${lastSurveyDt.day}-${lastSurveyDt.month}-${lastSurveyDt.year}'
+          final String lastSurveyDate = modifiedDt != null
+              ? '${modifiedDt.day}-${modifiedDt.month}-${modifiedDt.year}'
               : '-';
 
           // ------------------ DISPLAY DATA ------------------
           final String name =
-              (info['headName'] ?? info['memberName'] ?? info['name'])
+              (info['headName'])
                   ?.toString()
                   .trim() ??
                   '';
@@ -1398,14 +1423,12 @@ class _TodayworkState extends State<Todaywork> {
             displayId = displayId.substring(displayId.length - 11);
           }
 
-          // ------------------ ADD ITEM ------------------
-          final rawCreatedDate = row['created_date_time']?.toString();
-
           print('=== DEBUG: Adding Family Survey Completed Item ===');
           print('Name: $name');
           print('Raw Created Date: $rawCreatedDate');
           print('Raw Modified Date: $rawModifiedDate');
           print('Last Survey Date: $lastSurveyDate');
+          print('Criteria: Created before 6 months AND modified today');
           print('=============================================');
 
           items.add({
@@ -1450,7 +1473,6 @@ class _TodayworkState extends State<Todaywork> {
       final List<Map<String, dynamic>> items = [];
       final Set<String> processedBeneficiaries = {};
 
-      // ---------- Fetch ANC due beneficiaries ----------
       String query = '''
       SELECT 
         mca.*,
@@ -1579,90 +1601,58 @@ class _TodayworkState extends State<Todaywork> {
           activeWindowEnd = fourthEnd;
         }
 
-        // ❌ Today is not in ANY ANC window
-        if (activeWindowStart == null || activeWindowEnd == null) {
+        // ---------- Check if today is within or after ANC windows ----------
+        String currentAncDueDate = '';
+        bool shouldIncludeInList = false;
+
+        print('🔍 DEBUG ANC Date Check for beneficiary: $beneficiaryKey');
+        print('   Today: ${_formatDate(todayDate)}');
+        print('   4th ANC End: ${fourthEnd != null ? _formatDate(fourthEnd!) : 'null'}');
+
+        if (activeWindowStart != null && activeWindowEnd != null) {
+          // Today is within an ANC window
+          shouldIncludeInList = true;
+          currentAncDueDate = _formatAncDateOnly(activeWindowEnd.toIso8601String());
+          print('   ✅ Today is within ANC window: ${_formatDate(activeWindowStart)} to ${_formatDate(activeWindowEnd)}');
+        } else {
+          // Check if today is after the 4th ANC window
+          final fourthStart = ancRanges['4th_anc_start'];
+          final fourthEnd = ancRanges['4th_anc_end'];
+
+          if (fourthEnd != null) {
+            final fourthEndDateOnly = DateTime(fourthEnd.year, fourthEnd.month, fourthEnd.day);
+            print('   Fourth End Date Only: ${_formatDate(fourthEndDateOnly)}');
+            print('   Is today after fourth end? ${todayDate.isAfter(fourthEndDateOnly)}');
+
+            if (todayDate.isAfter(fourthEndDateOnly)) {
+              // Today is after the 4th ANC window - include and show current date
+              shouldIncludeInList = true;
+              currentAncDueDate = _formatDate(todayDate);
+              print('   ✅ Today is after 4th ANC window, showing current date: $currentAncDueDate');
+            } else {
+              print('   ❌ Today is NOT after 4th ANC window');
+            }
+          } else {
+            print('   ❌ Fourth ANC end date is null');
+          }
+        }
+
+        // ❌ Don't include if not within window and not after 4th window
+        if (!shouldIncludeInList) {
           continue;
         }
 
-        // ---------- Check followup forms for ANC visits ----------
-        final ancFormKey = 'bt7gs9rl1a5d26mz'; // FollowupFormDataTable.ancDueRegistration
+        // ---------- Check if ANC followup form already exists ----------
+        final ancFormKey = 'bt7gs9rl1a5d26mz'; // ANC due registration form key
         final followupFormsQuery = await db.query(
           FollowupFormDataTable.table,
           where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
           whereArgs: [ancFormKey, beneficiaryKey],
-          orderBy: 'created_date_time DESC',
+          limit: 1, // Only need to check if at least one record exists
         );
 
-        bool shouldExcludeFromTodo = false;
-
         if (followupFormsQuery.isNotEmpty) {
-          print('🔍 Found ${followupFormsQuery.length} ANC followup forms for beneficiary $beneficiaryKey');
-
-          for (final form in followupFormsQuery) {
-            final createdTimeStr = form['created_date_time']?.toString();
-            if (createdTimeStr != null && createdTimeStr.isNotEmpty) {
-              try {
-                final createdTime = DateTime.parse(createdTimeStr);
-                final createdDate = DateTime(createdTime.year, createdTime.month, createdTime.day);
-
-                bool isInAnyAncWindow = false;
-
-                if (firstStart != null && firstEnd != null) {
-                  final windowStart = DateTime(firstStart.year, firstStart.month, firstStart.day);
-                  final windowEnd = DateTime(firstEnd.year, firstEnd.month, firstEnd.day);
-                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
-                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
-                    isInAnyAncWindow = true;
-                    print('✅ Form created within 1st ANC window: ${_formatDate(createdTime)}');
-                  }
-                }
-
-                if (!isInAnyAncWindow && secondStart != null && secondEnd != null) {
-                  final windowStart = DateTime(secondStart.year, secondStart.month, secondStart.day);
-                  final windowEnd = DateTime(secondEnd.year, secondEnd.month, secondEnd.day);
-                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
-                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
-                    isInAnyAncWindow = true;
-                    print('✅ Form created within 2nd ANC window: ${_formatDate(createdTime)}');
-                  }
-                }
-
-                if (!isInAnyAncWindow && thirdStart != null && thirdEnd != null) {
-                  final windowStart = DateTime(thirdStart.year, thirdStart.month, thirdStart.day);
-                  final windowEnd = DateTime(thirdEnd.year, thirdEnd.month, thirdEnd.day);
-                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
-                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
-                    isInAnyAncWindow = true;
-                    print('✅ Form created within 3rd ANC window: ${_formatDate(createdTime)}');
-                  }
-                }
-
-                if (!isInAnyAncWindow && fourthStart != null && fourthEnd != null) {
-                  final windowStart = DateTime(fourthStart.year, fourthStart.month, fourthStart.day);
-                  final windowEnd = DateTime(fourthEnd.year, fourthEnd.month, fourthEnd.day);
-                  if ((createdDate.isAtSameMomentAs(windowStart) || createdDate.isAfter(windowStart)) &&
-                      (createdDate.isAtSameMomentAs(windowEnd) || createdDate.isBefore(windowEnd))) {
-                    isInAnyAncWindow = true;
-                    print('✅ Form created within 4th ANC window: ${_formatDate(createdTime)}');
-                  }
-                }
-
-                if (isInAnyAncWindow) {
-                  shouldExcludeFromTodo = true;
-                  print('🚫 Excluding beneficiary $beneficiaryKey from ANC todo list - form created within ANC window');
-                  break;
-                }
-              } catch (e) {
-                print('⚠️ Error parsing created_date_time for form: $e');
-              }
-            }
-          }
-        } else {
-          print('ℹ️ No ANC followup forms found for beneficiary $beneficiaryKey - including in todo list');
-        }
-
-        // If any form was created within ANC window, exclude from todo list
-        if (shouldExcludeFromTodo) {
+          // ANC followup form already exists, exclude from todo list
           continue;
         }
 
@@ -1672,7 +1662,14 @@ class _TodayworkState extends State<Todaywork> {
           final DateTime? dob =
           DateTime.tryParse(info['dob'].toString().split('T')[0]);
           if (dob != null) {
-            ageText = '${today.year - dob.year} Y';
+            int age = today.year - dob.year;
+            // Check if birthday hasn't occurred yet this year
+            final todayMonthDay = DateTime(today.year, today.month, today.day);
+            final birthdayThisYear = DateTime(today.year, dob.month, dob.day);
+            if (todayMonthDay.isBefore(birthdayThisYear)) {
+              age--;
+            }
+            ageText = '${age} Y';
           }
         }
 
@@ -1693,9 +1690,8 @@ class _TodayworkState extends State<Todaywork> {
           'age': ageText,
           'gender': 'Female',
           'last Visit date':
-          _formatAncDateOnly(activeWindowStart.toIso8601String()),
-          'Current ANC last due date':
-          _formatAncDateOnly(activeWindowEnd.toIso8601String()),
+          activeWindowStart != null ? _formatAncDateOnly(activeWindowStart.toIso8601String()) : currentAncDueDate,
+          'Current ANC last due date': currentAncDueDate,
           'mobile': info['mobileNo'] ?? '-',
           'badge': 'ANC',
           'beneficiary_info': jsonEncode(info),
@@ -1710,362 +1706,6 @@ class _TodayworkState extends State<Todaywork> {
     } catch (e) {
       debugPrint('ANC load error: $e');
     }
-  }
-
-  Future<DateTime?> _extractLmpDate(Map<String, dynamic> data) async {
-    try {
-      // First try to get LMP from beneficiary_info (beneficiaries_new table)
-      dynamic rawInfo = data['beneficiary_info'];
-      Map<String, dynamic> info;
-
-      if (rawInfo is String && rawInfo.isNotEmpty) {
-        info = jsonDecode(rawInfo) as Map<String, dynamic>;
-      } else if (rawInfo is Map) {
-        info = Map<String, dynamic>.from(rawInfo as Map);
-      } else {
-        info = <String, dynamic>{};
-      }
-
-      final lmpRaw = info['lmp']?.toString();
-      if (lmpRaw != null && lmpRaw.isNotEmpty) {
-        String dateStr = lmpRaw;
-        if (dateStr.contains('T')) {
-          dateStr = dateStr.split('T')[0];
-        }
-        final lmpDate = DateTime.tryParse(dateStr);
-        if (lmpDate != null) {
-          print(
-            '✅ Found LMP date from beneficiaries_new: ${_formatDate(lmpDate)}',
-          );
-          return lmpDate;
-        }
-      }
-
-      // Fallback: try to get from _rawRow if available
-      final rawRow = data['_rawRow'] as Map<String, dynamic>?;
-      if (rawRow != null) {
-        rawInfo = rawRow['beneficiary_info'];
-        if (rawInfo is String && rawInfo.isNotEmpty) {
-          info = jsonDecode(rawInfo) as Map<String, dynamic>;
-        } else if (rawInfo is Map) {
-          info = Map<String, dynamic>.from(rawInfo as Map);
-        } else {
-          info = <String, dynamic>{};
-        }
-
-        final lmpRaw = info['lmp']?.toString();
-        if (lmpRaw != null && lmpRaw.isNotEmpty) {
-          String dateStr = lmpRaw;
-          if (dateStr.contains('T')) {
-            dateStr = dateStr.split('T')[0];
-          }
-          final lmpDate = DateTime.tryParse(dateStr);
-          if (lmpDate != null) {
-            print('✅ Found LMP date from _rawRow: ${_formatDate(lmpDate)}');
-            return lmpDate;
-          }
-        }
-      }
-
-      // If not found in beneficiaries_new, check followup forms
-      print('⚠️ No LMP found in beneficiaries_new, checking followup forms...');
-      final lmpFromFollowup = await _getLmpFromFollowupForm(data);
-      if (lmpFromFollowup != null) {
-        print(
-          '✅ Found LMP date from followup form: ${_formatDate(lmpFromFollowup)}',
-        );
-        return lmpFromFollowup;
-      }
-
-      print('⚠️ No LMP date found in beneficiaries_new or followup forms');
-      return null;
-    } catch (e) {
-      print('⚠️ Error extracting LMP date: $e');
-      return null;
-    }
-  }
-
-  Future<DateTime?> _getLmpFromFollowupForm(Map<String, dynamic> data) async {
-    try {
-      final benId = data['BeneficiaryID']?.toString() ??
-          data['unique_key']?.toString() ??
-          (data['_rawRow'] is Map
-              ? (data['_rawRow'] as Map)['unique_key']?.toString()
-              : null);
-
-      if (benId == null || benId.isEmpty) {
-        print('⚠️ Missing beneficiary ID for followup form LMP lookup');
-        print('   benId: $benId');
-        print('   data keys: ${data.keys}');
-        return null;
-      }
-
-      print('🔍 Looking for followup forms with benId: $benId');
-
-      final db = await DatabaseProvider.instance.database;
-      final formKey = FollowupFormDataTable
-          .formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue];
-
-      print('🔍 Querying with formKey: $formKey, benId: $benId');
-
-      final result = await db.query(
-        FollowupFormDataTable.table,
-        where: 'forms_ref_key = ? AND beneficiary_ref_key = ?',
-        whereArgs: [formKey, benId],
-        orderBy: 'created_date_time DESC',
-      );
-
-      print('📋 Found ${result.length} followup forms for beneficiary: $benId');
-
-      if (result.isEmpty) {
-        print('ℹ️ No eligible couple tracking due forms found for beneficiary: $benId');
-
-        final allForms = await db.query(
-          FollowupFormDataTable.table,
-          where: 'beneficiary_ref_key = ?',
-          whereArgs: [benId],
-          orderBy: 'created_date_time DESC',
-        );
-
-        print('🔍 DEBUG: All forms for beneficiary $benId:');
-        for (int i = 0; i < allForms.length; i++) {
-          final form = allForms[i];
-          print(
-            '   Form ${i + 1}: forms_ref_key=${form['forms_ref_key']}, '
-                'household_ref_key=${form['household_ref_key']}',
-          );
-        }
-
-        return null;
-      }
-
-      // ✅ try block is now properly closed above
-      for (int i = 0; i < result.length; i++) {
-        final form = result[i];
-        final formJsonStr = form['form_json']?.toString();
-        final formHouseholdId = form['household_ref_key']?.toString();
-        final formBeneficiaryId = form['beneficiary_ref_key']?.toString();
-
-        print(
-          '📄 Processing form ${i + 1}/${result.length}: '
-              'household=$formHouseholdId, beneficiary=$formBeneficiaryId',
-        );
-
-        if (formJsonStr == null || formJsonStr.isEmpty) {
-          print('⚠️ Empty form_json in form ${i + 1}, skipping');
-          continue;
-        }
-
-        try {
-          final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
-          print('🔍 Parsing followup form JSON ${i + 1}: ${root.keys}');
-
-          String? lmpStr;
-
-          /// ✅ EXISTING CONDITION
-          final trackingData = root['eligible_couple_tracking_due_from'];
-          if (trackingData is Map) {
-            final val = trackingData['lmp_date']?.toString();
-            if (val != null && val.isNotEmpty && val != 'null') {
-              lmpStr = val;
-              print(
-                '✅ Found LMP in eligible_couple_tracking_due_from (form ${i + 1}): "$lmpStr"',
-              );
-            }
-          }
-
-          /// ✅ NEW CONDITION
-          if ((lmpStr == null || lmpStr.isEmpty || lmpStr == 'null') &&
-              root['form_data'] is Map) {
-            final formData = root['form_data'] as Map<String, dynamic>;
-            final val = formData['lmp_date']?.toString();
-            if (val != null && val.isNotEmpty && val != '""' && val != 'null') {
-              lmpStr = val;
-              print('✅ Found LMP in form_data (form ${i + 1}): "$lmpStr"');
-            }
-          }
-
-          if (lmpStr != null && lmpStr.isNotEmpty && lmpStr != 'null') {
-            try {
-              if (lmpStr.contains('T')) {
-                final lmpDate = DateTime.parse(lmpStr);
-                print('✅ Successfully parsed LMP date (form ${i + 1}): $lmpDate');
-                return lmpDate;
-              }
-
-              final lmpDate = DateTime.parse(lmpStr);
-              print('✅ Successfully parsed LMP date (form ${i + 1}): $lmpDate');
-              return lmpDate;
-            } catch (e) {
-              print('⚠️ Error parsing LMP date "$lmpStr": $e');
-            }
-          }
-        } catch (e) {
-          print('⚠️ Error parsing followup form JSON (form ${i + 1}): $e');
-        }
-      }
-
-      print('ℹ️ No LMP date found in any eligible couple tracking due forms');
-      return null;
-    } catch (e) {
-      print('❌ Error loading LMP from followup form: $e');
-      return null;
-    }
-  }
-
-  String _getNextAncDueDate(DateTime? lmpDate, int visitCount) {
-    if (lmpDate == null) return AppLocalizations.of(context)!.na;
-
-    final t = AppLocalizations.of(context);
-    final now = DateTime.now();
-    final ancRanges = _calculateAncDateRanges(lmpDate);
-
-    String? nextAncKey;
-
-    if (visitCount == 0) {
-      // First ANC is due
-      nextAncKey = '1st_anc_end';
-    } else if (visitCount == 1) {
-      // Second ANC is due
-      nextAncKey = '2nd_anc_end';
-    } else if (visitCount == 2) {
-      // Third ANC is due
-      nextAncKey = '3rd_anc_end';
-    } else if (visitCount == 3) {
-      // Fourth ANC is due
-      nextAncKey = '4th_anc_end';
-    } else {
-      nextAncKey = '4th_anc_end';
-    }
-
-    if (nextAncKey != null && ancRanges.containsKey(nextAncKey)) {
-      final dueDate = ancRanges[nextAncKey];
-      if (dueDate != null) {
-        return _formatDate(dueDate);
-      }
-    }
-
-    return AppLocalizations.of(context)!.na;
-  }
-
-  Future<Map<String, dynamic>> _getVisitCount(String beneficiaryId) async {
-    try {
-      if (beneficiaryId.isEmpty) {
-        print('⚠️ Empty beneficiary ID provided to _getVisitCount');
-        return {'count': 0, 'isHighRisk': false};
-      }
-
-      print(
-        '🔍 Fetching visit count and high-risk status for beneficiary: $beneficiaryId',
-      );
-      final result = await LocalStorageDao.instance.getANCVisitCount(
-        beneficiaryId,
-      );
-      print('✅ Visit details for $beneficiaryId: $result');
-      return result;
-    } catch (e) {
-      print('❌ Error in _getVisitCount for $beneficiaryId: $e');
-      return {'count': 0, 'isHighRisk': false};
-    }
-  }
-
-  Future<int> _getVisitCountFromFollowupForm(String beneficiaryId) async {
-    try {
-      if (beneficiaryId.isEmpty) {
-        print('⚠️ Empty beneficiary ID provided to _getVisitCountFromFollowupForm');
-        return 0;
-      }
-
-      final db = await DatabaseProvider.instance.database;
-      final ancFormKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
-
-      if (ancFormKey.isEmpty) {
-        print('⚠️ ANC form key is empty');
-        return 0;
-      }
-
-      // Get the most recent ANC form for this beneficiary
-      final result = await db.query(
-        FollowupFormDataTable.table,
-        where: 'forms_ref_key = ? AND beneficiary_ref_key = ? ',
-        whereArgs: [ancFormKey, beneficiaryId],
-        orderBy: 'created_date_time DESC',
-        limit: 1,
-      );
-
-      if (result.isEmpty) {
-        print('ℹ️ No ANC followup forms found for beneficiary: $beneficiaryId');
-        return 0;
-      }
-
-      final formJsonStr = result.first['form_json']?.toString();
-      if (formJsonStr == null || formJsonStr.isEmpty) {
-        print('⚠️ No form_json found in followup form for beneficiary: $beneficiaryId');
-        return 0;
-      }
-
-      try {
-        final formJson = jsonDecode(formJsonStr) as Map<String, dynamic>;
-
-        final ancForm = formJson['anc_form'] as Map<String, dynamic>?;
-        if (ancForm != null) {
-          final visitCount = ancForm['anc_visit'] as int?;
-          if (visitCount != null) {
-            print('✅ Found visit count $visitCount in anc_form for beneficiary: $beneficiaryId');
-            return visitCount;
-          }
-        }
-
-        // Try alternative structure (form_data)
-        final formData = formJson['form_data'] as Map<String, dynamic>?;
-        if (formData != null) {
-          final visitCount = formData['anc_visit'] as int?;
-          if (visitCount != null) {
-            print('✅ Found visit count $visitCount in form_data for beneficiary: $beneficiaryId');
-            return visitCount;
-          }
-        }
-
-        // Try top level
-        final visitCount = formJson['anc_visit'] as int?;
-        if (visitCount != null) {
-          print('✅ Found visit count $visitCount at top level for beneficiary: $beneficiaryId');
-          return visitCount;
-        }
-
-        print('⚠️ No visit count found in followup form for beneficiary: $beneficiaryId');
-        return 0;
-      } catch (e) {
-        print('❌ Error parsing followup form JSON for beneficiary $beneficiaryId: $e');
-        return 0;
-      }
-    } catch (e) {
-      print('❌ Error in _getVisitCountFromFollowupForm for $beneficiaryId: $e');
-      return 0;
-    }
-  }
-
-
-  Map<String, DateTime> _calculateAncDateRanges(DateTime lmp) {
-    final ranges = <String, DateTime>{};
-
-    ranges['1st_anc_start'] = lmp;
-    ranges['1st_anc_end'] = _dateAfterWeeks(lmp, 12);
-
-    ranges['2nd_anc_start'] = _dateAfterWeeks(lmp, 14);
-    ranges['2nd_anc_end'] = _dateAfterWeeks(lmp, 24);
-    ranges['3rd_anc_start'] = _dateAfterWeeks(lmp, 26);
-    ranges['3rd_anc_end'] = _dateAfterWeeks(lmp, 34);
-
-    ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
-    ranges['4th_anc_end'] = _calculateEdd(lmp);
-
-    ranges['pmsma_start'] = ranges['1st_anc_end']!.add(const Duration(days: 1));
-    ranges['pmsma_end'] = ranges['2nd_anc_start']!.subtract(
-      const Duration(days: 1),
-    );
-
-    return ranges;
   }
 
 
@@ -2338,6 +1978,366 @@ class _TodayworkState extends State<Todaywork> {
       setState(() => _isLoading = false);
     }
   }
+
+  Future<DateTime?> _extractLmpDate(Map<String, dynamic> data) async {
+    try {
+      // First try to get LMP from beneficiary_info (beneficiaries_new table)
+      dynamic rawInfo = data['beneficiary_info'];
+      Map<String, dynamic> info;
+
+      if (rawInfo is String && rawInfo.isNotEmpty) {
+        info = jsonDecode(rawInfo) as Map<String, dynamic>;
+      } else if (rawInfo is Map) {
+        info = Map<String, dynamic>.from(rawInfo as Map);
+      } else {
+        info = <String, dynamic>{};
+      }
+
+      final lmpRaw = info['lmp']?.toString();
+      if (lmpRaw != null && lmpRaw.isNotEmpty) {
+        String dateStr = lmpRaw;
+        if (dateStr.contains('T')) {
+          dateStr = dateStr.split('T')[0];
+        }
+        final lmpDate = DateTime.tryParse(dateStr);
+        if (lmpDate != null) {
+          print(
+            '✅ Found LMP date from beneficiaries_new: ${_formatDate(lmpDate)}',
+          );
+          return lmpDate;
+        }
+      }
+
+      // Fallback: try to get from _rawRow if available
+      final rawRow = data['_rawRow'] as Map<String, dynamic>?;
+      if (rawRow != null) {
+        rawInfo = rawRow['beneficiary_info'];
+        if (rawInfo is String && rawInfo.isNotEmpty) {
+          info = jsonDecode(rawInfo) as Map<String, dynamic>;
+        } else if (rawInfo is Map) {
+          info = Map<String, dynamic>.from(rawInfo as Map);
+        } else {
+          info = <String, dynamic>{};
+        }
+
+        final lmpRaw = info['lmp']?.toString();
+        if (lmpRaw != null && lmpRaw.isNotEmpty) {
+          String dateStr = lmpRaw;
+          if (dateStr.contains('T')) {
+            dateStr = dateStr.split('T')[0];
+          }
+          final lmpDate = DateTime.tryParse(dateStr);
+          if (lmpDate != null) {
+            print('✅ Found LMP date from _rawRow: ${_formatDate(lmpDate)}');
+            return lmpDate;
+          }
+        }
+      }
+
+      // If not found in beneficiaries_new, check followup forms
+      print('⚠️ No LMP found in beneficiaries_new, checking followup forms...');
+      final lmpFromFollowup = await _getLmpFromFollowupForm(data);
+      if (lmpFromFollowup != null) {
+        print(
+          '✅ Found LMP date from followup form: ${_formatDate(lmpFromFollowup)}',
+        );
+        return lmpFromFollowup;
+      }
+
+      print('⚠️ No LMP date found in beneficiaries_new or followup forms');
+      return null;
+    } catch (e) {
+      print('⚠️ Error extracting LMP date: $e');
+      return null;
+    }
+  }
+
+  Future<DateTime?> _getLmpFromFollowupForm(Map<String, dynamic> data) async {
+    try {
+      final benId = data['BeneficiaryID']?.toString() ??
+          data['unique_key']?.toString() ??
+          (data['_rawRow'] is Map
+              ? (data['_rawRow'] as Map)['unique_key']?.toString()
+              : null);
+
+      if (benId == null || benId.isEmpty) {
+        print('⚠️ Missing beneficiary ID for followup form LMP lookup');
+        print('   benId: $benId');
+        print('   data keys: ${data.keys}');
+        return null;
+      }
+
+      print('🔍 Looking for followup forms with benId: $benId');
+
+      final db = await DatabaseProvider.instance.database;
+      final formKey = FollowupFormDataTable
+          .formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue];
+
+      print('🔍 Querying with formKey: $formKey, benId: $benId');
+
+      final result = await db.query(
+        FollowupFormDataTable.table,
+        where: 'forms_ref_key = ? AND beneficiary_ref_key = ?',
+        whereArgs: [formKey, benId],
+        orderBy: 'created_date_time DESC',
+      );
+
+      print('📋 Found ${result.length} followup forms for beneficiary: $benId');
+
+      if (result.isEmpty) {
+        print('ℹ️ No eligible couple tracking due forms found for beneficiary: $benId');
+
+        final allForms = await db.query(
+          FollowupFormDataTable.table,
+          where: 'beneficiary_ref_key = ?',
+          whereArgs: [benId],
+          orderBy: 'created_date_time DESC',
+        );
+
+        print('🔍 DEBUG: All forms for beneficiary $benId:');
+        for (int i = 0; i < allForms.length; i++) {
+          final form = allForms[i];
+          print(
+            '   Form ${i + 1}: forms_ref_key=${form['forms_ref_key']}, '
+                'household_ref_key=${form['household_ref_key']}',
+          );
+        }
+
+        return null;
+      }
+
+      // ✅ try block is now properly closed above
+      for (int i = 0; i < result.length; i++) {
+        final form = result[i];
+        final formJsonStr = form['form_json']?.toString();
+        final formHouseholdId = form['household_ref_key']?.toString();
+        final formBeneficiaryId = form['beneficiary_ref_key']?.toString();
+
+        print(
+          '📄 Processing form ${i + 1}/${result.length}: '
+              'household=$formHouseholdId, beneficiary=$formBeneficiaryId',
+        );
+
+        if (formJsonStr == null || formJsonStr.isEmpty) {
+          print('⚠️ Empty form_json in form ${i + 1}, skipping');
+          continue;
+        }
+
+        try {
+          final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
+          print('🔍 Parsing followup form JSON ${i + 1}: ${root.keys}');
+
+          String? lmpStr;
+
+          /// ✅ EXISTING CONDITION
+          final trackingData = root['eligible_couple_tracking_due_from'];
+          if (trackingData is Map) {
+            final val = trackingData['lmp_date']?.toString();
+            if (val != null && val.isNotEmpty && val != 'null') {
+              lmpStr = val;
+              print(
+                '✅ Found LMP in eligible_couple_tracking_due_from (form ${i + 1}): "$lmpStr"',
+              );
+            }
+          }
+
+          /// ✅ NEW CONDITION
+          if ((lmpStr == null || lmpStr.isEmpty || lmpStr == 'null') &&
+              root['form_data'] is Map) {
+            final formData = root['form_data'] as Map<String, dynamic>;
+            final val = formData['lmp_date']?.toString();
+            if (val != null && val.isNotEmpty && val != '""' && val != 'null') {
+              lmpStr = val;
+              print('✅ Found LMP in form_data (form ${i + 1}): "$lmpStr"');
+            }
+          }
+
+          if (lmpStr != null && lmpStr.isNotEmpty && lmpStr != 'null') {
+            try {
+              if (lmpStr.contains('T')) {
+                final lmpDate = DateTime.parse(lmpStr);
+                print('✅ Successfully parsed LMP date (form ${i + 1}): $lmpDate');
+                return lmpDate;
+              }
+
+              final lmpDate = DateTime.parse(lmpStr);
+              print('✅ Successfully parsed LMP date (form ${i + 1}): $lmpDate');
+              return lmpDate;
+            } catch (e) {
+              print('⚠️ Error parsing LMP date "$lmpStr": $e');
+            }
+          }
+        } catch (e) {
+          print('⚠️ Error parsing followup form JSON (form ${i + 1}): $e');
+        }
+      }
+
+      print('ℹ️ No LMP date found in any eligible couple tracking due forms');
+      return null;
+    } catch (e) {
+      print('❌ Error loading LMP from followup form: $e');
+      return null;
+    }
+  }
+
+
+  String _getNextAncDueDate(DateTime? lmpDate, int visitCount) {
+    if (lmpDate == null) return AppLocalizations.of(context)!.na;
+
+    final t = AppLocalizations.of(context);
+    final now = DateTime.now();
+    final ancRanges = _calculateAncDateRanges(lmpDate);
+
+    String? nextAncKey;
+
+    if (visitCount == 0) {
+      // First ANC is due
+      nextAncKey = '1st_anc_end';
+    } else if (visitCount == 1) {
+      // Second ANC is due
+      nextAncKey = '2nd_anc_end';
+    } else if (visitCount == 2) {
+      // Third ANC is due
+      nextAncKey = '3rd_anc_end';
+    } else if (visitCount == 3) {
+      // Fourth ANC is due
+      nextAncKey = '4th_anc_end';
+    } else {
+      nextAncKey = '4th_anc_end';
+    }
+
+    if (nextAncKey != null && ancRanges.containsKey(nextAncKey)) {
+      final dueDate = ancRanges[nextAncKey];
+      if (dueDate != null) {
+        return _formatDate(dueDate);
+      }
+    }
+
+    return AppLocalizations.of(context)!.na;
+  }
+
+  Future<Map<String, dynamic>> _getVisitCount(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiary ID provided to _getVisitCount');
+        return {'count': 0, 'isHighRisk': false};
+      }
+
+      print(
+        '🔍 Fetching visit count and high-risk status for beneficiary: $beneficiaryId',
+      );
+      final result = await LocalStorageDao.instance.getANCVisitCount(
+        beneficiaryId,
+      );
+      print('✅ Visit details for $beneficiaryId: $result');
+      return result;
+    } catch (e) {
+      print('❌ Error in _getVisitCount for $beneficiaryId: $e');
+      return {'count': 0, 'isHighRisk': false};
+    }
+  }
+
+  Future<int> _getVisitCountFromFollowupForm(String beneficiaryId) async {
+    try {
+      if (beneficiaryId.isEmpty) {
+        print('⚠️ Empty beneficiary ID provided to _getVisitCountFromFollowupForm');
+        return 0;
+      }
+
+      final db = await DatabaseProvider.instance.database;
+      final ancFormKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
+
+      if (ancFormKey.isEmpty) {
+        print('⚠️ ANC form key is empty');
+        return 0;
+      }
+
+      // Get the most recent ANC form for this beneficiary
+      final result = await db.query(
+        FollowupFormDataTable.table,
+        where: 'forms_ref_key = ? AND beneficiary_ref_key = ? ',
+        whereArgs: [ancFormKey, beneficiaryId],
+        orderBy: 'created_date_time DESC',
+        limit: 1,
+      );
+
+      if (result.isEmpty) {
+        print('ℹ️ No ANC followup forms found for beneficiary: $beneficiaryId');
+        return 0;
+      }
+
+      final formJsonStr = result.first['form_json']?.toString();
+      if (formJsonStr == null || formJsonStr.isEmpty) {
+        print('⚠️ No form_json found in followup form for beneficiary: $beneficiaryId');
+        return 0;
+      }
+
+      try {
+        final formJson = jsonDecode(formJsonStr) as Map<String, dynamic>;
+
+        final ancForm = formJson['anc_form'] as Map<String, dynamic>?;
+        if (ancForm != null) {
+          final visitCount = ancForm['anc_visit'] as int?;
+          if (visitCount != null) {
+            print('✅ Found visit count $visitCount in anc_form for beneficiary: $beneficiaryId');
+            return visitCount;
+          }
+        }
+
+        // Try alternative structure (form_data)
+        final formData = formJson['form_data'] as Map<String, dynamic>?;
+        if (formData != null) {
+          final visitCount = formData['anc_visit'] as int?;
+          if (visitCount != null) {
+            print('✅ Found visit count $visitCount in form_data for beneficiary: $beneficiaryId');
+            return visitCount;
+          }
+        }
+
+        // Try top level
+        final visitCount = formJson['anc_visit'] as int?;
+        if (visitCount != null) {
+          print('✅ Found visit count $visitCount at top level for beneficiary: $beneficiaryId');
+          return visitCount;
+        }
+
+        print('⚠️ No visit count found in followup form for beneficiary: $beneficiaryId');
+        return 0;
+      } catch (e) {
+        print('❌ Error parsing followup form JSON for beneficiary $beneficiaryId: $e');
+        return 0;
+      }
+    } catch (e) {
+      print('❌ Error in _getVisitCountFromFollowupForm for $beneficiaryId: $e');
+      return 0;
+    }
+  }
+
+
+  Map<String, DateTime> _calculateAncDateRanges(DateTime lmp) {
+    final ranges = <String, DateTime>{};
+
+    ranges['1st_anc_start'] = lmp;
+    ranges['1st_anc_end'] = _dateAfterWeeks(lmp, 12);
+
+    ranges['2nd_anc_start'] = _dateAfterWeeks(lmp, 14);
+    ranges['2nd_anc_end'] = _dateAfterWeeks(lmp, 24);
+    ranges['3rd_anc_start'] = _dateAfterWeeks(lmp, 26);
+    ranges['3rd_anc_end'] = _dateAfterWeeks(lmp, 34);
+
+    ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
+    ranges['4th_anc_end'] = _calculateEdd(lmp);
+
+    ranges['pmsma_start'] = ranges['1st_anc_end']!.add(const Duration(days: 1));
+    ranges['pmsma_end'] = ranges['2nd_anc_start']!.subtract(
+      const Duration(days: 1),
+    );
+
+    return ranges;
+  }
+
+
+
 
   Future<int> _getHbncVisitCountFromHBNCList(String beneficiaryId) async {
     try {
@@ -2907,12 +2907,12 @@ class _TodayworkState extends State<Todaywork> {
             continue;
           }
 
-          // 🔹 Must have tracking_due
+
           final hasTrackingDue =
           await _hasTrackingDueStatus(beneficiaryRefKey);
           if (!hasTrackingDue) continue;
 
-          // 🔹 6 MONTH EXCLUSION LOGIC
+
           final trackingDueDate =
           await _getLatestTrackingDueDate(beneficiaryRefKey);
 
@@ -2959,6 +2959,12 @@ class _TodayworkState extends State<Todaywork> {
 
           final hhId = row['household_ref_key']?.toString() ?? '';
 
+          // Get last visit date from child_care_activities for infant_pnc or tracking_due states
+          final lastVisitDate = await _getLatestTrackingDueDate(beneficiaryRefKey);
+          final formattedLastVisitDate = lastVisitDate != null
+              ? _formatDateOnly(lastVisitDate.toIso8601String())
+              : '-';
+
           items.add({
             'id': _last11(beneficiaryRefKey),
             'household_ref_key': hhId,
@@ -2969,6 +2975,7 @@ class _TodayworkState extends State<Todaywork> {
             'gender': gender,
             'mobile': mobile,
             'badge': 'RI',
+            'last Visit date': formattedLastVisitDate,
           });
         } catch (e) {
           print('⚠️ Beneficiary error: $e');
@@ -3048,13 +3055,21 @@ class _TodayworkState extends State<Todaywork> {
 
     final result = await db.rawQuery(
       '''
+    WITH ranked AS (
+      SELECT
+          cca.created_date_time,
+          ROW_NUMBER() OVER (
+              PARTITION BY cca.beneficiary_ref_key
+              ORDER BY datetime(cca.created_date_time) DESC, cca.rowid DESC
+          ) AS rn
+      FROM child_care_activities cca
+      WHERE cca.is_deleted = 0
+        AND cca.beneficiary_ref_key = ?
+        AND cca.child_care_state IN ('tracking_due', 'infant_pnc')
+    )
     SELECT created_date_time
-    FROM child_care
-    WHERE beneficiaries_registration_ref_key = ?
-      AND child_care_type = 'tracking_due'
-      AND is_deleted = 0
-    ORDER BY datetime(created_date_time) DESC
-    LIMIT 1
+    FROM ranked
+    WHERE rn = 1
     ''',
       [beneficiaryKey],
     );
