@@ -326,7 +326,7 @@ class _RegisterChildScreenState extends State<RegisterChildScreen> {
               '';
 
           final fatherName =
-              info['fatherName']?.toString() ?? '';
+              info['fatherName']?.toString() ?? info['spouseName']?.toString() ?? '';
           final motherName =
               info['motherName']?.toString() ?? '';
           final mobileNo =

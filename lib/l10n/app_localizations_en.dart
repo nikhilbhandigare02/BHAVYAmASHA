@@ -2634,7 +2634,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get choose => 'choose';
 
   @override
-  String get headOfFamily => 'Head of the family';
+  String get headOfFamily => 'Family Head';
 
   @override
   String get casteGeneral => 'General';

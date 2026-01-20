@@ -430,7 +430,6 @@ class _AncvisitformState extends State<Ancvisitform> {
           }
         }
 
-        // If not found in beneficiaries_new, try households table
         if (!houseNoFound) {
           print('🔍 House number not found in beneficiaries_new, checking households table...');
           final householdResult = await db.query(
@@ -474,7 +473,83 @@ class _AncvisitformState extends State<Ancvisitform> {
         }
 
         if (!houseNoFound) {
-          print('⚠️ House number not found in either beneficiaries_new or households table');
+          print('🔍 House number not found in beneficiaries_new or households address, checking household_info column...');
+          
+          // Check household_info column as fallback
+          final householdInfoResult = await db.query(
+            'households',
+            where: 'unique_key = ?',
+            whereArgs: [householdRefKey],
+          );
+
+          if (householdInfoResult.isNotEmpty) {
+            for (final household in householdInfoResult) {
+              try {
+                final householdInfoRaw = household['household_info'];
+                if (householdInfoRaw != null && householdInfoRaw.toString().isNotEmpty) {
+                  Map<String, dynamic> householdInfo = {};
+                  
+                  if (householdInfoRaw is Map<String, dynamic>) {
+                    householdInfo = householdInfoRaw;
+                  } else if (householdInfoRaw is String) {
+                    try {
+                      householdInfo = jsonDecode(householdInfoRaw) as Map<String, dynamic>;
+                    } catch (e) {
+                      print('Error parsing household_info JSON string: $e');
+                      continue;
+                    }
+                  }
+
+                  // Extract house number from family_head_details
+                  if (householdInfo.containsKey('family_head_details')) {
+                    final familyHeadDetails = householdInfo['family_head_details'];
+                    if (familyHeadDetails is Map<String, dynamic>) {
+                      final houseNoFromInfo = familyHeadDetails['house_no']?.toString()?.trim();
+                      if (houseNoFromInfo != null && houseNoFromInfo.isNotEmpty && houseNoFromInfo != 'null') {
+                        _bloc.add(HouseNumberChanged(houseNoFromInfo));
+                        houseNo = houseNoFromInfo;
+                        houseNoFound = true;
+                        print('✅ Found house number in household_info.family_head_details: $houseNoFromInfo');
+                        break;
+                      }
+                    }
+                  }
+
+                  // Also check in all_members array if not found in family_head_details
+                  if (!houseNoFound && householdInfo.containsKey('all_members')) {
+                    final allMembers = householdInfo['all_members'];
+                    if (allMembers is List) {
+                      for (final member in allMembers) {
+                        if (member is Map<String, dynamic>) {
+                          // Check memberDetails
+                          if (member.containsKey('memberDetails')) {
+                            final memberDetails = member['memberDetails'];
+                            if (memberDetails is Map<String, dynamic>) {
+                              final houseNoFromMember = memberDetails['house_no']?.toString()?.trim();
+                              if (houseNoFromMember != null && houseNoFromMember.isNotEmpty && houseNoFromMember != 'null') {
+                                _bloc.add(HouseNumberChanged(houseNoFromMember));
+                                houseNo = houseNoFromMember;
+                                houseNoFound = true;
+                                print('✅ Found house number in household_info.all_members.memberDetails: $houseNoFromMember');
+                                break;
+                              }
+                            }
+                          }
+                        }
+                      }
+                      if (houseNoFound) break;
+                    }
+                  }
+                }
+              } catch (e) {
+                print('Error parsing household_info data: $e');
+              }
+            }
+          }
+        }
+
+        if (!houseNoFound) {
+          print('⚠️ House number not found in beneficiaries_new, households address, or household_info');
         }
       }
     } catch (e) {

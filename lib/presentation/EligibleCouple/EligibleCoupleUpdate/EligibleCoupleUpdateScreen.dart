@@ -306,6 +306,7 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                 items: const [
                                   'Self',
                                   'Husband',
+                                  'Family Head',
                                   'Wife',
                                   'Father',
                                   'Mother',
@@ -325,6 +326,8 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                     case 'Husband':
                                       return '${t!.husbandLabel} ';
 
+                                    case 'Family Head':
+                                      return '${t!.headOfFamily} ';
                                     case 'Mother':
                                       return '${t!.mother} ';
 

@@ -873,7 +873,7 @@
   "birthCertificateNumberLabel": "Birth certificate number",
   "weightGramLabel": "Weight (g)",
   "choose": "choose",
-  "headOfFamily": "Head of the family",
+  "headOfFamily": "Family Head",
   "casteGeneral": "General",
   "casteObc": "OBC",
   "casteSc": "SC",
@@ -2632,7 +2632,7 @@
   "dontNO": "Don't Know",
   "dateOfvisitTracking":"Date of visit",
   "motherNameLabelchild":"Mother name",
-  "fatherNameLabelchild":"Father name",
+  "fatherNameLabelchild":"Father name"
 
 
 
