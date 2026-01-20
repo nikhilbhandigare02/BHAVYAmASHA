@@ -300,9 +300,9 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             .toString()
             .toLowerCase();
         if (kOut == 'yes') {
-          info['houseKitchen'] = 'No';
-        } else if (kOut == 'no') {
           info['houseKitchen'] = 'Yes';
+        } else if (kOut == 'no') {
+          info['houseKitchen'] = 'No';
         } else {
           info['houseKitchen'] = '';
         }

@@ -6,6 +6,7 @@ import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/core/widgets/TextField/TextField.dart';
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/HouseHoldDetails_Amenities/bloc/household_details_amenities_bloc.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
+import '../../../core/widgets/MultiSelect/MultiSelect.dart';
 import '../../../l10n/app_localizations.dart';
 
 class HouseHoldAmenities extends StatelessWidget {
@@ -89,11 +90,17 @@ class HouseHoldAmenities extends StatelessWidget {
                       .where((e) => e.isNotEmpty)
                       .toSet();
 
+
+                  List<String> fuels = state.cookingFuel
+                      .split(',')
+                      .map((e) => e.trim())
+                      .toList();
+
                   final displayText = selected.isEmpty
                       ? l.select
                       : selected.map(labelFor).join(', ');
 
-                  Future<void> openFuelDialog() async {
+                /*  Future<void> openFuelDialog() async {
                     final current = Set<String>.from(selected);
 
                     await showDialog<void>(
@@ -197,12 +204,12 @@ class HouseHoldAmenities extends StatelessWidget {
                         );
                       },
                     );
-                  }
-
+                  }*/
+                  final l10n = AppLocalizations.of(context);
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
+                     /* Padding(
                         padding: const EdgeInsets.only(top: 4.0),
                         child: Text(
                           l.cookingFuelTypeLabel,
@@ -211,8 +218,62 @@ class HouseHoldAmenities extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+                      ),*/
+                      MultiSelect<String>(
+                        items:
+                        const [
+                          'LPG',
+                          'Firewood',
+                          'Coal',
+                          'Kerosene',
+                          'Crop Residue',
+                          'Drug Cake',
+                          'Other',
+                        ]
+                            .map(
+                              (risk) => MultiSelectItem<String>(
+                            label: () {
+                              switch (risk) {case 'LPG':
+                                return l.fuelLpg;
+                                case 'Firewood':
+                                  return l.fuelFirewood;
+                                case 'Coal':
+                                  return l.fuelCoal;
+                                case 'Kerosene':
+                                  return l.fuelKerosene;
+                                case 'Crop Residue':
+                                  return l.fuelCropResidue;
+                                case 'Drug Cake':
+                                  return l.fuelDungCake;
+                                case 'Other':
+                                  return l.fuelOther;
+                                default:
+                                  return risk;
+                              }
+                            }(),
+                            value: risk,
+                          ),
+                        )
+                            .toList(),
+                        selectedValues: fuels,
+                        labelText: l.cookingFuelTypeLabel,
+                        hintText: l.cookingFuelTypeLabel,
+                        onSelectionChanged: (values) {
+
+                          final joined = values.join(', ');
+                          bloc.add(
+                            CookingFuelTypeChange(cookingFuel: joined),
+                          );
+                         // Navigator.of(ctx).pop();
+                         /* bloc.add(
+                            SelectedRisksChanged(
+                              List<String>.from(values),
+                            ),
+                          );*/
+                        },
                       ),
-                      InkWell(
+
+                     /* InkWell(
                         onTap: openFuelDialog,
                         child: InputDecorator(
                           decoration: const InputDecoration(
@@ -239,7 +300,7 @@ class HouseHoldAmenities extends StatelessWidget {
                             ],
                           ),
                         ),
-                      ),
+                      ),*/
                       Divider(color: AppColors.divider, thickness: 0.8),
                       if (selected.contains('Other'))
                         CustomTextField(
