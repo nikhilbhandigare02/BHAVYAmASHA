@@ -79,14 +79,109 @@ class _DeseasedListState extends State<DeseasedList> {
             : [],
       );
 
+      Map<String, dynamic> asMap(dynamic value) {
+        if (value == null) return <String, dynamic>{};
+        if (value is Map) {
+          return Map<String, dynamic>.from(value as Map);
+        }
+        final s = value.toString();
+        if (s.trim().isEmpty || s == 'null') return <String, dynamic>{};
+        try {
+          final decoded = jsonDecode(s);
+          if (decoded is Map) {
+            return Map<String, dynamic>.from(decoded as Map);
+          }
+        } catch (_) {}
+        return <String, dynamic>{};
+      }
+
+      final List<String> beneficiaryKeys = deceasedBeneficiaries
+          .map((e) => e['unique_key']?.toString() ?? '')
+          .where((e) => e.trim().isNotEmpty)
+          .toSet()
+          .toList();
+
+      final Map<String, Map<String, dynamic>> latestDeathFormByBeneficiary = {};
+      if (beneficiaryKeys.isNotEmpty) {
+        final placeholders = List.filled(beneficiaryKeys.length, '?').join(',');
+        final childTrackingRefKey =
+            FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.childTrackingDue] ??
+                '30bycxe4gv7fqnt6';
+
+        final rows = await db.rawQuery(
+          '''
+          SELECT beneficiary_ref_key, form_json, created_date_time, modified_date_time, id
+          FROM ${FollowupFormDataTable.table}
+          WHERE is_deleted = 0
+            AND forms_ref_key = ?
+            AND beneficiary_ref_key IN ($placeholders)
+          ORDER BY beneficiary_ref_key ASC,
+                   COALESCE(modified_date_time, created_date_time) DESC,
+                   id DESC
+          ''',
+          [childTrackingRefKey, ...beneficiaryKeys],
+        );
+
+        for (final row in rows) {
+          final beneficiaryRefKey = row['beneficiary_ref_key']?.toString();
+          if (beneficiaryRefKey == null || beneficiaryRefKey.trim().isEmpty) continue;
+          if (latestDeathFormByBeneficiary.containsKey(beneficiaryRefKey)) continue;
+          final formJson = asMap(row['form_json']);
+          latestDeathFormByBeneficiary[beneficiaryRefKey] = formJson;
+        }
+      }
 
       final transformed = deceasedBeneficiaries.map((beneficiary) {
-        final beneficiaryInfo =
-        jsonDecode(beneficiary['beneficiary_info']?.toString() ?? '{}');
-        final householdData =
-        jsonDecode(beneficiary['hh_info']?.toString() ?? '{}');
-        final deathDetails =
-        jsonDecode(beneficiary['death_details']?.toString() ?? '{}');
+        final beneficiaryInfo = asMap(beneficiary['beneficiary_info']);
+        final householdData = asMap(beneficiary['hh_info']);
+
+        final rawDeathDetails = asMap(beneficiary['death_details']);
+        final bool hasDbDeathDetails = rawDeathDetails.isNotEmpty;
+
+        final beneficiaryKey = beneficiary['unique_key']?.toString() ?? '';
+        final latestFormJson =
+            latestDeathFormByBeneficiary[beneficiaryKey] ?? const <String, dynamic>{};
+        final latestFormData = asMap(latestFormJson['form_data']);
+        final latestDeathSource = latestFormData.isNotEmpty ? latestFormData : latestFormJson;
+
+        final Map<String, dynamic> deathDetails = {
+          ...rawDeathDetails,
+          if (!hasDbDeathDetails) ...{
+            'date_of_death': beneficiaryInfo['date_of_death'],
+            'death_place': beneficiaryInfo['death_place'],
+            'reason_of_death': beneficiaryInfo['reason_of_death'],
+            'other_reason_for_death': beneficiaryInfo['other_reason_for_death'],
+            'cause_of_death': beneficiaryInfo['cause_of_death'],
+            'probable_cause_of_death': beneficiaryInfo['probable_cause_of_death'],
+          },
+          if (!hasDbDeathDetails) ...{
+            if ((beneficiaryInfo['date_of_death'] == null ||
+                beneficiaryInfo['date_of_death'].toString().trim().isEmpty) &&
+                latestDeathSource['date_of_death'] != null)
+              'date_of_death': latestDeathSource['date_of_death'],
+            if ((beneficiaryInfo['death_place'] == null ||
+                beneficiaryInfo['death_place'].toString().trim().isEmpty) &&
+                latestDeathSource['death_place'] != null)
+              'death_place': latestDeathSource['death_place'],
+            if ((beneficiaryInfo['reason_of_death'] == null ||
+                beneficiaryInfo['reason_of_death'].toString().trim().isEmpty) &&
+                latestDeathSource['reason_of_death'] != null)
+              'reason_of_death': latestDeathSource['reason_of_death'],
+            if ((beneficiaryInfo['other_reason_for_death'] == null ||
+                beneficiaryInfo['other_reason_for_death'].toString().trim().isEmpty) &&
+                latestDeathSource['other_reason_for_death'] != null)
+              'other_reason_for_death': latestDeathSource['other_reason_for_death'],
+            if ((beneficiaryInfo['cause_of_death'] == null ||
+                beneficiaryInfo['cause_of_death'].toString().trim().isEmpty) &&
+                latestDeathSource['cause_of_death'] != null)
+              'cause_of_death': latestDeathSource['cause_of_death'],
+            if ((beneficiaryInfo['probable_cause_of_death'] == null ||
+                beneficiaryInfo['probable_cause_of_death'].toString().trim().isEmpty) &&
+                latestDeathSource['probable_cause_of_death'] != null)
+              'probable_cause_of_death': latestDeathSource['probable_cause_of_death'],
+          },
+        };
+
 
         String getValue(dynamic value, [String? defaultValue]) {
           if (value == null ||
@@ -95,6 +190,11 @@ class _DeseasedListState extends State<DeseasedList> {
             return defaultValue ?? t?.na ?? 'N/A';
           }
           return value.toString();
+        }
+
+        String _capitalizeFirst(String text) {
+          if (text.isEmpty) return text;
+          return text[0].toUpperCase() + text.substring(1).toLowerCase();
         }
 
         String formatDate(dynamic dateValue, [String defaultValue = 'N/A']) {
@@ -109,15 +209,7 @@ class _DeseasedListState extends State<DeseasedList> {
           }
         }
 
-        String getAge() {
-          if (beneficiaryInfo['years'] != null) {
-            return getValue(beneficiaryInfo['years']);
-          } else if (beneficiaryInfo['months'] != null) {
-            return getValue(beneficiaryInfo['months']);
-          } else if (beneficiaryInfo['days'] != null) {
-            return getValue(beneficiaryInfo['days']);
-          }
-
+        String   getAge() {
           if (beneficiaryInfo['dob'] != null) {
             try {
               final dob = DateTime.parse(beneficiaryInfo['dob']);
@@ -167,12 +259,55 @@ class _DeseasedListState extends State<DeseasedList> {
               // Use death date for calculation, fallback to current date if death date not available
               final referenceDate = deathDate ?? DateTime.now();
 
-              int age = referenceDate.year - dob.year;
-              if (referenceDate.month < dob.month ||
-                  (referenceDate.month == dob.month && referenceDate.day < dob.day)) {
-                age--;
+              // Calculate years with remainder
+              int years = referenceDate.year - dob.year;
+              int remainingMonths = referenceDate.month - dob.month;
+              int remainingDays = referenceDate.day - dob.day;
+
+              // Adjust if birthday hasn't occurred yet in the death year
+              if (remainingMonths < 0 || (remainingMonths == 0 && remainingDays < 0)) {
+                years--;
+                remainingMonths += 12;
               }
-              return age > 0 ? age.toString() : 'N/A';
+
+              // If there are remaining days, adjust months
+              if (remainingDays < 0) {
+                remainingMonths--;
+                // Calculate days in previous month
+                final previousMonth = DateTime(referenceDate.year, referenceDate.month, 0);
+                remainingDays += previousMonth.day;
+              }
+
+              // If age is 1 year or more
+              if (years >= 1) {
+                // Round up if there are any remaining months or days
+                if (remainingMonths > 0 || remainingDays > 0) {
+                  years++;
+                }
+                return '${years}Y';
+              }
+
+              // Calculate total months
+              int totalMonths = (referenceDate.year - dob.year) * 12 + (referenceDate.month - dob.month);
+              if (referenceDate.day < dob.day) {
+                totalMonths--;
+                remainingDays = referenceDate.day + DateTime(referenceDate.year, referenceDate.month, 0).day - dob.day;
+              } else {
+                remainingDays = referenceDate.day - dob.day;
+              }
+
+              // If age is 1 month or more
+              if (totalMonths >= 1) {
+                // Round up if there are any remaining days
+                if (remainingDays > 0) {
+                  totalMonths++;
+                }
+                return '${totalMonths}M';
+              }
+
+              // For less than 1 month, show days (always at least 0)
+              final days = referenceDate.difference(dob).inDays;
+              return '${days < 0 ? 0 : days}D';
             } catch (_) {}
           }
           return 'N/A';
@@ -197,7 +332,7 @@ class _DeseasedListState extends State<DeseasedList> {
                   beneficiaryInfo['headName'] ??
                   beneficiaryInfo['child_name']),
           'Age|Gender':
-          '${getAge()} | ${getValue(beneficiaryInfo['gender'])}',
+          '${getAge()} | ${_capitalizeFirst(getValue(beneficiaryInfo['gender']))}',
           'Mobileno.': getValue(
               beneficiaryInfo['mobileNo'] ??
                   householdData['mobile_number']),
@@ -211,8 +346,15 @@ class _DeseasedListState extends State<DeseasedList> {
             deathDetails['cause_of_death'] ??
                 deathDetails['probable_cause_of_death'],
           ),
-          'reason': getValue(
-              deathDetails['reason_of_death']),
+          'reason': (() {
+            final reason = getValue(deathDetails['reason_of_death']);
+            final other = getValue(deathDetails['other_reason_for_death']);
+            if (other != (t?.na ?? 'N/A') && other.trim().isNotEmpty) {
+              if (reason == (t?.na ?? 'N/A') || reason.trim().isEmpty) return other;
+              return '$reason ($other)';
+            }
+            return reason;
+          })(),
           'place': getValue(
               deathDetails['death_place']),
           'DateofDeath': formatDate(
@@ -300,39 +442,39 @@ class _DeseasedListState extends State<DeseasedList> {
         Expanded(
           child: _filtered.isEmpty
               ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.search_off,
-                        size: 48,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        _deceasedList.isEmpty
-                            ? t.noDeceasedChildrenFound
-                            : t.noDeceasedChildrenFound,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : SingleChildScrollView(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    itemCount: _filtered.length,
-                    itemBuilder: (context, index) {
-                      final data = _filtered[index];
-                      return _deceasedCard(context, data);
-                    },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off,
+                  size: 48,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _deceasedList.isEmpty
+                      ? t.noDeceasedChildrenFound
+                      : t.noDeceasedChildrenFound,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
                   ),
                 ),
+              ],
+            ),
+          )
+              : SingleChildScrollView(
+            child: ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              itemCount: _filtered.length,
+              itemBuilder: (context, index) {
+                final data = _filtered[index];
+                return _deceasedCard(context, data);
+              },
+            ),
+          ),
         ),
       ],
     );
@@ -423,9 +565,11 @@ class _DeseasedListState extends State<DeseasedList> {
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([
-                      _rowText(l10n.fatherName, data['FatherName'] ?? l10n.na),
                       _rowText(l10n.mobileNo, data['Mobileno.'] ?? l10n.na),
                       _rowText(l10n.dateOfDeathLabel, data['DateofDeath'] ?? l10n.na),
+                      _rowText(l10n.fatherName, data['FatherName'] ?? l10n.na),
+
+
                     ]),
                     const SizedBox(height: 8),
                     _buildRow([

@@ -5330,7 +5330,7 @@ abstract class AppLocalizations {
   /// No description provided for @headOfFamily.
   ///
   /// In en, this message translates to:
-  /// **'Head of the family'**
+  /// **'Family Head'**
   String get headOfFamily;
 
   /// No description provided for @casteGeneral.

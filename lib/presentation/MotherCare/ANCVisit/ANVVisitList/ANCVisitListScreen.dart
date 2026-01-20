@@ -242,7 +242,7 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     ranges['3rd_anc_end'] = _dateAfterWeeks(lmp, 34);
 
     ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
-    ranges['4th_anc_end'] = _calculateEdd(lmp);
+    ranges['4th_anc_end'] = _dateAfterWeeks(lmp, 40);
 
     ranges['pmsma_start'] = ranges['1st_anc_end']!.add(const Duration(days: 1));
     ranges['pmsma_end'] = ranges['2nd_anc_start']!.subtract(const Duration(days: 1));
@@ -250,7 +250,6 @@ class _AncvisitlistscreenState extends State<Ancvisitlistscreen> {
     return ranges;
   }
 
-  // Format date to dd/MM/yyyy format
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
   }

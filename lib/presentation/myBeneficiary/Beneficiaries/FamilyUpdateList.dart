@@ -24,12 +24,118 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
   List<Map<String, dynamic>> _items = [];
   List<Map<String, dynamic>> _filtered = [];
   bool _isLoading = true;
+  List<Map<String, dynamic>> _households = []; // Store households data for fallback
+
+  // Helper method to extract house number from household address
+  String _extractHouseNumberFromAddress(Map<String, dynamic> addressData) {
+    if (addressData.isEmpty) return '';
+    
+    // Try common house number fields in address data
+    final houseNoFields = [
+      'houseNo',
+      'house_no',
+      'houseNumber',
+      'house_number',
+      'houseno',
+      'building_no',
+      'buildingNumber',
+      'building_no',
+      'address_line1',
+      'addressLine1',
+    ];
+    
+    for (final field in houseNoFields) {
+      final value = addressData[field]?.toString().trim();
+      if (value != null && value.isNotEmpty) {
+        return value;
+      }
+    }
+    
+    final fullAddress = addressData['full_address']?.toString() ??
+                       addressData['address']?.toString() ?? 
+                       addressData['complete_address']?.toString() ?? '';
+    
+    if (fullAddress.isNotEmpty) {
+      // Try to extract house number from the beginning of address
+      final lines = fullAddress.split(',');
+      for (final line in lines) {
+        final trimmed = line.trim();
+        // Look for patterns like "House No: 123", "H.No. 123", "123", etc.
+        if (RegExp(r'^\d+').hasMatch(trimmed) || 
+            RegExp(r'(?i)house\s*(no|number)?\s*[:\-]?\s*\d+').hasMatch(trimmed) ||
+            RegExp(r'(?i)h\.?\.?\s*no\.?\s*[:\-]?\s*\d+').hasMatch(trimmed)) {
+          return trimmed;
+        }
+      }
+    }
+    
+    return '';
+  }
+
+  // Helper method to get house number with fallback logic
+  String _getHouseNumber(Map<String, dynamic> data, List<Map<String, dynamic>> households) {
+    // First try to get from beneficiary_new table
+    final beneficiaryHouseNo = data['houseNo']?.toString() ?? 
+                              data['_raw']['beneficiary_info']?['houseNo']?.toString() ?? '';
+    
+    if (beneficiaryHouseNo.isNotEmpty && beneficiaryHouseNo != '0') {
+      return beneficiaryHouseNo;
+    }
+    
+    // If not found in beneficiary_new, try households table
+    final householdRefKey = data['_raw']['household_ref_key']?.toString() ?? '';
+    if (householdRefKey.isNotEmpty) {
+      for (final household in households) {
+        if (household['unique_key']?.toString() == householdRefKey) {
+          final addressData = household['address'] as Map<String, dynamic>?;
+          if (addressData != null) {
+            final houseNoFromAddress = _extractHouseNumberFromAddress(addressData);
+            if (houseNoFromAddress.isNotEmpty) {
+              return houseNoFromAddress;
+            }
+          }
+        }
+      }
+    }
+    
+    return '';
+  }
+
+  DateTime _resolveSortDate(Map<String, dynamic> raw) {
+    dynamic value = raw['modified_date_time'];
+
+    if (value == null || value.toString().isEmpty) {
+      value = raw['created_date_time'];
+    }
+
+    if (value == null) {
+      return DateTime.fromMillisecondsSinceEpoch(0);
+    }
+
+    final str = value.toString();
+
+    // ISO 8601: 2026-01-08T13:38:14.074Z
+    final parsed = DateTime.tryParse(str);
+    if (parsed != null) return parsed.toUtc();
+
+    // Timestamp (seconds or milliseconds)
+    final ts = int.tryParse(str);
+    if (ts != null) {
+      return DateTime.fromMillisecondsSinceEpoch(
+        ts > 1000000000000 ? ts : ts * 1000,
+        isUtc: true,
+      );
+    }
+
+    return DateTime.fromMillisecondsSinceEpoch(0);
+  }
 
   @override
   void initState() {
     super.initState();
     _loadData();
 
+    LocalStorageDao.instance.getAllBeneficiaries();
     _searchCtrl.addListener(_onSearchChanged);
   }
 
@@ -51,6 +157,8 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           final houseNo = (e['houseNo'] ?? '').toString().toLowerCase();
           final name = (e['name'] ?? '').toString().toLowerCase();
           final mobile = (e['mobile'] ?? '').toString().toLowerCase();
+          final mohalla = (e['mohalla'] ?? '').toString().toLowerCase();
+          final mohallaTola = (e['mohallaTola'] ?? '').toString().toLowerCase();
 
           final raw = (e['_raw'] as Map<String, dynamic>? ?? const {});
           final fullHhRef = (raw['household_ref_key'] ?? '').toString();
@@ -62,6 +170,8 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
               houseNo.contains(q) ||
               name.contains(q) ||
               mobile.contains(q) ||
+              mohalla.contains(q) ||
+              mohallaTola.contains(q) ||
               searchHhRef.contains(q);
         }).toList();
       }
@@ -74,140 +184,32 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
     }
 
     try {
-      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
       final db = await DatabaseProvider.instance.database;
 
       final currentUserData = await SecureStorageService.getCurrentUserData();
       final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
 
-      /// ------------------ HOUSEHOLDS ------------------
+      /// ----------- BENEFICIARIES -----------
+      final rows = await LocalStorageDao.instance.getAllBeneficiaries();
+
+      /// ----------- HOUSEHOLDS -----------
+      _households = await LocalStorageDao.instance.getAllHouseholds();
+
       final households = await db.query(
         'households',
         where: 'is_deleted = 0 AND current_user_key = ?',
         whereArgs: [currentUserKey],
-        orderBy: 'id DESC',
       );
 
-      /// household_ref_key -> head_unique_key
       final Map<String, String> headKeyByHousehold = {};
       for (final hh in households) {
-        final hhKey = hh['unique_key']?.toString() ?? '';
-        final headId = hh['head_id']?.toString() ?? '';
-        if (hhKey.isNotEmpty && headId.isNotEmpty) {
+        final hhKey = hh['unique_key']?.toString();
+        final headId = hh['head_id']?.toString();
+        if (hhKey != null && headId != null) {
           headKeyByHousehold[hhKey] = headId;
         }
       }
 
-      /// ------------------ ANC DUE ------------------
-      final ancDueRows = await db.rawQuery(
-        '''
-      SELECT household_ref_key FROM mother_care_activities
-      WHERE current_user_key = ?
-        AND mother_care_state = 'anc_due'
-      ''',
-        [currentUserKey],
-      );
-
-      final Map<String, int> ancDueCountMap = {};
-      for (final r in ancDueRows) {
-        final hhKey = r['household_ref_key']?.toString();
-        if (hhKey != null && hhKey.isNotEmpty) {
-          ancDueCountMap[hhKey] = (ancDueCountMap[hhKey] ?? 0) + 1;
-        }
-      }
-
-      /// ------------------ AGE & CATEGORY MAPS ------------------
-      final Map<String, int> elderlyCountMap = {};
-      final Map<String, int> child0to1Map = {};
-      final Map<String, int> child1to2Map = {};
-      final Map<String, int> child2to5Map = {};
-      final Map<String, int> eligibleCoupleCountMap = {};
-
-      /// ------------------ GROUP BY HOUSEHOLD ------------------
-      final Map<String, List<Map<String, dynamic>>> byHousehold = {};
-      for (final r in rows) {
-        final hhKey = r['household_ref_key']?.toString();
-        if (hhKey != null && hhKey.isNotEmpty) {
-          byHousehold.putIfAbsent(hhKey, () => []).add(r);
-        }
-      }
-
-      /// ------------------ ELIGIBLE COUPLES ------------------
-      byHousehold.forEach((hhKey, members) {
-        int count = 0;
-
-        for (final m in members) {
-          if (m['is_deleted'] == 1 || m['is_migrated'] == 1 || m['is_death'] == 1) {
-            continue;
-          }
-
-          final info = m['beneficiary_info'] is String
-              ? jsonDecode(m['beneficiary_info'])
-              : (m['beneficiary_info'] ?? {});
-
-          final marital = info['maritalStatus']?.toString().toLowerCase();
-          if (marital != 'married') continue;
-
-          final gender = info['gender']?.toString().toLowerCase();
-          final isPregnant =
-              info['isPregnant'] == true ||
-                  info['isPregnant']?.toString().toLowerCase() == 'yes';
-
-          if (gender == 'male') {
-            count += 1;
-          } else if (gender == 'female' && !isPregnant) {
-            count += 1;
-          }
-        }
-
-        count += ancDueCountMap[hhKey] ?? 0;
-        eligibleCoupleCountMap[hhKey] = count;
-      });
-
-      /// ------------------ AGE CALCULATIONS ------------------
-      for (final r in rows) {
-        if (r['is_deleted'] == 1 || r['is_migrated'] == 1 || r['is_death'] == 1) {
-          continue;
-        }
-
-        final info = r['beneficiary_info'] is String
-            ? jsonDecode(r['beneficiary_info'])
-            : (r['beneficiary_info'] ?? {});
-
-        final hhKey = r['household_ref_key']?.toString();
-        if (hhKey == null || hhKey.isEmpty) continue;
-
-        final dobRaw = info['dob'] ?? info['dateOfBirth'];
-        if (dobRaw == null) continue;
-
-        DateTime? dob = DateTime.tryParse(dobRaw.toString());
-        if (dob == null) continue;
-
-        final now = DateTime.now();
-        int months =
-            (now.year - dob.year) * 12 + (now.month - dob.month);
-        if (now.day < dob.day) months--;
-
-        final isChild =
-            info['memberType']?.toString().toLowerCase() == 'child' ||
-                info['relation']?.toString().toLowerCase() == 'child';
-
-        if (isChild) {
-          if (months < 12) {
-            child0to1Map[hhKey] = (child0to1Map[hhKey] ?? 0) + 1;
-          } else if (months <= 25) {
-            child1to2Map[hhKey] = (child1to2Map[hhKey] ?? 0) + 1;
-          } else if (months < 60) {
-            child2to5Map[hhKey] = (child2to5Map[hhKey] ?? 0) + 1;
-          }
-        }
-
-        if (months >= 65 * 12) {
-          elderlyCountMap[hhKey] = (elderlyCountMap[hhKey] ?? 0) + 1;
-        }
-      }
-
-      /// ------------------ FAMILY HEAD IDENTIFICATION (FINAL) ------------------
       final familyHeads = rows.where((r) {
         final hhKey = r['household_ref_key']?.toString();
         final uniqueKey = r['unique_key']?.toString();
@@ -217,51 +219,64 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           return false;
         }
 
-        Map<String, dynamic> info;
+        Map<String, dynamic> info = {};
         try {
-          final rawInfo = r['beneficiary_info'];
-          if (rawInfo is String && rawInfo.isNotEmpty) {
-            info = jsonDecode(rawInfo) as Map<String, dynamic>;
-          } else if (rawInfo is Map) {
-            info = Map<String, dynamic>.from(rawInfo);
-          } else {
-            info = <String, dynamic>{};
+          final raw = r['beneficiary_info'];
+          if (raw is String && raw.isNotEmpty) {
+            info = jsonDecode(raw);
+          } else if (raw is Map) {
+            info = Map<String, dynamic>.from(raw);
           }
-        } catch (e) {
-          print('⚠️ Error parsing beneficiary info: $e');
-          info = <String, dynamic>{};
-        }
+        } catch (_) {}
 
-        final isFamilyhead = info['isFamilyhead'];
-        if (isFamilyhead) return true;
+
+        if (info['isFamilyhead'] == true) return true;
 
         return headKeyByHousehold[hhKey] == uniqueKey;
       }).toList();
 
-      /// ------------------ MAP TO UI ------------------
-      final List<Map<String, dynamic>> mapped = familyHeads.map((r) {
+      /// ----------- MAP TO UI -----------
+      final mapped = familyHeads.map((r) {
         final info = r['beneficiary_info'] is String
             ? jsonDecode(r['beneficiary_info'])
             : (r['beneficiary_info'] ?? {});
 
-        final hhKey = r['household_ref_key']?.toString() ?? '';
+        final uniqueKey = r['unique_key']?.toString() ?? '';
+        final headId = uniqueKey.length > 11
+            ? uniqueKey.substring(uniqueKey.length - 11)
+            : uniqueKey;
+
+        final tempData = {
+          'houseNo': info['houseNo'] ?? 0,
+          '_raw': r,
+        };
+
+        final houseNumber = _getHouseNumber(tempData, _households);
 
         return {
-          'name': info['headName'] ?? info['name'] ?? '',
+          'name': info['headName'] ??
+              info['memberName'] ??
+              info['name'] ??
+              '',
           'mobile': info['mobileNo'] ?? '',
-          'hhId': r['unique_key'],
-          'totalMembers': byHousehold[hhKey]?.length ?? 0,
-          'elderly': elderlyCountMap[hhKey] ?? 0,
-          'pregnantWomen': ancDueCountMap[hhKey] ?? 0,
-          'eligibleCouples': eligibleCoupleCountMap[hhKey] ?? 0,
-          'child0to1': child0to1Map[hhKey] ?? 0,
-          'child1to2': child1to2Map[hhKey] ?? 0,
-          'child2to5': child2to5Map[hhKey] ?? 0,
-           'mohalla': info['mohalla'] ?? '',
+          'hhId': headId,
+          'houseNo': houseNumber.isNotEmpty ? houseNumber : 0,
+          'mohalla': info['mohalla'] ?? '',
           'mohallaTola': info['mohallaTola'] ?? '',
           '_raw': r,
         };
       }).toList();
+
+      /// ----------- SORT BY CREATED DATE (LATEST FIRST) -----------
+      mapped.sort((a, b) {
+        final ra = a['_raw'] as Map<String, dynamic>;
+        final rb = b['_raw'] as Map<String, dynamic>;
+
+        final dateA = _resolveSortDate(ra);
+        final dateB = _resolveSortDate(rb);
+
+        return dateB.compareTo(dateA);
+      });
 
       if (mounted) {
         setState(() {
@@ -277,6 +292,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -287,6 +303,7 @@ class _FamliyUpdateState extends State<FamliyUpdate> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
+
                 Expanded(
                   child: _filtered.isEmpty
                       ? Center(

@@ -118,9 +118,14 @@ class _RoutinescreenState extends State<Routinescreen> {
 
         try {
           final root = Map<String, dynamic>.from(jsonDecode(formJsonStr));
+
           final formData = root['form_data'];
-          if (formData is Map) {
-            result[id] = Map<String, dynamic>.from(formData);
+          final ancForm = root['anc_form'];
+
+          if (formData is Map || ancForm is Map) {
+            result[id] = Map<String, dynamic>.from(
+              (formData is Map) ? formData : ancForm,
+            );
           }
         } catch (_) {
           continue;
@@ -429,16 +434,13 @@ class _RoutinescreenState extends State<Routinescreen> {
 
           if (lmpStr != null && lmpStr.isNotEmpty && lmpStr != 'null') {
             try {
-              // Handle different date formats
               String dateStr = lmpStr;
               if (dateStr.contains('T')) {
-                // For ISO 8601 format, extract just the date part or parse as-is
                 try {
                   final lmpDate = DateTime.parse(dateStr);
                   print('✅ Successfully parsed LMP date (form ${i + 1}): $lmpDate');
                   return lmpDate;
                 } catch (e) {
-                  // If full parsing fails, try date part only
                   dateStr = dateStr.split('T')[0];
                   print('⚠️ Full date parsing failed, trying date part only (form ${i + 1}): "$dateStr"');
                 }
@@ -507,10 +509,7 @@ class _RoutinescreenState extends State<Routinescreen> {
           final String genderRaw =
               info['gender']?.toString().toLowerCase() ?? '';
 
-
           if (!(genderRaw == 'f' || genderRaw == 'female')) continue;
-
-
           if (!isPregnant && !isAncDue) continue;
 
           final String ageGender = _formatAgeGenderFromInfo(info);
@@ -524,23 +523,19 @@ class _RoutinescreenState extends State<Routinescreen> {
           // ---------------- GET NEXT ANC DUE DATE ----------------
           String nextAncDueDate = 'N/A';
           try {
-            // Get visit count for this beneficiary
             final visitData = await _getVisitCount(beneficiaryId);
             final visitCount = visitData['count'] ?? 0;
 
-            // Extract LMP date from beneficiary info first
             DateTime? lmpDate;
             final lmpStr = info['lmp']?.toString();
             if (lmpStr != null && lmpStr.isNotEmpty) {
               lmpDate = DateTime.tryParse(lmpStr.split('T')[0]);
             }
 
-            // If LMP not found in beneficiary info, try to get from followup forms
             if (lmpDate == null) {
               lmpDate = await _extractLmpDate(row);
             }
 
-            // Calculate next ANC due date
             nextAncDueDate = _getNextAncDueDate(lmpDate, visitCount);
           } catch (e) {
             print('Error calculating next ANC due date: $e');
@@ -567,7 +562,7 @@ class _RoutinescreenState extends State<Routinescreen> {
         }
       }
 
-      // ---------------- ADD ANC DUE ONLY (NO BENEFICIARY MATCH) ----------------
+      // ---------------- ADD ANC DUE ONLY ----------------
       for (final ancDue in ancDueRecords) {
         final String beneficiaryId =
             ancDue['beneficiary_ref_key']?.toString() ?? '';
@@ -577,17 +572,12 @@ class _RoutinescreenState extends State<Routinescreen> {
           continue;
         }
 
-        // ---------------- GET NEXT ANC DUE DATE ----------------
         String nextAncDueDate = 'N/A';
         try {
-          // Get visit count for this beneficiary
           final visitData = await _getVisitCount(beneficiaryId);
           final visitCount = visitData['count'] ?? 0;
 
-          // Extract LMP date from ancDue record (now returns DateTime directly)
           final lmpDate = await _extractLmpDate(ancDue);
-
-          // Calculate next ANC due date
           nextAncDueDate = _getNextAncDueDate(lmpDate, visitCount);
         } catch (e) {
           print('Error calculating next ANC due date for ANC due record: $e');
@@ -636,6 +626,7 @@ class _RoutinescreenState extends State<Routinescreen> {
             .toSet(),
       );
 
+      // ---------------- FILTER PW LIST ----------------
       final filteredList = list.where((item) {
         final beneficiaryId = item['BeneficiaryID']?.toString() ?? '';
         if (beneficiaryId.isEmpty) return false;
@@ -643,15 +634,29 @@ class _RoutinescreenState extends State<Routinescreen> {
         final formData = latestFormDataByBeneficiary[beneficiaryId];
         if (formData == null) return false;
 
-        final weeks = _parseIntValue(formData['weeks_of_pregnancy']);
+        final weeks =
+            _parseIntValue(formData['weeks_of_pregnancy']) ??
+                _parseIntValue(formData['week_of_pregnancy']);
+
         if (weeks == null || weeks > 12) return false;
 
-        final td1Missing = _isMissingValue(formData['td1_date']);
-        final td2Missing = _isMissingValue(formData['td2_date']);
-        final tdBoosterMissing = _isMissingValue(formData['td_booster_date']);
+        final td1Missing =
+            _isMissingValue(formData['td1_date']) &&
+                _isMissingValue(formData['date_of_td1']);
+
+        final td2Missing =
+            _isMissingValue(formData['td2_date']) &&
+                _isMissingValue(formData['date_of_td2']);
+
+        final tdBoosterMissing =
+            _isMissingValue(formData['td_booster_date']) &&
+                _isMissingValue(formData['date_of_td_booster']);
 
         final tdNotCompleted =
-            td1Missing || td2Missing || (tdBoosterMissing && td1Missing && td2Missing);
+            td1Missing ||
+                td2Missing ||
+                (tdBoosterMissing && td1Missing && td2Missing);
+
         return tdNotCompleted;
       }).toList();
 
@@ -667,6 +672,7 @@ class _RoutinescreenState extends State<Routinescreen> {
       }
     }
   }
+
 
   DateTime? _safeParseDateTime(dynamic raw) {
     if (raw == null) return null;

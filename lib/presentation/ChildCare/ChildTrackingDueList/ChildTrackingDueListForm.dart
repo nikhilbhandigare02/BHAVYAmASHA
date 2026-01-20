@@ -248,9 +248,9 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
     });
   }
   Future<bool> _prefillWeightsFromRegistrationForm(
-    String householdId,
-    String beneficiaryId,
-  ) async {
+      String householdId,
+      String beneficiaryId,
+      ) async {
     try {
       final rows = await LocalStorageDao.instance.getFollowupFormsByHouseholdAndBeneficiary(
         formType: FollowupFormDataTable.childRegistrationDue,
@@ -281,7 +281,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         formDataMap = Map<String, dynamic>.from(formRoot['form_data'] as Map);
       } else if (formRoot[FollowupFormDataTable.childRegistrationDue] is Map<String, dynamic>) {
         formDataMap =
-            Map<String, dynamic>.from(formRoot[FollowupFormDataTable.childRegistrationDue] as Map);
+        Map<String, dynamic>.from(formRoot[FollowupFormDataTable.childRegistrationDue] as Map);
       } else {
         formDataMap = Map<String, dynamic>.from(formRoot);
       }
@@ -328,7 +328,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
       );
       if (rows.isEmpty) {
         final fromRegistration =
-            await _prefillWeightsFromRegistrationForm(householdId, beneficiaryId);
+        await _prefillWeightsFromRegistrationForm(householdId, beneficiaryId);
         if (!fromRegistration) {
           await _prefillDataFromBeneficiaryTable(beneficiaryId);
         }
@@ -375,7 +375,7 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
         });
       } else {
         final fromRegistration =
-            await _prefillWeightsFromRegistrationForm(householdId, beneficiaryId);
+        await _prefillWeightsFromRegistrationForm(householdId, beneficiaryId);
         if (!fromRegistration) {
           await _prefillDataFromBeneficiaryTable(beneficiaryId);
         }
@@ -872,7 +872,10 @@ class _ChildTrackingDueState extends State<_ChildTrackingDueListFormView>
                   Builder(
                     builder: (context) {
                       final weightMode = _getWeightMode();
-                      if (weightMode == 'kg') {
+                      final fetchedWeight = double.tryParse(
+                        (_formData['weight_grams'] ?? '').toString().trim(),
+                      );
+                      if (weightMode == 'kg' || (fetchedWeight != null && fetchedWeight <= 90)) {
                         return Column(
                           children: [
                             CustomTextField(

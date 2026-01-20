@@ -1167,7 +1167,7 @@ class _RegisterChildDueListFormScreen
                               labelText:
                               l10n?.birthCertificateNumberLabel ??
                                   'Birth Certificate Number',
-                              hintText: l10n?.birthCertificateIssuedLabel,
+                              hintText: l10n?.birthCertificateNumberLabel,
                               initialValue: state.birthCertificateNumber,
                               onChanged: (v) =>
                                   bloc.add(BirthCertificateNumberChanged(v)),
