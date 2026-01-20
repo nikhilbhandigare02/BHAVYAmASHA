@@ -12284,7 +12284,7 @@ abstract class AppLocalizations {
   /// No description provided for @member_status_label.
   ///
   /// In en, this message translates to:
-  /// **'Member Status *'**
+  /// **'Member Status'**
   String get member_status_label;
 
   /// No description provided for @member_status_head.

@@ -1808,7 +1808,7 @@
   "setChildDetails": "बच्चों का विवरण भरने के लिए Have Children = Yes का चयन करें।",
   "childrenDetails": "बच्चों का विवरण",
   "spouseDetails": "पति का विवरण",
-  "member_status_label": "सदस्य की स्थिति *",
+  "member_status_label": "सदस्य की स्थिति",
   "member_status_head": "सदस्य की स्थिति",
   "death": "मृत्यू",
   "please_select_date_of_death": "कृपया मृत्यु की तिथि चुनें",

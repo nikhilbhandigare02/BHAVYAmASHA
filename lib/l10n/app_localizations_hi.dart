@@ -6118,7 +6118,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get spouseDetails => 'पति का विवरण';
 
   @override
-  String get member_status_label => 'सदस्य की स्थिति *';
+  String get member_status_label => 'सदस्य की स्थिति';
 
   @override
   String get member_status_head => 'सदस्य की स्थिति';

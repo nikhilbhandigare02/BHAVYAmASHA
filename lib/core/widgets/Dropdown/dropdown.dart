@@ -55,6 +55,16 @@ class ApiDropdown<T> extends StatefulWidget {
         case 'atyanth_pichda_varg':
           return 'Atyant Pichda Varg' as T;
 
+        case 'community_toilet':
+          return 'Community toilet' as T;
+
+        case 'friend_relative_toilet':
+          return 'Friend/Relative toilet' as T;
+
+        case 'open_toilet':
+          return 'Open space' as T;
+
+
       // 🔹 Place of Service / Facility cases
         case 'vhsnd_anganwadi':
           return 'VHSND/Anganwadi' as T;

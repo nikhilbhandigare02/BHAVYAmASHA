@@ -29,11 +29,11 @@ class OutcomeFormState extends Equatable {
   final String? institutionalPlaceOfDelivery; // e.g. Sub-Center, PHC, Nursing Home
   final String? conductedBy; // 'ANM', 'LHV', 'Doctor', 'Staff Nurse', 'Relative TBA'
   final String? otherConductedByName;
-  final String? typeOfDelivery; // 'Cesarean', 'Assisted/Forceps', 'Normal'
-  final String? hadComplications; // 'Yes' or 'No'
-  final String? nonInstitutionalPlaceType; // 'Home', 'In Transit', 'Other'
-  final String? transitPlace; // 'Ambulance', 'Other'
-  final String? otherNonInstitutionalPlaceName; // free text when Other
+  final String? typeOfDelivery; 
+  final String? hadComplications; 
+  final String? nonInstitutionalPlaceType; 
+  final String? transitPlace;
+  final String? otherNonInstitutionalPlaceName;
   final String? otherPlaceOfDeliveryName;
   final String? otherTransitPlaceName;
   final String? complicationType;

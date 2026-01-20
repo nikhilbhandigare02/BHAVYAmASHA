@@ -2082,7 +2082,7 @@
   "setChildDetails": "Select Have Children = Yes to fill Children details.",
   "childrenDetails": "Children Details",
   "spouseDetails": "Spouse Details",
-  "member_status_label": "Member Status *",
+  "member_status_label": "Member Status",
   "member_status_head": "Member Status",
   "death": "Death",
   "please_select_date_of_death": "Please select date of death",
