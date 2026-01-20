@@ -3630,6 +3630,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get memberDetails => 'MEMBER DETAILS';
 
   @override
+  String get memberDetailsTitle => 'Member Details';
+
+  @override
   String get hello => 'Hello';
 
   @override
@@ -4630,7 +4633,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get no_high_risk_anc_visits_found => 'No high-risk ANC visits found';
 
   @override
-  String get hrp => 'HRP';
+  String get hrp => 'High Risk';
 
   @override
   String get no_name => 'No Name';

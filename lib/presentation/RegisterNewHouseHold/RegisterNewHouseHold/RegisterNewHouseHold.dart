@@ -300,16 +300,20 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             .toString()
             .toLowerCase();
         if (kOut == 'yes') {
-          info['houseKitchen'] = 'No';
-        } else if (kOut == 'no') {
           info['houseKitchen'] = 'Yes';
+        } else if (kOut == 'no') {
+          info['houseKitchen'] = 'No';
         } else {
           info['houseKitchen'] = '';
         }
 
-        info['cookingFuel'] = mapValue(
+       /* info['cookingFuel'] = mapValue(
           'cookingFuel',
           amenities['type_of_fuel_used_for_cooking'],
+        );*/
+        info['cookingFuel'] = mapValue(
+          'cookingFuel',
+          (amenities['type_of_fuel_used_for_cooking'] as List).join(', '),
         );
         info['otherCookingFuel'] =
             amenities['other_type_of_fuel_used_for_cooking'];
@@ -333,7 +337,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           amenities['type_of_toilet'],
         );
         info['typeOfToilet'] =
-            amenities['other_type_of_toilet']; // Maps to "Other" type
+            amenities['other_type_of_toilet'];
         info['toiletPlace'] = mapValue(
           'toiletPlace',
           amenities['where_do_you_go_for_toilet'],

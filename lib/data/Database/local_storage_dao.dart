@@ -1296,11 +1296,13 @@ ORDER BY b.created_date_time DESC;
         print('🔑 Filtering by ASHA unique key: $ashaUniqueKey');
       }
 
+      // 1. Fetch activities that are marked as tracking_due
       final trackingDueRows = await db.query(
         'eligible_couple_activities',
         columns: ['beneficiary_ref_key', 'current_user_key'],
         where: whereClause,
         whereArgs: whereArgs,
+        orderBy: 'created_date_time DESC', // Good practice to order this as well
       );
 
       final trackingDueBeneficiaryKeys = trackingDueRows
@@ -1320,22 +1322,41 @@ ORDER BY b.created_date_time DESC;
         trackingDueBeneficiaryKeys.length,
         '?',
       ).join(',');
+
+      // 2. Fetch beneficiary details
       final rows = await db.query(
         'beneficiaries_new',
         where:
         'unique_key IN ($placeholders) AND (is_deleted IS NULL OR is_deleted = 0) AND (is_migrated IS NULL OR is_migrated = 0)',
         whereArgs: trackingDueBeneficiaryKeys.toList(),
-        orderBy: 'created_date_time DESC',
+        orderBy: 'created_date_time DESC', // Ensures the latest entries come first
       );
 
       print(
-        '📊 Found ${rows.length} beneficiaries matching tracking_due status',
+        '📊 Found ${rows.length} raw beneficiary rows (before deduping)',
+      );
+
+      // 3. Apply Distinct Logic: Keep only the latest entry for each unique_key
+      final distinctRows = <Map<String, dynamic>>[];
+      final seenBeneficiaryKeys = <String>{};
+
+      for (final row in rows) {
+        final uniqueKey = row['unique_key']?.toString();
+        if (uniqueKey != null && !seenBeneficiaryKeys.contains(uniqueKey)) {
+          seenBeneficiaryKeys.add(uniqueKey);
+          distinctRows.add(row);
+        }
+      }
+
+      print(
+        '✨ After filtering distinct latest entries: ${distinctRows.length}',
       );
 
       final couples = <Map<String, dynamic>>[];
       final households = <String, List<Map<String, dynamic>>>{};
 
-      for (final row in rows) {
+      // Use distinctRows instead of rows
+      for (final row in distinctRows) {
         final hhKey = row['household_ref_key']?.toString() ?? '';
         households.putIfAbsent(hhKey, () => []).add(row);
       }
@@ -1407,10 +1428,10 @@ ORDER BY b.created_date_time DESC;
         }
       }
 
-      print('🏁 Finished processing. Found ${couples.length} eligible couples');
+      print('Finished processing. Found ${couples.length} eligible couples');
       return couples;
     } catch (e) {
-      print('❌ Error in getUpdatedEligibleCouples: $e');
+      print(' Error in getUpdatedEligibleCouples: $e');
       return [];
     }
   }
@@ -1440,6 +1461,7 @@ ORDER BY b.created_date_time DESC;
         columns: ['beneficiary_ref_key', 'current_user_key'],
         where: whereClause,
         whereArgs: whereArgs,
+        orderBy: 'created_date_time DESC', // Ensure newest activities are checked first
       );
 
       final trackingDueBeneficiaryKeys = trackingDueRows
@@ -1459,22 +1481,39 @@ ORDER BY b.created_date_time DESC;
         trackingDueBeneficiaryKeys.length,
         '?',
       ).join(',');
+
+      // Fetch raw rows (may contain duplicates)
       final rows = await db.query(
         'beneficiaries_new',
         where:
         'unique_key IN ($placeholders) AND (is_deleted IS NULL OR is_deleted = 0) AND (is_migrated IS NULL OR is_migrated = 0)',
         whereArgs: trackingDueBeneficiaryKeys.toList(),
-        orderBy: 'created_date_time DESC',
+        orderBy: 'created_date_time DESC', // Crucial: puts latest entries first
       );
 
       print(
-        '📊 Found ${rows.length} beneficiaries matching tracking_due status',
+        '📊 Found ${rows.length} raw beneficiaries matching tracking_due status',
       );
+
+      // --- DISTINCT LOGIC START ---
+      final distinctRows = <Map<String, dynamic>>[];
+      final seenBeneficiaryKeys = <String>{};
+
+      for (final row in rows) {
+        final uniqueKey = row['unique_key']?.toString();
+        if (uniqueKey != null && !seenBeneficiaryKeys.contains(uniqueKey)) {
+          seenBeneficiaryKeys.add(uniqueKey);
+          distinctRows.add(row);
+        }
+      }
+      print('✨ After filtering distinct latest entries: ${distinctRows.length}');
+      // --- DISTINCT LOGIC END ---
 
       final couples = <Map<String, dynamic>>[];
       final households = <String, List<Map<String, dynamic>>>{};
 
-      for (final row in rows) {
+      // Use distinctRows instead of raw rows
+      for (final row in distinctRows) {
         final hhKey = row['household_ref_key']?.toString() ?? '';
         households.putIfAbsent(hhKey, () => []).add(row);
       }

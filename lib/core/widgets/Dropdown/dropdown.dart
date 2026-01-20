@@ -72,6 +72,63 @@ class ApiDropdown<T> extends StatefulWidget {
           return 'Medical College Hospital(MCH)' as T;
         case 'pmsma_site':
           return 'PMSMA Site' as T;
+
+
+      // 🔹 House Type cases
+        case 'none':
+          return 'None' as T;
+        case 'kachcha':
+          return 'Kuchcha House' as T;
+        case 'semi_pakka_house':
+          return 'Semi Pucca House' as T;
+        case 'pakka_house':
+          return 'Pucca House' as T;
+        case 'thrust_house':
+          return 'Thrust House' as T;
+        case 'other':
+          return 'Other' as T;
+
+      // 🔹 Toilet Facility cases
+        case 'flush_with_water':
+          return 'Flush toilet with running water' as T;
+        case 'flush_without_water':
+          return 'Flush toilet without water' as T;
+        case 'pit_toilet_with_water':
+          return 'Pit toilet with running water supply' as T;
+        case 'pit_toilet_without_water':
+          return 'Pit toilet without water supply' as T;
+
+      // 🔹 Drinking Water Source cases
+        case 'supply_water':
+          return 'Supply water' as T;
+        case 'ro':
+          return 'R.O.' as T;
+        case 'handpump_within_house':
+          return 'Hand pump within house' as T;
+        case 'handpump_outside_of_house':
+          return 'Hand pump outside of house' as T;
+        case 'tanker':
+          return 'Tanker' as T;
+        case 'river':
+          return 'River' as T;
+        case 'pond':
+          return 'Pond' as T;
+        case 'lake':
+          return 'Lake' as T;
+        case 'well':
+          return 'Well' as T;
+
+      // 🔹 Power / Electricity Source
+        case 'electricity_supply':
+          return 'Electricity supply' as T;
+        case 'generator':
+          return 'Generator' as T;
+        case 'solar_power':
+          return 'Solar power' as T;
+        case 'kerosene_lamp':
+          return 'Kerosene lamp' as T;
+
+
       }
     }
     return value;

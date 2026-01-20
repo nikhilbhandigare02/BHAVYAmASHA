@@ -2336,6 +2336,7 @@
   "onTheWay": "रास्ते मे",
   "childDetails": "बच्चे का विवरण",
   "memberDetails": "सदस्य का विवरण",
+  "memberDetailsTitle": "सदस्य का विवरण",
   "loadData": "डेटा लोड किया जा रहा है",
   "loadDataComplete": "डेटा प्राप्त करना पूर्ण हुआ",
   "dataNotFound": "उपयोगकर्ता डेटा उपलब्ध नहीं है",

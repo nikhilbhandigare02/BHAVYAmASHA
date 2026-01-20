@@ -3630,6 +3630,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get memberDetails => 'सदस्य का विवरण';
 
   @override
+  String get memberDetailsTitle => 'सदस्य का विवरण';
+
+  @override
   String get hello => 'नमस्ते';
 
   @override

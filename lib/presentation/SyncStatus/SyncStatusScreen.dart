@@ -98,16 +98,37 @@ class _SyncStatusScreenState extends State<SyncStatusScreen> {
       if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) {
         // Get total beneficiary count for current user
         final beneficiaryTotalResult = await db.rawQuery(
-          'SELECT COUNT(*) as count FROM beneficiaries_new WHERE is_deleted = 0 AND current_user_key = ? AND is_migrated == 0',
+          '''
+  SELECT COUNT(DISTINCT unique_key) AS count
+  FROM beneficiaries_new
+  WHERE is_deleted = 0
+    AND is_migrated = 0
+    AND current_user_key = ?
+  ''',
           [ashaUniqueKey],
         );
+
+        _beneficiaryTotal =
+            beneficiaryTotalResult.first['count'] as int? ?? 0;
+
         _beneficiaryTotal = beneficiaryTotalResult.first['count'] as int? ?? 0;
 
         // Get synced beneficiary count for current user
         final beneficiarySyncedResult = await db.rawQuery(
-          'SELECT COUNT(*) as count FROM beneficiaries_new WHERE is_deleted = 0 AND is_synced = 1 AND current_user_key = ? AND is_migrated == 0',
+          '''
+  SELECT COUNT(DISTINCT unique_key) AS count
+  FROM beneficiaries_new
+  WHERE is_deleted = 0
+    AND is_synced = 1
+    AND is_migrated = 0
+    AND current_user_key = ?
+  ''',
           [ashaUniqueKey],
         );
+
+        _beneficiarySynced =
+            beneficiarySyncedResult.first['count'] as int? ?? 0;
+
         _beneficiarySynced = beneficiarySyncedResult.first['count'] as int? ?? 0;
       }
       // else {

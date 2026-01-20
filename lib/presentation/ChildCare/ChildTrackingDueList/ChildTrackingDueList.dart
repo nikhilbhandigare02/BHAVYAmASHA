@@ -75,7 +75,7 @@ class _CHildTrackingDueListState extends State<CHildTrackingDueList> {
     AND ranked.child_care_state IN (?, ?)
     AND bn.is_death = 0
     AND bn.is_deleted = 0
-  ORDER BY datetime(bn.created_date_time) DESC
+  ORDER BY datetime(bn.id) DESC
   ''',
         [
           if (ashaUniqueKey != null && ashaUniqueKey.isNotEmpty) ashaUniqueKey,

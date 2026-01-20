@@ -1203,7 +1203,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
           },
           child: Scaffold(
             appBar: AppHeader(
-              screenTitle: _isEdit ? l.memberDetails : l.newMemberDetailsTitle,
+              screenTitle: _isEdit ? l.memberDetailsTitle : l.newMemberDetailsTitle,
               showBack: true,
               onBackTap: () async {
                 final shouldExit = await showConfirmationDialog(

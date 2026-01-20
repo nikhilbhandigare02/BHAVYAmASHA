@@ -7313,6 +7313,12 @@ abstract class AppLocalizations {
   /// **'MEMBER DETAILS'**
   String get memberDetails;
 
+  /// No description provided for @memberDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Member Details'**
+  String get memberDetailsTitle;
+
   /// No description provided for @hello.
   ///
   /// In en, this message translates to:
@@ -9308,7 +9314,7 @@ abstract class AppLocalizations {
   /// No description provided for @hrp.
   ///
   /// In en, this message translates to:
-  /// **'HRP'**
+  /// **'High Risk'**
   String get hrp;
 
   /// No description provided for @no_name.
