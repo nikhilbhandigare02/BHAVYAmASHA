@@ -17,7 +17,9 @@ class Validations {
       return l10n.passwordTooShort;
     }
 
-    final passwordRegex = RegExp(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]).{6,}$');
+    final passwordRegex = RegExp(
+      r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\\/-]).{6,}$',
+    );
     if (!passwordRegex.hasMatch(password)) {
       return l10n.passwordComplexity;
     }
@@ -25,7 +27,10 @@ class Validations {
     return null; // valid
   }
 
-  static String? validateCurrentPassword(AppLocalizations l10n, String? password) {
+  static String? validateCurrentPassword(
+    AppLocalizations l10n,
+    String? password,
+  ) {
     if (password == null || password.isEmpty) {
       return l10n.currentPasswordEmpty;
     }
@@ -36,8 +41,11 @@ class Validations {
     return null;
   }
 
-
-  static String? validateYoungestChildAge(AppLocalizations l10n, String? rawAge, String? unit) {
+  static String? validateYoungestChildAge(
+    AppLocalizations l10n,
+    String? rawAge,
+    String? unit,
+  ) {
     final raw = (rawAge ?? '').trim();
     if (raw.isEmpty) return null;
 
@@ -64,6 +72,7 @@ class Validations {
     }
     return null;
   }
+
   static String? validateHouseNo(AppLocalizations l10n, String? houseNo) {
     if (houseNo == null || houseNo.isEmpty) {
       return l10n.enterHouseNumber;
@@ -90,7 +99,11 @@ class Validations {
     return null;
   }
 
-  static String? validateReEnterPassword(AppLocalizations l10n, String? password, String? newPassword) {
+  static String? validateReEnterPassword(
+    AppLocalizations l10n,
+    String? password,
+    String? newPassword,
+  ) {
     if (password == null || password.isEmpty) {
       return l10n.reenterPasswordEmpty;
     }
@@ -119,35 +132,26 @@ class Validations {
       return l10n.dateOfBirthFuture;
     }
 
-    int years = today.year - dob.year;
-    int months = today.month - dob.month;
-    int days = today.day - dob.day;
+    final totalDays = todayDate.difference(dobDate).inDays;
+    const int minDays = 15 * 360;
+    const int maxDays = 110 * 360;
 
-    if (months < 0 || (months == 0 && days < 0)) {
-      years--;
-      months += 12;
-      if (days < 0) {
-        months--;
-        final lastMonth = today.month == 1 ? 12 : today.month - 1;
-        final lastYear = today.month == 1 ? today.year - 1 : today.year;
-        final daysInLastMonth = DateTime(lastYear, lastMonth + 1, 0).day;
-        days += daysInLastMonth;
-      }
+    if (totalDays < minDays) {
+      return l10n.pleaseEnterAgeBetween15To110;
     }
-
-    // Check if age is exactly 15 years or more
-    if (years < 15 || (years == 15 && (months < 0 || days < 0))) {
+    if (totalDays > maxDays) {
       return l10n.pleaseEnterAgeBetween15To110;
     }
 
-    // Check maximum age (110 years)
-    if (years > 110 || (years == 110 && (months > 0 || days > 0))) {
-      return l10n.pleaseEnterAgeBetween15To110;
-    }
-
-    return null; // ✅ valid
+    return null;
   }
-  static String? validateApproxAge(AppLocalizations l10n, String? years, String? months, String? days) {
+
+  static String? validateApproxAge(
+    AppLocalizations l10n,
+    String? years,
+    String? months,
+    String? days,
+  ) {
     const int minAgeYears = 15;
     const int maxAgeYears = 110;
     const int maxMonths = 11;
@@ -193,7 +197,12 @@ class Validations {
     return null;
   }
 
-  static String? validateApproxAgeChild(AppLocalizations l10n, String? years, String? months, String? days) {
+  static String? validateApproxAgeChild(
+    AppLocalizations l10n,
+    String? years,
+    String? months,
+    String? days,
+  ) {
     const double minAgeYears = 1.0 / 365.0;
     const int maxAgeYears = 15;
 
@@ -212,11 +221,13 @@ class Validations {
     final totalYears = yy + (mm / 12.0) + (dd / 365.0);
 
     if (totalYears < minAgeYears || totalYears > maxAgeYears) {
-      return l10n.pleaseEnterAgeBetween1DayTo15Year;;
+      return l10n.pleaseEnterAgeBetween1DayTo15Year;
+      ;
     }
 
     return null;
   }
+
   static String? validateLMP(AppLocalizations l10n, DateTime? dob) {
     if (dob == null) {
       return l10n.pleaseEnterLMP;
@@ -230,15 +241,15 @@ class Validations {
     }
     return null;
   }
+
   static String? validateEDD(AppLocalizations l10n, DateTime? dob) {
     if (dob == null) {
       return l10n.pleaseEnterExpectedDeliveryDate;
     }
 
-
-
     return null; // ✅ valid
   }
+
   static String? validateAdoptingPlan(AppLocalizations l10n, String? dob) {
     if (dob == null || dob.trim().isEmpty || dob == 'Select') {
       return l10n.pleaseEnterFamilyPlanning;
@@ -254,6 +265,7 @@ class Validations {
 
     return null;
   }
+
   static String? validateWhoMobileNo(AppLocalizations l10n, String? mobileNo) {
     if (mobileNo == null || mobileNo.isEmpty) {
       return l10n.pleaseEnterWhoseMobile;
@@ -261,6 +273,7 @@ class Validations {
 
     return null;
   }
+
   static String? validateMobileNo(AppLocalizations l10n, String? mobileNo) {
     if (mobileNo == null || mobileNo.isEmpty) {
       return l10n.pleaseEnterMobileNo;
@@ -274,13 +287,17 @@ class Validations {
     return null; // ✅ valid
   }
 
-  static String? validateMaritalStatus(AppLocalizations l10n, String? maritalStatus) {
+  static String? validateMaritalStatus(
+    AppLocalizations l10n,
+    String? maritalStatus,
+  ) {
     if (maritalStatus == null || maritalStatus.isEmpty) {
       return l10n.pleaseEnterMaritalStatus;
     }
 
     return null;
   }
+
   static String? validateFamilyHead(AppLocalizations l10n, String? familyHead) {
     if (familyHead == null || familyHead.isEmpty) {
       return l10n.pleaseEnterFamilyHead;
@@ -295,15 +312,16 @@ class Validations {
     return null;
   }
 
-  static String? validateFamilyHeadRelation(AppLocalizations l10n, String? familyHead) {
+  static String? validateFamilyHeadRelation(
+    AppLocalizations l10n,
+    String? familyHead,
+  ) {
     if (familyHead == null || familyHead.isEmpty) {
       return l10n.enter_relation_with_family_head;
     }
 
-
     return null;
   }
-
 
   static String? validateSpousName(AppLocalizations l10n, String? spousName) {
     if (spousName == null || spousName.isEmpty) {
@@ -320,13 +338,18 @@ class Validations {
 
     return null;
   }
-  static String? validateRelationWithHead(AppLocalizations l10n, String? relation) {
+
+  static String? validateRelationWithHead(
+    AppLocalizations l10n,
+    String? relation,
+  ) {
     if (relation == null || relation.isEmpty) {
       return l10n.enter_relation_with_family_head;
     }
 
     return null;
   }
+
   static String? validateNameofMember(AppLocalizations l10n, String? name) {
     if (name == null || name.isEmpty) {
       return l10n.pleaseEnterNameOfMember;
@@ -345,7 +368,10 @@ class Validations {
     return null;
   }
 
-  static String? validateBankAccountNumber(AppLocalizations l10n, String? accountNumber) {
+  static String? validateBankAccountNumber(
+    AppLocalizations l10n,
+    String? accountNumber,
+  ) {
     if (accountNumber == null || accountNumber.trim().isEmpty) {
       return null;
     }

@@ -5422,7 +5422,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get eligibleCoupleTrackingDue => 'योग्य दम्पत्तियों की ट्रैकिंग';
 
   @override
-  String get methodOfContraception => 'गर्भनिरोधक का तिथि';
+  String get methodOfContraception => 'गर्भनिरोध का तरीका';
 
   @override
   String get condom => 'कंडोम';

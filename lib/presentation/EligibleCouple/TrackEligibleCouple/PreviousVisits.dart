@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:medixcel_new/core/widgets/AppDrawer/Drawer.dart';
+
 import 'package:medixcel_new/core/widgets/AppHeader/AppHeader.dart';
 import 'package:medixcel_new/data/Database/database_provider.dart';
-import 'package:sizer/sizer.dart';
-
 import '../../../data/Database/tables/followup_form_data_table.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -69,12 +67,13 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
       final formsRefKey = FollowupFormDataTable.formUniqueKeys[
       FollowupFormDataTable.eligibleCoupleTrackingDue] ??
           '';
+
       final visits = await db.query(
         FollowupFormDataTable.table,
         where:
         'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
         whereArgs: [widget.beneficiaryRefKey, formsRefKey],
-        orderBy: 'created_date_time ASC',
+        orderBy: 'created_date_time DESC', // Order by descending to get latest first
       );
 
       final parsedVisits = visits.map((visit) {
@@ -99,9 +98,55 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
         }
       }).toList();
 
+      // Filter to get only one record per date (latest by time)
+      final Map<String, Map<String, dynamic>> uniqueDateVisits = {};
+
+      for (var visit in parsedVisits) {
+        final dateTimeStr = visit['created_date_time'] as String?;
+        if (dateTimeStr != null) {
+          try {
+            final dateTime = DateTime.parse(dateTimeStr);
+            // Extract only the date part (year-month-day)
+            final dateKey = '${dateTime.year}-${_twoDigits(dateTime.month)}-${_twoDigits(dateTime.day)}';
+
+            // If this date doesn't exist or current record is newer, update it
+            if (!uniqueDateVisits.containsKey(dateKey)) {
+              uniqueDateVisits[dateKey] = visit;
+            } else {
+              // Compare times and keep the latest one
+              final existingDateTime = DateTime.parse(uniqueDateVisits[dateKey]!['created_date_time'] as String);
+              if (dateTime.isAfter(existingDateTime)) {
+                uniqueDateVisits[dateKey] = visit;
+              }
+            }
+          } catch (e) {
+            print('Error parsing date: $e');
+            // If date parsing fails, include the record anyway
+            uniqueDateVisits[dateTimeStr] = visit;
+          }
+        }
+      }
+
+      // Convert map back to list and sort by date (ascending)
+      final filteredVisits = uniqueDateVisits.values.toList();
+      filteredVisits.sort((a, b) {
+        try {
+          final dateA = DateTime.parse(a['created_date_time'] as String);
+          final dateB = DateTime.parse(b['created_date_time'] as String);
+          return dateA.compareTo(dateB); // Ascending order
+        } catch (e) {
+          return 0;
+        }
+      });
+
+      // Remove the first record (oldest one) if there are any records
+      if (filteredVisits.isNotEmpty) {
+        filteredVisits.removeAt(0);
+      }
+
       if (mounted) {
         setState(() {
-          _visits = parsedVisits;
+          _visits = filteredVisits;
           _isLoading = false;
         });
       }
@@ -188,7 +233,7 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      'Sr No.',
+                      l10n!.srNo,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                       ),
@@ -197,7 +242,7 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                   Expanded(
                     flex: 6,
                     child: Text(
-                      'Visit Date',
+                      l10n!.visitDateLabel,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                       ),
@@ -394,9 +439,9 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                                     crossAxisAlignment:
                                     CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        'Family planning',
-                                        style: TextStyle(
+                                      Text(
+                                        l10n.familyPlanning,
+                                        style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight:
                                           FontWeight.w600,
@@ -420,9 +465,9 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                                     crossAxisAlignment:
                                     CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        'Method Of Contraception',
-                                        style: TextStyle(
+                                      Text(
+                                        l10n.methodOfContraception,
+                                        style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight:
                                           FontWeight.w600,

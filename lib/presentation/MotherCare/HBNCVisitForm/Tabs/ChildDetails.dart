@@ -828,6 +828,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: yn(c['givenBath']),
+                      autoOpenTick: state.focusedErrorField == 'givenBath' ? state.validationTick : null,
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
                         NewbornDetailsChanged(field: 'givenBath', value: val, childIndex: widget.childIndex),
                       ),
@@ -840,6 +841,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: yn(c['wrappedAndPlacedNearMother']),
+                      autoOpenTick: state.focusedErrorField == 'wrappedAndPlacedNearMother' ? state.validationTick : null,
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
                         NewbornDetailsChanged(field: 'wrappedAndPlacedNearMother', value: val, childIndex: widget.childIndex),
                       ),
@@ -952,6 +954,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                           items: const ['Swelling', 'Oozing pus'],
                           getLabel: (e) => e,
                           value: c['eyesProblemType'],
+                          autoOpenTick: state.focusedErrorField == 'eyesProblemType' ? state.validationTick : null,
                           onChanged: (val) => context.read<HbncVisitBloc>().add(
                             NewbornDetailsChanged(field: 'eyesProblemType', value: val, childIndex: widget.childIndex),
                           ),
@@ -1092,6 +1095,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                         items:  [t.hsc,t.aphc,t.phc,t.chc,t.rhLabel,t.sdh,t.dhLabel],
                         getLabel: (e) => e,
                         value: s(c['referredByASHAFacility']),
+                        autoOpenTick: state.focusedErrorField == 'referredByASHAFacility' ? state.validationTick : null,
                         onChanged: (val) => context.read<HbncVisitBloc>().add(
                           NewbornDetailsChanged(field: 'referredByASHAFacility', value: val, childIndex: widget.childIndex),
                         ),
@@ -1162,6 +1166,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                         items: const ['Yes', 'No'],
                         getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                         value: yn(c['weightRecordedInMcpCard']),
+                        autoOpenTick: state.focusedErrorField == 'weightRecordedInMcpCard' ? state.validationTick : null,
                         onChanged: (val) => context.read<HbncVisitBloc>().add(
                           NewbornDetailsChanged(field: 'weightRecordedInMcpCard', value: val, childIndex: widget.childIndex),
                         ),
@@ -1175,6 +1180,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                       items: const ['Yes', 'No'],
                       getLabel: (e) => e == 'Yes' ? t.yes : t.no,
                       value: yn(c['referToHospital']),
+                      autoOpenTick: state.focusedErrorField == 'referToHospital' ? state.validationTick : null,
                       onChanged: (val) => context.read<HbncVisitBloc>().add(
                         NewbornDetailsChanged(field: 'referToHospital', value: val, childIndex: widget.childIndex),
                       ),
@@ -1193,6 +1199,7 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
                         ],
                         getLabel: (e) => e,
                         value: s(c['referToHospitalFacility']),
+                        autoOpenTick: state.focusedErrorField == 'referToHospitalFacility' ? state.validationTick : null,
                         onChanged: (val) => context.read<HbncVisitBloc>().add(
                           NewbornDetailsChanged(field: 'referToHospitalFacility', value: val, childIndex: widget.childIndex),
                         ),

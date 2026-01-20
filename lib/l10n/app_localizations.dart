@@ -10280,7 +10280,7 @@ abstract class AppLocalizations {
   /// No description provided for @familyPlanning.
   ///
   /// In en, this message translates to:
-  /// **'Family Planning'**
+  /// **'Family planing'**
   String get familyPlanning;
 
   /// No description provided for @otherPublicHealthProgram.

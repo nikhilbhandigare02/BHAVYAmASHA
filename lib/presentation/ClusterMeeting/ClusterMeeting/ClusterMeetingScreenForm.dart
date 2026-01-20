@@ -7,7 +7,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../../core/config/themes/CustomColors.dart';
 import '../../../core/utils/device_info_utils.dart';
-import '../../../core/utils/id_generator_utils.dart';
+import '../../../core/utils/id_generator_utils.dart' show IdGenerator;
 import '../../../core/widgets/AppHeader/AppHeader.dart';
 import '../../../core/widgets/DatePicker/DatePicker.dart';
 import '../../../core/widgets/Dropdown/Dropdown.dart';
@@ -31,6 +31,9 @@ class Day {
   final String name;
 
   const Day({required this.id, required this.name});
+
+  @override
+  String toString() => 'Day_$id';
 }
 
 class ClusterMeetingScreenForm extends StatefulWidget {

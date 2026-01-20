@@ -5116,7 +5116,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adolescentHealth => 'Adolescent Health';
 
   @override
-  String get familyPlanning => 'Family Planning';
+  String get familyPlanning => 'Family planing';
 
   @override
   String get otherPublicHealthProgram => 'Other Public Health Program';

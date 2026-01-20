@@ -136,7 +136,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
       final visitNumber = state.visitDetails['visitNumber'] as int?;
       final visitDate = state.visitDetails['visitDate'] as DateTime?;
       DateTime? calculatedHbncVisitDate;
-      
+
       if (visitNumber != null) {
         // Get delivery date from beneficiary data if available
         DateTime? deliveryDate;
@@ -146,11 +146,11 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
             deliveryDate = DateTime.tryParse(deliveryDateStr);
           }
         }
-        
+
         // Use the visit date as base for calculation, or delivery date if available
         final baseDate = visitDate ?? deliveryDate;
         calculatedHbncVisitDate = calculateHbncVisitDate(visitNumber, baseDate);
-        
+
         print('🗓️ Calculated HBNC visit date:');
         print('  - Visit Number: $visitNumber');
         print('  - Base Date: $baseDate');
@@ -233,7 +233,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         print('  - Beneficiary Ref Key: ${savedData.first['beneficiary_ref_key']}');
         print('  - Created: ${savedData.first['created_date_time']}');
 
-      // Also close the mother care activity if both mother and baby are recorded as death
+        // Also close the mother care activity if both mother and baby are recorded as death
         final motherStatus = state.motherDetails['motherStatus']?.toString();
         String? babyCondition;
         if (state.newbornDetailsList.isNotEmpty) {
@@ -243,7 +243,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
 
         final shouldCompleteMotherCare =
             ((visitNumber ?? 0) == 42) ||
-            (motherStatus == 'death' && babyCondition == 'death');
+                (motherStatus == 'death' && babyCondition == 'death');
 
         if (beneficiaryId.isNotEmpty && shouldCompleteMotherCare) {
           try {
@@ -375,6 +375,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         'birthRegistered': null,
         'birthCertificateIssued': null,
         'birthDoseVaccination': null,
+        'birthDoseVaccinations': [],
         'mcpCardAvailable': null,
         'referredByASHAFacility': null,
         'referToHospitalFacility': null,
@@ -415,7 +416,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
     // Auto-calculate next visit date when visit number changes
     if (event.field == 'visitNumber' && event.value != null) {
       final visitNumber = int.tryParse(event.value.toString()) ?? 0;
-      
+
       // Calculate and set next visit date asynchronously
       _calculateAndSetNextVisitDate(visitNumber, event.beneficiaryId, emit);
     }
@@ -427,11 +428,11 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
   Future<void> _calculateAndSetNextVisitDate(int visitNumber, String? beneficiaryId, Emitter<HbncVisitState> emit) async {
     try {
       final nextVisitDate = await _calculateNextHbncVisitDate(visitNumber, beneficiaryId);
-      
+
       if (nextVisitDate != null) {
         final updatedVisitDetails = Map<String, dynamic>.from(state.visitDetails)
           ..['nextVisitDate'] = nextVisitDate;
-        
+
         emit(state.copyWith(visitDetails: updatedVisitDetails));
         print('🗓️ Auto-calculated next visit date for visit $visitNumber: $nextVisitDate');
       }
@@ -444,16 +445,16 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
   Future<String?> _calculateNextHbncVisitDate(int visitNumber, String? beneficiaryId) async {
     try {
       final now = DateTime.now();
-      
+
       // If visit number is 0 or null, show last record's created date
       if (visitNumber == 0 || beneficiaryId == null || beneficiaryId.isEmpty) {
         return '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
       }
-      
+
       // Get last inserted record's created date from database
       final db = await DatabaseProvider.instance.database;
       final hbncVisitKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.pncMother];
-      
+
       final lastRecordResults = await db.query(
         FollowupFormDataTable.table,
         where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
@@ -461,7 +462,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         orderBy: 'created_date_time DESC',
         limit: 1,
       );
-      
+
       DateTime baseDate;
       if (lastRecordResults.isNotEmpty) {
         final createdDateTime = lastRecordResults.first['created_date_time']?.toString();
@@ -473,7 +474,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
       } else {
         baseDate = now;
       }
-      
+
       // Calculate next visit date based on visit number
       DateTime nextVisitDate;
       switch (visitNumber) {
@@ -493,10 +494,10 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
           nextVisitDate = baseDate.add(const Duration(days: 14));
           break;
         default:
-          // For any other visit number, add 7 days as default
+        // For any other visit number, add 7 days as default
           nextVisitDate = baseDate.add(const Duration(days: 7));
       }
-      
+
       return '${nextVisitDate.year.toString().padLeft(4, '0')}-${nextVisitDate.month.toString().padLeft(2, '0')}-${nextVisitDate.day.toString().padLeft(2, '0')}';
     } catch (e) {
       print('❌ Error calculating next HBNC visit date: $e');
@@ -510,7 +511,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
     try {
       // Use the current visit date as base, or delivery date if provided
       final DateTime currentDate = baseDate ?? DateTime.now();
-      
+
       switch (visitNumber) {
         case 1: // Day 1 (within 24 hours of birth)
           return currentDate;
@@ -527,7 +528,7 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         case 42: // Day 42 (14 days after day 28)
           return currentDate.add(const Duration(days: 14));
         default:
-          // For any other visit number, add 7 days as default
+        // For any other visit number, add 7 days as default
           return currentDate.add(const Duration(days: 7));
       }
     } catch (e) {
@@ -606,7 +607,6 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
       // If mother is marked as death, do NOT validate fields that are
       // hidden in the UI (MCP card, post-delivery problems, etc.).
       // This ensures we only show validation for fields actually
-      // visible on screen.
       if (!isDeath) {
         req('mcpCardAvailable', 'err_mcp_mother_required');
         reqIf(m['mcpCardAvailable'] == 'Yes', 'mcpCardFilled', 'err_mcp_mother_filled_required');
@@ -617,16 +617,15 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         req('breastfeedingProblems', 'err_breastfeeding_problems_required');
         reqIf(m['breastfeedingProblems'] == 'Yes', 'breastfeedingProblemDescription', 'err_breastfeeding_problem_description_required');
         reqIf(m['breastfeedingProblems'] == 'Yes', 'breastfeedingHelpGiven', 'err_breastfeeding_help_required');
-        req('padsPerDay', 'err_pads_per_day_required');
         req('mealsPerDay', 'err_meals_per_day_required');
+        req('counselingAdvice', 'err_counseling_advice_required');
+        req('padsPerDay', 'err_pads_per_day_required');
         req('temperature', 'err_mothers_temperature_required');
         final _tempStr = (m['temperature'] ?? '').toString();
         final _isUpto102 = _tempStr == 'Temperature upto 102 degree F(38.9 degree C)';
         reqIf(_isUpto102, 'paracetamolGiven', 'err_paracetamol_given_required');
         req('foulDischargeHighFever', 'err_foul_discharge_high_fever_required');
         req('abnormalSpeechOrSeizure', 'err_abnormal_speech_or_seizure_required');
-        // Newly added starred fields
-        req('counselingAdvice', 'err_counseling_advice_required');
         req('milkNotProducingOrLess', 'err_milk_not_producing_or_less_required');
         reqIf(m['milkNotProducingOrLess'] == 'Yes', 'milkCounselingAdvice', 'err_milk_counseling_advice_required');
         req('nippleCracksPainOrEngorged', 'err_nipple_cracks_pain_or_engorged_required');
@@ -637,6 +636,14 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
       final ci = idx - 2;
       final c = ci < state.newbornDetailsList.length ? state.newbornDetailsList[ci] : <String, dynamic>{};
       void req(String key, String code) {
+        final val = c[key];
+        if (val == null || (val is String && val.trim().isEmpty)) {
+          errors.add(code);
+          focusField ??= key;
+        }
+      }
+      void reqIf(bool condition, String key, String code) {
+        if (!condition) return;
         final val = c[key];
         if (val == null || (val is String && val.trim().isEmpty)) {
           errors.add(code);
@@ -654,33 +661,50 @@ class HbncVisitBloc extends Bloc<HbncVisitEvent, HbncVisitState> {
         req('weightColorMatch', 'err_weight_color_match_required');
         req('weighingScaleColor', 'err_weighing_scale_color_required');
         req('motherReportsTempOrChestIndrawing', 'err_mother_reports_temp_or_chest_indrawing_required');
+        req('exclusiveBreastfeedingStarted', 'err_exclusive_breastfeeding_started_required');
+        req('firstBreastfeedTiming', 'err_first_breastfeed_timing_required');
+        reqIf(c['firstBreastfeedTiming'] == 'Other', 'firstBreastfeedCustomTime', 'err_first_breastfeed_custom_time_required');
+        reqIf(c['firstBreastfeedTiming'] != 'Not breastfed', 'howWasBreastfed', 'err_how_was_breastfed_required');
+        req('firstFeedGivenAfterBirth', 'err_first_feed_given_after_birth_required');
+        reqIf(c['firstFeedGivenAfterBirth'] == 'Other', 'firstFeedOther', 'err_first_feed_other_required');
+        req('adequatelyFedSevenToEightTimes', 'err_adequately_fed_seven_eight_required');
+        reqIf(c['adequatelyFedSevenToEightTimes'] == 'No', 'adequatelyFedCounseling', 'err_adequately_fed_counseling_required');
+        req('babyDrinkingLessMilk', 'err_baby_drinking_less_milk_required');
+        req('breastfeedingStopped', 'err_breastfeeding_stopped_required');
+        req('bloatedStomachOrFrequentVomiting', 'err_bloated_or_frequent_vomit_required');
         req('bleedingUmbilicalCord', 'err_bleeding_umbilical_cord_required');
+        reqIf(c['bleedingUmbilicalCord'] == 'Yes', 'navelTiedByAshaAnm', 'err_navel_tied_by_asha_required');
         req('pusInNavel', 'err_pus_in_navel_required');
         req('routineCareDone', 'err_routine_care_done_required');
+        req('wipedWithCleanCloth', 'err_wiped_with_clean_cloth_required');
+        req('keptWarm', 'err_kept_warm_required');
+        req('givenBath', 'err_given_bath_required');
+        req('wrappedAndPlacedNearMother', 'err_wrapped_and_placed_near_mother_required');
         req('breathingRapid', 'err_breathing_rapid_required');
+        req('lethargic', 'err_lethargic_required');
         req('congenitalAbnormalities', 'err_congenital_abnormalities_required');
+        reqIf(c['congenitalAbnormalities'] == 'Yes', 'congenitalAbnormalityType', 'err_congenital_abnormality_type_required');
+        reqIf(c['congenitalAbnormalityType'] == 'Other', 'congenitalAbnormalityOther', 'err_congenital_abnormality_other_required');
         req('eyesNormal', 'err_eyes_normal_required');
+        reqIf(c['eyesNormal'] == 'No', 'eyesProblemType', 'err_eyes_problem_type_required');
         req('eyesSwollenOrPus', 'err_eyes_swollen_or_pus_required');
         req('skinFoldRedness', 'err_skin_fold_redness_required');
         req('jaundice', 'err_newborn_jaundice_required');
         req('pusBumpsOrBoil', 'err_pus_bumps_or_boil_required');
         req('seizures', 'err_newborn_seizures_required');
         req('cryingConstantlyOrLessUrine', 'err_crying_constant_or_less_urine_required');
+        reqIf(c['cryingConstantlyOrLessUrine'] == 'Yes', 'cryingCounseling', 'err_crying_counseling_required');
         req('cryingSoftly', 'err_crying_softly_required');
         req('stoppedCrying', 'err_stopped_crying_required');
         req('referredByASHA', 'err_referred_by_asha_required');
+        reqIf(c['referredByASHA'] == 'Yes', 'referredByASHAFacility', 'err_referred_by_asha_facility_required');
         req('birthRegistered', 'err_birth_registered_required');
         req('birthCertificateIssued', 'err_birth_certificate_issued_required');
         req('birthDoseVaccination', 'err_birth_dose_vaccination_required');
         req('mcpCardAvailable', 'err_mcp_child_required');
-        req('exclusiveBreastfeedingStarted', 'err_exclusive_breastfeeding_started_required');
-        req('firstBreastfeedTiming', 'err_first_breastfeed_timing_required');
-        req('howWasBreastfed', 'err_how_was_breastfed_required');
-        req('firstFeedGivenAfterBirth', 'err_first_feed_given_after_birth_required');
-        req('adequatelyFedSevenToEightTimes', 'err_adequately_fed_seven_eight_required');
-        req('babyDrinkingLessMilk', 'err_baby_drinking_less_milk_required');
-        req('breastfeedingStopped', 'err_breastfeeding_stopped_required');
-        req('bloatedStomachOrFrequentVomiting', 'err_bloated_or_frequent_vomit_required');
+        reqIf(c['mcpCardAvailable'] == 'Yes', 'weightRecordedInMcpCard', 'err_weight_recorded_in_mcp_required');
+        req('referToHospital', 'err_refer_to_hospital_required');
+        reqIf(c['referToHospital'] == 'Yes', 'referToHospitalFacility', 'err_refer_to_hospital_facility_required');
       }
     }
 

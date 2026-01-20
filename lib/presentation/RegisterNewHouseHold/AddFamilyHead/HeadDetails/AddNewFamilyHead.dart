@@ -2775,7 +2775,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               child: Spousdetails(
                                 syncFromHead: true,
                                 isEdit: widget.isEdit,
-                                initial: _createSpousInitialState(),
+                                initial: widget.initial != null
+                                    ? _createSpousInitialState()
+                                    : null,
                               ),
                             ),
                           );
