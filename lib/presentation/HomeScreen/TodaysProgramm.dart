@@ -1896,25 +1896,17 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         DateTime? activeWindowStart;
         DateTime? activeWindowEnd;
 
-        final DateTime? firstStart =
-        ancRanges['1st_anc_start'];
-        final DateTime? firstEnd =
-        ancRanges['1st_anc_end'];
+        final firstStart = ancRanges['1st_anc_start'];
+        final firstEnd = ancRanges['1st_anc_end'];
 
-        final DateTime? secondStart =
-        ancRanges['2nd_anc_start'];
-        final DateTime? secondEnd =
-        ancRanges['2nd_anc_end'];
+        final secondStart = ancRanges['2nd_anc_start'];
+        final secondEnd = ancRanges['2nd_anc_end'];
 
-        final DateTime? thirdStart =
-        ancRanges['3rd_anc_start'];
-        final DateTime? thirdEnd =
-        ancRanges['3rd_anc_end'];
+        final thirdStart = ancRanges['3rd_anc_start'];
+        final thirdEnd = ancRanges['3rd_anc_end'];
 
-        final DateTime? fourthStart =
-        ancRanges['4th_anc_start'];
-        final DateTime? fourthEnd =
-        ancRanges['4th_anc_end'];
+        final fourthStart = ancRanges['4th_anc_start'];
+        final fourthEnd = ancRanges['4th_anc_end'];
 
         if (firstStart != null &&
             firstEnd != null &&
@@ -1938,58 +1930,38 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           activeWindowEnd = fourthEnd;
         }
 
-        // ---------- Check if today is within or after ANC windows ----------
+        // ---------- Check if today is within ANC windows ----------
         String currentAncDueDate = '';
         bool shouldIncludeInList = false;
 
         print('🔍 DEBUG ANC Date Check for beneficiary: $beneficiaryKey');
         print('   Today: ${_formatDate(todayDate)}');
-        print('   4th ANC End: ${fourthEnd != null ? _formatDate(fourthEnd!) : 'null'}');
 
         if (activeWindowStart != null && activeWindowEnd != null) {
           // Today is within an ANC window
           shouldIncludeInList = true;
-          currentAncDueDate = _formatAncDateOnly(activeWindowEnd.toIso8601String());
+          currentAncDueDate = _formatAncDateOnly(activeWindowEnd?.toIso8601String() ?? '');
           print('   ✅ Today is within ANC window: ${_formatDate(activeWindowStart)} to ${_formatDate(activeWindowEnd)}');
         } else {
-          // Check if today is after the 4th ANC window
-          final fourthStart = ancRanges['4th_anc_start'];
-          final fourthEnd = ancRanges['4th_anc_end'];
-
-          if (fourthEnd != null) {
-            final fourthEndDateOnly = DateTime(fourthEnd.year, fourthEnd.month, fourthEnd.day);
-            print('   Fourth End Date Only: ${_formatDate(fourthEndDateOnly)}');
-            print('   Is today after fourth end? ${todayDate.isAfter(fourthEndDateOnly)}');
-
-            if (todayDate.isAfter(fourthEndDateOnly)) {
-              // Today is after the 4th ANC window - include and show current date
-              shouldIncludeInList = true;
-              currentAncDueDate = _formatDate(todayDate);
-              print('   ✅ Today is after 4th ANC window, showing current date: $currentAncDueDate');
-            } else {
-              print('   ❌ Today is NOT after 4th ANC window');
-            }
-          } else {
-            print('   ❌ Fourth ANC end date is null');
-          }
+          print('   ❌ Today is NOT within any ANC window - excluding beneficiary');
         }
 
-        // ❌ Don't include if not within window and not after 4th window
+        // ❌ Don't include if not within any ANC window
         if (!shouldIncludeInList) {
           continue;
         }
 
         // ---------- Check if ANC followup form already exists ----------
-        final ancFormKey = 'bt7gs9rl1a5d26mz'; // ANC due registration form key
+        final ancFormKey = 'bt7gs9rl1a5d26mz';
         final followupFormsQuery = await db.query(
           FollowupFormDataTable.table,
-          where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
+          where:
+          'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
           whereArgs: [ancFormKey, beneficiaryKey],
-          limit: 1, // Only need to check if at least one record exists
+          limit: 1,
         );
 
         if (followupFormsQuery.isNotEmpty) {
-          // ANC followup form already exists, exclude from todo list
           continue;
         }
 
@@ -2000,18 +1972,14 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           DateTime.tryParse(info['dob'].toString().split('T')[0]);
           if (dob != null) {
             int age = today.year - dob.year;
-            // Check if birthday hasn't occurred yet this year
-            final todayMonthDay = DateTime(today.year, today.month, today.day);
-            final birthdayThisYear = DateTime(today.year, dob.month, dob.day);
-            if (todayMonthDay.isBefore(birthdayThisYear)) {
-              age--;
-            }
-            ageText = '${age} Y';
+            final birthdayThisYear =
+            DateTime(today.year, dob.month, dob.day);
+            if (todayDate.isBefore(birthdayThisYear)) age--;
+            ageText = '$age Y';
           }
         }
 
-        final String uniqueKey =
-            row['unique_key']?.toString() ?? '';
+        final String uniqueKey = row['unique_key']?.toString() ?? '';
         final String householdRefKey =
             row['household_ref_key']?.toString() ?? '';
 
@@ -2027,7 +1995,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           'age': ageText,
           'gender': 'Female',
           'last Visit date':
-          activeWindowStart != null ? _formatAncDateOnly(activeWindowStart.toIso8601String()) : currentAncDueDate,
+          _formatAncDateOnly(activeWindowStart?.toIso8601String() ?? ''),
           'Current ANC last due date': currentAncDueDate,
           'mobile': info['mobileNo'] ?? '-',
           'badge': 'ANC',
@@ -2044,6 +2012,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
       debugPrint('ANC load error: $e');
     }
   }
+
 
 
   Future<void> _loadHbncItems() async {

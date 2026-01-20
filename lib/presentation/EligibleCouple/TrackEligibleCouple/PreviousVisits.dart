@@ -22,6 +22,19 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
   bool _isLoading = true;
   String _errorMessage = '';
   final Set<int> _expanded = {};
+  late final l10n = AppLocalizations.of(context);
+
+  late final Map<String, String> fpMethodMap = {
+    "antra_injection": l10n?.atraInjection ?? "Antra Injection",
+    "copper_t": l10n?.copperT  ?? "Copper - T (IUCD)",
+    "condom": l10n?.condom ?? "Condom",
+    "mala_n_daily": l10n?.malaN ?? "Mala - N(Daily contraceptive pill)",
+    "chhaya_weekly": l10n?.chhaya ?? "Chhaya(Weekly contraceptive pill)",
+    "ecp": l10n?.ecp ?? "ECP(Emergency Contraceptive Pill)",
+    "male_sterilization": l10n?.maleSterilization ?? "Male Sterilization",
+    "female_sterilization": l10n?.femaleSterilization ?? "Female Sterilization",
+    "any_other_specify": l10n?.anyOtherSpecifyy ?? "Any Other Specify",
+  };
 
   @override
   void initState() {
@@ -47,22 +60,23 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
 
       // First, check if the table exists
       final tables = await db.rawQuery(
-          "SELECT name FROM sqlite_master WHERE type='table' AND name='followup_form_data'"
-      );
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='followup_form_data'");
 
       if (tables.isEmpty) {
         throw Exception('followup_form_data table does not exist');
       }
 
-      final formsRefKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.eligibleCoupleTrackingDue] ?? '';
+      final formsRefKey = FollowupFormDataTable.formUniqueKeys[
+      FollowupFormDataTable.eligibleCoupleTrackingDue] ??
+          '';
       final visits = await db.query(
         FollowupFormDataTable.table,
-        where: 'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
+        where:
+        'beneficiary_ref_key = ? AND forms_ref_key = ? AND is_deleted = 0',
         whereArgs: [widget.beneficiaryRefKey, formsRefKey],
-        orderBy: 'created_date_time DESC',
+        orderBy: 'created_date_time ASC',
       );
 
-      // Parse the form_json data
       final parsedVisits = visits.map((visit) {
         try {
           final formJson = jsonDecode(visit['form_json'] as String? ?? '{}');
@@ -70,7 +84,8 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
           return {
             ...visit,
             'form_data': formJson is Map ? formJson : {},
-            'created_date_time': visit['created_date_time'] ?? visit['created_at']
+            'created_date_time':
+            visit['created_date_time'] ?? visit['created_at']
           };
         } catch (e, stackTrace) {
           print('Error parsing form data: $e');
@@ -122,7 +137,6 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
     return value.toString();
   }
 
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -167,7 +181,8 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(10),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12, vertical: 10),
               child: Row(
                 children: [
                   Expanded(
@@ -197,7 +212,8 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
             child: _visits.isEmpty
                 ? Center(
               child: Text(
-                l10n?.noPreviousVisits ?? 'No previous visits found',
+                l10n?.noPreviousVisits ??
+                    'No previous visits found',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[600],
@@ -215,11 +231,13 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
 
                 // Extract inner form_data
                 final formValues = formData['form_data'] is Map
-                    ? formData['form_data'] as Map<String, dynamic>
+                    ? formData['form_data']
+                as Map<String, dynamic>
                     : <String, dynamic>{};
 
                 // Extract basic info
-                final visitDate = _formatDate(visit['created_date_time']);
+                final visitDate =
+                _formatDate(visit['created_date_time']);
                 final serialNumber = (index + 1).toString();
 
                 return Container(
@@ -241,7 +259,8 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                       dividerColor: Colors.transparent,
                     ),
                     child: ExpansionTile(
-                      tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      tilePadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 4),
                       childrenPadding: const EdgeInsets.all(0),
                       onExpansionChanged: (open) {
                         setState(() {
@@ -262,7 +281,9 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
-                                color: _expanded.contains(index) ? Colors.blue : Colors.black,
+                                color: _expanded.contains(index)
+                                    ? Colors.blue
+                                    : Colors.black,
                               ),
                             ),
                           ),
@@ -273,7 +294,9 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
-                                color: _expanded.contains(index) ? Colors.blue : Colors.black,
+                                color: _expanded.contains(index)
+                                    ? Colors.blue
+                                    : Colors.black,
                               ),
                             ),
                           ),
@@ -295,37 +318,88 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                             ),
                           ),
                           child: Builder(builder: (context) {
-                            final alt = formData['eligible_couple_tracking_due_from'] is Map
-                                ? formData['eligible_couple_tracking_due_from'] as Map<String, dynamic>
+                            final alt = formData[
+                            'eligible_couple_tracking_due_from']
+                            is Map
+                                ? formData[
+                            'eligible_couple_tracking_due_from']
+                            as Map<String, dynamic>
                                 : <String, dynamic>{};
-                            final fpAdoptingRaw = formValues['fp_adopting'] ?? alt['is_family_planning'];
-                            bool fpAdopting = (fpAdoptingRaw == true) ||
-                                (fpAdoptingRaw?.toString().toLowerCase() == 'true') ||
-                                (fpAdoptingRaw?.toString().toLowerCase() == 'yes') ||
-                                (fpAdoptingRaw?.toString() == '1');
-                            final methodRaw = formValues['fp_method'] ?? alt['method_of_contraception'];
-                            final hasMethod = methodRaw != null && methodRaw.toString().trim().isNotEmpty;
+
+                            final fpAdoptingRaw =
+                                formValues['fp_adopting'] ??
+                                    alt['is_family_planning'];
+                            bool fpAdopting = (fpAdoptingRaw ==
+                                true) ||
+                                (fpAdoptingRaw
+                                    ?.toString()
+                                    .toLowerCase() ==
+                                    'true') ||
+                                (fpAdoptingRaw
+                                    ?.toString()
+                                    .toLowerCase() ==
+                                    'yes') ||
+                                (fpAdoptingRaw?.toString() ==
+                                    '1');
+
+                            final methodRaw =
+                                formValues['fp_method'] ??
+                                    alt['method_of_contraception'];
+
+                            final hasMethod = methodRaw != null &&
+                                methodRaw
+                                    .toString()
+                                    .trim()
+                                    .isNotEmpty;
+
                             if (!fpAdopting && hasMethod) {
                               fpAdopting = true;
                             }
-                            final familyPlanningValue = fpAdopting ? 'Yes' : 'No';
-                            final methodValue = fpAdopting
-                                ? ((methodRaw == null || (methodRaw is String && methodRaw.toString().isEmpty))
-                                ? 'Not Available'
-                                : _formatValue(methodRaw))
-                                : 'Not Available';
+
+                            final familyPlanningValue =
+                            fpAdopting ? 'Yes' : 'No';
+
+                            // --- Updated Logic for methodValue ---
+                            String methodValue;
+                            if (fpAdopting) {
+                              if (methodRaw == null ||
+                                  (methodRaw is String &&
+                                      methodRaw
+                                          .toString()
+                                          .isEmpty)) {
+                                methodValue = 'Not Available';
+                              } else {
+                                // Check if the raw value exists in our map
+                                final key = methodRaw.toString();
+                                // Use the local map 'fpMethodMap' instead of _fpMethodMap
+                                if (fpMethodMap
+                                    .containsKey(key)) {
+                                  methodValue = fpMethodMap[key]!;
+                                } else {
+                                  // Fallback to raw value
+                                  methodValue =
+                                      _formatValue(methodRaw);
+                                }
+                              }
+                            } else {
+                              methodValue = 'Not Available';
+                            }
+                            // -------------------------------------
+
                             return Row(
                               children: [
                                 Expanded(
                                   flex: 1,
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Family planning',
                                         style: TextStyle(
                                           fontSize: 14,
-                                          fontWeight: FontWeight.w600,
+                                          fontWeight:
+                                          FontWeight.w600,
                                           color: Colors.white,
                                         ),
                                       ),
@@ -343,13 +417,15 @@ class _PreviousVisitsScreenState extends State<PreviousVisitsScreen> {
                                 Expanded(
                                   flex: 1,
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Method Of Contraception',
                                         style: TextStyle(
                                           fontSize: 14,
-                                          fontWeight: FontWeight.w600,
+                                          fontWeight:
+                                          FontWeight.w600,
                                           color: Colors.white,
                                         ),
                                       ),

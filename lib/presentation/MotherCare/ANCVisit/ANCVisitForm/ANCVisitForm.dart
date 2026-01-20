@@ -146,6 +146,53 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
   }
 
+  // Helper method to extract house number from household address
+  String _extractHouseNumberFromAddress(Map<String, dynamic> addressData) {
+    if (addressData.isEmpty) return '';
+    
+    // Try common house number fields in address data
+    final houseNoFields = [
+      'houseNo',
+      'house_no',
+      'houseNumber',
+      'house_number',
+      'houseno',
+      'building_no',
+      'buildingNumber',
+      'building_no',
+      'address_line1',
+      'addressLine1',
+    ];
+    
+    for (final field in houseNoFields) {
+      final value = addressData[field]?.toString().trim();
+      if (value != null && value.isNotEmpty) {
+        return value;
+      }
+    }
+    
+    // If no specific field found, try to extract from full address
+    final fullAddress = addressData['full_address']?.toString() ?? 
+                       addressData['address']?.toString() ?? 
+                       addressData['complete_address']?.toString() ?? '';
+    
+    if (fullAddress.isNotEmpty) {
+      // Try to extract house number from the beginning of address
+      final lines = fullAddress.split(',');
+      for (final line in lines) {
+        final trimmed = line.trim();
+        // Look for patterns like "House No: 123", "H.No. 123", "123", etc.
+        if (RegExp(r'^\d+').hasMatch(trimmed) || 
+            RegExp(r'(?i)house\s*(no|number)?\s*[:\-]?\s*\d+').hasMatch(trimmed) ||
+            RegExp(r'(?i)h\.?\.?\s*no\.?\s*[:\-]?\s*\d+').hasMatch(trimmed)) {
+          return trimmed;
+        }
+      }
+    }
+    
+    return '';
+  }
+
   void _updateFormWithData(Map<String, dynamic> formData) {
     print('🔍 _updateFormWithData called with keys: ${formData.keys.toList()}');
     print('🔍 Folic acid data: ${formData['folic_acid_tablets']}');
@@ -340,7 +387,9 @@ class _AncvisitformState extends State<Ancvisitform> {
       _bloc.add(HusbandNameChanged(husbandName));
     }
 
-    // 2. Fetch and set house number from beneficiary data
+    // 2. Fetch and set house number from beneficiary data with fallback to household table
+    bool houseNoFound = false;
+    
     try {
       final householdRefKey =
           data['hhId']?.toString() ??
@@ -349,6 +398,7 @@ class _AncvisitformState extends State<Ancvisitform> {
                   : null);
 
       if (householdRefKey != null && householdRefKey.isNotEmpty) {
+        // First try to get from beneficiaries_new table
         final db = await DatabaseProvider.instance.database;
         final result = await db.query(
           'beneficiaries_new',
@@ -363,16 +413,68 @@ class _AncvisitformState extends State<Ancvisitform> {
               jsonDecode(row['beneficiary_info'] as String? ?? '{}')
               as Map<String, dynamic>;
               if (beneficiaryInfo.containsKey('houseNo') &&
-                  beneficiaryInfo['houseNo'] != null) {
+                  beneficiaryInfo['houseNo'] != null &&
+                  beneficiaryInfo['houseNo'].toString().isNotEmpty &&
+                  beneficiaryInfo['houseNo'].toString() != '0') {
                 _bloc.add(
                   HouseNumberChanged(beneficiaryInfo['houseNo'].toString()),
                 );
+                houseNo = beneficiaryInfo['houseNo'].toString();
+                houseNoFound = true;
+                print('✅ Found house number in beneficiaries_new table: $houseNo');
                 break; // Found house number, no need to check other records
               }
             } catch (e) {
               print('Error parsing beneficiary info: $e');
             }
           }
+        }
+
+        // If not found in beneficiaries_new, try households table
+        if (!houseNoFound) {
+          print('🔍 House number not found in beneficiaries_new, checking households table...');
+          final householdResult = await db.query(
+            'households',
+            where: 'unique_key = ?',
+            whereArgs: [householdRefKey],
+          );
+
+          if (householdResult.isNotEmpty) {
+            for (final household in householdResult) {
+              try {
+                dynamic addressDataRaw = household['address'];
+                Map<String, dynamic> addressData = {};
+                
+                if (addressDataRaw is Map<String, dynamic>) {
+                  addressData = addressDataRaw;
+                } else if (addressDataRaw is String && addressDataRaw.isNotEmpty) {
+                  try {
+                    addressData = jsonDecode(addressDataRaw) as Map<String, dynamic>;
+                  } catch (e) {
+                    print('Error parsing address JSON string: $e');
+                    continue;
+                  }
+                }
+                
+                if (addressData.isNotEmpty) {
+                  final houseNoFromAddress = _extractHouseNumberFromAddress(addressData);
+                  if (houseNoFromAddress.isNotEmpty) {
+                    _bloc.add(HouseNumberChanged(houseNoFromAddress));
+                    houseNo = houseNoFromAddress;
+                    houseNoFound = true;
+                    print('✅ Found house number in households table address: $houseNoFromAddress');
+                    break;
+                  }
+                }
+              } catch (e) {
+                print('Error parsing household address data: $e');
+              }
+            }
+          }
+        }
+
+        if (!houseNoFound) {
+          print('⚠️ House number not found in either beneficiaries_new or households table');
         }
       }
     } catch (e) {
