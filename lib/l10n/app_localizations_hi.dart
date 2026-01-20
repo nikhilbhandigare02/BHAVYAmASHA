@@ -938,7 +938,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dateHint => 'dd-mm-yyyy';
 
   @override
-  String get dateOfInspectionLabel => 'जांच की तिथि *';
+  String get dateOfInspectionLabel => 'जाँच की तिथि *';
 
   @override
   String get daughter => 'पुत्री का';
@@ -1764,7 +1764,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get mother => 'माँ का';
 
   @override
-  String get motherAncVisitTitle => 'एएनसी दौरे';
+  String get motherAncVisitTitle => 'ए एन सी दौरा';
 
   @override
   String get motherInLaw => 'सास का';
@@ -2469,7 +2469,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get visitTypeHospital => 'Hospital';
 
   @override
-  String get visitTypeLabel => 'दौरें प्रकार';
+  String get visitTypeLabel => 'दौरे का प्रकार';
 
   @override
   String get visitTypePNC => 'प्रसवोत्तर देखभाल';
@@ -2530,6 +2530,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get whoseMobileLabel => 'किसका मोबाइल नंबर है?';
+
+  @override
+  String get whoseMobileEligibleCoupleLabel => 'मोबाइल उपयोगकर्ता';
 
   @override
   String get widowed => 'विधवा/विधुर';
@@ -2724,7 +2727,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get colorRed => 'लाल';
 
   @override
-  String get motherReportsTempOrChestIndrawingLabel => 'मां बताती हैं कि शिशु छूने पर गर्म या ठंडा लगता है या शिशु का तापमान 37.5°C या अधिक या 35.5°C से कम है और सांस लेते समय छाती अंदर की ओर जाती है.';
+  String get motherReportsTempOrChestIndrawingLabel => 'माँ बताती हैं कि बच्चा छूने पर गर्म या ठंडा लगता है, या बच्चे का तापमान 37.5 डिग्री सेल्सियस या उससे अधिक अथवा 35.5 डिग्री सेल्सियस से कम है तथा साँस लेते समय छाती अंदर की ओर खिंचती है। *';
 
   @override
   String get bleedingUmbilicalCordLabel => 'क्या नाभि से रक्तस्राव हो रहा है?';
@@ -2742,10 +2745,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get highRisk => 'उच्च जोखिम वाली गर्भवतियों की सूची';
 
   @override
-  String get dateOfHomeVisitLabel => 'गृह भ्रमण की तिथि*';
+  String get dateOfHomeVisitLabel => 'गृह भ्रमण की तिथि *';
 
   @override
-  String get motherStatusLabel => 'माता की स्थिति*';
+  String get motherStatusLabel => 'माता की स्थिति *';
 
   @override
   String get mcpCardAvailableLabelMother => 'क्या \'मातृ शिशु संरक्षण (एमसीपी)\' कार्ड की उपलब्धता है? *';
@@ -2772,7 +2775,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get postDeliveryProblemConvulsions => 'दौरे';
 
   @override
-  String get mealsPerDayLabel => '24 घंटे में मां कितनी बार पूर्ण भोजन लेती है?';
+  String get mealsPerDayLabel => '24 घंटे में माँ कितनी बार पूरा भोजन लेती है?';
 
   @override
   String get padsPerDayLabel => 'रक्तस्राव के लिए एक दिन में कितने पैड बदले गए हैं? *';
@@ -2787,7 +2790,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get abnormalSpeechOrSeizureLabel => 'क्या मां असामान्य ढंग से बोल रही है या उसे दौरे पड़ रहे हैं?';
 
   @override
-  String get counselingAdviceLabel => 'परामर्श / सलाह';
+  String get counselingAdviceLabel => 'परामर्श / सलाह *';
 
   @override
   String get outcomeFormTitle => 'प्रसव परिणाम ';
@@ -4528,7 +4531,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get createVia => 'के माध्यम से बनाएं';
 
   @override
-  String get aadhaarNumber => 'आधार नंबर';
+  String get aadhaarNumber => 'आधार संख्या';
 
   @override
   String get iHerebyDeclareThat => 'मैं एतद्द्वारा घोषणा करता/करती हूं कि';
@@ -6028,16 +6031,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get write_take_action => 'कृपया किए जाने वाले कार्य को लिखें';
 
   @override
-  String get breastfeeding_problem_help => 'यदि स्तनपान में कोई समस्या है, तो माँ की मदद करें ताकि वह इसे दूर कर सके *';
+  String get breastfeeding_problem_help => 'यदि माँ को स्तनपान कराने में कोई पेरशानी हो रही है, तो उसे दूर करने में माँ की मदद करें *';
 
   @override
-  String get temp_upto_102 => '102°F (38.9°C) तक तापमान';
+  String get temp_upto_102 => 'तापमान 102 डिग्री फ़ारेनहाइट (38.9 डिग्री सेल्सियस) तक ';
 
   @override
-  String get temp_more_than_102 => '102°F (38.9°C) से अधिक तापमान';
+  String get temp_more_than_102 => 'तापमान 102 डिग्री फ़ारेनहाइट (38.9 डिग्री सेल्सियस) से अधिक';
 
   @override
-  String get paracetamolGivenLabel => 'पैरासिटामोल टैबलेट दी गई (तापमान 102°F / 38.9°C तक)';
+  String get paracetamolGivenLabel => 'पैरासिटामोल टैबलेट दी गई';
 
   @override
   String get refer_to_hospital => 'अस्पताल रेफर किया गया*';
@@ -7639,7 +7642,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dontNO => 'Don\'t Know';
 
   @override
-  String get dateOfvisitTracking => 'Date of visit';
+  String get dateOfvisitTracking => 'भ्रमण की तिथि';
 
   @override
   String get motherNameLabelchild => 'माता का नाम';

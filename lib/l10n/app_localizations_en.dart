@@ -2532,6 +2532,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get whoseMobileLabel => 'Whose mobile no.?';
 
   @override
+  String get whoseMobileEligibleCoupleLabel => 'Whose mobile no.?';
+
+  @override
   String get widowed => 'Widowed';
 
   @override
@@ -6034,7 +6037,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get temp_upto_102 => 'Temperature upto 102 degree F(38.9 degree C)';
 
   @override
-  String get temp_more_than_102 => 'Temperature More than 102 degree F(38.9 degree C)';
+  String get temp_more_than_102 => 'Temperature More than 102 degree F (38.9 degree C)';
 
   @override
   String get paracetamolGivenLabel => 'Paracetamol tablet given (Temperature up to 102°F / 38.9°C)';

@@ -305,7 +305,7 @@ class _UpdatedEligibleCoupleListScreenState
 
   Widget _householdCard(BuildContext context, Map<String, dynamic> data) {
     final primary = Theme.of(context).primaryColor;
-    final t = AppLocalizations.of(context);
+    final t = AppLocalizations.of(context)!;
 
     return InkWell(
       onTap: () async {
@@ -323,7 +323,6 @@ class _UpdatedEligibleCoupleListScreenState
           await _loadCouples();
         }
       },
-
       borderRadius: BorderRadius.circular(8),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -372,8 +371,10 @@ class _UpdatedEligibleCoupleListScreenState
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      data['status'] ?? '',
-                      style:  TextStyle(
+                      data['status']?.toString().toLowerCase() == 'protected'
+                          ? t.protected
+                          : t.unprotected,
+                      style: TextStyle(
                         color: (data['status']?.toString().toLowerCase() == 'protected'
                             ? Colors.green
                             : Colors.red),
@@ -383,6 +384,7 @@ class _UpdatedEligibleCoupleListScreenState
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+
 
                   const SizedBox(width: 8),
                   FutureBuilder<Map<String, dynamic>>(

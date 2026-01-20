@@ -466,13 +466,13 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                           hintText: t.selectOption,
                           items: const [
                             'Temperature upto 102 degree F(38.9 degree C)',
-                            'Temperure More that102 degree F (38.9 degree C)',
+                            'Temperature More than 102 degree F (38.9 degree C)',
                           ],
                           getLabel: (s) {
                             switch (s) {
                               case 'Temperature upto 102 degree F(38.9 degree C)':
                                 return t.temp_upto_102;
-                              case 'Temperature More than 102 degree F(38.9 degree C)':
+                              case 'Temperature More than 102 degree F (38.9 degree C)':
                                 return t.temp_more_than_102;
                               default:
                                 return s;
@@ -620,10 +620,10 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                             items: [
                               t.phc,
                               t.chc,
-                              t.rh,
+                              t.rhLabel,
                               t.sdh,
-                              t.dh,
-                              t.mch,
+                              t.dhLabel,
+                              t.mchLabel,
                             ],
                             getLabel: (e) => e,
                             value: _asString(m['referTo']),

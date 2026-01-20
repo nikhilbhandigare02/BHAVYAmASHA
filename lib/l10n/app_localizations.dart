@@ -5117,6 +5117,12 @@ abstract class AppLocalizations {
   /// **'Whose mobile no.?'**
   String get whoseMobileLabel;
 
+  /// No description provided for @whoseMobileEligibleCoupleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Whose mobile no.?'**
+  String get whoseMobileEligibleCoupleLabel;
+
   /// No description provided for @widowed.
   ///
   /// In en, this message translates to:
@@ -12116,7 +12122,7 @@ abstract class AppLocalizations {
   /// No description provided for @temp_more_than_102.
   ///
   /// In en, this message translates to:
-  /// **'Temperature More than 102 degree F(38.9 degree C)'**
+  /// **'Temperature More than 102 degree F (38.9 degree C)'**
   String get temp_more_than_102;
 
   /// No description provided for @paracetamolGivenLabel.
