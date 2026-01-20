@@ -98,6 +98,36 @@ class ApiDropdown<T> extends StatefulWidget {
         case 'pit_toilet_without_water':
           return 'Pit toilet without water supply' as T;
 
+      // 🔹 Drinking Water Source cases
+        case 'supply_water':
+          return 'Supply water' as T;
+        case 'ro':
+          return 'R.O.' as T;
+        case 'handpump_within_house':
+          return 'Hand pump within house' as T;
+        case 'handpump_outside_of_house':
+          return 'Hand pump outside of house' as T;
+        case 'tanker':
+          return 'Tanker' as T;
+        case 'river':
+          return 'River' as T;
+        case 'pond':
+          return 'Pond' as T;
+        case 'lake':
+          return 'Lake' as T;
+        case 'well':
+          return 'Well' as T;
+
+      // 🔹 Power / Electricity Source
+        case 'electricity_supply':
+          return 'Electricity supply' as T;
+        case 'generator':
+          return 'Generator' as T;
+        case 'solar_power':
+          return 'Solar power' as T;
+        case 'kerosene_lamp':
+          return 'Kerosene lamp' as T;
+
 
       }
     }

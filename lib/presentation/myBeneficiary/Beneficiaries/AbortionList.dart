@@ -168,32 +168,56 @@ class _AbortionlistState extends State<Abortionlist> {
             const Expanded(
               child: Center(child: CircularProgressIndicator()),
             )
-          else if (_error.isNotEmpty)
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 48),
-                    const SizedBox(height: 16),
-                    Text(
-                      _error,
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _loadANCVisits,
-                      child: const Text('Retry'),
-                    ),
-                  ],
+          // else if (_error.isNotEmpty)
+          //   Expanded(
+          //     child: Center(
+          //       child: Column(
+          //         mainAxisAlignment: MainAxisAlignment.center,
+          //         children: [
+          //           const Icon(Icons.error_outline, color: Colors.red, size: 48),
+          //           const SizedBox(height: 16),
+          //           Text(
+          //             _error,
+          //             style: const TextStyle(color: Colors.red),
+          //             textAlign: TextAlign.center,
+          //           ),
+          //           const SizedBox(height: 16),
+          //           ElevatedButton(
+          //             onPressed: _loadANCVisits,
+          //             child: const Text('Retry'),
+          //           ),
+          //         ],
+          //       ),
+          //     ),
+          //   )
+          else if (displayVisits.isEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              child: Card(
+                color: Colors.white,
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 50.0, horizontal: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        l10n?.noRecordFound ?? 'No Record Found',
+                        style: TextStyle(
+                          fontSize: 17.sp,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             )
-          else if (displayVisits.isEmpty)
-              Expanded(
-                child: _buildNoRecordCard(context),
-              )
             else
               Expanded(
                 child: ListView.builder(
