@@ -21,71 +21,28 @@ part 'add_family_head_state.dart';
 
 class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
   int _daysInMonth(int year, int month) {
-    if (month == 12) {
-      return DateTime(year + 1, 1, 0).day;
-    }
-    return DateTime(year, month + 1, 0).day;
+    return 30;
   }
 
   Map<String, int> _agePartsFromDob(DateTime dob) {
     final today = DateTime.now();
-    int years = today.year - dob.year;
-    int months = today.month - dob.month;
-    int days = today.day - dob.day;
-
-    if (days < 0) {
-      months -= 1;
-      final prevMonth = today.month == 1 ? 12 : today.month - 1;
-      final prevYear = prevMonth == 12 ? today.year - 1 : today.year;
-      days += _daysInMonth(prevYear, prevMonth);
+    int totalDays = today.difference(dob).inDays;
+    if (totalDays < 0) {
+      totalDays = 0;
     }
-
-    if (months < 0) {
-      years -= 1;
-      months += 12;
-    }
-
-    if (years < 0) {
-      years = 0;
-      months = 0;
-      days = 0;
-    }
-
-    return {
-      'years': years,
-      'months': months,
-      'days': days,
-    };
+    final years = totalDays ~/ 360;
+    final remainderAfterYears = totalDays % 360;
+    final months = remainderAfterYears ~/ 30;
+    final days = remainderAfterYears % 30;
+    return {'years': years, 'months': months, 'days': days};
   }
 
   DateTime? _dobFromAgeParts(int years, int months, int days) {
     if (years < 0 || months < 0 || days < 0) return null;
     if (years == 0 && months == 0 && days == 0) return null;
-
+    final totalDays = years * 360 + months * 30 + days;
     final today = DateTime.now();
-    int y = today.year - years;
-    int m = today.month - months;
-    int d = today.day - days;
-
-    while (d <= 0) {
-      m -= 1;
-      if (m <= 0) {
-        m += 12;
-        y -= 1;
-      }
-      d += _daysInMonth(y, m);
-    }
-
-    while (m <= 0) {
-      m += 12;
-      y -= 1;
-    }
-
-    if (y < 1900) {
-      y = 1900;
-    }
-
-    return DateTime(y, m, d);
+    return today.subtract(Duration(days: totalDays));
   }
 
   AddFamilyHeadBloc() : super(AddFamilyHeadState()) {
@@ -132,6 +89,12 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       final dob = event.value;
       if (dob == null) {
         emit(state.copyWith(dob: null));
+        return;
+      }
+
+      // In approximate age mode, only set DOB; do not override age fields
+      if (!state.useDob) {
+        emit(state.copyWith(dob: dob));
         return;
       }
 
@@ -284,8 +247,8 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
 
     on<UpdateYears>((event, emit) {
       final yearsStr = event.value;
-      final monthsStr = state.months ?? '0';
-      final daysStr = state.days ?? '0';
+      final monthsStr = state.months ?? '';
+      final daysStr = state.days ?? '';
 
       int years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
       int months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
@@ -308,7 +271,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       // Update the string values with calculated rollover
       final newYearStr = years.toString();
       final newMonthStr = months.toString();
-      final newDayStr = days.toString();
+      final newDayStr = daysStr.isEmpty ? '' : days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
@@ -326,8 +289,8 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
 
     on<UpdateMonths>((event, emit) {
       final monthsStr = event.value;
-      final yearsStr = state.years ?? '0';
-      final daysStr = state.days ?? '0';
+      final yearsStr = state.years ?? '';
+      final daysStr = state.days ?? '';
 
       int years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
       int months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
@@ -350,7 +313,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       // Update the string values with calculated rollover
       final newYearStr = years.toString();
       final newMonthStr = months.toString();
-      final newDayStr = days.toString();
+      final newDayStr = daysStr.isEmpty ? '' : days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();
@@ -368,8 +331,8 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
 
     on<UpdateDays>((event, emit) {
       final daysStr = event.value;
-      final yearsStr = state.years ?? '0';
-      final monthsStr = state.months ?? '0';
+      final yearsStr = state.years ?? '';
+      final monthsStr = state.months ?? '';
 
       int years = int.tryParse(yearsStr.isEmpty ? '0' : yearsStr) ?? 0;
       int months = int.tryParse(monthsStr.isEmpty ? '0' : monthsStr) ?? 0;
@@ -392,7 +355,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
       // Update the string values with calculated rollover
       final newYearStr = years.toString();
       final newMonthStr = months.toString();
-      final newDayStr = days.toString();
+      final newDayStr = daysStr.isEmpty ? '' : days.toString();
 
       final dob = _dobFromAgeParts(years, months, days);
       final approx = '$years years $months months $days days'.trim();

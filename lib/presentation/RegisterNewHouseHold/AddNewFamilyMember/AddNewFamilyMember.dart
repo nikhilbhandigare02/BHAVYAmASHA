@@ -559,9 +559,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
     final m = int.tryParse(state.updateMonth ?? '0') ?? 0;
     final d = int.tryParse(state.updateDay ?? '0') ?? 0;
 
-    // Calculate DOB and update BLoC state (rollover logic is handled in BLoC)
+    // Calculate DOB using fixed 30-day months and 360-day years
+    final totalDays = y * 360 + m * 30 + d;
     final now = DateTime.now();
-    final calculatedDob = DateTime(now.year - y, now.month - m, now.day - d);
+    final calculatedDob = now.subtract(Duration(days: totalDays));
 
     bloc.add(AnmUpdateDob(calculatedDob));
   }
@@ -1203,7 +1204,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
           },
           child: Scaffold(
             appBar: AppHeader(
-              screenTitle: _isEdit ? l.memberDetailsTitle : l.newMemberDetailsTitle,
+              screenTitle: _isEdit
+                  ? l.memberDetailsTitle
+                  : l.newMemberDetailsTitle,
               showBack: true,
               onBackTap: () async {
                 final shouldExit = await showConfirmationDialog(
@@ -2551,126 +2554,174 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       height: 0,
                                     ),
                                     _section(
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            if (_fatherOption != 'Other') ...[
-                                              Divider(
-                                                color: AppColors.divider,
-                                                thickness: 0.5,
-                                                height: 0,
-                                              ),
-                                              Builder(
-                                                builder: (context) {
-                                                  const String fatherNotAddedKey = '__FATHER_NOT_ADDED__';
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          if (_fatherOption != 'Other') ...[
+                                            Divider(
+                                              color: AppColors.divider,
+                                              thickness: 0.5,
+                                              height: 0,
+                                            ),
+                                            Builder(
+                                              builder: (context) {
+                                                const String fatherNotAddedKey =
+                                                    '__FATHER_NOT_ADDED__';
 
-                                                  final bool showOnlyPlaceholder =
-                                                      _isEdit && (_fatherOption == null || _fatherOption.isEmpty);
+                                                final bool showOnlyPlaceholder =
+                                                    _isEdit &&
+                                                    (_fatherOption == null ||
+                                                        _fatherOption.isEmpty);
 
-                                                  final Set<String> fatherSet = {
-                                                    ..._maleAdultNames,
-                                                  };
+                                                final Set<String> fatherSet = {
+                                                  ..._maleAdultNames,
+                                                };
 
-                                                  final List<String> fatherItems = showOnlyPlaceholder
-                                                      ? [fatherNotAddedKey] // 👈 ONLY ONE ITEM
-                                                      : [
-                                                    ...fatherSet,
-                                                    'Other',
-                                                  ];
+                                                final List<String> fatherItems =
+                                                    showOnlyPlaceholder
+                                                    ? [
+                                                        fatherNotAddedKey,
+                                                      ] // 👈 ONLY ONE ITEM
+                                                    : [...fatherSet, 'Other'];
 
-                                                  return ApiDropdown<String>(
-                                                    labelText: _isEdit
-                                                        ? l.fatherGuardianNameLabel
-                                                        : '${l.fatherGuardianNameLabel} *',
-                                                    hintText: l.select,
-                                                    items: fatherItems,
+                                                return ApiDropdown<String>(
+                                                  labelText: _isEdit
+                                                      ? l.fatherGuardianNameLabel
+                                                      : '${l.fatherGuardianNameLabel} *',
+                                                  hintText: l.select,
+                                                  items: fatherItems,
 
-                                                    getLabel: (s) {
-                                                      if (s == fatherNotAddedKey) {
-                                                        return 'Father is not added yet';
+                                                  getLabel: (s) {
+                                                    if (s ==
+                                                        fatherNotAddedKey) {
+                                                      return 'Father is not added yet';
+                                                    }
+                                                    return s;
+                                                  },
+
+                                                  value: showOnlyPlaceholder
+                                                      ? fatherNotAddedKey
+                                                      : (_fatherOption ==
+                                                                l.select ||
+                                                            _fatherOption
+                                                                .isEmpty)
+                                                      ? null
+                                                      : _fatherOption,
+
+                                                  validator: (value) {
+                                                    if (!_isEdit) {
+                                                      if (_fatherOption ==
+                                                              l.select ||
+                                                          _fatherOption
+                                                              .isEmpty) {
+                                                        return l
+                                                            .fatherGuardianNameRequired
+                                                            .toLowerCase();
                                                       }
-                                                      return s;
-                                                    },
+                                                    }
+                                                    return null;
+                                                  },
 
-                                                    value: showOnlyPlaceholder
-                                                        ? fatherNotAddedKey
-                                                        : (_fatherOption == l.select || _fatherOption.isEmpty)
-                                                        ? null
-                                                        : _fatherOption,
+                                                  onChanged: (v) {
+                                                    if (v == null) return;
 
-                                                    validator: (value) {
-                                                      if (!_isEdit) {
-                                                        if (_fatherOption == l.select || _fatherOption.isEmpty) {
-                                                          return l.fatherGuardianNameRequired.toLowerCase();
-                                                        }
-                                                      }
-                                                      return null;
-                                                    },
+                                                    /// 👇 Block selection when placeholder is shown
+                                                    if (showOnlyPlaceholder &&
+                                                        v ==
+                                                            fatherNotAddedKey) {
+                                                      context
+                                                          .read<
+                                                            AddnewfamilymemberBloc
+                                                          >()
+                                                          .add(
+                                                            AnmUpdateFatherName(
+                                                              '',
+                                                            ),
+                                                          );
+                                                      return;
+                                                    }
 
-                                                    onChanged: (v) {
-                                                      if (v == null) return;
+                                                    setState(() {
+                                                      _fatherOption = v;
+                                                    });
 
-                                                      /// 👇 Block selection when placeholder is shown
-                                                      if (showOnlyPlaceholder && v == fatherNotAddedKey) {
-                                                        context.read<AddnewfamilymemberBloc>().add(
-                                                          AnmUpdateFatherName(''),
-                                                        );
-                                                        return;
-                                                      }
+                                                    if (v != 'Other' &&
+                                                        v != l.select) {
+                                                      context
+                                                          .read<
+                                                            AddnewfamilymemberBloc
+                                                          >()
+                                                          .add(
+                                                            AnmUpdateFatherName(
+                                                              v,
+                                                            ),
+                                                          );
+                                                    } else {
+                                                      context
+                                                          .read<
+                                                            AddnewfamilymemberBloc
+                                                          >()
+                                                          .add(
+                                                            AnmUpdateFatherName(
+                                                              '',
+                                                            ),
+                                                          );
+                                                    }
 
-                                                      setState(() {
-                                                        _fatherOption = v;
-                                                      });
-
-                                                      if (v != 'Other' && v != l.select) {
-                                                        context.read<AddnewfamilymemberBloc>().add(
-                                                          AnmUpdateFatherName(v),
-                                                        );
-                                                      } else {
-                                                        context.read<AddnewfamilymemberBloc>().add(
-                                                          AnmUpdateFatherName(''),
-                                                        );
-                                                      }
-
-                                                      _formKey.currentState?.validate();
-                                                    },
-                                                  );
-                                                },
-                                              ),
-
-                                            ],
-
-                                            if (_fatherOption == 'Other') ...[
-                                              CustomTextField(
-                                                labelText: _isEdit
-                                                    ? l.fatherGuardianNameLabel
-                                                    : '${l.fatherGuardianNameLabel} *',
-                                                hintText: l.fatherGuardianNameLabel,
-                                                initialValue: state.fatherName ?? '',
-                                                readOnly: _isEdit, // 👈 make readonly in edit mode
-                                                onChanged: (v) {
-                                                  if (_isEdit) return; // extra safety
-                                                  context.read<AddnewfamilymemberBloc>().add(
-                                                    AnmUpdateFatherName(v.trim()),
-                                                  );
-                                                  _formKey.currentState?.validate();
-                                                },
-                                                validator: (value) {
-                                                  if (!_isEdit && (value == null || value.trim().isEmpty)) {
-                                                    return l.fatherGuardianNameRequired.toLowerCase();
-                                                  }
-                                                  return null;
-                                                },
-                                              ),
-
-                                            ],
+                                                    _formKey.currentState
+                                                        ?.validate();
+                                                  },
+                                                );
+                                              },
+                                            ),
                                           ],
-                                        )
 
+                                          if (_fatherOption == 'Other') ...[
+                                            CustomTextField(
+                                              labelText: _isEdit
+                                                  ? l.fatherGuardianNameLabel
+                                                  : '${l.fatherGuardianNameLabel} *',
+                                              hintText:
+                                                  l.fatherGuardianNameLabel,
+                                              initialValue:
+                                                  state.fatherName ?? '',
+                                              readOnly:
+                                                  _isEdit, // 👈 make readonly in edit mode
+                                              onChanged: (v) {
+                                                if (_isEdit)
+                                                  return; // extra safety
+                                                context
+                                                    .read<
+                                                      AddnewfamilymemberBloc
+                                                    >()
+                                                    .add(
+                                                      AnmUpdateFatherName(
+                                                        v.trim(),
+                                                      ),
+                                                    );
+                                                _formKey.currentState
+                                                    ?.validate();
+                                              },
+                                              validator: (value) {
+                                                if (!_isEdit &&
+                                                    (value == null ||
+                                                        value.trim().isEmpty)) {
+                                                  return l
+                                                      .fatherGuardianNameRequired
+                                                      .toLowerCase();
+                                                }
+                                                return null;
+                                              },
+                                            ),
+                                          ],
+                                        ],
+                                      ),
                                     ),
 
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         if (_motherOption != 'Other') ...[
                                           Divider(
@@ -2680,24 +2731,26 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           ),
                                           Builder(
                                             builder: (context) {
-                                              const String motherNotAddedKey = '__MOTHER_NOT_ADDED__';
+                                              const String motherNotAddedKey =
+                                                  '__MOTHER_NOT_ADDED__';
 
                                               final bool showOnlyPlaceholder =
                                                   _isEdit &&
-                                                      (_motherOption == null ||
-                                                          _motherOption.isEmpty ||
-                                                          _motherOption == l.select);
+                                                  (_motherOption == null ||
+                                                      _motherOption.isEmpty ||
+                                                      _motherOption ==
+                                                          l.select);
 
                                               final Set<String> motherSet = {
                                                 ..._femaleAdultNames,
                                               };
 
-                                              final List<String> motherItems = showOnlyPlaceholder
-                                                  ? [motherNotAddedKey] // 👈 ONLY PLACEHOLDER
-                                                  : [
-                                                ...motherSet,
-                                                'Other',
-                                              ];
+                                              final List<String> motherItems =
+                                                  showOnlyPlaceholder
+                                                  ? [
+                                                      motherNotAddedKey,
+                                                    ] // 👈 ONLY PLACEHOLDER
+                                                  : [...motherSet, 'Other'];
 
                                               return ApiDropdown<String>(
                                                 labelText: _isEdit
@@ -2716,8 +2769,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 value: showOnlyPlaceholder
                                                     ? motherNotAddedKey
                                                     : (_motherOption == null ||
-                                                    _motherOption.isEmpty ||
-                                                    _motherOption == l.select)
+                                                          _motherOption
+                                                              .isEmpty ||
+                                                          _motherOption ==
+                                                              l.select)
                                                     ? null
                                                     : _motherOption,
 
@@ -2731,26 +2786,37 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   if (_isEdit) {
                                                     if (_motherOption == null ||
                                                         _motherOption.isEmpty ||
-                                                        _motherOption == l.select) {
+                                                        _motherOption ==
+                                                            l.select) {
                                                       return 'Mother is is not selected';
                                                     }
                                                   } else {
-                                                    if (_motherOption == l.select || _motherOption.isEmpty) {
-                                                      return l.motherGuardianNameRequired.toLowerCase();
+                                                    if (_motherOption ==
+                                                            l.select ||
+                                                        _motherOption.isEmpty) {
+                                                      return l
+                                                          .motherGuardianNameRequired
+                                                          .toLowerCase();
                                                     }
                                                   }
                                                   return null;
                                                 },
 
-
                                                 onChanged: (v) {
                                                   if (v == null) return;
 
                                                   /// 👇 Block placeholder selection
-                                                  if (showOnlyPlaceholder && v == motherNotAddedKey) {
-                                                    context.read<AddnewfamilymemberBloc>().add(
-                                                      AnmUpdateMotherName(''),
-                                                    );
+                                                  if (showOnlyPlaceholder &&
+                                                      v == motherNotAddedKey) {
+                                                    context
+                                                        .read<
+                                                          AddnewfamilymemberBloc
+                                                        >()
+                                                        .add(
+                                                          AnmUpdateMotherName(
+                                                            '',
+                                                          ),
+                                                        );
                                                     return;
                                                   }
 
@@ -2758,17 +2824,31 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     _motherOption = v;
                                                   });
 
-                                                  if (v != l.select && v != 'Other') {
-                                                    context.read<AddnewfamilymemberBloc>().add(
-                                                      AnmUpdateMotherName(v),
-                                                    );
+                                                  if (v != l.select &&
+                                                      v != 'Other') {
+                                                    context
+                                                        .read<
+                                                          AddnewfamilymemberBloc
+                                                        >()
+                                                        .add(
+                                                          AnmUpdateMotherName(
+                                                            v,
+                                                          ),
+                                                        );
                                                   } else {
-                                                    context.read<AddnewfamilymemberBloc>().add(
-                                                      AnmUpdateMotherName(''),
-                                                    );
+                                                    context
+                                                        .read<
+                                                          AddnewfamilymemberBloc
+                                                        >()
+                                                        .add(
+                                                          AnmUpdateMotherName(
+                                                            '',
+                                                          ),
+                                                        );
                                                   }
 
-                                                  _formKey.currentState?.validate();
+                                                  _formKey.currentState
+                                                      ?.validate();
                                                 },
                                               );
                                             },
@@ -2788,21 +2868,31 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 : "${l.motherNameLabel} *",
                                             hintText: l.motherNameLabel,
                                             readOnly: _isEdit,
-                                            initialValue: state.motherName ?? '',
+                                            initialValue:
+                                                state.motherName ?? '',
                                             onChanged: (v) {
-                                              context.read<AddnewfamilymemberBloc>().add(
-                                                AnmUpdateMotherName(v.trim()),
-                                              );
+                                              context
+                                                  .read<
+                                                    AddnewfamilymemberBloc
+                                                  >()
+                                                  .add(
+                                                    AnmUpdateMotherName(
+                                                      v.trim(),
+                                                    ),
+                                                  );
                                               _formKey.currentState?.validate();
                                             },
                                             validator: (value) {
                                               if (_isEdit) {
-                                                if (value == null || value.trim().isEmpty) {
+                                                if (value == null ||
+                                                    value.trim().isEmpty) {
                                                   return 'Mother name is not selected';
                                                 }
                                               } else {
-                                                if (value == null || value.trim().isEmpty) {
-                                                  return l.motherGuardianNameRequired
+                                                if (value == null ||
+                                                    value.trim().isEmpty) {
+                                                  return l
+                                                      .motherGuardianNameRequired
                                                       .toLowerCase();
                                                 }
                                               }
@@ -2816,8 +2906,7 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           ),
                                         ],
                                       ],
-                                    )
-
+                                    ),
                                   ],
                                   Divider(
                                     color: AppColors.divider,
@@ -2832,125 +2921,172 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       height: 0,
                                     ),
                                     _section(
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            if (_fatherOption != 'Other') ...[
-                                              Divider(
-                                                color: AppColors.divider,
-                                                thickness: 0.5,
-                                                height: 0,
-                                              ),
-                                              Builder(
-                                                builder: (context) {
-                                                  const String fatherNotAddedKey = '__FATHER_NOT_ADDED__';
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          if (_fatherOption != 'Other') ...[
+                                            Divider(
+                                              color: AppColors.divider,
+                                              thickness: 0.5,
+                                              height: 0,
+                                            ),
+                                            Builder(
+                                              builder: (context) {
+                                                const String fatherNotAddedKey =
+                                                    '__FATHER_NOT_ADDED__';
 
-                                                  final bool showOnlyPlaceholder =
-                                                      _isEdit && (_fatherOption == null || _fatherOption.isEmpty);
+                                                final bool showOnlyPlaceholder =
+                                                    _isEdit &&
+                                                    (_fatherOption == null ||
+                                                        _fatherOption.isEmpty);
 
-                                                  final Set<String> fatherSet = {
-                                                    ..._maleAdultNames,
-                                                  };
+                                                final Set<String> fatherSet = {
+                                                  ..._maleAdultNames,
+                                                };
 
-                                                  final List<String> fatherItems = showOnlyPlaceholder
-                                                      ? [fatherNotAddedKey] // 👈 ONLY ONE ITEM
-                                                      : [
-                                                    ...fatherSet,
-                                                    'Other',
-                                                  ];
+                                                final List<String> fatherItems =
+                                                    showOnlyPlaceholder
+                                                    ? [
+                                                        fatherNotAddedKey,
+                                                      ] // 👈 ONLY ONE ITEM
+                                                    : [...fatherSet, 'Other'];
 
-                                                  return ApiDropdown<String>(
-                                                    labelText: _isEdit
-                                                        ? l.fatherGuardianNameLabel
-                                                        : '${l.fatherGuardianNameLabel} *',
-                                                    hintText: l.select,
-                                                    items: fatherItems,
+                                                return ApiDropdown<String>(
+                                                  labelText: _isEdit
+                                                      ? l.fatherGuardianNameLabel
+                                                      : '${l.fatherGuardianNameLabel} *',
+                                                  hintText: l.select,
+                                                  items: fatherItems,
 
-                                                    getLabel: (s) {
-                                                      if (s == fatherNotAddedKey) {
-                                                        return 'Father is not added yet';
+                                                  getLabel: (s) {
+                                                    if (s ==
+                                                        fatherNotAddedKey) {
+                                                      return 'Father is not added yet';
+                                                    }
+                                                    return s;
+                                                  },
+
+                                                  value: showOnlyPlaceholder
+                                                      ? fatherNotAddedKey
+                                                      : (_fatherOption ==
+                                                                l.select ||
+                                                            _fatherOption
+                                                                .isEmpty)
+                                                      ? null
+                                                      : _fatherOption,
+
+                                                  validator: (value) {
+                                                    if (!_isEdit) {
+                                                      if (_fatherOption ==
+                                                              l.select ||
+                                                          _fatherOption
+                                                              .isEmpty) {
+                                                        return l
+                                                            .fatherGuardianNameRequired
+                                                            .toLowerCase();
                                                       }
-                                                      return s;
-                                                    },
+                                                    }
+                                                    return null;
+                                                  },
 
-                                                    value: showOnlyPlaceholder
-                                                        ? fatherNotAddedKey
-                                                        : (_fatherOption == l.select || _fatherOption.isEmpty)
-                                                        ? null
-                                                        : _fatherOption,
+                                                  onChanged: (v) {
+                                                    if (v == null) return;
 
-                                                    validator: (value) {
-                                                      if (!_isEdit) {
-                                                        if (_fatherOption == l.select || _fatherOption.isEmpty) {
-                                                          return l.fatherGuardianNameRequired.toLowerCase();
-                                                        }
-                                                      }
-                                                      return null;
-                                                    },
+                                                    /// 👇 Block selection when placeholder is shown
+                                                    if (showOnlyPlaceholder &&
+                                                        v ==
+                                                            fatherNotAddedKey) {
+                                                      context
+                                                          .read<
+                                                            AddnewfamilymemberBloc
+                                                          >()
+                                                          .add(
+                                                            AnmUpdateFatherName(
+                                                              '',
+                                                            ),
+                                                          );
+                                                      return;
+                                                    }
 
-                                                    onChanged: (v) {
-                                                      if (v == null) return;
+                                                    setState(() {
+                                                      _fatherOption = v;
+                                                    });
 
-                                                      /// 👇 Block selection when placeholder is shown
-                                                      if (showOnlyPlaceholder && v == fatherNotAddedKey) {
-                                                        context.read<AddnewfamilymemberBloc>().add(
-                                                          AnmUpdateFatherName(''),
-                                                        );
-                                                        return;
-                                                      }
+                                                    if (v != 'Other' &&
+                                                        v != l.select) {
+                                                      context
+                                                          .read<
+                                                            AddnewfamilymemberBloc
+                                                          >()
+                                                          .add(
+                                                            AnmUpdateFatherName(
+                                                              v,
+                                                            ),
+                                                          );
+                                                    } else {
+                                                      context
+                                                          .read<
+                                                            AddnewfamilymemberBloc
+                                                          >()
+                                                          .add(
+                                                            AnmUpdateFatherName(
+                                                              '',
+                                                            ),
+                                                          );
+                                                    }
 
-                                                      setState(() {
-                                                        _fatherOption = v;
-                                                      });
-
-                                                      if (v != 'Other' && v != l.select) {
-                                                        context.read<AddnewfamilymemberBloc>().add(
-                                                          AnmUpdateFatherName(v),
-                                                        );
-                                                      } else {
-                                                        context.read<AddnewfamilymemberBloc>().add(
-                                                          AnmUpdateFatherName(''),
-                                                        );
-                                                      }
-
-                                                      _formKey.currentState?.validate();
-                                                    },
-                                                  );
-                                                },
-                                              ),
-
-                                            ],
-
-                                            if (_fatherOption == 'Other') ...[
-                                              CustomTextField(
-                                                labelText: _isEdit
-                                                    ? l.fatherGuardianNameLabel
-                                                    : '${l.fatherGuardianNameLabel} *',
-                                                hintText: l.fatherGuardianNameLabel,
-                                                initialValue: state.fatherName ?? '',
-                                                readOnly: _isEdit,
-
-                                                onChanged: (v) {
-                                                  context.read<AddnewfamilymemberBloc>().add(
-                                                    AnmUpdateFatherName(v.trim()),
-                                                  );
-                                                  _formKey.currentState?.validate();
-                                                },
-                                                validator: (value) {
-                                                  if (!_isEdit && (value == null || value.trim().isEmpty)) {
-                                                    return l.fatherGuardianNameRequired.toLowerCase();
-                                                  }
-                                                  return null;
-                                                },
-                                              ),
-                                            ],
+                                                    _formKey.currentState
+                                                        ?.validate();
+                                                  },
+                                                );
+                                              },
+                                            ),
                                           ],
-                                        )
 
+                                          if (_fatherOption == 'Other') ...[
+                                            CustomTextField(
+                                              labelText: _isEdit
+                                                  ? l.fatherGuardianNameLabel
+                                                  : '${l.fatherGuardianNameLabel} *',
+                                              hintText:
+                                                  l.fatherGuardianNameLabel,
+                                              initialValue:
+                                                  state.fatherName ?? '',
+                                              readOnly: _isEdit,
+
+                                              onChanged: (v) {
+                                                context
+                                                    .read<
+                                                      AddnewfamilymemberBloc
+                                                    >()
+                                                    .add(
+                                                      AnmUpdateFatherName(
+                                                        v.trim(),
+                                                      ),
+                                                    );
+                                                _formKey.currentState
+                                                    ?.validate();
+                                              },
+                                              validator: (value) {
+                                                if (!_isEdit &&
+                                                    (value == null ||
+                                                        value.trim().isEmpty)) {
+                                                  return l
+                                                      .fatherGuardianNameRequired
+                                                      .toLowerCase();
+                                                }
+                                                return null;
+                                              },
+                                            ),
+                                          ],
+                                        ],
+                                      ),
                                     ),
 
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         if (_motherOption != 'Other') ...[
                                           Divider(
@@ -2960,24 +3096,26 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                           ),
                                           Builder(
                                             builder: (context) {
-                                              const String motherNotAddedKey = '__MOTHER_NOT_ADDED__';
+                                              const String motherNotAddedKey =
+                                                  '__MOTHER_NOT_ADDED__';
 
                                               final bool showOnlyPlaceholder =
                                                   _isEdit &&
-                                                      (_motherOption == null ||
-                                                          _motherOption.isEmpty ||
-                                                          _motherOption == l.select);
+                                                  (_motherOption == null ||
+                                                      _motherOption.isEmpty ||
+                                                      _motherOption ==
+                                                          l.select);
 
                                               final Set<String> motherSet = {
                                                 ..._femaleAdultNames,
                                               };
 
-                                              final List<String> motherItems = showOnlyPlaceholder
-                                                  ? [motherNotAddedKey] // 👈 ONLY PLACEHOLDER
-                                                  : [
-                                                ...motherSet,
-                                                'Other',
-                                              ];
+                                              final List<String> motherItems =
+                                                  showOnlyPlaceholder
+                                                  ? [
+                                                      motherNotAddedKey,
+                                                    ] // 👈 ONLY PLACEHOLDER
+                                                  : [...motherSet, 'Other'];
 
                                               return ApiDropdown<String>(
                                                 labelText: _isEdit
@@ -2996,8 +3134,10 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 value: showOnlyPlaceholder
                                                     ? motherNotAddedKey
                                                     : (_motherOption == null ||
-                                                    _motherOption.isEmpty ||
-                                                    _motherOption == l.select)
+                                                          _motherOption
+                                                              .isEmpty ||
+                                                          _motherOption ==
+                                                              l.select)
                                                     ? null
                                                     : _motherOption,
 
@@ -3011,26 +3151,37 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   if (_isEdit) {
                                                     if (_motherOption == null ||
                                                         _motherOption.isEmpty ||
-                                                        _motherOption == l.select) {
+                                                        _motherOption ==
+                                                            l.select) {
                                                       return 'Mother name is not selected';
                                                     }
                                                   } else {
-                                                    if (_motherOption == l.select || _motherOption.isEmpty) {
-                                                      return l.motherGuardianNameRequired.toLowerCase();
+                                                    if (_motherOption ==
+                                                            l.select ||
+                                                        _motherOption.isEmpty) {
+                                                      return l
+                                                          .motherGuardianNameRequired
+                                                          .toLowerCase();
                                                     }
                                                   }
                                                   return null;
                                                 },
 
-
                                                 onChanged: (v) {
                                                   if (v == null) return;
 
                                                   /// 👇 Block placeholder selection
-                                                  if (showOnlyPlaceholder && v == motherNotAddedKey) {
-                                                    context.read<AddnewfamilymemberBloc>().add(
-                                                      AnmUpdateMotherName(''),
-                                                    );
+                                                  if (showOnlyPlaceholder &&
+                                                      v == motherNotAddedKey) {
+                                                    context
+                                                        .read<
+                                                          AddnewfamilymemberBloc
+                                                        >()
+                                                        .add(
+                                                          AnmUpdateMotherName(
+                                                            '',
+                                                          ),
+                                                        );
                                                     return;
                                                   }
 
@@ -3038,17 +3189,31 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     _motherOption = v;
                                                   });
 
-                                                  if (v != l.select && v != 'Other') {
-                                                    context.read<AddnewfamilymemberBloc>().add(
-                                                      AnmUpdateMotherName(v),
-                                                    );
+                                                  if (v != l.select &&
+                                                      v != 'Other') {
+                                                    context
+                                                        .read<
+                                                          AddnewfamilymemberBloc
+                                                        >()
+                                                        .add(
+                                                          AnmUpdateMotherName(
+                                                            v,
+                                                          ),
+                                                        );
                                                   } else {
-                                                    context.read<AddnewfamilymemberBloc>().add(
-                                                      AnmUpdateMotherName(''),
-                                                    );
+                                                    context
+                                                        .read<
+                                                          AddnewfamilymemberBloc
+                                                        >()
+                                                        .add(
+                                                          AnmUpdateMotherName(
+                                                            '',
+                                                          ),
+                                                        );
                                                   }
 
-                                                  _formKey.currentState?.validate();
+                                                  _formKey.currentState
+                                                      ?.validate();
                                                 },
                                               );
                                             },
@@ -3067,23 +3232,34 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 ? l.motherNameLabel
                                                 : "${l.motherNameLabel} *",
                                             hintText: l.motherNameLabel,
-                                            readOnly: _isEdit, // 👈 make readonly in edit mode
+                                            readOnly:
+                                                _isEdit, // 👈 make readonly in edit mode
 
-                                            initialValue: state.motherName ?? '',
+                                            initialValue:
+                                                state.motherName ?? '',
                                             onChanged: (v) {
-                                              context.read<AddnewfamilymemberBloc>().add(
-                                                AnmUpdateMotherName(v.trim()),
-                                              );
+                                              context
+                                                  .read<
+                                                    AddnewfamilymemberBloc
+                                                  >()
+                                                  .add(
+                                                    AnmUpdateMotherName(
+                                                      v.trim(),
+                                                    ),
+                                                  );
                                               _formKey.currentState?.validate();
                                             },
                                             validator: (value) {
                                               if (_isEdit) {
-                                                if (value == null || value.trim().isEmpty) {
+                                                if (value == null ||
+                                                    value.trim().isEmpty) {
                                                   return 'Mother name is not selected';
                                                 }
                                               } else {
-                                                if (value == null || value.trim().isEmpty) {
-                                                  return l.motherGuardianNameRequired
+                                                if (value == null ||
+                                                    value.trim().isEmpty) {
+                                                  return l
+                                                      .motherGuardianNameRequired
                                                       .toLowerCase();
                                                 }
                                               }
@@ -3735,6 +3911,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   inputFormatters: [
                                                     FilteringTextInputFormatter
                                                         .digitsOnly,
+                                                    LengthLimitingTextInputFormatter(
+                                                      2,
+                                                    ),
                                                     MaxValueFormatter(
                                                       99,
                                                     ), // Allow up to 99 for rollover calculation
@@ -5139,31 +5318,39 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                       ),
                                     ],
 
-                                    if(!_isEdit)...[_section(
-                                      CustomTextField(
-                                        labelText: '${l.spouseNameLabel} *',
-                                        hintText: l.spouseNameHint,
-                                        initialValue: state.spouseName,
-                                        readOnly: _isEdit,
-                                        onChanged: _isEdit ? null : (v) => context
-                                            .read<AddnewfamilymemberBloc>()
-                                            .add(
-                                          AnmUpdateSpouseName(v.trim()),
+                                    if (!_isEdit) ...[
+                                      _section(
+                                        CustomTextField(
+                                          labelText: '${l.spouseNameLabel} *',
+                                          hintText: l.spouseNameHint,
+                                          initialValue: state.spouseName,
+                                          readOnly: _isEdit,
+                                          onChanged: _isEdit
+                                              ? null
+                                              : (v) => context
+                                                    .read<
+                                                      AddnewfamilymemberBloc
+                                                    >()
+                                                    .add(
+                                                      AnmUpdateSpouseName(
+                                                        v.trim(),
+                                                      ),
+                                                    ),
+                                          validator: (value) {
+                                            if (state.maritalStatus ==
+                                                'Married') {
+                                              return _captureAnmError(
+                                                Validations.validateSpousName(
+                                                  l,
+                                                  value,
+                                                ),
+                                              );
+                                            }
+                                            return null;
+                                          },
                                         ),
-                                        validator: (value) {
-                                          if (state.maritalStatus ==
-                                              'Married') {
-                                            return _captureAnmError(
-                                              Validations.validateSpousName(
-                                                l,
-                                                value,
-                                              ),
-                                            );
-                                          }
-                                          return null;
-                                        },
                                       ),
-                                    ),],
+                                    ],
 
                                     Divider(
                                       color: AppColors.divider,
@@ -5749,13 +5936,16 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                             }
                           } catch (_) {}
                           if (_isEdit) {
-                            Future.delayed(const Duration(milliseconds: 300), () {
-                              if (mounted) {
-                                Navigator.of(
-                                  context,
-                                ).pop<Map<String, dynamic>>(result);
-                              }
-                            });
+                            Future.delayed(
+                              const Duration(milliseconds: 300),
+                              () {
+                                if (mounted) {
+                                  Navigator.of(
+                                    context,
+                                  ).pop<Map<String, dynamic>>(result);
+                                }
+                              },
+                            );
                           } else {
                             WidgetsBinding.instance.addPostFrameCallback((_) {
                               if (mounted) {

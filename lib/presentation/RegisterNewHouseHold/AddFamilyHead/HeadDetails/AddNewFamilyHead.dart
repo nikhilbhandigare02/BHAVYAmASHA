@@ -228,12 +228,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
   SpousState _createSpousInitialState() {
     if (widget.initial == null) return const SpousState();
-    
+
     final m = widget.initial!;
     if (m.isEmpty) return const SpousState();
-    
+
     debugPrint('AddNewFamilyHead: Creating spouse initial state from map data');
-    
+
     // Helper functions for accessing spouse and head data
     dynamic getSpouseVal(String key) {
       if (m.containsKey('sp_$key')) return m['sp_$key'];
@@ -264,18 +264,27 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     }
 
     dynamic getHeadVal(String key) => m[key];
-    
+
     DateTime? _parseDate(String? iso) =>
         (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
-    
+
     return SpousState(
       relation: getSpouseVal('relation') ?? 'spouse',
-      memberName: getSpouseVal('memberName') ?? getSpouseVal('name') ?? getSpouseVal('headName'),
+      memberName:
+          getSpouseVal('memberName') ??
+          getSpouseVal('name') ??
+          getSpouseVal('headName'),
       ageAtMarriage: getSpouseVal('ageAtMarriage'),
       RichIDChanged: getSpouseVal('RichIDChanged'),
-      spouseName: getSpouseVal('spouseName') ?? getHeadVal('headName') ?? getHeadVal('memberName'),
+      spouseName:
+          getSpouseVal('spouseName') ??
+          getHeadVal('headName') ??
+          getHeadVal('memberName'),
       fatherName: getSpouseVal('father_name'),
-      useDob: getSpouseVal('age_by') == 'by_dob' || getSpouseVal('useDob') == true || getSpouseVal('useDob') == 'true',
+      useDob:
+          getSpouseVal('age_by') == 'by_dob' ||
+          getSpouseVal('useDob') == true ||
+          getSpouseVal('useDob') == 'true',
       dob: _parseDate(getSpouseVal('dob')?.toString()),
       edd: _parseDate(getSpouseVal('edd')?.toString()),
       lmp: _parseDate(getSpouseVal('lmp')?.toString()),
@@ -283,7 +292,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
       UpdateYears: getSpouseVal('UpdateYears'),
       UpdateMonths: getSpouseVal('UpdateMonths'),
       UpdateDays: getSpouseVal('UpdateDays'),
-      gender: getSpouseVal('gender') ?? ((getHeadVal('gender') == 'Male') ? 'Female' : (getHeadVal('gender') == 'Female') ? 'Male' : null),
+      gender:
+          getSpouseVal('gender') ??
+          ((getHeadVal('gender') == 'Male')
+              ? 'Female'
+              : (getHeadVal('gender') == 'Female')
+              ? 'Male'
+              : null),
       occupation: getSpouseVal('occupation'),
       education: getSpouseVal('education'),
       religion: getSpouseVal('religion'),
@@ -295,19 +310,39 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
       otherCategory: getSpouseVal('otherCategory'),
       mobileOwnerOtherRelation: getSpouseVal('mobileOwnerOtherRelation'),
       mobileNo: getSpouseVal('mobileNo'),
-      bankAcc: getSpouseVal('bankAcc') ?? getSpouseVal('bankAccountNumber') ?? getSpouseVal('account_number') ?? getSpouseVal('bank_account_number'),
-      ifsc: getSpouseVal('ifsc') ?? getSpouseVal('ifscCode') ?? getSpouseVal('ifsc_code'),
+      bankAcc:
+          getSpouseVal('bankAcc') ??
+          getSpouseVal('bankAccountNumber') ??
+          getSpouseVal('account_number') ??
+          getSpouseVal('bank_account_number'),
+      ifsc:
+          getSpouseVal('ifsc') ??
+          getSpouseVal('ifscCode') ??
+          getSpouseVal('ifsc_code'),
       voterId: getSpouseVal('voterId') ?? getSpouseVal('voter_id'),
-      rationId: getSpouseVal('rationId') ?? getSpouseVal('rationCardId') ?? getSpouseVal('ration_card_id') ?? getSpouseVal('ration_card_number'),
-      phId: getSpouseVal('phId') ?? getSpouseVal('personalHealthId') ?? getSpouseVal('personal_health_id') ?? getSpouseVal('health_id'),
-      beneficiaryType: getSpouseVal('beneficiaryType') ?? getSpouseVal('type_of_beneficiary') ?? getSpouseVal('ben_type'),
+      rationId:
+          getSpouseVal('rationId') ??
+          getSpouseVal('rationCardId') ??
+          getSpouseVal('ration_card_id') ??
+          getSpouseVal('ration_card_number'),
+      phId:
+          getSpouseVal('phId') ??
+          getSpouseVal('personalHealthId') ??
+          getSpouseVal('personal_health_id') ??
+          getSpouseVal('health_id'),
+      beneficiaryType:
+          getSpouseVal('beneficiaryType') ??
+          getSpouseVal('type_of_beneficiary') ??
+          getSpouseVal('ben_type'),
       isPregnant: getSpouseVal('isPregnant'),
       familyPlanningCounseling: getSpouseVal('hpfamilyPlanningCounseling'),
       fpMethod: getSpouseVal('hpMethod'),
       removalDate: _parseDate(getSpouseVal('hpremovalDate') as String?),
       removalReason: getSpouseVal('hpremovalReason'),
       condomQuantity: getSpouseVal('hpcondomQuantity'),
-      memberStatus: (getSpouseVal('is_death') == 1) ? 'death' : getSpouseVal('memberStatus'),
+      memberStatus: (getSpouseVal('is_death') == 1)
+          ? 'death'
+          : getSpouseVal('memberStatus'),
     );
   }
 
@@ -454,9 +489,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     final m = int.tryParse(state.months ?? '0') ?? 0;
     final d = int.tryParse(state.days ?? '0') ?? 0;
 
-    // Calculate DOB and update BLoC state (rollover logic is handled in BLoC)
+    // Calculate DOB using fixed 30-day months and 360-day years
+    final totalDays = y * 360 + m * 30 + d;
     final now = DateTime.now();
-    final calculatedDob = DateTime(now.year - y, now.month - m, now.day - d);
+    final calculatedDob = now.subtract(Duration(days: totalDays));
 
     bloc.add(AfhUpdateDob(calculatedDob));
   }
@@ -988,6 +1024,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               readOnly: widget.isEdit,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(2),
                                 MaxValueFormatter(
                                   99,
                                 ), // Allow up to 99 for rollover calculation
