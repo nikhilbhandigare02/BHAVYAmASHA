@@ -1202,7 +1202,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                           headRow ??= members.first;
 
                           Map<String, dynamic> info;
-                          final rawInfo = headRow['beneficiary_info'];
+                          final rawInfo = headRow!['beneficiary_info'];
                           if (rawInfo is Map<String, dynamic>) {
                             info = rawInfo;
                           } else if (rawInfo is String && rawInfo.isNotEmpty) {
@@ -1225,6 +1225,69 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                               headRow['unique_key']?.toString() ?? '';
                           if (headRow['id'] != null) {
                             map['head_id_pk'] = headRow['id'].toString();
+                          }
+
+                          // Check if head is separated and fetch spouse data in addition to head data
+                          if (headRow!['is_separated'] == 1) {
+                            final spouseKey = headRow!['spouse_key']?.toString();
+                            if (spouseKey != null && spouseKey.isNotEmpty) {
+                              // Clean spouse key by removing brackets if present
+                              String cleanSpouseKey = spouseKey;
+                              if (spouseKey.startsWith('[') && spouseKey.endsWith(']')) {
+                                cleanSpouseKey = spouseKey.substring(1, spouseKey.length - 1);
+                                debugPrint('AllHouseHold: Cleaned spouse key from "$spouseKey" to "$cleanSpouseKey"');
+                              }
+                              
+                              debugPrint('AllHouseHold: Head is separated, looking for spouse with key: $cleanSpouseKey');
+                              
+                              // Search in entire beneficiaries table, not just household members
+                              try {
+                                final db = await DatabaseProvider.instance.database;
+                                final currentUserData = await SecureStorageService.getCurrentUserData();
+                                final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
+                                
+                                final spouseRecords = await db.query(
+                                  'beneficiaries_new',
+                                  where: 'unique_key = ? AND current_user_key = ? AND is_deleted = 0',
+                                  whereArgs: [cleanSpouseKey, currentUserKey],
+                                );
+                                
+                                if (spouseRecords.isNotEmpty) {
+                                  debugPrint('AllHouseHold: Found spouse in beneficiaries table, adding spouse data for editing');
+                                  final spouseRow = spouseRecords.first;
+                                  
+                                  // Parse spouse info and add to map with sp_ prefix for Spousdetails prefill
+                                  final spouseRawInfo = spouseRow['beneficiary_info'];
+                                  Map<String, dynamic> spouseInfo;
+                                  if (spouseRawInfo is Map<String, dynamic>) {
+                                    spouseInfo = spouseRawInfo;
+                                  } else if (spouseRawInfo is String && spouseRawInfo.isNotEmpty) {
+                                    spouseInfo = Map<String, dynamic>.from(jsonDecode(spouseRawInfo) as Map);
+                                  } else {
+                                    spouseInfo = <String, dynamic>{};
+                                  }
+                                  
+                                  // Add spouse data with sp_ prefix for Spousdetails prefill
+                                  spouseInfo.forEach((key, value) {
+                                    if (value != null) {
+                                      map['sp_$key'] = value.toString();
+                                    }
+                                  });
+                                  
+                                  map['spouse_unique_key'] = spouseRow['unique_key']?.toString() ?? '';
+                                  if (spouseRow['id'] != null) {
+                                    map['spouse_id_pk'] = spouseRow['id'].toString();
+                                  }
+                                  
+                                  // Also add spouse name to head data for cross-reference
+                                  map['spouseName'] = spouseInfo['name'] ?? spouseInfo['memberName'] ?? '';
+                                } else {
+                                  debugPrint('AllHouseHold: No spouse found with key: $cleanSpouseKey');
+                                }
+                              } catch (e) {
+                                debugPrint('AllHouseHold: Error searching for spouse: $e');
+                              }
+                            }
                           }
 
                           try {

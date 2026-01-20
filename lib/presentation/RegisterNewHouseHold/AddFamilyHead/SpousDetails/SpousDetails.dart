@@ -300,7 +300,7 @@ List<String> _getMobileOwnerList(String gender) {
     ];
   }
 
-  // Fallback if gender is unknown
+
   return [
     'Self',
     'Husband',
@@ -398,6 +398,18 @@ class _SpousdetailsState extends State<Spousdetails>
   @override
   void initState() {
     super.initState();
+    
+    // Handle initial data if provided
+    if (widget.initial != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final spBloc = context.read<SpousBloc>();
+          debugPrint('SpousDetails: Hydrating with initial data');
+          spBloc.add(SpHydrate(widget.initial!));
+        }
+      });
+    }
+    
     if (widget.isAddMember && widget.headMobileNo != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -624,7 +636,6 @@ class _SpousdetailsState extends State<Spousdetails>
             final spBloc = ctx.read<SpousBloc>();
             final curr = spBloc.state;
 
-            // Update gender and relation when head's gender changes
             if (st.gender != null) {
               final isMale = st.gender == 'Male';
               final relation = isMale ? 'Wife' : 'Husband';
@@ -653,8 +664,7 @@ class _SpousdetailsState extends State<Spousdetails>
               }
             }
 
-            // Update names from head form only when non-empty, so that
-            // member-flow prefilled values are not wiped out by blanks.
+
             final memberName = st.spouseName?.trim() ?? '';
             final spouseName = st.headName?.trim() ?? '';
             final currMember = curr.memberName?.trim() ?? '';
@@ -2106,7 +2116,7 @@ class _SpousdetailsState extends State<Spousdetails>
                         key: const ValueKey('lmp_date'),
                         labelText: '${l.lmpDateLabel}',
                         hintText: l.dateHint,
-                        initialDate: state.lmp, // Add initial date from state
+                        initialDate: state.lmp,
                         firstDate: DateTime.now().subtract(
                           const Duration(days: 276),
                         ),
@@ -2123,7 +2133,6 @@ class _SpousdetailsState extends State<Spousdetails>
                           } else {
                             bloc.add(const SpEDDChange(null));
                           }
-                          // Trigger validation after change
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             spousFormKey.currentState?.validate();
                           });
@@ -2142,7 +2151,6 @@ class _SpousdetailsState extends State<Spousdetails>
                     height: 0,
                   ),
 
-                  // For EDD when pregnant
                   if (state.isPregnant == 'Yes')
                     _section(
                       CustomDatePicker(

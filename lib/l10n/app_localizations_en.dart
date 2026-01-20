@@ -7630,7 +7630,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get government => 'Government';
 
   @override
-  String get private => 'private';
+  String get private => 'Private';
 
   @override
   String get selectChildren => 'Select Children';

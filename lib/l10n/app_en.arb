@@ -2628,7 +2628,7 @@
   "userNotFound": "User does not exist. Please enter valid credentials.",
   "typeofschool": "Type of school",
   "government": "Government",
-  "private": "private",
+  "private": "Private",
   "selectChildren":"Select Children",
   "nextancduedate":"Next ANC due date",
   "householdUpdatedSuccessfully": "Household updated successfully",

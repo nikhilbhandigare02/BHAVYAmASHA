@@ -15308,7 +15308,7 @@ abstract class AppLocalizations {
   /// No description provided for @private.
   ///
   /// In en, this message translates to:
-  /// **'private'**
+  /// **'Private'**
   String get private;
 
   /// No description provided for @selectChildren.
