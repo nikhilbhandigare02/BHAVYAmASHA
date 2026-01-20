@@ -79,6 +79,85 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
     return '';
   }
 
+  // Helper method to extract house number from household_info JSON structure
+  String _extractHouseNumberFromHouseholdInfo(Map<String, dynamic> householdInfo) {
+    if (householdInfo.isEmpty) return '';
+    
+    // Try to get from family_head_details first
+    final familyHeadDetails = householdInfo['family_head_details'];
+    if (familyHeadDetails != null) {
+      Map<String, dynamic> headInfo;
+      if (familyHeadDetails is Map) {
+        headInfo = Map<String, dynamic>.from(familyHeadDetails);
+      } else if (familyHeadDetails is String && familyHeadDetails.isNotEmpty) {
+        try {
+          headInfo = Map<String, dynamic>.from(jsonDecode(familyHeadDetails));
+        } catch (_) {
+          headInfo = <String, dynamic>{};
+        }
+      } else {
+        headInfo = <String, dynamic>{};
+      }
+      
+      final houseNo = headInfo['house_no']?.toString().trim() ?? 
+                     headInfo['houseNo']?.toString().trim() ?? '';
+      if (houseNo.isNotEmpty && houseNo != '0') {
+        return houseNo;
+      }
+    }
+    
+    // If not found in family_head_details, try to extract from all_members
+    final allMembersRaw = householdInfo['all_members'];
+    if (allMembersRaw != null) {
+      List<dynamic> allMembers;
+      if (allMembersRaw is List) {
+        allMembers = allMembersRaw;
+      } else if (allMembersRaw is String && allMembersRaw.isNotEmpty) {
+        try {
+          final parsed = jsonDecode(allMembersRaw);
+          if (parsed is List) {
+            allMembers = parsed;
+          } else {
+            return '';
+          }
+        } catch (_) {
+          return '';
+        }
+      } else {
+        return '';
+      }
+      
+      // Iterate through all members to find house number
+      for (final member in allMembers) {
+        if (member is Map) {
+          final memberData = Map<String, dynamic>.from(member);
+          
+          // Check in memberDetails
+          final memberDetails = memberData['memberDetails'];
+          if (memberDetails != null && memberDetails is Map) {
+            final houseNo = memberDetails['house_no']?.toString().trim() ?? 
+                           memberDetails['houseNo']?.toString().trim() ?? '';
+            if (houseNo.isNotEmpty && houseNo != '0') {
+              return houseNo;
+            }
+          }
+          
+          // Check in spouseDetails
+          final spouseDetails = memberData['spouseDetails'];
+          if (spouseDetails != null && spouseDetails is Map) {
+            final houseNo = spouseDetails['house_no']?.toString().trim() ?? 
+                           spouseDetails['houseNo']?.toString().trim() ?? '';
+            if (houseNo.isNotEmpty && houseNo != '0') {
+              return houseNo;
+            }
+          }
+        }
+      }
+    }
+    
+    return '';
+  }
+
   // Helper method to get house number with fallback logic
   String _getHouseNumber(Map<String, dynamic> data, List<Map<String, dynamic>> households) {
     // First try to get from beneficiary_new table
@@ -89,7 +168,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       return beneficiaryHouseNo;
     }
     
-    // If not found in beneficiary_new, try households table
+    // If not found in beneficiary_new, try households table address column
     final householdRefKey = data['_raw']['household_ref_key']?.toString() ?? '';
     if (householdRefKey.isNotEmpty) {
       for (final household in households) {
@@ -99,6 +178,28 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             final houseNoFromAddress = _extractHouseNumberFromAddress(addressData);
             if (houseNoFromAddress.isNotEmpty) {
               return houseNoFromAddress;
+            }
+          }
+          
+          // If not found in address column, check household_info column
+          final householdInfoRaw = household['household_info'];
+          if (householdInfoRaw != null) {
+            Map<String, dynamic> householdInfo;
+            if (householdInfoRaw is Map) {
+              householdInfo = Map<String, dynamic>.from(householdInfoRaw);
+            } else if (householdInfoRaw is String && householdInfoRaw.isNotEmpty) {
+              try {
+                householdInfo = Map<String, dynamic>.from(jsonDecode(householdInfoRaw));
+              } catch (_) {
+                householdInfo = <String, dynamic>{};
+              }
+            } else {
+              householdInfo = <String, dynamic>{};
+            }
+            
+            final houseNoFromInfo = _extractHouseNumberFromHouseholdInfo(householdInfo);
+            if (houseNoFromInfo.isNotEmpty) {
+              return houseNoFromInfo;
             }
           }
         }
@@ -722,15 +823,40 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
             (headInfo['mobile_no_of_family_head'] ?? headInfo['mobileNo'] ?? '')
                 .toString();
         
-        // Use the helper method to get house number with fallback logic
-        String houseNo = (headInfo['house_no'] ?? headInfo['houseNo'] ?? '').toString();
+        // Use the enhanced helper method to get house number with full fallback logic
+        String houseNo = '';
+        
+        // Create a temporary data structure to use with the helper method
+        final tempData = {
+          'houseNo': headInfo['house_no'] ?? headInfo['houseNo'] ?? '',
+          '_raw': {
+            'household_ref_key': hhRefKey,
+            'beneficiary_info': headInfo,
+          },
+        };
+        
+        houseNo = _getHouseNumber(tempData, _households);
+        
+        // If still empty, try direct extraction from household_info as additional fallback
         if (houseNo.isEmpty) {
-          // Try to get from household address using the helper method
           final householdData = _households.where((h) => h['unique_key']?.toString() == hhRefKey).firstOrNull;
           if (householdData != null) {
-            final addressData = householdData['address'] as Map<String, dynamic>?;
-            if (addressData != null) {
-              houseNo = _extractHouseNumberFromAddress(addressData);
+            final householdInfoRaw = householdData['household_info'];
+            if (householdInfoRaw != null) {
+              Map<String, dynamic> householdInfo;
+              if (householdInfoRaw is Map) {
+                householdInfo = Map<String, dynamic>.from(householdInfoRaw);
+              } else if (householdInfoRaw is String && householdInfoRaw.isNotEmpty) {
+                try {
+                  householdInfo = Map<String, dynamic>.from(jsonDecode(householdInfoRaw));
+                } catch (_) {
+                  householdInfo = <String, dynamic>{};
+                }
+              } else {
+                householdInfo = <String, dynamic>{};
+              }
+              
+              houseNo = _extractHouseNumberFromHouseholdInfo(householdInfo);
             }
           }
         }

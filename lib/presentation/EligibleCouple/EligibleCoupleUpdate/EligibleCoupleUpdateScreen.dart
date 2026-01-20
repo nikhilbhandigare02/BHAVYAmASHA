@@ -305,13 +305,14 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                     'Whose mobile no.',
                                 items: const [
                                   'Self',
+                                  'Husband',
                                   'Wife',
                                   'Father',
                                   'Mother',
                                   'Son',
                                   'Daughter',
-                                  'Father in Law',
-                                  'Mother in Law',
+                                  'Father In Law',
+                                  'Mother In Law',
                                   'Neighbour',
                                   'Relative',
                                   'Other',
@@ -319,27 +320,41 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                                 getLabel: (s) {
                                   switch (s) {
                                     case 'Self':
-                                      return t!.self;
-                                    case 'Wife':
-                                      return t!.wife;
-                                    case 'Father':
-                                      return t!.father;
+                                      return "${t!.self}";
+
+                                    case 'Husband':
+                                      return '${t!.husbandLabel} ';
+
                                     case 'Mother':
-                                      return t!.mother;
+                                      return '${t!.mother} ';
+
+                                    case 'Father':
+                                      return '${t!.father}';
+
+                                    case 'Wife':
+                                      return '${t!.wife} ';
+
                                     case 'Son':
-                                      return t!.son;
+                                      return '${t!.son}';
+
                                     case 'Daughter':
-                                      return t!.daughter;
-                                    case 'Father in Law':
-                                      return t!.fatherInLaw;
-                                    case 'Mother in Law':
-                                      return t!.motherInLaw;
+                                      return '${t!.daughter} ';
+
+                                    case 'Mother In Law':
+                                      return '${t!.motherInLaw} ';
+
+                                    case 'Father In Law':
+                                      return '${t!.fatherInLaw}';
+
                                     case 'Neighbour':
-                                      return t!.neighbour;
+                                      return '${t!.neighbour} ';
+
                                     case 'Relative':
-                                      return t!.relative;
+                                      return "${t!.relative} ";
+
                                     case 'Other':
-                                      return t!.otherDropdown;
+                                      return '${t!.otherDropdown} ';
+
                                     default:
                                       return s;
                                   }
@@ -450,15 +465,64 @@ class _EligibleCoupleUpdateViewState extends State<_EligibleCoupleUpdateView> {
                             ),
 
                             // Category Field
-                            CustomTextField(
-                              labelText: t?.categoryLabel ?? 'Category',
-                              hintText: t?.selectOptions ?? ' ',
-                              initialValue: state.category,
-                              onChanged: (value) => context
-                                  .read<EligibleCouleUpdateBloc>()
-                                  .add(CategoryChanged(value)),
-                              readOnly: true,
+                            // CustomTextField(
+                            //   labelText: t?.categoryLabel ?? 'Category',
+                            //   hintText: t?.selectOptions ?? ' ',
+                            //   initialValue: state.category,
+                            //   onChanged: (value) => context
+                            //       .read<EligibleCouleUpdateBloc>()
+                            //       .add(CategoryChanged(value)),
+                            //   readOnly: true,
+                            // ),
+
+                            IgnorePointer(
+                              child: ApiDropdown<String>(
+                                key: const ValueKey('category'),
+                                labelText: t?.categoryLabel ?? 'Religion',
+                                items: const [
+                                  'Do not want to disclose',
+                                  'General',
+                                  'OBC',
+                                  'SC',
+                                  'ST',
+                                  'Pichda Varg 1',
+                                  'Pichda Varg 2',
+                                  'Atyant Pichda Varg',
+                                  'Do not Know',
+                                  'Other',
+                                ],
+                                getLabel: (s) {
+                                  switch (s) {
+                                    case 'Do not want to disclose':
+                                      return t!.categoryNotDisclosed;
+                                    case 'General':
+                                      return t!.categoryGeneral;
+                                    case 'OBC':
+                                      return t!.categoryOBC;
+                                    case 'SC':
+                                      return t!.categorySC;
+                                    case 'ST':
+                                      return t!.categoryST;
+                                    case 'Pichda Varg 1':
+                                      return t!.categoryPichdaVarg1;
+                                    case 'Pichda Varg 2':
+                                      return t!.categoryPichdaVarg2;
+                                    case 'Atyant Pichda Varg':
+                                      return t!.categoryAtyantPichdaVarg;
+                                    case 'Do not Know':
+                                      return t!.categoryDontKnow;
+                                    case 'Other':
+                                      return t!.religionOther;
+                                    default:
+                                      return s;
+                                  }
+                                },
+                                value: state.category.isEmpty ? null : state.category,
+                                onChanged: null, // Readonly
+                                hintText: t?.select ?? 'Select',
+                              ),
                             ),
+
                             Divider(
                               color: AppColors.divider,
                               thickness: 0.5,

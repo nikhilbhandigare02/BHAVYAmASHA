@@ -287,135 +287,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
 
 
-  Future<int> _getVisitCountFromFollowupForm(String beneficiaryId) async {
-    try {
-      if (beneficiaryId.isEmpty) {
-        print('⚠️ Empty beneficiary ID provided to _getVisitCountFromFollowupForm');
-        return 0;
-      }
-
-      final db = await DatabaseProvider.instance.database;
-      final ancFormKey = FollowupFormDataTable.formUniqueKeys[FollowupFormDataTable.ancDueRegistration] ?? '';
-
-      if (ancFormKey.isEmpty) {
-        print('⚠️ ANC form key is empty');
-        return 0;
-      }
-
-      // Get the most recent ANC form for this beneficiary
-      final result = await db.query(
-        FollowupFormDataTable.table,
-        where: 'forms_ref_key = ? AND beneficiary_ref_key = ? ',
-        whereArgs: [ancFormKey, beneficiaryId],
-        orderBy: 'created_date_time DESC',
-        limit: 1,
-      );
-
-      if (result.isEmpty) {
-        print('ℹ️ No ANC followup forms found for beneficiary: $beneficiaryId');
-        return 0;
-      }
-
-      final formJsonStr = result.first['form_json']?.toString();
-      if (formJsonStr == null || formJsonStr.isEmpty) {
-        print('⚠️ No form_json found in followup form for beneficiary: $beneficiaryId');
-        return 0;
-      }
-
-      try {
-        final formJson = jsonDecode(formJsonStr) as Map<String, dynamic>;
-
-        final ancForm = formJson['anc_form'] as Map<String, dynamic>?;
-        if (ancForm != null) {
-          final visitCount = ancForm['anc_visit'] as int?;
-          if (visitCount != null) {
-            print('✅ Found visit count $visitCount in anc_form for beneficiary: $beneficiaryId');
-            return visitCount;
-          }
-        }
-
-        // Try alternative structure (form_data)
-        final formData = formJson['form_data'] as Map<String, dynamic>?;
-        if (formData != null) {
-          final visitCount = formData['anc_visit'] as int?;
-          if (visitCount != null) {
-            print('✅ Found visit count $visitCount in form_data for beneficiary: $beneficiaryId');
-            return visitCount;
-          }
-        }
-
-        // Try top level
-        final visitCount = formJson['anc_visit'] as int?;
-        if (visitCount != null) {
-          print('✅ Found visit count $visitCount at top level for beneficiary: $beneficiaryId');
-          return visitCount;
-        }
-
-        print('⚠️ No visit count found in followup form for beneficiary: $beneficiaryId');
-        return 0;
-      } catch (e) {
-        print('❌ Error parsing followup form JSON for beneficiary $beneficiaryId: $e');
-        return 0;
-      }
-    } catch (e) {
-      print('❌ Error in _getVisitCountFromFollowupForm for $beneficiaryId: $e');
-      return 0;
-    }
-  }
-
-  String _getNextAncDueDate(DateTime? lmpDate, int visitCount) {
-    if (lmpDate == null) return AppLocalizations.of(context)!.na;
-
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final ancRanges = _calculateAncDateRanges(lmpDate);
-
-    if (ancRanges['4th_anc_start'] != null && ancRanges['4th_anc_end'] != null) {
-      final windowStart = DateTime(ancRanges['4th_anc_start']!.year, ancRanges['4th_anc_start']!.month, ancRanges['4th_anc_start']!.day);
-      final windowEnd = DateTime(ancRanges['4th_anc_end']!.year, ancRanges['4th_anc_end']!.month, ancRanges['4th_anc_end']!.day);
-
-      if ((today.isAtSameMomentAs(windowStart) || today.isAfter(windowStart)) &&
-          (today.isAtSameMomentAs(windowEnd) || today.isBefore(windowEnd))) {
-        return _formatDate(windowEnd);
-      }
-    }
-
-    // Check 3rd ANC window (26-34 weeks)
-    if (ancRanges['3rd_anc_start'] != null && ancRanges['3rd_anc_end'] != null) {
-      final windowStart = DateTime(ancRanges['3rd_anc_start']!.year, ancRanges['3rd_anc_start']!.month, ancRanges['3rd_anc_start']!.day);
-      final windowEnd = DateTime(ancRanges['3rd_anc_end']!.year, ancRanges['3rd_anc_end']!.month, ancRanges['3rd_anc_end']!.day);
-
-      if ((today.isAtSameMomentAs(windowStart) || today.isAfter(windowStart)) &&
-          (today.isAtSameMomentAs(windowEnd) || today.isBefore(windowEnd))) {
-        return _formatDate(windowEnd);
-      }
-    }
-
-    if (ancRanges['2nd_anc_start'] != null && ancRanges['2nd_anc_end'] != null) {
-      final windowStart = DateTime(ancRanges['2nd_anc_start']!.year, ancRanges['2nd_anc_start']!.month, ancRanges['2nd_anc_start']!.day);
-      final windowEnd = DateTime(ancRanges['2nd_anc_end']!.year, ancRanges['2nd_anc_end']!.month, ancRanges['2nd_anc_end']!.day);
-
-      if ((today.isAtSameMomentAs(windowStart) || today.isAfter(windowStart)) &&
-          (today.isAtSameMomentAs(windowEnd) || today.isBefore(windowEnd))) {
-        return _formatDate(windowEnd);
-      }
-    }
-
-    // Check 1st ANC window (0-12 weeks)
-    if (ancRanges['1st_anc_start'] != null && ancRanges['1st_anc_end'] != null) {
-      final windowStart = DateTime(ancRanges['1st_anc_start']!.year, ancRanges['1st_anc_start']!.month, ancRanges['1st_anc_start']!.day);
-      final windowEnd = DateTime(ancRanges['1st_anc_end']!.year, ancRanges['1st_anc_end']!.month, ancRanges['1st_anc_end']!.day);
-
-      if ((today.isAtSameMomentAs(windowStart) || today.isAfter(windowStart)) &&
-          (today.isAtSameMomentAs(windowEnd) || today.isBefore(windowEnd))) {
-        return _formatDate(windowEnd);
-      }
-    }
-
-    // If today doesn't fall within any ANC window, return NA
-    return AppLocalizations.of(context)!.na;
-  }
-
   Future<void> _loadData() async {
     if (!mounted) return;
 
@@ -482,7 +353,9 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     ranges['3rd_anc_end'] = _dateAfterWeeks(lmp, 34);
 
     ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
-    ranges['4th_anc_end'] = _calculateEdd(lmp);
+
+    var displayEndDate = ranges['4th_anc_start']!.add(const Duration(days: 15));
+    ranges['4th_anc_end'] = displayEndDate;
 
     ranges['pmsma_start'] = ranges['1st_anc_end']!.add(const Duration(days: 1));
     ranges['pmsma_end'] = ranges['2nd_anc_start']!.subtract(
@@ -543,8 +416,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
     if (age <= 0) return '0 Y';
 
     final now = DateTime.now();
-    // We need to calculate more precise age, so let's use the same logic as _formatAgeGender
-    // But since we only have years, we'll just show years with Y suffix
+
     return '$age Y';
   }
 
@@ -1847,7 +1719,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
                 todayDate.isBefore(e));
       }
 
-      // ---------- Process each row ----------
       for (final row in rows) {
         final String beneficiaryKey =
             row['beneficiary_ref_key']?.toString() ?? '';
@@ -1858,10 +1729,8 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         }
         processedBeneficiaries.add(beneficiaryKey);
 
-        // Skip death / migrated
         if (row['is_death'] == 1 || row['is_migrated'] == 1) continue;
 
-        // ---------- Parse beneficiary info ----------
         final Object? infoRaw = row['beneficiary_info'];
         if (infoRaw == null) continue;
 
@@ -1881,7 +1750,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
         if (!isPregnant && gender != 'f' && gender != 'female') continue;
 
-        // ---------- Extract LMP ----------
         DateTime? lmpDate = await _extractLmpDate(row);
         lmpDate ??= info['lmp'] != null
             ? DateTime.tryParse(info['lmp'].toString().split('T')[0])
@@ -1889,7 +1757,6 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
 
         if (lmpDate == null) continue;
 
-        // ---------- Calculate ANC windows ----------
         final Map<String, DateTime?> ancRanges =
         _calculateAncDateRanges(lmpDate);
 
@@ -1924,18 +1791,49 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         final String currentAncDueDate =
         _formatAncDateOnly(activeWindowEnd.toIso8601String());
 
-        // ---------- Check if ANC followup form already exists ----------
+        // ---------- Check if ANC followup form exists within current ANC window ----------
         final ancFormKey = 'bt7gs9rl1a5d26mz';
         final followupFormsQuery = await db.query(
           FollowupFormDataTable.table,
-          where:
-          'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
-          whereArgs: [ancFormKey, beneficiaryKey],
+          where: '''
+            forms_ref_key = ? 
+            AND beneficiary_ref_key = ? 
+            AND (is_deleted IS NULL OR is_deleted = 0)
+            AND DATE(created_date_time) >= DATE(?) 
+            AND DATE(created_date_time) <= DATE(?)
+          ''',
+          whereArgs: [
+            ancFormKey, 
+            beneficiaryKey,
+            activeWindowStart.toIso8601String().split('T')[0],
+            activeWindowEnd.toIso8601String().split('T')[0]
+          ],
           limit: 1,
         );
 
         if (followupFormsQuery.isNotEmpty) {
           continue;
+        }
+
+        // ---------- Check if current date exceeds 4th ANC window and no ANC follow-up exists ----------
+        final fourthAncEnd = ancRanges['4th_anc_end'];
+        if (fourthAncEnd != null && today.isAfter(fourthAncEnd)) {
+          // Check if beneficiary has ANY ANC follow-up form in any window
+          final anyAncFollowupQuery = await db.query(
+            FollowupFormDataTable.table,
+            where: '''
+              forms_ref_key = ? 
+              AND beneficiary_ref_key = ? 
+              AND (is_deleted IS NULL OR is_deleted = 0)
+            ''',
+            whereArgs: [ancFormKey, beneficiaryKey],
+            limit: 1,
+          );
+
+          if (anyAncFollowupQuery.isEmpty) {
+            // No ANC follow-up found and current date is beyond 4th ANC window
+            continue;
+          }
         }
 
         // ---------- Age ----------

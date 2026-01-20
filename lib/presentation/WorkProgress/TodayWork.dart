@@ -1510,7 +1510,6 @@ class _TodayworkState extends State<Todaywork> {
                 todayDate.isBefore(e));
       }
 
-      // ---------- Process each row ----------
       for (final row in rows) {
         final String beneficiaryKey =
             row['beneficiary_ref_key']?.toString() ?? '';
@@ -1521,10 +1520,8 @@ class _TodayworkState extends State<Todaywork> {
         }
         processedBeneficiaries.add(beneficiaryKey);
 
-        // Skip death / migrated
         if (row['is_death'] == 1 || row['is_migrated'] == 1) continue;
 
-        // ---------- Parse beneficiary info ----------
         final Object? infoRaw = row['beneficiary_info'];
         if (infoRaw == null) continue;
 
@@ -1544,7 +1541,6 @@ class _TodayworkState extends State<Todaywork> {
 
         if (!isPregnant && gender != 'f' && gender != 'female') continue;
 
-        // ---------- Extract LMP ----------
         DateTime? lmpDate = await _extractLmpDate(row);
         lmpDate ??= info['lmp'] != null
             ? DateTime.tryParse(info['lmp'].toString().split('T')[0])
@@ -1552,108 +1548,83 @@ class _TodayworkState extends State<Todaywork> {
 
         if (lmpDate == null) continue;
 
-        // ---------- Calculate ANC windows ----------
         final Map<String, DateTime?> ancRanges =
         _calculateAncDateRanges(lmpDate);
 
         DateTime? activeWindowStart;
         DateTime? activeWindowEnd;
 
-        final DateTime? firstStart =
-        ancRanges['1st_anc_start'];
-        final DateTime? firstEnd =
-        ancRanges['1st_anc_end'];
+        final windows = [
+          ['1st_anc_start', '1st_anc_end'],
+          ['2nd_anc_start', '2nd_anc_end'],
+          ['3rd_anc_start', '3rd_anc_end'],
+          ['4th_anc_start', '4th_anc_end'],
+        ];
 
-        final DateTime? secondStart =
-        ancRanges['2nd_anc_start'];
-        final DateTime? secondEnd =
-        ancRanges['2nd_anc_end'];
-
-        final DateTime? thirdStart =
-        ancRanges['3rd_anc_start'];
-        final DateTime? thirdEnd =
-        ancRanges['3rd_anc_end'];
-
-        final DateTime? fourthStart =
-        ancRanges['4th_anc_start'];
-        final DateTime? fourthEnd =
-        ancRanges['4th_anc_end'];
-
-        if (firstStart != null &&
-            firstEnd != null &&
-            isTodayInsideWindow(firstStart, firstEnd)) {
-          activeWindowStart = firstStart;
-          activeWindowEnd = firstEnd;
-        } else if (secondStart != null &&
-            secondEnd != null &&
-            isTodayInsideWindow(secondStart, secondEnd)) {
-          activeWindowStart = secondStart;
-          activeWindowEnd = secondEnd;
-        } else if (thirdStart != null &&
-            thirdEnd != null &&
-            isTodayInsideWindow(thirdStart, thirdEnd)) {
-          activeWindowStart = thirdStart;
-          activeWindowEnd = thirdEnd;
-        } else if (fourthStart != null &&
-            fourthEnd != null &&
-            isTodayInsideWindow(fourthStart, fourthEnd)) {
-          activeWindowStart = fourthStart;
-          activeWindowEnd = fourthEnd;
-        }
-
-        // ---------- Check if today is within or after ANC windows ----------
-        String currentAncDueDate = '';
-        bool shouldIncludeInList = false;
-
-        print('🔍 DEBUG ANC Date Check for beneficiary: $beneficiaryKey');
-        print('   Today: ${_formatDate(todayDate)}');
-        print('   4th ANC End: ${fourthEnd != null ? _formatDate(fourthEnd!) : 'null'}');
-
-        if (activeWindowStart != null && activeWindowEnd != null) {
-          // Today is within an ANC window
-          shouldIncludeInList = true;
-          currentAncDueDate = _formatAncDateOnly(activeWindowEnd.toIso8601String());
-          print('   ✅ Today is within ANC window: ${_formatDate(activeWindowStart)} to ${_formatDate(activeWindowEnd)}');
-        } else {
-          // Check if today is after the 4th ANC window
-          final fourthStart = ancRanges['4th_anc_start'];
-          final fourthEnd = ancRanges['4th_anc_end'];
-
-          if (fourthEnd != null) {
-            final fourthEndDateOnly = DateTime(fourthEnd.year, fourthEnd.month, fourthEnd.day);
-            print('   Fourth End Date Only: ${_formatDate(fourthEndDateOnly)}');
-            print('   Is today after fourth end? ${todayDate.isAfter(fourthEndDateOnly)}');
-
-            if (todayDate.isAfter(fourthEndDateOnly)) {
-              // Today is after the 4th ANC window - include and show current date
-              shouldIncludeInList = true;
-              currentAncDueDate = _formatDate(todayDate);
-              print('   ✅ Today is after 4th ANC window, showing current date: $currentAncDueDate');
-            } else {
-              print('   ❌ Today is NOT after 4th ANC window');
-            }
-          } else {
-            print('   ❌ Fourth ANC end date is null');
+        for (final w in windows) {
+          final start = ancRanges[w[0]];
+          final end = ancRanges[w[1]];
+          if (start != null &&
+              end != null &&
+              isTodayInsideWindow(start, end)) {
+            activeWindowStart = start;
+            activeWindowEnd = end;
+            break;
           }
         }
 
-        // ❌ Don't include if not within window and not after 4th window
-        if (!shouldIncludeInList) {
+        // ---------- STRICT FILTER ----------
+        // ❌ If today is not inside ANY ANC window → skip
+        if (activeWindowStart == null || activeWindowEnd == null) {
           continue;
         }
 
-        // ---------- Check if ANC followup form already exists ----------
-        final ancFormKey = 'bt7gs9rl1a5d26mz'; // ANC due registration form key
+        final String currentAncDueDate =
+        _formatAncDateOnly(activeWindowEnd.toIso8601String());
+
+        // ---------- Check if ANC followup form exists within current ANC window ----------
+        final ancFormKey = 'bt7gs9rl1a5d26mz';
         final followupFormsQuery = await db.query(
           FollowupFormDataTable.table,
-          where: 'forms_ref_key = ? AND beneficiary_ref_key = ? AND (is_deleted IS NULL OR is_deleted = 0)',
-          whereArgs: [ancFormKey, beneficiaryKey],
-          limit: 1, // Only need to check if at least one record exists
+          where: '''
+            forms_ref_key = ? 
+            AND beneficiary_ref_key = ? 
+            AND (is_deleted IS NULL OR is_deleted = 0)
+            AND DATE(created_date_time) >= DATE(?) 
+            AND DATE(created_date_time) <= DATE(?)
+          ''',
+          whereArgs: [
+            ancFormKey,
+            beneficiaryKey,
+            activeWindowStart.toIso8601String().split('T')[0],
+            activeWindowEnd.toIso8601String().split('T')[0]
+          ],
+          limit: 1,
         );
 
         if (followupFormsQuery.isNotEmpty) {
-          // ANC followup form already exists, exclude from todo list
           continue;
+        }
+
+        // ---------- Check if current date exceeds 4th ANC window and no ANC follow-up exists ----------
+        final fourthAncEnd = ancRanges['4th_anc_end'];
+        if (fourthAncEnd != null && today.isAfter(fourthAncEnd)) {
+          // Check if beneficiary has ANY ANC follow-up form in any window
+          final anyAncFollowupQuery = await db.query(
+            FollowupFormDataTable.table,
+            where: '''
+              forms_ref_key = ? 
+              AND beneficiary_ref_key = ? 
+              AND (is_deleted IS NULL OR is_deleted = 0)
+            ''',
+            whereArgs: [ancFormKey, beneficiaryKey],
+            limit: 1,
+          );
+
+          if (anyAncFollowupQuery.isEmpty) {
+            // No ANC follow-up found and current date is beyond 4th ANC window
+            continue;
+          }
         }
 
         // ---------- Age ----------
@@ -1663,18 +1634,14 @@ class _TodayworkState extends State<Todaywork> {
           DateTime.tryParse(info['dob'].toString().split('T')[0]);
           if (dob != null) {
             int age = today.year - dob.year;
-            // Check if birthday hasn't occurred yet this year
-            final todayMonthDay = DateTime(today.year, today.month, today.day);
-            final birthdayThisYear = DateTime(today.year, dob.month, dob.day);
-            if (todayMonthDay.isBefore(birthdayThisYear)) {
-              age--;
-            }
-            ageText = '${age} Y';
+            final birthdayThisYear =
+            DateTime(today.year, dob.month, dob.day);
+            if (todayDate.isBefore(birthdayThisYear)) age--;
+            ageText = '$age Y';
           }
         }
 
-        final String uniqueKey =
-            row['unique_key']?.toString() ?? '';
+        final String uniqueKey = row['unique_key']?.toString() ?? '';
         final String householdRefKey =
             row['household_ref_key']?.toString() ?? '';
 
@@ -1690,7 +1657,7 @@ class _TodayworkState extends State<Todaywork> {
           'age': ageText,
           'gender': 'Female',
           'last Visit date':
-          activeWindowStart != null ? _formatAncDateOnly(activeWindowStart.toIso8601String()) : currentAncDueDate,
+          _formatAncDateOnly(activeWindowStart.toIso8601String()),
           'Current ANC last due date': currentAncDueDate,
           'mobile': info['mobileNo'] ?? '-',
           'badge': 'ANC',
@@ -2326,7 +2293,8 @@ class _TodayworkState extends State<Todaywork> {
     ranges['3rd_anc_end'] = _dateAfterWeeks(lmp, 34);
 
     ranges['4th_anc_start'] = _dateAfterWeeks(lmp, 36);
-    ranges['4th_anc_end'] = _calculateEdd(lmp);
+    var displayEndDate = ranges['4th_anc_start']!.add(const Duration(days: 15));
+    ranges['4th_anc_end'] = displayEndDate;
 
     ranges['pmsma_start'] = ranges['1st_anc_end']!.add(const Duration(days: 1));
     ranges['pmsma_end'] = ranges['2nd_anc_start']!.subtract(
