@@ -5548,7 +5548,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get riskPIH => 'Pregnancy Induced Hypertension, pre-eclampsia, Eclampsia';
 
   @override
-  String get riskInfections => 'Syphilis, HIV Positive, Hepatitis-B, Hepatitis C';
+  String get riskInfections => 'Syphilis, HIV Positive, Hepatitis B, Hepatitis C';
 
   @override
   String get riskGestationalDiabetes => 'Gestational Diabetes';
