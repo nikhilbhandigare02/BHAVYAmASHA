@@ -19,16 +19,17 @@ import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/Hea
 
 import 'package:medixcel_new/presentation/RegisterNewHouseHold/AddFamilyHead/SpousDetails/SpousDetails.dart'
     show
-        spousFormKey,
-        clearSpousFormError,
-        spousLastFormError,
-        scrollToFirstError,
-        Spousdetails,
-        validateAllSpousFields;
+    spousFormKey,
+    clearSpousFormError,
+    spousLastFormError,
+    scrollToFirstError,
+    Spousdetails,
+    validateAllSpousFields;
 
 import '../../../../data/Database/User_Info.dart';
 import '../../../../data/SecureStorage/SecureStorage.dart';
 import '../../../../data/repositories/RegisterNewHouseHoldController/register_new_house_hold.dart';
+import '../../../../data/Database/local_storage_dao.dart';
 import '../Children_Details/ChildrenDetaills.dart';
 import '../Children_Details/bloc/children_bloc.dart';
 import '../SpousDetails/bloc/spous_bloc.dart';
@@ -48,9 +49,9 @@ class MaxValueFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
     if (newValue.text.isEmpty) return newValue;
 
     final value = int.tryParse(newValue.text);
@@ -132,9 +133,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   }
 
   void _handleAbhaProfileResult(
-    Map<String, dynamic> profile,
-    BuildContext context,
-  ) {
+      Map<String, dynamic> profile,
+      BuildContext context,
+      ) {
     debugPrint("Filling ABHA data into form...");
 
     final bloc = context.read<AddFamilyHeadBloc>();
@@ -268,9 +269,9 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
   final RegisterNewHouseHold repository = RegisterNewHouseHold();
 
   Future<Map<String, dynamic>?> fetchRCHDataForScreen(
-    int rchId, {
-    required int requestFor,
-  }) async {
+      int rchId, {
+        required int requestFor,
+      }) async {
     try {
       print('Calling API: getRCHData(rchId: $rchId, requestFor: $requestFor)');
 
@@ -399,11 +400,189 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     bloc.add(UpdateDays(days.toString()));
   }
 
+  // Helper method to extract house number from household address
+  String _extractHouseNumberFromAddress(Map<String, dynamic> addressData) {
+    if (addressData.isEmpty) return '';
+    
+    // Try common house number fields in address data
+    final houseNoFields = [
+      'houseNo',
+      'house_no',
+      'houseNumber',
+      'house_number',
+      'houseno',
+      'building_no',
+      'buildingNumber',
+      'building_no',
+      'address_line1',
+      'addressLine1',
+    ];
+    
+    for (final field in houseNoFields) {
+      final value = addressData[field]?.toString().trim();
+      if (value != null && value.isNotEmpty) {
+        return value;
+      }
+    }
+    
+    // If no specific field found, try to extract from full address
+    final fullAddress = addressData['full_address']?.toString() ?? 
+                       addressData['address']?.toString() ?? 
+                       addressData['complete_address']?.toString() ?? '';
+    
+    if (fullAddress.isNotEmpty) {
+      // Try to extract house number from the beginning of address
+      final lines = fullAddress.split(',');
+      for (final line in lines) {
+        final trimmed = line.trim();
+        // Look for patterns like "House No: 123", "H.No. 123", "123", etc.
+        if (RegExp(r'^\d+').hasMatch(trimmed) || 
+            RegExp(r'(?i)house\s*(no|number)?\s*[:\-]?\s*\d+').hasMatch(trimmed) ||
+            RegExp(r'(?i)h\.?\.?\s*no\.?\s*[:\-]?\s*\d+').hasMatch(trimmed)) {
+          return trimmed;
+        }
+      }
+    }
+    
+    return '';
+  }
+
+  // Helper method to extract house number from household_info JSON structure
+  String _extractHouseNumberFromHouseholdInfo(Map<String, dynamic> householdInfo) {
+    if (householdInfo.isEmpty) return '';
+    
+    // Try to get from family_head_details first
+    final familyHeadDetails = householdInfo['family_head_details'];
+    if (familyHeadDetails != null) {
+      Map<String, dynamic> headInfo;
+      if (familyHeadDetails is Map) {
+        headInfo = Map<String, dynamic>.from(familyHeadDetails);
+      } else if (familyHeadDetails is String && familyHeadDetails.isNotEmpty) {
+        try {
+          headInfo = Map<String, dynamic>.from(jsonDecode(familyHeadDetails));
+        } catch (_) {
+          headInfo = <String, dynamic>{};
+        }
+      } else {
+        headInfo = <String, dynamic>{};
+      }
+      
+      final houseNo = headInfo['house_no']?.toString().trim() ?? 
+                     headInfo['houseNo']?.toString().trim() ?? '';
+      if (houseNo.isNotEmpty && houseNo != '0') {
+        return houseNo;
+      }
+    }
+    
+    // If not found in family_head_details, try to extract from all_members
+    final allMembersRaw = householdInfo['all_members'];
+    if (allMembersRaw != null) {
+      List<dynamic> allMembers;
+      if (allMembersRaw is List) {
+        allMembers = allMembersRaw;
+      } else if (allMembersRaw is String && allMembersRaw.isNotEmpty) {
+        try {
+          final parsed = jsonDecode(allMembersRaw);
+          if (parsed is List) {
+            allMembers = parsed;
+          } else {
+            return '';
+          }
+        } catch (_) {
+          return '';
+        }
+      } else {
+        return '';
+      }
+      
+      // Iterate through all members to find house number
+      for (final member in allMembers) {
+        if (member is Map) {
+          final memberData = Map<String, dynamic>.from(member);
+          
+          // Check in memberDetails
+          final memberDetails = memberData['memberDetails'];
+          if (memberDetails != null && memberDetails is Map) {
+            final houseNo = memberDetails['house_no']?.toString().trim() ?? 
+                           memberDetails['houseNo']?.toString().trim() ?? '';
+            if (houseNo.isNotEmpty && houseNo != '0') {
+              return houseNo;
+            }
+          }
+          
+          // Check in spouseDetails
+          final spouseDetails = memberData['spouseDetails'];
+          if (spouseDetails != null && spouseDetails is Map) {
+            final houseNo = spouseDetails['house_no']?.toString().trim() ?? 
+                           spouseDetails['houseNo']?.toString().trim() ?? '';
+            if (houseNo.isNotEmpty && houseNo != '0') {
+              return houseNo;
+            }
+          }
+        }
+      }
+    }
+    
+    return '';
+  }
+
+  // Helper method to get house number with fallback logic
+  Future<String> _getHouseNumber(Map<String, dynamic> data) async {
+    // First try to get from beneficiary_new table
+    final beneficiaryHouseNo = data['houseNo']?.toString() ?? 
+                              data['_raw']['beneficiary_info']?['houseNo']?.toString() ?? '';
+    
+    if (beneficiaryHouseNo.isNotEmpty && beneficiaryHouseNo != '0') {
+      return beneficiaryHouseNo;
+    }
+    
+    // If not found in beneficiary_new, try households table address column
+    final householdRefKey = data['_raw']['household_ref_key']?.toString() ?? '';
+    if (householdRefKey.isNotEmpty) {
+      final households = await LocalStorageDao.instance.getAllHouseholds();
+      for (final household in households) {
+        if (household['unique_key']?.toString() == householdRefKey) {
+          final addressData = household['address'] as Map<String, dynamic>?;
+          if (addressData != null) {
+            final houseNoFromAddress = _extractHouseNumberFromAddress(addressData);
+            if (houseNoFromAddress.isNotEmpty) {
+              return houseNoFromAddress;
+            }
+          }
+          
+          // If not found in address column, check household_info column
+          final householdInfoRaw = household['household_info'];
+          if (householdInfoRaw != null) {
+            Map<String, dynamic> householdInfo;
+            if (householdInfoRaw is Map) {
+              householdInfo = Map<String, dynamic>.from(householdInfoRaw);
+            } else if (householdInfoRaw is String && householdInfoRaw.isNotEmpty) {
+              try {
+                householdInfo = Map<String, dynamic>.from(jsonDecode(householdInfoRaw));
+              } catch (_) {
+                householdInfo = <String, dynamic>{};
+              }
+            } else {
+              householdInfo = <String, dynamic>{};
+            }
+            
+            final houseNoFromInfo = _extractHouseNumberFromHouseholdInfo(householdInfo);
+            if (houseNoFromInfo.isNotEmpty) {
+              return houseNoFromInfo;
+            }
+          }
+        }
+      }
+    }
+    
+    return '';
+  }
+
   Widget _buildFamilyHeadForm(
-    BuildContext context,
-    AddFamilyHeadState state,
-    AppLocalizations l,
-  ) {
+      BuildContext context,
+      AddFamilyHeadState state,
+      AppLocalizations l,
+      ) {
     // Update age controllers when state changes
     if (yearsController.text != (state.years ?? '')) {
       yearsController.text = state.years ?? '';
@@ -426,15 +605,29 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
         child: Column(
           children: [
             _Section(
-              child: CustomTextField(
-                labelText: '${l.houseNoHint} *',
-                hintText: l.houseNoHint,
-                initialValue: state.houseNo,
-                onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
-                  AfhUpdateHouseNo(v.trim()),
-                ),
-                validator: (value) =>
-                    _captureError(Validations.validateHouseNo(l, value)),
+              child: FutureBuilder<String>(
+                future: widget.isEdit && widget.initial != null 
+                    ? _getHouseNumber({
+                        '_raw': {
+                          'household_ref_key': widget.initial!['hh_unique_key'],
+                          'beneficiary_info': {'houseNo': widget.initial!['houseNo']}
+                        },
+                        'houseNo': state.houseNo
+                      })
+                    : Future.value(state.houseNo ?? ''),
+                builder: (context, snapshot) {
+                  final displayValue = snapshot.data ?? state.houseNo ?? '';
+                  return CustomTextField(
+                    labelText: '${l.houseNoHint} *',
+                    hintText: l.houseNoHint,
+                    initialValue: displayValue,
+                    onChanged: (v) => context.read<AddFamilyHeadBloc>().add(
+                      AfhUpdateHouseNo(v.trim()),
+                    ),
+                    validator: (value) =>
+                        _captureError(Validations.validateHouseNo(l, value)),
+                  );
+                },
               ),
             ),
             Divider(color: AppColors.divider, thickness: 0.1.h, height: 0),
@@ -455,8 +648,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     }
                   },
                   value: state.memberStatus?.isEmpty == true
-                      ? null
-                      : state.memberStatus,
+                      ? 'Alive'
+                      : (state.memberStatus ?? 'Alive'),
                   hintText: l.selectOption,
                   onChanged: (v) => context
                       .read<AddFamilyHeadBloc>()
@@ -501,14 +694,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     onChanged: widget.isEdit
                         ? null
                         : (_) {
-                            context.read<AddFamilyHeadBloc>().add(
-                              AfhToggleUseDob(),
-                            );
-                            // When switching to DOB mode, update DOB from age fields
-                            if (!state.useDob) {
-                              updateDobFromAge();
-                            }
-                          },
+                      context.read<AddFamilyHeadBloc>().add(
+                        AfhToggleUseDob(),
+                      );
+                      // When switching to DOB mode, update DOB from age fields
+                      if (!state.useDob) {
+                        updateDobFromAge();
+                      }
+                    },
                   ),
                   Text(l.dobShort, style: TextStyle(fontSize: 14.sp)),
                   SizedBox(width: 2.w),
@@ -518,13 +711,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     onChanged: widget.isEdit
                         ? null
                         : (_) {
-                            context.read<AddFamilyHeadBloc>().add(
-                              AfhToggleUseDob(),
-                            );
-                            if (!state.useDob) {
-                              updateDobFromAge();
-                            }
-                          },
+                      context.read<AddFamilyHeadBloc>().add(
+                        AfhToggleUseDob(),
+                      );
+                      if (!state.useDob) {
+                        updateDobFromAge();
+                      }
+                    },
                   ),
                   Text(l.ageApproximate, style: TextStyle(fontSize: 14.sp)),
                 ],
@@ -642,8 +835,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               onChanged: widget.isEdit
                                   ? null
                                   : (value) => context
-                                        .read<AddFamilyHeadBloc>()
-                                        .add(UpdateYears(value)),
+                                  .read<AddFamilyHeadBloc>()
+                                  .add(UpdateYears(value)),
                             ),
                           ),
                         ),
@@ -668,8 +861,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               onChanged: widget.isEdit
                                   ? null
                                   : (value) => context
-                                        .read<AddFamilyHeadBloc>()
-                                        .add(UpdateMonths(value)),
+                                  .read<AddFamilyHeadBloc>()
+                                  .add(UpdateMonths(value)),
                             ),
                           ),
                         ),
@@ -695,8 +888,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                               onChanged: widget.isEdit
                                   ? null
                                   : (value) => context
-                                        .read<AddFamilyHeadBloc>()
-                                        .add(UpdateDays(value)),
+                                  .read<AddFamilyHeadBloc>()
+                                  .add(UpdateDays(value)),
                             ),
                           ),
                         ),
@@ -729,8 +922,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   onChanged: widget.isEdit
                       ? null
                       : (v) => context.read<AddFamilyHeadBloc>().add(
-                          AfhUpdateGender(v),
-                        ),
+                    AfhUpdateGender(v),
+                  ),
                   validator: (v) =>
                       _captureError(v == null ? l.genderRequired : null),
                 ),
@@ -1196,10 +1389,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   ),
                   validator: (value) => state.mobileOwner == 'Other'
                       ? _captureError(
-                          (value == null || value.trim().isEmpty)
-                              ? l.relation_with_mobile_holder_required
-                              : null,
-                        )
+                    (value == null || value.trim().isEmpty)
+                        ? l.relation_with_mobile_holder_required
+                        : null,
+                  )
                       : null,
                 ),
               ),
@@ -1273,12 +1466,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
             BlocBuilder<AddFamilyHeadBloc, AddFamilyHeadState>(
               buildWhen: (previous, current) =>
-                  previous.bankAcc != current.bankAcc,
+              previous.bankAcc != current.bankAcc,
               builder: (contxt, state) {
                 final bankAcc = state.bankAcc ?? '';
                 final isValid =
                     bankAcc.isEmpty ||
-                    bankAcc.replaceAll(RegExp(r'[^0-9]'), '').length >= 10;
+                        bankAcc.replaceAll(RegExp(r'[^0-9]'), '').length >= 10;
 
                 return Column(
                   children: [
@@ -1544,7 +1737,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                   if (state.isPregnant == 'Yes') ...[
                     _Section(
                       child: CustomDatePicker(
-                        labelText: '${l.lmpDateLabel} *',
+                        labelText: '${l.lmpDateLabel}',
                         hintText: l.dateHint,
                         initialDate: state.lmp,
 
@@ -1825,7 +2018,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
         debugPrint('AddNewFamilyHead: Category normalized to "ST"');
         return 'ST';
       default:
-        // For other categories, preserve original case but trim
+      // For other categories, preserve original case but trim
         debugPrint(
           'AddNewFamilyHead: Category preserved as "${category.toString().trim()}"',
         );
@@ -1892,7 +2085,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     otherReligion: m['religion'] == 'Other'
                         ? m['other_religion']
                         : null,
-                     memberStatus: (m['is_death'] == 1) ? 'death' : m['memberStatus'],
+                    memberStatus: (m['is_death'] == 1) ? 'death' : m['memberStatus'],
                   ),
                 ),
               );
@@ -1944,7 +2137,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                         : null,
                     mobileOwner: m['mobileOwner'],
                     mobileOwnerOtherRelation:
-                        m['mobile_owner_relation'] == 'Other'
+                    m['mobile_owner_relation'] == 'Other'
                         ? m['mobile_owner_relation']
                         : m['mobile_owner_relation'],
                     mobileNo: m['mobileNo'],
@@ -1953,31 +2146,31 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                     wardNo: m['wardNo'],
                     mohalla: m['mohalla'],
                     bankAcc:
-                        m['bankAcc'] ??
+                    m['bankAcc'] ??
                         m['bankAccountNumber'] ??
                         m['account_number'] ??
                         m['bank_account_number'],
                     ifsc: m['ifsc'] ?? m['ifscCode'] ?? m['ifsc_code'],
                     voterId: m['voterId'] ?? m['voter_id'],
                     rationId:
-                        m['rationId'] ??
+                    m['rationId'] ??
                         m['rationCardId'] ??
                         m['ration_card_id'] ??
                         m['ration_card_number'],
                     phId:
-                        m['phId'] ??
+                    m['phId'] ??
                         m['personalHealthId'] ??
                         m['personal_health_id'] ??
                         m['health_id'],
                     beneficiaryType:
-                        m['beneficiaryType'] ??
+                    m['beneficiaryType'] ??
                         m['type_of_beneficiary'] ??
                         m['ben_type'],
                     maritalStatus: m['maritalStatus'],
                     ageAtMarriage: m['ageAtMarriage'],
                     spouseName:
-                        (m['spouseName'] != null &&
-                            m['spouseName'].toString().trim().isNotEmpty)
+                    (m['spouseName'] != null &&
+                        m['spouseName'].toString().trim().isNotEmpty)
                         ? m['spouseName']
                         : null,
                     AfhRichIdChange: m['AfhRichIdChange'],
@@ -2126,18 +2319,18 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
             final spState = SpousState(
               relation: getSpouseVal('relation') ?? 'spouse',
               memberName:
-                  getSpouseVal('memberName') ?? getHeadVal('spouseName'),
+              getSpouseVal('memberName') ?? getHeadVal('spouseName'),
               ageAtMarriage: getSpouseVal('ageAtMarriage'),
               RichIDChanged: getSpouseVal('RichIDChanged'),
               spouseName:
-                  getSpouseVal('spouseName') ??
+              getSpouseVal('spouseName') ??
                   getHeadVal('headName') ??
                   getHeadVal('memberName'),
               fatherName: getSpouseVal('father_name'),
               useDob: getSpouseVal('age_by') != null
                   ? getSpouseVal('age_by') == 'by_dob'
                   : (getSpouseVal('useDob') == true ||
-                      getSpouseVal('useDob') == 'true'),
+                  getSpouseVal('useDob') == 'true'),
               dob: _parseDate(getSpouseVal('dob')?.toString()),
               edd: _parseDate(getSpouseVal('edd')?.toString()),
               lmp: _parseDate(getSpouseVal('lmp')?.toString()),
@@ -2146,7 +2339,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
               UpdateMonths: updateMonths,
               UpdateDays: updateDays,
               gender:
-                  getSpouseVal('gender') ??
+              getSpouseVal('gender') ??
                   ((getHeadVal('gender') == 'Male')
                       ? 'Female'
                       : (getHeadVal('gender') == 'Female')
@@ -2296,23 +2489,23 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       'Type': 'Adult',
                       'Name': (state.headName ?? '').toString(),
                       'Age':
-                          ((state.useDob && state.dob != null)
-                                  ? _ageFromDob(state.dob!)
-                                  : (state.approxAge ?? ''))
-                              .toString(),
+                      ((state.useDob && state.dob != null)
+                          ? _ageFromDob(state.dob!)
+                          : (state.approxAge ?? ''))
+                          .toString(),
                       'Gender': (state.gender ?? '').toString(),
                       'Relation': 'Self',
                       'Father': (state.fatherName ?? '').toString(),
                       'Spouse': (state.spouseName ?? '').toString(),
                       'Total Children':
-                          (state.children != null && state.children!.isNotEmpty)
+                      (state.children != null && state.children!.isNotEmpty)
                           ? state.children!
                           : (state.hasChildren == 'Yes' ? '1+' : '0'),
                       'isSpouseRow': '0',
                     },
                   ];
                   if (((state.maritalStatus?.toLowerCase() == 'married') ||
-                          (state.maritalStatus?.toLowerCase() == 'Married')) &&
+                      (state.maritalStatus?.toLowerCase() == 'Married')) &&
                       (state.spouseName != null) &&
                       state.spouseName!.isNotEmpty) {
                     final spouseGender = (state.gender == 'Male')
@@ -2327,8 +2520,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       final sp = context.read<SpousBloc>().state;
                       spouseAge =
                           ((sp.useDob && sp.dob != null)
-                                  ? _ageFromDob(sp.dob!)
-                                  : (sp.approxAge ?? ''))
+                              ? _ageFromDob(sp.dob!)
+                              : (sp.approxAge ?? ''))
                               .toString();
                       spouseFather = (sp.fatherName ?? '').toString();
                     } catch (e) {
@@ -2349,7 +2542,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                       'Father': spouseFather,
                       'Spouse': (state.headName ?? '').toString(),
                       'Total Children':
-                          (state.children != null && state.children!.isNotEmpty)
+                      (state.children != null && state.children!.isNotEmpty)
                           ? state.children!
                           : (state.hasChildren == 'Yes' ? '1+' : '0'),
                       'isSpouseRow': '1',
@@ -2425,10 +2618,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
                         final showSpouse =
                             state.maritalStatus == 'Married' ||
-                            state.maritalStatus == 'married';
+                                state.maritalStatus == 'married';
                         final showChildren =
                             state.hasChildren == 'Yes' ||
-                            state.hasChildren == 'yes';
+                                state.hasChildren == 'yes';
 
                         if (showSpouse) {
                           final spBloc = context.read<SpousBloc>();
@@ -2437,17 +2630,17 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                           final bool isSpouseStateEmpty =
                               (current.relation == null ||
                                   current.relation!.trim().isEmpty) &&
-                              (current.memberName == null ||
-                                  current.memberName!.trim().isEmpty) &&
-                              (current.spouseName == null ||
-                                  current.spouseName!.trim().isEmpty) &&
-                              current.dob == null &&
-                              (current.UpdateYears == null ||
-                                  current.UpdateYears!.trim().isEmpty) &&
-                              (current.UpdateMonths == null ||
-                                  current.UpdateMonths!.trim().isEmpty) &&
-                              (current.UpdateDays == null ||
-                                  current.UpdateDays!.trim().isEmpty);
+                                  (current.memberName == null ||
+                                      current.memberName!.trim().isEmpty) &&
+                                  (current.spouseName == null ||
+                                      current.spouseName!.trim().isEmpty) &&
+                                  current.dob == null &&
+                                  (current.UpdateYears == null ||
+                                      current.UpdateYears!.trim().isEmpty) &&
+                                  (current.UpdateMonths == null ||
+                                      current.UpdateMonths!.trim().isEmpty) &&
+                                  (current.UpdateDays == null ||
+                                      current.UpdateDays!.trim().isEmpty);
 
                           if (isSpouseStateEmpty) {
                             final g = (state.gender == 'Male')
@@ -2471,12 +2664,12 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                             final headName = state.headName?.trim();
                             final spouseName = state.spouseName?.trim();
                             if ((current.memberName == null ||
-                                    current.memberName!.isEmpty) &&
+                                current.memberName!.isEmpty) &&
                                 (spouseName != null && spouseName.isNotEmpty)) {
                               spBloc.add(SpUpdateMemberName(spouseName));
                             }
                             if ((current.spouseName == null ||
-                                    current.spouseName!.isEmpty) &&
+                                current.spouseName!.isEmpty) &&
                                 (headName != null && headName!.isNotEmpty)) {
                               spBloc.add(SpUpdateSpouseName(headName));
                             }
@@ -2486,11 +2679,11 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                             MultiBlocListener(
                               listeners: [
                                 BlocListener<
-                                  AddFamilyHeadBloc,
-                                  AddFamilyHeadState
+                                    AddFamilyHeadBloc,
+                                    AddFamilyHeadState
                                 >(
                                   listenWhen: (prev, curr) =>
-                                      prev.headName != curr.headName ||
+                                  prev.headName != curr.headName ||
                                       prev.spouseName != curr.spouseName,
                                   listener: (ctx, st) {
                                     if (_syncingNames) return;
@@ -2514,7 +2707,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
                                 BlocListener<SpousBloc, SpousState>(
                                   listenWhen: (p, c) =>
-                                      p.memberName != c.memberName ||
+                                  p.memberName != c.memberName ||
                                       p.spouseName != c.spouseName,
                                   listener: (ctx, sp) {
                                     if (_syncingNames) return;
@@ -2523,13 +2716,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                       final headBloc = ctx
                                           .read<AddFamilyHeadBloc>();
                                       final newSpouseName =
-                                          (sp.memberName ?? '').trim();
+                                      (sp.memberName ?? '').trim();
                                       final newHeadName = (sp.spouseName ?? '')
                                           .trim();
 
                                       if (newSpouseName.isNotEmpty &&
                                           (headBloc.state.spouseName ?? '')
-                                                  .trim() !=
+                                              .trim() !=
                                               newSpouseName) {
                                         headBloc.add(
                                           AfhUpdateSpouseName(newSpouseName),
@@ -2537,7 +2730,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                       }
                                       if (newHeadName.isNotEmpty &&
                                           (headBloc.state.headName ?? '')
-                                                  .trim() !=
+                                              .trim() !=
                                               newHeadName) {
                                         headBloc.add(
                                           AfhUpdateHeadName(newHeadName),
@@ -2546,8 +2739,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                     } finally {
                                       WidgetsBinding.instance
                                           .addPostFrameCallback((_) {
-                                            _syncingNames = false;
-                                          });
+                                        _syncingNames = false;
+                                      });
                                     }
                                   },
                                 ),
@@ -2616,34 +2809,34 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                   child: Builder(
                                     builder: (ctx) {
                                       final controller =
-                                          DefaultTabController.of(ctx)!;
+                                      DefaultTabController.of(ctx)!;
                                       return AnimatedBuilder(
                                         animation: controller.animation!,
                                         builder: (context, _) {
                                           final showNav = tabs.length > 1;
                                           return BlocBuilder<
-                                            AddFamilyHeadBloc,
-                                            AddFamilyHeadState
+                                              AddFamilyHeadBloc,
+                                              AddFamilyHeadState
                                           >(
                                             builder: (context, state) {
                                               final isLoading =
                                                   state.postApiStatus ==
-                                                  PostApiStatus.loading;
+                                                      PostApiStatus.loading;
                                               if (!showNav) {
                                                 return Align(
                                                   alignment:
-                                                      Alignment.centerRight,
+                                                  Alignment.centerRight,
                                                   child: SizedBox(
                                                     width: 25.5.w,
                                                     height: 4.5.h,
                                                     child: RoundButton(
                                                       title: isLoading
                                                           ? (widget.isEdit
-                                                                ? 'UPDATING...'
-                                                                : l.addingButton)
+                                                          ? 'UPDATING...'
+                                                          : l.addingButton)
                                                           : (widget.isEdit
-                                                                ? 'UPDATE'
-                                                                : l.addButton),
+                                                          ? 'UPDATE'
+                                                          : l.addButton),
                                                       color: AppColors.primary,
                                                       borderRadius: 4,
                                                       height: 4.5.h,
@@ -2656,8 +2849,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                         if (formState == null)
                                                           return;
                                                         final isValid =
-                                                            formState
-                                                                .validate();
+                                                        formState
+                                                            .validate();
                                                         if (!isValid) {
                                                           if (_lastFormError !=
                                                               null) {
@@ -2671,14 +2864,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                         }
                                                         context
                                                             .read<
-                                                              AddFamilyHeadBloc
-                                                            >()
+                                                            AddFamilyHeadBloc
+                                                        >()
                                                             .add(
-                                                              AfhSubmit(
-                                                                context:
-                                                                    context,
-                                                              ),
-                                                            );
+                                                          AfhSubmit(
+                                                            context:
+                                                            context,
+                                                          ),
+                                                        );
                                                       },
                                                     ),
                                                   ),
@@ -2689,8 +2882,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                               final last = tabs.length - 1;
                                               return Row(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                                MainAxisAlignment
+                                                    .spaceBetween,
                                                 children: [
                                                   if (i > 0)
                                                     SizedBox(
@@ -2703,26 +2896,26 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                             4.5.h,
                                                           ),
                                                           backgroundColor:
-                                                              AppColors.primary,
+                                                          AppColors.primary,
                                                           foregroundColor:
-                                                              Colors.white,
+                                                          Colors.white,
                                                           side: BorderSide(
                                                             color: AppColors
                                                                 .primary,
                                                             width: 0.2.w,
                                                           ), // 👈 matching border
                                                           padding:
-                                                              const EdgeInsets.symmetric(
-                                                                horizontal: 16,
-                                                              ),
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 16,
+                                                          ),
                                                           shape: RoundedRectangleBorder(
                                                             borderRadius:
-                                                                BorderRadius.circular(
-                                                                  4,
-                                                                ), // rounded edges
+                                                            BorderRadius.circular(
+                                                              4,
+                                                            ), // rounded edges
                                                           ),
                                                           elevation:
-                                                              0.5, // subtle elevation for depth
+                                                          0.5, // subtle elevation for depth
                                                           shadowColor: AppColors
                                                               .primary
                                                               .withOpacity(0.4),
@@ -2730,13 +2923,13 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                         onPressed: () =>
                                                             controller
                                                                 .animateTo(
-                                                                  i - 1,
-                                                                ),
+                                                              i - 1,
+                                                            ),
                                                         child: Text(
                                                           l.previousButton,
                                                           style: TextStyle(
                                                             fontWeight:
-                                                                FontWeight.w600,
+                                                            FontWeight.w600,
                                                             letterSpacing: 0.5,
                                                             fontSize: 14.sp,
                                                           ),
@@ -2752,26 +2945,30 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                       title: i < last
                                                           ? l.nextButton
                                                           : (isLoading
-                                                                ? l.addingButton
-                                                                : l.addButton),
+                                                          ? (widget.isEdit
+                                                          ? 'UPDATING...'
+                                                          : l.addingButton)
+                                                          : (widget.isEdit
+                                                          ? 'UPDATE'
+                                                          : l.addButton)),
                                                       onPress: () {
                                                         if (i < last) {
                                                           bool canProceed =
-                                                              true;
+                                                          true;
                                                           if (i == 0) {
                                                             _clearFormError();
                                                             final headForm =
                                                                 _formKey
                                                                     .currentState;
                                                             if (headForm ==
-                                                                    null ||
+                                                                null ||
                                                                 !headForm
                                                                     .validate()) {
                                                               canProceed =
-                                                                  false;
+                                                              false;
                                                               final msg =
                                                                   _lastFormError ??
-                                                                  'Please correct the highlighted errors before continuing.';
+                                                                      'Please correct the highlighted errors before continuing.';
                                                               showAppSnackBar(
                                                                 context,
                                                                 msg,
@@ -2786,32 +2983,32 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                             final spousState =
                                                                 context
                                                                     .read<
-                                                                      SpousBloc
-                                                                    >()
+                                                                    SpousBloc
+                                                                >()
                                                                     .state;
 
                                                             final isFormValid =
                                                                 spouseForm
                                                                     ?.validate() ??
-                                                                false;
+                                                                    false;
 
                                                             final areAllFieldsValid =
-                                                                validateAllSpousFields(
-                                                                  spousState,
-                                                                  AppLocalizations.of(
-                                                                    context,
-                                                                  )!,
-                                                                  isEdit: widget
-                                                                      .isEdit,
-                                                                );
+                                                            validateAllSpousFields(
+                                                              spousState,
+                                                              AppLocalizations.of(
+                                                                context,
+                                                              )!,
+                                                              isEdit: widget
+                                                                  .isEdit,
+                                                            );
 
                                                             if (!isFormValid ||
                                                                 !areAllFieldsValid) {
                                                               canProceed =
-                                                                  false;
+                                                              false;
                                                               final msg =
                                                                   spousLastFormError ??
-                                                                  'Please correct the highlighted errors before continuing.';
+                                                                      'Please correct the highlighted errors before continuing.';
                                                               showAppSnackBar(
                                                                 context,
                                                                 msg,
@@ -2834,31 +3031,31 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                             final spousState =
                                                                 context
                                                                     .read<
-                                                                      SpousBloc
-                                                                    >()
+                                                                    SpousBloc
+                                                                >()
                                                                     .state;
 
                                                             // First validate the form fields
                                                             final isFormValid =
                                                                 spouseForm
                                                                     ?.validate() ??
-                                                                false;
+                                                                    false;
 
                                                             final areAllFieldsValid =
-                                                                validateAllSpousFields(
-                                                                  spousState,
-                                                                  AppLocalizations.of(
-                                                                    context,
-                                                                  )!,
-                                                                  isEdit: widget
-                                                                      .isEdit,
-                                                                );
+                                                            validateAllSpousFields(
+                                                              spousState,
+                                                              AppLocalizations.of(
+                                                                context,
+                                                              )!,
+                                                              isEdit: widget
+                                                                  .isEdit,
+                                                            );
 
                                                             if (!isFormValid ||
                                                                 !areAllFieldsValid) {
                                                               final msg =
                                                                   spousLastFormError ??
-                                                                  'Please correct the highlighted errors before continuing.';
+                                                                      'Please correct the highlighted errors before continuing.';
                                                               showAppSnackBar(
                                                                 context,
                                                                 msg,
@@ -2876,8 +3073,8 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                             try {
                                                               final ch = context
                                                                   .read<
-                                                                    ChildrenBloc
-                                                                  >()
+                                                                  ChildrenBloc
+                                                              >()
                                                                   .state;
 
                                                               // 1) total live children must not be greater than total born children
@@ -2912,7 +3109,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
                                                               // 4) sum of male and female children must not be greater than total live children
                                                               if ((ch.totalMale +
-                                                                      ch.totalFemale) !=
+                                                                  ch.totalFemale) !=
                                                                   ch.totalLive) {
                                                                 showAppSnackBar(
                                                                   context,
@@ -2922,10 +3119,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                               }
 
                                                               final youngestGenderErr =
-                                                                  _validateYoungestGender(
-                                                                    ch,
-                                                                    l,
-                                                                  );
+                                                              _validateYoungestGender(
+                                                                ch,
+                                                                l,
+                                                              );
                                                               if (youngestGenderErr !=
                                                                   null) {
                                                                 showAppSnackBar(
@@ -2936,10 +3133,10 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
                                                               }
 
                                                               final youngestErr =
-                                                                  _validateYoungestChild(
-                                                                    ch,
-                                                                    l,
-                                                                  );
+                                                              _validateYoungestChild(
+                                                                ch,
+                                                                l,
+                                                              );
                                                               if (youngestErr !=
                                                                   null) {
                                                                 showAppSnackBar(
@@ -2953,14 +3150,14 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
 
                                                           context
                                                               .read<
-                                                                AddFamilyHeadBloc
-                                                              >()
+                                                              AddFamilyHeadBloc
+                                                          >()
                                                               .add(
-                                                                AfhSubmit(
-                                                                  context:
-                                                                      context,
-                                                                ),
-                                                              );
+                                                            AfhSubmit(
+                                                              context:
+                                                              context,
+                                                            ),
+                                                          );
                                                         }
                                                       },
                                                       color: AppColors.primary,

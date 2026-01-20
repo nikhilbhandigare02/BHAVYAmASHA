@@ -205,25 +205,25 @@ class _RoutinescreenState extends State<Routinescreen> {
     String? nextAncKey;
     String? nextAncLabel;
 
-    if (visitCount == 0) {
-      // First ANC is due
-      nextAncKey = '1st_anc_start';
-      nextAncLabel = t!.nextancduedate;
-    } else if (visitCount == 1) {
-      // Second ANC is due
-      nextAncKey = '2nd_anc_start';
-      nextAncLabel = t!.nextancduedate;
-    } else if (visitCount == 2) {
-      // Third ANC is due
-      nextAncKey = '3rd_anc_start';
-      nextAncLabel = t!.nextancduedate;
-    } else if (visitCount == 3) {
-      // Fourth ANC is due
-      nextAncKey = '4th_anc_start';
-      nextAncLabel = t!.nextancduedate;
+    // Determine current ANC window based on current date and pregnancy weeks
+    final currentWeeks = now.difference(lmpDate).inDays ~/ 7;
+    
+    if (currentWeeks <= 12) {
+      nextAncKey = '1st_anc_end';
+      nextAncLabel = '1st ANC Window';
+    } else if (currentWeeks <= 24) {
+      nextAncKey = '2nd_anc_end';
+      nextAncLabel = '2nd ANC Window';
+    } else if (currentWeeks <= 34) {
+      nextAncKey = '3rd_anc_end';
+      nextAncLabel = '3rd ANC Window';
+    } else if (currentWeeks <= 40) {
+      nextAncKey = '4th_anc_end';
+      nextAncLabel = '4th ANC Window';
     } else {
-      nextAncKey = '4th_anc_start';
-      nextAncLabel = t!.nextancduedate;
+      // Beyond 40 weeks
+      nextAncKey = '4th_anc_end';
+      nextAncLabel = '4th ANC Window';
     }
 
     if (nextAncKey != null && ancRanges.containsKey(nextAncKey)) {

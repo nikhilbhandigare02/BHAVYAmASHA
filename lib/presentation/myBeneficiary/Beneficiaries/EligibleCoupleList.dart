@@ -37,18 +37,19 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
       final db = await DatabaseProvider.instance.database;
 
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey =
-      currentUserData?['unique_key']?.toString();
+      final String currentUserKey =
+          currentUserData?['unique_key']?.toString() ?? '';
 
-      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) {
+      if (currentUserKey.isEmpty) {
         setState(() => _filtered = []);
         return;
       }
 
       final query = '''
-      SELECT DISTINCT b.*, 
-             e.eligible_couple_state, 
-             e.created_date_time AS registration_date
+      SELECT 
+        b.*, 
+        e.eligible_couple_state, 
+        e.created_date_time AS registration_date
       FROM beneficiaries_new b
       INNER JOIN eligible_couple_activities e 
         ON b.unique_key = e.beneficiary_ref_key
@@ -61,64 +62,54 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
       ORDER BY b.id DESC
     ''';
 
-      final rows = await db.rawQuery(query, [ashaUniqueKey]);
+      final rows = await db.rawQuery(query, [currentUserKey]);
 
       if (rows.isEmpty) {
         setState(() => _filtered = []);
         return;
       }
 
-      final filteredRows = rows.map((row) {
-        final mappedRow = Map<String, dynamic>.from(row);
+      final List<Map<String, dynamic>> couples = [];
+      final Set<String> seenBeneficiaries = {};
+
+      for (final row in rows) {
+        final Map<String, dynamic> member =
+        Map<String, dynamic>.from(row);
+
+        /// -------- PARSE beneficiary_info --------
+        Map<String, dynamic> info = {};
         try {
-          mappedRow['beneficiary_info'] =
-              jsonDecode(mappedRow['beneficiary_info'] ?? '{}');
-          mappedRow['geo_location'] =
-              jsonDecode(mappedRow['geo_location'] ?? '{}');
-          mappedRow['device_details'] =
-              jsonDecode(mappedRow['device_details'] ?? '{}');
-          mappedRow['app_details'] =
-              jsonDecode(mappedRow['app_details'] ?? '{}');
-          mappedRow['parent_user'] =
-              jsonDecode(mappedRow['parent_user'] ?? '{}');
-        } catch (_) {}
-        return mappedRow;
-      }).toList();
+          final raw = member['beneficiary_info'];
+          if (raw is String && raw.isNotEmpty) {
+            info = jsonDecode(raw) as Map<String, dynamic>;
+          } else if (raw is Map) {
+            info = Map<String, dynamic>.from(raw);
+          }
+        } catch (_) {
+          continue;
+        }
 
-      final couples = <Map<String, dynamic>>[];
+        final String beneficiaryKey =
+            member['unique_key']?.toString() ?? '';
 
-      for (final member in filteredRows) {
-        final info = _toStringMap(member['beneficiary_info']);
-        final memberUniqueKey = member['unique_key']?.toString() ?? '';
+        if (beneficiaryKey.isEmpty) continue;
 
         /// -------- SKIP CHILD --------
-        final memberType =
+        final String memberType =
             info['memberType']?.toString().toLowerCase() ?? '';
         if (memberType == 'child') continue;
-
-        /// -------- AGE CALCULATION --------
-        final dob = info['dob']?.toString();
-        final age = _calculateAgeFromDob(dob);
-        if (age == null) continue;
-
-        final gender =
-            info['gender']?.toString().toLowerCase() ?? '';
-
-        /// -------- AGE ELIGIBILITY --------
-        if (gender == 'female' && (age < 15 || age > 49)) continue;
-        if (gender == 'male' && (age < 15 || age > 54)) continue;
 
         /// -------- STERILIZATION CHECK --------
         final hasSterilization = await _hasSterilizationRecord(
           db,
-          memberUniqueKey,
-          ashaUniqueKey,
+          beneficiaryKey,
+          currentUserKey,
         );
+        if (hasSterilization) continue;
 
-        if (hasSterilization) {
-          print('Skipping sterilized beneficiary: $memberUniqueKey');
-          continue;
-        }
+        /// -------- SKIP DUPLICATE BENEFICIARY --------
+        if (seenBeneficiaries.contains(beneficiaryKey)) continue;
+        seenBeneficiaries.add(beneficiaryKey);
 
         /// -------- ADD ELIGIBLE COUPLE --------
         couples.add(
@@ -126,7 +117,7 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
             _toStringMap(member),
             info,
             <String, dynamic>{},
-            isHead: false,
+            isHead: true,
           ),
         );
       }
@@ -135,29 +126,9 @@ class _EligibleCoupleListState extends State<EligibleCoupleList> {
         _filtered = couples;
       });
     } catch (e, stackTrace) {
-      print('Error in _loadEligibleCouples: $e');
+      print('❌ Error in _loadEligibleCouples: $e');
       print(stackTrace);
       setState(() => _filtered = []);
-    }
-  }
-
-  int? _calculateAgeFromDob(String? dob) {
-    if (dob == null || dob.isEmpty) return null;
-
-    try {
-      final DateTime dobDate = DateTime.parse(dob);
-      final DateTime today = DateTime.now();
-
-      int age = today.year - dobDate.year;
-
-      if (today.month < dobDate.month ||
-          (today.month == dobDate.month && today.day < dobDate.day)) {
-        age--;
-      }
-
-      return age;
-    } catch (e) {
-      return null;
     }
   }
 

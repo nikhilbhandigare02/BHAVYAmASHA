@@ -59,6 +59,7 @@ class _MybeneficiariesState extends State<Mybeneficiaries> {
             hbcnCount = 0;
             lbwReferredCount = 0;
             abortionListCount = 0;
+
             deathRegisterCount = 0;
             migratedOutCount = 0;
             guestBeneficiaryCount = 0;
@@ -357,71 +358,69 @@ ORDER BY d.created_date_time DESC
     try {
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final String? ashaUniqueKey =
-      currentUserData?['unique_key']?.toString();
+      final String currentUserKey =
+          currentUserData?['unique_key']?.toString() ?? '';
 
-      if (ashaUniqueKey == null || ashaUniqueKey.isEmpty) return 0;
+      if (currentUserKey.isEmpty) return 0;
 
       final query = '''
-      SELECT DISTINCT b.*, e.eligible_couple_state, 
-               e.created_date_time as registration_date
-        FROM beneficiaries_new b
-        INNER JOIN eligible_couple_activities e ON b.unique_key = e.beneficiary_ref_key
-        WHERE b.is_deleted = 0 
-          AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
-          AND (b.is_death = 0 OR b.is_death IS NULL)
-          AND e.eligible_couple_state = 'eligible_couple'
-          AND e.is_deleted = 0
-          AND e.current_user_key = ?
+      SELECT 
+        b.*, 
+        e.eligible_couple_state,
+        e.created_date_time AS registration_date
+      FROM beneficiaries_new b
+      INNER JOIN eligible_couple_activities e
+        ON b.unique_key = e.beneficiary_ref_key
+      WHERE b.is_deleted = 0
+        AND (b.is_migrated = 0 OR b.is_migrated IS NULL)
+        AND (b.is_death = 0 OR b.is_death IS NULL)
+        AND e.eligible_couple_state = 'eligible_couple'
+        AND e.is_deleted = 0
+        AND e.current_user_key = ?
     ''';
 
-      final rows = await db.rawQuery(query, [ashaUniqueKey]);
+      final rows = await db.rawQuery(query, [currentUserKey]);
 
+      if (rows.isEmpty) return 0;
+
+      final Set<String> seenBeneficiaries = {};
       int count = 0;
 
       for (final row in rows) {
         try {
-          final beneficiaryInfo =
-              row['beneficiary_info']?.toString() ?? '{}';
+          final beneficiaryKey = row['unique_key']?.toString() ?? '';
+          if (beneficiaryKey.isEmpty) continue;
 
-          final Map<String, dynamic> info =
-          beneficiaryInfo.isNotEmpty
-              ? Map<String, dynamic>.from(
-              jsonDecode(beneficiaryInfo))
-              : <String, dynamic>{};
+          /// 🚫 Skip duplicate beneficiaries
+          if (seenBeneficiaries.contains(beneficiaryKey)) continue;
 
-          /// -------- SKIP CHILD --------
+          /// -------- PARSE beneficiary_info --------
+          Map<String, dynamic> info = {};
+          final raw = row['beneficiary_info'];
+          if (raw is String && raw.isNotEmpty) {
+            info = jsonDecode(raw) as Map<String, dynamic>;
+          } else if (raw is Map) {
+            info = Map<String, dynamic>.from(raw);
+          }
+
+          /// 🚫 Skip children
           final memberType =
               info['memberType']?.toString().toLowerCase() ?? '';
           if (memberType == 'child') continue;
 
-          /// -------- AGE CALCULATION --------
-          final dob = info['dob']?.toString();
-          final age = _calculateAgeFromDob(dob);
-          if (age == null) continue;
-
-          final gender =
-              info['gender']?.toString().toLowerCase() ?? '';
-
-          /// -------- AGE ELIGIBILITY --------
-          if (gender == 'female' && (age < 15 || age > 49)) continue;
-          if (gender == 'male' && (age < 15 || age > 54)) continue;
-
-          /// -------- STERILIZATION CHECK --------
-          final beneficiaryKey = row['unique_key']?.toString() ?? '';
-          final hasSterilization =
-          await _hasSterilizationRecord(
+          /// 🚫 Skip sterilized beneficiaries
+          final hasSterilization = await _hasSterilizationRecord(
             db,
             beneficiaryKey,
-            ashaUniqueKey,
+            currentUserKey,
           );
-
           if (hasSterilization) continue;
 
-          /// -------- COUNT VALID ELIGIBLE --------
+          /// ✅ Count valid eligible couple
+          seenBeneficiaries.add(beneficiaryKey);
           count++;
         } catch (_) {
-          // Ignore malformed rows safely
+          // safely ignore malformed rows
           continue;
         }
       }
@@ -431,6 +430,9 @@ ORDER BY d.created_date_time DESC
       return 0;
     }
   }
+
+
+
   int? _calculateAgeFromDob(String? dob) {
     if (dob == null || dob.isEmpty) return null;
 

@@ -146,11 +146,10 @@ class _AncvisitformState extends State<Ancvisitform> {
     }
   }
 
-  // Helper method to extract house number from household address
+
   String _extractHouseNumberFromAddress(Map<String, dynamic> addressData) {
     if (addressData.isEmpty) return '';
     
-    // Try common house number fields in address data
     final houseNoFields = [
       'houseNo',
       'house_no',

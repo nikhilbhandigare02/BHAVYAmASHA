@@ -100,17 +100,32 @@ class EligibleCouleUpdateBloc
       print('🌍 Fetched village: $village');
     }
 
+    // Declare variables at method level to be accessible throughout
+    String name = '';
+    String mobile = '';
+    String rchId = '';
+    String ageGender = '';
+    String hhId = '';
+    String beneficiaryId = '';
+    String currentAge = '';
+    String ageAtMarriage = '';
+    String totalBorn = '';
+    String totalLive = '';
+    String totalMale = '';
+    String totalFemale = '';
+    String youngestAge = '';
+    String youngestAgeUnit = '';
+    String youngestGender = '';
+
     try {
       // Extract data directly from the passed arguments
-      final name = data['name']?.toString() ?? '';
-      final mobile = data['mobile']?.toString() ?? data['mobileno']?.toString() ?? '';
-      final rchId = data['RichID']?.toString() ?? '';
-      final ageGender = data['ageGender']?.toString() ?? '';
-      final hhId = data['hhId']?.toString() ?? '';
+      name = data['name']?.toString() ?? '';
+      mobile = data['mobile']?.toString() ?? data['mobileno']?.toString() ?? '';
+      rchId = data['RichID']?.toString() ?? '';
+      ageGender = data['ageGender']?.toString() ?? '';
+      hhId = data['hhId']?.toString() ?? '';
+      beneficiaryId = (data['unique_key'] ?? data['fullBeneficiaryId'] ?? data['BeneficiaryID'])?.toString() ?? '';
 
-      final beneficiaryId = (data['unique_key'] ?? data['fullBeneficiaryId'] ?? data['BeneficiaryID'])?.toString() ?? '';
-
-      String currentAge = '';
       if (ageGender.isNotEmpty) {
         final parts = ageGender.split('/');
         if (parts.isNotEmpty) {
@@ -122,16 +137,7 @@ class EligibleCouleUpdateBloc
         }
       }
 
-      // Initialize children data variables (optional by default)
-      String totalBorn = '';
-      String totalLive = '';
-      String totalMale = '';
-      String totalFemale = '';
-      String youngestAge = '';
-      String youngestAgeUnit = '';
-      String youngestGender = '';
-
-      // Try to extract children data from the initial data
+      // Try to extract children data and ageAtMarriage from the initial data
       try {
         if (data['totalBorn'] != null) totalBorn = data['totalBorn'].toString();
         if (data['totalLive'] != null) totalLive = data['totalLive'].toString();
@@ -140,6 +146,7 @@ class EligibleCouleUpdateBloc
         if (data['youngestAge'] != null) youngestAge = data['youngestAge'].toString();
         if (data['youngestAgeUnit'] != null) youngestAgeUnit = data['youngestAgeUnit'].toString();
         if (data['youngestGender'] != null) youngestGender = _normalizeGender(data['youngestGender'].toString());
+        if (data['ageAtMarriage'] != null) ageAtMarriage = data['ageAtMarriage'].toString();
       } catch (e) {
         print('⚠️ Error extracting children data: $e');
       }
@@ -148,7 +155,8 @@ class EligibleCouleUpdateBloc
       print('   👤 Name: $name');
       print('   🆔 RCH ID: $rchId');
       print('   📅 Age: $currentAge (from: $ageGender)');
-      print('   📱 Mobile: $mobile');
+      print('   � Age at Marriage: $ageAtMarriage');
+      print('   � Mobile: $mobile');
       print('   🏠 HH ID: $hhId');
       print('   👶 Youngest Child Gender: $youngestGender');
 
@@ -184,6 +192,7 @@ class EligibleCouleUpdateBloc
           rchId: rchId,
           womanName: name,
           currentAge: currentAge,
+          ageAtMarriage: ageAtMarriage,
           mobileNo: mobile,
           address: addressFromVillage,
           totalChildrenBorn: totalBorn,
@@ -237,6 +246,12 @@ class EligibleCouleUpdateBloc
       // Extract woman's details (the eligible couple member)
       final womanDetails = isHead ? headDetails : spouseDetails;
 
+      // Debug logging for ageAtMarriage extraction
+      print('🔍 Age at Marriage extraction:');
+      print('   From womanDetails: ${womanDetails['ageAtMarriage']}');
+      print('   From beneficiaryInfo: ${beneficiaryInfo['ageAtMarriage']}');
+      print('   From initial data: $ageAtMarriage');
+
       // Get address components
       final villageFromHead = headDetails['village']?.toString() ?? '';
       final mohalla = headDetails['mohalla']?.toString() ?? headDetails['tola']?.toString() ?? '';
@@ -273,7 +288,7 @@ class EligibleCouleUpdateBloc
             category: info['category']?.toString() ?? state.category,
             otherReligion: (info['other_religion']?.toString() ?? headDetails['other_religion']?.toString() ?? info['otherReligion']?.toString() ?? headDetails['otherReligion']?.toString() ?? ''),
             otherCategory: (info['other_category']?.toString() ?? headDetails['other_category']?.toString() ?? info['otherCategory']?.toString() ?? headDetails['otherCategory']?.toString() ?? ''),
-            ageAtMarriage: info['ageAtMarriage']?.toString() ?? state.ageAtMarriage,
+            ageAtMarriage: info['ageAtMarriage']?.toString() ?? ageAtMarriage,
             whoseMobile: info['mobileOwner']?.toString() ?? state.whoseMobile,
             totalChildrenBorn: info['totalBorn']?.toString() ?? totalBorn,
             totalLiveChildren: info['totalLive']?.toString() ?? totalLive,
@@ -299,7 +314,9 @@ class EligibleCouleUpdateBloc
         mobileNo: mobile, // Always use the passed mobile
 
         // Use database values for other fields
-        ageAtMarriage: womanDetails['ageAtMarriage']?.toString() ?? state.ageAtMarriage,
+        ageAtMarriage: womanDetails['ageAtMarriage']?.toString() ?? 
+                      beneficiaryInfo['ageAtMarriage']?.toString() ?? 
+                      ageAtMarriage,
         address: address,
         whoseMobile: womanDetails['mobileOwner']?.toString() ?? state.whoseMobile,
         religion: womanDetails['religion']?.toString() ??
@@ -337,7 +354,8 @@ class EligibleCouleUpdateBloc
       print('   👤 Woman Name: ${newState.womanName}');
       print('   🆔 RCH ID: ${newState.rchId}');
       print('   📅 Age: ${newState.currentAge}');
-      print('   📱 Mobile: ${newState.mobileNo}');
+      print('   � Age at Marriage: ${newState.ageAtMarriage}');
+      print('   �� Mobile: ${newState.mobileNo}');
       print('   🏠 Address: ${newState.address}');
       print('   👶 Youngest Child Gender: ${newState.youngestChildGender}');
 
@@ -369,6 +387,7 @@ class EligibleCouleUpdateBloc
           rchId: rchId,
           womanName: name,
           currentAge: currentAge,
+          ageAtMarriage: ageAtMarriage,
           mobileNo: mobile,
           beneficiaryName: name,
           error: 'Using basic data only. Full details unavailable.',

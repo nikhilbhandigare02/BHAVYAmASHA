@@ -906,24 +906,19 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   Future<void> _loadEligibleCouplesCount() async {
     try {
-      //setState(() => _isLoading = true);
-
       final db = await DatabaseProvider.instance.database;
       final currentUserData = await SecureStorageService.getCurrentUserData();
-      final currentUserKey = currentUserData?['unique_key']?.toString() ?? '';
+      final String currentUserKey =
+          currentUserData?['unique_key']?.toString() ?? '';
 
       if (currentUserKey.isEmpty) {
-        print('❌ Error: Current user key not found');
-        setState(() {
-          /*_filtered = [];
-          _isLoading = false;*/
-        });
+        print('❌ Current user key missing');
         return;
       }
 
       final query = '''
-      SELECT 
-        b.*, 
+      SELECT DISTINCT
+        b.*,
         e.eligible_couple_state,
         e.created_date_time AS registration_date
       FROM beneficiaries_new b
@@ -935,101 +930,88 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         AND e.eligible_couple_state = 'eligible_couple'
         AND e.is_deleted = 0
         AND e.current_user_key = ?
-      ORDER BY b.created_date_time DESC
+      ORDER BY e.created_date_time DESC
     ''';
 
       final rows = await db.rawQuery(query, [currentUserKey]);
+
       print('🔍 Raw eligible couple rows: ${rows.length}');
 
-      if (rows.isEmpty) {
-        setState(() {
-          // eligibleCouplesCount = [];
-          //_isLoading = false;
-        });
-        return;
-      }
-
-      final List<Map<String, dynamic>> couples = [];
       final Set<String> seenBeneficiaries = {};
+      final List<Map<String, dynamic>> couples = [];
 
       for (final row in rows) {
-        final Map<String, dynamic> member =
-        Map<String, dynamic>.from(row);
-
-        Map<String, dynamic> info = {};
         try {
-          final raw = member['beneficiary_info'];
-          if (raw is String && raw.isNotEmpty) {
-            info = jsonDecode(raw) as Map<String, dynamic>;
-          } else if (raw is Map) {
-            info = Map<String, dynamic>.from(raw);
-          }
+          final String beneficiaryKey =
+              row['unique_key']?.toString() ?? '';
+          if (beneficiaryKey.isEmpty) continue;
+
+          // 🚫 Avoid duplicates
+          if (seenBeneficiaries.contains(beneficiaryKey)) continue;
+
+          /// ---------- PARSE BENEFICIARY INFO ----------
+          final rawInfo = row['beneficiary_info']?.toString() ?? '{}';
+          final Map<String, dynamic> info =
+          rawInfo.isNotEmpty ? jsonDecode(rawInfo) : {};
+
+          /// ---------- SKIP CHILD ----------
+          final memberType =
+              info['memberType']?.toString().toLowerCase() ?? '';
+          if (memberType == 'child') continue;
+
+          /// ---------- AGE CALCULATION ----------
+          final dob = info['dob']?.toString();
+          final age = _calculateAgeFromDob(dob);
+          if (age == null) continue;
+
+          final gender =
+              info['gender']?.toString().toLowerCase() ?? '';
+
+          /// ---------- AGE ELIGIBILITY ----------
+          if (gender == 'female' && (age < 15 || age > 49)) continue;
+          if (gender == 'male' && (age < 15 || age > 54)) continue;
+
+          /// ---------- STERILIZATION CHECK ----------
+          final hasSterilization = await _hasSterilizationRecord(
+            db,
+            beneficiaryKey,
+            currentUserKey,
+          );
+
+          if (hasSterilization) continue;
+
+          /// ---------- VALID ELIGIBLE ----------
+          seenBeneficiaries.add(beneficiaryKey);
+
+          couples.add(
+            _formatCoupleData(
+              _toStringMap(row),
+              info,
+              <String, dynamic>{},
+              isHead: true,
+              shouldShowGuestBadge: false,
+            ),
+          );
         } catch (e) {
-          print('⚠️ JSON parse error: $e');
+          print('⚠️ Skipping malformed row: $e');
           continue;
         }
-
-        final String beneficiaryKey =
-            member['unique_key']?.toString() ?? '';
-
-        if (beneficiaryKey.isEmpty) {
-          print('⚠️ Beneficiary unique_key missing');
-          continue;
-        }
-
-        final String memberType =
-            info['memberType']?.toString().toLowerCase() ?? '';
-
-        // 🚫 Skip children
-        if (memberType == 'child') {
-          print('⛔ Skipping child record');
-          continue;
-        }
-
-        final beneficiaryKeya = row['unique_key']?.toString() ?? '';
-        final hasSterilization =
-        await _hasSterilizationRecord(
-          db,
-          beneficiaryKeya,
-          currentUserKey,
-        );
-
-        if (hasSterilization) continue;
-
-        // 🚫 Skip duplicate beneficiary
-        if (seenBeneficiaries.contains(beneficiaryKey)) {
-          print('⛔ Duplicate beneficiary skipped: $beneficiaryKey');
-          continue;
-        }
-
-        seenBeneficiaries.add(beneficiaryKey);
-
-        couples.add(
-          _formatCoupleData(
-            _toStringMap(member),
-            info,
-            <String, dynamic>{},
-            isHead: true,
-            shouldShowGuestBadge: false,
-          ),
-        );
       }
 
-      print('✅ Final eligible couples (unique beneficiaries): ${couples.length}');
+      print('✅ Final eligible couples count: ${couples.length}');
 
       setState(() {
         eligibleCouplesCount = couples.length;
-        // _isLoading = false;
       });
     } catch (e, stackTrace) {
-      print('❌ Error in _loadEligibleCouples: $e');
+      print('❌ Error in _loadEligibleCouplesCount: $e');
       print(stackTrace);
       setState(() {
-        //eligibleCouplesCount = 0;
-        // _isLoading = false;
+        eligibleCouplesCount = 0;
       });
     }
   }
+
 
   Map<String, dynamic> _toStringMap(dynamic map) {
     if (map == null) return {};

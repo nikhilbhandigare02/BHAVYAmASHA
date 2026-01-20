@@ -11123,10 +11123,16 @@ abstract class AppLocalizations {
   /// **'Epilepsy'**
   String get epilespy;
 
+  /// No description provided for @hrphigh.
+  ///
+  /// In en, this message translates to:
+  /// **'HRP'**
+  String get hrphigh;
+
   /// No description provided for @specifyOtherDisease.
   ///
   /// In en, this message translates to:
-  /// **'Please specify other disease'**
+  /// **'Enter the name of other pre-Existing disease'**
   String get specifyOtherDisease;
 
   /// No description provided for @selectRisks.
@@ -11150,7 +11156,7 @@ abstract class AppLocalizations {
   /// No description provided for @riskInfections.
   ///
   /// In en, this message translates to:
-  /// **'Syphilis, HIV Positive, Hepatitis B, Hepatitis C'**
+  /// **'Syphilis, HIV Positive, Hepatitis-B, Hepatitis-C'**
   String get riskInfections;
 
   /// No description provided for @riskGestationalDiabetes.
@@ -12182,7 +12188,7 @@ abstract class AppLocalizations {
   /// No description provided for @pitToiletWithRunningWater.
   ///
   /// In en, this message translates to:
-  /// **'Pit toilet with running water'**
+  /// **'Pit toilet with running water supply'**
   String get pitToiletWithRunningWater;
 
   /// No description provided for @pitToiletWithoutWaterSupply.
