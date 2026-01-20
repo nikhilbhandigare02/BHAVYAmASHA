@@ -1896,60 +1896,33 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
         DateTime? activeWindowStart;
         DateTime? activeWindowEnd;
 
-        final firstStart = ancRanges['1st_anc_start'];
-        final firstEnd = ancRanges['1st_anc_end'];
+        final windows = [
+          ['1st_anc_start', '1st_anc_end'],
+          ['2nd_anc_start', '2nd_anc_end'],
+          ['3rd_anc_start', '3rd_anc_end'],
+          ['4th_anc_start', '4th_anc_end'],
+        ];
 
-        final secondStart = ancRanges['2nd_anc_start'];
-        final secondEnd = ancRanges['2nd_anc_end'];
-
-        final thirdStart = ancRanges['3rd_anc_start'];
-        final thirdEnd = ancRanges['3rd_anc_end'];
-
-        final fourthStart = ancRanges['4th_anc_start'];
-        final fourthEnd = ancRanges['4th_anc_end'];
-
-        if (firstStart != null &&
-            firstEnd != null &&
-            isTodayInsideWindow(firstStart, firstEnd)) {
-          activeWindowStart = firstStart;
-          activeWindowEnd = firstEnd;
-        } else if (secondStart != null &&
-            secondEnd != null &&
-            isTodayInsideWindow(secondStart, secondEnd)) {
-          activeWindowStart = secondStart;
-          activeWindowEnd = secondEnd;
-        } else if (thirdStart != null &&
-            thirdEnd != null &&
-            isTodayInsideWindow(thirdStart, thirdEnd)) {
-          activeWindowStart = thirdStart;
-          activeWindowEnd = thirdEnd;
-        } else if (fourthStart != null &&
-            fourthEnd != null &&
-            isTodayInsideWindow(fourthStart, fourthEnd)) {
-          activeWindowStart = fourthStart;
-          activeWindowEnd = fourthEnd;
+        for (final w in windows) {
+          final start = ancRanges[w[0]];
+          final end = ancRanges[w[1]];
+          if (start != null &&
+              end != null &&
+              isTodayInsideWindow(start, end)) {
+            activeWindowStart = start;
+            activeWindowEnd = end;
+            break;
+          }
         }
 
-        // ---------- Check if today is within ANC windows ----------
-        String currentAncDueDate = '';
-        bool shouldIncludeInList = false;
-
-        print('🔍 DEBUG ANC Date Check for beneficiary: $beneficiaryKey');
-        print('   Today: ${_formatDate(todayDate)}');
-
-        if (activeWindowStart != null && activeWindowEnd != null) {
-          // Today is within an ANC window
-          shouldIncludeInList = true;
-          currentAncDueDate = _formatAncDateOnly(activeWindowEnd?.toIso8601String() ?? '');
-          print('   ✅ Today is within ANC window: ${_formatDate(activeWindowStart)} to ${_formatDate(activeWindowEnd)}');
-        } else {
-          print('   ❌ Today is NOT within any ANC window - excluding beneficiary');
-        }
-
-        // ❌ Don't include if not within any ANC window
-        if (!shouldIncludeInList) {
+        // ---------- STRICT FILTER ----------
+        // ❌ If today is not inside ANY ANC window → skip
+        if (activeWindowStart == null || activeWindowEnd == null) {
           continue;
         }
+
+        final String currentAncDueDate =
+        _formatAncDateOnly(activeWindowEnd.toIso8601String());
 
         // ---------- Check if ANC followup form already exists ----------
         final ancFormKey = 'bt7gs9rl1a5d26mz';
@@ -1995,7 +1968,7 @@ class _TodayProgramSectionState extends State<TodayProgramSection> {
           'age': ageText,
           'gender': 'Female',
           'last Visit date':
-          _formatAncDateOnly(activeWindowStart?.toIso8601String() ?? ''),
+          _formatAncDateOnly(activeWindowStart.toIso8601String()),
           'Current ANC last due date': currentAncDueDate,
           'mobile': info['mobileNo'] ?? '-',
           'badge': 'ANC',
