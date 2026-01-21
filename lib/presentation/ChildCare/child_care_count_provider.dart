@@ -758,15 +758,6 @@ class ChildCareCountProvider {
       return false;
     }
   }
-  String _formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return 'N/A';
-    try {
-      final date = DateTime.parse(dateStr);
-      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
-    } catch (e) {
-      return dateStr;
-    }
-  }
 
   // Future<int> getTrackingDueCount() async {
   //   try {

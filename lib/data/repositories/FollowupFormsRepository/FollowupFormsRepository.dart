@@ -349,7 +349,7 @@ final formType = formJsonValue['form_type'];
             'mala_quantity': src['mala_quantity'],
             'chhaya_quantity': src['chhaya_quantity'],
             'ecp_quantity': src['ecp_quantity'],
-            'removal_reason': src['removal_reason'],
+            'removal_reason': src['removal_reason'] ?? src['reason'],
             'beneficiary_absent': src['beneficiary_absent'],
             'antra_injection_date': src['antra_injection_date'],
             'removal_date': src['removal_date'],
@@ -371,7 +371,7 @@ final formType = formJsonValue['form_type'];
               final v = value.toLowerCase().trim();
               if (v == 'true' || v == 'yes') return 'yes';
               if (v == 'false' || v == 'no') return 'no';
-              return v; // keep existing like 'unknown'
+              return v;
             }
 
             return '';
