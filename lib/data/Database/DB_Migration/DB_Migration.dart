@@ -101,7 +101,7 @@ class DbMigration {
         "birthWeight",
         "fp_method",
         "totalBorn","totalLive","totalMale","totalFemale","youngestAge","ageUnit","youngestGender",
-"childSchool","type_of_school","is_family_planning"
+"childSchool","type_of_school","is_family_planning","totalLiveChildren"
 
       ];
 
@@ -156,6 +156,7 @@ class DbMigration {
         "isFamilyheadWife": "isFamilyheadWife",
         "totalBorn": "total_children",
         "totalLive": "total_live_children",
+        "totalLiveChildren": "total_live_children",
         "totalMale": "total_male_children",
         "totalFemale": "total_female_children",
         "youngestAge": "age_of_youngest_child",
@@ -211,6 +212,7 @@ class DbMigration {
             "date_of_death": resolvedDeathDate,
             "cause_of_death": row["cause_of_death"] ?? form["cause_of_death"],
             "death_place": row["death_place"] ?? form["death_place"],
+            "reason_of_death": row["reason_of_death"] ?? form["reason_of_death"],
             "remark": form["remark"],
           };
 

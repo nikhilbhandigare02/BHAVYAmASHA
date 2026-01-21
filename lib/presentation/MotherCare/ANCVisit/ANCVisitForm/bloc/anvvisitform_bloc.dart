@@ -555,21 +555,37 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
             } catch (_) {}
 
             try {
-              if (saved['form_json'] is String && (saved['form_json'] as String).isNotEmpty) {
-                final fj = jsonDecode(saved['form_json']);
-                if (fj is Map) {
-                  formRoot = Map<String, dynamic>.from(fj);
-                  if (fj['anc_form'] is Map) {
-                    formDataJson = Map<String, dynamic>.from(fj['anc_form']);
+              if (saved['form_json'] is String &&
+                  (saved['form_json'] as String).isNotEmpty) {
+
+                final decoded = jsonDecode(saved['form_json']);
+
+                if (decoded is Map<String, dynamic>) {
+                  // full root json
+                  formRoot = Map<String, dynamic>.from(decoded);
+
+                  // --- CASE 1 & 2: anc_form always handled ---
+                  if (decoded['anc_form'] is Map<String, dynamic>) {
+                    formDataJson = Map<String, dynamic>.from(decoded['anc_form']);
                   }
-                  if (fj['geolocation_details'] is Map) {
-                    geoJson = Map<String, dynamic>.from(fj['geolocation_details']);
-                  } else if (formDataJson['geolocation_details'] is Map) {
-                    geoJson = Map<String, dynamic>.from(formDataJson['geolocation_details']);
+
+                  // --- GEOLOCATION fallback chain ---
+                  if (decoded['geolocation_details'] is Map<String, dynamic>) {
+                    geoJson = Map<String, dynamic>.from(decoded['geolocation_details']);
+                  } else if (formDataJson['geolocation_details'] is Map<String, dynamic>) {
+                    geoJson =
+                    Map<String, dynamic>.from(formDataJson['geolocation_details']);
+                  }
+
+                  // OPTIONAL: if anc_form is missing but root itself is form data
+                  if (formDataJson.isEmpty) {
+                    formDataJson = Map<String, dynamic>.from(decoded);
                   }
                 }
               }
-            } catch (_) {}
+            } catch (e) {
+              print('Error parsing form_json: $e');
+            }
 
 
           }

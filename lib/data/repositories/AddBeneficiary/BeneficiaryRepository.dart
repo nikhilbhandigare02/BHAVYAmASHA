@@ -410,7 +410,7 @@ class BeneficiaryRepository {
       'totalMale': info['total_male_children'] ?? 0,
       'totalFemale': info['total_female_children'] ?? 0,
       'youngestAge': info['age_of_youngest_child'],
-      'ageUnit': info['age_of_youngest_child_unit'] ?? 'years',
+      'ageUnit': info['age_of_youngest_child_unit'] ?? '',
       'youngestGender': info['gender_of_younget_child'],
 
       'gender': _genderText(info['gender']?.toString()),

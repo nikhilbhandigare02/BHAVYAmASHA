@@ -7363,6 +7363,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get abhaAddressLinked => 'ABHA Address Linked!';
 
   @override
+  String get selectAbnormality => 'Select abnormality *';
+
+  @override
+  String get curvedLimbs => ' Curved limbs';
+
+  @override
+  String get cliftLipPalate => 'Clift lip / palate';
+
+  @override
   String get selectAbhaId => 'Select ABHA ID';
 
   @override
