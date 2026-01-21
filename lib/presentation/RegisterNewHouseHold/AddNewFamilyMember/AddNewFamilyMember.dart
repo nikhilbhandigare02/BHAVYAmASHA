@@ -3105,6 +3105,11 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                       _motherOption.isEmpty ||
                                                       _motherOption ==
                                                           l.select);
+                                              final bool disableMotherDropdown =
+                                                  _isEdit &&
+                                                      _motherOption != null &&
+                                                      _motherOption.isNotEmpty &&
+                                                      _motherOption != l.select;
 
                                               final Set<String> motherSet = {
                                                 ..._femaleAdultNames,
@@ -3115,9 +3120,9 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                   ? [
                                                       motherNotAddedKey,
                                                     ] // 👈 ONLY PLACEHOLDER
-                                                  : [...motherSet, 'Other'];
+                                                   : [...motherSet, 'Other'];
 
-                                              return ApiDropdown<String>(
+                                               return ApiDropdown<String>(
                                                 labelText: _isEdit
                                                     ? l.motherNameLabel
                                                     : "${l.motherNameLabel} *",
@@ -3134,54 +3139,22 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                 value: showOnlyPlaceholder
                                                     ? motherNotAddedKey
                                                     : (_motherOption == null ||
-                                                          _motherOption
-                                                              .isEmpty ||
-                                                          _motherOption ==
-                                                              l.select)
+                                                    _motherOption.isEmpty ||
+                                                    _motherOption == l.select)
                                                     ? null
                                                     : _motherOption,
 
-                                                /// ✅ VALIDATION (UNCHANGED LOGIC)
-                                                validator: (value) {
-                                                  /// 🚫 NO validation when placeholder is shown in edit mode
-                                                  if (showOnlyPlaceholder) {
-                                                    return null;
-                                                  }
-
-                                                  if (_isEdit) {
-                                                    if (_motherOption == null ||
-                                                        _motherOption.isEmpty ||
-                                                        _motherOption ==
-                                                            l.select) {
-                                                      return 'Mother name is not selected';
-                                                    }
-                                                  } else {
-                                                    if (_motherOption ==
-                                                            l.select ||
-                                                        _motherOption.isEmpty) {
-                                                      return l
-                                                          .motherGuardianNameRequired
-                                                          .toLowerCase();
-                                                    }
-                                                  }
-                                                  return null;
-                                                },
-
-                                                onChanged: (v) {
+                                                /// 🚫 Disable dropdown when editing & value exists
+                                                onChanged: disableMotherDropdown
+                                                    ? null
+                                                    : (v) {
                                                   if (v == null) return;
 
-                                                  /// 👇 Block placeholder selection
-                                                  if (showOnlyPlaceholder &&
-                                                      v == motherNotAddedKey) {
+                                                  /// Block placeholder selection
+                                                  if (showOnlyPlaceholder && v == motherNotAddedKey) {
                                                     context
-                                                        .read<
-                                                          AddnewfamilymemberBloc
-                                                        >()
-                                                        .add(
-                                                          AnmUpdateMotherName(
-                                                            '',
-                                                          ),
-                                                        );
+                                                        .read<AddnewfamilymemberBloc>()
+                                                        .add(const AnmUpdateMotherName(''));
                                                     return;
                                                   }
 
@@ -3189,33 +3162,39 @@ class _AddNewFamilyMemberScreenState extends State<AddNewFamilyMemberScreen>
                                                     _motherOption = v;
                                                   });
 
-                                                  if (v != l.select &&
-                                                      v != 'Other') {
+                                                  if (v != l.select && v != 'Other') {
                                                     context
-                                                        .read<
-                                                          AddnewfamilymemberBloc
-                                                        >()
-                                                        .add(
-                                                          AnmUpdateMotherName(
-                                                            v,
-                                                          ),
-                                                        );
+                                                        .read<AddnewfamilymemberBloc>()
+                                                        .add(AnmUpdateMotherName(v));
                                                   } else {
                                                     context
-                                                        .read<
-                                                          AddnewfamilymemberBloc
-                                                        >()
-                                                        .add(
-                                                          AnmUpdateMotherName(
-                                                            '',
-                                                          ),
-                                                        );
+                                                        .read<AddnewfamilymemberBloc>()
+                                                        .add(const AnmUpdateMotherName(''));
                                                   }
 
-                                                  _formKey.currentState
-                                                      ?.validate();
+                                                  _formKey.currentState?.validate();
+                                                },
+
+                                                validator: (value) {
+                                                  /// No validation when locked
+                                                  if (disableMotherDropdown) return null;
+
+                                                  if (_isEdit) {
+                                                    if (_motherOption == null ||
+                                                        _motherOption.isEmpty ||
+                                                        _motherOption == l.select) {
+                                                      return 'Mother name is not selected';
+                                                    }
+                                                  } else {
+                                                    if (_motherOption == l.select ||
+                                                        _motherOption.isEmpty) {
+                                                      return l.motherGuardianNameRequired.toLowerCase();
+                                                    }
+                                                  }
+                                                  return null;
                                                 },
                                               );
+                                              ;
                                             },
                                           ),
                                         ],
