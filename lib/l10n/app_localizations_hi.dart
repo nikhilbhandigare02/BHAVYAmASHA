@@ -4636,7 +4636,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get no_high_risk_anc_visits_found => 'कोई उच्च-जोखिम ANC विज़िट नहीं मिली';
 
   @override
-  String get hrp => 'एचआरपी';
+  String get hrp => 'उच्च जोखिम';
 
   @override
   String get no_name => 'कोई नाम नहीं';
@@ -5422,7 +5422,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get eligibleCoupleTrackingDue => 'योग्य दम्पत्तियों की ट्रैकिंग';
 
   @override
-  String get methodOfContraception => 'गर्भनिरोधक का तिथि';
+  String get methodOfContraception => 'गर्भनिरोध का तरीका';
 
   @override
   String get condom => 'कंडोम';
@@ -5540,6 +5540,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get epilespy => 'मिर्गी';
+
+  @override
+  String get hrphigh => 'एचआरपी';
 
   @override
   String get specifyOtherDisease => 'कृपया अन्य बीमारी बताएं';
@@ -6115,7 +6118,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get spouseDetails => 'पति का विवरण';
 
   @override
-  String get member_status_label => 'सदस्य की स्थिति *';
+  String get member_status_label => 'सदस्य की स्थिति';
 
   @override
   String get member_status_head => 'सदस्य की स्थिति';

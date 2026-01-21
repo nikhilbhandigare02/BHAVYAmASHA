@@ -5116,7 +5116,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adolescentHealth => 'Adolescent Health';
 
   @override
-  String get familyPlanning => 'Family Planning';
+  String get familyPlanning => 'Family planing';
 
   @override
   String get otherPublicHealthProgram => 'Other Public Health Program';
@@ -5542,7 +5542,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get epilespy => 'Epilepsy';
 
   @override
-  String get specifyOtherDisease => 'Please specify other disease';
+  String get hrphigh => 'HRP';
+
+  @override
+  String get specifyOtherDisease => 'Enter the name of other pre-Existing disease';
 
   @override
   String get selectRisks => 'Select risks';
@@ -5554,7 +5557,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get riskPIH => 'Pregnancy Induced Hypertension, pre-eclampsia, Eclampsia';
 
   @override
-  String get riskInfections => 'Syphilis, HIV Positive, Hepatitis B, Hepatitis C';
+  String get riskInfections => 'Syphilis, HIV Positive, Hepatitis-B, Hepatitis-C';
 
   @override
   String get riskGestationalDiabetes => 'Gestational Diabetes';
@@ -6070,7 +6073,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get flushToiletWithoutWater => 'Flush toilet without water';
 
   @override
-  String get pitToiletWithRunningWater => 'Pit toilet with running water';
+  String get pitToiletWithRunningWater => 'Pit toilet with running water supply';
 
   @override
   String get pitToiletWithoutWaterSupply => 'Pit toilet without water supply';
@@ -6115,7 +6118,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spouseDetails => 'Spouse Details';
 
   @override
-  String get member_status_label => 'Member Status *';
+  String get member_status_label => 'Member Status';
 
   @override
   String get member_status_head => 'Member Status';
@@ -7627,7 +7630,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get government => 'Government';
 
   @override
-  String get private => 'private';
+  String get private => 'Private';
 
   @override
   String get selectChildren => 'Select Children';

@@ -38,7 +38,6 @@ class _DeathRegisterState extends State<DeathRegister> {
   }
 
   String _getMemberTypeFromAgeGender(String ageString, String gender) {
-    // Extract numeric age from age string
     int age = 0;
     if (ageString != 'Not Available') {
       if (ageString.contains('Y') || ageString.contains('years')) {

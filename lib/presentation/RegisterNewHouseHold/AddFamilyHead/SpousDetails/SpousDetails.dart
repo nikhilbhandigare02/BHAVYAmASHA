@@ -16,6 +16,7 @@ import '../../../../data/Database/local_storage_dao.dart';
 import '../../../../data/repositories/RegisterNewHouseHoldController/register_new_house_hold.dart';
 import '../../AddNewFamilyMember/bloc/addnewfamilymember_bloc.dart';
 import 'bloc/spous_bloc.dart';
+
 class MaxValueFormatter extends TextInputFormatter {
   final int max;
 
@@ -23,9 +24,9 @@ class MaxValueFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) return newValue;
 
     final value = int.tryParse(newValue.text);
@@ -35,7 +36,6 @@ class MaxValueFormatter extends TextInputFormatter {
     return newValue;
   }
 }
-
 
 final GlobalKey<FormState> spousFormKey = GlobalKey<FormState>();
 String? spousLastFormError;
@@ -53,10 +53,10 @@ String? captureSpousError(String? message) {
 }
 
 bool validateAllSpousFields(
-    SpousState state,
-    AppLocalizations l, {
-      bool isEdit = false,
-    }) {
+  SpousState state,
+  AppLocalizations l, {
+  bool isEdit = false,
+}) {
   final form = spousFormKey.currentState;
   bool isValid = true;
 
@@ -300,7 +300,6 @@ List<String> _getMobileOwnerList(String gender) {
     ];
   }
 
-  // Fallback if gender is unknown
   return [
     'Self',
     'Husband',
@@ -320,7 +319,6 @@ List<String> _getMobileOwnerList(String gender) {
 
 class _SpousdetailsState extends State<Spousdetails>
     with AutomaticKeepAliveClientMixin {
-
   // Controllers for age fields to handle dynamic updates
   final yearsController = TextEditingController();
   final monthsController = TextEditingController();
@@ -333,9 +331,10 @@ class _SpousdetailsState extends State<Spousdetails>
     final m = int.tryParse(months) ?? 0;
     final d = int.tryParse(days) ?? 0;
 
-    // Calculate DOB and update BLoC state (rollover logic is handled in BLoC)
+    // Calculate DOB using fixed 30-day months and 360-day years
+    final totalDays = y * 360 + m * 30 + d;
     final now = DateTime.now();
-    final calculatedDob = DateTime(now.year - y, now.month - m, now.day - d);
+    final calculatedDob = now.subtract(Duration(days: totalDays));
 
     bloc.add(SpUpdateDob(calculatedDob));
   }
@@ -368,9 +367,9 @@ class _SpousdetailsState extends State<Spousdetails>
   final RegisterNewHouseHold repository = RegisterNewHouseHold();
 
   Future<Map<String, dynamic>?> fetchRCHDataForScreen(
-      int rchId, {
-        required int requestFor,
-      }) async {
+    int rchId, {
+    required int requestFor,
+  }) async {
     try {
       print('Calling API: getRCHData(rchId: $rchId, requestFor: $requestFor)');
 
@@ -398,6 +397,18 @@ class _SpousdetailsState extends State<Spousdetails>
   @override
   void initState() {
     super.initState();
+
+    // Handle initial data if provided
+    if (widget.initial != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final spBloc = context.read<SpousBloc>();
+          debugPrint('SpousDetails: Hydrating with initial data');
+          spBloc.add(SpHydrate(widget.initial!));
+        }
+      });
+    }
+
     if (widget.isAddMember && widget.headMobileNo != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -561,7 +572,7 @@ class _SpousdetailsState extends State<Spousdetails>
       if (widget.isMemberDetails) {
         return BlocListener<AddnewfamilymemberBloc, AddnewfamilymemberState>(
           listenWhen: (previous, current) =>
-          previous.religion != current.religion ||
+              previous.religion != current.religion ||
               previous.category != current.category ||
               previous.otherReligion != current.otherReligion ||
               previous.otherCategory != current.otherCategory ||
@@ -611,7 +622,7 @@ class _SpousdetailsState extends State<Spousdetails>
       } else {
         return BlocListener<AddFamilyHeadBloc, AddFamilyHeadState>(
           listenWhen: (previous, current) =>
-          previous.headName != current.headName ||
+              previous.headName != current.headName ||
               previous.spouseName != current.spouseName ||
               previous.gender != current.gender ||
               previous.mobileNo != current.mobileNo ||
@@ -624,7 +635,6 @@ class _SpousdetailsState extends State<Spousdetails>
             final spBloc = ctx.read<SpousBloc>();
             final curr = spBloc.state;
 
-            // Update gender and relation when head's gender changes
             if (st.gender != null) {
               final isMale = st.gender == 'Male';
               final relation = isMale ? 'Wife' : 'Husband';
@@ -653,8 +663,6 @@ class _SpousdetailsState extends State<Spousdetails>
               }
             }
 
-            // Update names from head form only when non-empty, so that
-            // member-flow prefilled values are not wiped out by blanks.
             final memberName = st.spouseName?.trim() ?? '';
             final spouseName = st.headName?.trim() ?? '';
             final currMember = curr.memberName?.trim() ?? '';
@@ -697,9 +705,9 @@ class _SpousdetailsState extends State<Spousdetails>
   }
 
   void _handleAbhaProfileResult(
-      Map<String, dynamic> profile,
-      BuildContext context,
-      ) {
+    Map<String, dynamic> profile,
+    BuildContext context,
+  ) {
     debugPrint("ABHA Profile Received in Spouse Tab: $profile");
 
     final spBloc = context.read<SpousBloc>();
@@ -816,9 +824,8 @@ class _SpousdetailsState extends State<Spousdetails>
                         ? 'Alive'
                         : (state.memberStatus ?? 'Alive'),
                     hintText: l.selectOption,
-                    onChanged: (v) => context.read<SpousBloc>().add(
-                      SpUpdateMemberStatus(v),
-                    ),
+                    onChanged: (v) =>
+                        context.read<SpousBloc>().add(SpUpdateMemberStatus(v)),
                   ),
                 ),
                 Divider(color: AppColors.divider, thickness: 0.5, height: 0),
@@ -832,27 +839,27 @@ class _SpousdetailsState extends State<Spousdetails>
 
                       items: widget.isMemberDetails
                           ? [
-                        'Self',
-                        'Father',
-                        'Mother',
-                        'Husband',
-                        'Wife',
-                        'Brother',
-                        'Sister',
-                        'Nephew',
-                        'Niece',
-                        'Son',
-                        'Daughter',
-                        'Grand Father',
-                        'Grand Mother',
-                        'Father In Law',
-                        'Mother In Law',
-                        'Grand Son',
-                        'Grand Daughter',
-                        'Son In Law',
-                        'Daughter In Law',
-                        'Other',
-                      ]
+                              'Self',
+                              'Father',
+                              'Mother',
+                              'Husband',
+                              'Wife',
+                              'Brother',
+                              'Sister',
+                              'Nephew',
+                              'Niece',
+                              'Son',
+                              'Daughter',
+                              'Grand Father',
+                              'Grand Mother',
+                              'Father In Law',
+                              'Mother In Law',
+                              'Grand Son',
+                              'Grand Daughter',
+                              'Son In Law',
+                              'Daughter In Law',
+                              'Other',
+                            ]
                           : const ['Husband', 'Wife'],
                       validator: (value) => captureSpousError(
                         value == null || value.isEmpty
@@ -914,22 +921,22 @@ class _SpousdetailsState extends State<Spousdetails>
 
                       value: widget.isMemberDetails
                           ? ((state.relation == null ||
-                          state.relation!.trim().isEmpty)
-                          ? null
-                          : state.relation)
+                                    state.relation!.trim().isEmpty)
+                                ? null
+                                : state.relation)
                           : (state.relation == 'Spouse'
-                          ? (state.gender == 'Female'
-                          ? 'Husband'
-                          : 'Wife')
-                          : (state.relation ??
-                          (state.gender == 'Female'
-                              ? 'Husband'
-                              : 'Wife'))),
+                                ? (state.gender == 'Female'
+                                      ? 'Husband'
+                                      : 'Wife')
+                                : (state.relation ??
+                                      (state.gender == 'Female'
+                                          ? 'Husband'
+                                          : 'Wife'))),
                       onChanged: widget.isEdit
                           ? null
                           : (v) => context.read<SpousBloc>().add(
-                        SpUpdateRelation(v),
-                      ),
+                              SpUpdateRelation(v),
+                            ),
                     ),
                   ),
                 ),
@@ -938,7 +945,7 @@ class _SpousdetailsState extends State<Spousdetails>
 
                 _section(
                   CustomTextField(
-                    key:   ValueKey('member_name'),
+                    key: ValueKey('member_name'),
                     labelText: '${l.nameOfMemberLabel} *',
                     hintText: l.nameOfMemberHint,
                     initialValue: state.memberName,
@@ -979,7 +986,7 @@ class _SpousdetailsState extends State<Spousdetails>
                     key: const ValueKey('spouse_name'),
                     labelText: '${l.spouseNameLabel} *',
                     hintText: l.spouseNameHint,
-                    readOnly :true,
+                    readOnly: true,
                     initialValue: state.spouseName,
                     //readOnly: widget.isEdit,
                     // validator: (value) => captureSpousError(
@@ -988,8 +995,8 @@ class _SpousdetailsState extends State<Spousdetails>
                     onChanged: widget.isEdit
                         ? null
                         : (v) => context.read<SpousBloc>().add(
-                      SpUpdateSpouseName(v.trim()),
-                    ),
+                            SpUpdateSpouseName(v.trim()),
+                          ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return l.pleaseEnterSpouseName;
@@ -1022,16 +1029,16 @@ class _SpousdetailsState extends State<Spousdetails>
                       onChanged: widget.isEdit
                           ? null
                           : (_) {
-                        context.read<SpousBloc>().add(SpToggleUseDob());
-                        // When switching to DOB mode, update DOB from age fields
-                        if (!state.useDob) {
-                          _updateDobFromAge(
-                            yearsController.text,
-                            monthsController.text,
-                            daysController.text,
-                          );
-                        }
-                      },
+                              context.read<SpousBloc>().add(SpToggleUseDob());
+                              // When switching to DOB mode, update DOB from age fields
+                              if (!state.useDob) {
+                                _updateDobFromAge(
+                                  yearsController.text,
+                                  monthsController.text,
+                                  daysController.text,
+                                );
+                              }
+                            },
                     ),
                     Text(l.dobShort, style: TextStyle(fontSize: 14.sp)),
                     SizedBox(width: 4.w),
@@ -1041,16 +1048,16 @@ class _SpousdetailsState extends State<Spousdetails>
                       onChanged: widget.isEdit
                           ? null
                           : (_) {
-                        context.read<SpousBloc>().add(SpToggleUseDob());
-                        // When switching to DOB mode, update DOB from age fields
-                        if (!state.useDob) {
-                          _updateDobFromAge(
-                            yearsController.text,
-                            monthsController.text,
-                            daysController.text,
-                          );
-                        }
-                      },
+                              context.read<SpousBloc>().add(SpToggleUseDob());
+                              // When switching to DOB mode, update DOB from age fields
+                              if (!state.useDob) {
+                                _updateDobFromAge(
+                                  yearsController.text,
+                                  monthsController.text,
+                                  daysController.text,
+                                );
+                              }
+                            },
                     ),
                     Text(l.ageApproximate, style: TextStyle(fontSize: 14.sp)),
                   ],
@@ -1127,15 +1134,15 @@ class _SpousdetailsState extends State<Spousdetails>
                                 onChanged: widget.isEdit
                                     ? null
                                     : (v) {
-                                  context.read<SpousBloc>().add(
-                                    UpdateYearsChanged(v.trim()),
-                                  );
-                                  _updateDobFromAge(
-                                    yearsController.text,
-                                    monthsController.text,
-                                    daysController.text,
-                                  );
-                                },
+                                        context.read<SpousBloc>().add(
+                                          UpdateYearsChanged(v.trim()),
+                                        );
+                                        _updateDobFromAge(
+                                          yearsController.text,
+                                          monthsController.text,
+                                          daysController.text,
+                                        );
+                                      },
                                 validator: (value) {
                                   final years = yearsController.text.trim();
                                   final months = monthsController.text.trim();
@@ -1178,15 +1185,15 @@ class _SpousdetailsState extends State<Spousdetails>
                                 onChanged: widget.isEdit
                                     ? null
                                     : (v) {
-                                  context.read<SpousBloc>().add(
-                                    UpdateMonthsChanged(v.trim()),
-                                  );
-                                  _updateDobFromAge(
-                                    yearsController.text,
-                                    monthsController.text,
-                                    daysController.text,
-                                  );
-                                },
+                                        context.read<SpousBloc>().add(
+                                          UpdateMonthsChanged(v.trim()),
+                                        );
+                                        _updateDobFromAge(
+                                          yearsController.text,
+                                          monthsController.text,
+                                          daysController.text,
+                                        );
+                                      },
                                 validator: (value) {
                                   // Don't show red validation message, only snackbar
                                   return null;
@@ -1207,12 +1214,13 @@ class _SpousdetailsState extends State<Spousdetails>
                               child: CustomTextField(
                                 labelText: l.days,
                                 hintText: '0',
-                                maxLength: 3,
+                                maxLength: 2,
                                 controller: daysController,
                                 keyboardType: TextInputType.number,
                                 readOnly: widget.isEdit,
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(2),
                                   MaxValueFormatter(
                                     99,
                                   ), // Allow up to 99 for rollover calculation
@@ -1220,15 +1228,15 @@ class _SpousdetailsState extends State<Spousdetails>
                                 onChanged: widget.isEdit
                                     ? null
                                     : (v) {
-                                  context.read<SpousBloc>().add(
-                                    UpdateDaysChanged(v.trim()),
-                                  );
-                                  _updateDobFromAge(
-                                    yearsController.text,
-                                    monthsController.text,
-                                    daysController.text,
-                                  );
-                                },
+                                        context.read<SpousBloc>().add(
+                                          UpdateDaysChanged(v.trim()),
+                                        );
+                                        _updateDobFromAge(
+                                          yearsController.text,
+                                          monthsController.text,
+                                          daysController.text,
+                                        );
+                                      },
                                 validator: (value) {
                                   // Don't show red validation message, only snackbar
                                   return null;
@@ -1578,8 +1586,8 @@ class _SpousdetailsState extends State<Spousdetails>
                               // Show error if not empty and not exactly 12 digits
                               if (value.isNotEmpty && value.length != 12) {
                                 WidgetsBinding.instance.addPostFrameCallback((
-                                    _,
-                                    ) {
+                                  _,
+                                ) {
                                   if (mounted) {
                                     showAppSnackBar(
                                       context,
@@ -1663,7 +1671,7 @@ class _SpousdetailsState extends State<Spousdetails>
                                 } else {
                                   final message =
                                       result?['message'] ??
-                                          l.failed_to_fetch_rch_data;
+                                      l.failed_to_fetch_rch_data;
                                   showAppSnackBar(context, message);
                                 }
                               } else {
@@ -1749,7 +1757,7 @@ class _SpousdetailsState extends State<Spousdetails>
                           }
 
                           final headNo =
-                          (widget.headMobileNo?.trim() ??
+                              (widget.headMobileNo?.trim() ??
                               context
                                   .read<AddFamilyHeadBloc>()
                                   .state
@@ -2106,7 +2114,7 @@ class _SpousdetailsState extends State<Spousdetails>
                         key: const ValueKey('lmp_date'),
                         labelText: '${l.lmpDateLabel}',
                         hintText: l.dateHint,
-                        initialDate: state.lmp, // Add initial date from state
+                        initialDate: state.lmp,
                         firstDate: DateTime.now().subtract(
                           const Duration(days: 276),
                         ),
@@ -2123,7 +2131,6 @@ class _SpousdetailsState extends State<Spousdetails>
                           } else {
                             bloc.add(const SpEDDChange(null));
                           }
-                          // Trigger validation after change
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             spousFormKey.currentState?.validate();
                           });
@@ -2142,7 +2149,6 @@ class _SpousdetailsState extends State<Spousdetails>
                     height: 0,
                   ),
 
-                  // For EDD when pregnant
                   if (state.isPregnant == 'Yes')
                     _section(
                       CustomDatePicker(

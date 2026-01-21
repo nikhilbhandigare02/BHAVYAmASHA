@@ -10280,7 +10280,7 @@ abstract class AppLocalizations {
   /// No description provided for @familyPlanning.
   ///
   /// In en, this message translates to:
-  /// **'Family Planning'**
+  /// **'Family planing'**
   String get familyPlanning;
 
   /// No description provided for @otherPublicHealthProgram.
@@ -11129,10 +11129,16 @@ abstract class AppLocalizations {
   /// **'Epilepsy'**
   String get epilespy;
 
+  /// No description provided for @hrphigh.
+  ///
+  /// In en, this message translates to:
+  /// **'HRP'**
+  String get hrphigh;
+
   /// No description provided for @specifyOtherDisease.
   ///
   /// In en, this message translates to:
-  /// **'Please specify other disease'**
+  /// **'Enter the name of other pre-Existing disease'**
   String get specifyOtherDisease;
 
   /// No description provided for @selectRisks.
@@ -11156,7 +11162,7 @@ abstract class AppLocalizations {
   /// No description provided for @riskInfections.
   ///
   /// In en, this message translates to:
-  /// **'Syphilis, HIV Positive, Hepatitis B, Hepatitis C'**
+  /// **'Syphilis, HIV Positive, Hepatitis-B, Hepatitis-C'**
   String get riskInfections;
 
   /// No description provided for @riskGestationalDiabetes.
@@ -12188,7 +12194,7 @@ abstract class AppLocalizations {
   /// No description provided for @pitToiletWithRunningWater.
   ///
   /// In en, this message translates to:
-  /// **'Pit toilet with running water'**
+  /// **'Pit toilet with running water supply'**
   String get pitToiletWithRunningWater;
 
   /// No description provided for @pitToiletWithoutWaterSupply.
@@ -12278,7 +12284,7 @@ abstract class AppLocalizations {
   /// No description provided for @member_status_label.
   ///
   /// In en, this message translates to:
-  /// **'Member Status *'**
+  /// **'Member Status'**
   String get member_status_label;
 
   /// No description provided for @member_status_head.
@@ -15302,7 +15308,7 @@ abstract class AppLocalizations {
   /// No description provided for @private.
   ///
   /// In en, this message translates to:
-  /// **'private'**
+  /// **'Private'**
   String get private;
 
   /// No description provided for @selectChildren.

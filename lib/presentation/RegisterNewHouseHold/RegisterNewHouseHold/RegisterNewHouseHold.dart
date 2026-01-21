@@ -56,17 +56,140 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
   bool _hideAddMemberButton = false;
   late final HouseholdDetailsAmenitiesBloc _hhBloc;
   bool _skipExitConfirm = false;
+
+  Future<void> _handleAppBarBackTap() async {
+    if (_skipExitConfirm) {
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
+
+    if (_members.isEmpty) {
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
+
+    final shouldExit = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4.0),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10.0,
+                  offset: const Offset(0.0, 10.0),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Container(
+                  padding: const EdgeInsets.only(
+                    top: 20,
+                    bottom: 20,
+                    left: 24,
+                    right: 24,
+                  ),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFCDD2),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(4.0),
+                      topRight: Radius.circular(4.0),
+                    ),
+                  ),
+                  child: const Text(
+                    'Attention !',
+                    style: TextStyle(
+                      color: Color(0xFFD32F2F),
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 24.0,
+                  ),
+                  color: Colors.white,
+                  child: const Text(
+                    'If you go back, detail will be lost, Do you want to go back',
+                    style: TextStyle(
+                      color: Color(0xFFD32F2F),
+                      fontSize: 16.0,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.only(
+                    left: 8.0,
+                    right: 8.0,
+                    bottom: 8.0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(dialogContext).pop(true);
+                        },
+                        child: const Text(
+                          'YES',
+                          style: TextStyle(
+                            color: Color(0xFFD32F2F),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(dialogContext).pop(false);
+                        },
+                        child: const Text(
+                          'NO',
+                          style: TextStyle(
+                            color: Color(0xFFD32F2F),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (shouldExit == true && mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
   Future<void> _persistAdultsToSecureStorage() async {
     try {
       final adults = _members
           .where((m) => (m['Type'] ?? '').toString() == 'Adult')
           .map(
             (m) => {
-              'Name': (m['Name'] ?? '').toString(),
-              'Gender': (m['Gender'] ?? '').toString(),
-              'Relation': (m['Relation'] ?? '').toString(),
-            },
-          )
+          'Name': (m['Name'] ?? '').toString(),
+          'Gender': (m['Gender'] ?? '').toString(),
+          'Relation': (m['Relation'] ?? '').toString(),
+        },
+      )
           .toList();
       await SecureStorageService.saveHouseholdAdultsSummary(adults);
     } catch (_) {}
@@ -208,7 +331,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             if (lower == 'other') return 'Other';
             break;
           case 'houseKitchen':
-            // Logic handled separately for is_kitchen_outside
+          // Logic handled separately for is_kitchen_outside
             if (lower == 'yes') return 'Yes';
             if (lower == 'no') return 'No';
             break;
@@ -257,8 +380,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               return 'Flush toilet with running water';
             if (lower == 'flush toilet without water')
               return 'Flush Toilet Without Water';
-            if (lower == 'pit toilet with running water')
-              return 'Pit toilet with running water';
+            if (lower == 'pit toilet with running water supply')
+              return 'Pit toilet with running water supply';
             if (lower == 'pit toilet without water supply')
               return 'Pit toilet without water supply';
             if (lower == 'other') return 'Other';
@@ -286,7 +409,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           details['type_of_residential_area'],
         );
         info['otherResidentialArea'] =
-            details['other_type_of_residential_area'];
+        details['other_type_of_residential_area'];
         info['houseType'] = mapValue('houseType', details['type_of_house']);
         info['otherHouseType'] = details['other_type_of_house'];
         info['ownershipType'] = mapValue(
@@ -307,7 +430,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           info['houseKitchen'] = '';
         }
 
-       /* info['cookingFuel'] = mapValue(
+        /* info['cookingFuel'] = mapValue(
           'cookingFuel',
           amenities['type_of_fuel_used_for_cooking'],
         );*/
@@ -316,7 +439,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           (amenities['type_of_fuel_used_for_cooking'] as List).join(', '),
         );
         info['otherCookingFuel'] =
-            amenities['other_type_of_fuel_used_for_cooking'];
+        amenities['other_type_of_fuel_used_for_cooking'];
         info['waterSource'] = mapValue(
           'waterSource',
           amenities['primary_source_of_water'],
@@ -327,7 +450,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           amenities['availability_of_electricity'],
         );
         info['otherElectricity'] =
-            amenities['other_availability_of_electricity'];
+        amenities['other_availability_of_electricity'];
         info['toilet'] = mapValue(
           'toilet',
           amenities['availability_of_toilet'],
@@ -337,7 +460,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           amenities['type_of_toilet'],
         );
         info['typeOfToilet'] =
-            amenities['other_type_of_toilet'];
+        amenities['other_type_of_toilet'];
         info['toiletPlace'] = mapValue(
           'toiletPlace',
           amenities['where_do_you_go_for_toilet'],
@@ -443,24 +566,123 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       onWillPop: () async {
         if (_skipExitConfirm) return true;
         if (_members.isNotEmpty) {
-          final shouldExit = await showConfirmationDialog(
+          final shouldExit = await showDialog<bool>(
             context: context,
-            title: l10n?.confirmAttentionTitle ?? 'Attention!',
-            message:
-                l10n?.confirmBackLoseDetailsMsg ??
-                'If you go back, details will be lost. Do you want to go back?',
-            yesText: l10n?.yes ?? '',
-            noText: l10n?.confirmNo ?? 'No',
+            barrierDismissible: false,
+            builder: (BuildContext dialogContext) {
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10.0,
+                        offset: const Offset(0.0, 10.0),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Container(
+                        padding: const EdgeInsets.only(
+                          top: 20,
+                          bottom: 20,
+                          left: 24,
+                          right: 24,
+                        ),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFFFCDD2),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(4.0),
+                            topRight: Radius.circular(4.0),
+                          ),
+                        ),
+                        child: Text(
+                          'Attention !',
+                          style: const TextStyle(
+                            color: Color(0xFFD32F2F),
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24.0,
+                          vertical: 24.0,
+                        ),
+                        color: Colors.white,
+                        child: Text(
+                          'If you go back, detail will be lost, Do you want to go back',
+                          style: const TextStyle(
+                            color: Color(0xFFD32F2F),
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.only(
+                          left: 8.0,
+                          right: 8.0,
+                          bottom: 8.0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop(true);
+                              },
+                              child: Text(
+                                'YES',
+                                style: const TextStyle(
+                                  color: Color(0xFFD32F2F),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop(false);
+                              },
+                              child: Text(
+                                'NO',
+                                style: const TextStyle(
+                                  color: Color(0xFFD32F2F),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           );
-          return shouldExit ?? false;
+          return shouldExit == true;
         }
         return true;
       },
       child: Scaffold(
         appBar: AppHeader(
           screenTitle:
-              l10n?.gridNewHouseholdRegister ?? 'Register New Household',
+          l10n?.gridNewHouseholdRegister ?? 'Register New Household',
           showBack: true,
+          onBackTap: () {
+            _handleAppBarBackTap();
+          },
         ),
 
         body: SafeArea(
@@ -573,13 +795,13 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
                   SizedBox(
                     height:
-                        MediaQuery.of(context).size.width >
-                            MediaQuery.of(context).size.height
+                    MediaQuery.of(context).size.width >
+                        MediaQuery.of(context).size.height
                         ? 9.h
                         : 5.h,
                     width:
-                        MediaQuery.of(context).size.width >
-                            MediaQuery.of(context).size.height
+                    MediaQuery.of(context).size.width >
+                        MediaQuery.of(context).size.height
                         ? 20.w
                         : 12.h,
                     child: Builder(
@@ -600,21 +822,21 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                             .read<RegisterNewHouseholdBloc>();
 
                         return BlocConsumer<
-                          RegisterNewHouseholdBloc,
-                          RegisterHouseholdState
+                            RegisterNewHouseholdBloc,
+                            RegisterHouseholdState
                         >(
                           listener: (context, state) {
                             if (state.isSaved) {
                               _skipExitConfirm = true;
                               if (widget.showSuccessOnSave) {
                                 showSuccessDialog(context).then((
-                                  shouldNavigate,
-                                ) {
+                                    shouldNavigate,
+                                    ) {
                                   if (shouldNavigate == true && mounted) {
                                     Navigator.pushNamedAndRemoveUntil(
                                       context,
                                       Route_Names.homeScreen,
-                                      (route) => false,
+                                          (route) => false,
                                     );
                                   }
                                 });
@@ -623,7 +845,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                                   Navigator.pushNamedAndRemoveUntil(
                                     context,
                                     Route_Names.homeScreen,
-                                    (route) => false,
+                                        (route) => false,
                                   );
                                 }
                               }
@@ -676,40 +898,39 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                                       ' Current Amenities State: ${amenitiesState.toString()}',
                                     );
 
-                                    // Create a map with all the amenities data
                                     final amenitiesData = {
                                       'residentialArea':
-                                          amenitiesState.residentialArea,
+                                      amenitiesState.residentialArea,
                                       'otherResidentialArea':
-                                          amenitiesState.otherResidentialArea,
+                                      amenitiesState.otherResidentialArea,
                                       'ownershipType':
-                                          amenitiesState.ownershipType,
+                                      amenitiesState.ownershipType,
                                       'otherOwnershipType':
-                                          amenitiesState.otherOwnershipType,
+                                      amenitiesState.otherOwnershipType,
                                       'houseType': amenitiesState.houseType,
                                       'otherHouseType':
-                                          amenitiesState.otherHouseType,
+                                      amenitiesState.otherHouseType,
                                       'houseKitchen':
-                                          amenitiesState.houseKitchen,
+                                      amenitiesState.houseKitchen,
                                       'cookingFuel': amenitiesState.cookingFuel,
                                       'otherCookingFuel':
-                                          amenitiesState.otherCookingFuel,
+                                      amenitiesState.otherCookingFuel,
                                       'waterSource': amenitiesState.waterSource,
                                       'otherWaterSource':
-                                          amenitiesState.otherWaterSource,
+                                      amenitiesState.otherWaterSource,
                                       'electricity': amenitiesState.electricity,
                                       'otherElectricity':
-                                          amenitiesState.otherElectricity,
+                                      amenitiesState.otherElectricity,
                                       'toilet': amenitiesState.toilet,
                                       'toiletType': amenitiesState.toiletType,
                                       'typeOfToilet':
-                                          amenitiesState.typeOfToilet,
+                                      amenitiesState.typeOfToilet,
                                       'toiletPlace': amenitiesState.toiletPlace,
                                     };
 
                                     amenitiesData.removeWhere(
-                                      (key, value) =>
-                                          value == null ||
+                                          (key, value) =>
+                                      value == null ||
                                           (value is String && value.isEmpty) ||
                                           value == '',
                                     );
@@ -757,7 +978,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
   Future<void> _openAddHead() async {
     try {
-      // Convert Map<String, dynamic>? to Map<String, String>? 
+      // Convert Map<String, dynamic>? to Map<String, String>?
       Map<String, String>? initialData;
       if (_headForm != null) {
         initialData = <String, String>{};
@@ -766,7 +987,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
             initialData![key] = value.toString();
           }
         });
-        
+
         // Ensure critical fields are preserved even if missing
         if (!initialData.containsKey('houseNo') && _headForm!.containsKey('house_no')) {
           initialData!['houseNo'] = _headForm!['house_no'].toString();
@@ -774,12 +995,12 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
         if (!initialData.containsKey('dob') && _headForm!.containsKey('date_of_birth')) {
           initialData!['dob'] = _headForm!['date_of_birth'].toString();
         }
-        
+
         debugPrint('RegisterNewHouseHold: initialData keys: ${initialData?.keys.toList()}');
         debugPrint('RegisterNewHouseHold: houseNo in initialData: ${initialData?['houseNo']}');
         debugPrint('RegisterNewHouseHold: dob in initialData: ${initialData?['dob']}');
       }
-      
+
       final result = await Navigator.of(context).push<Map<String, dynamic>>(
         MaterialPageRoute(builder: (_) => AddNewFamilyHeadScreen(
           initial: initialData,
@@ -848,11 +1069,11 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           }
           final String father = (result['father_name'] ?? '').toString();
           final String totalChildren =
-              (result['children'] != null &&
-                  result['children'].toString().isNotEmpty)
+          (result['children'] != null &&
+              result['children'].toString().isNotEmpty)
               ? (int.tryParse(result['children'].toString()) ?? 0) > 0
-                    ? result['children'].toString()
-                    : '0'
+              ? result['children'].toString()
+              : '0'
               : '0';
 
           _members.add({
@@ -945,8 +1166,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
       // Try to find spouse info if available
       try {
         final spouseMember = _members.firstWhere(
-          (m) =>
-              (m['Relation'] ?? '').toString().toLowerCase() == 'spouse' ||
+              (m) =>
+          (m['Relation'] ?? '').toString().toLowerCase() == 'spouse' ||
               (m['Relation'] ?? '').toString().toLowerCase() == 'wife',
         );
         spouse = Map<String, String>.from(spouseMember);
@@ -967,8 +1188,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           // Try to get mobile number from different possible keys
           spouseMobileNumber =
               spMap['mobileNo']?.toString() ??
-              spMap['mobile']?.toString() ??
-              spMap['phoneNumber']?.toString();
+                  spMap['mobile']?.toString() ??
+                  spMap['phoneNumber']?.toString();
 
           // Also update _headForm with all spouse details
           spMap.forEach((key, value) {
@@ -1075,11 +1296,11 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           final String father = (result['father_name'] ?? '').toString();
           final String spouse = (result['spouseName'] ?? '').toString();
           final String totalChildren =
-              (result['children'] != null &&
-                  result['children'].toString().isNotEmpty)
+          (result['children'] != null &&
+              result['children'].toString().isNotEmpty)
               ? (int.tryParse(result['children'].toString()) ?? 0) > 0
-                    ? result['children'].toString()
-                    : '0'
+              ? result['children'].toString()
+              : '0'
               : '0';
 
           _members.add({
@@ -1147,7 +1368,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   );
                 } else {
                   final bool spouseUseDobFromDetails =
-                      (spMap['useDob'] == true);
+                  (spMap['useDob'] == true);
                   final String? spouseDobFromDetails = spMap['dob'] as String?;
                   print(
                     '📅 [RegisterNewHouseHold] Spouse DOB details - useDob: $spouseUseDobFromDetails, dob: $spouseDobFromDetails',
@@ -1350,13 +1571,13 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
           Center(
             child: SizedBox(
               height:
-                  MediaQuery.of(context).size.width >
-                      MediaQuery.of(context).size.height
+              MediaQuery.of(context).size.width >
+                  MediaQuery.of(context).size.height
                   ? 9.h
                   : 5.h,
               width:
-                  MediaQuery.of(context).size.width >
-                      MediaQuery.of(context).size.height
+              MediaQuery.of(context).size.width >
+                  MediaQuery.of(context).size.height
                   ? 40.w
                   : 25.h,
               child: RoundButton(
@@ -1367,8 +1588,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                 color: AppColors.green,
                 borderRadius: 8,
                 height:
-                    MediaQuery.of(context).size.width >
-                        MediaQuery.of(context).size.height
+                MediaQuery.of(context).size.width >
+                    MediaQuery.of(context).size.height
                     ? 7.h
                     : 5.h,
                 fontSize: 15.sp,
@@ -1400,14 +1621,14 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
   }
 
   Widget _memberCard(
-    BuildContext context,
-    Map<String, String> m,
-    AppLocalizations? l10n,
-  ) {
+      BuildContext context,
+      Map<String, String> m,
+      AppLocalizations? l10n,
+      )
+  {
     final Color primary = Theme.of(context).primaryColor;
     final String ageGender = '${m['Age'] ?? ''} | ${m['Gender'] ?? ''}';
 
-    // Debug logging for spouse cards
     if (m['Relation'] == 'Spouse' || m['Relation'] == 'Wife') {
       print(
         '🎴 [RegisterNewHouseHold] Displaying spouse card - Name: ${m['Name']}, Age: "${m['Age']}", Gender: ${m['Gender']}, Relation: ${m['Relation']}',
@@ -1447,8 +1668,6 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               final isSpouseRow = (m['isSpouseRow'] ?? '0').toString() == '1';
               final int initialStep = isSpouseRow ? 1 : 0;
 
-              // Ensure marital status is set to 'Married' when opening spouse cards
-              // so that the spouse tab becomes accessible
               if (isSpouseRow) {
                 initialMember['maritalStatus'] = 'Married';
 
@@ -1527,23 +1746,23 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
 
               final result = await Navigator.of(context)
                   .push<Map<String, dynamic>>(
-                    MaterialPageRoute(
-                      builder: (_) => AddNewFamilyMemberScreen(
-                        hhId: _headForm?['hh_unique_key']?.toString(),
-                        headName: _headForm?['headName']?.toString(),
-                        headGender: _headForm?['gender']?.toString(),
-                        isAddMember: true,
-                        headMobileNumber: _headForm?['mobileNo']
-                            ?.toString(), // Add this line
-                        spouseName: _headForm?['spouseName']?.toString(),
-                        spouseGender: _headForm?['spouseGender']?.toString(),
-                        inlineEdit: true,
-                        isEdit: true,
-                        initial: initialMember,
-                        initialStep: initialStep,
-                      ),
-                    ),
-                  );
+                MaterialPageRoute(
+                  builder: (_) => AddNewFamilyMemberScreen(
+                    hhId: _headForm?['hh_unique_key']?.toString(),
+                    headName: _headForm?['headName']?.toString(),
+                    headGender: _headForm?['gender']?.toString(),
+                    isAddMember: true,
+                    headMobileNumber: _headForm?['mobileNo']
+                        ?.toString(), // Add this line
+                    spouseName: _headForm?['spouseName']?.toString(),
+                    spouseGender: _headForm?['spouseGender']?.toString(),
+                    inlineEdit: true,
+                    isEdit: true,
+                    initial: initialMember,
+                    initialStep: initialStep,
+                  ),
+                ),
+              );
               if (result != null) {
                 print(
                   '🔄 [RegisterNewHouseHold] EDIT - Received result from AddNewFamilyMember: ${result.keys}',
@@ -1584,23 +1803,23 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   final String father = (result['father_name'] ?? '').toString();
                   final String spouse = (result['spouseName'] ?? '').toString();
                   final String totalChildren =
-                      (result['children'] != null &&
-                          result['children'].toString().isNotEmpty)
+                  (result['children'] != null &&
+                      result['children'].toString().isNotEmpty)
                       ? (int.tryParse(result['children'].toString()) ?? 0) > 0
-                            ? result['children'].toString()
-                            : '0'
+                      ? result['children'].toString()
+                      : '0'
                       : '0';
                   final String maritalStatus = (result['maritalStatus'] ?? '')
                       .toString();
                   final String formIndexKey = formIndexStr.toString();
                   final int primaryIndex = _members.indexWhere(
-                    (row) =>
-                        (row['formIndex'] ?? '') == formIndexKey &&
+                        (row) =>
+                    (row['formIndex'] ?? '') == formIndexKey &&
                         (row['isSpouseRow'] ?? '0') == '0',
                   );
                   final int spouseIndex = _members.indexWhere(
-                    (row) =>
-                        (row['formIndex'] ?? '') == formIndexKey &&
+                        (row) =>
+                    (row['formIndex'] ?? '') == formIndexKey &&
                         (row['isSpouseRow'] ?? '0') == '1',
                   );
                   if (primaryIndex != -1) {
@@ -1663,9 +1882,9 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                           );
                         } else {
                           final bool spouseUseDobFromDetails =
-                              (spMap['useDob'] == true);
+                          (spMap['useDob'] == true);
                           final String? spouseDobFromDetails =
-                              spMap['dob'] as String?;
+                          spMap['dob'] as String?;
                           print(
                             '📅 [RegisterNewHouseHold] EDIT - Spouse DOB details - useDob: $spouseUseDobFromDetails, dob: $spouseDobFromDetails',
                           );
@@ -1735,9 +1954,9 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                             spouseAge = preCalculatedAge;
                           } else {
                             final bool spouseUseDobFromDetails =
-                                (spMap['useDob'] == true);
+                            (spMap['useDob'] == true);
                             final String? spouseDobFromDetails =
-                                spMap['dob'] as String?;
+                            spMap['dob'] as String?;
                             if (spouseUseDobFromDetails &&
                                 spouseDobFromDetails != null &&
                                 spouseDobFromDetails.isNotEmpty) {
@@ -1794,9 +2013,9 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                             spouseAge = preCalculatedAge;
                           } else {
                             final bool spouseUseDobFromDetails =
-                                (spMap['useDob'] == true);
+                            (spMap['useDob'] == true);
                             final String? spouseDobFromDetails =
-                                spMap['dob'] as String?;
+                            spMap['dob'] as String?;
                             if (spouseUseDobFromDetails &&
                                 spouseDobFromDetails != null &&
                                 spouseDobFromDetails.isNotEmpty) {
@@ -1861,7 +2080,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   initial[key] = value.toString();
                 }
               });
-              
+
               // Ensure critical fields are preserved with alternative key names
               if (!initial.containsKey('houseNo') && _headForm!.containsKey('house_no')) {
                 initial['houseNo'] = _headForm!['house_no'].toString();
@@ -1869,7 +2088,7 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               if (!initial.containsKey('dob') && _headForm!.containsKey('date_of_birth')) {
                 initial['dob'] = _headForm!['date_of_birth'].toString();
               }
-              
+
               debugPrint('RegisterNewHouseHold (edit): initial keys: ${initial.keys.toList()}');
               debugPrint('RegisterNewHouseHold (edit): houseNo in initial: ${initial['houseNo']}');
               debugPrint('RegisterNewHouseHold (edit): dob in initial: ${initial['dob']}');
@@ -1887,17 +2106,17 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
               }
               final relation = (m['Relation'] ?? '').toString();
               final int initialTab =
-                  (relation == 'Wife' || relation == 'Spouse') ? 1 : 0;
+              (relation == 'Wife' || relation == 'Spouse') ? 1 : 0;
               final result = await Navigator.of(context)
                   .push<Map<String, dynamic>>(
-                    MaterialPageRoute(
-                      builder: (_) => AddNewFamilyHeadScreen(
-                        isEdit: false,
-                        initial: initial,
-                        initialTab: initialTab,
-                      ),
-                    ),
-                  );
+                MaterialPageRoute(
+                  builder: (_) => AddNewFamilyHeadScreen(
+                    isEdit: false,
+                    initial: initial,
+                    initialTab: initialTab,
+                  ),
+                ),
+              );
               if (result != null) {
                 setState(() {
                   _headForm = Map<String, dynamic>.from(result);
@@ -1941,14 +2160,14 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   final String father = (result['father_name'] ?? '').toString();
                   final String spouse = (result['spouseName'] ?? '').toString();
                   final String totalChildren =
-                      (result['children'] != null &&
-                          result['children'].toString().isNotEmpty)
+                  (result['children'] != null &&
+                      result['children'].toString().isNotEmpty)
                       ? (int.tryParse(result['children'].toString()) ?? 0) > 0
-                            ? result['children'].toString()
-                            : '0'
+                      ? result['children'].toString()
+                      : '0'
                       : '0';
                   final int headIndex = _members.indexWhere(
-                    (row) => row['Relation'] == 'Self',
+                        (row) => row['Relation'] == 'Self',
                   );
                   if (headIndex >= 0) {
                     final Map<String, String> headRow = {
@@ -1967,8 +2186,8 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                   final String maritalStatus = (result['maritalStatus'] ?? '')
                       .toString();
                   final int spouseIndex = _members.indexWhere(
-                    (row) =>
-                        row['Relation'] == 'Wife' ||
+                        (row) =>
+                    row['Relation'] == 'Wife' ||
                         row['Relation'] == 'Spouse',
                   );
                   if (maritalStatus == 'Married' && spouse.isNotEmpty) {
@@ -1979,9 +2198,9 @@ class _RegisterNewHouseHoldScreenState extends State<RegisterNewHouseHoldScreen>
                           ? 'Male'
                           : '';
                       final bool spouseUseDob =
-                          (result['spouseUseDob'] == true);
+                      (result['spouseUseDob'] == true);
                       final String? spouseDobIso =
-                          result['spouseDob'] as String?;
+                      result['spouseDob'] as String?;
                       String spouseAge = '';
                       if (spouseUseDob &&
                           spouseDobIso != null &&

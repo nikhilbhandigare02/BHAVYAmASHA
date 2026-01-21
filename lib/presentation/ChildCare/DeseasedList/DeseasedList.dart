@@ -21,6 +21,86 @@ class _DeseasedListState extends State<DeseasedList> {
   final TextEditingController _searchCtrl = TextEditingController();
   final LocalStorageDao _storageDao = LocalStorageDao();
 
+  static const Map<String, String> _causeOfDeathValueToEn = {
+    'measules': 'Measles',
+    'low_birth_weight': 'Low Birth Weight',
+    'high_fever': 'High Fever',
+    'diarrhoea': 'Diarrhoea',
+    'pneumonia': 'Pneumonia',
+    'any_other': 'Any Other Specify',
+  };
+
+  static const Map<String, String> _causeOfDeathLabelToEn = {
+    'measles': 'Measles',
+    'low birth weight': 'Low Birth Weight',
+    'high fever': 'High Fever',
+    'diarrhoea': 'Diarrhoea',
+    'pneumonia': 'Pneumonia',
+    'any other specify': 'Any Other Specify',
+  };
+
+  static const Map<String, String> _reasonOfDeathValueToEn = {
+    'ph': 'PH',
+    'pph': 'PPH',
+    'severe anaemia': 'Severe Anaemia',
+    'sepsis': 'Sepsis',
+    'obstructed labour': 'Obstructed Labour',
+    'malpresentation': 'Malpresentation',
+    'eclampsia/severe hypertension': 'Eclampsia/Severe Hypertension',
+    'unsafe abortion': 'Unsafe Abortion',
+    'surgical complication': 'Surgical Complication',
+    'other reason apart from maternal complications':
+    'Other reason apart from maternal complications',
+  };
+
+  static const Map<String, String> _reasonOfDeathLabelToEn = {
+    'ph': 'PH',
+    'pph': 'PPH',
+    'severe anaemia': 'Severe Anaemia',
+    'sepsis': 'Sepsis',
+    'obstructed labour': 'Obstructed Labour',
+    'malpresentation': 'Malpresentation',
+    'eclampsia/severe hypertension': 'Eclampsia/Severe Hypertension',
+    'unsafe abortion': 'Unsafe Abortion',
+    'surgical complication': 'Surgical Complication',
+    'other reason apart from maternal complications':
+    'Other reason apart from maternal complications',
+  };
+
+  static const Map<String, String> _placeOfDeathValueToEn = {
+    'home': 'Home',
+    'migrate out': 'Migrated Out',
+    'on the way': 'On the way',
+    'facility': 'Facility',
+  };
+
+  static const Map<String, String> _placeOfDeathLabelToEn = {
+    'home': 'Home',
+    'migrated out': 'Migrated Out',
+    'on the way': 'On the way',
+    'facility': 'Facility',
+  };
+
+  String _normalizeOptionKey(String value) => value.trim().toLowerCase();
+
+  String _displayFromOptions(
+      String value, {
+        required String na,
+        required Map<String, String> valueToEn,
+        required Map<String, String> labelToEn,
+      }) {
+    final s = value.trim();
+    if (s.isEmpty || s == 'null' || s == na) return na;
+
+    final key = _normalizeOptionKey(s);
+    final mapped = valueToEn[key] ?? labelToEn[key];
+    if (mapped != null) return mapped;
+
+    final first = s.substring(0, 1).toUpperCase();
+    if (s.length == 1) return first;
+    return first + s.substring(1);
+  }
+
   bool _isLoading = true;
   List<Map<String, dynamic>> _deceasedList = [];
   List<Map<String, dynamic>> _filtered = [];
@@ -209,7 +289,7 @@ class _DeseasedListState extends State<DeseasedList> {
           }
         }
 
-        String   getAge() {
+        String getAge() {
           if (beneficiaryInfo['dob'] != null) {
             try {
               final dob = DateTime.parse(beneficiaryInfo['dob']);
@@ -317,6 +397,8 @@ class _DeseasedListState extends State<DeseasedList> {
             beneficiary['household_created_date'] ??
                 beneficiary['created_date_time'];
 
+        final na = t?.na ?? 'N/A';
+
         return {
           'hhId': getValue(
               householdData['household_id'] ??
@@ -342,21 +424,46 @@ class _DeseasedListState extends State<DeseasedList> {
           'MotherName': getValue(
               beneficiaryInfo['motherName'] ??
                   beneficiaryInfo['mother_name']),
-          'causeOFDeath': getValue(
-            deathDetails['cause_of_death'] ??
-                deathDetails['probable_cause_of_death'],
+          'causeOFDeath': _displayFromOptions(
+            getValue(
+              deathDetails['cause_of_death'] ??
+                  deathDetails['probable_cause_of_death'],
+              na,
+            ),
+            na: na,
+            valueToEn: _causeOfDeathValueToEn,
+            labelToEn: _causeOfDeathLabelToEn,
           ),
           'reason': (() {
-            final reason = getValue(deathDetails['reason_of_death']);
-            final other = getValue(deathDetails['other_reason_for_death']);
-            if (other != (t?.na ?? 'N/A') && other.trim().isNotEmpty) {
-              if (reason == (t?.na ?? 'N/A') || reason.trim().isEmpty) return other;
+            final reasonRaw = getValue(deathDetails['reason_of_death'], na);
+            final otherRaw = getValue(deathDetails['other_reason_for_death'], na);
+
+            final reason = _displayFromOptions(
+              reasonRaw,
+              na: na,
+              valueToEn: _reasonOfDeathValueToEn,
+              labelToEn: _reasonOfDeathLabelToEn,
+            );
+
+            final other = _displayFromOptions(
+              otherRaw,
+              na: na,
+              valueToEn: _reasonOfDeathValueToEn,
+              labelToEn: _reasonOfDeathLabelToEn,
+            );
+
+            if (other != na && other.trim().isNotEmpty) {
+              if (reason == na || reason.trim().isEmpty) return other;
               return '$reason ($other)';
             }
             return reason;
           })(),
-          'place': getValue(
-              deathDetails['death_place']),
+          'place': _displayFromOptions(
+            getValue(deathDetails['death_place'], na),
+            na: na,
+            valueToEn: _placeOfDeathValueToEn,
+            labelToEn: _placeOfDeathLabelToEn,
+          ),
           'DateofDeath': formatDate(
               deathDetails['date_of_death']),
           'age': getAge(),

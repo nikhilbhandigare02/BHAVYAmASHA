@@ -27,6 +27,7 @@ class MotherDetailsTab extends StatefulWidget {
     'excessiveBleeding': GlobalKey(),
     'breastfeedingProblems': GlobalKey(),
     'breastfeedingHelpGiven': GlobalKey(),
+    'counselingAdvice': GlobalKey(),
     'mealsPerDay': GlobalKey(),
     'padsPerDay': GlobalKey(),
     'temperature': GlobalKey(),
@@ -431,6 +432,7 @@ class _MotherDetailsTabState extends State<MotherDetailsTab> {
                         const Divider(),
 
                         ApiDropdown<String>(
+                          key: MotherDetailsTab.fieldKeys['counselingAdvice'],
                           labelText: t.counselingAdviceLabel,
                           items: const ['Yes', 'No'],
                           getLabel: (e) => e == 'Yes' ? t.yes : t.no,

@@ -1,6 +1,6 @@
 part of 'outcome_form_bloc.dart';
 
-// Non-institutional delivery events
+
 class NonInstitutionalPlaceTypeChanged extends OutcomeFormEvent {
   final String value;
 

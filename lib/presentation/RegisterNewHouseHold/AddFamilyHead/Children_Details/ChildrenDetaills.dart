@@ -86,14 +86,14 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
         builder: (context, state) {
           String? _validateYoungestAge(String raw, {String? overrideUnit}) {
             final unit = overrideUnit ?? state.ageUnit;
-            
+
             if (raw.isNotEmpty && raw.trim().isNotEmpty) {
               if (unit == null || unit.isEmpty) {
                 return 'Please select age unit';
               }
-              
+
               final msg = Validations.validateYoungestChildAge(l, raw, unit);
-              
+
               if (msg != null) {
                 if (msg.startsWith(l.selectAgeUnit)) {
                   return null;
@@ -101,12 +101,12 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
                 return l.selectAgeUnit;
               }
             }
-            
+
             return null;
           }
           return ListView(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-              children: [
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+            children: [
               _section(
                 _counterRow(
                   label: l.totalChildrenBorn,
@@ -148,56 +148,52 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
               _section(
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        labelText: l.youngestChildAge,
-                        readOnly: true,
-                        onChanged: (v) {
-                          context.read<ChildrenBloc>().add(ChUpdateYoungestAge(v.trim()));
-                          setState(() {
-                            _youngestAgeError = _validateYoungestAge(v);
-                          });
-                        },
-                        initialValue: state.youngestAge,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      width: 52,
-                      height: 36,
-                      child: TextField(
-                        keyboardType: TextInputType.number,
-                        textAlign: TextAlign.center,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          contentPadding: EdgeInsets.zero,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(6),
-                            borderSide: const BorderSide(color: AppColors.divider),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(6),
-                            borderSide: const BorderSide(color: AppColors.divider),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(6),
-                            borderSide: BorderSide(color: AppColors.primary, width: 1.5),
-                          ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l.youngestChildAge,
+                          style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
                         ),
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                        onChanged: (value) {
-                          context.read<ChildrenBloc>().add(ChUpdateYoungestAge(value.trim()));
-                          setState(() {
-                            _youngestAgeError = _validateYoungestAge(value);
-                          });
-                        },
                       ),
-                    ),
-                  ],
+                      SizedBox(
+                        width: 52,
+                        height: 36,
+                        child: TextField(
+                          controller: TextEditingController(text: state.youngestAge ?? ''),
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: EdgeInsets.zero,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: const BorderSide(color: AppColors.divider),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: const BorderSide(color: AppColors.divider),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+                            ),
+                          ),
+                          style: const TextStyle(fontSize: 14 ),
+                          onChanged: (value) {
+                            context.read<ChildrenBloc>().add(ChUpdateYoungestAge(value.trim()));
+                            setState(() {
+                              _youngestAgeError = _validateYoungestAge(value);
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
@@ -222,38 +218,38 @@ class _ChildrendetaillsState extends State<Childrendetaills> {
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
 
 
-                _section(
-                  ApiDropdown<String>(
-                    labelText: l.genderOfYoungest,
-                    items: const ['Male', 'Female','Transgender'],
-                    getLabel: (s) {
-                      switch (s) {
-                        case 'Male':
-                          return l.genderMale;
-                        case 'Female':
-                          return l.genderFemale;
-                        case 'Transgender':
-                          return l.transgender;
-                        default:
-                          return s;
-                      }
-                    },
-                    value: state.youngestGender,
-                    onChanged: (v) {
-                      String? err;
-                      if (v == 'Male' && state.totalMale == 0) {
-                        err = l.invalidGenderMaleZero;
-                      } else if (v == 'Female' && state.totalFemale == 0) {
-                        err = l.invalidGenderFemaleZero;
-                      }
-                      context.read<ChildrenBloc>().add(ChUpdateYoungestGender(v));
-                      setState(() {
-                        _youngestGenderError = err;
-                        _youngestAgeError = _validateYoungestAge(state.youngestAge ?? '');
-                      });
-                    },
-                  ),
+              _section(
+                ApiDropdown<String>(
+                  labelText: l.genderOfYoungest,
+                  items: const ['Male', 'Female','Transgender'],
+                  getLabel: (s) {
+                    switch (s) {
+                      case 'Male':
+                        return l.genderMale;
+                      case 'Female':
+                        return l.genderFemale;
+                      case 'Transgender':
+                        return l.transgender;
+                      default:
+                        return s;
+                    }
+                  },
+                  value: state.youngestGender,
+                  onChanged: (v) {
+                    String? err;
+                    if (v == 'Male' && state.totalMale == 0) {
+                      err = l.invalidGenderMaleZero;
+                    } else if (v == 'Female' && state.totalFemale == 0) {
+                      err = l.invalidGenderFemaleZero;
+                    }
+                    context.read<ChildrenBloc>().add(ChUpdateYoungestGender(v));
+                    setState(() {
+                      _youngestGenderError = err;
+                      _youngestAgeError = _validateYoungestAge(state.youngestAge ?? '');
+                    });
+                  },
                 ),
+              ),
               Divider(color: AppColors.divider, thickness: 0.5, height: 0),
             ],
           );

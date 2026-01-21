@@ -326,7 +326,7 @@ class _EligibleCoupleListState extends State<HighRisk> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      l10n?.hrp ?? "HRP",
+                      l10n?.hrphigh ?? "HRP",
                       style: TextStyle(
                         color: Colors.red[600],
                         fontWeight: FontWeight.bold,

@@ -607,6 +607,7 @@ class LocalStorageDao {
     }
   }
 
+
   Future<List<Map<String, dynamic>>> getAncFormsByBeneficiaryId(
       String beneficiaryId,
       ) async {
@@ -671,7 +672,6 @@ class LocalStorageDao {
       return [];
     }
   }
-
 
   Future<Map<String, dynamic>?> getBeneficiaryByServerKey(
       String serverKey,
@@ -2321,10 +2321,17 @@ ORDER BY b.created_date_time DESC;
   Future<List<Map<String, dynamic>>> getAbortionFollowupForms() async {
     final db = await _db;
 
+    /// 🔹 Step 1: Fetch abortion-related followup forms
     final forms = await db.query(
       'followup_form_data',
-      where:
-      "is_deleted = 0 AND forms_ref_key = 'bt7gs9rl1a5d26mz' AND (form_json LIKE '%\"is_abortion\"%' OR form_json LIKE '%\"has_abortion_complication\"%')",
+      where: '''
+      is_deleted = 0 
+      AND forms_ref_key = 'bt7gs9rl1a5d26mz'
+      AND (
+        form_json LIKE '%"is_abortion"%'
+        OR form_json LIKE '%"has_abortion_complication"%'
+      )
+    ''',
     );
 
     final List<Map<String, dynamic>> result = [];
@@ -2337,45 +2344,104 @@ ORDER BY b.created_date_time DESC;
         final decoded = safeJsonDecode(formJson);
         if (decoded is! Map<String, dynamic>) continue;
 
-        Map<String, dynamic>? formDataMap;
-        final ancForm = decoded['anc_form'];
-        if (ancForm is Map<String, dynamic>) {
-          formDataMap = Map<String, dynamic>.from(ancForm);
+        /// 🔹 Step 2: Extract abortion form data
+        Map<String, dynamic> formDataMap;
+        if (decoded['anc_form'] is Map<String, dynamic>) {
+          formDataMap = Map<String, dynamic>.from(decoded['anc_form']);
+        } else if (decoded['form_data'] is Map<String, dynamic>) {
+          formDataMap = Map<String, dynamic>.from(decoded['form_data']);
         } else {
-          final nestedFormData = decoded['form_data'];
-          if (nestedFormData is Map<String, dynamic>) {
-            formDataMap = Map<String, dynamic>.from(nestedFormData);
-          } else {
-            formDataMap = Map<String, dynamic>.from(decoded);
-          }
+          formDataMap = Map<String, dynamic>.from(decoded);
         }
 
-        final isAbortion = formDataMap['is_abortion']?.toString().toLowerCase();
+        /// 🔹 Step 3: Check abortion flags
+        final isAbortion =
+        formDataMap['is_abortion']?.toString().toLowerCase();
         final hasComplication =
-        formDataMap['has_abortion_complication']?.toString().toLowerCase();
+        formDataMap['has_abortion_complication']
+            ?.toString()
+            .toLowerCase();
 
         final bool isAbortionCase =
             isAbortion == 'yes' || isAbortion == 'true' || isAbortion == '1';
-        final bool hasComplicationCase = hasComplication == 'yes' ||
-            hasComplication == 'true' ||
-            hasComplication == '1';
+        final bool hasComplicationCase =
+            hasComplication == 'yes' ||
+                hasComplication == 'true' ||
+                hasComplication == '1';
 
-        // Must match at least one of the "positive" abortion flags
         if (!isAbortionCase && !hasComplicationCase) continue;
 
+        /// 🔹 Step 4: Validate abortion date
         final abortionDateRaw =
-        (formDataMap['date_of_abortion'] ?? formDataMap['abortion_date'])
+        (formDataMap['date_of_abortion'] ??
+            formDataMap['abortion_date'])
             ?.toString()
             .trim();
+
         if (abortionDateRaw == null ||
             abortionDateRaw.isEmpty ||
             abortionDateRaw == ',' ||
             abortionDateRaw == 'null') continue;
 
-        final beneficiaryRefKey = form['beneficiary_ref_key']?.toString();
+        final beneficiaryRefKey =
+        form['beneficiary_ref_key']?.toString();
         if (beneficiaryRefKey == null) continue;
 
-        // Fetch beneficiary details
+        /// =====================================================
+        /// 🔹 Step 5: FAMILY PLANNING EXCLUSION CHECK (CORE PART)
+        /// =====================================================
+        final fpForms = await db.query(
+          'followup_form_data',
+          where: '''
+          is_deleted = 0
+          AND beneficiary_ref_key = ?
+          AND forms_ref_key IN (
+            '0g5au2h46icwjlvr',   -- FP follow-up
+   
+          )
+        ''',
+          whereArgs: [beneficiaryRefKey],
+        );
+
+        bool hasFamilyPlanning = false;
+
+        for (final fpForm in fpForms) {
+          final fpJson = fpForm['form_json'] as String?;
+          if (fpJson == null || fpJson.isEmpty) continue;
+
+          final fpDecoded = safeJsonDecode(fpJson);
+          if (fpDecoded is! Map<String, dynamic>) continue;
+
+          final fpData =
+              fpDecoded['form_data'] ??
+                  fpDecoded['fp_form'] ??
+                  fpDecoded;
+
+          if (fpData is! Map<String, dynamic>) continue;
+
+          final isFP =
+          fpData['is_family_planning']?.toString().toLowerCase();
+          final isFPCounselling =
+          fpData['is_family_planning_counselling']
+              ?.toString()
+              .toLowerCase();
+          final method =
+          fpData['method_of_contraception']?.toString().trim();
+
+          if (isFP == 'yes' ||
+              isFP == 'true' ||
+              isFP == '1' ||
+              isFPCounselling == 'yes' ||
+              (method != null && method.isNotEmpty && method != ',')) {
+            hasFamilyPlanning = true;
+            break;
+          }
+        }
+
+        /// 🚫 EXCLUDE if FP is YES
+        if (hasFamilyPlanning) continue;
+
+        /// 🔹 Step 6: Fetch beneficiary details
         final benRows = await db.query(
           'beneficiaries_new',
           where: 'unique_key = ? AND is_deleted = 0',
@@ -2387,24 +2453,25 @@ ORDER BY b.created_date_time DESC;
         if (benRows.isNotEmpty) {
           beneficiaryData = Map<String, dynamic>.from(benRows.first);
           if (beneficiaryData['beneficiary_info'] is String) {
-            beneficiaryData['beneficiary_info'] = safeJsonDecode(
-              beneficiaryData['beneficiary_info'],
-            );
+            beneficiaryData['beneficiary_info'] =
+                safeJsonDecode(beneficiaryData['beneficiary_info']);
           }
         }
 
+        /// 🔹 Step 7: Build final result
         final resultMap = Map<String, dynamic>.from(form);
         resultMap['form_data'] = formDataMap;
         resultMap['beneficiary_data'] = beneficiaryData;
 
         result.add(resultMap);
       } catch (e) {
-        print('Error processing abortion form: $e');
+        print('❌ Error processing abortion form: $e');
       }
     }
 
     return result;
   }
+
 
   Future<List<Map<String, dynamic>>> getAllHouseholds() async {
     try {

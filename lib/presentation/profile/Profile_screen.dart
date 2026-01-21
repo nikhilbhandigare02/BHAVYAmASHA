@@ -235,9 +235,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final division = workingLocation['division']?.toString() ?? '';
         final district = workingLocation['district']?.toString() ?? '';
         final block = workingLocation['block']?.toString() ?? '';
-        final panchayat = workingLocation['panchayat']?.toString() ?? '';
-        final village = workingLocation['village']?.toString() ?? '';
-        final tola = workingLocation['tola']?.toString() ?? '';
+        final panchayat = (workingLocation['panchayat']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['panchayat']?.toString() ?? '')
+            : (actualUserData['panchayat']?.toString() ?? '');
+        final village = (workingLocation['village']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['village']?.toString() ?? '')
+            : (actualUserData['village']?.toString() ?? '');
+        final tola = (workingLocation['tola']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['tola']?.toString() ?? '')
+            : (actualUserData['tolla']?.toString() ?? '');
+
+        // Pincode from working_location or residential_address
+        final pincode = (workingLocation['pincode']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['pincode']?.toString() ?? '')
+            : ((actualUserData['residential_address'] is Map
+            ? Map<String, dynamic>.from(actualUserData['residential_address'])
+            : <String, dynamic>{})['pincode']
+            ?.toString() ?? '');
+
+        // Mohalla not available in current API response
+        final mohalla = '';
 
         // HSC Information
         final hscName = workingLocation['hsc_name']?.toString() ?? '';
@@ -273,23 +294,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final aadharName = actualUserData['aadhar_name']?.toString() ?? '';
         final uniqueKey = actualUserData['unique_key']?.toString() ?? '';
 
-        // Extract additional contact/staff information if available
-        final choName = workingLocation['cho_name']?.toString() ?? '';
-        final choMobile = workingLocation['cho_mobile']?.toString() ?? '';
-        final awwName = workingLocation['aww_name']?.toString() ?? '';
-        final awwMobile = workingLocation['aww_mobile']?.toString() ?? '';
-        final anganwadiCenterNo =
-            workingLocation['anganwadi_center_no']?.toString() ?? '';
-        final anm1Name = workingLocation['anm1_name']?.toString() ?? '';
-        final anm1Mobile = workingLocation['anm1_mobile']?.toString() ?? '';
-        final anm2Name = workingLocation['anm2_name']?.toString() ?? '';
-        final anm2Mobile = workingLocation['anm2_mobile']?.toString() ?? '';
-        final bcmName = workingLocation['bcm_name']?.toString() ?? '';
-        final bcmMobile = workingLocation['bcm_mobile']?.toString() ?? '';
-        final dcmName = workingLocation['dcm_name']?.toString() ?? '';
-        final dcmMobile = workingLocation['dcm_mobile']?.toString() ?? '';
+        final choName = (workingLocation['cho_name']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['cho_name']?.toString() ?? '')
+            : (actualUserData['cho_name']?.toString() ?? '');
+        final choMobile = (workingLocation['cho_mobile']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['cho_mobile']?.toString() ?? '')
+            : (actualUserData['cho_mobile_number']?.toString() ?? '');
+        final awwName = (workingLocation['aww_name']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['aww_name']?.toString() ?? '')
+            : (actualUserData['aww_name']?.toString() ?? '');
+        final awwMobile = (workingLocation['aww_mobile']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['aww_mobile']?.toString() ?? '')
+            : (actualUserData['aww_mobile_number']?.toString() ?? '');
+        final anganwadiCenterNo = (workingLocation['anganwadi_center_no']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['anganwadi_center_no']?.toString() ?? '')
+            : (actualUserData['aanganwadi_center_number']?.toString() ?? '');
+        final anm1Name = (workingLocation['anm1_name']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['anm1_name']?.toString() ?? '')
+            : (actualUserData['name_of_ANM1']?.toString() ?? '');
+        final anm1Mobile = (workingLocation['anm1_mobile']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['anm1_mobile']?.toString() ?? '')
+            : (actualUserData['mobile_of_ANM1']?.toString() ?? '');
+        final anm2Name = (workingLocation['anm2_name']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['anm2_name']?.toString() ?? '')
+            : (actualUserData['name_of_ANM2']?.toString() ?? '');
+        final anm2Mobile = (workingLocation['anm2_mobile']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['anm2_mobile']?.toString() ?? '')
+            : (actualUserData['mobile_of_ANM2']?.toString() ?? '');
+        final bcmName = (workingLocation['bcm_name']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['bcm_name']?.toString() ?? '')
+            : (actualUserData['name_of_BCM']?.toString() ?? '');
+        final bcmMobile = (workingLocation['bcm_mobile']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['bcm_mobile']?.toString() ?? '')
+            : (actualUserData['mobile_number_of_BCM']?.toString() ?? '');
+        final dcmName = (workingLocation['dcm_name']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['dcm_name']?.toString() ?? '')
+            : (actualUserData['name_of_DCM']?.toString() ?? '');
+        final dcmMobile = (workingLocation['dcm_mobile']?.toString() ?? '')
+            .isNotEmpty
+            ? (workingLocation['dcm_mobile']?.toString() ?? '')
+            : (actualUserData['mobile_number_of_DCM']?.toString() ?? '');
 
-        // Update form fields using individual events
+        // Additional fields from API
+        final mukhiyaName = (actualUserData['village_mukiya_name']?.toString() ?? '');
+        final mukhiyaMobile = (actualUserData['village_mukiya_mob_no']?.toString() ?? '');
+        final ashaFacilitatorName = (actualUserData['name_of_ASHA_facilitator']?.toString() ?? '');
+        final ashaFacilitatorMobile = (actualUserData['mobile_number_of_ASHA_facilitator']?.toString() ?? '');
+        final fruName = (actualUserData['fru_name']?.toString() ?? '');
+        final phc = (actualUserData['phc']?.toString() ?? '');
+        final rh = (actualUserData['rh']?.toString() ?? '');
+        final hwcName = (actualUserData['hwc_name']?.toString() ?? '');
+
         if (mounted) {
           // Update basic information
           _profileBloc.add(AshaIdChanged(ashaId));
@@ -333,6 +400,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _profileBloc.add(BcmMobileChanged(bcmMobile));
           _profileBloc.add(DcmNameChanged(dcmName));
           _profileBloc.add(DcmMobileChanged(dcmMobile));
+          _profileBloc.add(MukhiyaNameChanged(mukhiyaName));
+          _profileBloc.add(MukhiyaMobileChanged(mukhiyaMobile));
+          _profileBloc.add(AshaFacilitatorNameChanged(ashaFacilitatorName));
+          _profileBloc.add(AshaFacilitatorMobileChanged(ashaFacilitatorMobile));
+          _profileBloc.add(FruNameChanged(fruName));
+          _profileBloc.add(PhcChcChanged(phc));
+          _profileBloc.add(RhSdhDhChanged(rh));
+          _profileBloc.add(HwcNameChanged(hwcName));
         }
 
         // Handle dates
@@ -1200,7 +1275,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       builder: (context, state) {
                         return CustomTextField(
                           key: ValueKey('cho_mobile_field_${state.choMobile}'),
-                           labelText: l10n.choMobileLabel,
+                          labelText: l10n.choMobileLabel,
                           hintText: l10n.choMobileHint,
                           initialValue: state.choMobile,
                           keyboardType: TextInputType.phone,

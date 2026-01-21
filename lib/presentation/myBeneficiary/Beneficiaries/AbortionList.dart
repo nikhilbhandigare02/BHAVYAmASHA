@@ -38,7 +38,6 @@ class _AbortionlistState extends State<Abortionlist> {
         _error = '';
       });
 
-      // Get abortion visits from followup forms directly
       final dbForms = await LocalStorageDao.instance.getAbortionFollowupForms();
 
       print('Total records fetched: ${dbForms.length}');
@@ -82,6 +81,9 @@ class _AbortionlistState extends State<Abortionlist> {
             'gender': gender,
             'has_abortion_complication': true,
             'abortion_date': formData['date_of_abortion'] ?? formData['abortion_date'],
+            'fp_method': formData['fp_method'],
+            'is_family_planning': formData['is_family_planning'],
+            'is_family_planning_counselling': formData['is_family_planning_counselling'],
           };
 
           abortionVisits.add(ANCVisitModel.fromJson(visitData));
