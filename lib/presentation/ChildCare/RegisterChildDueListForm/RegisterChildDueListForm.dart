@@ -734,7 +734,7 @@ class _RegisterChildDueListFormScreen
                     color: detailsBarColor,
                     alignment: Alignment.center,
                     child: Text(
-                      'DETAILS',
+                     l10n!.detailsCapital,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onPrimary,
                         fontWeight: FontWeight.w600,

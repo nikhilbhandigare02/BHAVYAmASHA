@@ -2385,7 +2385,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get trainingSave => 'संरक्षित करें';
 
   @override
-  String get trainingTitle => 'भाव्या एम-आशा प्रशिक्षण';
+  String get trainingTitle => 'प्रशिक्षण';
 
   @override
   String get trainingTypeLabel => 'प्रशिक्षण प्रकार';
@@ -7661,4 +7661,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get cliftLipPalate => 'कटा हुआ होंठ/तालु';
+
+  @override
+  String get detailsCapital => 'विवरण';
 }

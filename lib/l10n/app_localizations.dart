@@ -15370,6 +15370,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clift lip / palate'**
   String get cliftLipPalate;
+
+  /// No description provided for @detailsCapital.
+  ///
+  /// In en, this message translates to:
+  /// **'DETAILS'**
+  String get detailsCapital;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

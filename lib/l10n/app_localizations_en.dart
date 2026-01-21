@@ -7661,4 +7661,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cliftLipPalate => 'Clift lip / palate';
+
+  @override
+  String get detailsCapital => 'DETAILS';
 }

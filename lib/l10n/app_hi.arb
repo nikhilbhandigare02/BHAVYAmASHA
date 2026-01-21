@@ -651,7 +651,6 @@
   "trainingPlaceLabel": "प्रशिक्षण का स्थान",
   "trainingProvidedTitle": "प्रशिक्षण प्रदान किया गया",
   "trainingReceivedTitle": "प्रशिक्षण प्राप्त हुआ",
-  "trainingTitle": "भाव्या एम-आशा प्रशिक्षण",
   "trainingTypeLabel": "प्रशिक्षण प्रकार",
   "unmarried": "अविवाहित",
   "updatedEligibleCoupleListTitle": "अपडेटेड योग्य दम्पत्ति सूची",
@@ -2498,8 +2497,9 @@
   "dateOfvisitTracking": "भ्रमण की तिथि",
   "selectAbnormality":"विषमता का चयन करें *",
   "curvedLimbs":"मुड़ा हुआ अंग",
-  "cliftLipPalate":"कटा हुआ होंठ/तालु"
-
+  "cliftLipPalate":"कटा हुआ होंठ/तालु",
+  "detailsCapital": "विवरण",
+  "trainingTitle": "प्रशिक्षण"
 }
 
 
