@@ -476,6 +476,7 @@
   "monthlyTaskPC21": "PC2.1 - प्रतिरक्षण-Due List अद्यतन कर 90% लक्षित बच्चों का Full immunization करने पर",
   "mother": "माँ का",
   "motherAncVisitTitle": "ए एन सी दौरा",
+
   "motherInLaw": "सास का",
   "motherNameLabel": "माता का नाम",
   "mukhiyaMobileHint": "मुखिया का मोबाइल नंबर",
@@ -2499,7 +2500,8 @@
   "curvedLimbs":"मुड़ा हुआ अंग",
   "cliftLipPalate":"कटा हुआ होंठ/तालु",
   "detailsCapital": "विवरण",
-  "trainingTitle": "प्रशिक्षण"
+  "trainingTitle": "प्रशिक्षण",
+  "cliftLipPalate":"कटा हुआ होंठ/तालु"
 }
 
 

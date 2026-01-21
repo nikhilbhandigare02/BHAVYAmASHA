@@ -7363,6 +7363,15 @@ class AppLocalizationsHi extends AppLocalizations {
   String get abhaAddressLinked => 'ABHA पता लिंक हो गया है!';
 
   @override
+  String get selectAbnormality => 'विषमता का चयन करें *';
+
+  @override
+  String get curvedLimbs => 'मुड़ा हुआ अंग';
+
+  @override
+  String get cliftLipPalate => 'कटा हुआ होंठ/तालु';
+
+  @override
   String get selectAbhaId => 'ABHA ID चुनें';
 
   @override
