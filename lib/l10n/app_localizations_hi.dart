@@ -7649,4 +7649,13 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get fatherNameLabelchild => 'पिता का नाम';
+
+  @override
+  String get selectAbnormality => 'विषमता का चयन करें *';
+
+  @override
+  String get curvedLimbs => 'मुड़ा हुआ अंग';
+
+  @override
+  String get cliftLipPalate => 'कटा हुआ होंठ/तालु';
 }

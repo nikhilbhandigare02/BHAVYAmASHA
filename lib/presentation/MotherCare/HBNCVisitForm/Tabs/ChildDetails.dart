@@ -885,9 +885,9 @@ class _ChildDetailsTabState extends State<ChildDetailsTab> {
 
                     if (c['congenitalAbnormalities'] == 'Yes') ...[
                       ApiDropdown<String>(
-                        labelText: "Select abnormality *",
-                        hintText: t.selectOption,
-                        items: const ['Curved limbs', 'Clift lip / palate', 'Other'],
+                        labelText: t.selectAbnormality,
+                        hintText: t.selectOptions,
+                        items: [t.curvedLimbs, t.cliftLipPalate, t.other],
                         getLabel: (e) => e,
                         value: c['congenitalAbnormalityType'],
                         onChanged: (val) {

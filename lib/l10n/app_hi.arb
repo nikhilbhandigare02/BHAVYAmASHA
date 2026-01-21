@@ -2493,7 +2493,10 @@
   "saveSuccess": "प्रपत्र सफलतापूर्वक संरक्षित किया गया",
   "motherNameLabelchild":"माता का नाम",
   "fatherNameLabelchild":"पिता का नाम",
-  "dateOfvisitTracking": "भ्रमण की तिथि"
+  "dateOfvisitTracking": "भ्रमण की तिथि",
+  "selectAbnormality":"विषमता का चयन करें *",
+  "curvedLimbs":"मुड़ा हुआ अंग",
+  "cliftLipPalate":"कटा हुआ होंठ/तालु"
 
 }
 

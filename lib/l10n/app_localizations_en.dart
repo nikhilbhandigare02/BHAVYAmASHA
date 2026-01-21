@@ -7649,4 +7649,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fatherNameLabelchild => 'Father name';
+
+  @override
+  String get selectAbnormality => 'Select abnormality *';
+
+  @override
+  String get curvedLimbs => ' Curved limbs';
+
+  @override
+  String get cliftLipPalate => 'Clift lip / palate';
 }

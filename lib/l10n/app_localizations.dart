@@ -15346,6 +15346,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Father name'**
   String get fatherNameLabelchild;
+
+  /// No description provided for @selectAbnormality.
+  ///
+  /// In en, this message translates to:
+  /// **'Select abnormality *'**
+  String get selectAbnormality;
+
+  /// No description provided for @curvedLimbs.
+  ///
+  /// In en, this message translates to:
+  /// **' Curved limbs'**
+  String get curvedLimbs;
+
+  /// No description provided for @cliftLipPalate.
+  ///
+  /// In en, this message translates to:
+  /// **'Clift lip / palate'**
+  String get cliftLipPalate;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
