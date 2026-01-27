@@ -7664,4 +7664,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get detailsCapital => 'विवरण';
+
+  @override
+  String get routineRI => 'नियमित टीकाकरण';
 }

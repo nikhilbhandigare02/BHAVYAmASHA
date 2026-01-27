@@ -15376,6 +15376,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'DETAILS'**
   String get detailsCapital;
+
+  /// No description provided for @routineRI.
+  ///
+  /// In en, this message translates to:
+  /// **'Routine Immunization'**
+  String get routineRI;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

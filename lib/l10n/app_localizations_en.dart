@@ -7664,4 +7664,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get detailsCapital => 'DETAILS';
+
+  @override
+  String get routineRI => 'Routine Immunization';
 }

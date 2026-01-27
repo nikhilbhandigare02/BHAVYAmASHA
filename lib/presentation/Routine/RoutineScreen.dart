@@ -1315,7 +1315,7 @@ class _RoutinescreenState extends State<Routinescreen> {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppHeader(screenTitle: l10n.routine, showBack: true,),
+      appBar: AppHeader(screenTitle: l10n.routineRI, showBack: true,),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         children: [
