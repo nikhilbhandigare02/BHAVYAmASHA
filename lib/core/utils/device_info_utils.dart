@@ -23,9 +23,8 @@ class DeviceInfo {
       String model,
       String osVersion,
       String platform,
+      String deviceId,
       ) {
-    String deviceId = DateTime.now().millisecondsSinceEpoch.toString();
-
     return DeviceInfo(
       deviceId: deviceId,
       osVersion: osVersion,
@@ -52,6 +51,7 @@ class DeviceInfo {
     String platform = 'unknown';
     String osVersion = 'unknown';
     String model = 'unknown';
+    String deviceId = 'unknown';
 
     if (Platform.isAndroid) {
       final android = await deviceInfoPlugin.androidInfo;
@@ -60,29 +60,45 @@ class DeviceInfo {
       final manufacturer = android.manufacturer ?? '';
       final deviceModel = android.model ?? '';
       model = _formatModelName(manufacturer, deviceModel);
+      
+      // Get the actual Android ID
+      deviceId = android.id;
+      
+      // Debug logging to verify the Android ID
+      print('=== Android Device Info ===');
+      print('Android ID (android.id): $deviceId');
+      print('Android ID length: ${deviceId.length}');
+      print('Manufacturer: $manufacturer');
+      print('Model: $deviceModel');
+      print('Version: ${android.version.release}');
+      print('==========================');
     } else if (Platform.isIOS) {
       final ios = await deviceInfoPlugin.iosInfo;
       platform = 'iOS';
       osVersion = ios.systemVersion ?? 'unknown';
       model = ios.name ?? 'iPhone';
+      deviceId = ios.identifierForVendor ?? 'unknown'; // Use iOS identifier
     } else if (Platform.isWindows) {
       final windows = await deviceInfoPlugin.windowsInfo;
       platform = 'Windows';
       osVersion = windows.displayVersion ?? 'unknown';
       model = windows.computerName;
+      deviceId = windows.computerName; // Use computer name as fallback
     } else if (Platform.isMacOS) {
       final mac = await deviceInfoPlugin.macOsInfo;
       platform = 'macOS';
       osVersion = mac.osRelease;
       model = mac.model;
+      deviceId = mac.model; // Use model as fallback
     } else if (Platform.isLinux) {
       final linux = await deviceInfoPlugin.linuxInfo;
       platform = 'Linux';
       osVersion = linux.version ?? 'unknown';
       model = linux.prettyName ?? 'Linux';
+      deviceId = linux.id ?? 'unknown'; // Use Linux machine ID
     }
 
-    return DeviceInfo.fromPackageInfo(packageInfo, model, osVersion, platform);
+    return DeviceInfo.fromPackageInfo(packageInfo, model, osVersion, platform, deviceId);
   }
 
   static String _formatModelName(String manufacturer, String model) {

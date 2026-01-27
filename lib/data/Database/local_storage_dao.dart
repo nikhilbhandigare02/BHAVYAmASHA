@@ -3765,11 +3765,14 @@ ORDER BY b.created_date_time DESC;
   Future<List<Map<String, dynamic>>> getNotifications() async {
     try {
       final db = await _db;
-      return await db.query(
-        NotificationDetailsTable.table,
-        where: "is_deleted = 0",
-        orderBy: "added_date_time DESC",
-      );
+
+      return await db.rawQuery('''
+      SELECT *
+      FROM ${NotificationDetailsTable.table}
+      WHERE is_deleted = 0
+      GROUP BY _id
+      ORDER BY datetime(added_date_time) DESC
+    ''');
     } catch (e) {
       print("Error fetching notifications: $e");
       rethrow;

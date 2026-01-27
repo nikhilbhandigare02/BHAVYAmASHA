@@ -196,44 +196,37 @@ class _RoutinescreenState extends State<Routinescreen> {
   }
 
   String _getNextAncDueDate(DateTime? lmpDate, int visitCount) {
-    if (lmpDate == null) return '${AppLocalizations.of(context)!.nextancduedate}: ${AppLocalizations.of(context)!.na}';
+    final t = AppLocalizations.of(context)!;
 
-    final t = AppLocalizations.of(context);
+    if (lmpDate == null) {
+      return '${t.nextancduedate}: ${t.na}';
+    }
+
     final now = DateTime.now();
     final ancRanges = _calculateAncDateRanges(lmpDate);
 
-    String? nextAncKey;
-    String? nextAncLabel;
+    String nextAncKey;
 
-    // Determine current ANC window based on current date and pregnancy weeks
+    // Pregnancy weeks
     final currentWeeks = now.difference(lmpDate).inDays ~/ 7;
-    
+
     if (currentWeeks <= 12) {
       nextAncKey = '1st_anc_end';
-      nextAncLabel = '1st ANC Window';
     } else if (currentWeeks <= 24) {
       nextAncKey = '2nd_anc_end';
-      nextAncLabel = '2nd ANC Window';
     } else if (currentWeeks <= 34) {
       nextAncKey = '3rd_anc_end';
-      nextAncLabel = '3rd ANC Window';
-    } else if (currentWeeks <= 40) {
-      nextAncKey = '4th_anc_end';
-      nextAncLabel = '4th ANC Window';
     } else {
-      // Beyond 40 weeks
       nextAncKey = '4th_anc_end';
-      nextAncLabel = '4th ANC Window';
     }
 
-    if (nextAncKey != null && ancRanges.containsKey(nextAncKey)) {
-      final dueDate = ancRanges[nextAncKey];
-      if (dueDate != null) {
-        return '$nextAncLabel: ${_formatDate(dueDate)}';
-      }
+    final dueDate = ancRanges[nextAncKey];
+
+    if (dueDate != null) {
+      return '${t.nextancduedate}: ${_formatDate(dueDate)}';
     }
 
-    return '${t!.nextancduedate}: ${t!.na}';
+    return '${t.nextancduedate}: ${t.na}';
   }
 
   Future<Map<String, dynamic>> _getSyncStatus(String beneficiaryRefKey) async {

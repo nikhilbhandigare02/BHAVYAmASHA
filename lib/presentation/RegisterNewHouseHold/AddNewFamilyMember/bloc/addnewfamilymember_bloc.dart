@@ -59,9 +59,9 @@ class AddnewfamilymemberBloc
   bool _dataClearedByTypeChange = false;
 
   Future<void> _onLoadBeneficiaryData(
-    LoadBeneficiaryData event,
-    Emitter<AddnewfamilymemberState> emit,
-  ) async {
+      LoadBeneficiaryData event,
+      Emitter<AddnewfamilymemberState> emit,
+      ) async {
     try {
       print('📥 [Bloc] Loading beneficiary data: ${event.beneficiaryId}');
       print('📥 [Bloc] Data cleared flag: $_dataClearedByTypeChange');
@@ -149,13 +149,13 @@ class AddnewfamilymemberBloc
         // Derive primary name from available fields
         final String? primaryName =
             (allData['name'] as String?) ??
-            (allData['memberName'] as String?) ??
-            (allData['headName'] as String?);
+                (allData['memberName'] as String?) ??
+                (allData['headName'] as String?);
 
         // Derive relation from either 'relation' or legacy 'relation_to_head'
         final String? rawRelation =
             (allData['relation'] as String?) ??
-            (allData['relation_to_head'] as String?);
+                (allData['relation_to_head'] as String?);
         String? primaryRelation;
         if (rawRelation != null) {
           final r = rawRelation.toString();
@@ -244,10 +244,26 @@ class AddnewfamilymemberBloc
           if (d.isNotEmpty) loadedUpdateDay = d;
         }
 
-        if (allData['age_by'] == 'by_age') {
-          loadedUpdateDay = allData['days']?.toString();
-          loadedUpdateMonth = allData['months']?.toString();
-          loadedUpdateYear = allData['years']?.toString();
+
+        if (allData['useDob'] == 'by_age') {
+
+          String approxAge = allData['approxAge'];
+
+          final regex = RegExp(r'(\d+)\s+Years\s+(\d+)\s+Months\s+(\d+)\s+Days');
+          final match = regex.firstMatch(approxAge);
+
+          int years = 0;
+          int months = 0;
+          int days = 0;
+
+          if (match != null) {
+            years = int.parse(match.group(1)!);
+            months = int.parse(match.group(2)!);
+            days = int.parse(match.group(3)!);
+          }
+          loadedUpdateDay = days.toString();
+          loadedUpdateMonth = months.toString();
+          loadedUpdateYear = years.toString();
         }
 
         // Parse LMP and EDD dates if they exist
@@ -269,7 +285,7 @@ class AddnewfamilymemberBloc
         final rawCategory = allData['category'] as String?;
         final rawOccupation = allData['occupation'] as String?;
         final rawMobileOwnerRelation =
-            allData['mobileOwnerRelation'] as String?;
+        allData['mobileOwnerRelation'] as String?;
 
         // Check if the field is 'Other' in the database
         // final isReligionOther = rawReligion == 'Other';
@@ -332,7 +348,7 @@ class AddnewfamilymemberBloc
         if (normalizedMemberType.isNotEmpty) {
           normalizedMemberType =
               normalizedMemberType[0].toUpperCase() +
-              normalizedMemberType.substring(1).toLowerCase();
+                  normalizedMemberType.substring(1).toLowerCase();
         }
 
         // Determine useDob based on age_by field
@@ -354,7 +370,7 @@ class AddnewfamilymemberBloc
         final String? fatherName = (allData['father_name'] as String?);
         final String? motherName =
             (allData['motherName'] as String?) ??
-            (allData['mother_name'] as String?);
+                (allData['mother_name'] as String?);
 
         // Update the state with all the data
         emit(
@@ -372,7 +388,7 @@ class AddnewfamilymemberBloc
             birthOrder: allData['birthOrder']?.toString(),
             gender: allData['gender'] as String?,
             bankAcc:
-                allData['bankAcc'] as String? ??
+            allData['bankAcc'] as String? ??
                 allData['bankAccountNumber'] as String?,
             ifsc: allData['ifsc'] as String? ?? allData['ifscCode'] as String?,
             // Handle occupation and other occupation
@@ -394,12 +410,12 @@ class AddnewfamilymemberBloc
             // Handle mobile owner and relation
             mobileOwner: _firstString(['mobileOwner', 'mobile_owner']),
             mobileOwnerRelation:
-                rawMobileOwnerRelation ??
+            rawMobileOwnerRelation ??
                 (allData['mobile_owner_relation'] as String?),
             mobileNo: _firstString(['mobileNo', 'mobile_no', 'mobile']),
             voterId: allData['voterId'] as String?,
             rationId:
-                allData['rationId'] as String? ??
+            allData['rationId'] as String? ??
                 allData['rationCardId'] as String?,
             phId: _firstString(['phId', 'personalHealthId']),
             beneficiaryType: allData['beneficiaryType'] as String?,
@@ -407,7 +423,7 @@ class AddnewfamilymemberBloc
             ageAtMarriage: allData['ageAtMarriage'] as String?,
             spouseName: _firstString(['spouseName', 'spouse_name']),
             hasChildren:
-                (allData['hasChildren'] ?? allData['have_children']) as String?,
+            (allData['hasChildren'] ?? allData['have_children']) as String?,
             isPregnant: allData['isPregnant'] as String?,
             lmp: lmpDate,
             edd: eddDate,
@@ -417,10 +433,10 @@ class AddnewfamilymemberBloc
             WeightChange: allData['weight'] as String?,
             birthWeight: allData['birthWeight']?.toString(),
             ChildSchool:
-                allData['childSchool'] as String? ??
+            allData['childSchool'] as String? ??
                 allData['school'] as String?,
             TypeOfSchool:
-                allData['typeOfSchool'] as String? ??
+            allData['typeOfSchool'] as String? ??
                 allData['type_of_school'] as String?,
             BirthCertificateChange: allData['birthCertificate'] as String?,
             errorMessage: null,
@@ -439,7 +455,7 @@ class AddnewfamilymemberBloc
         // Handle family planning and pregnancy related fields
         final isFamilyPlanning =
             allData['isFamilyPlanning'] == true ||
-            allData['isFamilyPlanning'] == 'true';
+                allData['isFamilyPlanning'] == 'true';
         final familyPlanningMethod = allData['familyPlanningMethod'] as String?;
         final fpMethod = allData['fpMethod'] as String?;
         final antraDate = allData['antraDate'] != null
@@ -502,7 +518,7 @@ class AddnewfamilymemberBloc
   }
 
   AddnewfamilymemberBloc({this.householdBloc})
-    : super(const AddnewfamilymemberState()) {
+      : super(const AddnewfamilymemberState()) {
     on<LoadBeneficiaryData>(_onLoadBeneficiaryData);
     on<AddnewfamilymemberEvent>((event, emit) {
       // TODO: implement event handler
@@ -538,20 +554,20 @@ class AddnewfamilymemberBloc
       if (normalizedValue.isNotEmpty) {
         normalizedValue =
             normalizedValue[0].toUpperCase() +
-            normalizedValue.substring(1).toLowerCase();
+                normalizedValue.substring(1).toLowerCase();
       }
       emit(state.copyWith(memberType: normalizedValue));
     });
     on<AnmUpdateRelation>((e, emit) => emit(state.copyWith(relation: e.value)));
     on<AnmUpdateOtherRelation>(
-      (e, emit) => emit(state.copyWith(otherRelation: e.value)),
+          (e, emit) => emit(state.copyWith(otherRelation: e.value)),
     );
     on<AnmUpdateName>((e, emit) => emit(state.copyWith(name: e.value)));
     on<AnmUpdateFatherName>(
-      (e, emit) => emit(state.copyWith(fatherName: e.value)),
+          (e, emit) => emit(state.copyWith(fatherName: e.value)),
     );
     on<AnmUpdateMotherName>(
-      (e, emit) => emit(state.copyWith(motherName: e.value)),
+          (e, emit) => emit(state.copyWith(motherName: e.value)),
     );
     on<AnmToggleUseDob>((e, emit) {
       final toggled = !(state.useDob);
@@ -593,7 +609,7 @@ class AddnewfamilymemberBloc
       );
     });
     on<AnmUpdateApproxAge>(
-      (e, emit) => emit(state.copyWith(approxAge: e.value)),
+          (e, emit) => emit(state.copyWith(approxAge: e.value)),
     );
     on<UpdateDayChanged>((e, emit) {
       final dayStr = e.value;
@@ -720,7 +736,7 @@ class AddnewfamilymemberBloc
     });
     on<ChildrenChanged>((e, emit) => emit(state.copyWith(children: e.value)));
     on<AnmUpdateBirthOrder>(
-      (e, emit) => emit(state.copyWith(birthOrder: e.value)),
+          (e, emit) => emit(state.copyWith(birthOrder: e.value)),
     );
     on<AnmUpdateGender>((e, emit) => emit(state.copyWith(gender: e.value)));
     on<AnmUpdateBankAcc>((e, emit) => emit(state.copyWith(bankAcc: e.value)));
@@ -736,110 +752,110 @@ class AddnewfamilymemberBloc
     });
     on<AnmUpdateIfsc>((e, emit) => emit(state.copyWith(ifsc: e.value)));
     on<AnmUpdateOccupation>(
-      (e, emit) => emit(state.copyWith(occupation: e.value)),
+          (e, emit) => emit(state.copyWith(occupation: e.value)),
     );
     on<AnmUpdateOtherOccupation>(
-      (e, emit) => emit(state.copyWith(otherOccupation: e.value)),
+          (e, emit) => emit(state.copyWith(otherOccupation: e.value)),
     );
     on<AnmUpdateEducation>(
-      (e, emit) => emit(state.copyWith(education: e.value)),
+          (e, emit) => emit(state.copyWith(education: e.value)),
     );
     on<AnmUpdateReligion>((e, emit) => emit(state.copyWith(religion: e.value)));
     on<AnmUpdateOtherReligion>(
-      (e, emit) => emit(state.copyWith(otherReligion: e.value)),
+          (e, emit) => emit(state.copyWith(otherReligion: e.value)),
     );
     on<AnmUpdateCategory>((e, emit) => emit(state.copyWith(category: e.value)));
     on<AnmUpdateOtherCategory>(
-      (e, emit) => emit(state.copyWith(otherCategory: e.value)),
+          (e, emit) => emit(state.copyWith(otherCategory: e.value)),
     );
     on<WeightChange>((e, emit) => emit(state.copyWith(WeightChange: e.value)));
     on<BirthWeightChange>(
-      (e, emit) => emit(state.copyWith(birthWeight: e.value)),
+          (e, emit) => emit(state.copyWith(birthWeight: e.value)),
     );
     on<ChildSchoolChange>(
-      (e, emit) => emit(state.copyWith(ChildSchool: e.value)),
+          (e, emit) => emit(state.copyWith(ChildSchool: e.value)),
     );
     on<TypeOfSchoolChange>(
-      (e, emit) => emit(state.copyWith(TypeOfSchool: e.value)),
+          (e, emit) => emit(state.copyWith(TypeOfSchool: e.value)),
     );
     on<BirthCertificateChange>(
-      (e, emit) => emit(state.copyWith(BirthCertificateChange: e.value)),
+          (e, emit) => emit(state.copyWith(BirthCertificateChange: e.value)),
     );
     on<AnmUpdateAbhaAddress>(
-      (e, emit) => emit(state.copyWith(abhaAddress: e.value)),
+          (e, emit) => emit(state.copyWith(abhaAddress: e.value)),
     );
     on<AnmUpdateMobileOwner>(
-      (e, emit) => emit(state.copyWith(mobileOwner: e.value)),
+          (e, emit) => emit(state.copyWith(mobileOwner: e.value)),
     );
     on<AnmUpdateMobileOwnerRelation>(
-      (e, emit) => emit(state.copyWith(mobileOwnerRelation: e.value)),
+          (e, emit) => emit(state.copyWith(mobileOwnerRelation: e.value)),
     );
     on<AnmUpdateMobileNo>((e, emit) => emit(state.copyWith(mobileNo: e.value)));
     on<AnmUpdateVoterId>((e, emit) => emit(state.copyWith(voterId: e.value)));
     on<AnmUpdateRationId>((e, emit) => emit(state.copyWith(rationId: e.value)));
     on<AnmUpdatePhId>((e, emit) => emit(state.copyWith(phId: e.value)));
     on<AnmUpdateBeneficiaryType>(
-      (e, emit) => emit(state.copyWith(beneficiaryType: e.value)),
+          (e, emit) => emit(state.copyWith(beneficiaryType: e.value)),
     );
     on<AnmUpdateMaritalStatus>(
-      (e, emit) => emit(state.copyWith(maritalStatus: e.value)),
+          (e, emit) => emit(state.copyWith(maritalStatus: e.value)),
     );
     on<AnmUpdateAgeAtMarriage>(
-      (e, emit) => emit(state.copyWith(ageAtMarriage: e.value)),
+          (e, emit) => emit(state.copyWith(ageAtMarriage: e.value)),
     );
     on<AnmUpdateSpouseName>(
-      (e, emit) => emit(state.copyWith(spouseName: e.value)),
+          (e, emit) => emit(state.copyWith(spouseName: e.value)),
     );
     on<AnmUpdateHasChildren>(
-      (e, emit) => emit(state.copyWith(hasChildren: e.value)),
+          (e, emit) => emit(state.copyWith(hasChildren: e.value)),
     );
     on<AnmUpdateIsPregnant>(
-      (e, emit) => emit(state.copyWith(isPregnant: e.value)),
+          (e, emit) => emit(state.copyWith(isPregnant: e.value)),
     );
     on<AnmLMPChange>((e, emit) => emit(state.copyWith(lmp: e.date)));
     on<AnmEDDChange>((e, emit) => emit(state.copyWith(edd: e.date)));
     on<AnmUpdateFamilyPlanning>(
-      (e, emit) => emit(state.copyWith(isFamilyPlanning: e.value)),
+          (e, emit) => emit(state.copyWith(isFamilyPlanning: e.value)),
     );
     on<AnmUpdateFamilyPlanningMethod>(
-      (e, emit) => emit(state.copyWith(familyPlanningMethod: e.value)),
+          (e, emit) => emit(state.copyWith(familyPlanningMethod: e.value)),
     );
     // Family planning detailed fields (mirror spouse flow)
     on<AnmFpMethodChanged>(
-      (e, emit) => emit(state.copyWith(fpMethod: e.value)),
+          (e, emit) => emit(state.copyWith(fpMethod: e.value)),
     );
     on<AnmFpRemovalDateChanged>(
-      (e, emit) => emit(state.copyWith(removalDate: e.value)),
+          (e, emit) => emit(state.copyWith(removalDate: e.value)),
     );
     on<AnmFpDateOfAntraChanged>(
-      (e, emit) => emit(state.copyWith(antraDate: e.value)),
+          (e, emit) => emit(state.copyWith(antraDate: e.value)),
     );
     on<AnmFpRemovalReasonChanged>(
-      (e, emit) => emit(state.copyWith(removalReason: e.value)),
+          (e, emit) => emit(state.copyWith(removalReason: e.value)),
     );
     on<AnmFpCondomQuantityChanged>(
-      (e, emit) => emit(state.copyWith(condomQuantity: e.value)),
+          (e, emit) => emit(state.copyWith(condomQuantity: e.value)),
     );
     on<AnmFpMalaQuantityChanged>(
-      (e, emit) => emit(state.copyWith(malaQuantity: e.value)),
+          (e, emit) => emit(state.copyWith(malaQuantity: e.value)),
     );
     on<AnmFpChhayaQuantityChanged>(
-      (e, emit) => emit(state.copyWith(chhayaQuantity: e.value)),
+          (e, emit) => emit(state.copyWith(chhayaQuantity: e.value)),
     );
     on<AnmFpEcpQuantityChanged>(
-      (e, emit) => emit(state.copyWith(ecpQuantity: e.value)),
+          (e, emit) => emit(state.copyWith(ecpQuantity: e.value)),
     );
     on<UpdateIsMemberStatus>(
-      (e, emit) => emit(state.copyWith(memberStatus: e.value)),
+          (e, emit) => emit(state.copyWith(memberStatus: e.value)),
     );
     on<UpdateDateOfDeath>(
-      (e, emit) => emit(state.copyWith(dateOfDeath: e.value)),
+          (e, emit) => emit(state.copyWith(dateOfDeath: e.value)),
     );
     on<UpdateReasonOfDeath>(
-      (e, emit) => emit(state.copyWith(deathReason: e.value)),
+          (e, emit) => emit(state.copyWith(deathReason: e.value)),
     );
     on<UpdateOtherReasonOfDeath>(
-      (e, emit) => emit(state.copyWith(otherDeathReason: e.value)),
+          (e, emit) => emit(state.copyWith(otherDeathReason: e.value)),
     );
     on<UpdateDatePlace>((e, emit) {
       final newState = state.copyWith(deathPlace: e.value);
@@ -922,8 +938,8 @@ class AddnewfamilymemberBloc
         final working = userDetails['working_location'] ?? {};
         final facilityId =
             working['asha_associated_with_facility_id'] ??
-            userDetails['asha_associated_with_facility_id'] ??
-            0;
+                userDetails['asha_associated_with_facility_id'] ??
+                0;
         final ashaUniqueKey = userDetails['unique_key'] ?? {};
 
         final geoLocation = await GeoLocation.getCurrentLocation();
@@ -947,12 +963,12 @@ class AddnewfamilymemberBloc
 
         final deathDetails = isDeath == 1
             ? {
-                'dateOfDeath': state.dateOfDeath?.toIso8601String(),
-                'deathReason': state.deathReason,
-                'otherDeathReason': state.otherDeathReason,
-                'deathPlace': state.deathPlace,
-                'otherDeathPlace': state.otherDeathPlace,
-              }
+          'dateOfDeath': state.dateOfDeath?.toIso8601String(),
+          'deathReason': state.deathReason,
+          'otherDeathReason': state.otherDeathReason,
+          'deathPlace': state.deathPlace,
+          'otherDeathPlace': state.otherDeathPlace,
+        }
             : {};
 
         Map<String, dynamic> childrenData = {};
@@ -1035,11 +1051,11 @@ class AddnewfamilymemberBloc
                     ? Map<String, dynamic>.from(headRecord['beneficiary_info'])
                     : <String, dynamic>{};
                 final spouseInfo =
-                    spouseRecord != null &&
-                        spouseRecord['beneficiary_info'] is Map
+                spouseRecord != null &&
+                    spouseRecord['beneficiary_info'] is Map
                     ? Map<String, dynamic>.from(
-                        spouseRecord['beneficiary_info'],
-                      )
+                  spouseRecord['beneficiary_info'],
+                )
                     : <String, dynamic>{};
                 final headGender = (headInfo['gender'] ?? '')
                     .toString()
@@ -1364,7 +1380,7 @@ class AddnewfamilymemberBloc
                 'lmp': spousState.lmp?.toIso8601String(),
                 'approxAge': spousState.approxAge,
                 'gender':
-                    spousState.gender ??
+                spousState.gender ??
                     (state.gender == 'Male' ? 'Female' : 'Male'),
                 'occupation': spousState.occupation,
                 'education': spousState.education,
@@ -1454,29 +1470,29 @@ class AddnewfamilymemberBloc
             // Determine spouse gender properly - use the same logic as in payload
             final spouseGender =
                 spousState.gender ??
-                (state.gender == 'Male' ? 'Female' : 'Male');
+                    (state.gender == 'Male' ? 'Female' : 'Male');
 
             final bool isSterilized =
                 spousState.fpMethod?.toLowerCase() == 'male sterilization' ||
-                spousState.fpMethod?.toLowerCase() == 'female sterilization' ||
-                state.fpMethod?.toLowerCase() == 'male sterilization' ||
-                state.fpMethod?.toLowerCase() == 'female sterilization';
+                    spousState.fpMethod?.toLowerCase() == 'female sterilization' ||
+                    state.fpMethod?.toLowerCase() == 'male sterilization' ||
+                    state.fpMethod?.toLowerCase() == 'female sterilization';
 
             // Use the same logic as RegisterNewHouseHold for gender and marital status
             final bool isFemale =
                 spouseGender.toLowerCase() ==
-                'female'; // Only check spouse gender for spouse record
+                    'female'; // Only check spouse gender for spouse record
 
             final bool isMarried =
                 state.maritalStatus ==
-                'Married'; // Check main member's marital status
+                    'Married'; // Check main member's marital status
 
             final bool isFemaleMarried =
                 isFemale &&
-                isMarried &&
-                !isSterilized &&
-                age >= 15 &&
-                age <= 49;
+                    isMarried &&
+                    !isSterilized &&
+                    age >= 15 &&
+                    age <= 49;
 
             if (isFemaleMarried) {
               // Use the same logic as RegisterNewHouseHold for pregnancy status
@@ -1490,7 +1506,7 @@ class AddnewfamilymemberBloc
                 final existingEC = await db.query(
                   'eligible_couple_activities',
                   where:
-                      'beneficiary_ref_key = ? AND eligible_couple_state = ?',
+                  'beneficiary_ref_key = ? AND eligible_couple_state = ?',
                   whereArgs: [spousKey, 'eligible_couple'],
                 );
 
@@ -1533,7 +1549,7 @@ class AddnewfamilymemberBloc
                   final existingTD = await db.query(
                     'eligible_couple_activities',
                     where:
-                        'beneficiary_ref_key = ? AND eligible_couple_state = ?',
+                    'beneficiary_ref_key = ? AND eligible_couple_state = ?',
                     whereArgs: [spousKey, 'tracking_due'],
                   );
 
@@ -1587,10 +1603,10 @@ class AddnewfamilymemberBloc
             final info = (savedMember['beneficiary_info'] is Map)
                 ? Map<String, dynamic>.from(savedMember['beneficiary_info'])
                 : (savedMember['beneficiary_info'] is String &&
-                      (savedMember['beneficiary_info'] as String).isNotEmpty)
+                (savedMember['beneficiary_info'] as String).isNotEmpty)
                 ? Map<String, dynamic>.from(
-                    jsonDecode(savedMember['beneficiary_info']),
-                  )
+              jsonDecode(savedMember['beneficiary_info']),
+            )
                 : <String, dynamic>{};
 
             final currentUser2 = await UserInfo.getCurrentUser();
@@ -1631,8 +1647,8 @@ class AddnewfamilymemberBloc
                   final acc = m['accuracy_m'] ?? m['accuracy'] ?? m['Accuracy'];
                   final tsCap =
                       m['captured_at'] ??
-                      m['captured_datetime'] ??
-                      m['timestamp'];
+                          m['captured_datetime'] ??
+                          m['timestamp'];
                   return {
                     'lat': (lat is num) ? lat : double.tryParse('${lat ?? ''}'),
                     'lng': (lng is num) ? lng : double.tryParse('${lng ?? ''}'),
@@ -1640,10 +1656,10 @@ class AddnewfamilymemberBloc
                         ? acc
                         : double.tryParse('${acc ?? ''}'),
                     'captured_at':
-                        tsCap?.toString() ??
+                    tsCap?.toString() ??
                         DateTime.now().toUtc().toIso8601String(),
                   }..removeWhere(
-                    (k, v) => v == null || (v is String && v.isEmpty),
+                        (k, v) => v == null || (v is String && v.isEmpty),
                   );
                 }
               } catch (_) {}
@@ -1657,113 +1673,113 @@ class AddnewfamilymemberBloc
 
             final nameStr = (info['name'] ?? '').toString();
             final beneficiaryInfoApi =
-                {
-                  'name': {
-                    'first_name': nameStr,
-                    'middle_name': '',
-                    'last_name': '',
-                  },
-                  'gender': genderCode(
-                    (info['gender'] ?? state.gender)?.toString(),
-                  ),
-                  'dob': yyyyMMdd(info['dob']?.toString()),
-                  'marital_status':
-                      (info['maritalStatus'] ?? state.maritalStatus)
-                          ?.toString()
-                          .toLowerCase(),
-                  'aadhaar': (info['aadhaar'] ?? info['aadhar'])?.toString(),
-                  'phone': (info['mobileNo'] ?? state.mobileNo)?.toString(),
-                  'address':
-                      {
-                        'state': working['state'] ?? userDetails['stateName'],
-                        'district':
-                            working['district'] ?? userDetails['districtName'],
-                        'block': working['block'] ?? userDetails['blockName'],
-                        'village':
-                            working['village'] ?? userDetails['villageName'],
-                        'pincode': working['pincode'] ?? userDetails['pincode'],
-                      }..removeWhere(
-                        (k, v) =>
-                            v == null || (v is String && v.trim().isEmpty),
-                      ),
+            {
+              'name': {
+                'first_name': nameStr,
+                'middle_name': '',
+                'last_name': '',
+              },
+              'gender': genderCode(
+                (info['gender'] ?? state.gender)?.toString(),
+              ),
+              'dob': yyyyMMdd(info['dob']?.toString()),
+              'marital_status':
+              (info['maritalStatus'] ?? state.maritalStatus)
+                  ?.toString()
+                  .toLowerCase(),
+              'aadhaar': (info['aadhaar'] ?? info['aadhar'])?.toString(),
+              'phone': (info['mobileNo'] ?? state.mobileNo)?.toString(),
+              'address':
+              {
+                'state': working['state'] ?? userDetails['stateName'],
+                'district':
+                working['district'] ?? userDetails['districtName'],
+                'block': working['block'] ?? userDetails['blockName'],
+                'village':
+                working['village'] ?? userDetails['villageName'],
+                'pincode': working['pincode'] ?? userDetails['pincode'],
+              }..removeWhere(
+                    (k, v) =>
+                v == null || (v is String && v.trim().isEmpty),
+              ),
 
-                  // Extra flat fields required by backend sample schema,
-                  // mapped from existing local info/state when possible.
-                  'is_abha_verified': info['is_abha_verified'] ?? false,
-                  'is_rch_id_verified': info['is_rch_id_verified'] ?? false,
-                  'is_fetched_from_abha': info['is_fetched_from_abha'] ?? false,
-                  'is_fetched_from_rch': info['is_fetched_from_rch'] ?? false,
-                  'is_existing_father': info['is_existing_father'] ?? false,
-                  'is_existing_mother': info['is_existing_mother'] ?? false,
-                  'ben_type':
-                      info['ben_type'] ??
-                      (info['memberType'] ?? state.memberType ?? 'adult'),
-                  'mother_ben_ref_key':
-                      info['mother_ben_ref_key'] ??
-                      savedMember['mother_key']?.toString() ??
-                      '',
-                  'father_ben_ref_key':
-                      info['father_ben_ref_key'] ??
-                      savedMember['father_key']?.toString() ??
-                      '',
-                  'relaton_with_family_head':
-                      info['relaton_with_family_head'] ??
-                      info['relation_to_head'] ??
-                      state.relation,
-                  'member_status':
-                      info['member_status'] ?? state.memberStatus ?? 'alive',
-                  'member_name': info['member_name'] ?? nameStr,
-                  'father_name': info['father_name'] ?? nameStr,
-                  'father_or_spouse_name':
-                      info['father_or_spouse_name'] ??
-                      info['fatherName'] ??
-                      info['spouseName'],
-                  'have_children':
-                      info['have_children'] ??
-                      info['hasChildren'] ??
-                      state.hasChildren,
-                  'is_family_planning':
-                      info['is_family_planning'] ??
-                      savedMember['is_family_planning'] ??
-                      0,
-                  'total_children': info['total_children'] ?? info['totalBorn'],
-                  'total_live_children':
-                      info['total_live_children'] ?? info['totalLive'],
-                  'total_male_children':
-                      info['total_male_children'] ?? info['totalMale'],
-                  'age_of_youngest_child':
-                      info['age_of_youngest_child'] ?? info['youngestAge'],
-                  'gender_of_younget_child':
-                      info['gender_of_younget_child'] ?? info['youngestGender'],
-                  'whose_mob_no': info['whose_mob_no'] ?? info['mobileOwner'],
-                  'mobile_no':
-                      info['mobile_no'] ?? info['mobileNo'] ?? state.mobileNo,
-                  'dob_day': info['dob_day'],
-                  'dob_month': info['dob_month'],
-                  'dob_year': info['dob_year'],
-                  'age_by': info['age_by'],
-                  'date_of_birth': info['date_of_birth'] ?? info['dob'],
-                  'age': info['age'] ?? info['approxAge'] ?? state.approxAge,
-                  'village_name':
-                      info['village_name'] ??
-                      working['village'] ??
-                      userDetails['villageName'],
-                  'is_new_member': info['is_new_member'] ?? true,
-                  'isFamilyhead': info['isFamilyhead'] ?? false,
-                  'isFamilyheadWife': info['isFamilyheadWife'] ?? false,
-                  'age_of_youngest_child_unit':
-                      info['age_of_youngest_child_unit'] ?? info['ageUnit'],
-                  'type_of_beneficiary':
-                      info['type_of_beneficiary'] ??
-                      info['beneficiaryType'] ??
-                      state.beneficiaryType,
-                  'name_of_spouse':
-                      info['name_of_spouse'] ??
-                      info['spouseName'] ??
-                      state.spouseName,
-                }..removeWhere(
+              // Extra flat fields required by backend sample schema,
+              // mapped from existing local info/state when possible.
+              'is_abha_verified': info['is_abha_verified'] ?? false,
+              'is_rch_id_verified': info['is_rch_id_verified'] ?? false,
+              'is_fetched_from_abha': info['is_fetched_from_abha'] ?? false,
+              'is_fetched_from_rch': info['is_fetched_from_rch'] ?? false,
+              'is_existing_father': info['is_existing_father'] ?? false,
+              'is_existing_mother': info['is_existing_mother'] ?? false,
+              'ben_type':
+              info['ben_type'] ??
+                  (info['memberType'] ?? state.memberType ?? 'adult'),
+              'mother_ben_ref_key':
+              info['mother_ben_ref_key'] ??
+                  savedMember['mother_key']?.toString() ??
+                  '',
+              'father_ben_ref_key':
+              info['father_ben_ref_key'] ??
+                  savedMember['father_key']?.toString() ??
+                  '',
+              'relaton_with_family_head':
+              info['relaton_with_family_head'] ??
+                  info['relation_to_head'] ??
+                  state.relation,
+              'member_status':
+              info['member_status'] ?? state.memberStatus ?? 'alive',
+              'member_name': info['member_name'] ?? nameStr,
+              'father_name': info['father_name'] ?? nameStr,
+              'father_or_spouse_name':
+              info['father_or_spouse_name'] ??
+                  info['fatherName'] ??
+                  info['spouseName'],
+              'have_children':
+              info['have_children'] ??
+                  info['hasChildren'] ??
+                  state.hasChildren,
+              'is_family_planning':
+              info['is_family_planning'] ??
+                  savedMember['is_family_planning'] ??
+                  0,
+              'total_children': info['total_children'] ?? info['totalBorn'],
+              'total_live_children':
+              info['total_live_children'] ?? info['totalLive'],
+              'total_male_children':
+              info['total_male_children'] ?? info['totalMale'],
+              'age_of_youngest_child':
+              info['age_of_youngest_child'] ?? info['youngestAge'],
+              'gender_of_younget_child':
+              info['gender_of_younget_child'] ?? info['youngestGender'],
+              'whose_mob_no': info['whose_mob_no'] ?? info['mobileOwner'],
+              'mobile_no':
+              info['mobile_no'] ?? info['mobileNo'] ?? state.mobileNo,
+              'dob_day': info['dob_day'],
+              'dob_month': info['dob_month'],
+              'dob_year': info['dob_year'],
+              'age_by': info['age_by'],
+              'date_of_birth': info['date_of_birth'] ?? info['dob'],
+              'age': info['age'] ?? info['approxAge'] ?? state.approxAge,
+              'village_name':
+              info['village_name'] ??
+                  working['village'] ??
+                  userDetails['villageName'],
+              'is_new_member': info['is_new_member'] ?? true,
+              'isFamilyhead': info['isFamilyhead'] ?? false,
+              'isFamilyheadWife': info['isFamilyheadWife'] ?? false,
+              'age_of_youngest_child_unit':
+              info['age_of_youngest_child_unit'] ?? info['ageUnit'],
+              'type_of_beneficiary':
+              info['type_of_beneficiary'] ??
+                  info['beneficiaryType'] ??
+                  state.beneficiaryType,
+              'name_of_spouse':
+              info['name_of_spouse'] ??
+                  info['spouseName'] ??
+                  state.spouseName,
+            }..removeWhere(
                   (k, v) => v == null || (v is String && v.trim().isEmpty),
-                );
+            );
 
             final apiPayload = {
               'unique_key': savedMember['unique_key'],
@@ -1804,16 +1820,16 @@ class AddnewfamilymemberBloc
               'app_details': {
                 'captured_by_user': userDetails['user_identifier'] ?? '',
                 'captured_role_id':
-                    userDetails['role_id'] ?? userDetails['role'] ?? 0,
+                userDetails['role_id'] ?? userDetails['role'] ?? 0,
                 'source': 'mobile',
               },
               'parent_user':
-                  {
-                    'user_key': userDetails['supervisor_user_key'] ?? '',
-                    'name': userDetails['supervisor_name'] ?? '',
-                  }..removeWhere(
+              {
+                'user_key': userDetails['supervisor_user_key'] ?? '',
+                'name': userDetails['supervisor_name'] ?? '',
+              }..removeWhere(
                     (k, v) => v == null || (v is String && v.trim().isEmpty),
-                  ),
+              ),
               'current_user_key': savedMember['current_user_key'] ?? facilityId,
               'facility_id': savedMember['facility_id'] ?? facilityId,
               'created_date_time': savedMember['created_date_time'] ?? ts,
@@ -1835,9 +1851,9 @@ class AddnewfamilymemberBloc
                       if (sid.isNotEmpty && reqUniqueKey.isNotEmpty) {
                         final updated = await LocalStorageDao.instance
                             .updateBeneficiaryServerIdByUniqueKey(
-                              uniqueKey: reqUniqueKey,
-                              serverId: sid,
-                            );
+                          uniqueKey: reqUniqueKey,
+                          serverId: sid,
+                        );
                         print(
                           'Updated member with server_id=' +
                               sid +
@@ -1852,9 +1868,9 @@ class AddnewfamilymemberBloc
                     if (sid.isNotEmpty && reqUniqueKey.isNotEmpty) {
                       final updated = await LocalStorageDao.instance
                           .updateBeneficiaryServerIdByUniqueKey(
-                            uniqueKey: reqUniqueKey,
-                            serverId: sid,
-                          );
+                        uniqueKey: reqUniqueKey,
+                        serverId: sid,
+                      );
                       print(
                         'Updated member with server_id=' +
                             sid +
@@ -1890,10 +1906,10 @@ class AddnewfamilymemberBloc
               final info = (savedMember['beneficiary_info'] is Map)
                   ? Map<String, dynamic>.from(savedMember['beneficiary_info'])
                   : (savedMember['beneficiary_info'] is String &&
-                        (savedMember['beneficiary_info'] as String).isNotEmpty)
+                  (savedMember['beneficiary_info'] as String).isNotEmpty)
                   ? Map<String, dynamic>.from(
-                      jsonDecode(savedMember['beneficiary_info']),
-                    )
+                jsonDecode(savedMember['beneficiary_info']),
+              )
                   : <String, dynamic>{};
 
               final currentUser2 = await UserInfo.getCurrentUser();
@@ -1935,8 +1951,8 @@ class AddnewfamilymemberBloc
                         m['accuracy_m'] ?? m['accuracy'] ?? m['Accuracy'];
                     final tsCap =
                         m['captured_at'] ??
-                        m['captured_datetime'] ??
-                        m['timestamp'];
+                            m['captured_datetime'] ??
+                            m['timestamp'];
                     return {
                       'lat': (lat is num)
                           ? lat
@@ -1948,10 +1964,10 @@ class AddnewfamilymemberBloc
                           ? acc
                           : double.tryParse('${acc ?? ''}'),
                       'captured_at':
-                          tsCap?.toString() ??
+                      tsCap?.toString() ??
                           DateTime.now().toUtc().toIso8601String(),
                     }..removeWhere(
-                      (k, v) => v == null || (v is String && v.isEmpty),
+                          (k, v) => v == null || (v is String && v.isEmpty),
                     );
                   }
                 } catch (_) {}
@@ -1961,46 +1977,46 @@ class AddnewfamilymemberBloc
                   'accuracy_m': null,
                   'captured_at': DateTime.now().toUtc().toIso8601String(),
                 }..removeWhere(
-                  (k, v) => v == null || (v is String && v.isEmpty),
+                      (k, v) => v == null || (v is String && v.isEmpty),
                 );
               }
 
               final nameStr = (info['name'] ?? '').toString();
               final beneficiaryInfoApi =
-                  {
-                    'name': {
-                      'first_name': nameStr,
-                      'middle_name': '',
-                      'last_name': '',
-                    },
-                    'gender': genderCode(
-                      (info['gender'] ?? state.gender)?.toString(),
-                    ),
-                    'dob': yyyyMMdd(info['dob']?.toString()),
-                    'marital_status':
-                        (info['maritalStatus'] ?? state.maritalStatus)
-                            ?.toString()
-                            .toLowerCase(),
-                    'aadhaar': (info['aadhaar'] ?? info['aadhar'])?.toString(),
-                    'phone': (info['mobileNo'] ?? state.mobileNo)?.toString(),
-                    'address':
-                        {
-                          'state': working['state'] ?? userDetails['stateName'],
-                          'district':
-                              working['district'] ??
-                              userDetails['districtName'],
-                          'block': working['block'] ?? userDetails['blockName'],
-                          'village':
-                              working['village'] ?? userDetails['villageName'],
-                          'pincode':
-                              working['pincode'] ?? userDetails['pincode'],
-                        }..removeWhere(
-                          (k, v) =>
-                              v == null || (v is String && v.trim().isEmpty),
-                        ),
-                  }..removeWhere(
+              {
+                'name': {
+                  'first_name': nameStr,
+                  'middle_name': '',
+                  'last_name': '',
+                },
+                'gender': genderCode(
+                  (info['gender'] ?? state.gender)?.toString(),
+                ),
+                'dob': yyyyMMdd(info['dob']?.toString()),
+                'marital_status':
+                (info['maritalStatus'] ?? state.maritalStatus)
+                    ?.toString()
+                    .toLowerCase(),
+                'aadhaar': (info['aadhaar'] ?? info['aadhar'])?.toString(),
+                'phone': (info['mobileNo'] ?? state.mobileNo)?.toString(),
+                'address':
+                {
+                  'state': working['state'] ?? userDetails['stateName'],
+                  'district':
+                  working['district'] ??
+                      userDetails['districtName'],
+                  'block': working['block'] ?? userDetails['blockName'],
+                  'village':
+                  working['village'] ?? userDetails['villageName'],
+                  'pincode':
+                  working['pincode'] ?? userDetails['pincode'],
+                }..removeWhere(
+                      (k, v) =>
+                  v == null || (v is String && v.trim().isEmpty),
+                ),
+              }..removeWhere(
                     (k, v) => v == null || (v is String && v.trim().isEmpty),
-                  );
+              );
 
               final apiPayload = {
                 'unique_key': savedMember['unique_key'],
@@ -2036,32 +2052,32 @@ class AddnewfamilymemberBloc
                   'device_id': deviceInfo.deviceId,
                   'model': deviceInfo.model,
                   'os':
-                      deviceInfo.platform + ' ' + (deviceInfo.osVersion ?? ''),
+                  deviceInfo.platform + ' ' + (deviceInfo.osVersion ?? ''),
                   'app_version': deviceInfo.appVersion.split('+').first,
                 },
                 'app_details': {
                   'captured_by_user': userDetails['user_identifier'] ?? '',
                   'captured_role_id':
-                      userDetails['role_id'] ?? userDetails['role'] ?? 0,
+                  userDetails['role_id'] ?? userDetails['role'] ?? 0,
                   'source': 'mobile',
                 },
                 'parent_user':
-                    {
-                      'user_key': userDetails['supervisor_user_key'] ?? '',
-                      'name': userDetails['supervisor_name'] ?? '',
-                    }..removeWhere(
+                {
+                  'user_key': userDetails['supervisor_user_key'] ?? '',
+                  'name': userDetails['supervisor_name'] ?? '',
+                }..removeWhere(
                       (k, v) => v == null || (v is String && v.trim().isEmpty),
-                    ),
+                ),
                 'current_user_key':
-                    savedMember['current_user_key'] ??
+                savedMember['current_user_key'] ??
                     savedMember['facility_id'],
                 'facility_id':
-                    savedMember['facility_id'] ?? savedMember['facility_id'],
+                savedMember['facility_id'] ?? savedMember['facility_id'],
                 'created_date_time':
-                    savedMember['created_date_time'] ??
+                savedMember['created_date_time'] ??
                     DateTime.now().toIso8601String(),
                 'modified_date_time':
-                    savedMember['modified_date_time'] ??
+                savedMember['modified_date_time'] ??
                     DateTime.now().toIso8601String(),
               };
 
@@ -2081,9 +2097,9 @@ class AddnewfamilymemberBloc
                         if (sid.isNotEmpty && reqUniqueKey.isNotEmpty) {
                           await LocalStorageDao.instance
                               .markBeneficiarySyncedByUniqueKey(
-                                uniqueKey: reqUniqueKey,
-                                serverId: sid,
-                              );
+                            uniqueKey: reqUniqueKey,
+                            serverId: sid,
+                          );
                         }
                       }
                     } else if (resp['data'] is Map) {
@@ -2092,9 +2108,9 @@ class AddnewfamilymemberBloc
                       if (sid.isNotEmpty && reqUniqueKey.isNotEmpty) {
                         await LocalStorageDao.instance
                             .markBeneficiarySyncedByUniqueKey(
-                              uniqueKey: reqUniqueKey,
-                              serverId: sid,
-                            );
+                          uniqueKey: reqUniqueKey,
+                          serverId: sid,
+                        );
                       }
                     }
                   }
@@ -2203,8 +2219,8 @@ class AddnewfamilymemberBloc
         final working = userDetails['working_location'] ?? {};
         final facilityId =
             working['asha_associated_with_facility_id'] ??
-            userDetails['asha_associated_with_facility_id'] ??
-            0;
+                userDetails['asha_associated_with_facility_id'] ??
+                0;
         final ashaUniqueKey = userDetails['unique_key'] ?? {};
 
         final geoLocation = await GeoLocation.getCurrentLocation();
@@ -2227,11 +2243,11 @@ class AddnewfamilymemberBloc
 
         final deathDetails = isDeath == 1
             ? {
-                'dateOfDeath': state.dateOfDeath?.toIso8601String(),
-                'deathReason': state.deathReason,
-                'otherDeathReason': state.otherDeathReason,
-                'deathPlace': state.deathPlace,
-              }
+          'dateOfDeath': state.dateOfDeath?.toIso8601String(),
+          'deathReason': state.deathReason,
+          'otherDeathReason': state.otherDeathReason,
+          'deathPlace': state.deathPlace,
+        }
             : {};
 
         String? resolvedMotherKey2;
@@ -2315,12 +2331,12 @@ class AddnewfamilymemberBloc
               }
 
               final headInfo =
-                  headRecord != null && headRecord['beneficiary_info'] is Map
+              headRecord != null && headRecord['beneficiary_info'] is Map
                   ? Map<String, dynamic>.from(headRecord['beneficiary_info'])
                   : <String, dynamic>{};
               final spouseInfo =
-                  spouseRecord != null &&
-                      spouseRecord['beneficiary_info'] is Map
+              spouseRecord != null &&
+                  spouseRecord['beneficiary_info'] is Map
                   ? Map<String, dynamic>.from(spouseRecord['beneficiary_info'])
                   : <String, dynamic>{};
               final headGender = (headInfo['gender'] ?? '')
@@ -2396,22 +2412,22 @@ class AddnewfamilymemberBloc
           ..['bankAcc'] = state.bankAcc
           ..['ifsc'] = state.ifsc
           ..['occupation'] =
-              state.occupation == 'Other' &&
-                  state.otherOccupation != null &&
-                  state.otherOccupation!.isNotEmpty
+          state.occupation == 'Other' &&
+              state.otherOccupation != null &&
+              state.otherOccupation!.isNotEmpty
               ? '${state.otherOccupation}_other'
               : state.occupation
           ..['education'] = state.education
           ..['religion'] =
-              state.religion == 'Other' &&
-                  state.otherReligion != null &&
-                  state.otherReligion!.isNotEmpty
+          state.religion == 'Other' &&
+              state.otherReligion != null &&
+              state.otherReligion!.isNotEmpty
               ? '${state.otherReligion}_other'
               : state.religion
           ..['category'] =
-              state.category == 'Other' &&
-                  state.otherCategory != null &&
-                  state.otherCategory!.isNotEmpty
+          state.category == 'Other' &&
+              state.otherCategory != null &&
+              state.otherCategory!.isNotEmpty
               ? '${state.otherCategory}_other'
               : state.category
           ..['weight'] = state.WeightChange
@@ -2422,9 +2438,9 @@ class AddnewfamilymemberBloc
           ..['abhaAddress'] = state.abhaAddress
           ..['mobileOwner'] = state.mobileOwner
           ..['mobileOwnerRelation'] =
-              state.mobileOwnerRelation == 'Other' &&
-                  state.otherRelation != null &&
-                  state.otherRelation!.isNotEmpty
+          state.mobileOwnerRelation == 'Other' &&
+              state.otherRelation != null &&
+              state.otherRelation!.isNotEmpty
               ? '${state.otherRelation}_other'
               : state.mobileOwnerRelation
           ..['other_religion'] = state.religion == 'Other'
@@ -2484,8 +2500,8 @@ class AddnewfamilymemberBloc
               final working = userDetails['working_location'] ?? {};
               final facilityId =
                   working['asha_associated_with_facility_id'] ??
-                  userDetails['asha_associated_with_facility_id'] ??
-                  0;
+                      userDetails['asha_associated_with_facility_id'] ??
+                      0;
               final ashaUniqueKey = userDetails['unique_key'] ?? '';
 
               final motherCareActivityData = {

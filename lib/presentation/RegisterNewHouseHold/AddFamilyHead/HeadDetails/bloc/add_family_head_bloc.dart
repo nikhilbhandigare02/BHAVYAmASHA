@@ -92,7 +92,6 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         return;
       }
 
-      // In approximate age mode, only set DOB; do not override age fields
       if (!state.useDob) {
         emit(state.copyWith(dob: dob));
         return;
@@ -401,7 +400,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         final days = int.tryParse(state.days ?? '');
 
         if (years == null || months == null || days == null) {
-          errors.add('Please enter age');
+          errors.add('');
         } else if (years < 15 || years > 110) {
           errors.add('Age in years should be between 0 and 110');
         } else if (months < 0 || months > 11) {
@@ -430,7 +429,7 @@ class AddFamilyHeadBloc extends Bloc<AddFamilyHeadEvent, AddFamilyHeadState> {
         final days = int.tryParse(state.days ?? '');
 
         if (years == null || months == null || days == null) {
-          errors.add('Please enter age');
+          errors.add('');
         } else if (years < 15 || years > 110) {
           errors.add('Age in years should be between 0 and 110');
         } else if (months < 0 || months > 11) {

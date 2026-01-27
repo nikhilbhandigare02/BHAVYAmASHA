@@ -389,96 +389,92 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
       }
 
 
+      final eligibleCoupleActivities = await db.rawQuery('''
+        SELECT eca.*, bn.household_ref_key as beneficiary_household_ref_key FROM eligible_couple_activities eca
+        INNER JOIN beneficiaries_new bn ON eca.beneficiary_ref_key = bn.unique_key
+        WHERE eca.current_user_key = ? 
+        AND eca.is_deleted = 0
+        AND bn.is_migrated = 0
+        AND bn.is_death = 0
+        AND bn.is_deleted = 0
+        AND bn.household_ref_key IS NOT NULL
+        AND bn.household_ref_key != ''
+        ORDER BY eca.household_ref_key, eca.beneficiary_ref_key, eca.created_date_time DESC
+      ''',
+        [currentUserKey],
+      );
+
+      debugPrint('AllHouseHold: Found ${eligibleCoupleActivities.length} eligible couple activities');
+
+      // Group eligible couples by household and get only latest state per beneficiary
       final eligibleCoupleCountMap = <String, int>{};
+      final processedBeneficiaries = <String, String>{};
+      
+      for (final activity in eligibleCoupleActivities) {
+        try {
+          final householdRefKeyFromEca = (activity['household_ref_key'] ?? '').toString();
+          final householdRefKeyFromBn = (activity['beneficiary_household_ref_key'] ?? '').toString();
+          final beneficiaryKey = (activity['beneficiary_ref_key'] ?? '').toString();
+          final eligibleCoupleState = (activity['eligible_couple_state'] ?? '').toString().toLowerCase();
+          
+          if (householdRefKeyFromEca.isEmpty || beneficiaryKey.isEmpty) continue;
+          
+          // Validate household_ref_key consistency between tables
+          final householdRefKey = householdRefKeyFromBn.isNotEmpty ? householdRefKeyFromBn : householdRefKeyFromEca;
+          
+          if (householdRefKey.isEmpty || beneficiaryKey.isEmpty) continue;
+          
+          if (householdRefKeyFromBn.isNotEmpty && householdRefKeyFromEca != householdRefKeyFromBn) {
+            debugPrint('AllHouseHold: Household mismatch - ECA: $householdRefKeyFromEca, BN: $householdRefKeyFromBn for beneficiary $beneficiaryKey - Using BN value');
+          }
+          
+          // Create a unique key for household+beneficiary combination
+          final householdBeneficiaryKey = '${householdRefKey}_${beneficiaryKey}';
+          
+          // Check if we've already processed this beneficiary for this household
+          if (processedBeneficiaries.containsKey(householdBeneficiaryKey)) {
+            debugPrint('AllHouseHold: Skipping already processed beneficiary $beneficiaryKey for household $householdRefKey');
+            continue;
+          }
+          
+          // Mark this beneficiary as processed for this household
+          processedBeneficiaries[householdBeneficiaryKey] = eligibleCoupleState;
+          
+          debugPrint('AllHouseHold: Processing beneficiary $beneficiaryKey for household $householdRefKey with state: $eligibleCoupleState');
+          
+          // Count only if the eligible couple state indicates they are an eligible couple
+          // Common states might be: 'active', 'eligible', 'registered', 'due', etc.
+          // Adjust these states based on your actual eligible couple state values
+          if (eligibleCoupleState.isNotEmpty && 
+              eligibleCoupleState != 'inactive' && 
+              eligibleCoupleState != 'closed' && 
+              eligibleCoupleState != 'terminated') {
+            
+            eligibleCoupleCountMap[householdRefKey] = (eligibleCoupleCountMap[householdRefKey] ?? 0) + 1;
+            debugPrint('AllHouseHold: Added eligible couple for household $householdRefKey. New count: ${eligibleCoupleCountMap[householdRefKey]}');
+          } else {
+            debugPrint('AllHouseHold: Beneficiary $beneficiaryKey state "$eligibleCoupleState" not counted as eligible couple');
+          }
+        } catch (e) {
+          debugPrint('AllHouseHold: Error processing eligible couple activity: $e');
+          continue;
+        }
+      }
+      
+      debugPrint('AllHouseHold: Final eligible couple counts per household:');
+      eligibleCoupleCountMap.forEach((householdKey, count) {
+        debugPrint('  Household $householdKey: $count eligible couples');
+      });
 
       final beneficiariesByHousehold = <String, List<Map<String, dynamic>>>{};
 
-// Group beneficiaries by household
+      // Group beneficiaries by household for age categorization
       for (final row in rows) {
         final householdRefKey = (row['household_ref_key'] ?? '').toString();
         if (householdRefKey.isNotEmpty) {
           beneficiariesByHousehold.putIfAbsent(householdRefKey, () => []);
           beneficiariesByHousehold[householdRefKey]!.add(row);
         }
-      }
-
-// Calculate eligible couples per household
-      for (final householdRefKey in beneficiariesByHousehold.keys) {
-        final householdBeneficiaries =
-        beneficiariesByHousehold[householdRefKey]!;
-
-        int marriedMaleCount = 0;
-        int marriedFemaleCount = 0;
-
-        debugPrint(
-            'AllHouseHold: Calculating eligible couples for household: $householdRefKey');
-
-        for (final beneficiary in householdBeneficiaries) {
-          try {
-            // Skip deleted / migrated / death
-            if (beneficiary['is_deleted'] == 1 ||
-                beneficiary['is_migrated'] == 1 ||
-                beneficiary['is_death'] == 1) {
-              continue;
-            }
-
-            // Parse beneficiary_info safely
-            final rawInfo = beneficiary['beneficiary_info'];
-            Map<String, dynamic> info;
-
-            if (rawInfo is Map) {
-              info = Map<String, dynamic>.from(rawInfo);
-            } else if (rawInfo is String && rawInfo.isNotEmpty) {
-              info = Map<String, dynamic>.from(jsonDecode(rawInfo));
-            } else {
-              continue;
-            }
-
-            // ✅ STRICT MARITAL STATUS CHECK
-            final maritalStatus = info['maritalStatus']
-                ?.toString()
-                .trim()
-                .toLowerCase();
-
-            if (maritalStatus != 'married') {
-              // ❌ skip single / widowed / divorced / separated / null
-              continue;
-            }
-
-            // Gender check
-            final gender =
-                info['gender']?.toString().trim().toLowerCase() ?? '';
-
-            // Check sterilization status for this beneficiary
-            final beneficiaryKey = (beneficiary['unique_key'] ?? '').toString();
-            if (beneficiaryKey.isNotEmpty) {
-              final hasSterilization = await _hasSterilizationRecord(db, beneficiaryKey, currentUserKey);
-              
-              if (hasSterilization) {
-                final name = (info['headName'] ?? info['memberName'] ?? info['name'] ?? 'Unknown').toString();
-                debugPrint('AllHouseHold: Skipping sterilized beneficiary $name ($gender)');
-                continue;
-              }
-            }
-
-            if (gender == 'male') {
-              marriedMaleCount++;
-            } else if (gender == 'female') {
-              marriedFemaleCount++;
-            }
-          } catch (e) {
-            continue;
-          }
-        }
-
-        // ✅ Eligible individuals count (excluding sterilized individuals)
-        final eligibleIndividuals =
-            marriedMaleCount + marriedFemaleCount;
-
-        eligibleCoupleCountMap[householdRefKey] = eligibleIndividuals;
-
-        debugPrint(
-            'AllHouseHold: Household $householdRefKey → Married males: $marriedMaleCount, Married females: $marriedFemaleCount, Eligible individuals: $eligibleIndividuals');
       }
 
 
@@ -764,7 +760,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
         debugPrint('AllHouseHold: Mapping for household $householdRefKeyFromRaw - Pregnant women: $pregnantWomenCount');
 
-        // Create a temporary data map to use with the helper method
         final tempData = {
           'houseNo': info['houseNo'] ?? 0,
           '_raw': r,
@@ -1181,6 +1176,11 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
 
                           final members = await LocalStorageDao.instance
                               .getBeneficiariesByHousehold(hhKey);
+                          debugPrint('AllHouseHold: Found ${members.length} members for household $hhKey');
+                          if (members.isNotEmpty) {
+                            debugPrint('AllHouseHold: First member keys: ${members.first.keys.toList()}');
+                            debugPrint('AllHouseHold: First member is_separated: ${members.first['is_separated']}');
+                          }
                           if (members.isEmpty) {
                             return;
                           }
@@ -1188,18 +1188,53 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                           Map<String, dynamic>? headRow;
                           final configuredHeadKey = data['_raw']['unique_key']
                               ?.toString();
-                          if (configuredHeadKey != null &&
-                              configuredHeadKey.isNotEmpty) {
+                          
+                          // First try to find head by isFamilyHead in beneficiary_info
+                          for (final m in members) {
+                            final beneficiaryInfo = m['beneficiary_info'];
+                            bool isFamilyHead = false;
+                            
+                            debugPrint('AllHouseHold: Member ${m['unique_key']} beneficiary_info: $beneficiaryInfo');
+                            
+                            if (beneficiaryInfo is Map<String, dynamic>) {
+                              isFamilyHead = beneficiaryInfo['isFamilyHead'] == true || 
+                                           beneficiaryInfo['isFamilyHead'] == 'true';
+                              debugPrint('AllHouseHold: Member ${m['unique_key']} isFamilyHead from Map: $isFamilyHead');
+                            } else if (beneficiaryInfo is String) {
+                              try {
+                                final decoded = jsonDecode(beneficiaryInfo) as Map<String, dynamic>;
+                                isFamilyHead = decoded['isFamilyHead'] == true || 
+                                             decoded['isFamilyHead'] == 'true';
+                                debugPrint('AllHouseHold: Member ${m['unique_key']} isFamilyHead from String: $isFamilyHead');
+                              } catch (e) {
+                                debugPrint('AllHouseHold: Error parsing beneficiary_info for ${m['unique_key']}: $e');
+                              }
+                            }
+                            
+                            debugPrint('AllHouseHold: Checking member ${m['unique_key']} - isFamilyHead: $isFamilyHead');
+                            
+                            if (isFamilyHead) {
+                              headRow = m;
+                              debugPrint('AllHouseHold: Found headRow by isFamilyHead with is_separated: ${headRow!['is_separated']}');
+                              break;
+                            }
+                          }
+                          
+                          // Fallback to unique_key matching if no head found by isFamilyHead
+                          if (headRow == null && configuredHeadKey != null && configuredHeadKey.isNotEmpty) {
                             for (final m in members) {
+                              debugPrint('AllHouseHold: Fallback - checking member ${m['unique_key']} vs configured head $configuredHeadKey');
                               if ((m['unique_key'] ?? '').toString() ==
                                   configuredHeadKey) {
                                 headRow = m;
+                                debugPrint('AllHouseHold: Found headRow by unique_key fallback with is_separated: ${headRow!['is_separated']}');
                                 break;
                               }
                             }
                           }
 
                           headRow ??= members.first;
+                          debugPrint('AllHouseHold: Using fallback headRow with is_separated: ${headRow!['is_separated']}');
 
                           Map<String, dynamic> info;
                           final rawInfo = headRow!['beneficiary_info'];
@@ -1227,8 +1262,11 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                             map['head_id_pk'] = headRow['id'].toString();
                           }
 
-                          // Check if head is separated and fetch spouse data in addition to head data
-                          if (headRow!['is_separated'] == 1) {
+                          // Debug logging to check is_separated value
+                          debugPrint('AllHouseHold: headRow data: ${headRow!.keys.toList()}');
+                          debugPrint('AllHouseHold: is_separated value from database: ${headRow!['is_separated']} (type: ${headRow!['is_separated'].runtimeType})');
+                          
+                          if (headRow['is_separated'] == 1) {
                             final spouseKey = headRow!['spouse_key']?.toString();
                             if (spouseKey != null && spouseKey.isNotEmpty) {
                               // Clean spouse key by removing brackets if present
@@ -1255,8 +1293,7 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                                 if (spouseRecords.isNotEmpty) {
                                   debugPrint('AllHouseHold: Found spouse in beneficiaries table, adding spouse data for editing');
                                   final spouseRow = spouseRecords.first;
-                                  
-                                  // Parse spouse info and add to map with sp_ prefix for Spousdetails prefill
+
                                   final spouseRawInfo = spouseRow['beneficiary_info'];
                                   Map<String, dynamic> spouseInfo;
                                   if (spouseRawInfo is Map<String, dynamic>) {
@@ -1267,7 +1304,6 @@ class _AllhouseholdScreenState extends State<AllhouseholdScreen> {
                                     spouseInfo = <String, dynamic>{};
                                   }
                                   
-                                  // Add spouse data with sp_ prefix for Spousdetails prefill
                                   spouseInfo.forEach((key, value) {
                                     if (value != null) {
                                       map['sp_$key'] = value.toString();

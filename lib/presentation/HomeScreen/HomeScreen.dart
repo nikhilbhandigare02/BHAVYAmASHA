@@ -1520,7 +1520,19 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         print('HomeScreen: error while fetching notifications -> $e');
       }
 
-      final notifications = await LocalStorageDao.instance.getNotifications();
+      final allNotifications = await LocalStorageDao.instance.getNotifications();
+      final now = DateTime.now();
+
+      // Filter notifications based on date period (same logic as NotificationScreen)
+      final notifications = allNotifications.where((n) {
+        final start = _parseNotificationDate(n['announcement_start_period']);
+        final end = _parseNotificationDate(n['announcement_end_period']);
+
+        final isAfterStart = !now.isBefore(start);
+        final isBeforeEnd = !now.isAfter(end);
+        return isAfterStart && isBeforeEnd;
+      }).toList();
+
       if (mounted) {
         setState(() {
           notificationCount = notifications.length;
@@ -1528,6 +1540,24 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       }
     } catch (e) {
       print('Error loading notification count: $e');
+    }
+  }
+
+  DateTime _parseNotificationDate(dynamic value) {
+    if (value == null) return DateTime.now();
+
+    try {
+      return DateTime.parse(value.toString());
+    } catch (_) {
+      try {
+        return DateFormat("dd-MM-yyyy").parse(value);
+      } catch (_) {
+        try {
+          return DateFormat("yyyy-MM-dd HH:mm:ss").parse(value);
+        } catch (_) {
+          return DateTime.now();
+        }
+      }
     }
   }
 
@@ -1781,6 +1811,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                             childRegisteredCount: childRegisteredCount,
                             highRiskCount: highRiskCount,
                             ncdCount: ncdCount,
+                            notificationCount: notificationCount,
                             selectedGridIndex: selectedGridIndex,
                             onGridTap: (index) =>
                                 setState(() => selectedGridIndex = index),

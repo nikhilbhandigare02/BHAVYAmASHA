@@ -235,6 +235,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
     debugPrint('AddNewFamilyHead: Creating spouse initial state from map data');
 
     // Helper functions for accessing spouse and head data
+    dynamic getHeadVal(String key) => m[key];
     dynamic getSpouseVal(String key) {
       if (m.containsKey('sp_$key')) return m['sp_$key'];
 
@@ -263,12 +264,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
       return m['sp_$key'];
     }
 
-    dynamic getHeadVal(String key) => m[key];
-
     DateTime? _parseDate(String? iso) =>
         (iso == null || iso.isEmpty) ? null : DateTime.tryParse(iso);
 
-    return SpousState(
+    // Debug: Log the raw data structure
+    debugPrint('AddNewFamilyHead: Raw data keys: ${m.keys.toList()}');
+    debugPrint('AddNewFamilyHead: Raw years: ${getHeadVal('years')}, months: ${getHeadVal('months')}, days: ${getHeadVal('days')}');
+    debugPrint('AddNewFamilyHead: Raw dob: ${getHeadVal('dob')}');
+    debugPrint('AddNewFamilyHead: Raw approxAge: ${getHeadVal('approxAge')}');
+
+    final spousState = SpousState(
       relation: getSpouseVal('relation') ?? 'spouse',
       memberName:
           getSpouseVal('memberName') ??
@@ -278,6 +283,7 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
       RichIDChanged: getSpouseVal('RichIDChanged'),
       spouseName:
           getSpouseVal('spouseName') ??
+          getHeadVal('spouseName') ??
           getHeadVal('headName') ??
           getHeadVal('memberName'),
       fatherName: getSpouseVal('father_name'),
@@ -285,13 +291,22 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           getSpouseVal('age_by') == 'by_dob' ||
           getSpouseVal('useDob') == true ||
           getSpouseVal('useDob') == 'true',
-      dob: _parseDate(getSpouseVal('dob')?.toString()),
+      dob: _parseDate(getSpouseVal('dob')?.toString()) ?? 
+           _parseDate(getHeadVal('dob')?.toString()),
       edd: _parseDate(getSpouseVal('edd')?.toString()),
       lmp: _parseDate(getSpouseVal('lmp')?.toString()),
-      approxAge: getSpouseVal('approxAge'),
-      UpdateYears: getSpouseVal('UpdateYears'),
-      UpdateMonths: getSpouseVal('UpdateMonths'),
-      UpdateDays: getSpouseVal('UpdateDays'),
+      approxAge: getSpouseVal('approxAge') ?? 
+               getHeadVal('approxAge'),
+      // Handle years, months, days - check both direct fields and spouse-prefixed fields
+      UpdateYears: getSpouseVal('UpdateYears') ?? 
+                  getHeadVal('years')?.toString() ?? 
+                  getSpouseVal('years')?.toString(),
+      UpdateMonths: getSpouseVal('UpdateMonths') ?? 
+                    getHeadVal('months')?.toString() ?? 
+                    getSpouseVal('months')?.toString(),
+      UpdateDays: getSpouseVal('UpdateDays') ?? 
+                  getHeadVal('days')?.toString() ?? 
+                  getSpouseVal('days')?.toString(),
       gender:
           getSpouseVal('gender') ??
           ((getHeadVal('gender') == 'Male')
@@ -344,6 +359,16 @@ class _AddNewFamilyHeadScreenState extends State<AddNewFamilyHeadScreen>
           ? 'death'
           : getSpouseVal('memberStatus'),
     );
+
+    // Debug: Log the final assigned values
+    debugPrint('AddNewFamilyHead: Final spouse state values:');
+    debugPrint('  UpdateYears: ${spousState.UpdateYears}');
+    debugPrint('  UpdateMonths: ${spousState.UpdateMonths}');
+    debugPrint('  UpdateDays: ${spousState.UpdateDays}');
+    debugPrint('  dob: ${spousState.dob}');
+    debugPrint('  approxAge: ${spousState.approxAge}');
+
+    return spousState;
   }
 
   bool useDob = true;

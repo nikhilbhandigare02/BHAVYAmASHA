@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import '../../core/config/themes/CustomColors.dart';
 import '../../core/widgets/AppHeader/AppHeader.dart';
 import '../../data/Database/local_storage_dao.dart';
@@ -27,9 +28,10 @@ class _NotificationscreenState extends State<Notificationscreen> {
     try {
       await NotificationRepository().fetchAndSaveNotifications();
     } catch (e) {
-      // Log the error but do not crash the screen
-      debugPrint('NotificationScreen: error while fetching notifications → $e');
+      debugPrint(
+          'NotificationScreen: error while fetching notifications → $e');
     }
+
     setState(() {
       _notificationFuture = LocalStorageDao.instance.getNotifications();
     });
@@ -42,19 +44,21 @@ class _NotificationscreenState extends State<Notificationscreen> {
       return DateTime.parse(value.toString());
     } catch (_) {
       try {
-        return DateFormat("dd-MM-yyyy").parse(value);
+        return DateFormat("dd-MM-yyyy").parse(value.toString());
       } catch (_) {
         try {
-          return DateFormat("yyyy-MM-dd HH:mm:ss").parse(value);
+          return DateFormat("yyyy-MM-dd HH:mm:ss")
+              .parse(value.toString());
         } catch (_) {
-          return DateTime.now(); // Last fallback
+          return DateTime.now();
         }
       }
     }
   }
 
   String stripHtmlTags(String htmlText) {
-    final exp = RegExp(r'<[^>]*>', multiLine: true, caseSensitive: false);
+    final exp =
+    RegExp(r'<[^>]*>', multiLine: true, caseSensitive: false);
     return htmlText.replaceAll(exp, '').trim();
   }
 
@@ -69,31 +73,38 @@ class _NotificationscreenState extends State<Notificationscreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-          appBar: AppHeader(
-            screenTitle: l10n.notifications,
-            showBack: true,
-          ),
+        appBar: AppHeader(
+          screenTitle: l10n.notifications,
+          showBack: true,
+        ),
         body: FutureBuilder<List<Map<String, dynamic>>>(
           future: _notificationFuture,
           builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
+            if (snapshot.connectionState ==
+                ConnectionState.waiting) {
+              return const Center(
+                  child: CircularProgressIndicator());
             }
 
             final allNotifications = snapshot.data ?? [];
             final now = DateTime.now();
 
             final notifications = allNotifications.where((n) {
-              final start = _parseDate(n['announcement_start_period']);
-              final end = _parseDate(n['announcement_end_period']);
-
-              final isAfterStart = !now.isBefore(start);
-              final isBeforeEnd = !now.isAfter(end);
-              return isAfterStart && isBeforeEnd;
+              final start =
+              _parseDate(n['announcement_start_period']);
+              final end =
+              _parseDate(n['announcement_end_period']);
+              return !now.isBefore(start) &&
+                  !now.isAfter(end);
             }).toList();
 
             if (notifications.isEmpty) {
-              return  Center(child: Text(l10n.noNotificationsFound ?? "No notifications found."));
+              return Center(
+                child: Text(
+                  l10n.noNotificationsFound ??
+                      "No notifications found.",
+                ),
+              );
             }
 
             return ListView.builder(
@@ -101,12 +112,11 @@ class _NotificationscreenState extends State<Notificationscreen> {
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final n = notifications[index];
-                final plainText = stripHtmlTags(n["content_en"] ?? "");
 
                 return NotificationCard(
-                  title: n["title_en"] ?? "",
-                  content: plainText,
-                  date: _parseDate(n["announcement_start_period"]),
+                  title: n['title_en'] ?? '',
+                  content:
+                  stripHtmlTags(n['content_en'] ?? ''),
                 );
               },
             );
@@ -115,130 +125,85 @@ class _NotificationscreenState extends State<Notificationscreen> {
       ),
     );
   }
-
-  String _truncateText(String text, int maxLines) {
-    const int charsPerLine = 80;
-    final int maxChars = maxLines * charsPerLine;
-    if (text.length <= maxChars) return text;
-    return text.substring(0, maxChars).trim() + "...";
-  }
 }
 
-class NotificationCard extends StatefulWidget {
+class NotificationCard extends StatelessWidget {
   final String title;
   final String content;
-  final DateTime date;
 
   const NotificationCard({
     Key? key,
     required this.title,
     required this.content,
-    required this.date,
   }) : super(key: key);
 
   @override
-  State<NotificationCard> createState() => _NotificationCardState();
-}
-
-class _NotificationCardState extends State<NotificationCard> {
-  bool isExpanded = false;
-
-  static const int maxLinesCollapsed = 2;
-
-  @override
   Widget build(BuildContext context) {
-    final bool needReadMore = widget.content.length > 80;
-    final l10n = AppLocalizations.of(context)!;
-
-    final String formattedDate =
-    DateFormat('dd-MM-yyyy').format(widget.date);
-
     return Container(
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(4),
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
-            blurRadius: 4,
-            spreadRadius: 1,
-            offset: Offset(0, 2),
-          )
+            blurRadius: 1,
+            spreadRadius: 0.5,
+            offset: Offset(0, 1),
+          ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                 widget.title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          dividerColor: Colors.transparent,
+        ),
+        child: ExpansionTile(
+          dense: true,
+          visualDensity:
+          const VisualDensity(horizontal: -4, vertical: -4),
 
-              SizedBox(width: 2),
-              IntrinsicWidth(
-                child: Text(
-                  formattedDate,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.primary,
-                  ),
-                  overflow: TextOverflow.visible,
-                ),
-              ),
-            ],
+          tilePadding:
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          childrenPadding:
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+
+          iconColor: AppColors.primary,
+          collapsedIconColor: AppColors.primary,
+
+          // 🚫 REMOVE TOP & BOTTOM BORDERS
+          shape: const RoundedRectangleBorder(
+            side: BorderSide.none,
           ),
-           SizedBox(height: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                isExpanded ? widget.content : widget.content,
+          collapsedShape: const RoundedRectangleBorder(
+            side: BorderSide.none,
+          ),
+
+          title: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                content,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 13,
                   color: Colors.grey[700],
-                  height: 1.5,
+                  height: 1.4,
                 ),
-                maxLines: isExpanded ? null : 1,
-                overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 6),
-              if (needReadMore)
-                GestureDetector(
-                  onTap: () => setState(() => isExpanded = !isExpanded),
-                  child: Text(
-                    isExpanded ?(l10n.readLess ?? "Read less") : (l10n.readMore ?? "Read more"),
-                    style:  TextStyle(
-                      color:Colors.grey[500],
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-            ],
-          )
-        ],
+            ),
+          ],
+        ),
       ),
     );
-  }
-
-  // Truncate to N lines
-  String _truncateText(String text, int lines) {
-    const int charsPerLine = 70;
-    final int maxChars = charsPerLine * lines;
-
-    if (text.length <= maxChars) return text;
-    return text.substring(0, maxChars).trim() + "...";
   }
 }

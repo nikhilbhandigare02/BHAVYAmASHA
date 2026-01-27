@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:medixcel_new/core/utils/device_info_utils.dart';
 
@@ -50,41 +52,76 @@ class IdGenerator {
   static Future<String> generateUniqueId(DeviceInfo deviceInfo) async {
 
     try{
+      // Add 1-second delay to ensure unique timestamps for sequential calls
+      await Future.delayed(Duration(seconds: 1));
+      
       final DateTime now = DateTime.now();
-      String deviceId = await DeviceInfoService.getAndroidId();
-      // yyyyMMddHHmmss
+      String deviceId = await _getAndroidId();
       final String formattedDate =
           '${now.year}'
           '${now.month.toString().padLeft(2, '0')}'
           '${now.day.toString().padLeft(2, '0')}'
-          '${now.hour.toString().padLeft(2, '0')}'
+          '${now.hour.toString ().padLeft(2, '0')}'
           '${now.minute.toString().padLeft(2, '0')}'
           '${now.second.toString().padLeft(2, '0')}';
 
-      // milliseconds padded to 4 digits
-      final String milliseconds =
-      now.millisecond.toString().padLeft(4, '0');
-
-      return '${deviceId}_${milliseconds}$formattedDate';
+      return '${deviceId}_$formattedDate';
     }
     catch(e){
       return '';
     }
   }
 
-}
-
-class DeviceInfoService {
-  static const MethodChannel _channel =
-  MethodChannel('flutter/device_info');
-
-  static Future<String> getAndroidId() async {
+  /// Gets the Android ID using Settings.Secure.ANDROID_ID
+  static Future<String> _getAndroidId() async {
     try {
-      final String? deviceId =
-      await _channel.invokeMethod<String>('getAndroidId');
-      return deviceId ?? 'Unknown';
+      if (Platform.isAndroid) {
+        print('=== Attempting to get Android ID via MethodChannel ===');
+        
+        // Use the proper method to get Android ID from Settings.Secure
+        const MethodChannel channel = MethodChannel('medixcel/device_id');
+        
+        try {
+          final String? deviceId = await channel.invokeMethod<String>('getAndroidId');
+          
+          print('MethodChannel result: $deviceId');
+          
+          if (deviceId != null && deviceId.isNotEmpty && deviceId != 'Unknown' && !deviceId.startsWith('Error:')) {
+            // Debug logging
+            print('=== IdGenerator Android Info ===');
+            print('Proper Android ID: $deviceId');
+            print('Android ID length: ${deviceId.length}');
+            print('Is Android ID empty: ${deviceId.isEmpty}');
+            print('===============================');
+            return deviceId;
+          } else {
+            print('MethodChannel returned invalid result: $deviceId');
+          }
+        } catch (e) {
+          print('MethodChannel failed: $e');
+        }
+        
+        // Fallback to device_info_plus
+        print('=== Falling back to device_info_plus ===');
+        final deviceInfoPlugin = DeviceInfoPlugin();
+        final androidInfo = await deviceInfoPlugin.androidInfo;
+        final fallbackId = androidInfo.id;
+        
+        print('=== IdGenerator Fallback Info ===');
+        print('Fallback Android ID: $fallbackId');
+        print('Fallback ID length: ${fallbackId.length}');
+        print('===============================');
+        
+        return fallbackId;
+      } else {
+        // For non-Android platforms, return a fallback ID
+        return 'non_android_${DateTime.now().millisecondsSinceEpoch}';
+      }
     } catch (e) {
-      return 'Unknown';
+      // Fallback if Android ID cannot be retrieved
+      print('Error getting Android ID: $e');
+      return 'fallback_${DateTime.now().millisecondsSinceEpoch}';
     }
   }
+
 }

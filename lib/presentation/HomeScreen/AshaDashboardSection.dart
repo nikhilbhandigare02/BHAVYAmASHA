@@ -22,6 +22,7 @@ class AshaDashboardSection extends StatelessWidget {
   final int? childRegisteredCount;
   final int? highRiskCount;
   final int? ncdCount;
+  final int? notificationCount;
   final int appRoleId;
 
   const AshaDashboardSection({
@@ -40,6 +41,7 @@ class AshaDashboardSection extends StatelessWidget {
     this.childRegisteredCount,
     this.highRiskCount,
     this.ncdCount,
+    this.notificationCount,
     required this.appRoleId,
   });
 
@@ -122,7 +124,11 @@ class AshaDashboardSection extends StatelessWidget {
     };
 
     final List<Map<String, dynamic>> bottomGridItems = [
-      {"image": 'assets/images/announcement.png', "label": l10n.announcements},
+      {
+        "image": 'assets/images/announcement.png', 
+        "label": l10n.announcements,
+        "count": notificationCount ?? 0,
+      },
       if (appRoleId == 4)
         {
           "image": 'assets/images/beneficiaries.png',

@@ -74,89 +74,38 @@ class _HouseHold_BeneficiaryScreenState
             ? 'household_ref_key = ? AND is_migrated = 0'
             : 'is_migrated = 0',
         whereArgs: widget.hhId != null ? [widget.hhId] : null,
-        orderBy: '''
-  id ASC
-  ''',
+        orderBy: 'id ASC',
       );
 
-
-      if (widget.hhId != null) {
-        print('=== ALL RECORDS FOR HOUSEHOLD ${widget.hhId} ===');
-        for (var row in rows) {
-          try {
-            final info = row['beneficiary_info'] is String
-                ? jsonDecode(row['beneficiary_info'] as String)
-                : row['beneficiary_info'];
-
-            print('--- Record ---');
-            print('ID: ${row['id']}');
-            print('Unique Key: ${row['unique_key']}');
-            print('Spouse Key: ${row['spouse_key']}');
-            print('Household Ref Key: ${row['household_ref_key']}');
-            print(
-              'Name: ${info['name'] ?? info['memberName'] ?? info['headName']}',
-            );
-            print('Relation: ${info['relation'] ?? info['relation_to_head']}');
-            print('Gender: ${info['gender']}');
-            print('DOB: ${info['dob']}');
-            print('Mobile: ${info['mobileNo'] ?? info['mobile']}');
-            print('Is Death: ${row['is_death']}');
-            print('Is Migrated: ${row['is_migrated']}');
-            print('-------------');
-          } catch (e) {
-            print('Error parsing record: $e');
-            print('Raw row data: $row');
-          }
-        }
-        print('=== TOTAL RECORDS: ${rows.length} ===');
-      }
-
-      if (widget.hhId != null) {
-        print('=== HOUSEHOLD RECORDS FOR HH_ID: ${widget.hhId} ===');
-        for (var row in rows) {
-          try {
-            final info = row['beneficiary_info'] is String
-                ? jsonDecode(row['beneficiary_info'] as String)
-                : row['beneficiary_info'];
-
-            print('--- Record ---');
-            print('ID: ${row['id']}');
-            print('Unique Key: ${row['unique_key']}');
-            print('Spouse Key: ${row['spouse_key']}');
-            print('Household Ref Key: ${row['household_ref_key']}');
-            print(
-              'Name: ${info['name'] ?? info['memberName'] ?? info['headName']}',
-            );
-            print('Relation: ${info['relation'] ?? info['relation_to_head']}');
-            print('Gender: ${info['gender']}');
-            print('DOB: ${info['dob']}');
-            print('Mobile: ${info['mobileNo'] ?? info['mobile']}');
-            print('-------------');
-          } catch (e) {
-            print('Error parsing record: $e');
-            print('Raw row data: $row');
-          }
-        }
-      }
-
       final beneficiaries = <Map<String, dynamic>>[];
+      final Set<String> seenBeneficiaryKeys = {}; // 🔑 DEDUP KEY
+
       String? headerVillage;
       String? headerMohalla;
 
-      // Process all records and add them to beneficiaries list
       for (final row in rows) {
-        final rowHhId = row['household_ref_key']?.toString();
-        if (rowHhId == null) continue;
+        final hhId = row['household_ref_key']?.toString();
+        if (hhId == null) continue;
+
+        // ✅ Deduplicate using beneficiary unique_key
+        final beneficiaryKey = row['unique_key']?.toString() ?? '';
+        if (beneficiaryKey.isEmpty) continue;
+
+        if (seenBeneficiaryKeys.contains(beneficiaryKey)) {
+          debugPrint('⚠️ Skipping duplicate beneficiary_key: $beneficiaryKey');
+          continue;
+        }
+        seenBeneficiaryKeys.add(beneficiaryKey);
 
         final info = row['beneficiary_info'] is String
-            ? jsonDecode(row['beneficiary_info'] as String)
+            ? jsonDecode(row['beneficiary_info'])
             : row['beneficiary_info'];
 
-        if (info is! Map) continue;
+        if (info is! Map<String, dynamic>) continue;
 
-        // Get basic info from record
-        final gender = (info['gender']?.toString().toLowerCase() ?? '');
+        final gender = info['gender']?.toString().toLowerCase() ?? '';
         final isFemale = gender == 'female' || gender == 'f';
+
         final richId =
             info['RichIDChanged']?.toString() ??
                 info['richIdChanged']?.toString() ??
@@ -172,17 +121,16 @@ class _HouseHold_BeneficiaryScreenState
                 info['memberNameLocal']?.toString() ??
                 '';
 
-        // Get relation
         final relation =
             info['relation']?.toString() ??
                 info['relation_to_head']?.toString() ??
                 'Member';
 
         final card = <String, dynamic>{
-          'hhId': rowHhId,
+          'hhId': hhId,
           'RegitrationDate': row['created_date_time']?.toString() ?? '',
           'RegitrationType': 'General',
-          'BeneficiaryID': row['id']?.toString() ?? '',
+          'BeneficiaryID': beneficiaryKey,
           'Name': name,
           'Age|Gender': _formatAgeGender(info['dob'], info['gender']),
           'Mobileno.':
@@ -195,16 +143,28 @@ class _HouseHold_BeneficiaryScreenState
           info['maritalStatus']?.toString() ??
               info['marital_status']?.toString() ??
               '',
-          'FatherName':
-              info['father_name']?.toString() ??
-              '',
+          'FatherName': info['father_name']?.toString() ?? '',
           'MotherName':
           info['motherName']?.toString() ??
               info['mother_name']?.toString() ??
               '',
-          'WifeName': info['wifeName']?.toString() ?? info['wife_name']?.toString() ?? info['wife']?.toString() ?? info['spouse_name']?.toString() ?? '',
-          'HusbandName': info['husbandName']?.toString() ?? info['husband_name']?.toString() ?? info['husband']?.toString() ?? info['spouse_name']?.toString() ?? '',
-          'SpouseName': info['spouseName']?.toString() ?? info['spouse_name']?.toString() ?? info['spouse']?.toString() ?? '',
+          'WifeName':
+          info['wifeName']?.toString() ??
+              info['wife_name']?.toString() ??
+              info['wife']?.toString() ??
+              info['spouse_name']?.toString() ??
+              '',
+          'HusbandName':
+          info['husbandName']?.toString() ??
+              info['husband_name']?.toString() ??
+              info['husband']?.toString() ??
+              info['spouse_name']?.toString() ??
+              '',
+          'SpouseName':
+          info['spouseName']?.toString() ??
+              info['spouse_name']?.toString() ??
+              info['spouse']?.toString() ??
+              '',
           '_raw': row,
           '_memberData': info,
         };
@@ -215,27 +175,11 @@ class _HouseHold_BeneficiaryScreenState
 
         beneficiaries.add(card);
 
-        // 🔃 Sort beneficiaries by created_date_time (latest first)
-        // beneficiaries.sort((a, b) {
-        //   final rawA = a['_raw'] as Map<String, dynamic>;
-        //   final rawB = b['_raw'] as Map<String, dynamic>;
-        //
-        //   DateTime parse(dynamic v) {
-        //     final d = DateTime.tryParse(v?.toString() ?? '');
-        //     return d?.toUtc() ?? DateTime.fromMillisecondsSinceEpoch(0);
-        //   }
-        //
-        //   final aDate = parse(rawA['modified_date_time'] ?? rawA['created_date_time']);
-        //   final bDate = parse(rawB['modified_date_time'] ?? rawB['created_date_time']);
-        //
-        //   return bDate.compareTo(aDate); // latest first
-        // });
-
-
         headerVillage ??= info['village']?.toString();
         headerMohalla ??= info['mohalla']?.toString();
       }
 
+      // 🔃 RELATION SORT
       final List<String> relationOrder = [
         'self',
         'family head',
@@ -252,52 +196,39 @@ class _HouseHold_BeneficiaryScreenState
       ];
 
       beneficiaries.sort((a, b) {
-        // 1️⃣ Relation priority
         final relationA = normalizeRelation(a['Relation']);
         final relationB = normalizeRelation(b['Relation']);
 
         final indexA = relationOrder.indexOf(relationA);
         final indexB = relationOrder.indexOf(relationB);
 
-        final safeIndexA = indexA == -1 ? relationOrder.length : indexA;
-        final safeIndexB = indexB == -1 ? relationOrder.length : indexB;
+        final safeA = indexA == -1 ? relationOrder.length : indexA;
+        final safeB = indexB == -1 ? relationOrder.length : indexB;
 
-        if (safeIndexA != safeIndexB) {
-          return safeIndexA.compareTo(safeIndexB);
-        }
+        if (safeA != safeB) return safeA.compareTo(safeB);
 
-        // 2️⃣ SAME relation → sort by beneficiary_new.id
         final rawA = a['_raw'] as Map<String, dynamic>;
         final rawB = b['_raw'] as Map<String, dynamic>;
 
-        final int idA = int.tryParse(rawA['id']?.toString() ?? '') ?? 0;
-        final int idB = int.tryParse(rawB['id']?.toString() ?? '') ?? 0;
+        final idA = int.tryParse(rawA['id']?.toString() ?? '') ?? 0;
+        final idB = int.tryParse(rawB['id']?.toString() ?? '') ?? 0;
 
-        return idA.compareTo(idB); // ASC (older first)
-        // return idB.compareTo(idA); // DESC (latest first)
+        return idA.compareTo(idB); // older first
       });
 
-
-      _beneficiaries.sort((a, b) {
-        final relationA = normalizeRelation(a['Relation']);
-        final relationB = normalizeRelation(b['Relation']);
-
-        final indexA = relationOrder.indexOf(relationA);
-        final indexB = relationOrder.indexOf(relationB);
-
-        final safeIndexA = indexA == -1 ? relationOrder.length : indexA;
-        final safeIndexB = indexB == -1 ? relationOrder.length : indexB;
-
-        return safeIndexA.compareTo(safeIndexB);
-      });
+      debugPrint('=== DEDUP SUMMARY ===');
+      debugPrint('Fetched: ${rows.length}');
+      debugPrint('Unique beneficiaries: ${beneficiaries.length}');
+      debugPrint('Removed: ${rows.length - beneficiaries.length}');
+      debugPrint('=====================');
 
       if (mounted) {
         setState(() {
           _beneficiaries = List<Map<String, dynamic>>.from(beneficiaries);
           _filtered = List<Map<String, dynamic>>.from(beneficiaries);
-          _isLoading = false;
           _village = headerVillage;
           _mohalla = headerMohalla;
+          _isLoading = false;
         });
       }
     } catch (e) {
@@ -307,6 +238,7 @@ class _HouseHold_BeneficiaryScreenState
       }
     }
   }
+
 
   String normalizeRelation(dynamic value) {
     return value

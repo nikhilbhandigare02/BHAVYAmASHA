@@ -53,7 +53,7 @@ class Validations {
     if (value == null) {
       return l10n.enterValidNumber;
     }
-    if (unit == null || unit.isEmpty) {
+    if (unit == null || unit.isEmpty && value > 0) {
       return l10n.selectAgeUnit;
     }
 

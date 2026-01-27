@@ -53,16 +53,16 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
       }
       // EDD = LMP + 277 days (same as SpousDetails)
       final edd = _calculateEddFromLmp(e.value!);
-      
+
       // Calculate weeks of pregnancy
       final base = state.dateOfInspection ?? DateTime.now();
       final difference = base.difference(e.value!).inDays;
       final weeksOfPregnancy = (difference / 7).floor() + 1;
-      
+
       emit(state.copyWith(
-        lmpDate: e.value, 
-        eddDate: edd, 
-        weeksOfPregnancy: weeksOfPregnancy.toString()
+          lmpDate: e.value,
+          eddDate: edd,
+          weeksOfPregnancy: weeksOfPregnancy.toString()
       ));
     });
     on<EddDateChanged>((e, emit) => emit(state.copyWith(eddDate: e.value)));
@@ -308,33 +308,33 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
 
 
       final formDataForDb  = {
-          'server_id': '',
-          'forms_ref_key': formsRefKey,
-          'household_ref_key': householdRefKey,
-          'beneficiary_ref_key': beneficiaryId,
-          'mother_key': '',
-          'father_key': '',
-          'child_care_state': '',
-          'device_details': jsonEncode({
-            'id': await DeviceInfo.getDeviceInfo().then((value) => value.deviceId),
-            'platform': await DeviceInfo.getDeviceInfo().then((value) => value.platform),
-            'version': await DeviceInfo.getDeviceInfo().then((value) => value.osVersion),
-          }),
-          'app_details': jsonEncode({
-            'app_version': await DeviceInfo.getDeviceInfo().then((value) => value.appVersion.split('+').first),
-            'app_name': await DeviceInfo.getDeviceInfo().then((value) => value.appName),
-            'build_number': await DeviceInfo.getDeviceInfo().then((value) => value.buildNumber),
-            'package_name': await DeviceInfo.getDeviceInfo().then((value) => value.packageName),
-          }),
-          'parent_user': '',
-          'current_user_key': ashaUniqueKey,
-          'facility_id': facilityId,
-          'form_json': jsonEncode(formData),
-          'created_date_time': now,
-          'modified_date_time': now,
-          'is_synced': 0,
-          'is_deleted': 0,
-        };
+        'server_id': '',
+        'forms_ref_key': formsRefKey,
+        'household_ref_key': householdRefKey,
+        'beneficiary_ref_key': beneficiaryId,
+        'mother_key': '',
+        'father_key': '',
+        'child_care_state': '',
+        'device_details': jsonEncode({
+          'id': await DeviceInfo.getDeviceInfo().then((value) => value.deviceId),
+          'platform': await DeviceInfo.getDeviceInfo().then((value) => value.platform),
+          'version': await DeviceInfo.getDeviceInfo().then((value) => value.osVersion),
+        }),
+        'app_details': jsonEncode({
+          'app_version': await DeviceInfo.getDeviceInfo().then((value) => value.appVersion.split('+').first),
+          'app_name': await DeviceInfo.getDeviceInfo().then((value) => value.appName),
+          'build_number': await DeviceInfo.getDeviceInfo().then((value) => value.buildNumber),
+          'package_name': await DeviceInfo.getDeviceInfo().then((value) => value.packageName),
+        }),
+        'parent_user': '',
+        'current_user_key': ashaUniqueKey,
+        'facility_id': facilityId,
+        'form_json': jsonEncode(formData),
+        'created_date_time': now,
+        'modified_date_time': now,
+        'is_synced': 0,
+        'is_deleted': 0,
+      };
 
       try {
         final formId = await LocalStorageDao.instance.insertFollowupFormData(formDataForDb);
@@ -344,9 +344,9 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
           try {
             final deviceInfo = await DeviceInfo.getDeviceInfo();
             final ts = DateTime.now().toIso8601String();
-            
+
             final existingActivity = await LocalStorageDao.instance.getMotherCareActivityByBeneficiary(beneficiaryId);
-            
+
             final motherCareActivityData = {
               'mother_care_state': 'delivery_outcome',
               'device_details': jsonEncode({
@@ -389,7 +389,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
 
             try {
               final existingEligibleActivity = await LocalStorageDao.instance.getEligibleCoupleActivityByBeneficiary(beneficiaryId);
-              
+
               final eligibleCoupleActivityData = {
                 'eligible_couple_state': 'tracking_due',
                 'device_details': jsonEncode({
@@ -661,42 +661,42 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
     final visitDates = <Map<String, dynamic>>[];
     final lmpDate = state.lmpDate;
     final eddDate = state.eddDate;
-    
+
     if (lmpDate != null && eddDate != null) {
       // ANC Visit 1: Up to 12 weeks
       visitDates.add({
         'from': DateFormat('yyyy-MM-dd HH:mm:ss').format(lmpDate),
         'to': DateFormat('yyyy-MM-dd HH:mm:ss').format(lmpDate.add(Duration(days: 84))), // 12 weeks
       });
-      
+
       // ANC Visit 2: 13-20 weeks
       final visit2From = lmpDate.add(Duration(days: 85));
       visitDates.add({
         'from': DateFormat('yyyy-MM-dd HH:mm:ss').format(visit2From),
         'to': DateFormat('yyyy-MM-dd HH:mm:ss').format(lmpDate.add(Duration(days: 140))), // 20 weeks
       });
-      
+
       // ANC Visit 3: 21-28 weeks
       final visit3From = lmpDate.add(Duration(days: 141));
       visitDates.add({
         'from': DateFormat('yyyy-MM-dd HH:mm:ss').format(visit3From),
         'to': DateFormat('yyyy-MM-dd HH:mm:ss').format(lmpDate.add(Duration(days: 196))), // 28 weeks
       });
-      
+
       // ANC Visit 4: 29-32 weeks
       final visit4From = lmpDate.add(Duration(days: 197));
       visitDates.add({
         'from': DateFormat('yyyy-MM-dd HH:mm:ss').format(visit4From),
         'to': DateFormat('yyyy-MM-dd HH:mm:ss').format(lmpDate.add(Duration(days: 224))), // 32 weeks
       });
-      
+
       // ANC Visit 5: 33-36 weeks
       final visit5From = lmpDate.add(Duration(days: 225));
       visitDates.add({
         'from': DateFormat('yyyy-MM-dd HH:mm:ss').format(visit5From),
         'to': DateFormat('yyyy-MM-dd HH:mm:ss').format(lmpDate.add(Duration(days: 252))), // 36 weeks
       });
-      
+
       // ANC Visit 6: 37-40 weeks
       final visit6From = lmpDate.add(Duration(days: 253));
       final visit6To = eddDate.isBefore(lmpDate.add(Duration(days: 280))) ? eddDate : lmpDate.add(Duration(days: 280));
@@ -705,7 +705,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
         'to': DateFormat('yyyy-MM-dd HH:mm:ss').format(visit6To),
       });
     }
-    
+
     return visitDates;
   }
 
@@ -722,7 +722,7 @@ class AnvvisitformBloc extends Bloc<AnvvisitformEvent, AnvvisitformState> {
 
   String _calculateNextVisitDate(AnvvisitformState state) {
     final currentDate = state.dateOfInspection ?? DateTime.now();
-    final nextVisitDate = currentDate.add(Duration(days: 28)); // 4 weeks interval
+    final nextVisitDate = currentDate.add(Duration(days: 28));
     return DateFormat('yyyy-MM-dd HH:mm:ss').format(nextVisitDate);
   }
 }
